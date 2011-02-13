@@ -88,15 +88,16 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
-  // Previous time level solution (initialized by the external temperature).
-  Solution* sln = new Solution(&mesh, TEMP_INIT);
+  // Previous and next time level solutions.
+  Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
+  Solution* sln_time_new = new Solution(&mesh);
 
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian_vol));
-  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln);
-  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln);
-  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln);
+  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln_time_prev);
+  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln_time_prev);
+  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -111,7 +112,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, sln, &space, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
 		      verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -125,19 +126,19 @@ int main(int argc, char* argv[])
   } 
   while (current_time < T_FINAL);
 
-  info("Coordinate (-2.0, 2.0) value = %lf", sln->get_pt_value(-2.0, 2.0));
-  info("Coordinate (-1.0, 2.0) value = %lf", sln->get_pt_value(-1.0, 2.0));
-  info("Coordinate ( 0.0, 2.0) value = %lf", sln->get_pt_value(0.0, 2.0));
-  info("Coordinate ( 1.0, 2.0) value = %lf", sln->get_pt_value(1.0, 2.0));
-  info("Coordinate ( 2.0, 2.0) value = %lf", sln->get_pt_value(2.0, 2.0));
+  info("Coordinate (-2.0, 2.0) value = %lf", sln_time_new->get_pt_value(-2.0, 2.0));
+  info("Coordinate (-1.0, 2.0) value = %lf", sln_time_new->get_pt_value(-1.0, 2.0));
+  info("Coordinate ( 0.0, 2.0) value = %lf", sln_time_new->get_pt_value(0.0, 2.0));
+  info("Coordinate ( 1.0, 2.0) value = %lf", sln_time_new->get_pt_value(1.0, 2.0));
+  info("Coordinate ( 2.0, 2.0) value = %lf", sln_time_new->get_pt_value(2.0, 2.0));
 
   bool success = true;
 
-  if (fabs(sln->get_pt_value(-2.0, 2.0) - 10.000033) > 1E-6) success = false;
-  if (fabs(sln->get_pt_value(-1.0, 2.0) - 9.999999) > 1E-6) success = false;
-  if (fabs(sln->get_pt_value(0.0, 2.0) - 10.000005) > 1E-6) success = false;
-  if (fabs(sln->get_pt_value(1.0, 2.0) - 9.999999) > 1E-6) success = false;
-  if (fabs(sln->get_pt_value(2.0, 2.0) - 10.000033) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 10.000033) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 9.999999) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(0.0, 2.0) - 10.000005) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(1.0, 2.0) - 9.999999) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(2.0, 2.0) - 10.000033) > 1E-6) success = false;
 
 
   if (success) {

@@ -1,6 +1,6 @@
 # Higher-order Runge-Kutta methods (via Butcher's tables)
-add_subdirectory(butcher-adapt)
-add_subdirectory(butcher-comparison)
+add_subdirectory(19-rk-adapt-time-step)
+add_subdirectory(19-rk-comparison)
 
 # Elasticity
 add_subdirectory(elasticity-bracket)

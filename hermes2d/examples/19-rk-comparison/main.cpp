@@ -5,13 +5,14 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from example "butcher" that handles 
-//  time integration with general Butcher's tables and thus has some 
-//  overhead. This example only implements the implicit Euler method 
-//  and an SDIRK-2 method in a straightforward fashion, and thus is 
-//  faster than example "butcher" for the same methods. The sole 
-//  purpose of this example is a performance comparison with example 
-//  "butcher". The Butcher's table of the SDIRK-2 method is:
+//  The sole purpose of this example is a performance comparison with example 
+//  19-newton-timedep-heat-rk. This example only implements the implicit Euler 
+//  SDIRK-22 methods in a straightforward fashion, and thus it is faster than 
+//  example 19-newton-timedep-heat-rk. However, it is our goal to reduce this 
+//  difference by optimizing 19-newton-timedep-heat-rk.
+//
+//  We need to handle all entries in the Butcher's table of the SDIRK-22 method 
+//  explicitly:
 
 double GAMMA = 1. - 1./sqrt(2.);
 double BUTCHER_A_11 = 1. - 1./sqrt(2.);
@@ -35,7 +36,7 @@ double BUTCHER_C_2 = 1.;
 //
 //  The following parameters can be changed:
 
-const int TIME_INTEGRATION = 2;                   // 1 = implicit Euler, 2 = SDIRK-2
+const int TIME_INTEGRATION = 2;                   // 1 = implicit Euler, 2 = SDIRK-22
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
@@ -49,40 +50,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double ALPHA = 4.0;                         // For the nonlinear thermal ocnductivity.
 double TIME = 0.0;
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) { return 1 + pow(u, ALPHA);}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA-1);}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition. It will be projected on the FE mesh 
-// to obtain initial coefficient vector for the Newton's method.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{ return dir_lift(x, y, dx, dy);}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition markers.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (forcing term in accordance with exact solution).
-template<typename Real>
-Real heat_src(Real x, Real y, double t) { return 1.0;}
+// Model parameters.
+#include "model.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -175,7 +144,7 @@ int main(int argc, char* argv[])
     } 
     else {
       // Perform Newton's iteration for sdirk_stage_sol.
-      info("SDIRK-2 time step, stage I (t = %g, tau = %g):", TIME, TAU);
+      info("SDIRK-22 time step, stage I (t = %g, tau = %g):", TIME, TAU);
       bool verbose = true;
       if (!solve_newton(coeff_vec1, dp1, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
@@ -185,7 +154,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
 
       // Perform Newton's iteration for the final solution.
-      info("SDIRK-2 time step, stage II (t = %g, tau = %g):", TIME, TAU);
+      info("SDIRK-22 time step, stage II (t = %g, tau = %g):", TIME, TAU);
 
       if (!solve_newton(coeff_vec2, dp2, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))

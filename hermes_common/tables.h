@@ -105,6 +105,7 @@ public:
   bool is_explicit();
   bool is_diagonally_implicit();
   bool is_fully_implicit();
+  bool is_embedded();
   void switch_B_rows(); // For experimental purposes. Switches the B and B2 rows. B2 row
                         // must be nonzero, otherwise error is thrown.
 

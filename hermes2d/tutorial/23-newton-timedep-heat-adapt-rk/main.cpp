@@ -4,11 +4,10 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from example 23-newton-timedep-heat-adapt-basic
-//  and it does basically the same, but the time discretization is 
-//  now performed using arbitrary (explicit or implicit, low-order 
-//  or higher-order) Runge-Kutta methods entered via their Butcher's
-//  tables. 
+//  This example is derived from example 23-newton-timedep-heat-adapt-basic.
+//  If an embedded method is used, temporal error is measured and visualized. 
+//  Adaptive time stepping can be turned on or off using the flag ADAPTIVE_TIME_STEP_ON. 
+//  An embedded R-K method must be used if ADAPTIVE_TIME_STEP_ON == true.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity:
@@ -20,14 +19,16 @@ using namespace RefinementSelectors;
 //  BC:  Dirichlet, given by the function dir_lift() below.
 //  IC: Same function dir_lift().
 //
+//  Time-integration: Use an embedded method for adaptive time stepping. 
+//
 //  The following parameters can be changed:
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const double time_step = 0.5;                     // Time step. 
+double time_step = 0.05;                          // Time step. 
 const double T_FINAL = 2.0;                       // Time interval length.
 
-// Adaptivity
+// Spatial adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
 const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
                                                   // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
@@ -56,13 +57,25 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double SPACE_ERR_TOL = 1.0;                 // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-// Newton's method
+
+// Temporal adaptivity.
+bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
+                                                  // The methods for the adaptive and fixed-step versions are set
+                                                  // below. An embedded method must be used with adaptive time stepping. 
+const double TIME_ERR_TOL_UPPER = 1.0;            // If rel. temporal error is greater than this threshold, decrease time 
+                                                  // step size and repeat time step.
+const double TIME_ERR_TOL_LOWER = 0.8;            // If rel. temporal error is less than this threshold, increase time step
+                                                  // but do not repeat time step (this might need further research).
+const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
+const double TIME_STEP_DEC_RATIO = 0.6;           // Time step decrease ratio (applied when rel. temporal error is too large).
+
+// Newton's method.
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on fine mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
@@ -81,51 +94,10 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u)
-{
-  return 1 + pow(u, 4);
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) {
-  return 4*pow(u, 3);
-}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/100.;
-  dy = (x+10)/100.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{
-  return dir_lift(x, y, dx, dy);
-}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y)
-{
-  return 1.0;
-}
+// Model parameters.
+#include "model.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -133,11 +105,16 @@ Real heat_src(Real x, Real y)
 int main(int argc, char* argv[])
 {
   // Choose a Butcher's table or define your own.
-  ButcherTable bt(butcher_table_type);
-  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
-  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
-  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
+  ButcherTable* bt = new ButcherTable(butcher_table_type);
+  if (bt->is_explicit()) info("Using a %d-stage explicit R-K method.", bt->get_size());
+  if (bt->is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt->get_size());
+  if (bt->is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt->get_size());
 
+  // Turn off adaptive time stepping if R-K method is not embedded.
+  if (bt->is_embedded() == false && ADAPTIVE_TIME_STEP_ON == true) {
+    warn("R-K method not embedded, turning off adaptive time stepping.");
+    ADAPTIVE_TIME_STEP_ON = false;
+  }
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
@@ -162,10 +139,6 @@ int main(int argc, char* argv[])
   // Convert initial condition into a Solution.
   Solution* sln_prev_time = new Solution(&mesh, init_cond);
 
-  // Initialize coarse and reference mesh solution.
-  Solution sln, ref_sln;
-  sln.copy(sln_prev_time);
-
   // Initialize the weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_prev_time);
@@ -180,15 +153,22 @@ int main(int argc, char* argv[])
 
   // Visualize initial condition.
   char title[100];
-  ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
-  OrderView ordview("Initial mesh", new WinGeom(445, 0, 410, 350));
-  view.show(sln_prev_time);
+  ScalarView sln_view("Initial condition", new WinGeom(0, 0, 440, 350));
+  OrderView ordview("Initial mesh", new WinGeom(445, 0, 440, 350));
+  ScalarView time_error_view("Temporal error", new WinGeom(445, 400, 440, 350));
+  ScalarView space_error_view("Spatial error", new WinGeom(0, 400, 440, 350));
+  sln_view.show(sln_prev_time);
   ordview.show(&space);
+
+  // Graph for time step history.
+  SimpleGraph time_step_graph;
+  if (ADAPTIVE_TIME_STEP_ON) info("Time step history will be saved to file time_step_history.dat.");
   
   // Time stepping loop.
   double current_time = time_step; int ts = 1;
   do 
   {
+    info("Begin time step %d.", ts);
     // Periodic global derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
@@ -199,70 +179,106 @@ int main(int argc, char* argv[])
       ndof = Space::get_num_dofs(&space);
     }
 
-    // The following is done only in the first time step, 
-    // when the nonlinear problem was never solved before.
-    if (ts == 1) {
-      // Runge-Kutta step on the coarse mesh.
-      bool verbose = true;
-      bool is_linear = false;
-      info("Runge-Kutta time step on coarse mesh (t = %g s, tau = %g s, stages: %d).", 
-         current_time, time_step, bt.get_size());
-      if (!rk_time_step(current_time, time_step, &bt, &sln, &space, &dp_coarse, matrix_solver,
-		        verbose, is_linear, NEWTON_TOL_COARSE, NEWTON_MAX_ITER)) {
-        error("Runge-Kutta time step failed, try to decrease time step size.");
-      }
-    }
-
-    // Spatial adaptivity loop. Note: sln_prev_time must not be changed during spatial adaptivity. 
+    // Spatial adaptivity loop. Note: sln_prev_time must not be 
+    // changed during spatial adaptivity. 
+    Solution ref_sln;
+    Solution* time_error_fn;
+    if (bt->is_embedded() == true) time_error_fn = new Solution(&mesh);
+    else time_error_fn = NULL;
     bool done = false; int as = 1;
     double err_est;
     do {
-      info("Time step %d, adaptivity step %d:", ts, as);
-
       // Construct globally refined reference mesh and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
       // Initialize discrete problem on reference mesh.
-      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-
-      // Calculate initial solution on the fine mesh.
-      if (ts == 1 && as == 1) {
-        info("Projecting coarse mesh solution to obtain initial solution on fine mesh.");
-        OGProjection::project_global(ref_space, &sln, &ref_sln, matrix_solver);
-      }
-      else {
-        info("Projecting last fine mesh solution to obtain initial solution on new fine mesh.");
-        OGProjection::project_global(ref_space, &ref_sln, &ref_sln, matrix_solver);
-      }
-
-      // Now we can deallocate the previous fine mesh.
-      //if(as > 1) delete ref_sln.get_mesh();
+      DiscreteProblem* ref_dp = new DiscreteProblem(&wf, ref_space);
 
       // Runge-Kutta step on the fine mesh.
       info("Runge-Kutta time step on fine mesh (t = %g s, tau = %g s, stages: %d).", 
-         current_time, time_step, bt.get_size());
+         current_time, time_step, bt->get_size());
       bool verbose = true;
       bool is_linear = false;
-      if (!rk_time_step(current_time, time_step, &bt, &ref_sln, ref_space, dp, matrix_solver,
-		        verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
+      if (!rk_time_step(current_time, time_step, bt, sln_prev_time, &ref_sln, time_error_fn,
+                        ref_dp, matrix_solver, verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
         error("Runge-Kutta time step failed, try to decrease time step size.");
       }
 
+      /* If ADAPTIVE_TIME_STEP_ON == true, estimate temporal error. 
+         If too large or too small, then adjust it and restart the time step. */
+
+      double rel_err_time;
+      if (bt->is_embedded() == true) {
+        info("Calculating temporal error estimate.");
+
+        // Show temporal error.
+        char title[100];
+        sprintf(title, "Temporal error est, spatial adaptivity step %d", as);     
+        time_error_view.set_title(title);
+        time_error_view.show_mesh(false);
+        time_error_view.show(time_error_fn);
+
+        rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
+        if (ADAPTIVE_TIME_STEP_ON == false) info("rel_err_time: %g%%", rel_err_time);
+      }
+
+      if (ADAPTIVE_TIME_STEP_ON) {
+        if (rel_err_time > TIME_ERR_TOL_UPPER) {
+          info("rel_err_time %g%% is above upper limit %g%%", rel_err_time, TIME_ERR_TOL_UPPER);
+          info("Decreasing tau from %g to %g s and restarting time step.", 
+               time_step, time_step * TIME_STEP_DEC_RATIO);
+          time_step *= TIME_STEP_DEC_RATIO;
+          delete ref_space;
+          delete ref_dp;
+          continue;
+        }
+        else if (rel_err_time < TIME_ERR_TOL_LOWER) {
+          info("rel_err_time = %g%% is below lower limit %g%%", rel_err_time, TIME_ERR_TOL_UPPER);
+          info("Increasing tau from %g to %g s and restarting time step.", 
+               time_step, time_step * TIME_STEP_INC_RATIO);
+          time_step *= TIME_STEP_INC_RATIO;
+          delete ref_space;
+          delete ref_dp;
+          continue;
+        }
+        else {
+          info("rel_err_time = %g%% is in acceptable interval (%g%%, %g%%)", 
+            rel_err_time, TIME_ERR_TOL_LOWER, TIME_ERR_TOL_UPPER);
+        }
+
+        // Add entry to time step history graph.
+        time_step_graph.add_values(current_time, time_step);
+        time_step_graph.save("time_step_history.dat");
+      }
+
+      /* Estimate spatial errors and perform mesh refinement */
+
+      info("Spatial adaptivity step %d.", as);
+
       // Project the fine mesh solution onto the coarse mesh.
+      Solution sln;
       info("Projecting fine mesh solution on coarse mesh for error estimation.");
       OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
-      // Calculate element errors and total error estimate.
-      info("Calculating error estimate.");
+      // Show spatial error.
+      sprintf(title, "Spatial error est, spatial adaptivity step %d", as);  
+      DiffFilter* space_error_fn = new DiffFilter(Hermes::vector<MeshFunction*>(&ref_sln, &sln));   
+      space_error_view.set_title(title);
+      space_error_view.show_mesh(false);
+      AbsFilter abs_sef(space_error_fn);
+      space_error_view.show(&abs_sef);
+
+      // Calculate element errors and spatial error estimate.
+      info("Calculating spatial error estimate.");
       Adapt* adaptivity = new Adapt(&space);
-      double err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+      double err_rel_space = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
       // Report results.
-      info("ndof: %d, ref_ndof: %d, err_est_rel: %g%%", 
-           Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel_total);
+      info("ndof: %d, ref_ndof: %d, err_rel_space: %g%%", 
+           Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_rel_space);
 
       // If err_est too large, adapt the mesh.
-      if (err_est_rel_total < ERR_STOP) done = true;
+      if (err_rel_space < SPACE_ERR_TOL) done = true;
       else 
       {
         info("Adapting the coarse mesh.");
@@ -278,17 +294,21 @@ int main(int argc, char* argv[])
       // Clean up.
       delete adaptivity;
       delete ref_space;
-      delete dp;
+      delete ref_dp;
+      delete space_error_fn;
     }
     while (done == false);
 
+    // Clean up.
+    if (time_error_fn != NULL) delete time_error_fn;
+
     // Visualize the solution and mesh.
     char title[100];
-    sprintf(title, "Solution, time %g", current_time);
-    view.set_title(title);
-    view.show_mesh(false);
-    view.show(&sln);
-    sprintf(title, "Mesh, time %g", current_time);
+    sprintf(title, "Solution, time %g s", current_time);
+    sln_view.set_title(title);
+    sln_view.show_mesh(false);
+    sln_view.show(&ref_sln);
+    sprintf(title, "Mesh, time %g s", current_time);
     ordview.set_title(title);
     ordview.show(&space);
 
@@ -303,6 +323,7 @@ int main(int argc, char* argv[])
 
   // Clean up.
   delete sln_prev_time;
+  delete bt;
 
   // Wait for all views to be closed.
   View::wait();

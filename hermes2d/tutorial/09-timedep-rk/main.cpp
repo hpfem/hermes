@@ -56,7 +56,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+ButcherTableType butcher_table_type = Implicit_RK_1;
 
 // Boundary markers.
 const std::string BDY_GROUND = "Boundary ground";
@@ -111,15 +111,16 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
-  // Previous time level solution (initialized by the external temperature).
-  Solution* sln = new Solution(&mesh, TEMP_INIT);
+  // Previous and next time level solutions.
+  Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
+  Solution* sln_time_new = new Solution(&mesh);
 
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(callback(stac_jacobian_vol));
-  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln);
-  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln);
-  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln);
+  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln_time_prev);
+  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln_time_prev);
+  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, sln, &space, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
 		      verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -148,7 +149,10 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Time %3.2f s, exterior temperature %3.5f C", current_time, temp_ext(current_time));
     Tview.set_title(title);
-    Tview.show(sln);
+    Tview.show(sln_time_new);
+
+    // Copy solution for the new time step.
+    sln_time_prev->copy(sln_time_new);
 
     // Increase current time and time step counter.
     current_time += time_step;
@@ -157,7 +161,8 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Cleanup.
-  delete sln;
+  delete sln_time_prev;
+  delete sln_time_new;
 
   // Wait for the view to be closed.
   View::wait();

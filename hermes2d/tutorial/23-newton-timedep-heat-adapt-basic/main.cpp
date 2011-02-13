@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Solution, time %g", current_time);
     view.set_title(title);
     view.show_mesh(false);
-    view.show(&sln);
+    view.show(&ref_sln);
     sprintf(title, "Mesh, time %g", current_time);
     ordview.set_title(title);
     ordview.show(&space);

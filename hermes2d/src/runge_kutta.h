@@ -42,15 +42,18 @@ void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, in
 // Many improvements are needed, a todo list is presented at the beginning of
 // the corresponding .cpp file.
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             Solution* sln, Space* space, Solution* error_fn, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
-                             double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+                             Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                             DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, 
+                             int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
+                             double newton_max_allowed_residual_norm = 1e6);
 
 // This is a wrapper for the previous function if error_fn is not provided
 // (adaptive time stepping is not wanted). 
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             Solution* sln, Space* sln_space, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
+                             Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
+                             MatrixSolverType matrix_solver, bool verbose = false, bool is_linear = false, 
+                             double newton_tol = 1e-6, int newton_max_iter = 20,
                              double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 

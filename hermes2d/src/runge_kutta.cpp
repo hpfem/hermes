@@ -242,8 +242,8 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
 
 bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  Solution* sln, Space* sln_space, Solution* error_fn, DiscreteProblem* dp, 
-                  MatrixSolverType matrix_solver,
+                  Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                  DiscreteProblem* dp, MatrixSolverType matrix_solver,
                   bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
@@ -257,11 +257,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   int num_stages = bt->get_size();
 
   // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-  if(error_fn != NULL) {
-    double b2_coeff_sum = 0;
-    for (int i=0; i < num_stages; i++) b2_coeff_sum += fabs(bt->get_B2(i)); 
-    if (b2_coeff_sum < 1e-10) 
-      error("error_fn != NULL but the B2 row in the Butcher's table is zero in rk_time_step().");
+  if(error_fn != NULL) if (bt->is_embedded() == false) {
+    error("rk_time_step(): R-K method must be embedded if temporal error estimate is requested.");
   }
 
   // Matrix for the time derivative part of the equation (left-hand side).
@@ -418,7 +415,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // to be able to add them together. The result of the projection 
   // will be stored in the vector coeff_vec.
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(K_space, sln, coeff_vec, matrix_solver);
+  OGProjection::project_global(K_space, sln_time_prev, coeff_vec, matrix_solver);
 
   // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
   for (int i = 0; i < ndof; i++) {
@@ -426,7 +423,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
       coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j*ndof + i];
     }
   }
-  Solution::vector_to_solution(coeff_vec, K_space, sln);
+  Solution::vector_to_solution(coeff_vec, K_space, sln_time_new);
 
   // If error_fn is not NULL, use the B2-row in the Butcher's
   // table to calculate the temporal error estimate.
@@ -467,12 +464,13 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
 // This is the same as the rk_time_step() function above but it does not have the error_fn parameter.
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  Solution* sln, Space* sln_space, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                  bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
+                  Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
+                  MatrixSolverType matrix_solver, bool verbose, bool is_linear, 
+                  double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm) 
 {
   return rk_time_step(current_time, time_step, bt,
-	              sln, sln_space, NULL, dp, matrix_solver,
+	              sln_time_prev, sln_time_new, NULL, dp, matrix_solver,
 	              verbose, is_linear, newton_tol, newton_max_iter,
                       newton_damping_coeff, newton_max_allowed_residual_norm);
 }

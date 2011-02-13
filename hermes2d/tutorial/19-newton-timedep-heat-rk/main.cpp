@@ -48,48 +48,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+ButcherTableType butcher_table_type = Implicit_RK_1;
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) 
-{ 
-  return 1 + pow(u, 4);
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) 
-{ 
-  return 4*pow(u, 3);
-}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/100.;
-  dy = (x+10)/100.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition. It will be projected on the FE mesh 
-// to obtain initial coefficient vector for the Newton's method.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{ return dir_lift(x, y, dx, dy);}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition markers.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y) { return 1.0;}
+// Model parameters.
+#include "model.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -126,13 +88,14 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Solution (initialized by the initial condition).
-  Solution* sln = new Solution(&mesh, init_cond);
+  // Previous and next time level solutions.
+  Solution* sln_time_prev = new Solution(&mesh, init_cond);
+  Solution* sln_time_new = new Solution(&mesh);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_time_prev);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -152,7 +115,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, sln, space, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -164,8 +127,11 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
-    sview.show(sln, HERMES_EPS_VERYHIGH);
+    sview.show(sln_time_new, HERMES_EPS_VERYHIGH);
     oview.show(space);
+
+    // Copy solution for the new time step.
+    sln_time_prev->copy(sln_time_new);
 
     // Increase counter of time steps.
     ts++;
@@ -174,7 +140,8 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete space;
-  delete sln;
+  delete sln_time_prev;
+  delete sln_time_new;
 
   // Wait for all views to be closed.
   View::wait();

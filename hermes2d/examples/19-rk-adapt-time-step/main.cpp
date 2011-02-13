@@ -6,14 +6,13 @@
 
 using namespace RefinementSelectors;
 
-//  This example is derived from the example "butcher" and it 
-//  shows how adaptive time-stepping can be done with a pair 
-//  of embedded Runge-Kutta methods. By embedded we mean that 
-//  the Butcher's table has two B rows. After calculating the 
-//  stages K_1, K_2, ..., K_s, the two B rows are used to 
-//  calculate two different approximations Y_{n+1} on the next
-//  time level, with different orders of accuracy. With those
-//  one works as usual.  
+//  This example is derived from example 19-newton-timedep-heat-rk and it 
+//  shows how adaptive time-stepping can be done with a pair of embedded 
+//  Runge-Kutta methods. By embedded we mean that the Butcher's table has 
+//  two B rows. After calculating the stages K_1, K_2, ..., K_s, the two 
+//  B rows are used to calculate two different approximations Y_{n+1} on 
+//  the next time level, with different orders of accuracy. With those
+//  one works as usual.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
@@ -57,46 +56,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) 
-{ 
-  return 1 + pow(u, 4);
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) 
-{ 
-  return 4*pow(u, 3);
-}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/100.;
-  dy = (x+10)/100.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition. It will be projected on the FE mesh 
-// to obtain initial coefficient vector for the Newton's method.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{ return dir_lift(x, y, dx, dy);}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition markers.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y) { return 1.0;}
+// Model parameters.
+#include "model.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -136,14 +97,15 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(space);
   info("ndof = %d.", ndof);
 
-  // Solution (initialized by the initial condition) and error function.
-  Solution* sln = new Solution(&mesh, init_cond);
+  // Previous and next time level solutions.
+  Solution* sln_time_prev = new Solution(&mesh, init_cond);
+  Solution* sln_time_new = new Solution(&mesh);
   Solution* error_fn = new Solution(&mesh, 0.0);
 
   // Initialize the weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln);
+  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_time_prev);
+  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -168,7 +130,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, sln, space, error_fn, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, error_fn, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -185,7 +147,7 @@ int main(int argc, char* argv[])
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err_time = calc_norm(error_fn, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
+    double rel_err_time = calc_norm(error_fn, HERMES_H1_NORM) / calc_norm(sln_time_new, HERMES_H1_NORM) * 100;
     info("rel_err_time = %g%%", rel_err_time);
     if (rel_err_time > TIME_TOL_UPPER) {
       info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and repeating time step.", 
@@ -209,8 +171,11 @@ int main(int argc, char* argv[])
     // Show the new time level solution.
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
-    sview.show(sln, HERMES_EPS_VERYHIGH);
+    sview.show(sln_time_new, HERMES_EPS_VERYHIGH);
     oview.show(space);
+
+    // Copy solution for next time step.
+    sln_time_prev->copy(sln_time_new);
 
     // Increase counter of time steps.
     ts++;
@@ -219,7 +184,8 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete space;
-  delete sln;
+  delete sln_time_prev;
+  delete sln_time_new;
   delete error_fn;
 
   // Wait for all views to be closed.

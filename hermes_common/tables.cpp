@@ -763,12 +763,22 @@ bool ButcherTable::is_fully_implicit()
   return result;
 } 
 
-void ButcherTable::switch_B_rows()
+
+bool ButcherTable::is_embedded()
 {
   // Test whether B2 row is not zero.
   double sum = 0;
   for (unsigned  int i = 0; i < size; i++) sum += fabs(B2[i]);
-  if (sum < 1e-10) error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
+  if (sum < 1e-10) return false;
+  else return true;
+}
+
+void ButcherTable::switch_B_rows()
+{
+  // Test whether nonzero B2 row exists.
+  if (this->is_embedded() == false) 
+    error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
+  
   // Switch B rows.
   for (unsigned int i = 0; i < size; i++) {
     double tmp = B[i];
