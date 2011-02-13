@@ -246,11 +246,11 @@ int main()
       delete [] coeff_vec;
 
       // Print FTR solution (enumerated). 
-      Linearizer *lxx = new Linearizer(space_ref_local);
-      char out_filename[255];
-      sprintf(out_filename, "solution_ref_%d.gp", i);
-      lxx->plot_solution(out_filename);
-      delete lxx;
+      //Linearizer *lxx = new Linearizer(space_ref_local);
+      //char out_filename[255];
+      //sprintf(out_filename, "solution_ref_%d.gp", i);
+      //lxx->plot_solution(out_filename);
+      //delete lxx;
 
       // Calculate norm of the difference between the coarse space 
       // and FTR solutions.
@@ -266,7 +266,7 @@ int main()
       Iterator *I_ref = new Iterator(space_ref_local);
       Element *e, *e_ref;
       while (1) 
-     {
+      {
         e = I->next_active_element();
         e_ref = I_ref->next_active_element();
         if (e->id == i) 
@@ -322,7 +322,7 @@ int main()
     adapt(NORM, ADAPT_TYPE, THRESHOLD, elem_errors, space, ref_elem_pairs);
 
     // Plot spaces, results, and errors.
-    adapt_plotting(space, ref_elem_pairs, NORM, EXACT_SOL_PROVIDED, exact_sol);
+    //adapt_plotting(space, ref_elem_pairs, NORM, EXACT_SOL_PROVIDED, exact_sol);
 
     as++;
   }
