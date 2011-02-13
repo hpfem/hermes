@@ -18,17 +18,25 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
+// Select one of the mesh files below.
+//const char* mesh_file = "domain_square_quad_1_sym.mesh";     // Square domain with one single element (symmetric).
+//const char* mesh_file = "domain_square_quad_2_sym.mesh";     // Square domain with four quad elements (symmetric).
+//const char* mesh_file = "domain_lshape_quad_sym.mesh";       // L-Shape domain with quadrilateral mesh (symmetric). 
+//const char* mesh_file = "domain_square_quad_2_nonsym.mesh";  // Square domain with four quad elements (non-symmetric).
+const char* mesh_file = "domain_square_tria_nonsym.mesh";    // Square domain with triangular mesh    (non-symmetric).
+//const char* mesh_file = "domain_lshape_tria_nonsym.mesh";    // L-Shape domain with triangular mesh   (non-symmetric).  
+
 int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 for the first, 2 for the second, etc.
 
-int DIMENSION_SUBSPACE = 3;              	  // Dimension of the subspace to use, it should be greater or equal to TARGET_EIGENFUNCTION
-
+int DIMENSION_SUBSPACE = 3;              	  // Dimension of the subspace to use, it should be greater or equal 
+                                                  // to TARGET_EIGENFUNCTION.
 int ITERATIVE_METHOD = 3;                         // 1 = Newton, 2 = Picard, 3 = Eigensolver.
 
-int RECONSTRUCTION = 1;                           // Eigenfunction reconstruction: 0 = Off, 1 = On. 
+bool RECONSTRUCTION_ON = true;                    // Use eigenfunction reconstruction.
 
-int DIMENSION_TARGET_EIGENSPACE = 1;              // Dimension of the target eigenspace
+int DIMENSION_TARGET_EIGENSPACE = 1;              // Dimension of the target eigenspace.
 
-int FIRST_INDEX_EIGENSPACE = 2;                   // Index of the first eigenfunction in the target eigenspace
+int FIRST_INDEX_EIGENSPACE = 2;                   // Index of the first eigenfunction in the target eigenspace.
 
 int P_INIT = 2;                                   // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
@@ -66,7 +74,7 @@ const double PYSPARSE_TARGET_VALUE = 2.0;         // PySparse parameter: Eigenva
 const double PYSPARSE_TOL = 1e-10;                // PySparse parameter: Error tolerance.
 const int PYSPARSE_MAX_ITER = 1000;               // PySparse parameter: Maximum number of iterations.
 
-// Parameters for the Newton's and Picard's method.
+// Parameters for the Newton's and Picard's methods.
 const double NEWTON_TOL = 1e-3;
 const int NEWTON_MAX_ITER = 10;
 const double PICARD_TOL = 1e-3;
@@ -98,8 +106,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain_lshape_tria.mesh", &mesh);
-  //mloader.load("domain_square.mesh", &mesh);
+  mloader.load(mesh_file, &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -189,8 +196,7 @@ int main(int argc, char* argv[])
   }
   fclose(file);
 
-  
-  // Eigenvalue.
+  // Retrieve desired eigenvalue.
   double lambda = eigenval[TARGET_EIGENFUNCTION-1];
   info("Eigenvalue on coarse mesh: %g", lambda);
 
@@ -348,8 +354,8 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_space_ref[i], ref_space, &ref_sln_space[i]);
     }
 
-    // Reconstruction.
-    if (RECONSTRUCTION == 0) { 
+    // Perform eigenfunction reconstruction.
+    if (RECONSTRUCTION_ON == false) { 
       Solution::vector_to_solution(coeff_space_ref[TARGET_EIGENFUNCTION-1], ref_space, &ref_sln);
     }
     else {
