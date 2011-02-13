@@ -19,30 +19,40 @@
 
 // TODO LIST: 
 //
-// (1) Incorporate spatial adaptivity into the time stepping.
+// (1) In example 23-newton-timedep-heat-adapt-rk Newton's method takes 
+//     much longer than in 23-newton-timedep-heat-adapt-basic. This means 
+//     the the initial guess for the K_vector should be improved (currently 
+//     it is zero).
 //
-// (2) Enable more equations than one. Right now rk_time_step() does not 
+// (2) At the end of rk_time_step(), the previous time level solution is 
+//     projected onto the space of the new time-level solution so that 
+//     it can be added to the stages. This projection is slow so we should 
+//     find a way to do this differently. In any case, the projection 
+//     is not necessary when no adaptivity in space takes place and the 
+//     two spaces are the same (but it is done anyway).
+//
+// (3) Enable more equations than one. Right now rk_time_step() does not 
 //     work for systems.
 //
-// (3) Enable all other matrix solvers, so far UMFPack is hardwired here.
+// (4) Enable all other matrix solvers, so far UMFPack is hardwired here.
 //
-// (4) We do not take advantage of the fact that all blocks in the 
+// (5) We do not take advantage of the fact that all blocks in the 
 //     Jacobian matrix have the same structure. Thus it is enough to 
 //     assemble the matrix M (one block) and copy the sparsity structure
 //     into all remaining nonzero blocks (and diagonal blocks). Right 
 //     now, the sparsity structure is created expensively in each block 
 //     again.
 //
-// (5) If space does not change, the sparsity does not change. Right now 
+// (6) If space does not change, the sparsity does not change. Right now 
 //     we discard everything at the end of every time step, we should not 
 //     do it.  
 //
-// (6) If the problem does not depend explicitly on time, then all the blocks 
+// (7) If the problem does not depend explicitly on time, then all the blocks 
 //     in the Jacobian matrix of the stationary residual are the same up 
 //     to a multiplicative constant. Thus they do not have to be aassembled 
 //     from scratch.
 // 
-// (7) If the problem is linear, then the Jacobian is constant. If Space 
+// (8) If the problem is linear, then the Jacobian is constant. If Space 
 //     does not change between time steps, we should keep it. 
 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
@@ -414,6 +424,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Project previous time level solution on the stage space,
   // to be able to add them together. The result of the projection 
   // will be stored in the vector coeff_vec.
+  // FIXME - this projection is slow and it is not needed when the 
+  //         spaces are the same (if spatial adaptivity does not take place). 
   scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(K_space, sln_time_prev, coeff_vec, matrix_solver);
 
