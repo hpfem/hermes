@@ -1,7 +1,7 @@
 if(NOT H2D_REAL)
     return()
 endif(NOT H2D_REAL)
-project(example-butcher-adapt)
+project(example-19-rk-adapt-time-step)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
@@ -27,17 +27,17 @@ set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 #                                         // Method for Solving Ordinary Differential Equations). The method has
 #                                         // 7 stages but the first one is explicit. BEWARE - THE B2 ROW IS PROBABLY WRONG!
 
-add_test(example-butcher-adapt-Explicit_HEUN_EULER_2_12_embedded ${BIN} 1)
-add_test(example-butcher-adapt-Explicit_BOGACKI_SHAMPINE_4_23_embedded ${BIN} 2)
-add_test(example-butcher-adapt-EExplicit_FEHLBERG_6_45_embedded ${BIN} 3)
-add_test(example-butcher-adapt-IExplicit_CASH_KARP_6_45_embedded ${BIN} 4)
-add_test(example-butcher-adapt-Explicit_DORMAND_PRINCE_7_45_embedded ${BIN} 5)
+add_test(example-19-rk-adapt-time-step-Explicit_HEUN_EULER_2_12_embedded ${BIN} 1)
+add_test(example-19-rk-adapt-time-step-Explicit_BOGACKI_SHAMPINE_4_23_embedded ${BIN} 2)
+add_test(example-19-rk-adapt-time-step-EExplicit_FEHLBERG_6_45_embedded ${BIN} 3)
+add_test(example-19-rk-adapt-time-step-IExplicit_CASH_KARP_6_45_embedded ${BIN} 4)
+add_test(example-19-rk-adapt-time-step-Explicit_DORMAND_PRINCE_7_45_embedded ${BIN} 5)
 
-add_test(example-butcher-adapt-Implicit_ESDIRK_TRBDF2_3_23_embedded ${BIN} 6)
-add_test(example-butcher-adapt-Implicit_ESDIRK_TRX2_3_23_embedded ${BIN} 7)
-add_test(example-butcher-adapt-Implicit_SDIRK_CASH_3_23_embedded ${BIN} 8)
-add_test(example-butcher-adapt-Implicit_SDIRK_CASH_5_24_embedded ${BIN} 9)
-add_test(example-butcher-adapt-Implicit_SDIRK_CASH_5_34_embedded ${BIN} 10)
-add_test(example-butcher-adapt-Implicit_DIRK_7_45_embedded ${BIN} 11)
+add_test(example-19-rk-adapt-time-step-Implicit_ESDIRK_TRBDF2_3_23_embedded ${BIN} 6)
+add_test(example-19-rk-adapt-time-step-Implicit_ESDIRK_TRX2_3_23_embedded ${BIN} 7)
+add_test(example-19-rk-adapt-time-step-Implicit_SDIRK_CASH_3_23_embedded ${BIN} 8)
+add_test(example-19-rk-adapt-time-step-Implicit_SDIRK_CASH_5_24_embedded ${BIN} 9)
+add_test(example-19-rk-adapt-time-step-Implicit_SDIRK_CASH_5_34_embedded ${BIN} 10)
+add_test(example-19-rk-adapt-time-step-Implicit_DIRK_7_45_embedded ${BIN} 11)
 
 

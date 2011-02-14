@@ -5,7 +5,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that the example "butcher-comparison" works correctly.
+// This test makes sure that the example "19-rk-comparison" works correctly.
 
 // The Butcher's table of the SDIRK-2 method is:
 double GAMMA = 1. - 1./sqrt(2.);
@@ -33,40 +33,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double ALPHA = 4.0;                         // For the nonlinear thermal ocnductivity.
 double TIME = 0.0;
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) { return 1 + pow(u, ALPHA);}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) { return ALPHA*pow(u, ALPHA-1);}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition. It will be projected on the FE mesh 
-// to obtain initial coefficient vector for the Newton's method.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{ return dir_lift(x, y, dx, dy);}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition markers.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (forcing term in accordance with exact solution).
-template<typename Real>
-Real heat_src(Real x, Real y, double t) { return 1.0;}
+// Model parameters.
+#include "model.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -154,7 +122,7 @@ int main(int argc, char* argv[])
     } 
     else {
       // Perform Newton's iteration for sdirk_stage_sol.
-      info("SDIRK-2 time step, stage I (t = %g, tau = %g):", TIME, TAU);
+      info("SDIRK-22 time step, stage I (t = %g, tau = %g):", TIME, TAU);
       bool verbose = true;
       if (!solve_newton(coeff_vec1, dp1, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
@@ -164,7 +132,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
 
       // Perform Newton's iteration for the final solution.
-      info("SDIRK-2 time step, stage II (t = %g, tau = %g):", TIME, TAU);
+      info("SDIRK-22 time step, stage II (t = %g, tau = %g):", TIME, TAU);
 
       if (!solve_newton(coeff_vec2, dp2, solver, matrix,
 			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
