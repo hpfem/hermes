@@ -391,17 +391,6 @@ int main(int argc, char* argv[])
       // Project reference solution to coarse mesh.
       info("Projecting reference solution to coarse mesh for error calculation.");
       OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
-
-      // Visualize the projection.
-      info("Plotting projection of reference solution to new coarse mesh.");
-      char title[100];
-      sprintf(title, "Coarse mesh projection");
-      sview.set_title(title);
-      sview.show_mesh(false);
-      sview.show(&sln);
-      sprintf(title, "Coarse mesh, step %d", as);
-      oview.set_title(title);
-      oview.show(&space);
     }
 
     // Calculate element errors and total error estimate.
@@ -423,17 +412,29 @@ int main(int argc, char* argv[])
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      
-      // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
     }
     ndof = Space::get_num_dofs(&space);
     if (ndof >= NDOF_STOP) done = true;
 
     // Clean up.
     delete adaptivity;
+
     //delete ref_space->get_mesh();
     delete ref_space;
+
+    // Visualize the projection.
+    info("Plotting projection of reference solution to new coarse mesh.");
+    char title[100];
+    sprintf(title, "Coarse mesh projection");
+    sview.set_title(title);
+    sview.show_mesh(false);
+    sview.show(&sln);
+    sprintf(title, "Coarse mesh, step %d", as);
+    oview.set_title(title);
+    oview.show(&space);
+
+    // Increase the counter of performed adaptivity steps.
+    if (done == false) as++;
 
     // Wait for keypress.
     View::wait(HERMES_WAIT_KEYPRESS);
