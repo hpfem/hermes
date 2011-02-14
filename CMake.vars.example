@@ -1,3 +1,5 @@
+set(WITH_PYTHON YES)
+
 set(WITH_MUMPS YES)
 set(WITH_SUPERLU YES)
 

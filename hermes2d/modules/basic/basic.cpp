@@ -75,11 +75,13 @@ void ModuleBasic::set_initial_poly_degree(int p)
 }
 
 // Set material markers, and check compatibility with mesh file.
-void ModuleBasic::set_material_markers(const Hermes::vector<int> &m_markers)
+void ModuleBasic::set_material_markers(const std::vector<int> &m_markers)
 {
   this->mat_markers = m_markers;
   // FIXME: these global arrays need to be removed.
-  _global_mat_markers = m_markers;
+  for (unsigned int i = 0; i < m_markers.size(); i++) {
+    _global_mat_markers.push_back(m_markers[i]);;
+  }
 }
 
 // Set c1 array.
@@ -126,58 +128,72 @@ void ModuleBasic::set_c5_array(const std::vector<double> &c5_array)
 }
 
 // Set Dirichlet boundary markers.
-void ModuleBasic::set_dirichlet_markers(const Hermes::vector<int> &bdy_markers_dirichlet)
+void ModuleBasic::set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet)
 {
   //this->bdy_markers_dirichlet = bdy_markers_dirichlet;
   Hermes::vector<int> t;
-  t = bdy_markers_dirichlet;
+  for (unsigned int i = 0; i < bdy_markers_dirichlet.size(); i++) {
+    t.push_back(bdy_markers_dirichlet[i]);
+  }
   this->bc_types.add_bc_dirichlet(t);
 }
 
 // Set Dirichlet boundary values.
-void ModuleBasic::set_dirichlet_values(const Hermes::vector<int> &bdy_markers_dirichlet,
-                                       const Hermes::vector<double> &bdy_values_dirichlet)
+void ModuleBasic::set_dirichlet_values(const std::vector<int> &bdy_markers_dirichlet,
+                                       const std::vector<double> &bdy_values_dirichlet)
 {
   Hermes::vector<int> tm;
-  tm = bdy_markers_dirichlet;
+  for (unsigned int i = 0; i < bdy_markers_dirichlet.size(); i++) {
+    tm.push_back(bdy_markers_dirichlet[i]);
+  }
   Hermes::vector<double> tv;
-  tv = bdy_values_dirichlet;
+  for (unsigned int i = 0; i < bdy_values_dirichlet.size(); i++) {
+    tv.push_back(bdy_values_dirichlet[i]);
+  }
   if (tm.size() != tv.size()) error("Mismatched numbers of Dirichlet boundary markers and values.");
   for (unsigned int i = 0; i < tm.size(); i++) this->bc_values.add_const(tm[i], tv[i]);
 }
 
 // Set Neumann boundary markers.
-void ModuleBasic::set_neumann_markers(const Hermes::vector<int> &bdy_markers_neumann)
+void ModuleBasic::set_neumann_markers(const std::vector<int> &bdy_markers_neumann)
 {
   this->bdy_markers_neumann = bdy_markers_neumann;
   Hermes::vector<int> t;
-  t = bdy_markers_neumann;
+  for (unsigned int i = 0; i < bdy_markers_neumann.size(); i++) {
+    t.push_back(bdy_markers_neumann[i]);
+  }
   this->bc_types.add_bc_neumann(t);
 }
 
 // Set Neumann boundary values.
-void ModuleBasic::set_neumann_values(const Hermes::vector<double> &bdy_values_neumann)
+void ModuleBasic::set_neumann_values(const std::vector<double> &bdy_values_neumann)
 {
   this->bdy_values_neumann = bdy_values_neumann;
   // FIXME: these global arrays need to be removed.
-  _global_bdy_values_neumann = bdy_values_neumann;
+  for (unsigned int i = 0; i < bdy_values_neumann.size(); i++) {
+    _global_bdy_values_neumann.push_back(bdy_values_neumann[i]);
+  }
 }
 
 // Set Newton boundary markers.
-void ModuleBasic::set_newton_markers(const Hermes::vector<int> &bdy_markers_newton)
+void ModuleBasic::set_newton_markers(const std::vector<int> &bdy_markers_newton)
 {
   this->bdy_markers_newton = bdy_markers_newton;
   Hermes::vector<int> t;
-  t = bdy_markers_newton;
+  for (unsigned int i = 0; i < bdy_markers_newton.size(); i++) {
+    t.push_back(bdy_markers_newton[i]);
+  }
   this->bc_types.add_bc_newton(t);
 }
 
 // Set Newton boundary values.
-void ModuleBasic::set_newton_values(const Hermes::vector<double_pair> &bdy_values_newton)
+void ModuleBasic::set_newton_values(const std::vector<double_pair> &bdy_values_newton)
 {
   this->bdy_values_newton = bdy_values_newton;
   // FIXME: these global arrays need to be removed.
-  _global_bdy_values_newton = bdy_values_newton;
+  for (unsigned int i = 0; i < bdy_values_newton.size(); i++) {
+    _global_bdy_values_newton.push_back(bdy_values_newton[i]);
+  }
 }
 
 // Sanity check of material markers and material constants.
