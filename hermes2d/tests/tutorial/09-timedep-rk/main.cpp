@@ -134,12 +134,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 10.000033) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 9.999999) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value(0.0, 2.0) - 10.000005) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value(1.0, 2.0) - 9.999999) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value(2.0, 2.0) - 10.000033) > 1E-6) success = false;
-
+  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 9.999982) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.000002) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 0.0, 2.0) - 9.999995) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.000002) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 2.0, 2.0) - 9.999982) > 1E-6) success = false;
 
   if (success) {
     printf("Success!\n");
