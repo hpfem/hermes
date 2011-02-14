@@ -10,7 +10,7 @@ vertices =
   {  0, a  },
   { -a, a },
   { -a, 0 },
-  (  0, 0 }
+  {  0, 0 }
 }
 
 elements =

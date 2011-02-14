@@ -12,7 +12,7 @@ vertices =
   {  0, a  },
   { -a, a },
   { -a, 0 },
-  (  x_pert, y_pert }
+  {  x_pert, y_pert }
 }
 
 elements =
