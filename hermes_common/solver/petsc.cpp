@@ -106,7 +106,7 @@ void PetscMatrix::alloc() {
 
   // calc nnz
   int *nnz_array = new int[size];
-  MEM_CHECK(nnz);
+  MEM_CHECK(nnz_array);
 
   // fill in nnz_array
   int aisize = get_num_indices();
@@ -293,11 +293,14 @@ void PetscVector::zero() {
 void PetscVector::change_sign() {
   _F_
 #ifdef WITH_PETSC
-  scalar y = 0;
-  for (int idx = 0; idx < n; idx++) {
-    VecGetValues(vec, 1, &idx, &y);
-    VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
-  }
+  PetscScalar* y = new PetscScalar [size];
+  int *idx = new int [size];
+  for (unsigned int i = 0; i < size; i++) idx[i] = i;
+  VecGetValues(vec, size, idx, y);
+  for (unsigned int i = 0; i < size; i++) y[i] *= -1.;
+  VecSetValues(vec, size, idx, y, INSERT_VALUES);
+  delete [] y;
+  delete [] idx;
 #endif
 }
 
