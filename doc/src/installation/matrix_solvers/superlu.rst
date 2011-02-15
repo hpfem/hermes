@@ -49,7 +49,7 @@ typical build scenarios that you may follow:
     the library source code from within a Hermes debugging session. Note that 
     you may install the optimized and debugging versions to separate directories
     and switch between them when building your application by adjusting the 
-    hermes{1|2|3}d CMake.vars file.
+    CMake.vars file.
     
   - Build the non-optimized version of the library::
 
@@ -77,7 +77,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the
+Now go to the directory with hermes. Create the file CMake.vars with the
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
@@ -169,7 +169,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the 
+Now go to the directory with hermes. Create the file CMake.vars with the 
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
@@ -183,7 +183,7 @@ Finally execute::
   cmake .
   make
     
-Hermes{1|2|3}d will now be compiled and linked with the multithreaded SuperLU 
+Hermes will now be compiled and linked with the multithreaded SuperLU 
 library. Before running the parallel calculation, you just need to set the 
 environment variable ``OMP_NUM_THREADS`` to the number of threads you wish to 
 employ for solution of your system (this is typically the number of cores in your 
