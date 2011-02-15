@@ -16,5 +16,6 @@ install(FILES __init__.py plot.py
     DESTINATION ${PY_PATH}
     )
 
+add_subdirectory(hermes_common)
 
 add_subdirectory(modules)

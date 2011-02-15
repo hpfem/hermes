@@ -610,17 +610,17 @@ int main(int argc, char* argv[])
   // Test the results.
   
   TestSubject<int> num_iter(2);
-  num_iter.test_overshoot(as, 14);
+  num_iter.test_overshoot(as, 13);
   
   TestSubject<double> eigenvalue(1e-5);
   eigenvalue.test_equality(k_eff, 1.140910);
   
   TestSubject<double> error_estimate(1e-5);
-  error_estimate.test_overshoot(energy_err_est, 0.06546);
+  error_estimate.test_overshoot(energy_err_est, 0.0780511);
 
   TestSubject<int> ndof(100);
   const int expected_ndofs[N_GROUPS] = {
-    1204, 884, 792, 1104
+    1189, 1101, 736, 1124
   };
   for_each_group(g) {
     ndof.test_overshoot(spaces[g]->get_num_dofs(), expected_ndofs[g]);
@@ -629,10 +629,10 @@ int main(int argc, char* argv[])
 
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
   const Extremum expected_maxima[N_GROUPS] = {
-    Extremum(1.021108, 1.794896, 5.481176),
-    Extremum(2.299487, 1.794896, 5.481176),
-    Extremum(0.341151, 1.794896, 5.481176),
-    Extremum(4.612591, 1.235793, 5.481176)
+    Extremum(1.021590, 1.794896, 5.481176),
+    Extremum(2.300548, 1.794896, 5.481176),
+    Extremum(0.339584, 1.897030, 5.438284),
+    Extremum(4.611592, 1.235793, 5.481176)
   };
   for_each_group(g) peak.test_equality(maxima[g], expected_maxima[g]);
   

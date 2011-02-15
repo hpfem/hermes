@@ -616,7 +616,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(4, 1.0);
     break;
     
-    case Implicit_DIRK_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
+    case Implicit_DIRK_ISMAIL_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
       this->alloc(7);
       this->set_A(0, 0, 0);
       this->set_A(1, 0, 0.28589);

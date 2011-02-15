@@ -1,6 +1,7 @@
 project(module-basic)
 
 add_library(hermes_basic SHARED basic.cpp)
+target_link_libraries(hermes_basic ${HERMES2D_REAL})
 
 add_executable(${PROJECT_NAME} main.cpp disc.cpp)
 target_link_libraries(${PROJECT_NAME} hermes_basic)
