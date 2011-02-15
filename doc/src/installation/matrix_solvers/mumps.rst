@@ -1,12 +1,15 @@
 Mumps
 -----
 
+.. _MUMPS home page: http://graal.ens-lyon.fr/MUMPS/index.php
+.. _solvers repository: https://github.com/hpfem/solvers
+.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/MUMPS_4.9.2.pdf
+
 Linux
 ~~~~~
 
 Using standard Debian packages
 ``````````````````````````````
-
 Install the libmumps-dev, libmumps-seq-dev, libmumps-seq-4.9.2 and libmumps-4.9.2 packages.
 In Ubuntu you can use the Synaptic package manager for that, or type::
 
@@ -17,6 +20,43 @@ of Ubuntu, please follow the instructions below.
 
 Using the special Hermes/Femhub package
 ```````````````````````````````````````
+Download the software package from the `solvers repository`_ and unpack 
+it in some temporary directory::
+  
+  wget https://github.com/hpfem/solvers/raw/master/packages/mumps-4.9.2.spkg --no-check-certificate
+  tar -jxvf mumps-4.9.2.spkg
+  rm mumps-4.9.2.spkg
+  cd mumps-4.9.2
+
+In order to install the library into say ``~/solvers/mumps`` (you may choose any
+path you like, provided that you have write access to it; the target directory 
+will be created if it doesn't exist), type now into the terminal::
+
+SPKG_LOCAL=~/solvers/mumps ./spkg-install
+
+For advanced configuration possibilities, please read
+src/README, the `manual`_ or visit the `SuperLU home page`_.
+
+Once the library has been built and installed, you may delete the temporary 
+directory with the unpacked package to save some disk space or 
+just remove the object files by running
+
+::
+
+  cd src
+  make clean 
+
+Now go to the directory with Hermes. Create the file CMake.vars with the
+following lines (or append to the existing one)::
+
+  set(WITH_MUMPS YES)
+  set(MUMPS_ROOT ~/solvers/mumps) #(or your own installation destination)
+
+Finally execute::
+  
+  rm CMakeCache.txt
+  cmake .
+  make
 
 Windows MSVC
 ~~~~~~~~~~~~
