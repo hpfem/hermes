@@ -280,7 +280,10 @@ void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned i
             (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
             (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
           neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
-        else
+        else if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
+            (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+            (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
+            (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
           neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
   }
   else handle_sub_idx_way_down(transformations);
@@ -312,7 +315,20 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
     unsigned int neighbor_i = neighbors_not_to_be_deleted[neighbors_not_to_be_deleted_i];
     for(unsigned int level = 0; level < transformations.size(); level++) {
       // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
-      central_transformations[neighbor_i][level] = transformations[level];
+      // But we have to be careful, if the original central element transformation was anisotropic and adjacent to the current active edge
+      // we have to adjust the transformations (leave the bsplit from set_active_edge), so that we do not lose any information by assembling over
+      // a too small subelement.
+      if(!
+          ((active_edge == 0 && transformations[level] == 4) ||
+          (active_edge == 1 && transformations[level] == 7) ||
+          (active_edge == 2 && transformations[level] == 5) ||
+          (active_edge == 3 && transformations[level] == 6))
+        ) {
+          central_transformations[neighbor_i][level] = transformations[level];
+          // Also if the transformation count is already bigger than central_n_trans, we need to raise it.
+          if(level >= central_n_trans[neighbor_i])
+            central_n_trans[neighbor_i] = level + 1;
+      }
       // If we are already on a bigger (i.e. ~ way up) neighbor.
       if(central_n_trans[neighbor_i] == level + 1) {
         for(unsigned int i = level + 1; i < transformations.size(); i++)
@@ -331,12 +347,13 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
                 (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
                 (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
               neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
-            else
+            else if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
+                (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+                (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
+                (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
               neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
       }
     }
-    if(transformations.size() > central_n_trans[neighbor_i])
-      central_n_trans[neighbor_i] = transformations.size(); 
   }
 
   // Now we truly delete (in the reverse order) the neighbors.
@@ -351,29 +368,29 @@ bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, 
   if(a == b)
     return true;
   if(edge == 0) {
-    if ((a == 0 && b == 6) ||
-        (a == 1 && b == 7))
+    if ((a == 0 && (b == 6 || b == 4)) ||
+        (a == 1 && (b == 7 || b == 4)))
       return true;
     else
       return false;
   }
   if(edge == 1) {
-    if ((a == 1 && b == 4) ||
-        (a == 2 && b == 5))
+    if ((a == 1 && (b == 4 || b == 7)) ||
+        (a == 2 && (b == 5 || b == 7)))
       return true;
     else
       return false;
   }
   if(edge == 2) {
-    if ((a == 2 && b == 7) ||
-        (a == 3 && b == 6))
+    if ((a == 2 && (b == 7 || b == 5)) ||
+        (a == 3 && (b == 6 || b == 5)))
       return true;
     else
       return false;
   }
   if(edge == 3) {
-    if ((a == 3 && b == 5) ||
-        (a == 0 && b == 4))
+    if ((a == 3 && (b == 5 || b == 6)) ||
+        (a == 0 && (b == 4 || b == 6)))
       return true;
     else
       return false;
