@@ -48,6 +48,8 @@ enum ButcherTableType
                                          // of TR-BDF2 by Hosea and Shampine.
    Implicit_SDIRK_CASH_3_23_embedded,    // From the paper Diagonally Implicit Runge-Kutta Formulae
                                          // with Error Estimates by J.R. Cash
+   Implicit_SDIRK_BILLINGTON_3_23_embedded, // From Master Thesis by S.R. Billington: Type Insensitive
+                                            // Codes for the Solution of Stiff and Non-Stiff systems of ODE's
    Implicit_SDIRK_CASH_5_24_embedded,    // From the paper Diagonally Implicit Runge-Kutta Formulae
                                          // with Error Estimates by J.R. Cash
    Implicit_SDIRK_CASH_5_34_embedded,    // From the paper Diagonally Implicit Runge-Kutta Formulae
@@ -55,8 +57,7 @@ enum ButcherTableType
    Implicit_DIRK_7_45_embedded  // Implicit embedded DIRK method pair of orders four in five (from the paper 
                                 // Fudziah Ismail et all: Embedded Pair of Diagonally Implicit Runge-Kutta  
                                 // Method for Solving Ordinary Differential Equations). The method has
-                                // 7 stages but the first one is explicit. BEWARE - THE B2 ROW IS PROBABLY 
-                                // WRONG!
+                                // 7 stages but the first one is explicit.
 };
 
 // General square table of real numbers.

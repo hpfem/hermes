@@ -354,6 +354,24 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
+    case Implicit_SDIRK_BILLINGTON_3_23_embedded:
+      this->alloc(3);
+      this->set_A(0, 0, 0.292893218813);
+      this->set_A(1, 0, 0.798989873223);
+      this->set_A(2, 0, 0.740789228841);
+      this->set_A(1, 1, 0.292893218813);
+      this->set_A(2, 1, 0.259210771159);
+      this->set_A(2, 2, 0.292893218813);
+      this->set_B(0, 0.691665115992);
+      this->set_B(1, 0.503597029883);
+      this->set_B(2, -0.195262145876);
+      this->set_B2(0, 0.740789228840);
+      this->set_B2(1, 0.259210771159);
+      this->set_C(0, 0.292893218813);
+      this->set_C(1, 1.091883092037);
+      this->set_C(2, 1.292893218813);
+    break;
+
     case Implicit_SDIRK_CASH_5_24_embedded:
       this->alloc(5);
       this->set_A(0, 0, 0.435866521508);
@@ -421,8 +439,7 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(3, 0.924556761814);
       this->set_C(4, 1.0);
     break;
-
-    // WARNING; THIS METHOD IS NOT CORRECT.
+    
     case Implicit_DIRK_7_45_embedded: // Implicit embedded DIRK method with orders 4 and 5.
       this->alloc(7);
       this->set_A(0, 0, 0);
@@ -460,25 +477,13 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_B(4, 0.234313169);
       this->set_B(5, -0.166317293);
       this->set_B(6, 0.28589);
-      /* ORIGINAL FROM FUDZIAH's PAPER
-         AND PROBABLY WRONG
-      this->set_B2(0, -0.094388662);
+      this->set_B2(0, 0.094388663);
       this->set_B2(1, 0);
-      this->set_B2(2, -0.039782614);
+      this->set_B2(2, -0.039782614 );
       this->set_B2(3, 0.745608552);
       this->set_B2(4, -0.505129807);
       this->set_B2(5, 0.704915206);
-      this->set_B2(6, 0.28589);
-      */
-      // Correction by Nikola Mirkov
-      this->set_B2(0, 0);
-      this->set_B2(1, 0);
-      this->set_B2(2, -0.15424);
-      this->set_B2(3, 1.2474);
-      this->set_B2(4, -1.7664);
-      this->set_B2(5, 1.3873);
-      this->set_B2(6, 0.28589);
-
+      this->set_B2(6, 0);
       this->set_C(0, 0);
       this->set_C(1, 0.57178);
       this->set_C(2, 1.352846);
