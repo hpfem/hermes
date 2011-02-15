@@ -13,12 +13,14 @@ library.
 Linux
 ~~~~~
 
-**Via Synaptic:**
+Using standard Debian packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SuperLU is available in Ubuntu via the Synaptic Package Manager, just install
 packages libsuperlu3 and libsuperlu3-dev.
 
-**From Source:**
+Using the special Hermes/Femhub package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sequential
 ``````````
@@ -77,7 +79,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes. Create the file CMake.vars with the
+Now go to the directory with Hermes. Create the file CMake.vars with the
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
@@ -89,6 +91,11 @@ Finally execute::
   rm CMakeCache.txt
   cmake .
   make
+  
+You may now select `SOLVER_SUPERLU` as the matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
     
 
 Multithreaded
@@ -169,7 +176,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes. Create the file CMake.vars with the 
+Now go to the directory with Hermes. Create the file CMake.vars with the 
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)

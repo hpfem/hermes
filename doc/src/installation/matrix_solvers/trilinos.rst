@@ -35,7 +35,7 @@ Download the sources for the latest version from the `Trilinos page <http://tril
 
 (This installs the library into ~/solvers/trilinos directory. If you do not like this location, change the CMAKE_INSTALL_PREFIX variable to whatever you like.)
 
-Go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the following lines (or append to the existing one)::
+Go to the directory with Hermes. Create the file CMake.vars with the following lines (or append to the existing one)::
 
     set(WITH_TRILINOS YES)
     set(TRILINOS_ROOT ~/solvers/trilinos) #(or your modified CMAKE_INSTALL_PREFIX variable)
@@ -102,7 +102,7 @@ Install Trilinos into the path specified by the {CMAKE_INSTALL_PREFIX} variable 
 
 	cmake -P cmake_install.cmake 
 	
-Go to the directory with hermes{1|2|3}d. Add the following lines into CMake.vars::
+Go to the directory with Hermes. Add the following lines into CMake.vars::
 
     set(WITH_TRILINOS YES)
     set(TRILINOS_ROOT {CMAKE_INSTALL_PREFIX}) 
