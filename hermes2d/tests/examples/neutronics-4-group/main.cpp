@@ -340,13 +340,13 @@ int main(int argc, char* argv[])
   num_iter.test_overshoot(iter, 48);
   
   TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
-  peak.test_equality(max1, Extremum(1.020590,1.690169,5.497631));
-  peak.test_equality(max2, Extremum(2.272636,1.807669,5.497631));
-  peak.test_equality(max3, Extremum(0.337387,1.807669,5.497631));
-  peak.test_equality(max4, Extremum(4.600162,1.149095,5.497631));
+  peak.test_equality(max1, Extremum(1.020625,1.690169,5.497631));
+  peak.test_equality(max2, Extremum(2.272566,1.807669,5.497631));
+  peak.test_equality(max3, Extremum(0.337373,1.807669,5.497631));
+  peak.test_equality(max4, Extremum(4.603256,1.149095,5.497631));
                                              
   TestSubject<double> eigenvalue(1e-5);      
-  eigenvalue.test_equality(k_eff, 1.1407201); 
+  eigenvalue.test_equality(k_eff, 1.140726); 
   
   if (num_iter.passed && peak.passed && eigenvalue.passed) {
     printf("Success!\n");
