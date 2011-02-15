@@ -460,7 +460,7 @@ PardisoLinearSolver::~PardisoLinearSolver()
   
   // Termination.
   phase = -1; // Release internal memory.
-  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &m->size, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
+  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, (int*) &m->size, &ddum, m->Ap, m->Ai, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &err, dparm);
 #endif
 }
 
@@ -476,8 +476,8 @@ bool PardisoLinearSolver::solve()
   TimePeriod tmr;
         
   // Convert matrix from 0-based C-notation to Fortran 1-based notation.
-  for (int i = 0; i < m->size + 1; i++) m->Ap[i] += 1;
-  for (int i = 0; i < m->nnz; i++) m->Ai[i] += 1;
+  for (unsigned int i = 0; i < m->size + 1; i++) m->Ap[i] += 1;
+  for (unsigned int i = 0; i < m->nnz; i++) m->Ai[i] += 1;
   
   // Prepare the solution vector;
   delete [] sln;
@@ -495,11 +495,11 @@ bool PardisoLinearSolver::solve()
   
   // Perform the jobs specified by setup_factorization().
   int idummy;
-  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &m->size, m->Ax, m->Ap, m->Ai, &idummy, &nrhs, iparm, &msglvl, rhs->v, sln, &err, dparm);
+  PARDISO(pt, &maxfct, &mnum, &mtype, &phase, (int*) &m->size, m->Ax, m->Ap, m->Ai, &idummy, &nrhs, iparm, &msglvl, rhs->v, sln, &err, dparm);
       
   //  Convert matrix back to 0-based C-notation.
-  for (int i = 0; i < m->size + 1; i++) m->Ap[i] -= 1;
-  for (int i = 0; i < m->nnz; i++) m->Ai[i] -= 1;
+  for (unsigned int i = 0; i < m->size + 1; i++) m->Ap[i] -= 1;
+  for (unsigned int i = 0; i < m->nnz; i++) m->Ai[i] -= 1;
   
   tmr.tick();
   time = tmr.accumulated();
