@@ -7,19 +7,15 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   neighb_el(NULL),
   quad(&g_quad_2d_std)
 {
-  for(unsigned int i = 0; i < max_neighbors; i++) {
-    for(unsigned int j = 0; j < max_n_trans; j++) {
-      central_transformations[i][j] = 0;
-      neighbor_transformations[i][j] = 0;
-    }
-    central_n_trans[i] = 0;
-    neighbor_n_trans[i] = 0;
-  }
+  memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
+  memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
 
   assert_msg(central_el != NULL && central_el->active == 1,
              "You must pass an active element to the NeighborSearch constructor.");
-  neighbors.reserve(NeighborSearch::max_neighbors);
-  neighbor_edges.reserve(NeighborSearch::max_neighbors);
+  neighbors.reserve(2);
+  neighbor_edges.reserve(2);
     
   ignore_errors = false;
   n_neighbors = 0;
@@ -36,17 +32,13 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   active_segment(ns.active_segment)
 {
   _F_
-  for(unsigned int i = 0; i < max_neighbors; i++) {
-    for(unsigned int j = 0; j < max_n_trans; j++) {
-      central_transformations[i][j] = 0;
-      neighbor_transformations[i][j] = 0;
-    }
-    central_n_trans[i] = 0;
-    neighbor_n_trans[i] = 0;
-  }
+  memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
+  memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
 
-  neighbors.reserve(NeighborSearch::max_neighbors);
-  neighbor_edges.reserve(NeighborSearch::max_neighbors);
+  neighbors.reserve(2);
+  neighbor_edges.reserve(2);
 
   for(unsigned int i = 0; i < ns.n_neighbors; i++)
     for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
@@ -101,14 +93,10 @@ void NeighborSearch::reset_neighb_info()
   n_neighbors = 0;
 
   // Reset transformations.
-  for(unsigned int i = 0; i < max_neighbors; i++) {
-    for(unsigned int j = 0; j < max_n_trans; j++) {
-      central_transformations[i][j] = 0;
-      neighbor_transformations[i][j] = 0;
-    }
-    central_n_trans[i] = 0;
-    neighbor_n_trans[i] = 0;
-  }
+  memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+  memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
+  memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
 }
 
@@ -431,23 +419,23 @@ void NeighborSearch::clear_initial_sub_idx()
 void NeighborSearch::delete_neighbor(unsigned int position)
 {
   _F_
-  for(unsigned int i = position; i < max_neighbors - 1; i++)
+  for(unsigned int i = position; i < n_neighbors - 1; i++)
     for(unsigned int j = 0; j < max_n_trans; j++)
       central_transformations[i][j] = central_transformations[i + 1][j];
   for(unsigned int j = 0; j < max_n_trans; j++)
-    central_transformations[max_neighbors - 1][j] = 0;
-  for(unsigned int i = position; i < max_neighbors - 1; i++)
+    central_transformations[n_neighbors - 1][j] = 0;
+  for(unsigned int i = position; i < n_neighbors - 1; i++)
     central_n_trans[i] = central_n_trans[i + 1];
-  central_n_trans[max_neighbors - 1] = 0;
+  central_n_trans[n_neighbors - 1] = 0;
 
-  for(unsigned int i = position; i < max_neighbors - 1; i++)
+  for(unsigned int i = position; i < n_neighbors - 1; i++)
     for(unsigned int j = 0; j < max_n_trans; j++)
       neighbor_transformations[i][j] = neighbor_transformations[i + 1][j];
   for(unsigned int j = 0; j < max_n_trans; j++)
-    neighbor_transformations[max_neighbors - 1][j] = 0;
-  for(unsigned int i = position; i < max_neighbors - 1; i++)
+    neighbor_transformations[n_neighbors - 1][j] = 0;
+  for(unsigned int i = position; i < n_neighbors - 1; i++)
     neighbor_n_trans[i] = neighbor_n_trans[i + 1];
-  neighbor_n_trans[max_neighbors - 1] = 0;
+  neighbor_n_trans[n_neighbors - 1] = 0;
 
   neighbor_edges.erase (neighbor_edges.begin() + position);
   neighbors.erase (neighbors.begin() + position);
