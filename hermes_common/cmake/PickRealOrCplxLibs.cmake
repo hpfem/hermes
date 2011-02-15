@@ -11,6 +11,10 @@
 # but this is not an issue as long as there aren't any other libraries with
 # same-named include files.
 #
+# Unfortunately, the latter happens with the dummy sequential "mpi.h" file, which
+# is used (with this name) both in PETSc and MUMPS. Therefore, it is neccessary 
+# to treat this single file via include_directories.
+#
 macro(SET_PETSC_FLAGS TRGT ARSP_INCLUDE_DIRS)
   if(WITH_PETSC)
     get_property(ARCH_SPECIFIC_FLAGS TARGET ${TRGT} PROPERTY COMPILE_FLAGS)
