@@ -64,7 +64,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
-//   Implicit_DIRK_FUDZIAH_7_45_embedded. 
+//   Implicit_DIRK_ISMAIL_7_45_embedded. 
 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 

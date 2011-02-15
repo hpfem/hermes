@@ -1,7 +1,3 @@
-# Higher-order Runge-Kutta methods (via Butcher's tables)
-add_subdirectory(19-rk-adapt-time-step)
-add_subdirectory(19-rk-comparison)
-
 # Elasticity
 add_subdirectory(elasticity-bracket)
 add_subdirectory(elasticity-crack)
@@ -54,8 +50,7 @@ add_subdirectory(helmholtz-waveguide)
 add_subdirectory(wave-1)
 
 # Eigenproblems
-add_subdirectory(eigen-schroedinger)
-add_subdirectory(eigen-schroedinger-iter)
+add_subdirectory(eigen-adapt-iter)
 
 # Miscellaneous
 add_subdirectory(singular-perturbation)
