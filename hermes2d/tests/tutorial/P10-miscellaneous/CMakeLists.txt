@@ -1,0 +1,11 @@
+# Miscellaneous techniques
+add_subdirectory(05-space-hcurl)
+add_subdirectory(10-space-hdiv)
+add_subdirectory(15-space-l2)
+if(H2D_WITH_GLUT)
+  add_subdirectory(20-remote-computing)
+endif(H2D_WITH_GLUT)
+add_subdirectory(25-markers-typical)
+add_subdirectory(30-markers-nontypical)
+add_subdirectory(35-nurbs)
+add_subdirectory(40-matrix-solvers)

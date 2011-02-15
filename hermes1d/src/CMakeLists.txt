@@ -43,6 +43,7 @@ configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 # Sets linker settings.
+include(PickRealOrCplxLibs)
 macro(LIBRARY_SETTINGS BIN)
 #    target_link_libraries(${BIN} hermes_common)
 
@@ -58,6 +59,7 @@ macro(LIBRARY_SETTINGS BIN)
   
   # Link with all third party libraries corresponding to selected configuration options.
   # The respective variables will be empty for unselected TPL's.
+  PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
   target_link_libraries(  ${BIN}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}

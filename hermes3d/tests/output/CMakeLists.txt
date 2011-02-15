@@ -15,9 +15,10 @@ add_executable(${BIN_GMSH}
 
 set_common_target_properties(${BIN_GMSH})
 
+get_target_property(CPFL ${BIN_GMSH} COMPILE_FLAGS)
 set_target_properties(${BIN_GMSH}
     PROPERTIES
-	COMPILE_FLAGS -DGMSH)
+	COMPILE_FLAGS "${CPFL} -DGMSH")
 
 
 # VTK ####
@@ -28,9 +29,10 @@ add_executable(${BIN_VTK}
 
 set_common_target_properties(${BIN_VTK})
 
+get_target_property(CPFL ${BIN_VTK} COMPILE_FLAGS)
 set_target_properties(${BIN_VTK}
     PROPERTIES
-	COMPILE_FLAGS -DVTK)
+	COMPILE_FLAGS "${CPFL} -DVTK")
 
 # Tests
 

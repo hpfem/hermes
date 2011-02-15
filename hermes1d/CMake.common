@@ -1,6 +1,8 @@
 include_directories(${hermes1d_SOURCE_DIR}/src)
 
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+include(PickRealOrCplxLibs)
+PICK_REAL_OR_CPLX_LIBS(${HERMES1D} ${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME} ${HERMES1D} ${TRILINOS_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${HERMES1D})

@@ -74,7 +74,7 @@ public:
   virtual void push_transform(int son)
   {
     assert(element != NULL);
-    if (top >= 20) error("Too deep transform.");
+    if (top >= H2D_MAX_TRN_LEVEL) error("Too deep transform.");
 
     Trf* mat = stack + (++top);
     Trf* tr = (element->is_triangle() ? tri_trf + son : quad_trf + son);
@@ -121,8 +121,7 @@ public:
   Trf* get_ctm() const { return ctm; }
 
   /// \return The depth of the current transformation.
-  int get_depth() const { return top; }
-
+  unsigned int get_depth() const { return top; }
 
 protected:
 
@@ -133,14 +132,18 @@ protected:
   Trf* ctm;
   /// Sub-element transformation index.
   uint64_t sub_idx;
+
   /// The largest sub_idx for top <= 10.
-  /// FIXME: Why it was only 0x4000?
-  static const uint64_t H2D_MAX_IDX = 0x4000;
+  /// FIXME: Why it is only 0x4000?
+  static const unsigned int H2D_MAX_TRN_LEVEL = 10;
+  static const uint64_t H2D_MAX_IDX = (1 << 3 * H2D_MAX_TRN_LEVEL) - 1;
 
   /// Transformation matrix stack.
   Trf stack[21];
   /// Stack top.
-  int top;
+  unsigned int top;
+
+  friend class NeighborSearch;
 };
 
 

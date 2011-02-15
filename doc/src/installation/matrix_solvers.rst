@@ -7,7 +7,6 @@ Installation of Matrix Solvers
     :maxdepth: 2
 
     matrix_solvers/mumps
-    matrix_solvers/pardiso
     matrix_solvers/petsc
     matrix_solvers/superlu
     matrix_solvers/trilinos

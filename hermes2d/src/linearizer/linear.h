@@ -71,6 +71,7 @@ public:
                                  double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                                  MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
                                  double dmult = 1.0);
+
   // This function is used by save_solution_vtk().
   virtual void save_data_vtk(const char* file_name, const char* quantity_name, bool mode_3D);
 

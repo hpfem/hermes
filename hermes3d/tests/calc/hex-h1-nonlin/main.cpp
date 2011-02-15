@@ -268,8 +268,7 @@ int main(int argc, char **args)
     
   // Solve the linear system.
   info("Solving.");
-  if(!solver_proj->solve());
-  	error ("Matrix solver failed.\n");
+  if(!solver_proj->solve()) error ("Matrix solver failed.\n");
 
   delete matrix;
   delete rhs;

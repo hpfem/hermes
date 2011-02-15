@@ -20,11 +20,11 @@
 #ifndef _FORMS_H_
 #define _FORMS_H_
 
-#include "h3d_common.h"
-#include "quad.h"
-#include "function.h"
-#include "solution.h"
-#include "refmap.h"
+#include "../h3d_common.h"
+#include "../quad.h"
+#include "../function.h"
+#include "../solution.h"
+#include "../refmap.h"
 
 #define callback(a)	a<double, scalar>, a<Ord, Ord>
 //#define FORM_CB(a)	a<double, scalar>, a<Ord, Ord>

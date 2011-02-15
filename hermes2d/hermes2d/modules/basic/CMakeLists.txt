@@ -2,6 +2,8 @@ CYTHON_ADD_MODULE_PYX(basic)
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/modules/basic)
 add_python_library(basic basic.cpp)
+include(PickRealOrCplxLibs)
+PICK_REAL_OR_CPLX_LIBS(${HERMES2D_REAL} basic)
 target_link_libraries(basic hermes_basic)
 
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d/modules/basic)

@@ -72,9 +72,6 @@ int main(int argc, char* argv[])
   if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
   if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
-  // This is for experimental purposes.
-  //bt.switch_B_rows();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -137,7 +134,6 @@ int main(int argc, char* argv[])
     }
 
     // Plot error function.
-    // Show the new time level solution.
     char title[100];
     sprintf(title, "Temporal error, t = %g", current_time);
     eview.set_title(title);

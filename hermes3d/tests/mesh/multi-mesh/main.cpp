@@ -284,12 +284,5 @@ int main(int argc, char **args)
 	delete rhs;
 	delete solver;
 
-#ifdef WITH_PETSC
-	mat.free();
-	rhs.free();
-
-	PetscFinalize();
-#endif
-
 	return res;
 }
