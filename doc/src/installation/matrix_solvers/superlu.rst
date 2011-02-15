@@ -17,7 +17,12 @@ Using standard Debian packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SuperLU is available in Ubuntu via the Synaptic Package Manager, just install
-packages libsuperlu3 and libsuperlu3-dev.
+packages libsuperlu3 and libsuperlu3-dev. In Ubuntu you can use the Synaptic package manager for that, or type::
+
+  sudo apt-get install libsuperlu3 libsuperlu3-dev 
+  
+Note that these packages are available since Ubuntu 6.06 (Dapper). If you have an older version of Ubuntu or want 
+an up-to date or specially tuned version of the library, please follow the instructions below.
 
 Using the special Hermes/Femhub package
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,7 +99,7 @@ Finally execute::
   
 You may now select `SOLVER_SUPERLU` as the matrix solver for your finite element problem, as detailed
 in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
-it just to solve a standalone matrix problem math:`Ax = b` as in the 
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
 `Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
     
 

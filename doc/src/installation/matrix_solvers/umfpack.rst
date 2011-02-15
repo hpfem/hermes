@@ -1,10 +1,71 @@
 UMFpack
 -------
 
+.. _UMFPack home page: http://www.cise.ufl.edu/research/sparse/umfpack/
+.. _solvers repository: https://github.com/hpfem/solvers
+.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/UMF-UserGuide.pdf
+
 Linux
 ~~~~~
 
-Coming soon.
+Using standard Debian packages
+``````````````````````````````
+Install the libsuitesparse-metis-3.1.0 and libsuitesparse-dev packages.
+In Ubuntu you can use the Synaptic package manager for that, or type::
+
+    sudo apt-get install libsuitesparse-metis-3.1.0 libsuitesparse-dev
+
+Note that these packages are available since Ubuntu 9.10 (Karmic). If you have an older version of Ubuntu or want an up-to date version of the library, please follow the instructions below.
+
+Using the special Hermes/Femhub package
+```````````````````````````````````````
+Download the software package from the `solvers repository`_ and unpack 
+it in some temporary directory::
+  
+  wget https://github.com/hpfem/solvers/raw/master/packages/umfpack-5.5.1.spkg --no-check-certificate
+  tar -jxvf umfpack-5.5.1.spkg
+  rm umfpack-5.5.1.spkg
+  cd umfpack-5.5.1
+
+In order to install the library into say ``~/solvers/umfpack`` (you may choose any
+path you like, provided that you have write access to it; the target directory 
+will be created if it doesn't exist), type now into the terminal::
+
+SPKG_LOCAL=~/solvers/umfpack ./spkg-install
+
+For advanced configuration possibilities, please read the `manual`_ or visit the 
+`UMFPack home page`_.
+
+Once the library has been built and installed, you may delete the temporary 
+directory with the unpacked package to save some disk space or 
+just remove the object files by executing the following commands
+
+::
+
+  cd UFconfig; make clean
+  cd AMD     ; make clean
+  cd CAMD    ; make clean
+  cd CCOLAMD ; make clean
+  cd COLAMD  ; make clean
+  cd CHOLMOD ; make clean
+  cd UMFPACK ; make clean
+
+Now go to the directory with Hermes. Create the file CMake.vars with the
+following lines (or append to the existing one)::
+
+  set(WITH_UMFPACK YES)
+  set(UMFPACK_ROOT ~/solvers/umfpack) #(or your own installation destination)
+
+Finally execute::
+  
+  rm CMakeCache.txt
+  cmake .
+  make
+
+You may now select `SOLVER_UMFPACK` as the matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
 
 Windows (Cygwin, MinGW, MSVC)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
