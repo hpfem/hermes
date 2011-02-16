@@ -97,7 +97,7 @@ Finally execute::
   cmake .
   make
   
-You may now select `SOLVER_SUPERLU` as the matrix solver for your finite element problem, as detailed
+You may now select ``SOLVER_SUPERLU`` as the matrix solver for your finite element problem, as detailed
 in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
 it just to solve a standalone matrix problem :math:`Ax = b` as in the 
 `Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
