@@ -2182,6 +2182,9 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
     delete ou;
     delete ov;
     if (fake_ext != NULL) {
+      for (int i = 0; i < fake_ext->nf; i++) {
+        delete fake_ext->fn[i];
+      }
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -2330,6 +2333,9 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
     // Clean up.
     delete [] oi;
     if (fake_ext != NULL) {
+      for (int i = 0; i < fake_ext->nf; i++) {
+        delete fake_ext->fn[i];
+      }
       fake_ext->free_ord(); 
       delete fake_ext;
     }
