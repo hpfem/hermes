@@ -1,7 +1,7 @@
-Windows (MSVC)
+Windows 64bit (MSVC)
 ==============
 
-This section describes how to build and use Hermes in Microsoft Visual C++ 2008 (Express Edition). 
+This section describes how to build and use Hermes in Microsoft Visual C++ 2010 (Professional Edition). 
 These instructions should probably work even for older versions of MS Visual C++ down to version 2005.
 
 Known limitations and issues
@@ -23,8 +23,7 @@ Building Hermes
 
  - In the directory 'my_hermes_root', to create project files by running CMAKE from a command prompt::
 
-       cmake . -G "Visual Studio 9 2008"  # MSVC2008 user
-       cmake . -G "Visual Studio 10"      # MSVC2010 user
+       cmake .
 
    If you have Cygwin installed, your might have an error "Coulld not create named generator Visual Studio 10". This is because your 
    cmake path is contaminated by Cygwin's cmake. Try to use absolute path for windows cmake.exe. 
@@ -59,13 +58,14 @@ In order to use Hermes in your project, you need to do the following steps. Step
 Dependency check-list
 ~~~~~~~~~~~~~~~~~~~~~
 
-This list works for 32-bit version of Hermes.
+This list works for Hermes built on 64-bit Windows (32 bit build, 64 bit build is not possible due to unavailable 64 bit dependencies). 
+As the first step, create a  directory structure.
 	
-  - In order to create the structure, execute the following command::
+  - In order to create the structure, navigate to CMakeVars\\MSVC and execute the following command::
 
         'prepare_dep_dir.bat'. 
 
-    Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
+    Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable as the script output tells you to.
   - All Hermes project files assumes that dependency libraries are available in a fixed directory structure. The root of this structure has to have the same parent as does Hermes director, i.e., if 'C:\\my_work\\hermes\\' is a root of the Hermes directory, then 'C:\\my_work\\dependecies\\' is a root of the dependency directory. Subdirectories are:
 
     - dependencies\\include: Header files (\*.h) of dependency libraries.
@@ -80,7 +80,7 @@ This list works for 32-bit version of Hermes.
     - Open it using your version of MSVC (newer versions will automatically convert the solution file).
     - Now build the python project (default one) and from the same directory copy python26_d.lib to dependencies\\lib and python26_d.dll to dependencies\\bin.
     - Copy Python.h from Python-2.6.5\\Include\\ to dependencies\\include. This is for the Python library.
-    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64)
+    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64).
     - Install Python. You can install it into the same directory where you copied the downloaded source.
 	- Add the path to python.exe to your PATH environment variable.
     - Open a command prompt, execute python, and you will see something like::
@@ -88,9 +88,6 @@ This list works for 32-bit version of Hermes.
           python.exe
           Python 2.6.5 (r27:82500, Jan 20 2011, 18:55:31) [MSC v.1600 32 bit (Intel)] on win32
 		  >>>
-
-
-		If you have Cygwin installed again, make sure you are running the Windows Python. 
  
     - Numpy(ver-1.4.1)
 
@@ -114,17 +111,17 @@ This list works for 32-bit version of Hermes.
     - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
     - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
 
-  - UMFPACK
+  - UMFPACK(ver-5.4.0)
 
     - UFConfig(ver-3.4.0):
 
-      - Download the UFconfig source file package (http://www.cise.ufl.edu/research/sparse/UFconfig/), and unpack it. 
+      - Download UFconfig source file package (http://www.cise.ufl.edu/research/sparse/UFconfig/), and unpack it. 
       - Copy UFconfig.h to 'include' dependecy directory.
 
     - AMD(ver-2.2.0):
 
       - Download AMD source file package (http://www.cise.ufl.edu/research/sparse/amd/).
-      - Unpack source files into a directory that has the same parent as a directory where you unpacked UFconfig.
+      - Unpack sources file into a directory that has the same parent as a directory where you unpacked UFconfig.
       - Copy the file 'my_hermes_root\\CMakeVars\\MSVC\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
       - Run MSVC command prompt and switch to 'my_amd_directory\\Lib'.
       - Compile AMD using 'nmake -f AMD.nmake'.
@@ -141,14 +138,7 @@ This list works for 32-bit version of Hermes.
 
   - CMAKE
 
-    - Download CMAKE (http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) version 2.6.4 source, and cmake 2.8.1 binary. 
-    - Since 2.8.1 came out after MSVC10, you need to download (http://www.cmake.org/files/v2.8/CMakeVS10FindMake.cmake) and 
-      replace your_cmake_2.8.1_root\\share\\cmake-2.8\\Modules\\CMakeVS10FindMake.cmake, If you are using MSVC10. 
-    - Double click cmake-gui (2.8.1), choose your_cmake_2.6.4_root as source directory, and your_cmake_2.6.4_tmp as build directory. 
-      click configure button, wait for a while.  After configuration is done, change CMAKE_INSTALL_PREFIX as: C:\\my_work\\dependencies 
-      so that cmake is installed under the 'dependencies\\bin' and accessible from every location. 
-    - Now, go to your_cmake_2.6.4_tmp (build dir), you will find a CMAKE.sln file asociated with MSVC. Open it with MSVC08/10, and 
-      find project "INSTALL", right click, choose "Build". 
+    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
  
   - OpenGL support (optional)
 
@@ -156,8 +146,7 @@ This list works for 32-bit version of Hermes.
     - FREEGLUT 
 
       - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
-      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in MSVC08, MSVC08 will convert file into a newer format, 
-          i.e., SLN and VCPROJ (MSVC10 user could open the converted file freeglut.sln).
+      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
       - Compile Debug or Release version. Debug version is recommended in a case of debugging.
       - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
   
@@ -180,8 +169,7 @@ This list works for 32-bit version of Hermes.
     - Zlib
 
       - Download sources of version 1.2.3 (http://sourceforge.net/projects/libpng/files/) and unpack them.
-      - Open 'my_zlib_root/projects/visualc6/zlib.dsw' (Visual C++ 6 Solution File) in MSVC08 and let MSVC to convert it and save the .sln file 
-          (MSVC10 user can open the .sln file).
+      - Open 'my_zlib_root/projects/visualc6/zlib.dsw' (Visual C++ 6 Solution File) in MSVC08 and let MSVC to convert it and save the .sln file (MSVC10 user can open the .sln file).
       - Switch a configuration to 'Release DLL' in Configuration Manager. 
       - Build project 'zlib': this will create DLL/LIB files in 'my_zlib_root/projects/visual6/Win32_DLL_Release'.
       - Copy 'zlib1.dll', 'zlib.h/zconf.h', and 'zlib1.lib' to 'bin', 'include', and 'lib' dependency directories respectively.
