@@ -572,7 +572,6 @@ double linear_form_interface(int element, int n, double *wt, Func<double> *ue[],
 }
 
 
-
 double linear_form_interface_0(int n, double *wt, Func<double> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   return linear_form_interface(0, n, wt, ue, v, e, ext);

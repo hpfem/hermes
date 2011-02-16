@@ -403,10 +403,16 @@ int main(int argc, char* argv[])
     prev_rho_v_y.copy(&sln_rho_v_y);
     prev_e.copy(&sln_e);
 
-// If used, we need to clean the vector valued form caches.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-    DiscreteProblem::empty_form_caches();
-#endif
+    // Visualization.
+    pressure.reinit();
+    u.reinit();
+    w.reinit();
+    Mach_number.reinit();
+    entropy_estimate.reinit();
+    pressure_view.show(&pressure);
+    entropy_production_view.show(&entropy_estimate);
+    Mach_number_view.show(&Mach_number);
+    vview.show(&u, &w);
   }
   bool okay = true;
   switch(P_INIT.order_h* 10 + P_INIT.order_v) {
