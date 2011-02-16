@@ -354,23 +354,20 @@ int main(int argc, char* argv[])
     Element *e;
     for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
           if (((e) = mesh.get_element_fast(_id))->used) \
-            if ((e)->active)
-    {
-      AsmList al;
-      space_rho.get_element_assembly_list(e, &al);
-      double rho = solution_vector[al.dof[0]];
-      space_rho_v_x.get_element_assembly_list(e, &al);
-      double v1 = solution_vector[al.dof[0]] / rho;
-      space_rho_v_y.get_element_assembly_list(e, &al);
-      double v2 = solution_vector[al.dof[0]] / rho;
-      space_e.get_element_assembly_list(e, &al);
-      double energy = solution_vector[al.dof[0]];
-      
-      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
-      
-      if(condition < min_condition || min_condition == 0.)
-        min_condition = condition;
-    }
+            if ((e)->active) {
+              AsmList al;
+              space_rho.get_element_assembly_list(e, &al);
+              double rho = solution_vector[al.dof[0]];
+              space_rho_v_x.get_element_assembly_list(e, &al);
+              double v1 = solution_vector[al.dof[0]] / rho;
+              space_rho_v_y.get_element_assembly_list(e, &al);
+              double v2 = solution_vector[al.dof[0]] / rho;
+              space_e.get_element_assembly_list(e, &al);
+              double energy = solution_vector[al.dof[0]];
+              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
+              if(condition < min_condition || min_condition == 0.)
+                min_condition = condition;
+            }
     if(TAU > min_condition)
       TAU = min_condition;
     if(TAU < min_condition * 0.9)
@@ -390,7 +387,6 @@ int main(int argc, char* argv[])
     prev_rho_v_x.copy(&sln_rho_v_x);
     prev_rho_v_y.copy(&sln_rho_v_y);
     prev_e.copy(&sln_e);
-
   }
   bool okay = true;
   switch(P_INIT.order_h* 10 + P_INIT.order_v) {

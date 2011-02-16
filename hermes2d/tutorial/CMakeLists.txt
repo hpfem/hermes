@@ -27,7 +27,3 @@ add_subdirectory(P09-trilinos)
 
 # Miscellaneous techniques
 add_subdirectory(P10-miscellaneous)
-
-
-
-
