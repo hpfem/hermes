@@ -295,18 +295,6 @@ int main(int argc, char* argv[])
   if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
     dp.set_fvm();
 
-  // Filters for visualization of pressure and the two components of velocity.
-  SimpleFilter pressure(calc_pressure_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter u(calc_u_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter w(calc_w_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter Mach_number(calc_Mach_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-
-  ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
-  ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
-  ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-  VectorView vview("Velocity", new WinGeom(700, 400, 600, 300));
-
   // Iteration number.
   int iteration = 0;
   
@@ -403,16 +391,6 @@ int main(int argc, char* argv[])
     prev_rho_v_y.copy(&sln_rho_v_y);
     prev_e.copy(&sln_e);
 
-    // Visualization.
-    pressure.reinit();
-    u.reinit();
-    w.reinit();
-    Mach_number.reinit();
-    entropy_estimate.reinit();
-    pressure_view.show(&pressure);
-    entropy_production_view.show(&entropy_estimate);
-    Mach_number_view.show(&Mach_number);
-    vview.show(&u, &w);
   }
   bool okay = true;
   switch(P_INIT.order_h* 10 + P_INIT.order_v) {

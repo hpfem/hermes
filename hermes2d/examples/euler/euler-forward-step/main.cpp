@@ -394,6 +394,11 @@ int main(int argc, char* argv[])
     s4.show(&sln_e);
   }
   
+  s1.close();
+  s2.close();
+  s3.close();
+  s4.close();
+
   time_der_out.close();
   return 0;
 }

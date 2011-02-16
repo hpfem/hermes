@@ -4,8 +4,7 @@
 
 using namespace RefinementSelectors;
 
-//  This example solves the compressible Euler equations using a basic
-//  piecewise-constant finite volume method.
+//  This example solves the compressible Euler equations using FVM and automatic adaptivity.
 //
 //  Equations: Compressible Euler equations, perfect gas state equation.
 //
@@ -19,7 +18,7 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
 
@@ -28,9 +27,9 @@ const int UNREF_FREQ = 10;                        // Every UNREF_FREQth time ste
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
-const double THRESHOLD = 0.7;                     // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 0;                           // Adaptive strategy:
+const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -43,7 +42,7 @@ const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element 
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
-const int MESH_REGULARITY = 1;                   // Maximum allowed level of hanging nodes:
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
                                                   // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
                                                   // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
@@ -51,7 +50,7 @@ const int MESH_REGULARITY = 1;                   // Maximum allowed level of han
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.02;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -182,39 +181,38 @@ int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh basemesh;
-  Mesh mesh_rho, mesh_rho_v_x, mesh_rho_v_y, mesh_e;
+  Mesh mesh;
   H2DReader mloader;
   mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
+  basemesh.refine_towards_boundary(1, 2);
+  basemesh.refine_towards_boundary(2, 2);
   basemesh.refine_by_criterion(criterion, 2);
-  mesh_rho.copy(&basemesh);
-  mesh_rho_v_x.copy(&basemesh);
-  mesh_rho_v_y.copy(&basemesh);
-  mesh_e.copy(&basemesh);
+  mesh.copy(&basemesh);
 
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
 
   // Create L2 spaces with default shapesets.
-  L2Space space_rho(&mesh_rho, &bc_types, P_INIT);
-  L2Space space_rho_v_x(&mesh_rho_v_x, &bc_types, P_INIT);
-  L2Space space_rho_v_y(&mesh_rho_v_y, &bc_types, P_INIT);
-  L2Space space_e(&mesh_e, &bc_types, P_INIT);
+  L2Space space_rho(&mesh, &bc_types, P_INIT);
+  L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
+  L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);
+  L2Space space_e(&mesh, &bc_types, P_INIT);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;
   Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
-  sln_rho.set_exact(&mesh_rho, ic_density);
-  sln_rho_v_x.set_exact(&mesh_rho_v_x, ic_density_vel_x);
-  sln_rho_v_y.set_exact(&mesh_rho_v_y, ic_density_vel_y);
-  sln_e.set_exact(&mesh_e, ic_energy);
-  prev_rho.set_exact(&mesh_rho, ic_density);
-  prev_rho_v_x.set_exact(&mesh_rho_v_x, ic_density_vel_x);
-  prev_rho_v_y.set_exact(&mesh_rho_v_y, ic_density_vel_y);
-  prev_e.set_exact(&mesh_e, ic_energy);
+  sln_rho.set_exact(&mesh, ic_density);
+  sln_rho_v_x.set_exact(&mesh, ic_density_vel_x);
+  sln_rho_v_y.set_exact(&mesh, ic_density_vel_y);
+  sln_e.set_exact(&mesh, ic_energy);
+  prev_rho.set_exact(&mesh, ic_density);
+  prev_rho_v_x.set_exact(&mesh, ic_density_vel_x);
+  prev_rho_v_y.set_exact(&mesh, ic_density_vel_y);
+  prev_e.set_exact(&mesh, ic_energy);
 
   // Initialize weak formulation.
   WeakForm wf(4);
@@ -229,62 +227,59 @@ int main(int argc, char* argv[])
   // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
   // from the previous time step.
   // First flux.
-  // Unnecessary for FVM.
-  if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
-    wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_x));
+  wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_x));
     
-    wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_2_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_3_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(2, callback(linear_form_2_0_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_1_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_2_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_3_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_0_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    // Second flux.
+  wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_1_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_2_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_3_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(2, callback(linear_form_2_0_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_1_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_2_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_3_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_0_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  // Second flux.
   
-    wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_2_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(1, callback(linear_form_1_3_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(2, callback(linear_form_2_0_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_1_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_2_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
-    wf.add_vector_form(2, callback(linear_form_2_3_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_0_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_1_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_2_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-    wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  }
+  wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_2_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(1, callback(linear_form_1_3_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(2, callback(linear_form_2_0_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_1_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_2_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+  wf.add_vector_form(2, callback(linear_form_2_3_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_0_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_1_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_2_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
+                      Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Volumetric linear forms coming from the time discretization.
   wf.add_vector_form(0,linear_form, linear_form_order, HERMES_ANY, &prev_rho);
@@ -337,31 +332,8 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Disable weighting of refinement candidates.
-  selector.set_error_weights(1, 1, 1);
-
   // Iteration number.
   int iteration = 0;
-  
-
-  
-  ScalarView s1("w1", new WinGeom(0, 0, 620, 300));
-  s1.fix_scale_width(80);
-  ScalarView s2("w2", new WinGeom(625, 0, 600, 300));
-  s2.fix_scale_width(50);
-  ScalarView s3("w3", new WinGeom(0, 350, 620, 300));
-  s3.fix_scale_width(80);
-  ScalarView s4("w4", new WinGeom(625, 350, 600, 300));
-  s4.fix_scale_width(50);
-
-  ScalarView s1r("w1", new WinGeom(33, 0, 620, 300));
-  s1.fix_scale_width(80);
-  ScalarView s2r("w2", new WinGeom(655, 0, 600, 300));
-  s2.fix_scale_width(50);
-  ScalarView s3r("w3", new WinGeom(33, 350, 620, 300));
-  s3.fix_scale_width(80);
-  ScalarView s4r("w4", new WinGeom(655, 350, 600, 300));
-  s4.fix_scale_width(50);
 
   for(t = 0.0; t < 10; t += TAU)
   {
@@ -373,10 +345,8 @@ int main(int argc, char* argv[])
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
       REFINEMENT_COUNT = 0;
       info("Global mesh derefinement.");
-      mesh_rho.unrefine_all_elements();
-      mesh_rho_v_x.unrefine_all_elements();
-      mesh_rho_v_y.unrefine_all_elements();
-      mesh_e.unrefine_all_elements();
+      mesh.copy(&basemesh);
+      mesh.copy(&basemesh);
       space_rho.set_uniform_order_internal(P_INIT);
       space_rho_v_x.set_uniform_order_internal(P_INIT);
       space_rho_v_y.set_uniform_order_internal(P_INIT);
@@ -416,10 +386,6 @@ int main(int argc, char* argv[])
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-      // The FE problem is in fact a FV problem.
-      if(P_INIT.order_h > 0 || P_INIT.order_v > 0)
-        dp->set_fvm();
-
       dp->assemble(matrix, rhs);
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
@@ -434,22 +400,10 @@ int main(int argc, char* argv[])
                      Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), matrix_solver, 
                      Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
 
-      s1.show(&sln_rho);
-      s2.show(&sln_rho_v_x);
-      s3.show(&sln_rho_v_y);
-      s4.show(&sln_e);
-
-      s1r.show(&rsln_rho);
-      s2r.show(&rsln_rho_v_x);
-      s3r.show(&rsln_rho_v_y);
-      s4r.show(&rsln_e);
-      //s1r.wait_for_keypress();
-
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
       Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
-      // Error components.
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e),
 							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e)) * 100;
 
@@ -493,7 +447,6 @@ int main(int argc, char* argv[])
     prev_rho_v_y.copy(&rsln_rho_v_y);
     prev_e.copy(&rsln_e);
 
-    /*
     pressure.reinit();
     u.reinit();
     w.reinit();
@@ -503,12 +456,17 @@ int main(int argc, char* argv[])
     entropy_production_view.show(&entropy_estimate);
     Mach_number_view.show(&Mach_number);
     vview.show(&u, &w);
-    */
 
     delete rsln_rho.get_mesh(); 
     delete rsln_rho_v_x.get_mesh(); 
     delete rsln_rho_v_y.get_mesh();
-    delete rsln_e.get_mesh(); 
+    delete rsln_e.get_mesh();
   }
+  
+  pressure_view.close();
+  entropy_production_view.close();
+  Mach_number_view.close();
+  vview.close();
+
   return 0;
 }
