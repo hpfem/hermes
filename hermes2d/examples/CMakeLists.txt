@@ -1,5 +1,6 @@
 add_subdirectory(advection-diffusion-reaction)
 add_subdirectory(euler)
+add_subdirectory(heat-transfer)
 add_subdirectory(helmholtz)
 add_subdirectory(linear-elasticity)
 add_subdirectory(maxwell)
