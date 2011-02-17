@@ -305,7 +305,7 @@ Scalar bilinear_form_precon(int n, double *wt, Func<Real> *ue[], Func<Real> *u, 
   Scalar result = 0;
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * v->val[i];
-  return -result;
+  return result;
 }
 
 // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices from the previous time step.
@@ -578,7 +578,7 @@ double linear_form_interface(int element, int n, double *wt, Func<double> *ue[],
 
     result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
-  return -result * TAU;
+  return result * TAU;
 }
 
 double linear_form_interface_0(int n, double *wt, Func<double> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
@@ -602,7 +602,7 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 // One function used for all the components.
 double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
-  return -int_u_v<double,double>(n, wt, ext->fn[0], v);
+  return int_u_v<double,double>(n, wt, ext->fn[0], v);
 }
 
 // Surface linear forms representing the solid part of the boundary.
@@ -639,7 +639,7 @@ double bdy_flux_solid_wall_comp(int element, int n, double *wt, Func<scalar> *ue
 
     result -= wt[i] * v->val[i] * flux[element];
   }
-  return -result * TAU;
+  return result * TAU;
 }
 
 double bdy_flux_solid_wall_comp_0(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
@@ -836,7 +836,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
     
     result -= wt[i] * v->val[i] * num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
   }
-  return -result * TAU;
+  return result * TAU;
 }
 
 double bdy_flux_inlet_outlet_comp_0(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)

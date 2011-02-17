@@ -25,7 +25,7 @@ const bool CALC_TIME_DER = true;
 
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
 const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
-double TAU = 1E-3;                                // Time step.
+double TAU = 1E-2;                                // Time step.
 
 // Equation parameters.
 double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
