@@ -5,6 +5,7 @@
 
 #ifndef _INTTYPES_H
 #define _INTTYPES_H	1
+#define _STDINT
 
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
