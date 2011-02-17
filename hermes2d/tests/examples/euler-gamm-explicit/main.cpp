@@ -190,9 +190,9 @@ int main(int argc, char* argv[])
   // Volumetric linear forms.
   // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
   // from the previous time step.
-  // First flux.
   // Unnecessary for FVM.
   if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
+    // First flux.
     wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_x));
     
     wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY, 

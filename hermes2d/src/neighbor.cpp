@@ -298,7 +298,7 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
   // We basically identify the neighbors that are not compliant with the current sub-element mapping on the central element.
   for(unsigned int neighbor_i = 0; neighbor_i < n_neighbors; neighbor_i++) {
     bool deleted = false;
-    for(unsigned int level = 0; level < std::min(transformations.size(), central_n_trans[neighbor_i]); level++)
+    for(unsigned int level = 0; level < std::min((unsigned int)transformations.size(), central_n_trans[neighbor_i]); level++)
       // If the found neighbor is not a neighbor of this subelement.
       if(!compatible_transformations(central_transformations[neighbor_i][level], transformations[level], active_edge)) {
         deleted = true;

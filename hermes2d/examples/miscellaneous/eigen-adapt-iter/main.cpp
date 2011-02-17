@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
   info("Pysparse finished.");
 
   // Initialize subspace - coefficients for all computed eigenfunctions
-  double* coeff_space[DIMENSION_SUBSPACE];
+  double** coeff_space = new double*[DIMENSION_SUBSPACE];
   for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
     coeff_space[i] = new double[ndof];
   }
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
   // eigenvector on the coarse mesh will not be needed anymore.
   Solution sln;
   Solution::vector_to_solution(coeff_space[TARGET_EIGENFUNCTION-1], &space, &sln);
-  Solution sln_space[DIMENSION_SUBSPACE];
+  Solution* sln_space = new Solution[DIMENSION_SUBSPACE];
   for (int i = 0; i < DIMENSION_SUBSPACE; i++) {  
     Solution::vector_to_solution(coeff_space[i], &space, &sln_space[i]);
   }
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 
   // Adaptivity loop:
   Solution ref_sln;
-  Solution ref_sln_space[DIMENSION_SUBSPACE];
+  Solution* ref_sln_space = new Solution[DIMENSION_SUBSPACE];
   Space* ref_space = NULL;  
   int as = 1; 
   bool done = false;
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 
     // Obtain initial approximation on new reference mesh.
     double* coeff_vec_ref = new double[ndof_ref];
-    double* coeff_space_ref[DIMENSION_SUBSPACE];
+    double** coeff_space_ref = new double*[DIMENSION_SUBSPACE];
     for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
       coeff_space_ref[i] = new double[ndof_ref];
     }
@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
       Solution::vector_to_solution(coeff_space_ref[TARGET_EIGENFUNCTION-1], ref_space, &ref_sln);
     }
     else {
-      double inners[DIMENSION_TARGET_EIGENSPACE];
+      double* inners = new double[DIMENSION_TARGET_EIGENSPACE];
       double* coeff_vec_rec = new double[ndof_ref];
       for (int i = 0; i < DIMENSION_TARGET_EIGENSPACE; i++) { 
          inners[i] = calc_inner_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[FIRST_INDEX_EIGENSPACE-1+i], coeff_vec_ref, ndof_ref);
@@ -376,6 +376,7 @@ int main(int argc, char* argv[])
       info("Reconstructed eigenvalue lambda: %.12f", lambda);
       Solution::vector_to_solution(coeff_vec_rec, ref_space, &ref_sln);
       delete [] coeff_vec_rec;
+      delete [] inners;
     }
 
     // Clean up.
@@ -385,6 +386,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
       delete [] coeff_space_ref[i];
     }
+    delete [] coeff_space_ref;
 
     // Project reference solution to coarse mesh for error estimation.
     if (as > 1) {

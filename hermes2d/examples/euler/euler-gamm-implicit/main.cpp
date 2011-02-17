@@ -19,9 +19,6 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-// Experimental caching of vector valued (vector) forms.
-#define HERMES_USE_VECTOR_VALUED_FORMS
-
 // Calculation of approximation of time derivative (and its output).
 // Setting this option to false saves the computation time.
 const bool CALC_TIME_DER = true;
@@ -182,6 +179,7 @@ int main(int argc, char* argv[])
 
   // Unnecessary for FVM.
   if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
+    // First flux.
     wf.add_vector_form(0, callback(linear_form_0_1), HERMES_ANY);
     
     wf.add_vector_form(1, callback(linear_form_1_0_first_flux), HERMES_ANY);
@@ -196,8 +194,8 @@ int main(int argc, char* argv[])
     wf.add_vector_form(3, callback(linear_form_3_1_first_flux), HERMES_ANY);
     wf.add_vector_form(3, callback(linear_form_3_2_first_flux), HERMES_ANY);
     wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY);
+
     // Second flux.
-    
     wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY);
     wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY);
     wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY);
@@ -214,60 +212,29 @@ int main(int argc, char* argv[])
   }
 
   // Volumetric linear forms coming from the time discretization.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  wf.add_vector_form(0, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  wf.add_vector_form(1, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  wf.add_vector_form(2, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  wf.add_vector_form(3, linear_form_vector, linear_form_order, HERMES_ANY, 
-                          Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-#else
   wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho);
   wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho_v_x);
   wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho_v_y);
   wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_time_e);
-#endif
 
   // Surface linear forms - inner edges coming from the DG formulation.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  wf.add_vector_form_surf(0, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE);
-  wf.add_vector_form_surf(1, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE);
-  wf.add_vector_form_surf(2, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE);
-  wf.add_vector_form_surf(3, linear_form_interface_vector, linear_form_order, H2D_DG_INNER_EDGE);
-#else
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE);
   wf.add_vector_form_surf(1, linear_form_interface_1, linear_form_order, H2D_DG_INNER_EDGE);
   wf.add_vector_form_surf(2, linear_form_interface_2, linear_form_order, H2D_DG_INNER_EDGE);
   wf.add_vector_form_surf(3, linear_form_interface_3, linear_form_order, H2D_DG_INNER_EDGE);
-#endif
 
   // Surface linear forms - inlet / outlet edges.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET);
-  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET);
-  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET);
-  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_vector, linear_form_order, BDY_INLET_OUTLET);
-#else
   wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_INLET_OUTLET);
   wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_INLET_OUTLET);
   wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, BDY_INLET_OUTLET);
   wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET_OUTLET);
-#endif
-  
+
   // Surface linear forms - Solid wall edges.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL);
-  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL);
-  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL);
-  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_vector, linear_form_order, BDY_SOLID_WALL);
-#else
   wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL);
   wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL);
   wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL);
   wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL);
-#endif
+
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -276,9 +243,6 @@ int main(int argc, char* argv[])
   // If the FE problem is in fact a FV problem.
   if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
     dp.set_fvm();
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-  dp.use_vector_valued_forms();
-#endif
 
   // Project the initial solution on the FE space 
   // in order to obtain initial vector for NOX. 
@@ -366,13 +330,13 @@ int main(int argc, char* argv[])
       solver.get_num_iters(), solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
       solver.get_num_lin_iters(), solver.get_achieved_tol());
-
-    // If used, we need to clean the vector valued form caches.
-#ifdef HERMES_USE_VECTOR_VALUED_FORMS
-    DiscreteProblem::empty_form_caches();
-#endif
   }
   
+  pressure_view.close();
+  entropy_production_view.close();
+  Mach_number_view.close();
+  vview.close();
+
   time_der_out.close();
   return 0;
 }
