@@ -430,14 +430,13 @@ private:
 /*** Transformations. ***/
 
   static const int max_n_trans = 20;              ///< Number of allowed transformations (or equiv. number of neighbors
-                                                  ///< (in a go-down neighborhood; stored row-wise for each neighbor).
+                                                  ///< in a go-down neighborhood) - see Transformable::push_transform.
   std::vector<int *> central_transformations;     ///< Vector of transformations of the central element to each neighbor
                                                   ///< (in a go-down neighborhood; stored row-wise for each neighbor).
   std::vector<int> central_n_trans;               ///< Number of transforms stored in each row of \c central_transformations.
   
   std::vector<int *> neighbor_transformations;    ///< Vector of transformations of the neighbor to the central element (go-up).
   std::vector<int> neighbor_n_trans;              ///< Number of transforms stored in each row of \c neighbor_transformations.
-  
   
   unsigned int original_central_el_transform;              ///< Sub-element transformation of any function that comes from the
                                                   ///< assembly, before transforms from \c transformations are pushed
@@ -488,6 +487,17 @@ private:
                           ///< parent. Corresponding transformations will be pushed in reverse order to the neighbor.
   };
   NeighborhoodType neighborhood_type;
+
+  /*
+  enum MultiMeshNeighborhoodType
+  {
+    H2D_DG_INTER_ELEM = 1,  ///< For multimesh, intra-element.
+    H2D_DG_MULTI_DOWN = 2,  ///< For multimesh, smaller neighbors.
+    H2D_DG_MULTI_UP = 3,    ///< For multimesh, bigger neighbor.
+    H2D_DG_MULTI_NONE = 4   ///< For multimesh, neighbor of the same sizes.
+  };
+  MultiMeshNeighborhoodType multi_neighborhood_type;
+  */
 
   /// Find the neighbor element to a smaller central element.
   ///
@@ -735,7 +745,7 @@ public:
   };
 
   /// When creating sparse structure of a matrix using this class, we want to ignore errors
-  /// and do nothing instead when set_active_edge() funciton is called for a non-boundary edge.
+  /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
   bool ignore_errors;
 };
 

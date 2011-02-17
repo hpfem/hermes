@@ -348,6 +348,10 @@ protected:
   scalar eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vector<Solution *> sln,
                       NeighborSearch* nbs_v, PrecalcShapeset* fv, RefMap* rv,
                       SurfPos* ep);
+
+  /// Pure DG functionality.
+  std::map<unsigned int, NeighborSearch> init_neighbors(const WeakForm::Stage& stage, const int& isurf);
+
   /// Class handling various caches used in assembling.
   class AssemblingCaches {
   public:

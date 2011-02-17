@@ -45,13 +45,21 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   ignore_visited_segments(true),
   quad(&g_quad_2d_std)
 {
-  transformations.reserve(NeighborSearch::max_neighbors * 2);
+  central_transformations.reserve(NeighborSearch::max_neighbors * 2);
   for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    transformations.push_back(new int[NeighborSearch::max_n_trans]);
+    central_transformations.push_back(new int[NeighborSearch::max_n_trans]);
 
-  n_trans.reserve(NeighborSearch::max_neighbors*2);
+  central_n_trans.reserve(NeighborSearch::max_neighbors*2);
   for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
-    n_trans.push_back(0);
+    central_n_trans.push_back(0);
+
+  neighbor_transformations.reserve(NeighborSearch::max_neighbors * 2);
+  for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
+    neighbor_transformations.push_back(new int[NeighborSearch::max_n_trans]);
+
+  neighbor_n_trans.reserve(NeighborSearch::max_neighbors*2);
+  for(int i = 0; i < NeighborSearch::max_neighbors * 2; i++)
+    neighbor_n_trans.push_back(0);
 
   assert_msg(central_el != NULL && central_el->active == 1,
              "You must pass an active element to the NeighborSearch constructor.");
@@ -70,10 +78,14 @@ NeighborSearch::~NeighborSearch()
   clear_supported_shapes();
   clear_neighbor_pss();
   detach_pss_and_rm();
-  for(unsigned int i = 0; i < transformations.size(); i++)
-    delete [] transformations.at(i);
-  transformations.clear();
-  n_trans.clear();
+  for(unsigned int i = 0; i < central_transformations.size(); i++)
+    delete [] central_transformations.at(i);
+  central_transformations.clear();
+  central_n_trans.clear();
+  for(unsigned int i = 0; i < neighbor_transformations.size(); i++)
+    delete [] neighbor_transformations.at(i);
+  neighbor_transformations.clear();
+  neighbor_n_trans.clear();
 }
 
 void NeighborSearch::reset_neighb_info()
@@ -90,11 +102,15 @@ void NeighborSearch::reset_neighb_info()
   n_neighbors = 0;
 
   // Reset transformations.
-  for(int i = 0; i < NeighborSearch::max_neighbors; i++)
-  {
-    n_trans[i] = 0;
+  for(int i = 0; i < NeighborSearch::max_neighbors; i++) {
+    central_n_trans[i] = 0;
     for(int j = 0; j < max_n_trans; j++)
-      transformations[i][j] = -1;
+      central_transformations[i][j] = -1;
+  }
+  for(int i = 0; i < NeighborSearch::max_neighbors; i++) {
+    neighbor_n_trans[i] = 0;
+    for(int j = 0; j < max_n_trans; j++)
+      neighbor_transformations[i][j] = -1;
   }
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
 
@@ -196,6 +212,211 @@ void NeighborSearch::set_active_edge(int edge, bool ignore_visited)
   neighbor_edge = -1;
 }
 
+void NeighborSearch::set_active_edge_multimesh(const int& edge, const uint64_t& sub_idx)
+{
+  Hermes::vector<unsigned int> transformations = get_transforms(sub_idx);
+  // Inter-element edge.
+  if(is_inter_edge(edge, transformations)) {
+    set_active_edge(edge);
+    update_according_to_sub_idx(transformations);
+  }
+  // Intra-element edge.
+  else {
+    neighb_el = central_el;
+    
+    for(unsigned int i = 0; i < transformations.size(); i++)
+      neighbor_transformations[0][i] = transformations[i];
+    neighbor_n_trans[0] = transformations.size();
+
+	  neighbor_edge = active_edge = edge;
+    NeighborEdgeInfo local_edge_info;
+	  local_edge_info.local_num_of_edge = neighbor_edge;
+	  //! The "opposite" view of the same edge has the same orientation.
+	  local_edge_info.orientation = 0;
+	  neighbor_edges.push_back(local_edge_info);
+
+	  n_neighbors = 1;
+	  neighbors.push_back(neighb_el);
+	  neighborhood_type = H2D_DG_NO_TRANSF;
+  }
+  return;
+}
+
+Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
+{
+  Hermes::vector<unsigned int> transformations_backwards;
+  int i = 0;
+  while(sub_idx >> 3 > 0)
+    transformations_backwards[i++] = sub_idx % 8;
+  
+  Hermes::vector<unsigned int> transformations;
+  for(unsigned int i = 0; i < transformations_backwards.size(); i++)
+    transformations[i] = transformations_backwards[transformations_backwards.size() - i];
+
+  return transformations;
+}
+
+bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations)
+{
+  // No subelements => of course this edge is an inter-element one.
+	if(transformations.size() == 0)
+		return true;
+
+	// Triangles.
+  for(unsigned int i = 0; i < transformations.size(); i++)
+	  if(central_el->get_mode() == HERMES_MODE_TRIANGLE) {
+      if ((edge == 0 && (transformations[i] == 3 || transformations[i] == 4)) ||
+          (edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
+          (edge == 2 && (transformations[i] == 2 || transformations[i] == 4)))
+        return false;
+    }
+	  // Quads.
+	  else {
+      if ((edge == 0 && (transformations[i] == 3 || transformations[i] == 4 || transformations[i] == 6)) ||
+          (edge == 1 && (transformations[i] == 1 || transformations[i] == 4 || transformations[i] == 7)) ||
+          (edge == 2 && (transformations[i] == 1 || transformations[i] == 2 || transformations[i] == 5)) ||
+          (edge == 3 && (transformations[i] == 2 || transformations[i] == 3 || transformations[i] == 0)))
+				return false;
+    }
+	return true;
+}
+
+void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
+{
+  if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) {
+    for(unsigned int i = 0; i < transformations.size(); i++)
+      // Triangles.
+      if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
+        if ((active_edge == 0 && transformations[i] == 1) ||
+            (active_edge == 1 && transformations[i] == 2) ||
+            (active_edge == 2 && transformations[i] == 3))
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+				else
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+	    // Quads.
+	    else
+        if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
+            (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+            (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
+            (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+        else
+          neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+  }
+  else handle_sub_idx_way_down(transformations);
+}
+
+void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
+{
+  // We basically identify the neighbors that are not compliant with the current sub-element mapping on the central element.
+  for(int level = 0; level < transformations.size(); level++) {
+    // In case of bigger (i.e. ~ way up) neighbor, there will be one neighbor left, so this saves time.
+    // Commented out for debugging, as the check should pass.
+    //if(n_neighbors == 1)
+    //  break;
+    for(int i = 0; i < n_neighbors; i++) {
+      // If the found neighbor is not a neighbor of this subelement.
+      if(!compatible transformations(central_transformations[i][level], transformations[level], active_edge))
+        delete_neighbor(i);
+      else
+        // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
+        central_transformations[i][level] = transformations[level];
+        // If we are already on a bigger (i.e. ~ way up) neighbor.
+        if(central_n_trans[i] == level + 1) {
+          for(unsigned int i = level + 1; i < transformations.size(); i++)
+            // Triangles.
+            if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
+              if ((active_edge == 0 && transformations[i] == 1) ||
+                  (active_edge == 1 && transformations[i] == 2) ||
+                  (active_edge == 2 && transformations[i] == 3))
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+				      else
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 3);
+	          // Quads.
+	          else
+              if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
+                  (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+                  (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 0)) ||
+                  (active_edge == 3 && (transformations[i] == 4 || transformations[i] == 6)))
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+              else
+                neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge : (neighbor_edge + 1) % 4);
+        }
+      }
+  }
+}
+
+bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, int edge)
+{
+  if(a == b)
+    return true;
+  if(edge == 0)
+    if ((a == 1 && b == 7) ||
+        (a == 2 && b == 0))
+      return true;
+    else
+      return false;
+  if(edge == 1)
+    if ((a == 2 && b == 5) ||
+        (a == 3 && b == 6))
+      return true;
+    else
+      return false;
+  if(edge == 2)
+    if ((a == 3 && b == 0) ||
+        (a == 4 && b == 7))
+      return true;
+    else
+      return false;
+  if(edge == 3)
+    if ((a == 4 && b == 6) ||
+        (a == 1 && b == 5))
+      return true;
+    else
+      return false;
+  return false;
+}
+
+void NeighborSearch::clear_initial_sub_idx(uint64_t sub_idx)
+{
+  if(!neighborhood_type == H2D_DG_GO_DOWN)
+    return;
+  // Obtain the transformations sequence.
+  Hermes::vector<unsigned int> transformations = get_transforms(sub_idx);
+  // Test for active element.
+  if(transformations.empty())
+    return;
+  for(unsigned int i = 0; i < n_neighbors; i++) {
+    // Find the index where the additional subelement mapping (on top of the initial one from assembling) starts.
+    int j = 0;
+    // Note that we do not have to test if central_transformations is empty or how long it is, because it has to be
+    // longer than transformations (and that is tested).
+    // Also the function compatible_transformations() does not have to be used, as now the array central_transformations
+    // has been adjusted so that it contains the array transformations.
+    while(central_transformations[i][j] == transformations[j])
+      if(++j > transformations.size() - 1)
+        break;
+    // Create a new array of transformations.
+    int shifted_trfs[] = new int[NeighborSearch::max_n_trans];
+    // Move the old one to the new one.
+    for(unsigned int k = j; k < central_n_trans; k++)
+      shifted_trfs[k -j] = central_transformations[i][k];
+    // Point to the new one and delete the old one.
+    delete central_transformations[i];
+    central_transformations[i] = shifted_trfs;
+  s}
+}
+
+void NeighborSearch::delete_neighbor(unsigned int position)
+{
+  delete [] central_transformations[position];
+  central_transformations.erase (central_transformations.begin()+position);
+  central_n_trans.erase (central_n_trans.begin()+position);
+  neighbor_edges.erase (neighbor_edges.begin()+position);
+  neighbors.erase (neighbors.begin()+position);
+  n_neighbors--;
+}
+
 
 void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
 {
@@ -253,10 +474,10 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 
 				Node* n = NULL;
 
-				// Add to the array of transformations one that transforms central el. to its parent completely
+				// Add to the array of neighbor_transformations one that transforms central el. to its parent completely
         // adjacent to the single big neighbor.
 				assert(n_neighbors == 0);
-				n_trans[n_neighbors] = n_parents;
+				neighbor_n_trans[n_neighbors] = n_parents;
         if(n_neighbors > NeighborSearch::max_neighbors)
           NeighborSearch::max_neighbors = n_neighbors;
 
@@ -267,25 +488,25 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 				*/
 
 				// Go back through the intermediate inactive parents down to the central element and stack corresponding
-        // transformations into the array 'transformations'.
+        // neighbor_transformations into the array 'neighbor_transformations'.
 				for(int j = n_parents - 1; j > 0; j-- )
 				{
           n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
           if(n == NULL)
           {
-            transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
+            neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
             p1 = par_mid_vertices[j]->id;
           }
           else
           {
             if(n->id == par_mid_vertices[j-1]->id)
             {
-              transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge + 1) % neighb_el->nvert;
+              neighbor_transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge + 1) % neighb_el->nvert;
               p2 = par_mid_vertices[j]->id;
             }
             else
             {
-              transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
+              neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge;
               p1 = par_mid_vertices[j]->id;
             }
           }
@@ -293,9 +514,9 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 
 				// Final transformation to the central element itself.
         if (orig_vertex_id[0] == par_mid_vertices[0]->id)
-					transformations[n_neighbors][n_parents - 1] = neighbor_edge;
+					neighbor_transformations[n_neighbors][n_parents - 1] = neighbor_edge;
 				else
-					transformations[n_neighbors][n_parents - 1] = (neighbor_edge + 1) % neighb_el->nvert;
+					neighbor_transformations[n_neighbors][n_parents - 1] = (neighbor_edge + 1) % neighb_el->nvert;
 
 
 				NeighborEdgeInfo local_edge_info;
@@ -371,9 +592,9 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
 
           // Construct the transformation path to the current neighbor.
           for(int k = 0; k < n_sons; k++)
-            transformations[n_neighbors][k] = sons[k];
+            central_transformations[n_neighbors][k] = sons[k];
 
-          n_trans[n_neighbors] = n_sons;
+          central_n_trans[n_neighbors] = n_sons;
 
 
           NeighborEdgeInfo local_edge_info;
@@ -438,8 +659,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 
     // Push the central element's transformation to the central pss and refmap.
     if (neighborhood_type == H2D_DG_GO_DOWN)
-      for(int i = 0; i < n_trans[active_segment]; i++)
-        central_pss->push_transform(transformations[active_segment][i]);
+      for(int i = 0; i < central_n_trans[active_segment]; i++)
+        central_pss->push_transform(central_transformations[active_segment][i]);
 
     central_rm->force_transform(central_pss->get_transform(), central_pss->get_ctm());
   }
@@ -447,8 +668,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
   {
     // Push the central element's transformation to the central refmap.
     if (neighborhood_type == H2D_DG_GO_DOWN)
-      for(int i = 0; i < n_trans[active_segment]; i++)
-        central_rm->push_transform(transformations[active_segment][i]);
+      for(int i = 0; i < central_n_trans[active_segment]; i++)
+        central_rm->push_transform(central_transformations[active_segment][i]);
   }
 
   if (with_neighbor_pss) // If the extended shapeset is needed...
@@ -472,8 +693,8 @@ bool NeighborSearch::set_active_segment(int neighbor, bool with_neighbor_pss)
 
     // Push the neighbor element's transformations in the case of a go-up neighborhood.
     if (neighborhood_type == H2D_DG_GO_UP) {
-      for(int i = 0; i < n_trans[active_segment]; i++)
-        neighb_pss->push_transform(transformations[active_segment][i]);
+      for(int i = 0; i < neighbor_n_trans[active_segment]; i++)
+        neighb_pss->push_transform(neighbor_transformations[active_segment][i]);
       neighb_rm->force_transform(neighb_pss->get_transform(), neighb_pss->get_ctm());
     }
   }
@@ -521,8 +742,7 @@ void NeighborSearch::detach_pss_and_rm()
 
 void NeighborSearch::detach_rm()
 {
-  if (central_rm != NULL &&
-      neighborhood_type == H2D_DG_GO_DOWN && central_rm->get_transform() != original_central_el_transform)
+  if (central_rm != NULL && neighborhood_type == H2D_DG_GO_DOWN && central_rm->get_transform() != original_central_el_transform)
     central_rm->set_transform(original_central_el_transform);
 }
 
@@ -693,8 +913,8 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
   if (neighborhood_type == H2D_DG_GO_DOWN)
     // Shrink the bigger central element to match the smaller neighbor (shrinks the active edge to the active segment).
-    for(int i = 0; i < n_trans[active_segment]; i++)
-      fu->push_transform(transformations[active_segment][i]);
+    for(int i = 0; i < central_n_trans[active_segment]; i++)
+      fu->push_transform(central_transformations[active_segment][i]);
 
   Func<scalar>* fn_central = init_fn(fu, fu->get_refmap(), get_quad_eo(false));
 
@@ -703,8 +923,8 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
 
   if (neighborhood_type == H2D_DG_GO_UP)
     // Shrink the bigger neighbor to match the smaller central element.
-    for(int i = 0; i < n_trans[active_segment]; i++)
-      fu->push_transform(transformations[active_segment][i]);
+    for(int i = 0; i < neighbor_n_trans[active_segment]; i++)
+      fu->push_transform(neighbor_transformations[active_segment][i]);
 
   Func<scalar>* fn_neighbor = init_fn(fu, fu->get_refmap(), get_quad_eo(true));
 
