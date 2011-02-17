@@ -1,3 +1,9 @@
+# This file contains compilation options that 
+# help you customize Hermes on your system. 
+# NOTE: when specifying paths, always use 
+# absolute paths (such as "/home/pavel/something" 
+# instead of "~/something").
+ 
 # Enable Python
 set(WITH_PYTHON YES)
 
@@ -8,7 +14,7 @@ set(WITH_MUMPS YES)
 # Enable PETSc
 # (linear solvers)
 set(WITH_PETSC YES)
-set(PETSC_ROOT ~/petsc-3.1-p5) #(or your own installation destination)
+set(PETSC_ROOT home/pavel/petsc-3.1-p5) #(or your own installation destination)
 set(PETSC_ARCH linux-cxx)
 
 # Enable SuperLU
