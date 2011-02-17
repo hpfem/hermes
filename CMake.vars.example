@@ -1,16 +1,27 @@
+# Enable Python
 set(WITH_PYTHON YES)
 
+# Enable MUMPS
+# (linear solvers)
 set(WITH_MUMPS YES)
 
+# Enable PETSc
+# (linear solvers)
 set(WITH_PETSC YES)
 set(PETSC_ROOT ~/petsc-3.1-p5) #(or your own installation destination)
 set(PETSC_ARCH linux-cxx)
 
+# Enable SuperLU
+# (linear solvers)
 set(WITH_SUPERLU YES)
 
+# Enable Trilinos 
+# (linear and nonlinear solvers)
 set(WITH_TRILINOS YES)
 set(TRILINOS_ROOT /opt/packages/trilinos)
 
+# Enable ExodusII and NetCDF
+# (CUBIT mesh format support)
 SET(WITH_EXODUSII YES)
 SET(EXODUSII_ROOT /opt/packages/exodusii)
 SET(NETCDF_ROOT /opt/packages/netcdf)
