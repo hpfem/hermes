@@ -102,6 +102,8 @@ Install Trilinos into the path specified by the {CMAKE_INSTALL_PREFIX} variable 
 
 	cmake -P cmake_install.cmake 
 	
+You may also need to create a dummy file "unistd.h" in the include folder under dependencies folder. This header is
+not present in certain versions of Microsoft C library.
 Go to the directory with Hermes. Add the following lines into CMake.vars::
 
     set(WITH_TRILINOS YES)
