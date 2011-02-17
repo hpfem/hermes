@@ -50,7 +50,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_Radau_IIA_3_5;
 
 // Boundary markers.
 const int BDY_BOTTOM = 1;
@@ -64,32 +64,12 @@ const double TEMP_EXT_TOP = 20;    // Exterior temperature top;
 
 const double ALPHA_BOTTOM = 25;    // Heat flux coefficient on the bottom edge.
 const double ALPHA_TOP = 8;        // Heat flux coefficient on the top edge.
-const double LAMBDA = 1.0;         // Thermal conductivity of the material.
 const double HEATCAP = 1020;       // Heat capacity.
 const double RHO = 2200;           // Material density.
 const double T_FINAL = 4000;       // Length of time interval in seconds.
 
-// Space distribution of fire temperature.
-template<typename Real>
-Real T_fire_x(Real x) {
-  return -1./32 * x*x*x + 3./16 * x*x;
-}
-
-// Temporal distribution of fire temperature.
-template<typename Real>
-Real T_fire_t(Real t) {
-  if (0 <= t  &&  t <= 100) return 0;
-  if (100 <= t  &&  t <= 600) return 980. / 500 * (t - 100.);
-  if (600 <= t  &&  t <= 1800) return 980;
-  if (1800 <= t  &&  t <= 3000) return 980 - 980. / 1200 * (t - 1800.);
-  return 0.;
-}
-
-// Fire temperature as function of x and time.
-template<typename Real>
-Real T_fire(Real x, Real t) {
-  return T_fire_x(x) * T_fire_t(t) + 20;
-}
+// Problem-specific functions.
+#include "extras.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -127,12 +107,12 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian_vol));
-  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln_time_prev);
-  wf.add_matrix_form_surf(callback(stac_jacobian_bottom), BDY_BOTTOM, sln_time_prev);
+  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord);
+  wf.add_vector_form(stac_residual_vol, stac_residual_vol_ord, HERMES_ANY, sln_time_prev);
+  wf.add_matrix_form_surf(stac_jacobian_bottom, stac_jacobian_bottom_ord, BDY_BOTTOM, sln_time_prev);
   wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, sln_time_prev);
-  wf.add_matrix_form_surf(callback(stac_jacobian_top), BDY_TOP, sln_time_prev);
-  wf.add_vector_form_surf(callback(stac_residual_top), BDY_TOP, sln_time_prev);
+  wf.add_matrix_form_surf(stac_jacobian_top, stac_jacobian_top_ord, BDY_TOP, sln_time_prev);
+  wf.add_vector_form_surf(stac_residual_top, stac_residual_top_ord, BDY_TOP, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = true;
