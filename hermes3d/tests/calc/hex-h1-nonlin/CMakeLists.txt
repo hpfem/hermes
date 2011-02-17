@@ -7,9 +7,9 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 macro(ADD_BIN BIN DEFINE)
 	add_executable(${BIN}		main.cpp)
 
-  set_common_target_properties(${BIN})
-
 	set_target_properties(${BIN} PROPERTIES COMPILE_FLAGS -D${DEFINE})
+    set_common_target_properties(${BIN})
+
 	set(BINARIES ${BINARIES} ${BIN})
 endmacro(ADD_BIN)
 
