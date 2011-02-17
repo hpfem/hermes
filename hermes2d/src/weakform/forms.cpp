@@ -328,7 +328,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 }
 
 /// Preparation of mesh functions.
-Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
+Func<scalar>* init_fn(MeshFunction *fu, const int order)
 {
   // sanity checks
   if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
@@ -373,7 +373,7 @@ Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order)
 }
 
 /// Preparation of solutions.
-Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order)
+Func<scalar>* init_fn(Solution *fu, const int order)
 {
   // sanity checks
   if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
