@@ -3,6 +3,8 @@ CYTHON_ADD_MODULE_PYX(schroedinger)
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/modules/schroedinger)
 add_python_library(schroedinger schroedinger.cpp)
+include(PickRealOrCplxLibs)
+PICK_REAL_OR_CPLX_LIBS(${HERMES2D_REAL} schroedinger)
 target_link_libraries(schroedinger hermes_schroedinger)
 
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d/modules/schroedinger)

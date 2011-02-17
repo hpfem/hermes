@@ -122,6 +122,3 @@ IF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)  # Search for the complex version 
   # linux specific (?)
   SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} dl)          
 ENDIF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)
-
-
-
