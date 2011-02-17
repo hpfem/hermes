@@ -14,7 +14,7 @@ set(WITH_MUMPS YES)
 # Enable PETSc
 # (linear solvers)
 set(WITH_PETSC YES)
-set(PETSC_ROOT home/pavel/petsc-3.1-p5) #(or your own installation destination)
+set(PETSC_ROOT /home/pavel/petsc-3.1-p5) #(or your own installation destination)
 set(PETSC_ARCH linux-cxx)
 
 # Enable SuperLU
