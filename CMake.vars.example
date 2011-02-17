@@ -1,6 +1,11 @@
 set(WITH_PYTHON YES)
 
 set(WITH_MUMPS YES)
+
+set(WITH_PETSC YES)
+set(PETSC_ROOT ~/petsc-3.1-p5) #(or your own installation destination)
+set(PETSC_ARCH linux-cxx)
+
 set(WITH_SUPERLU YES)
 
 set(WITH_TRILINOS YES)
