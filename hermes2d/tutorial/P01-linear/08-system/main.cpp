@@ -17,7 +17,7 @@
 
 const int P_INIT = 6;                                      // Initial polynomial degree of all elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                           // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                           // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_1 = 1, BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5;

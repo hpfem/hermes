@@ -13,7 +13,7 @@ const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // first Lame constan
 const double mu = E / (2*(1 + nu));                        // second Lame constant
 const int P_INIT = 8;                                      // Initial polynomial degree of all elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                           // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                           // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 
 // Boundary markers.

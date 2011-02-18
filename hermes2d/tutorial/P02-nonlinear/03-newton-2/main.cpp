@@ -23,7 +23,7 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.

@@ -35,7 +35,6 @@
 #include "../hermes_common/solver/epetra.h"
 #include "../hermes_common/solver/mumps.h"
 #include "../hermes_common/solver/nox.h"
-#include "../hermes_common/solver/pardiso.h"
 #include "../hermes_common/solver/petsc.h"
 #include "../hermes_common/solver/umfpack_solver.h"
 #include "../hermes_common/solver/superlu.h"

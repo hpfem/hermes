@@ -1,5 +1,4 @@
 #include "hermes2d.h"
-#include "solver_pardiso.h"
 
 const double Re = 300;
 const double tau = 0.05;
@@ -38,7 +37,7 @@ int main(int argc, char* argv[])
   wf.set_eqn(1, "(u1,v1)/tau + [u2,v2]/Re + (X*u2_x + Y*u2_y, v2) - (p,v2_y) = (Y,v2)/tau");
   wf.set_eqn(2, "(u1_x,q) + (u2_y,q) = 0");
 
-  PardisoSolver solver;
+  UmfpackSolver solver;
   LinSystem sys(&wf, &solver);
   sys.set_spaces(3, &xvel, &yvel, &press);
 

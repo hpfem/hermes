@@ -74,7 +74,7 @@ const int ADAPTIVITY_NORM = 2;                    // Specifies the norm used by 
                                                   // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
                                                   // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
 const int ERR_PLOT = 0;         // Row in the convergence graphs for exact errors .

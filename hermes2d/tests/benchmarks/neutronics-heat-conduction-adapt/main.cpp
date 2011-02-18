@@ -62,7 +62,7 @@ const int NEWTON_MAX_ITER = 20;            // Maximum allowed number of Newton i
 
 // Linear system solvers for the coarse and refined problems, respectively.
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // (depending on which optional solver libraries you have installed and enabled in hermes2d/CMake.vars).
 MatrixSolverType matrix_solver_coarse = SOLVER_UMFPACK;  
 MatrixSolverType matrix_solver_fine = SOLVER_UMFPACK;

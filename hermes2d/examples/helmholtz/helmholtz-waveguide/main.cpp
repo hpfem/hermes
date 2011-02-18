@@ -27,7 +27,7 @@
 const int P_INIT = 6;                                  // Initial polynomial degree of all elements.
 const int INIT_REF_NUM = 3;                            // Number of initial mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;       // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                       // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                       // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_PERFECT = 1, BDY_LEFT = 2, BDY_IMPEDANCE = 3;

@@ -16,7 +16,7 @@ const double TAU = 0.001;                         // Time step.
 const double T_FINAL = 2*TAU + 1e-4;              // Time interval length.
 const int TIME_INTEGRATION = 1;                   // 1... implicit Euler, 2... Crank-Nicolson.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Adaptivity
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.

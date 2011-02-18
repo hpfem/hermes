@@ -12,7 +12,6 @@
 #   "mpi"   MPI version
 #
 # Examples:
-#    ./run_configuration Cplx/pardiso 
 #    ./run_configuration Real/all mpi
 
 test -e CMake.vars && rm CMake.vars

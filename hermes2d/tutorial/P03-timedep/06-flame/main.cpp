@@ -28,7 +28,7 @@ const double T_FINAL = 60.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants.
 const double Le    = 1.0;

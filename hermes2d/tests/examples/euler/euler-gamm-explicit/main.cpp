@@ -24,7 +24,7 @@ const int INIT_REF_NUM = 4;                       // Number of initial uniform m
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 double P_EXT = 2.5;         // Exterior pressure (dimensionless).

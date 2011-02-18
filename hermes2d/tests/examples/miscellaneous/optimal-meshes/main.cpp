@@ -9,7 +9,7 @@
 
 const int P_INIT = 1;                             // Initial polynomial degree.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Initial condition. It will be projected on the FE mesh. 
 scalar init_cond(double x, double y, double& dx, double& dy)

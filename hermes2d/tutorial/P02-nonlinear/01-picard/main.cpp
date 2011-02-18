@@ -25,7 +25,7 @@ const double PICARD_TOL = 1e-6;                   // Stopping criterion for the 
 const int PICARD_MAX_ITER = 100;                  // Maximum allowed number of Picard iterations.
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Thermal conductivity (temperature-dependent)
 // Note: for any u, this function has to be positive.

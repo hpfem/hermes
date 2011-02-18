@@ -155,9 +155,8 @@ protected:
                                                // Therefore we introduce a bc_permut array that for any 
                                                // boundary marker gives its index in the list of boundary 
                                                // conditions. 
-  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, 
-                                               // SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, 
-                                               // SOLVER_SUPERLU, SOLVER_UMFPACK.
+  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, SOLVER_MUMPS, 
+                                               // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
   // Finite element mesh.
   Mesh* mesh;

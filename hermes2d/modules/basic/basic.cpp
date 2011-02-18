@@ -253,12 +253,11 @@ void ModuleBasic::set_matrix_solver(std::string solver_name)
   if (solver_name == "amesos" ) {this->matrix_solver = SOLVER_AMESOS;  found = true;}
   if (solver_name == "aztecoo") {this->matrix_solver = SOLVER_AZTECOO; found = true;}
   if (solver_name == "mumps"  ) {this->matrix_solver = SOLVER_MUMPS;   found = true;}
-  if (solver_name == "pardiso") {this->matrix_solver = SOLVER_PARDISO; found = true;}
   if (solver_name == "petsc"  ) {this->matrix_solver = SOLVER_PETSC;   found = true;}
   if (solver_name == "superlu") {this->matrix_solver = SOLVER_SUPERLU; found = true;}
   if (solver_name == "umfpack") {this->matrix_solver = SOLVER_UMFPACK; found = true;}
   if (!found) {
-    warn("Possible matrix solvers: amesos, aztecoo, mumps, pardiso, petsc, superlu, umfpack.");
+    warn("Possible matrix solvers: amesos, aztecoo, mumps, petsc, superlu, umfpack.");
     error("Unknown matrix solver %s.", solver_name.c_str());
   }
 }

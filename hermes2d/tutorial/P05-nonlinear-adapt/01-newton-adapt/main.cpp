@@ -52,7 +52,7 @@ const double NEWTON_TOL_COARSE = 1e-4;            // Stopping criterion for the 
 const double NEWTON_TOL_FINE = 1e-4;              // Stopping criterion for the Newton's method on fine mesh.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Thermal conductivity (temperature-dependent).
 // Note: for any u, this function has to be positive.

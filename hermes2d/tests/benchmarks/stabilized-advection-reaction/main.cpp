@@ -85,7 +85,7 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
 const int NDOF_STOP = 8000;                       // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 

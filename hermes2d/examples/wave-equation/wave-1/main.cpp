@@ -23,7 +23,7 @@ const int P_INIT = 6;                              // Initial polynomial degree 
 const double TAU = 0.01;                           // Time step.
 const double T_FINAL = 2.15;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY = 1;

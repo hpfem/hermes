@@ -23,7 +23,7 @@ const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;

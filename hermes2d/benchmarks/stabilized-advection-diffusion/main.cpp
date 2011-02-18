@@ -73,7 +73,7 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 
 GalerkinMethod method = DG;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK. 
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK. 
 
 // Problem parameters.
 const double EPSILON = 0.01;                      // Diffusivity.

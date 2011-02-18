@@ -20,7 +20,7 @@
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 

@@ -349,9 +349,8 @@ int main(int argc, char* argv[])
   // Initialize the discrete algebraic representation of the problem and its solver.
   //
   // Choose one of the available linear algebraic system solvers (possibilities:
-  // SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_SUPERLU,
-  // SOLVER_AMESOS, SOLVER_AZTECOO, depending on which solver libraries you have
-  // installed and enabled in Hermes).
+  // SOLVER_UMFPACK, SOLVER_PETSC, SOLVER_MUMPS, SOLVER_SUPERLU, SOLVER_AMESOS, 
+  // SOLVER_AZTECOO, depending on which solver libraries you have installed and enabled in Hermes).
 #ifdef WITH_PETSC  
   MatrixSolverType matrix_solver = SOLVER_PETSC;
 #else

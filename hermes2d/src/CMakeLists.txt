@@ -97,7 +97,6 @@ set(SRC
        ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
        ${HERMES_COMMON_DIR}/solver/amesos.cpp
        ${HERMES_COMMON_DIR}/solver/mumps.cpp 
-       ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
        ${HERMES_COMMON_DIR}/solver/superlu.cpp
        ${HERMES_COMMON_DIR}/solver/petsc.cpp 
        ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
@@ -139,7 +138,6 @@ macro(LIBRARY_SETTINGS BIN)
       ${HDF5_LIBRARY}
       ${ANTTWEAKBAR_LIBRARY}
       ${UMFPACK_LIBRARIES}
-      ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}

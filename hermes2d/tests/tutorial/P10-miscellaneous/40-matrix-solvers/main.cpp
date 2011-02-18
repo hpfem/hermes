@@ -6,9 +6,8 @@
 // in the coordinate format, then passed into a SparseMatrix and Vector,
 // and then solved using a LinearSolver.
 //
-// Possible solvers: petsc, petsc-block, umfpack, umfpack-block, pardiso, pardiso-block, 
-//                   aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block,
-//                   superlu, superlu-block.
+// Possible solvers: petsc, petsc-block, umfpack, umfpack-block, aztecoo, aztecoo-block, 
+//                   amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.
 //
 // Sample usage: "matrix-solvers umfpack linsys-N.txt" where N = 1, 2, 3.
 
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
   // Check number of command-line parameters.
   if (argc < 3) {
     warn("Possible solvers are: petsc, petsc-block, umfpack, umfpack-block, \
-pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
+aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
     error("Not enough parameters: Provide a solver and an input file with a matrix and vector.");
   }
 
@@ -149,60 +148,6 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
     }
 #else
     error("Hermes was not built with UMFpack support.");
-#endif
-  }
-  else if (strcasecmp(argv[1], "pardiso") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
-    if (solver.solve()) {
-      scalar *sln = solver.get_solution();
-      info("Matrix solve successful.");
-      printf("Solution vector: ");
-      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      printf("\n");
-    }
-    else {
-      info("Pardiso solver failed.");
-      return ERR_FAILURE;
-    }
-#else
-    error("Hermes was not built with PARDISO support.");
-#endif
-  }
-  else if (strcasecmp(argv[1], "pardiso-block") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
-    if (solver.solve()) {
-      scalar *sln = solver.get_solution();
-      info("Matrix solve successful.");
-      printf("Solution vector: ");
-      if ((sln[0] - 4) < 1e-6) printf("%g ", sln[0]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      if ((sln[1] - 2) < 1e-6) printf("%g ", sln[1]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      if ((sln[2] - 3) < 1e-6) printf("%g ", sln[2]);
-      else {printf("Failed. \n");  return ERR_FAILURE;} 
-      printf("\n");
-    }
-    else {
-      info("Pardiso solver failed.");
-      return ERR_FAILURE;
-    }
-#else
-    error("Hermes was not built with PARDISO support.");
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
@@ -435,7 +380,7 @@ pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mum
   }  
   else {
     warn("Possible solvers are: petsc, petsc-block, umfpack, umfpack-block, \
-pardiso, pardiso-block, aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
+aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.");
     error("Unknown matrix solver.");
   }
 
