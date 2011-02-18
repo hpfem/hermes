@@ -107,6 +107,8 @@ As the first step, create a  directory structure.
       - Open a command prompt, got to 'my_Cython_root', and excute following::
 
             python.exe setup.py install
+			
+      - Add the path to 'my_Cython_root\\bin' to your system PATH.
 
   - PTHREAD(2.8.0)
 

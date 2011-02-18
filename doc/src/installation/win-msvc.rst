@@ -111,6 +111,8 @@ This list works for 32-bit version of Hermes.
 
             python.exe setup.py install
 
+      - Add the path to 'my_Cython_root\\bin' to your system PATH.
+
   - PTHREAD(2.8.0)
 
     - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
