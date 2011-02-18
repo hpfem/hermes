@@ -32,15 +32,16 @@ const double TIME_DER_LIMIT = 1E-2;
 const bool PRECONDITIONING = true;
 
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM_BOUNDARY = 1;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
 double TAU = 1E-2;                                // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 5;                        // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
-const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.1;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
@@ -186,7 +187,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
     basemesh.refine_all_elements();
-  basemesh.refine_towards_boundary(1, 2);
+  basemesh.refine_towards_boundary(1, INIT_REF_NUM_BOUNDARY);
   mesh.copy(&basemesh);
 
   // Enter boundary markers.
@@ -369,6 +370,9 @@ int main(int argc, char* argv[])
       // Initialize NOX solver.
       NoxSolver solver(&dp);
       solver.set_ls_tolerance(1E-2);
+      solver.disable_abs_resid();
+      solver.set_conv_rel_resid(1.00);
+
       if(PRECONDITIONING)
         solver.set_precond(pc);
 
