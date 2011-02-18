@@ -316,9 +316,9 @@ int Linearizer::add_cell(Linearizer::Cell::EType type, int n, int *vtcs)
 
 //// FileFormatter /////////////////////////////////////////////////////////////////////////////////
 
-/// Produces a files in VTK format
+/// Produces a file in VTK format
 ///
-/// This class taker a Linearizer class, reads the info stored in there and produces a VTK
+/// This class takes a Linearizer class, reads the info stored in there and produces a VTK
 /// legacy file.
 class HERMES_API FileFormatter {
 public:
@@ -935,7 +935,7 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 	fprintf(this->out_file, "\n");
 	fprintf(this->out_file, "DATASET STRUCTURED_POINTS\n");
 
-	int n = mat->get_size();
+	unsigned int n = mat->get_size();
 	fprintf(this->out_file, "DIMENSIONS %d %d 1\n", n, n);
 
 	fprintf(this->out_file, "ASPECT_RATIO %d %d %d\n", 1, 1, 1);
@@ -952,15 +952,15 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 	}
 	else {
 		if (m->row_storage) {
-			for (int i = 0; i < n; i++) {
+			for (unsigned int i = 0; i < n; i++) {
 				int n_entries = m->get_num_row_entries(i);
 				std::vector<double> vals(n_entries);
-				std::vector<int> idxs(n_entries);
-				int n_extracted = 0;
+				std::vector<unsigned int> idxs(n_entries);
+				unsigned int n_extracted = 0;
 				m->extract_row_copy(i, n_entries, n_extracted, &vals[0], &idxs[0]);
 
 				double val;
-				for (int j = 0, k = 0; j < n; j++)
+				for (unsigned int j = 0, k = 0; j < n; j++)
 					if (idxs[k] == j) {
 						if (structure) val = fabs(vals[k]) < EPS ? 1.0 : 0.0;
 						else val = vals[k];
@@ -973,15 +973,15 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 			}
 		}
 		else if (m->col_storage) {
-			for (int i = 0; i < n; i++) {
+			for (unsigned int i = 0; i < n; i++) {
 				int n_entries = m->get_num_col_entries(i);
 				std::vector<double> vals(n_entries);
-				std::vector<int> idxs(n_entries);
-				int n_extracted = 0;
+				std::vector<unsigned int> idxs(n_entries);
+				unsigned int n_extracted = 0;
 				m->extract_col_copy(i, n_entries, n_extracted, &vals[0], &idxs[0]);
 
 				double val;
-				for (int j = 0, k = 0; j < n; j++)
+				for (unsigned int j = 0, k = 0; j < n; j++)
 					if (idxs[k] == j) {
 						if (structure) val = fabs(vals[k]) < EPS ? 1.0 : 0.0;
 						else val = vals[k];
@@ -995,8 +995,8 @@ void VtkOutputEngine::out(Matrix *mat, bool structure)
 		}
 		else {
 			// extract element by element
-			for (int i = 0; i < n; i++) {
-				for (int j = 0; j < n; j++) {
+			for (unsigned int i = 0; i < n; i++) {
+				for (unsigned int j = 0; j < n; j++) {
 					double val;
 					if (structure) val = ABS(m->get(i, j)) < EPS ? 1.0 : 0.0;
 					else val = REAL(m->get(i, j));

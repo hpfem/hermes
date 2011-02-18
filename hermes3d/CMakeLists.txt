@@ -1,68 +1,47 @@
 project(hermes3d)
 
 cmake_minimum_required(VERSION 2.6)
-
-# default values
-
+# H3D only supports Debug version.
 option(DEBUG         "Build debug version" YES)
-set(DEBUG_ORDER NO)
-set(PROFILING   NO)
 
-# real/complex version of the library
-option(H3D_REAL          "Build real (double precision) version of Hermes3D" YES)
-option(H3D_COMPLEX       "Build complex version of Hermes3D" YES)
-# supported element types
-option(WITH_TETRA    "Enable tetrahedral elements" YES)
-option(WITH_HEX      "Enable hexahedral elements" YES)
-option(WITH_PRISM    "Enable prism elements" NO)
-
-option(WITH_UMFPACK  "Enable support for UMFPACK" YES)
-option(WITH_SUPERLU  "Enable support for SUPERLU" NO)
-option(WITH_PETSC    "Enable support for PETSc" NO)
-option(WITH_PARDISO  "Enable support for PARDISO" NO)
-option(WITH_MUMPS    "Enable support for MUMPS solver" NO)
-option(WITH_TRILINOS "Enable support for Trilinos solvers" NO)
-
-option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
-option(WITH_HDF5     "Enable support for HDF5" NO)
-
-# Reporting and logging:
-set(HERMES_REPORT_WITH_LOGO        YES)  #logo will be shown
-set(HERMES_REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(HERMES_REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
-                                  #The runtime control is intended just for Python wrappers.
-set(HERMES_REPORT_ALL              NO)   #do not report all events, just selected ones
-set(HERMES_REPORT_WARNING          YES)  #warnings will be reported
-set(HERMES_REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-set(HERMES_REPORT_INFO             YES)  #info will be reported
-set(HERMES_REPORT_VERBOSE          NO)   #info details will not be reported
-set(HERMES_REPORT_TRACE            NO)   #code execution tracing will not be reported
-set(HERMES_REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
-#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
-
-option(WITH_OPENMP   "Build with OpenMP support" NO)
-
-option(WITH_EXAMPLES "Build examples" YES)
-option(WITH_BENCHMARKS "Build benchmarks" YES)
-option(WITH_TESTS    "Build tests" YES)
-set(WITH_TOOLS  NO)
-
-option(WITH_PYTHON   "Enable support for Python" NO)
-
+# Directory where the output will be written.
 set(OUTPUT_DIR "" CACHE STRING "Directory were the output will be written")
 
-set(DEV_TESTS NO)
+IF(H3D_WITH_EXAMPLES)
+	set(WITH_EXAMPLES YES)
+ELSE(H3D_WITH_EXAMPLES)
+	set(WITH_EXAMPLES NO)
+ENDIF(H3D_WITH_EXAMPLES)
+
+IF(H3D_WITH_BENCHMARKS)
+	set(WITH_BENCHMARKS YES)
+ELSE(H3D_WITH_BENCHMARKS)
+	set(WITH_BENCHMARKS NO)
+ENDIF(H3D_WITH_BENCHMARKS)
+
+IF(H3D_WITH_TESTS)
+	set(WITH_TESTS YES)
+ELSE(H3D_WITH_TESTS)
+	set(WITH_TESTS NO)
+ENDIF(H3D_WITH_TESTS)
+
+IF(H3D_WITH_TOOLS)
+	set(WITH_TOOLS YES)
+ELSE(H3D_WITH_TOOLS)
+	set(WITH_TOOLS NO)
+ENDIF(H3D_WITH_TOOLS)
+
+IF(H3D_WITH_DEV_TESTS)
+	set(WITH_DEV_TESTS YES)
+ELSE(H3D_WITH_DEV_TESTS)
+	set(WITH_DEV_TESTS NO)
+ENDIF(H3D_WITH_DEV_TESTS)
 
 # Doxygen related
 #set(DOXYGEN_BINARY doxygen)
 #set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
 
 #set(SPHINX_BUILD_BIN sphinx-build)
-
-# allow to override default values via CMake.vars 
-include(${PROJECT_BINARY_DIR}/CMake.vars OPTIONAL)
-
-# sanity checks
 
 # need at least real or complex version
 if(H3D_REAL)
@@ -73,11 +52,9 @@ if(H3D_COMPLEX)
 endif(H3D_COMPLEX)
 
 list(LENGTH VERS VERS_LEN)
-if(VERS_LEN GREATER 0)
-	message(STATUS "Will build versions: ${VERS}")
-else(VERS_LEN GREATER 0)
-	message(FATAL_ERROR "No versions specified. Re-run with REAL and/or COMPLEX set to YES")
-endif(VERS_LEN GREATER 0)
+if(NOT(VERS_LEN GREATER 0))
+	message(FATAL_ERROR "H3D: No versions specified. Re-run with REAL and/or COMPLEX set to YES")
+endif(NOT(VERS_LEN GREATER 0))
 
 if(WITH_TETRA)
 	list(APPEND ELEMTYPES "tetra")
@@ -90,134 +67,42 @@ if(WITH_PRISM)
 endif(WITH_PRISM)
 
 list(LENGTH ELEMTYPES ELEMTYPES_LEN)
-if(ELEMTYPES_LEN GREATER 0)
-	message(STATUS "Will build with element types: ${ELEMTYPES}")
-else(ELEMTYPES_LEN GREATER 0)
-	message(FATAL_ERROR "No element types selected. Re-run with WITH_TETRA, WITH_HEX or WITH_PRISM set to YES")
-endif(ELEMTYPES_LEN GREATER 0)
-
-# set internal library-wide variables
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
-set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
+if(NOT(ELEMTYPES_LEN GREATER 0))
+	message(FATAL_ERROR "H3D: No element types selected. Re-run with WITH_TETRA, WITH_HEX or WITH_PRISM set to YES")
+endif(NOT(ELEMTYPES_LEN GREATER 0))
 
 # internals regarding build type
 if(DEBUG)
 	if(H3D_REAL)
-		set(HERMES_REAL_BIN hermes3d-debug)
+		set(HERMES3D_REAL hermes3d-debug)
 	endif(H3D_REAL)
 	if(H3D_COMPLEX) 
-		set(HERMES_CPLX_BIN hermes3d-cplx-debug)
+		set(HERMES3D_CPLX hermes3d-cplx-debug)
 	endif(H3D_COMPLEX)
 	set(CMAKE_BUILD_TYPE Debug)
 else(DEBUG)
 	if(H3D_REAL)
-		set(HERMES_REAL_BIN hermes3d)
+		set(HERMES3D_REAL hermes3d)
 	endif(H3D_REAL)
 	if(H3D_COMPLEX)
-		set(HERMES_CPLX_BIN hermes3d-cplx)
+		set(HERMES3D_CPLX hermes3d-cplx)
 	endif(H3D_COMPLEX)
 	set(CMAKE_BUILD_TYPE Release)
 endif(DEBUG)
 
-# find necessary packages
-find_package(PTHREAD REQUIRED)
+# H3D needs BLAS. However, if it was needed before, there is no need to look for it again.
 add_definitions(-DWITH_BLAS)
-
 if(MSVC)
-	find_package(CLAPACK REQUIRED) # also searches for BLAS
+	if(NOT(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+		find_package(CLAPACK REQUIRED)
+		include_directories(${CLAPACK_INCLUDE_DIRS})
+	endif(NOT(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
 else(MSVC)
-	enable_language(Fortran)	# need a fortran compiler for checking BLAS
-	find_package(LAPACK REQUIRED) # also searches for BLAS
-endif(MSVC)
-
-
-# solvers
-if(WITH_PETSC)
-	find_package(PETSC REQUIRED)
-	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
-	# different directories), so we can't globally set the architecture-specific include directory here, but 
-	# rather on a per-target basis.
-	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
-endif(WITH_PETSC)
-
-if(WITH_UMFPACK)
-	find_package(UMFPACK REQUIRED)
-  include_directories(${UMFPACK_INCLUDE_DIRS})
-endif(WITH_UMFPACK)
-
-if(WITH_PARDISO)
-	find_package(PARDISO REQUIRED)
-endif(WITH_PARDISO)
-
-if(WITH_MUMPS)
-	find_package(MUMPS REQUIRED)
-	if(WITH_MPI)
-		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
-  endif(WITH_MPI)
-  include_directories(${MUMPS_INCLUDE_DIR})
-endif(WITH_MUMPS)
-
-if(WITH_TRILINOS)
-	find_package(TRILINOS REQUIRED)
-	include_directories(${TRILINOS_INCLUDE_DIR})
-endif(WITH_TRILINOS)
-
-if(WITH_SUPERLU)
-  find_package(SUPERLU REQUIRED)
-  include_directories(${SUPERLU_INCLUDE_DIR})
-  if(SUPERLU_MT)
-    add_definitions(-DSLU_MT)
-  endif(SUPERLU_MT)
-endif(WITH_SUPERLU)
-
-# SMP
-if(WITH_OPENMP)
-	find_package(OpenMP REQUIRED)
-	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
-endif(WITH_OPENMP)
-
-
-# domain decomposition
-
-if(WITH_METIS)
-	find_package(METIS REQUIRED)
-endif(WITH_METIS)
-
-
-if(WITH_HDF5)
-	find_package(HDF5 REQUIRED)
-	include_directories(${HDF5_INCLUDE_DIR})
-endif(WITH_HDF5)
-
-if(WITH_EXODUSII)
-	find_package(EXODUSII REQUIRED)
-	include_directories(${EXODUSII_INCLUDE_DIR})
-endif(WITH_EXODUSII)
-
-# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC)
-if(WITH_MPI)
-  if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
-    find_package(MPI REQUIRED)
-  else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-    if(NOT EXISTS MPI_INCLUDE_PATH)
-      message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
-    endif(NOT EXISTS MPI_INCLUDE_PATH)
-  endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-  include_directories(MPI_INCLUDE_PATH)	  
-endif(WITH_MPI)
-
-if(WITH_GLUT)
-  find_package(GLUT REQUIRED)
-  find_package(GLEW REQUIRED)
-else(WITH_GLUT)
-  add_definitions(-DNOGLUT)
-endif(WITH_GLUT)
-
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${HERMES_COMMON_DIR})
-
-include(../hermes_common/CMakeCommon.txt)
+  if(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+    enable_language(Fortran)
+    find_package(LAPACK REQUIRED)
+  endif(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+endif(MSVC)  
 
 # We require Python for the mesh parser (it also needs NumPy)
 find_package(Python REQUIRED)
@@ -225,9 +110,17 @@ find_package(NumPy REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 set(PYTHON_INSTALL_PATH lib/python/site-packages)
 
+# Python inclusion is different in H1D, H2D, H3D.
+if(WITH_PYTHON)
+	find_package(PythonLibs REQUIRED)
+	find_package(Cython REQUIRED)
+	add_subdirectory(python)
+	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+endif(WITH_PYTHON)
 
-#
+# Subdirectories.
 add_subdirectory(src)
+
 if(WITH_TESTS)
 	enable_testing()
 	add_subdirectory(tests)
@@ -235,15 +128,6 @@ endif(WITH_TESTS)
 if(WITH_TOOLS)
 	add_subdirectory(tools)
 endif(WITH_TOOLS)
-
-if(WITH_PYTHON)
-	find_package(PythonLibs REQUIRED)
-	find_package(Cython REQUIRED)
-	add_subdirectory(python)
-	message(STATUS "Compiling with python support")
-	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-endif(WITH_PYTHON)
-
 
 # examples
 add_subdirectory(examples)
@@ -307,9 +191,3 @@ set(CPACK_SOURCE_IGNORE_FILES
 )
 
 include(CPack)
-
-if(HAVE_TEUCHOS_STACKTRACE)
-    message("-- Print Teuchos stacktrace on segfault: YES")
-else(HAVE_TEUCHOS_STACKTRACE)
-    message("-- Print Teuchos stacktrace on segfault: NO")
-endif(HAVE_TEUCHOS_STACKTRACE)

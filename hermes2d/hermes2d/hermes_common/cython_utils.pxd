@@ -1,1 +1,1 @@
-../../../hermes_common/hermes_common/cython_utils.pxd
+cdef inline PY_NEW(T)

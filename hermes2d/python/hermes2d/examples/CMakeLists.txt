@@ -4,7 +4,7 @@ include_directories(..)
 
 macro(ADD_EXAMPLE name)
     cython_add_module(${name})
-    target_link_libraries(${name} ${HERMES_REAL_BIN})
+    target_link_libraries(${name} ${HERMES2D_REAL})
     if(WITH_PYTHON_UMFPACK)
         find_package(UMFPACK REQUIRED)
         include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})

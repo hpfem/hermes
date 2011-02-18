@@ -19,30 +19,48 @@
 
 // TODO LIST: 
 //
-// (1) Incorporate spatial adaptivity into the time stepping.
+// (1) With explicit and diagonally implicit methods, the matrix is treated
+//     in the same way as with fully implicit ones. To make this more 
+//     efficient, with explicit and diagonally implicit methods one should 
+//     first only solve for the upper left block, then eliminate all blocks 
+//     under it, then solve for block at position 22, eliminate all blocks 
+//     under it, etc. Currently this is not done and everything is left to 
+//     the matrix solver.   
 //
-// (2) Enable more equations than one. Right now rk_time_step() does not 
+// (2) In example 03-timedep-adapt-space-and-time with implicit Euler 
+//     method, Newton's method takes much longer than in 01-timedep-adapt-space-only
+//     (that also uses implicit Euler method). This means that the initial guess for 
+//     the K_vector should be improved (currently it is zero).
+//
+// (3) At the end of rk_time_step(), the previous time level solution is 
+//     projected onto the space of the new time-level solution so that 
+//     it can be added to the stages. This projection is slow so we should 
+//     find a way to do this differently. In any case, the projection 
+//     is not necessary when no adaptivity in space takes place and the 
+//     two spaces are the same (but it is done anyway).
+//
+// (4) Enable more equations than one. Right now rk_time_step() does not 
 //     work for systems.
 //
-// (3) Enable all other matrix solvers, so far UMFPack is hardwired here.
+// (5) Enable all other matrix solvers, so far UMFPack is hardwired here.
 //
-// (4) We do not take advantage of the fact that all blocks in the 
+// (6) We do not take advantage of the fact that all blocks in the 
 //     Jacobian matrix have the same structure. Thus it is enough to 
 //     assemble the matrix M (one block) and copy the sparsity structure
 //     into all remaining nonzero blocks (and diagonal blocks). Right 
 //     now, the sparsity structure is created expensively in each block 
 //     again.
 //
-// (5) If space does not change, the sparsity does not change. Right now 
+// (7) If space does not change, the sparsity does not change. Right now 
 //     we discard everything at the end of every time step, we should not 
 //     do it.  
 //
-// (6) If the problem does not depend explicitly on time, then all the blocks 
+// (8) If the problem does not depend explicitly on time, then all the blocks 
 //     in the Jacobian matrix of the stationary residual are the same up 
 //     to a multiplicative constant. Thus they do not have to be aassembled 
 //     from scratch.
 // 
-// (7) If the problem is linear, then the Jacobian is constant. If Space 
+// (9) If the problem is linear, then the Jacobian is constant. If Space 
 //     does not change between time steps, we should keep it. 
 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
@@ -78,7 +96,9 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
 
   // Create constant Solutions to represent the stage times,
   // stage_time = current_time + c_i*time_step.
-  // (Temporary workaround. these should be passed as numbers.)
+  // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
+  // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
+  // SOLUTIONS IN ExtData.
   Solution** stage_time_sol = new Solution*[num_stages];
   for (int i = 0; i < num_stages; i++) {
     stage_time_sol[i] = new Solution(mesh);
@@ -108,14 +128,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfv_ij.area = mfv_base.area;
         mfv_ij.fn = mfv_base.fn;
         mfv_ij.ord = mfv_base.ord;
-        std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin());
         mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
-        // Set offset for u_ext[] external solutions.
-        mfv_ij.u_ext_offset = i;
+        // Duplicate external solutions.
+        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+        // std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin()); 
+        for (unsigned int f_idx = 0; f_idx < mfv_base.ext.size(); f_idx++) 
+          mfv_ij.ext.push_back(mfv_base.ext[f_idx]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfv_ij.ext.push_back(stage_time_sol[i]);
+
+        // Set offset for u_ext[] external solutions.
+        mfv_ij.u_ext_offset = i;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -137,14 +162,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         mfs_ij.area = mfs_base.area;
         mfs_ij.fn = mfs_base.fn;
         mfs_ij.ord = mfs_base.ord;
-        std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin());
         mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
 
-        // Set offset for u_ext[] external solutions.
-        mfs_ij.u_ext_offset = i;
+        // Duplicate external solutions.
+        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+        // std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin()); 
+        for (unsigned int f_idx = 0; f_idx < mfs_base.ext.size(); f_idx++) 
+          mfs_ij.ext.push_back(mfs_base.ext[f_idx]);
 
         // Add stage_time_sol[i] as an external function to the form.
         mfs_ij.ext.push_back(stage_time_sol[i]);
+
+        // Set offset for u_ext[] external solutions.
+        mfs_ij.u_ext_offset = i;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -164,14 +194,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfv_i.area = vfv_base.area;
       vfv_i.fn = vfv_base.fn;
       vfv_i.ord = vfv_base.ord;
-      std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_i.ext.begin());
       vfv_i.scaling_factor = -1.0;
 
-      // Set offset for u_ext[] external solutions.
-      vfv_i.u_ext_offset = i;
+      // Duplicate external solutions.
+      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
+      for (unsigned int f_idx = 0; f_idx < vfv_base.ext.size(); f_idx++) 
+        vfv_i.ext.push_back(vfv_base.ext[f_idx]);
 
       // Add stage_time_sol[i] as an external function to the form.
       vfv_i.ext.push_back(stage_time_sol[i]);
+
+      // Set offset for u_ext[] external solutions.
+      vfv_i.u_ext_offset = i;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
@@ -190,14 +225,19 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       vfs_i.area = vfs_base.area;
       vfs_i.fn = vfs_base.fn;
       vfs_i.ord = vfs_base.ord;
-      std::copy(vfs_base.ext.begin(), vfs_base.ext.end(), vfs_i.ext.begin());
       vfs_i.scaling_factor = -1.0;
+
+      // Duplicate external solutions.
+      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
+      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
+      for (unsigned int f_idx = 0; f_idx < vfs_base.ext.size(); f_idx++) 
+        vfs_i.ext.push_back(vfs_base.ext[f_idx]);
+  
+      // Add stage_time_sol[i] as an external function to the form.
+      vfs_i.ext.push_back(stage_time_sol[i]);
 
       // Set offset for u_ext[] external solutions.
       vfs_i.u_ext_offset = i;
-
-      // Add stage_time_sol[i] as an external function to the form.
-      vfs_i.ext.push_back(stage_time_sol[i]);
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
@@ -205,6 +245,12 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
     }
   }
 }
+
+void destroy_stage_wf(WeakForm* stage_wf_left, WeakForm* stage_wf_right) 
+{
+
+}
+
 
 // This takes a matrix, and uses it to formally construct a block-diagonal
 // matrix. There are num_blocks blocks on the diagonal. The block diagonal
@@ -214,13 +260,14 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
 {
   int size = matrix->get_size();
   for (int i = 0; i < num_blocks; i++) {
-    matrix->multiply(source_vec + i*size, target_vec + i*size);
+    matrix->multiply_with_vector(source_vec + i*size, target_vec + i*size);
   }
 }
 
 bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                  Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                  DiscreteProblem* dp, MatrixSolverType matrix_solver,
                   bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
@@ -233,13 +280,9 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Get number of stages from the Butcher's table.
   int num_stages = bt->get_size();
 
-  // Check whether the user provided a second B-row if he wants 
-  // err_vec.
-  if(err_vec != NULL) {
-    double b2_coeff_sum = 0;
-    for (int i=0; i < num_stages; i++) b2_coeff_sum += fabs(bt->get_B2(i)); 
-    if (b2_coeff_sum < 1e-10) 
-      error("err_vec != NULL but the B2 row in the Butcher's table is zero in rk_time_step().");
+  // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
+  if(error_fn != NULL) if (bt->is_embedded() == false) {
+    error("rk_time_step(): R-K method must be embedded if temporal error estimate is requested.");
   }
 
   // Matrix for the time derivative part of the equation (left-hand side).
@@ -252,17 +295,17 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Create matrix solver.
   Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
 
-  // Get original space, mesh, and ndof.
-  dp->get_space(0);
-  Mesh* mesh = dp->get_space(0)->get_mesh();
-  int ndof = dp->get_space(0)->get_num_dofs();
+  // Get space, mesh, and ndof for the stage solutions in the R-K method (K_i vectors).
+  Space* K_space = dp->get_space(0);
+  Mesh* K_mesh = K_space->get_mesh();
+  int ndof = K_space->get_num_dofs();
 
-  // Create spaces for stage solutions. This is necessary
+  // Create spaces for stage solutions K_i. This is necessary
   // to define a num_stages x num_stages block weak formulation.
   Hermes::vector<Space*> stage_spaces;
-  stage_spaces.push_back(dp->get_space(0));
+  stage_spaces.push_back(K_space);
   for (int i = 1; i < num_stages; i++) {
-    stage_spaces.push_back(dp->get_space(0)->dup(mesh));
+    stage_spaces.push_back(K_space->dup(K_mesh));
   }
   Space::assign_dofs(stage_spaces);
 
@@ -274,17 +317,16 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
-  DiscreteProblem stage_dp_left(&stage_wf_left, dp->get_space(0));
+  DiscreteProblem stage_dp_left(&stage_wf_left, K_space);
   DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces);
 
   // Vector K_vector of length num_stages * ndof. will represent
-  // the 'k_i' vectors in the usual R-K notation.
+  // the 'K_i' vectors in the usual R-K notation.
   scalar* K_vector = new scalar[num_stages*ndof];
   memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
 
-  // Vector u_prev_vec will represent y_n + h \sum_{j=1}^s a_{ij}k_i
-  // in the usual R-K notation.
-  scalar* u_prev_vec = new scalar[num_stages*ndof];
+  // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
+  scalar* u_ext_vec = new scalar[num_stages*ndof];
 
   // Vector for the left part of the residual.
   scalar* vector_left = new scalar[num_stages*ndof];
@@ -293,7 +335,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   Hermes::vector<Solution*> residuals;
   Hermes::vector<bool> add_dir_lift;
   for (int i = 0; i < num_stages; i++) {
-    residuals.push_back(new Solution(mesh));
+    residuals.push_back(new Solution(K_mesh));
     add_dir_lift.push_back(false);
   }
 
@@ -307,27 +349,27 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   int it = 1;
   while (true)
   {
-    // Prepare vector Y_n + h\sum_{j=1}^s a_{ij} K_j.
+    // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
     for (int i = 0; i < num_stages; i++) {                // block row
       for (int idx = 0; idx < ndof; idx++) {
         scalar increment = 0;
         for (int j = 0; j < num_stages; j++) {
           increment += bt->get_A(i, j) * K_vector[j*ndof + idx];
         }
-        u_prev_vec[i*ndof + idx] = coeff_vec[idx] + time_step * increment;
+        u_ext_vec[i*ndof + idx] = time_step * increment;
       }
     }
 
-    multiply_as_diagonal_block_matrix(matrix_left, num_stages, 
-                                      K_vector, vector_left);
+    multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left
     // can be added later.
     bool rhs_only = false;
     bool force_diagonal_blocks = true;
-    stage_dp_right.assemble(u_prev_vec, matrix_right, vector_right,
-                            rhs_only, force_diagonal_blocks);
+    stage_dp_right.assemble(u_ext_vec, matrix_right, vector_right,
+                            rhs_only, force_diagonal_blocks, false); // false = do not add Dirichlet lift while
+                                                                     // converting u_ext_vec into Solutions.
 
     matrix_right->add_to_diagonal_blocks(num_stages, matrix_left);
 
@@ -370,7 +412,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix solver failed.\n");
 
-    // Add \deltaY^{n+1} to Y^n.
+    // Add \deltaK^{n+1} to K^n.
     for (int i = 0; i < num_stages*ndof; i++) {
       K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
     }
@@ -390,35 +432,40 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // If max number of iterations was exceeded, fail.
   if (it >= newton_max_iter) {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
+
+    // Destroy multistage weak formulation.
+    destroy_stage_wf(&stage_wf_left, &stage_wf_right); 
+
     return false;
   }
 
-  // Calculate the vector \sum_{j=1}^s b_j k_j.
-  Vector* rk_increment_vector = create_vector(matrix_solver);
-  rk_increment_vector->alloc(ndof);
+  // Project previous time level solution on the stage space,
+  // to be able to add them together. The result of the projection 
+  // will be stored in the vector coeff_vec.
+  // FIXME - this projection is slow and it is not needed when the 
+  //         spaces are the same (if spatial adaptivity does not take place). 
+  scalar* coeff_vec = new scalar[ndof];
+  OGProjection::project_global(K_space, sln_time_prev, coeff_vec, matrix_solver);
+
+  // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
   for (int i = 0; i < ndof; i++) {
-    rk_increment_vector->set(i, 0);
     for (int j = 0; j < num_stages; j++) {
-      rk_increment_vector->add(i, bt->get_B(j) * K_vector[j*ndof + i]);
+      coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j*ndof + i];
     }
   }
+  Solution::vector_to_solution(coeff_vec, K_space, sln_time_new);
 
-  // Calculate Y^{n+1} = Y^n + h \sum_{j=1}^s b_j k_j.
-  for (int i = 0; i < ndof; i++) coeff_vec[i] += time_step * rk_increment_vector->get(i);
-
-  // If err_vec is not NULL, use the second B-row in the Butcher's
-  // table to calculate the second approximation Y_{n+1}. Then 
-  // subtract the original one from it, and return this as an
-  // error vector err_vec.
-  if (err_vec != NULL) {
+  // If error_fn is not NULL, use the B2-row in the Butcher's
+  // table to calculate the temporal error estimate.
+  if (error_fn != NULL) {
     for (int i = 0; i < ndof; i++) {
-      rk_increment_vector->set(i, 0);
+      coeff_vec[i] = 0;
       for (int j = 0; j < num_stages; j++) {
-        rk_increment_vector->add(i, bt->get_B2(j) * K_vector[j*ndof + i]);
+        coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j*ndof + i];
       }
+      coeff_vec[i] *= time_step;
     }
-    for (int i = 0; i < ndof; i++) err_vec[i] = time_step * rk_increment_vector->get(i);
-    for (int i = 0; i < ndof; i++) err_vec[i] = err_vec[i] - coeff_vec[i];
+    Solution::vector_to_solution(coeff_vec, K_space, error_fn, false);
   }
 
   // Clean up.
@@ -426,7 +473,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   delete matrix_right;
   delete vector_right;
   delete solver;
-  delete rk_increment_vector;
 
   // Delete stage spaces, but not the first (original) one.
   for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
@@ -437,24 +483,27 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // TODO: Delete stage_wf, in particular its external solutions
   // stage_time_sol[i], i = 0, 1, ..., num_stages-1.
 
-  // Delete stage_vec and u_prev_vec.
-  delete [] K_vector;
-  delete [] u_prev_vec;
+  // Destroy multistage weak formulation.
+  destroy_stage_wf(&stage_wf_left, &stage_wf_right); 
 
-  // debug
+  // Clean up.
+  delete [] K_vector;
+  delete [] u_ext_vec;
+  delete [] coeff_vec;
   delete [] vector_left;
 
   return true;
 }
 
-// This is the same as the rk_time_step() function above but it does not have the err_vec vector.
+// This is the same as the rk_time_step() function above but it does not have the error_fn parameter.
 bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                  bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
+                  Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
+                  MatrixSolverType matrix_solver, bool verbose, bool is_linear, 
+                  double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm) 
 {
   return rk_time_step(current_time, time_step, bt,
-	       coeff_vec, NULL, dp, matrix_solver,
-		      verbose, is_linear, newton_tol, newton_max_iter,
-               newton_damping_coeff, newton_max_allowed_residual_norm);
+	              sln_time_prev, sln_time_new, NULL, dp, matrix_solver,
+	              verbose, is_linear, newton_tol, newton_max_iter,
+                      newton_damping_coeff, newton_max_allowed_residual_norm);
 }

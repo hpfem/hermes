@@ -36,8 +36,8 @@ double NEWTON_TOL = 1e-5;                         // Tolerance.
 int NEWTON_MAX_ITER = 150;                        // Max. number of Newton iterations.
 double TOL_SI = 1e-8;                             // Tolerance for the source (eigenvalue) iteration.
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
 double Val_neumann_left = 0.0;		// Total reflection on the left (zero Neumann).

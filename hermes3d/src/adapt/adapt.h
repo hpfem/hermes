@@ -21,7 +21,7 @@
 #define _ADAPT_H_
 
 #include "../../../hermes_common/vector.h"
-#include "../weakform.h"
+#include "../weakform/weakform.h"
 
 /// hp-Adaptivity module
 ///

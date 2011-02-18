@@ -42,7 +42,7 @@ const double T_FINAL = 1.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-10;                  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const double LX = 1.0;                            // Domain size in the x and y dimensions.
 const double LY = 1.0;                            // Note: must be in agreement with mesh file.

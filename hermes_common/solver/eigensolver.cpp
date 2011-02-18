@@ -21,7 +21,7 @@ EigenSolver::EigenSolver(const RCP<Matrix> &A, const RCP<Matrix> &B) {
 }
 
 void wrap_CSC(const Ptr<Python> p, const std::string name,
-        const Ptr<CSCMatrix> A)
+        const RCP<CSCMatrix> A)
 {
     p->push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
     p->push_numpy_int_inplace("_JA", A->get_Ap(), A->get_size()+1);

@@ -1,5 +1,11 @@
 add_subdirectory(oscillator)
 
+# Create file with preprocessor definitions exposing the build settings to the source code.
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h
+)
+
 project(module-schroedinger)
 
 set(SRC
@@ -7,9 +13,11 @@ set(SRC
     )
 
 include_directories(${hermes2d_SOURCE_DIR}/src)
-
 add_library(hermes_schroedinger SHARED ${SRC})
-target_link_libraries(hermes_schroedinger ${HERMES_REAL_BIN})
+target_link_libraries(hermes_schroedinger ${HERMES2D_REAL})
+
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(hermes_schroedinger)
 
 install(TARGETS hermes_schroedinger
     RUNTIME DESTINATION bin

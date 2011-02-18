@@ -862,6 +862,68 @@ void Linearizer::save_data(const char* filename)
   fclose(f);
 }
 
+void Linearizer::save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char *quantity_name,
+                                   bool mode_3D, int item, double eps, double max_abs,
+                                   MeshFunction* xdisp, MeshFunction* ydisp,
+                                   double dmult)
+{
+  // Create a linearizer. This class uses automatic adaptivity 
+  // to approximate higher-order polynomial elements via linear
+  // triangles for visualization purposes. Accuracy of this 
+  // approximation is set through the parameter "eps" below.
+  Linearizer lin;
+
+  // Create a piecewise-linear approximation, and save it to a file in VTK format.
+  lin.process_solution(meshfn, item, eps, max_abs, xdisp, ydisp, dmult);
+  lin.save_data_vtk(file_name, quantity_name, mode_3D);
+}
+
+void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode_3D)
+{
+  FILE* f = fopen(filename, "wb");
+  if (f == NULL) error("Could not open %s for writing.", filename);
+  lock_data();
+
+  // Output header for vertices.
+  fprintf(f, "# vtk DataFile Version 2.0\n");
+  fprintf(f, "\n");
+  fprintf(f, "ASCII\n\n");
+  fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
+
+  // Output vertices.
+  fprintf(f, "POINTS %d %s\n", this->nv, "float");
+  for (int i=0; i < this->nv; i++) {
+    if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
+    else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
+  }
+
+  // Output elements.
+  fprintf(f, "\n");
+  fprintf(f, "CELLS %d %d\n", this->nt, 4 * this->nt);
+  for (int i=0; i < this->nt; i++) {
+    fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
+  }
+
+  // Output cell types.
+  fprintf(f, "\n");
+  fprintf(f, "CELL_TYPES %d\n", this->nt);
+  for (int i=0; i < this->nt; i++) {
+    fprintf(f, "5\n");    // The "5" means triangle in VTK.
+  }
+
+  // This outputs scalar solution values. Look into hermes3d/src/output/vtk.cpp 
+  // for how it is done for vectors.
+  fprintf(f, "\n");
+  fprintf(f, "POINT_DATA %d\n", this->nv);
+  fprintf(f, "SCALARS %s %s %d\n", name, "float", 1);
+  fprintf(f, "LOOKUP_TABLE %s\n", "default");
+  for (int i=0; i < this->nv; i++) {
+    fprintf(f, "%g\n", this->verts[i][2]);
+  }
+
+  unlock_data();
+  fclose(f);
+}
 
 void Linearizer::load_data(const char* filename)
 {

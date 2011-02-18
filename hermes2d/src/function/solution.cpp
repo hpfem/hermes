@@ -43,8 +43,9 @@ MeshFunction::~MeshFunction()
 {
   delete refmap;
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
 }
@@ -68,11 +69,12 @@ void MeshFunction::set_active_element(Element* e)
 void MeshFunction::handle_overflow_idx()
 {
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
-  nodes = new std::map<unsigned int, Node*>;
+  nodes = new LightArray<Node *>;
   overflow_nodes = nodes;
 }
 
@@ -187,7 +189,7 @@ void Solution::init()
 
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
-      tables[i][j] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+      tables[i][j] = new LightArray<LightArray<Node*>*>;
 
   mono_coefs = NULL;
   elem_coefs[0] = elem_coefs[1] = NULL;
@@ -327,13 +329,16 @@ void Solution::free_tables()
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
       if(tables[i][j] != NULL) {
-	std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-	for (it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
-	  std::map<unsigned int, Node*>::iterator it_inner;
-	    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	      ::free(it_inner->second);
-	  it->second->clear();
-	}
+        for(unsigned int k = 0; k < tables[i][j]->get_size(); k++) 
+          if(tables[i][j]->present(k)) {
+            for(unsigned int l = 0; l < tables[i][j]->get(k)->get_size(); l++)
+              if(tables[i][j]->get(k)->present(l))
+                ::free(tables[i][j]->get(k)->get(l));
+            delete tables[i][j]->get(k);
+          }
+        delete tables[i][j];
+        tables[i][j] = NULL;
+        elems[i][j] = NULL;
       }
 }
 
@@ -474,7 +479,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   int ndof = Space::get_num_dofs(space);
 
   free();
-
+ 
   space_type = space->get_type();
 
   num_components = pss->get_num_components();
@@ -542,7 +547,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
       scalar* val = mono;
       elem_coefs[l][e->id] = (int) (mono - mono_coefs);
       memset(val, 0, sizeof(scalar)*np);
-      for (int k = 0; k < al.cnt; k++)
+      for (unsigned int k = 0; k < al.cnt; k++)
       {
         pss->set_active_shape(al.idx[k]);
         pss->set_quad_order(o, H2D_FN_VAL);
@@ -564,6 +569,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 
   if(mesh == NULL) error("mesh == NULL.\n");
   init_dxdy_buffer();
+  element = NULL;
 }
 
 
@@ -572,6 +578,7 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
 void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
 {
   free();
+
   this->mesh = mesh;
   exactfn1 = exactfn;
   num_components = 1;
@@ -584,6 +591,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
 void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
 {
   free();
+
   this->mesh = mesh;
   exactfn2 = exactfn;
   num_components = 2;
@@ -596,6 +604,7 @@ void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
 void Solution::set_const(Mesh* mesh, scalar c)
 {
   free();
+
   this->mesh = mesh;
   cnst[0] = c;
   cnst[1] = 0.0;
@@ -608,6 +617,7 @@ void Solution::set_const(Mesh* mesh, scalar c)
 void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
 {
   free();
+
   this->mesh = mesh;
   cnst[0] = c0;
   cnst[1] = c1;
@@ -795,15 +805,20 @@ void Solution::set_active_element(Element* e)
   // if not found, free the oldest one and use its slot
   if (cur_elem >= 4)
   {
-    if (tables[cur_quad][oldest[cur_quad]] != NULL) {
-      std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-      for (it = tables[cur_quad][oldest[cur_quad]]->begin(); it != tables[cur_quad][oldest[cur_quad]]->end(); it++) {
-	std::map<unsigned int, Node*>::iterator it_inner;
-	  for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	    ::free(it_inner->second);
-	it->second->clear();
-      }
+    if(tables[cur_quad][oldest[cur_quad]] != NULL) {
+      for(unsigned int k = 0; k < tables[cur_quad][oldest[cur_quad]]->get_size(); k++) 
+        if(tables[cur_quad][oldest[cur_quad]]->present(k)) {
+          for(unsigned int l = 0; l < tables[cur_quad][oldest[cur_quad]]->get(k)->get_size(); l++)
+            if(tables[cur_quad][oldest[cur_quad]]->get(k)->present(l))
+              ::free(tables[cur_quad][oldest[cur_quad]]->get(k)->get(l));
+          delete tables[cur_quad][oldest[cur_quad]]->get(k);
+        }
+      delete tables[cur_quad][oldest[cur_quad]];
+      tables[cur_quad][oldest[cur_quad]] = NULL;
+      elems[cur_quad][oldest[cur_quad]] = NULL;
     }
+
+    tables[cur_quad][oldest[cur_quad]] = new LightArray<LightArray<Node*>*>;
 
     cur_elem = oldest[cur_quad];
     if (++oldest[cur_quad] >= 4)
@@ -1141,11 +1156,11 @@ void Solution::precalculate(int order, int mask)
           "the solution on its right-hand side.");
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 

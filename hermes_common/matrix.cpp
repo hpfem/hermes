@@ -27,7 +27,6 @@
 #include "solver/umfpack_solver.h"
 #include "solver/superlu.h"
 #include "solver/amesos.h"
-#include "solver/pardiso.h"
 #include "solver/petsc.h"
 #include "solver/mumps.h"
 #include "solver/nox.h"
@@ -143,7 +142,7 @@ SparseMatrix::SparseMatrix()
   col_storage = false;
 }
 
-SparseMatrix::SparseMatrix(int size)
+SparseMatrix::SparseMatrix(unsigned int size)
 {
   _F_
   this->size = size;
@@ -159,7 +158,7 @@ SparseMatrix::~SparseMatrix()
   delete [] pages;
 }
 
-void SparseMatrix::prealloc(int n)
+void SparseMatrix::prealloc(unsigned int n)
 {
   _F_
   this->size = n;
@@ -169,7 +168,7 @@ void SparseMatrix::prealloc(int n)
   memset(pages, 0, n * sizeof(Page *));
 }
 
-void SparseMatrix::pre_add_ij(int row, int col)
+void SparseMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
@@ -207,7 +206,7 @@ int SparseMatrix::get_num_indices()
 {
   _F_
   int total = 0;
-  for (int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
 
@@ -229,11 +228,6 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
     case SOLVER_MUMPS: 
       {
         return new MumpsMatrix;
-        break;
-      }
-    case SOLVER_PARDISO: 
-      {
-        return new PardisoMatrix;
         break;
       }
     case SOLVER_PETSC: 
@@ -285,13 +279,6 @@ Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vec
         else return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs_dummy)); 
         break;
       }
-    case SOLVER_PARDISO: 
-      {
-        info("Using Pardiso."); 
-        if (rhs != NULL) return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs));
-        else return new PardisoLinearSolver(static_cast<PardisoMatrix*>(matrix), static_cast<PardisoVector*>(rhs_dummy));
-        break;
-      }
     case SOLVER_PETSC: 
       {
         info("Using PETSc.");        
@@ -333,11 +320,6 @@ Vector* create_vector(MatrixSolverType matrix_solver)
     case SOLVER_MUMPS: 
       {
         return new MumpsVector;
-        break;
-      }
-    case SOLVER_PARDISO: 
-      {
-        return new PardisoVector;
         break;
       }
     case SOLVER_PETSC: 

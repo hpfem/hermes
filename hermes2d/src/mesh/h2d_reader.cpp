@@ -394,7 +394,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
         }
 
         int idx = -1;
-        for (j = 0; j < e->nvert; j++)
+        for (unsigned j = 0; j < e->nvert; j++)
           if (e->en[j] == en) { idx = j; break; }
         assert(idx >= 0);
 
@@ -542,7 +542,7 @@ bool H2DReader::save(const char* filename, Mesh *mesh)
   fprintf(f, "\n}\n\nboundaries =\n{");
   first = true;
   for_all_base_elements(e, mesh)
-    for (i = 0; i < e->nvert; i++)
+    for (unsigned i = 0; i < e->nvert; i++)
       if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
         const char* nl = first ? "\n" : ",\n";  first = false;
         fprintf(f, "%s  { %d, %d, %d }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mrk);
@@ -553,7 +553,7 @@ bool H2DReader::save(const char* filename, Mesh *mesh)
   first = true;
   for_all_base_elements(e, mesh)
     if (e->is_curved())
-      for (i = 0; i < e->nvert; i++)
+      for (unsigned i = 0; i < e->nvert; i++)
         if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
           fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
           save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);

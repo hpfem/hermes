@@ -19,7 +19,6 @@
 #include "../h2d_common.h"
 #include "../function/solution.h"
 
-
 const double HERMES_EPS_LOW      = 0.007;
 const double HERMES_EPS_NORMAL   = 0.0004;
 const double HERMES_EPS_HIGH     = 0.0001;
@@ -59,10 +58,22 @@ public:
 
   double get_min_value() const { return min_val; }
   double get_max_value() const { return max_val; }
-  virtual void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
+  virtual void calc_vertices_aabb(double* min_x, double* max_x, 
+                                  double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
+  // Saves data in a binary format.
   virtual void save_data(const char* filename);
+  // Loads data in a binary format.
   virtual void load_data(const char* filename);
+  // Saves a MeshFunction (Solution, Filter) in VTK format.
+  virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
+                                 bool mode_3D = true, int item = H2D_FN_VAL_0, 
+                                 double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
+                                 MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
+                                 double dmult = 1.0);
+
+  // This function is used by save_solution_vtk().
+  virtual void save_data_vtk(const char* file_name, const char* quantity_name, bool mode_3D);
 
   void free();
 
@@ -158,13 +169,17 @@ public:
   Orderizer();
   ~Orderizer();
 
-  void process_solution(Space* space);
+  void process_space(Space* space);
 
   int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
         { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
 
   virtual void save_data(const char* filename);
   virtual void load_data(const char* filename);
+  // Saves a MeshFunction (Solution, Filter) in VTK format.
+  virtual void save_orders_vtk(Space* space, const char* file_name);
+  // This function is used by save_solution_vtk().
+  virtual void save_data_vtk(const char* file_name);
 
 protected:
 

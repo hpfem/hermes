@@ -2,8 +2,16 @@
 #define __H2D_EIGENSOLVER_H
 
 #include "../matrix.h"
-#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+
 #include "../python/python_api.h"
+
+#include "config.h"
+// RCP
+#ifndef WITH_TRILINOS
+#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#else
+#include "Teuchos_RCP.hpp"
+#endif
 
 namespace Hermes {
 

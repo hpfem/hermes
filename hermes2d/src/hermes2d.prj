@@ -106,7 +106,6 @@ module.include.files=\
 	adapt_ortho_h1.h\
 	solver_umfpack.h\
 	solver.h\
-	solver_pardiso.h\
 	adapt_ortho_hcurl.h\
 	linsystem.h\
 	adapt_ortho_l2.h\

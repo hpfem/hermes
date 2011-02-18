@@ -5,7 +5,7 @@ The Newton's method is more powerful but also more
 demanding than the Picard's method, and therefore 
 we will begin at a slower pace. 
 
-We'll stay with the model problem from the previous section::
+We'll stay with the model problem from the previous section
 
 .. math::
     :label: newton0

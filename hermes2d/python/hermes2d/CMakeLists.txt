@@ -5,8 +5,8 @@ add_custom_target(convert_api ./convert_api.py
     DEPENDS _hermes2d.cpp
     )
 add_dependencies(_hermes2d convert_api)
-target_link_libraries(_hermes2d hermes_common ${HERMES_REAL_BIN})
-set_property(TARGET _hermes2d PROPERTY COMPILE_FLAGS "-g -DH2D_REPORT_ALL -DH2D_REPORT_RUNTIME_CONTROL")
+target_link_libraries(_hermes2d hermes_common ${HERMES2D_REAL})
+set_property(TARGET _hermes2d PROPERTY COMPILE_FLAGS "-g -DH2D_REPORT_RUNTIME_CONTROL")
 if(WITH_PYTHON_UMFPACK)
     find_package(UMFPACK REQUIRED)
     include_directories(${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
@@ -19,7 +19,7 @@ endif(WITH_PYTHON_UMFPACK)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 cython_add_module(forms)
-target_link_libraries(forms ${HERMES_REAL_BIN})
+target_link_libraries(forms ${HERMES2D_REAL})
 install(TARGETS forms
             RUNTIME DESTINATION lib/python/hermes2d
             ARCHIVE DESTINATION lib/python/hermes2d

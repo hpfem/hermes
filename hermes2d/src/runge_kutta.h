@@ -25,6 +25,9 @@ void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTa
                                 DiscreteProblem* dp, WeakForm* stage_wf_left,
                                 WeakForm* stage_wf_right);
 
+/// Destroys augmented weak formulation.
+void HERMES_API create_stage_wf(WeakForm* stage_wf_left, WeakForm* stage_wf_right);
+
 /// Takes a matrix M of size ndof times ndof, extends it (formally) to
 /// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and
 /// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec
@@ -40,17 +43,20 @@ void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, in
 // table (the second B-row B2 must be nonzero in that case). The negative default 
 // values for newton_tol and newton_max_iter are for linear problems.
 // Many improvements are needed, a todo list is presented at the beginning of
-// the crresponding .cpp file.
+// the corresponding .cpp file.
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             scalar* coeff_vec, scalar* err_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
-                             double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+                             Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                             DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, 
+                             int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
+                             double newton_max_allowed_residual_norm = 1e6);
 
-// This is a wrapper for the previous function if err_vec is not desired (adaptive time stepping 
-// is not attempted). 
+// This is a wrapper for the previous function if error_fn is not provided
+// (adaptive time stepping is not wanted). 
 bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             scalar* coeff_vec, DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, int newton_max_iter = 20,
+                             Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
+                             MatrixSolverType matrix_solver, bool verbose = false, bool is_linear = false, 
+                             double newton_tol = 1e-6, int newton_max_iter = 20,
                              double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 

@@ -470,7 +470,7 @@ double get_l2_norm(Vector* vec)
 {
   _F_
   double val = 0;
-  for (int i = 0; i < vec->length(); i++)
+  for (unsigned int i = 0; i < vec->length(); i++)
     val = val + vec->get(i)*vec->get(i);
   return sqrt(std::abs(val));
 }
@@ -479,3 +479,9 @@ void set_zero(scalar *vec, int length)
 {
   memset(vec, 0, length * sizeof(scalar));
 }
+
+int DiscreteProblem::get_num_dofs() { return space->get_num_dofs(); };
+  
+bool DiscreteProblem::is_matrix_free() { return false; };
+
+void DiscreteProblem::create_sparse_structure(SparseMatrix* matrix) { return; };

@@ -1,5 +1,5 @@
-Waveguide (Electromagnetics)
-----------------------------
+Waveguide (Maxwell's Equation - Electromagnetics)
+-------------------------------------------------
 
 **Git reference:** Example `maxwell-waveguide <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/maxwell-waveguide>`_.
 
@@ -10,7 +10,7 @@ This example solves adaptively the electric field in a simplified microwave oven
 The waves are generated using a harmonic surface current on the right-most edge.
 (Such small cavity is present in every microwave oven). 
 
-.. image:: waveguide/waveguide.png
+.. image:: maxwell-waveguide/maxwell-waveguide.png
    :align: center
    :width: 450
    :alt: Domain.
@@ -42,7 +42,7 @@ Material parameters
 Sample solution
 ~~~~~~~~~~~~~~~
 
-.. image:: waveguide/solution.png
+.. image:: maxwell-waveguide/solution.png
    :align: center
    :width: 600
    :height: 400
@@ -53,28 +53,28 @@ Comparison of h-FEM (p=1), h-FEM (p=2) and hp-FEM with anisotropic refinements
 
 Final mesh (h-FEM, p=1, anisotropic refinements):
 
-.. image:: waveguide/mesh_h1_aniso.png
+.. image:: maxwell-waveguide/mesh_h1_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (h-FEM, p=2, anisotropic refinements):
 
-.. image:: waveguide/mesh_h2_aniso.png
+.. image:: maxwell-waveguide/mesh_h2_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 Final mesh (hp-FEM, h-anisotropic refinements):
 
-.. image:: waveguide/mesh_hp_aniso.png
+.. image:: maxwell-waveguide/mesh_hp_aniso.png
    :align: center
    :width: 450
    :alt: Final mesh.
 
 DOF convergence graphs:
 
-.. image:: waveguide/conv_dof_aniso.png
+.. image:: maxwell-waveguide/conv_dof_aniso.png
    :align: center
    :width: 600
    :height: 400
@@ -82,7 +82,7 @@ DOF convergence graphs:
 
 CPU convergence graphs:
 
-.. image:: waveguide/conv_cpu_aniso.png
+.. image:: maxwell-waveguide/conv_cpu_aniso.png
    :align: center
    :width: 600
    :height: 400

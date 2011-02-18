@@ -1,6 +1,4 @@
 #include "hermes2d.h"
-#include "solver_pardiso.h"
-
 
 int main(int argc, char* argv[])
 {
@@ -17,7 +15,7 @@ int main(int argc, char* argv[])
   WeakForm wf;
   wf.set_eqn("[u,v] = (2*v)");
 
-  PardisoSolver solver;
+  UmfpackSolver solver;
   Solution sln;
 
   // assemble and solve the linear system

@@ -82,7 +82,7 @@ void OrderView::show(Space* space)
     error("The space is not up to date.");
 
   ord.lock_data();
-  ord.process_solution(space);
+  ord.process_space(space);
   ord.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
   init_order_palette(ord.get_vertices());
   ord.unlock_data();

@@ -4,8 +4,8 @@ endif(NOT H2D_REAL)
 project(benchmark-nist-09)
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (../../CMake.common)
-
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(benchmark-nist-09 ${BIN})
 set_tests_properties(benchmark-nist-09 PROPERTIES LABELS slow)

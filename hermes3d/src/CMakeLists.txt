@@ -9,11 +9,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(SRC
 	hermes3d.cpp
 	filter.cpp
-	forms.cpp
+	weakform/forms.cpp
 	function.cpp
 	mesh.cpp
 	discrete_problem.cpp
 	ogprojection.cpp
+	loader/ctuReader.cpp
 	loader/exodusii.cpp
 	loader/mesh3d.cpp
 	loader/hdf5.cpp
@@ -42,7 +43,7 @@ set(SRC
 	space/hcurl.cpp
 	transform.cpp
 	traverse.cpp
-	weakform.cpp
+	weakform/weakform.cpp
         adapt/adapt.cpp
 	adapt/proj.cpp
 	adapt/projipol.cpp
@@ -64,7 +65,6 @@ set(SRC
   ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
   ${HERMES_COMMON_DIR}/solver/amesos.cpp
   ${HERMES_COMMON_DIR}/solver/mumps.cpp 
-  ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
   ${HERMES_COMMON_DIR}/solver/petsc.cpp 
   ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
   ${HERMES_COMMON_DIR}/solver/superlu.cpp
@@ -106,7 +106,6 @@ macro(LIBRARY_SETTINGS BIN)
       ${HDF5_LIBRARY}
       ${METIS_LIBRARY}
       ${UMFPACK_LIBRARIES}
-      ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}
@@ -121,16 +120,16 @@ endmacro(LIBRARY_SETTINGS)
 
 # real version
 if(H3D_REAL)
-	add_library(${HERMES_REAL_BIN} SHARED ${SRC})
-	set_target_properties(${HERMES_REAL_BIN} PROPERTIES COMPILE_FLAGS -DH3D_REAL)
-	LIBRARY_SETTINGS(${HERMES_REAL_BIN})
+	add_library(${HERMES3D_REAL} SHARED ${SRC})
+	set_target_properties(${HERMES3D_REAL} PROPERTIES COMPILE_FLAGS -DH3D_REAL)
+	LIBRARY_SETTINGS(${HERMES3D_REAL})
 endif(H3D_REAL)
 
 # complex version
 if(H3D_COMPLEX)
-	add_library(${HERMES_CPLX_BIN} SHARED ${SRC})
-	set_target_properties(${HERMES_CPLX_BIN} PROPERTIES COMPILE_FLAGS -DH3D_COMPLEX)
-	LIBRARY_SETTINGS(${HERMES_CPLX_BIN})
+	add_library(${HERMES3D_CPLX} SHARED ${SRC})
+	set_target_properties(${HERMES3D_CPLX} PROPERTIES COMPILE_FLAGS -DH3D_COMPLEX)
+	LIBRARY_SETTINGS(${HERMES3D_CPLX})
 endif(H3D_COMPLEX)
 
 INCLUDE (CheckFunctionExists)
@@ -204,17 +203,17 @@ endmacro(BUILD_LIB_ALL)
 # install library
 if(H3D_REAL)
 	if(MSVC)
-		BUILD_LIB_ALL(${HERMES_REAL_BIN} "-D H3D_REAL -DEXPORT_HERMES_DLL")	
+		BUILD_LIB_ALL(${HERMES3D_REAL} "-D H3D_REAL -DEXPORT_HERMES_DLL")	
 		
 	else(MSVC)
-		install(TARGETS ${HERMES_REAL_BIN} LIBRARY DESTINATION lib)
+		install(TARGETS ${HERMES3D_REAL} LIBRARY DESTINATION lib)
 	endif(MSVC)
 endif(H3D_REAL)
 
 if(H3D_COMPLEX)
 	if(MSVC)
-		BUILD_LIB_ALL(${HERMES_CPLX_BIN} "-D H3D_COMPLEX -DEXPORT_HERMES_DLL")	
+		BUILD_LIB_ALL(${HERMES3D_CPLX} "-D H3D_COMPLEX -DEXPORT_HERMES_DLL")	
 	else(MSVC)
-		install(TARGETS ${HERMES_CPLX_BIN} LIBRARY DESTINATION lib)
+		install(TARGETS ${HERMES3D_CPLX} LIBRARY DESTINATION lib)
 	endif(MSVC)
 endif(H3D_COMPLEX)

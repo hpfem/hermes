@@ -38,7 +38,6 @@ IDEAS FOR A NEW DISCRETE PROBLEM INTERFACE
   LinSystem     system.h
   LinSolver     solver.h
   UmfpackSolver solver_umfpack.h
-  PardisoSolver solver_pardiso.h
   EigSolver     eigsolver.h
 
 
@@ -53,7 +52,7 @@ IDEAS FOR A NEW DISCRETE PROBLEM INTERFACE
   sys.assemble();
   sys.solve(&sln);
 
-  PardisoSolver solver;
+  UmfpackSolver solver;
   PetscKSPSolver solver;
 
   sys.assemble_rhs();

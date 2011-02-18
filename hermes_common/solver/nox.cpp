@@ -86,7 +86,7 @@ NoxProblemInterface::~NoxProblemInterface()
 void NoxProblemInterface::prealloc_jacobian()
 {
   // preallocate jacobian structure
-  fep->create(&jacobian);
+  fep->create_sparse_structure(&jacobian);
   // jacobian.finish();
 }
 
@@ -206,7 +206,9 @@ NoxSolver::~NoxSolver()
 #ifdef HAVE_NOX
   // FIXME: this does not destroy the "interface_", and Trilinos 
   // complains at closing main.cpp.
+#ifndef H1D_REAL
   interface_->fep->invalidate_matrix();
+#endif
 #endif
 }
 

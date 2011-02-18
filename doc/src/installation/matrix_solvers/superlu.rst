@@ -13,12 +13,19 @@ library.
 Linux
 ~~~~~
 
-**Via Synaptic:**
+Using standard Debian packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SuperLU is available in Ubuntu via the Synaptic Package Manager, just install
-packages libsuperlu3 and libsuperlu3-dev.
+packages libsuperlu3 and libsuperlu3-dev. In Ubuntu you can use the Synaptic package manager for that, or type::
 
-**From Source:**
+  sudo apt-get install libsuperlu3 libsuperlu3-dev 
+  
+Note that these packages are available since Ubuntu 6.06 (Dapper). If you have an older version of Ubuntu or want 
+an up-to date or specially tuned version of the library, please follow the instructions below.
+
+Using the special Hermes/Femhub package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sequential
 ``````````
@@ -49,7 +56,7 @@ typical build scenarios that you may follow:
     the library source code from within a Hermes debugging session. Note that 
     you may install the optimized and debugging versions to separate directories
     and switch between them when building your application by adjusting the 
-    hermes{1|2|3}d CMake.vars file.
+    CMake.vars file.
     
   - Build the non-optimized version of the library::
 
@@ -77,7 +84,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the
+Now go to the directory with Hermes. Create the file CMake.vars with the
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
@@ -89,6 +96,11 @@ Finally execute::
   rm CMakeCache.txt
   cmake .
   make
+  
+You may now select ``SOLVER_SUPERLU`` as the matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
     
 
 Multithreaded
@@ -169,7 +181,7 @@ just remove the object files by running
   cd src
   make clean 
 
-Now go to the directory with hermes{1|2|3}d. Create the file CMake.vars with the 
+Now go to the directory with Hermes. Create the file CMake.vars with the 
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
@@ -183,7 +195,7 @@ Finally execute::
   cmake .
   make
     
-Hermes{1|2|3}d will now be compiled and linked with the multithreaded SuperLU 
+Hermes will now be compiled and linked with the multithreaded SuperLU 
 library. Before running the parallel calculation, you just need to set the 
 environment variable ``OMP_NUM_THREADS`` to the number of threads you wish to 
 employ for solution of your system (this is typically the number of cores in your 

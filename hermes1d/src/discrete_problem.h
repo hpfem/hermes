@@ -29,6 +29,12 @@ public:
   void assemble(scalar* coeff_vec, SparseMatrix *mat, Vector *rhs = NULL, 
                 bool rhsonly = false);
 
+  int get_num_dofs();
+  
+  bool is_matrix_free();
+
+  void create_sparse_structure(SparseMatrix* matrix);
+
 private:
   WeakForm* wf;
   Space* space;

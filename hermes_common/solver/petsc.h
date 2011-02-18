@@ -40,21 +40,21 @@ public:
   virtual void alloc();
   virtual void free();
   virtual void finish();
-  virtual scalar get(int m, int n);
+  virtual scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(int m, int n, scalar v);
+  virtual void add(unsigned int m, unsigned int n, scalar v);
   virtual void add_to_diagonal(scalar v);
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-  virtual int get_matrix_size() const;
-  virtual int get_nnz() const;
+  virtual unsigned int get_matrix_size() const;
+  virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
 
 protected:
 #ifdef WITH_PETSC
   Mat matrix;
 #endif
-  int nnz;
+  unsigned int nnz;
   bool inited;
 
   friend class PetscLinearSolver;
@@ -67,22 +67,22 @@ public:
   PetscVector();
   virtual ~PetscVector();
 
-  virtual void alloc(int ndofs);
+  virtual void alloc(unsigned int ndofs);
   virtual void free();
   virtual void finish();
-  virtual scalar get(int idx);
+  virtual scalar get(unsigned int idx);
   virtual void extract(scalar *v) const;
   virtual void zero();
   virtual void change_sign();
-  virtual void set(int idx, scalar y);
-  virtual void add(int idx, scalar y);
-  virtual void add(int n, int *idx, scalar *y);
+  virtual void set(unsigned int idx, scalar y);
+  virtual void add(unsigned int idx, scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
-    for (int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
   virtual void add_vector(scalar* vec) {
-    for (int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 

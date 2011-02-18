@@ -76,7 +76,7 @@ void Filter::init()
   order = 0;
 
   for(int i = 0; i < 10; i++)
-      tables[i] = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
+      tables[i] = new LightArray<LightArray<Node*>*>;
 
   memset(sln_sub, 0, sizeof(sln_sub));
   set_quad_2d(&g_quad_2d_std);
@@ -123,16 +123,19 @@ void Filter::set_active_element(Element* e)
   }
 
   if (tables[cur_quad] != NULL) {
-    std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-    for (it = tables[cur_quad]->begin(); it != tables[cur_quad]->end(); it++) {
-      std::map<unsigned int, Node*>::iterator it_inner;
-	for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	  ::free(it_inner->second);
-      it->second->clear();
-    }
+    for(unsigned int k = 0; k < tables[cur_quad]->get_size(); k++)
+      if(tables[cur_quad]->present(k)) {
+        for(unsigned int l = 0; l < tables[cur_quad]->get(k)->get_size(); l++)
+          if(tables[cur_quad]->get(k)->present(l))
+            ::free(tables[cur_quad]->get(k)->get(l));
+        delete tables[cur_quad]->get(k);
+      }
+    delete tables[cur_quad];
   }
 
-  sub_tables = (tables[cur_quad]);
+  tables[cur_quad] = new LightArray<LightArray<Node*>*>;
+
+  sub_tables = tables[cur_quad];
   update_nodes_ptr();
 
   order = 20; // fixme
@@ -143,14 +146,16 @@ void Filter::free()
 {
   for (int i = 0; i < num; i++)
     if (tables[i] != NULL) {
-    std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it;
-    for (it = tables[i]->begin(); it != tables[i]->end(); it++) {
-      std::map<unsigned int, Node*>::iterator it_inner;
-	for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++)
-	  ::free(it_inner->second);
-      it->second->clear();
+      for(unsigned int k = 0; k < tables[i]->get_size(); k++) 
+        if(tables[i]->present(k)) {
+          for(unsigned int l = 0; l < tables[i]->get(k)->get_size(); l++)
+            if(tables[i]->get(k)->present(l))
+              ::free(tables[i]->get(k)->get(l));
+          delete tables[i]->get(k);
+        }
+      delete tables[i];
+      tables[i] = NULL;
     }
-  }
 }
 
 
@@ -265,11 +270,11 @@ void SimpleFilter::precalculate(int order, int mask)
 		filter_fn(np, values, node->values[j][0]);
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 
@@ -351,11 +356,11 @@ void DXDYFilter::precalculate(int order, int mask)
     filter_fn(np, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 
@@ -540,11 +545,11 @@ void VonMisesFilter::precalculate(int order, int mask)
     node->values[0][0][i] = 1.0/sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6*sqr(txy));
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 
@@ -600,11 +605,11 @@ void LinearFilter::precalculate(int order, int mask)
 
   }
 
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 

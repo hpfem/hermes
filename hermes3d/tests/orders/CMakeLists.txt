@@ -5,7 +5,7 @@ if(H3D_REAL)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)
-set_common_target_properties(${PROJECT_NAME} ${HERMES_REAL_BIN})
+set_common_target_properties(${PROJECT_NAME} ${HERMES3D_REAL})
 
 # Tests
 

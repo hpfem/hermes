@@ -19,7 +19,7 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::WeakForm(int neq, bool mat_free)
+WeakForm::WeakForm(unsigned int neq, bool mat_free)
 {
   _F_
   this->neq = neq;
@@ -30,7 +30,7 @@ WeakForm::WeakForm(int neq, bool mat_free)
 void WeakForm::add_matrix_form(MatrixFormVol* form)
 {
   _F_
-  if (form->i < 0 || form->i >= neq || form->j < 0 || form->j >= neq)
+  if (form->i >= neq || form->j >= neq)
     error("Invalid equation number.");
   if (form->sym < -1 || form->sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
@@ -46,11 +46,11 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
   seq++;
 }
 
-void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
+void WeakForm::add_matrix_form(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                matrix_form_ord_t ord, SymFlag sym, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq || j < 0 || j >= neq)
+  if (i >= neq || j >= neq)
     error("Invalid equation number.");
   if (sym < -1 || sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
@@ -70,12 +70,12 @@ void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form(int i, int j, matrix_form_val_t fn,
+void WeakForm::add_matrix_form(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                matrix_form_ord_t ord, SymFlag sym, std::string area,
                                Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq || j < 0 || j >= neq)
+  if (i >= neq || j >= neq)
     error("Invalid equation number.");
   if (sym < -1 || sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
@@ -119,7 +119,7 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord, SymF
 void WeakForm::add_matrix_form(matrix_form_val_t fn,
                                matrix_form_ord_t ord, SymFlag sym, std::string area, Hermes::vector<MeshFunction*>ext)
 {
-  int i = 0, j = 0;
+  unsigned int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function.
   if (sym < -1 || sym > 1)
@@ -140,7 +140,7 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
 void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 {
   _F_
-  if (form->i < 0 || form->i >= neq || form->j < 0 || form->j >= neq)
+  if (form->i >= neq || form->j >= neq)
     error("Invalid equation number.");
   if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
           H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
@@ -150,11 +150,11 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord,
+void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, matrix_form_ord_t ord,
                                     int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq || j < 0 || j >= neq)
+  if (i >= neq || j >= neq)
     error("Invalid equation number.");
   if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
@@ -168,11 +168,11 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
+void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, matrix_form_ord_t ord, 
                                     std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq || j < 0 || j >= neq)
+  if (i >= neq || j >= neq)
     error("Invalid equation number.");
 
   double scaling_factor = 1.0;
@@ -186,7 +186,7 @@ void WeakForm::add_matrix_form_surf(int i, int j, matrix_form_val_t fn, matrix_f
 void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0, j = 0;
+  unsigned int i = 0, j = 0;
 
   // FIXME: the code below should be replaced with a call to the full function.
   if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
@@ -204,7 +204,7 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
 void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0, j = 0;
+  unsigned int i = 0, j = 0;
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor, u_ext_offset };
@@ -215,7 +215,7 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
 void WeakForm::add_vector_form(VectorFormVol* form)
 {
   _F_
-  if (form->i < 0 || form->i >= neq)
+  if (form->i >= neq)
     error("Invalid equation number.");
   if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
     error("Invalid area number.");
@@ -224,10 +224,10 @@ void WeakForm::add_vector_form(VectorFormVol* form)
   seq++;
 }
 
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
+void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq)
+  if (i >= neq)
     error("Invalid equation number.");
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
     error("Invalid area number.");
@@ -240,10 +240,10 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
+void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq)
+  if (i >= neq)
     error("Invalid equation number.");
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
@@ -256,7 +256,7 @@ void WeakForm::add_vector_form(int i, vector_form_val_t fn, vector_form_ord_t or
 void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, int area, Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0;
+  unsigned int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function.
   if (area != HERMES_ANY && area < 0 && (unsigned) (-area) > areas.size())
@@ -274,7 +274,7 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std:
                                Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0;
+  unsigned int i = 0;
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset };
@@ -285,7 +285,7 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord, std:
 void WeakForm::add_vector_form_surf(VectorFormSurf* form)
 {
   _F_
-  if (form->i < 0 || form->i >= neq)
+  if (form->i >= neq)
     error("Invalid equation number.");
   if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
           H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
@@ -295,11 +295,11 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, int area,
+void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq)
+  if (i >= neq)
     error("Invalid equation number.");
   if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
           H2D_DG_INNER_EDGE && area < 0 && (unsigned) (-area) > areas.size())
@@ -313,11 +313,11 @@ void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord
 }
 
 // A wrapper utilizing the MarkersConversion class.
-void WeakForm::add_vector_form_surf(int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area,
+void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  if (i < 0 || i >= neq) error("Invalid equation number.");
+  if (i >= neq) error("Invalid equation number.");
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset};
@@ -331,7 +331,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0;
+  unsigned int i = 0;
 
   // FIXME: the code below should be replaced with a call to the full function.
   if (area != HERMES_ANY && area != H2D_DG_BOUNDARY_EDGE && area !=
@@ -350,7 +350,7 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
                                     Hermes::vector<MeshFunction*>ext)
 {
   _F_
-  int i = 0;
+  unsigned int i = 0;
 
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
@@ -377,13 +377,13 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 			  std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
-  unsigned i;
+  unsigned int i;
   stages.clear();
 
   // process volume matrix forms
   for (i = 0; i < mfvol.size(); i++)
   {
-    int ii = mfvol[i].i, jj = mfvol[i].j;
+    unsigned int ii = mfvol[i].i, jj = mfvol[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
     Stage* s = find_stage(stages, ii, jj, m1, m2,
@@ -394,7 +394,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
   // process surface matrix forms
   for (i = 0; i < mfsurf.size(); i++)
   {
-    int ii = mfsurf[i].i, jj = mfsurf[i].j;
+    unsigned int ii = mfsurf[i].i, jj = mfsurf[i].j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
     Stage* s = find_stage(stages, ii, jj, m1, m2,
@@ -404,7 +404,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 
   // process volume vector forms
   for (unsigned i = 0; i < vfvol.size(); i++) {
-    int ii = vfvol[i].i;
+    unsigned int ii = vfvol[i].i;
     Mesh *m = spaces[ii]->get_mesh();
     Stage *s = find_stage(stages, ii, ii, m, m,
                           vfvol[i].ext, u_ext);
@@ -413,7 +413,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 
   // process surface vector forms
   for (unsigned i = 0; i < vfsurf.size(); i++) {
-    int ii = vfsurf[i].i;
+    unsigned int ii = vfsurf[i].i;
     Mesh *m = spaces[ii]->get_mesh();
     Stage *s = find_stage(stages, ii, ii, m, m,
                           vfsurf[i].ext, u_ext);
@@ -519,8 +519,8 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 {
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
-  for (int i = 0; i < neq; i++) {
-    for (int j = 0; j < neq; j++) {
+  for (unsigned int i = 0; i < neq; i++) {
+    for (unsigned int j = 0; j < neq; j++) {
       blocks[i][j] = false;
     }
     if (force_diagonal_blocks == true) blocks[i][i] = true;

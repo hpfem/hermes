@@ -4,11 +4,11 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 	
 if(H3D_REAL)
   add_executable(${PROJECT_NAME} main.cpp)
-  set_common_target_properties(${PROJECT_NAME} ${HERMES_REAL_BIN})
+  set_common_target_properties(${PROJECT_NAME} ${HERMES3D_REAL})
 endif(H3D_REAL)
 if(H3D_COMPLEX)
   add_executable(${PROJECT_NAME}-cplx main.cpp)
-  set_common_target_properties(${PROJECT_NAME}-cplx ${HERMES_CPLX_BIN})
+  set_common_target_properties(${PROJECT_NAME}-cplx ${HERMES3D_CPLX})
 endif(H3D_COMPLEX)
 
 # Tests
@@ -31,20 +31,6 @@ if(WITH_UMFPACK)
   add_test(umfpack-solver-b-3 sh -c "${BIN} umfpack-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-3 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-3")
   add_test(umfpack-solver-b-4 sh -c "${BIN} umfpack-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-singular | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-singular")
 endif(WITH_UMFPACK)
-
-if(WITH_PARDISO)
-  add_test(pardiso-solver-1 sh -c "${BIN} pardiso ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-1 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-1")
-  add_test(pardiso-solver-2 sh -c "${BIN} pardiso ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-2 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-2")
-  add_test(pardiso-solver-3 sh -c "${BIN} pardiso ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-3 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-3")
-  # NOTE: PARDISO is not able to recognize singular system        
-#  add_test(pardiso-solver-4 sh -c "${BIN} pardiso ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-singular | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-singular")
-
-  add_test(pardiso-solver-b-1 sh -c "${BIN} pardiso-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-1 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-1")
-  add_test(pardiso-solver-b-2 sh -c "${BIN} pardiso-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-2 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-2")
-  add_test(pardiso-solver-b-3 sh -c "${BIN} pardiso-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-3 | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-3")
-  # NOTE: PARDISO is not able to recognize singular system        
-#  add_test(pardiso-solver-b-4 sh -c "${BIN} pardiso-block ${CMAKE_CURRENT_SOURCE_DIR}/in/linsys-singular | diff - ${CMAKE_CURRENT_SOURCE_DIR}/out/linsys-singular")
-endif(WITH_PARDISO)
 
 if(WITH_TRILINOS)
   if(HAVE_AZTECOO)

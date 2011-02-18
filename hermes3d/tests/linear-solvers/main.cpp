@@ -155,7 +155,10 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
   for (std::map<unsigned int, scalar>::iterator it = ar_rhs.begin(); it != ar_rhs.end(); it++) {
     rs[it->first] = it->second;
   }
-  rhs->add(n, rows, rs);
+  unsigned int *u_rows = new unsigned int[n];
+  for (int i = 0; i < n; i++)
+    u_rows[i] = rows[i] >= 0 ? rows[i] : 0;
+  rhs->add(n, u_rows, rs);
   rhs->finish();
 }
 
@@ -232,26 +235,6 @@ int main(int argc, char *argv[]) {
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     UMFPackLinearSolver solver(&mat, &rhs);
-    solve(solver, n);
-#endif
-  }
-  else if (strcasecmp(argv[1], "pardiso") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
-    solve(solver, n);
-#endif
-  }
-  else if (strcasecmp(argv[1], "pardiso-block") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
     solve(solver, n);
 #endif
   }

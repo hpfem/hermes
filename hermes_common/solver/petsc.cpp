@@ -106,7 +106,7 @@ void PetscMatrix::alloc() {
 
   // calc nnz
   int *nnz_array = new int[size];
-  MEM_CHECK(nnz);
+  MEM_CHECK(nnz_array);
 
   // fill in nnz_array
   int aisize = get_num_indices();
@@ -115,7 +115,7 @@ void PetscMatrix::alloc() {
 
   // sort the indices and remove duplicities, insert into ai
   int pos = 0;
-  for (int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < size; i++) {
     nnz_array[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
     pos += nnz_array[i];
   }
@@ -152,12 +152,12 @@ void PetscMatrix::finish()
 #endif
 }
 
-scalar PetscMatrix::get(int m, int n)
+scalar PetscMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   scalar v = 0.0;
 #ifdef WITH_PETSC
-  MatGetValues(matrix, 1, &m, 1, &n, &v);
+  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
 #endif
   return v;
 }
@@ -169,30 +169,31 @@ void PetscMatrix::zero() {
 #endif
 }
 
-void PetscMatrix::add(int m, int n, scalar v) {
+void PetscMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
 #ifdef WITH_PETSC
-  if (v != 0.0 && m >= 0 && n >= 0)		// ignore "dirichlet DOF"
-    MatSetValue(matrix, m, n, (PetscScalar) v, ADD_VALUES);
+  if (v != 0.0)		// ignore zero values.
+    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, (PetscScalar) v, ADD_VALUES);
 #endif
 }
 
 /// Add a number to each diagonal entry.
 void PetscMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void PetscMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
+void PetscMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) {
   _F_
 #ifdef WITH_PETSC
   // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
   // row and cols for -1)
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
-      add(rows[i], cols[j], mat[i][j]);
+  for (unsigned int i = 0; i < m; i++)				// rows
+    for (unsigned int j = 0; j < n; j++)			// cols
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
@@ -203,12 +204,12 @@ bool PetscMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
   return false;
 }
 
-int PetscMatrix::get_matrix_size() const {
+unsigned int PetscMatrix::get_matrix_size() const {
   _F_
   return size;
 }
 
-int PetscMatrix::get_nnz() const {
+unsigned int PetscMatrix::get_nnz() const {
   _F_
   return nnz;
 }
@@ -236,7 +237,7 @@ PetscVector::~PetscVector() {
   remove_petsc_object();
 }
 
-void PetscVector::alloc(int n) {
+void PetscVector::alloc(unsigned int n) {
   _F_
 #ifdef WITH_PETSC
   free();
@@ -263,11 +264,11 @@ void PetscVector::finish()
 #endif
 }
 
-scalar PetscVector::get(int idx) {
+scalar PetscVector::get(unsigned int idx) {
   _F_
   scalar y = 0;
 #ifdef WITH_PETSC
-  VecGetValues(vec, 1, &idx, &y);
+  VecGetValues(vec, 1, (PetscInt*) &idx, &y);
 #endif
   return y;
 }
@@ -276,7 +277,7 @@ void PetscVector::extract(scalar *v) const {
   _F_
 #ifdef WITH_PETSC
   int *idx = new int [size];
-  for (int i = 0; i < size; i++) idx[i] = i;
+  for (unsigned int i = 0; i < size; i++) idx[i] = i;
   VecGetValues(vec, size, idx, (PetscScalar *) v);
   delete [] idx;
 #endif
@@ -292,34 +293,37 @@ void PetscVector::zero() {
 void PetscVector::change_sign() {
   _F_
 #ifdef WITH_PETSC
-  scalar y = 0;
-  for (int idx = 0; idx < n; idx++) {
-    VecGetValues(vec, 1, &idx, &y);
-    VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
-  }
+  PetscScalar* y = new PetscScalar [size];
+  int *idx = new int [size];
+  for (unsigned int i = 0; i < size; i++) idx[i] = i;
+  VecGetValues(vec, size, idx, y);
+  for (unsigned int i = 0; i < size; i++) y[i] *= -1.;
+  VecSetValues(vec, size, idx, y, INSERT_VALUES);
+  delete [] y;
+  delete [] idx;
 #endif
 }
 
 
-void PetscVector::set(int idx, scalar y) {
+void PetscVector::set(unsigned int idx, scalar y) {
   _F_
 #ifdef WITH_PETSC
-  if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
+  VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
 #endif
 }
 
-void PetscVector::add(int idx, scalar y) {
+void PetscVector::add(unsigned int idx, scalar y) {
   _F_
 #ifdef WITH_PETSC
-  if (idx >= 0) VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
+  VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
 #endif
 }
 
-void PetscVector::add(int n, int *idx, scalar *y) {
+void PetscVector::add(unsigned int n, unsigned int *idx, scalar *y) {
   _F_
 #ifdef WITH_PETSC
-  for (int i = 0; i < n; i++)
-    if (idx[i] >= 0) VecSetValue(vec, idx[i], (PetscScalar) y[i], ADD_VALUES);
+  for (unsigned int i = 0; i < n; i++)
+    VecSetValue(vec, idx[i], (PetscScalar) y[i], ADD_VALUES);
 #endif
 }
 
@@ -383,7 +387,7 @@ bool PetscLinearSolver::solve() {
   // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
   int *idx = new int [m->size];
   MEM_CHECK(idx);
-  for (int i = 0; i < m->size; i++) idx[i] = i;
+  for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
   // copy solution to the output solution vector
   VecGetValues(x, m->size, idx, (PetscScalar *) sln);

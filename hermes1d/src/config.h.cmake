@@ -1,5 +1,4 @@
 #cmakedefine WITH_UMFPACK
-#cmakedefine WITH_PARDISO
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_SUPERLU
 #cmakedefine WITH_PETSC

@@ -6,7 +6,7 @@
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
-class HERMES_API PidTimestepController {
+class PidTimestepController {
 
 public:
   PidTimestepController(double final_time, bool pid_on = true,
@@ -42,12 +42,15 @@ private:
   bool finished;
 
   // PID parameters
-  const static double kp = 0.075;
-  const static double kl = 0.175;
-  const static double kD = 0.01;
+  const static double kp;
+  const static double kl;
+  const static double kD;
 
 };
 
+  const double PidTimestepController::kp = 0.075;
+  const double PidTimestepController::kl = 0.175;
+  const double PidTimestepController::kD = 0.01;
 
 // Usage: do{ begin_step() calculations .... end_step(..);} while(has_next());
 

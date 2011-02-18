@@ -309,7 +309,6 @@ public:
   }
 };
 
-
 /// Geometry (coordinates, normals, tangents) of either an element or an edge.
 template<typename T>
 class Geom
@@ -368,16 +367,12 @@ template<typename T>
 class InterfaceGeom : public Geom<T>
 {
 private:
-  const Geom<T>* central_geom;  // The wrapped instance of Geom (representing geometric data for the
-                                // central element).
-
-public:
   int neighb_marker;
   int neighb_id;
   T   neighb_diam;
-
-  InterfaceGeom(const Geom<T>* geom, int n_marker, int n_id, T n_diam) :
-      Geom<T>(), central_geom(geom), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+public:
+  InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
+      Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
   {
     // Let this class expose the standard Geom interface.
     this->edge_marker = geom->edge_marker;
@@ -393,11 +388,11 @@ public:
     this->orientation = geom->orientation;
   }
 
-  ~InterfaceGeom() { delete central_geom; }
+  virtual ~InterfaceGeom() {}
 
-  virtual int get_neighbor_marker() const { return neighb_marker; }
-  virtual int get_neighbor_id()     const { return neighb_id; }
-  virtual T   get_neighbor_diam()   const { return neighb_diam; }
+  int get_neighbor_marker() const { return neighb_marker; }
+  int get_neighbor_id()     const { return neighb_id; }
+  T get_neighbor_diam()   const { return neighb_diam; }
 };
 
 /// Init element geometry for calculating the integration order.
@@ -407,17 +402,14 @@ Geom<double>* init_geom_vol(RefMap *rm, const int order);
 /// Init element geometry for surface integrals.
 Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
 
-
 /// Init the function for calculation the integration order.
 Func<Ord>* init_fn_ord(const int order);
 /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 /// Init the mesh-function for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(MeshFunction *fu, RefMap *rm, const int order);
+Func<scalar>* init_fn(MeshFunction *fu, const int order);
 /// Init the solution for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(Solution *fu, RefMap *rm, const int order);
-
-
+Func<scalar>* init_fn(Solution *fu, const int order);
 
 /// User defined data that can go to the bilinear and linear forms.
 /// It also holds arbitraty number of functions, that user can use.
@@ -447,11 +439,6 @@ public:
 
   void free_ord()
   {
-    for (int i = 0; i < nf; i++)
-    {
-      fn[i]->free_ord();
-      delete fn[i];
-    }
     delete [] fn;
   }
 };

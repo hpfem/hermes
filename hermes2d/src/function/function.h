@@ -117,23 +117,21 @@ public:
   /// \param mask [in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY,
   ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
   ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
-  void set_quad_order(int order, int mask = H2D_FN_DEFAULT)
+  void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT)
   {
-    Node* updated_node = NULL;
-    if(nodes->insert(std::make_pair(order, updated_node)).second == false) {
-      // The value had already existed.
-      cur_node = (*nodes)[order];
+    if(nodes->present(order)) {
+      cur_node = nodes->get(order);
       // If the mask has changed.
       if((cur_node->mask & mask) != mask) {
         precalculate(order, mask);
-        (*nodes)[order] = cur_node;
+        nodes->add(cur_node, order);
       }
     }
     else {
       // The value had not existed.
-      cur_node = (*nodes)[order];
+      cur_node = NULL;
       precalculate(order, mask);
-      (*nodes)[order] = cur_node;
+      nodes->add(cur_node, order);
     }
   }
 
@@ -249,30 +247,27 @@ protected:
   };
 
   /// Table of Node tables, for each possible transformation there can be a different Node table.
-  std::map<uint64_t, std::map<unsigned int, Node*>*>* sub_tables;
-  /// Table of Nodes. Indexed by integration order.
-  std::map<unsigned int, Node*>* nodes;
+  LightArray<LightArray<Node*>*>* sub_tables;
+
+  /// Table of nodes.
+  LightArray<Node*>* nodes;
+
   // Current Node.
   Node* cur_node;
-  // Nodes for the overflow sub-element transformation.
-  std::map<unsigned int, Node*>* overflow_nodes;
 
+  // Nodes for the overflow sub-element transformation.
+  LightArray<Node*>* overflow_nodes;
 
   /// With changed sub-element mapping, there comes the need for a change of the current
   /// Node table nodes.
   void update_nodes_ptr()
   {
-    std::map<unsigned int, Node*>* updated_nodes = new std::map<unsigned int, Node*>;
-
-    if (sub_idx > H2D_MAX_IDX) {
-      delete updated_nodes;
+    if (sub_idx > H2D_MAX_IDX)
       handle_overflow_idx();
-    }
     else {
-      if(sub_tables->insert(std::make_pair(sub_idx, updated_nodes)).second == false)
-        // The value had already existed.
-        delete updated_nodes;
-      nodes = (*sub_tables)[sub_idx];
+      if(!sub_tables->present((unsigned int)sub_idx))
+        sub_tables->add(new LightArray<Node*>, (unsigned int)sub_idx);
+      nodes = sub_tables->get((unsigned int) sub_idx);
     }
   };
 

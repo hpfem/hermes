@@ -37,8 +37,8 @@ struct TC3D {
 	int min_h_order;	// minimal horz order
 	int min_v_order;	// minimal vert order
 	int min_u_order;	// minimal vert order
-	fn3d_t fn;			// function
-	const char *fn_name;		// string representation of a function
+	fn3d_t fn;		// function
+	const char *fn_name;	// string representation of a function
 
 	TC3D(fn3d_t f, double e, int min_h, int min_v, int min_u, const char *n) {
 		exact = e;

@@ -69,15 +69,15 @@ void HERMES_API set_coeff_vector(scalar *y, Space *space, int sln=0);
 void HERMES_API get_coeff_vector(Space *space, Vector *y, int sln=0);
 void HERMES_API set_coeff_vector(Vector *y, Space *space, int sln=0);
 
-class Space {
+class HERMES_API Space {
     public:
         Space();
         // Creates equidistant space with uniform polynomial degree of elements.
         // All elements will have the same (zero) marker.
         Space(double a, double b, int n_base_elem, int p_init=1, int n_eq=1, int
                 n_sln=1, bool print_banner=true);
-        Space(double a, double b, int n_base_elem, Hermes::vector<std::pair<int, double> *> left_boundary_conditions = Hermes::vector<std::pair<int, double> *>(), 
-          Hermes::vector<std::pair<int, double> *> right_boundary_conditions = Hermes::vector<std::pair<int, double> *>(), int p_init=1, int n_eq=1, int
+        Space(double a, double b, int n_base_elem, Hermes::vector<std::pair<int, double> *> left_boundary_conditions = ( Hermes::vector<std::pair<int, double> *>() ), 
+	      Hermes::vector<std::pair<int, double> *> right_boundary_conditions = (Hermes::vector<std::pair<int, double> *>() ), int p_init=1, int n_eq=1, int
           n_sln=1, bool print_banner=true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements

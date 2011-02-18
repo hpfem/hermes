@@ -18,13 +18,23 @@
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
+#include "h2d_common.h"
+
+#include "config.h"
+
+// RCP
+#ifndef WITH_TRILINOS
+#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#else
+#include "Teuchos_RCP.hpp"
+#endif
+
 // hermes_common solvers
 #include "../hermes_common/solver/amesos.h"
 #include "../hermes_common/solver/aztecoo.h"
 #include "../hermes_common/solver/epetra.h"
 #include "../hermes_common/solver/mumps.h"
 #include "../hermes_common/solver/nox.h"
-#include "../hermes_common/solver/pardiso.h"
 #include "../hermes_common/solver/petsc.h"
 #include "../hermes_common/solver/umfpack_solver.h"
 #include "../hermes_common/solver/superlu.h"
@@ -34,19 +44,15 @@
 #include "../hermes_common/solver/precond_ifpack.h"
 #include "../hermes_common/solver/precond_ml.h"
 
-// Eigensolver
-#include "../hermes_common/solver/eigensolver.h"
-
-// RCP
-#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
-
 // boundary conditions
   // this
 #include "../hermes_common/bctypes.h"
   // is going to be replaced with this
 #include "boundaryconditions/boundaryconditions.h"
 
-#include "h2d_common.h"
+// Eigensolver
+#include "../hermes_common/solver/eigensolver.h"
+
 #include "hermes_logging.h"
 
 #include "range.h"

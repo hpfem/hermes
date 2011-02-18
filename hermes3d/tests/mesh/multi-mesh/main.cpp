@@ -130,8 +130,6 @@ int main(int argc, char **args)
 
 #if defined WITH_UMFPACK
 	MatrixSolverType matrix_solver = SOLVER_UMFPACK; 
-#elif defined WITH_PARDISO
-	MatrixSolverType matrix_solver = SOLVER_PARDISO; 
 #elif defined WITH_PETSC
 	MatrixSolverType matrix_solver = SOLVER_PETSC; 
 #elif defined WITH_MUMPS
@@ -283,13 +281,6 @@ int main(int argc, char **args)
 	delete matrix;
 	delete rhs;
 	delete solver;
-
-#ifdef WITH_PETSC
-	mat.free();
-	rhs.free();
-
-	PetscFinalize();
-#endif
 
 	return res;
 }

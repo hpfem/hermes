@@ -27,24 +27,24 @@
 /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
 /// do "delete matrix".
 template<typename T>
-T **new_matrix(int m, int n = 0)
+T **new_matrix(unsigned int m, unsigned int n = 0)
 {
   if (!n) n = m;
   T **vec = (T **) new char[sizeof(T *) * m + sizeof(T) * m * n];
   MEM_CHECK(vec);
   memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
   T *row = (T *) (vec + m);
-  for (int i = 0; i < m; i++, row += n) vec[i] = row;
+  for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;
   return vec;
 }
 
-/// Copies a matrix. Both matrices has to be equal to or larger than provideded sizes.
+/// Copies a matrix. Both matrices has to be equal to or larger than provided sizes.
 /// Size compatibility check is not done.
 template<typename T>
-void copy_matrix(T** dest, T** src, int m, int n = 0) 
+void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0) 
 {
   if (n == 0) n = m;
-  for(int i = 0; i < m; i++) {
+  for(unsigned int i = 0; i < m; i++) {
     memcpy(dest[i], src[i], n*sizeof(T));
   }
 }
@@ -56,7 +56,7 @@ void copy_matrix(T** dest, T** src, int m, int n = 0)
 /// \param[in] n A number of columns of the matrix. If zero, it is assumed to be equal to m.
 /// \param[in] filename An output filename. If not specified, matrix_name will be used by concatenating it with a suffix '.mat'.
 template<typename T>
-void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n = 0, const std::string& filename = std::string()) 
+void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string()) 
 {
   if (n == 0) n = m;
 
@@ -79,8 +79,8 @@ void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n
   fout << std::string("# columns: ") << n << std::endl;
 
   //write contents
-  for(int i = 0; i < m; i++) {
-    for(int k = 0; k < n; k++)
+  for(unsigned int i = 0; i < m; i++) {
+    for(unsigned int k = 0; k < n; k++)
       fout << ' ' << matrix[i][k];
     fout << std::endl;
   }
@@ -92,7 +92,7 @@ void save_matrix_octave(const std::string& matrix_name, T** matrix, int m, int n
 /// Saves MxM sparse matrix to a octave file format.
 template<typename T>
 void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, const int* Ap, const int* Ai, 
-                               int m, const std::string& filename = std::string()) 
+                               unsigned int m, const std::string& filename = std::string()) 
 {
   // create filename
   std::string fname = filename;
@@ -125,30 +125,30 @@ void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, cons
 /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
 /// a square matrix of the size max(m, n) in order for the transpose to fit inside it.
 template<typename T>
-void transpose(T **matrix, int m, int n) 
+void transpose(T **matrix, unsigned int m, unsigned int n) 
 {
-  int min = std::min(m, n);
-  for (int i = 0; i < min; i++)
-    for (int j = i+1; j < min; j++)
+  unsigned int min = std::min(m, n);
+  for (unsigned int i = 0; i < min; i++)
+    for (unsigned int j = i+1; j < min; j++)
        std::swap(matrix[i][j], matrix[j][i]);
 
   if (m < n)
-    for (int i = 0; i < m; i++)
-      for (int j = m; j < n; j++)
-	matrix[j][i] = matrix[i][j];
+    for (unsigned int i = 0; i < m; i++)
+      for (unsigned int j = m; j < n; j++)
+	      matrix[j][i] = matrix[i][j];
   else if (n < m)
-    for (int i = n; i < m; i++)
-      for (int j = 0; j < n; j++)
-	matrix[j][i] = matrix[i][j];
+    for (unsigned int i = n; i < m; i++)
+      for (unsigned int j = 0; j < n; j++)
+	      matrix[j][i] = matrix[i][j];
 }
 
 
 /// Changes the sign of a matrix
 template<typename T>
-void chsgn(T **matrix, int m, int n) 
+void chsgn(T **matrix, unsigned int m, unsigned int n) 
 {
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < n; j++)
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
       matrix[i][j] = -matrix[i][j];
 }
 
@@ -240,9 +240,9 @@ enum EMatrixDumpFormat {
 
 class HERMES_API Matrix {
 public:
-  int get_size() { return this->size;};
+  unsigned int get_size() { return this->size;};
 
-  Matrix(int size) { this->size = size;};
+  Matrix(unsigned int size) { this->size = size;};
 
   ~Matrix() {};
 
@@ -258,7 +258,7 @@ public:
   /// @return the value from the specified position
   /// @param[in] m - the number of row
   /// @param[in] n - the number of column
-  virtual scalar get(int m, int n) = 0;
+  virtual scalar get(unsigned int m, unsigned int n) = 0;
 
   /// Zero the matrix.
   virtual void zero() = 0;
@@ -271,7 +271,7 @@ public:
   /// @param[in] m    - the row where to update
   /// @param[in] n    - the column where to update
   /// @param[in] v    - value
-  virtual void add(int m, int n, scalar v) = 0;
+  virtual void add(unsigned int m, unsigned int n, scalar v) = 0;
 
   /// update the stiffness matrix
   ///
@@ -280,39 +280,39 @@ public:
   /// @param[in] matrix    - block of values
   /// @param[in] rows      - array with row indexes
   /// @param[in] cols      - array with column indexes
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols) = 0;
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) = 0;
 
   /// dumping matrix and right-hand side
   ///
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
 
-  virtual int get_matrix_size() const = 0;
+  virtual unsigned int get_matrix_size() const = 0;
 
 protected:
 
-  int size;  // matrix size
+  unsigned int size;  // matrix size
 };
 
 class HERMES_API SparseMatrix : public Matrix {
 public:
   SparseMatrix();
-  SparseMatrix(int size);
+  SparseMatrix(unsigned int size);
   virtual ~SparseMatrix();
 
   /// prepare memory
   ///
   /// @param[in] ndofs - number of unknowns
-  virtual void prealloc(int n);
+  virtual void prealloc(unsigned int n);
 
   /// add indices of nonzero matrix element
   ///
   /// @param[in] row  - row index
   /// @param[in] col  - column index
-  virtual void pre_add_ij(int row, int col);
+  virtual void pre_add_ij(unsigned int row, unsigned int col);
 
   virtual void finish() { }
 
-  virtual int get_size() { return size; }
+  virtual unsigned int get_size() { return size; }
 
   virtual void add_sparse_matrix(SparseMatrix* mat) 
   { 
@@ -323,7 +323,7 @@ public:
   ///
   /// @param[in] row - index of the row
   /// @return - the number of entries in the row 'row'
-  virtual int get_num_row_entries(int row) { return -1; }
+  virtual int get_num_row_entries(unsigned int row) { return -1; }
 
   /// Extract the copy of a row
   ///
@@ -332,13 +332,15 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this row.
   /// @param[out] idxs - extracted global column indices for the corresponding values.
-  virtual void extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs) { }
+  virtual void extract_row_copy(unsigned int row, unsigned int len, 
+                                unsigned int &n_entries, double *vals, 
+                                unsigned int *idxs) { }
 
   /// Return the number of entries in a specified column
   ///
   /// @param[in] row - index of the column
   /// @return - the number of entries in the column 'col'
-  virtual int get_num_col_entries(int col) { return -1; }
+  virtual int get_num_col_entries(unsigned int col) { return -1; }
 
   /// Extract the copy of a column
   ///
@@ -347,13 +349,20 @@ public:
   /// @param[out] n_entries - number of nonzero entries extracted.
   /// @param[out] vals - extracted values for this column.
   /// @param[out] idxs - extracted global row indices for the corresponding values.
-  virtual void extract_col_copy(int col, int len, int &n_entries, double *vals, int *idxs) { }
+  virtual void extract_col_copy(unsigned int col, unsigned int len, 
+                                unsigned int &n_entries, double *vals, 
+                                unsigned int *idxs) { }
 
-  // virtual function for multiplying a vector by a 
-  // derived type of SparseMatrix
-  virtual void multiply(scalar* vector_in, scalar* vector_out){ };
+  /// Multiply with a vector.
+  virtual void multiply_with_vector(scalar* vector_in, scalar* vector_out) { };
 	
-  //
+  /// Multiply with a scalar.
+  virtual void multiply_with_scalar(scalar value) { };
+
+  /// Duplicate sparse matrix (including allocation).
+  virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
+
+  /// Get fill-in.
   virtual double get_fill_in() const = 0;
 
   unsigned row_storage:1;
@@ -384,7 +393,7 @@ public:
   /// allocate memory for storing ndofs elements
   ///
   /// @param[in] ndofs - number of elements of the vector
-  virtual void alloc(int ndofs) = 0;
+  virtual void alloc(unsigned int ndofs) = 0;
   /// free the memory
   virtual void free() = 0;
   // finish the assembly of the vector
@@ -393,7 +402,7 @@ public:
   /// Get the value from a position
   /// @return the value form the specified index
   /// @param[in] idx - index which to obtain the value from
-  virtual scalar get(int idx) = 0;
+  virtual scalar get(unsigned int idx) = 0;
 
   /// Extract vector values into user-provided array.
   /// @param[out] v - array which will contain extracted values
@@ -409,13 +418,13 @@ public:
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void set(int idx, scalar y) = 0;
+  virtual void set(unsigned int idx, scalar y) = 0;
 
   /// update element on the specified position
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void add(int idx, scalar y) = 0;
+  virtual void add(unsigned int idx, scalar y) = 0;
 
   /// Add a vector.
   virtual void add_vector(Vector* vec) = 0;
@@ -426,17 +435,17 @@ public:
   /// @param[in] n   - number of positions to update
   /// @param[in] idx - indices where to update
   /// @param[in] y   - values
-  virtual void add(int n, int *idx, scalar *y) = 0;
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y) = 0;
 
   /// Get vector length.
-  int length() {return this->size;}
+  unsigned int length() {return this->size;}
 
   // Write to file.
   virtual bool dump(FILE *file, const char *var_name, 
                     EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
   
 protected:
-  int size;
+  unsigned int size;
 };
 
 HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);

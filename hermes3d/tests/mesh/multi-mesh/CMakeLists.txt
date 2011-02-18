@@ -7,11 +7,11 @@ set(BINARIES)
 macro(ADD_BIN BIN DEFINE)
 	add_executable(${BIN}		main.cpp)
 	set_common_target_properties(${BIN})
-
-	set_target_properties(${BIN} PROPERTIES COMPILE_FLAGS -D${DEFINE})
+    get_target_property(CPFL ${BIN} COMPILE_FLAGS)
+	set_target_properties(${BIN} PROPERTIES COMPILE_FLAGS "${CPFL} -D${DEFINE}")
 
 	target_link_libraries(${BIN} ${TESTS_LIBRARIES})
-	target_link_libraries(${BIN} ${HERMES_REAL_BIN})
+	target_link_libraries(${BIN} ${HERMES3D_REAL})
 
 	set(BINARIES ${BINARIES} ${BIN})
 endmacro(ADD_BIN)

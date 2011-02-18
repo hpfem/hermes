@@ -61,11 +61,12 @@ void PrecalcShapeset::set_quad_2d(Quad2D* quad_2d)
 void PrecalcShapeset::handle_overflow_idx()
 {
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
-  nodes = new std::map<unsigned int, Node*>;
+  nodes = new LightArray<Node *>;
   overflow_nodes = nodes;
 }
 
@@ -74,18 +75,16 @@ void PrecalcShapeset::set_active_shape(int index)
   // Key creation.
   unsigned key = cur_quad | (mode << 3) | ((unsigned) (max_index[mode] - index) << 4);
 
-  // Blank value.
-  std::map<uint64_t, std::map<unsigned int, Node*>*>* updated_nodes = new std::map<uint64_t, std::map<unsigned int, Node*>*>;
-
-  // Decision based on this PrecalcShapeset being a slave or not.
-  std::map<unsigned int, std::map<uint64_t, std::map<unsigned int, Node*>*>*>* tab = (master_pss == NULL) ? &tables : &(master_pss->tables);
-
-  if(tab->insert(make_pair(key, updated_nodes)).second == false)
-    // If the value had existed.
-    delete updated_nodes;
-
-  // Get the proper sub-element tables.
-  sub_tables = (*tab)[key];
+  if(master_pss == NULL) {
+    if(!tables.present(key))
+      tables.add(new LightArray<LightArray<Node*>*>, key);
+    sub_tables = tables.get(key);
+  }
+  else {
+    if(!master_pss->tables.present(key))
+      master_pss->tables.add(new LightArray<LightArray<Node*>*>, key);
+    sub_tables = master_pss->tables.get(key);
+  }
 
   // Update the Node table.
   update_nodes_ptr();
@@ -143,11 +142,11 @@ void PrecalcShapeset::precalculate(int order, int mask)
       }
     }
   }
-  if((*nodes)[order] != NULL) {
-    assert((*nodes)[order] == cur_node);
-    ::free((*nodes)[order]);
+  if(nodes->present(order)) {
+    assert(nodes->get(order) == cur_node);
+    ::free(nodes->get(order));
   }
-  (*nodes)[order] = node;
+  nodes->add(node, order);
   cur_node = node;
 }
 
@@ -155,20 +154,23 @@ void PrecalcShapeset::precalculate(int order, int mask)
 void PrecalcShapeset::free()
 {
   if (master_pss != NULL) return;
-  std::map<unsigned int, std::map<uint64_t, std::map<unsigned int, Node*>*>*>::iterator it;
-  for(it = tables.begin(); it != tables.end(); it++) {
-    std::map<uint64_t, std::map<unsigned int, Node*>*>::iterator it_inner;
-    for (it_inner = it->second->begin(); it_inner != it->second->end(); it_inner++) {
-      std::map<unsigned int, Node*>::iterator it_inner_inner;
-      for (it_inner_inner = it_inner->second->begin(); it_inner_inner != it_inner->second->end(); it_inner_inner++)
-        ::free(it_inner_inner->second);
-      it_inner->second->clear();
+
+  for(unsigned int i = 0; i < tables.get_size(); i++)
+    if(tables.present(i)) {
+      for(unsigned int j = 0; j < tables.get(i)->get_size(); j++) 
+        if(tables.get(i)->present(j)) {
+          for(unsigned int k = 0; k < tables.get(i)->get(j)->get_size(); k++)
+            if(tables.get(i)->get(j)->present(k))
+              ::free(tables.get(i)->get(j)->get(k));
+          delete tables.get(i)->get(j);
+        }
+      delete tables.get(i);
     }
-    it->second->clear();
-  }
+
   if(overflow_nodes != NULL) {
-    for(std::map<unsigned int, Node*>::iterator it = overflow_nodes->begin(); it != overflow_nodes->end(); it++)
-      ::free(it->second);
+    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+      if(overflow_nodes->present(i))
+        ::free(overflow_nodes->get(i));
     delete overflow_nodes;
   }
 }
@@ -178,8 +180,4 @@ extern PrecalcShapeset ref_map_pss;
 PrecalcShapeset::~PrecalcShapeset()
 {
   free();
-  {
-    verbose("~PrecalcShapeset(): peak size of precalculated tables: %d B (%0.1lf MB)%s", max_mem,
-            (double) max_mem / (1024 * 1024), (this == &ref_map_pss) ? " (refmap)" : "");
-  }
 }

@@ -1,5 +1,11 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
+
+// The module is a library.
+#ifndef EXPORT_HERMES_MODULE
+#define EXPORT_HERMES_MODULE
+#endif
+
 #include "hermes2d.h"
 
 // This is a simple generic module for a linear second-order PDE based on the Hermes 
@@ -24,7 +30,7 @@
 
 typedef std::pair<double, double> double_pair;
 
-class HERMES_API ModuleBasic {
+class HERMES_MODULE_API ModuleBasic {
 public:
   ModuleBasic();
 
@@ -40,7 +46,7 @@ public:
   void set_initial_poly_degree(int p);
 
   // Set material markers. These markers define subdomains.
-  void set_material_markers(const Hermes::vector<int> &mat_markers);
+  void set_material_markers(const std::vector<int> &mat_markers);
 
   // Set parameter c1 for all material subdomains.
   void set_c1_array(const std::vector<double> &c1_array);
@@ -58,23 +64,23 @@ public:
   void set_c5_array(const std::vector<double> &c5_array);
 
   // Set Dirichlet boundary markers.
-  void set_dirichlet_markers(const Hermes::vector<int> &bdy_markers_dirichlet);
+  void set_dirichlet_markers(const std::vector<int> &bdy_markers_dirichlet);
 
   // Set Dirichlet boundary values.
-  void set_dirichlet_values(const Hermes::vector<int> &bdy_markers_dirichlet,
-                            const Hermes::vector<double> &bdy_values_dirichlet);
+  void set_dirichlet_values(const std::vector<int> &bdy_markers_dirichlet,
+                            const std::vector<double> &bdy_values_dirichlet);
 
   // Set Neumann boundary markers.
-  void set_neumann_markers(const Hermes::vector<int> &bdy_markers_neumann);
+  void set_neumann_markers(const std::vector<int> &bdy_markers_neumann);
 
   // Set Neumann boundary values.
-  void set_neumann_values(const Hermes::vector<double> &bdy_values_neumann);
+  void set_neumann_values(const std::vector<double> &bdy_values_neumann);
 
   // Set Newton boundary markers.
-  void set_newton_markers(const Hermes::vector<int> &bdy_markers_newton);
+  void set_newton_markers(const std::vector<int> &bdy_markers_newton);
 
   // Set Newton boundary value pairs.
-  void set_newton_values(const Hermes::vector<double_pair> &bdy_values_newton);
+  void set_newton_values(const std::vector<double_pair> &bdy_values_newton);
 
   // Sanity check of material markers and material constants.
   void materials_sanity_check();
@@ -149,9 +155,8 @@ protected:
                                                // Therefore we introduce a bc_permut array that for any 
                                                // boundary marker gives its index in the list of boundary 
                                                // conditions. 
-  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, 
-                                               // SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, 
-                                               // SOLVER_SUPERLU, SOLVER_UMFPACK.
+  MatrixSolverType matrix_solver;              // Possibilities: SOLVER_AMESOS, SOLVER_ZATECOO, SOLVER_MUMPS, 
+                                               // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
   // Finite element mesh.
   Mesh* mesh;

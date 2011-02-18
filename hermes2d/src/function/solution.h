@@ -59,7 +59,7 @@ public:
   virtual void handle_overflow_idx();
 
   /// See Transformable::push_transform.
-	virtual void push_transform(int son);
+  virtual void push_transform(int son);
 
 protected:
 
@@ -217,7 +217,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, std::map<unsigned int, Node*>*>* tables[4][4];
+  LightArray<LightArray<Node*>*>* tables[4][4];
 
   Element* elems[4][4];
   int cur_elem, oldest[4];

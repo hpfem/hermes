@@ -29,31 +29,35 @@
 class HERMES_API CSCMatrix : public SparseMatrix {
 public:
   CSCMatrix();
-  CSCMatrix(int size);
+  CSCMatrix(unsigned int size);
   virtual ~CSCMatrix();
 
   virtual void alloc();
   virtual void free();
-  virtual scalar get(int m, int n);
+  virtual scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(int m, int n, scalar v);
+  virtual void add(unsigned int m, unsigned int n, scalar v);
   virtual void add_to_diagonal(scalar v);
   // TODO: implement this for other matrix types.
   virtual void add_matrix(CSCMatrix* mat);
   // TODO: implement this for other matrix types.
   virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix* mat);
   // TODO: implement this for other matrix types.
-  virtual void add_as_block(int i, int j, CSCMatrix* mat);
-  virtual void add(int m, int n, scalar **mat, int *rows, int *cols);
+  virtual void add_as_block(unsigned int i, unsigned int j, CSCMatrix* mat);
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-  virtual int get_matrix_size() const;
-  int get_nnz() {return this->nnz;}
+  virtual unsigned int get_matrix_size() const;
+  unsigned int get_nnz() {return this->nnz;}
   virtual double get_fill_in() const;
 
   // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply(scalar* vector_in, scalar* vector_out);
+  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  // Multiplies matrix with a scalar.
+  void multiply_with_scalar(scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
-  void create(int size, int nnz, int* ap, int* ai, scalar* ax);
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  // Duplicates a matrix (including allocation).
+  CSCMatrix* duplicate();
   // Exposes pointers to the CSC arrays.
   int *get_Ap() {
       return this->Ap;
@@ -67,10 +71,10 @@ public:
 
 protected:
   // UMFPack specific data structures for storing the system matrix (CSC format).
-  scalar *Ax;   // Matrix entries (column-wise).
-  int *Ai;      // Row indices of values in Ax.
-  int *Ap;      // Index to Ax/Ai, where each column starts.
-  int nnz;      // Number of non-zero entries (= Ap[size]).
+  scalar *Ax;            // Matrix entries (column-wise).
+  int *Ai;               // Row indices of values in Ax.
+  int *Ap;               // Index to Ax/Ai, where each column starts.
+  unsigned int nnz;      // Number of non-zero entries (= Ap[size]).
 
 };
 
@@ -82,24 +86,24 @@ class HERMES_API UMFPackMatrix : public CSCMatrix {
 class HERMES_API UMFPackVector : public Vector {
 public:
   UMFPackVector();
-  UMFPackVector(int size);
+  UMFPackVector(unsigned int size);
   virtual ~UMFPackVector();
 
-  virtual void alloc(int ndofs);
+  virtual void alloc(unsigned int ndofs);
   virtual void free();
-  virtual scalar get(int idx) { return v[idx]; }
+  virtual scalar get(unsigned int idx) { return v[idx]; }
   virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
   virtual void zero();
   virtual void change_sign();
-  virtual void set(int idx, scalar y);
-  virtual void add(int idx, scalar y);
-  virtual void add(int n, int *idx, scalar *y);
+  virtual void set(unsigned int idx, scalar y);
+  virtual void add(unsigned int idx, scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
-    for (int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
+    for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
   };
   virtual void add_vector(scalar* vec) {
-    for (int i = 0; i < this->length(); i++) this->v[i] += vec[i];
+    for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 

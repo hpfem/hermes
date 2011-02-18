@@ -1,3 +1,0 @@
-include_directories(${hermes1d_SOURCE_DIR}/src)
-
-include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})

@@ -262,7 +262,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
       int* parents;
       parents = meshes[i]->regularize(regularize);
       this->spaces[i]->distribute_orders(meshes[i], parents);
-      delete [] parents;
+      ::free(parents);
     }
   }
 
@@ -583,10 +583,10 @@ double Adapt::eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_
     jwt[i] = pt[i][2] * jac[i];
 
   // function values and values of external functions
-  Func<scalar>* err1 = init_fn(sln1, rv1, order);
-  Func<scalar>* err2 = init_fn(sln2, rv2, order);
-  Func<scalar>* v1 = init_fn(rsln1, rrv1, order);
-  Func<scalar>* v2 = init_fn(rsln2, rrv2, order);
+  Func<scalar>* err1 = init_fn(sln1, order);
+  Func<scalar>* err2 = init_fn(sln2, order);
+  Func<scalar>* v1 = init_fn(rsln1, order);
+  Func<scalar>* v2 = init_fn(rsln2, order);
 
   err1->subtract(*v1);
   err2->subtract(*v2);
@@ -646,8 +646,8 @@ double Adapt::eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* v1 = init_fn(rsln1, rrv1, order);
-  Func<scalar>* v2 = init_fn(rsln2, rrv2, order);
+  Func<scalar>* v1 = init_fn(rsln1, order);
+  Func<scalar>* v2 = init_fn(rsln2, order);
 
   scalar res = error_bi_fn(np, jwt, NULL, v1, v2, e, NULL);
 

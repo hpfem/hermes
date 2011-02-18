@@ -17,13 +17,13 @@ set(SRC
   ${HERMES_COMMON_DIR}/error.cpp
   ${HERMES_COMMON_DIR}/utils.cpp
   ${HERMES_COMMON_DIR}/matrix.cpp
+  ${HERMES_COMMON_DIR}/tables.cpp
   ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp 
   ${HERMES_COMMON_DIR}/solver/nox.cpp 
   ${HERMES_COMMON_DIR}/solver/epetra.cpp 
   ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
   ${HERMES_COMMON_DIR}/solver/amesos.cpp
   ${HERMES_COMMON_DIR}/solver/mumps.cpp 
-  ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
   ${HERMES_COMMON_DIR}/solver/petsc.cpp 
   ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
   ${HERMES_COMMON_DIR}/solver/superlu.cpp
@@ -42,6 +42,7 @@ configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/config.h
 )
 # Sets linker settings.
+include(PickRealOrCplxLibs)
 macro(LIBRARY_SETTINGS BIN)
 #    target_link_libraries(${BIN} hermes_common)
 
@@ -57,6 +58,7 @@ macro(LIBRARY_SETTINGS BIN)
   
   # Link with all third party libraries corresponding to selected configuration options.
   # The respective variables will be empty for unselected TPL's.
+  PICK_REAL_OR_CPLX_LIBS(${BIN} ${BIN})
   target_link_libraries(  ${BIN}
       ${GLUT_LIBRARY} ${GLEW_LIBRARY}
       ${EXODUSII_LIBRARIES}
@@ -65,19 +67,19 @@ macro(LIBRARY_SETTINGS BIN)
       ${UMFPACK_LIBRARY}
       ${SUPERLU_LIBRARY}
       ${AMD_LIBRARY}
-      ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
-      ${MUMPS_LIBRARIES}
+      ${MUMPS_REAL_LIBRARIES}
       ${LAPACK_LIBRARIES}
       ${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
+	  ${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
       ${ADDITIONAL_LIBS}        
   )
 endmacro(LIBRARY_SETTINGS)
 
 include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 
-add_library(${HERMES_BIN} SHARED ${SRC})
+add_library(${HERMES1D} SHARED ${SRC})
 if(DEBUG)
     set_target_properties(hermes1d-debug PROPERTIES COMPILE_FLAGS
         ${CMAKE_CXX_FLAGS_DEBUG})
@@ -86,7 +88,7 @@ if(RELEASE)
     set_target_properties(hermes1d PROPERTIES COMPILE_FLAGS
         ${CMAKE_CXX_FLAGS_RELEASE})
 endif(RELEASE)
-LIBRARY_SETTINGS(${HERMES_BIN})
+LIBRARY_SETTINGS(${HERMES1D})
 
 
 # MSVC (Win) helper macros
@@ -121,9 +123,9 @@ endmacro(BUILD_LIB_ALL)
 
 #install
 if(MSVC)
-	BUILD_LIB_ALL(${HERMES_BIN} "-DH1D_REAL -DEXPORT_HERMES_DLL")
+	BUILD_LIB_ALL(${HERMES1D} "-DH1D_REAL -DEXPORT_HERMES_DLL")
 else(MSVC)
-	install(TARGETS ${HERMES_BIN} RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+	install(TARGETS ${HERMES1D} RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 endif(MSVC)
 
 file(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")

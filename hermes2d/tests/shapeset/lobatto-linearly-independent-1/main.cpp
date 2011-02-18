@@ -9,7 +9,7 @@ const int P_INIT = 10;
 const int FNS_NUM = (P_INIT + 1)* (P_INIT + 1);
 double EPS = 10e-14;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 int main(int argc, char* argv[])
 {

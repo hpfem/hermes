@@ -1,7 +1,5 @@
-if(NOT H2D_REAL)
-    return()
-endif(NOT H2D_REAL)
-project(richards)
-
-add_executable(${PROJECT_NAME} main.cpp)
-include (../CMake.common)
+add_subdirectory(richards-basic)
+add_subdirectory(richards-capillary-barrier-adapt)
+add_subdirectory(richards-capillary-barrier-rk)
+add_subdirectory(richards-seepage-adapt)
+add_subdirectory(richards-tracy-adapt)

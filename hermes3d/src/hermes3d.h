@@ -20,6 +20,17 @@
 #ifndef _HERMES_3D_
 #define _HERMES_3D_
 
+#include "h3d_common.h"
+
+#include "config.h"
+
+// RCP
+#ifndef WITH_TRILINOS
+#include "../../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#else
+#include "Teuchos_RCP.hpp"
+#endif
+
 // hermes_common
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/utils.h"
@@ -29,7 +40,6 @@
 #include "../../hermes_common/solver/solver.h"
 #include "../../hermes_common/solver/umfpack_solver.h"
 #include "../../hermes_common/solver/superlu.h"
-#include "../../hermes_common/solver/pardiso.h"
 #include "../../hermes_common/solver/petsc.h"
 #include "../../hermes_common/solver/epetra.h"
 #include "../../hermes_common/solver/amesos.h"
@@ -45,11 +55,6 @@
 // Eigensolver
 #include "../../hermes_common/solver/eigensolver.h"
 
-// RCP
-#include "../../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
-
-#include "h3d_common.h"
-
 // mesh
 #include "mesh.h"
 
@@ -58,6 +63,7 @@
 #include "loader/mesh3d.h"
 #include "loader/hdf5.h"
 #include "loader/exodusii.h"
+#include "loader/ctuReader.h"
 
 // spaces
 #include "space/space.h"
@@ -68,7 +74,7 @@
 // quadrature
 #include "quad.h"
 #include "quadstd.h"
-#include "forms.h"
+#include "weakform/forms.h"
 
 #include "refmap.h"
 #include "integrals/h1.h"
@@ -96,7 +102,7 @@
 #include "asmlist.h"
 #include "solution.h"
 #include "filter.h"
-#include "weakform.h"
+#include "weakform/weakform.h"
 #include "discrete_problem.h"
 
 // adapt

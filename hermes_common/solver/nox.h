@@ -16,7 +16,9 @@
 #ifndef __HERMES_COMMON_NOX_SOLVER_H_
 #define __HERMES_COMMON_NOX_SOLVER_H_
 
-#if defined(H2D_REAL) || defined(H2D_COMPLEX)
+#if defined(H1D_REAL)
+#include "../../hermes1d/src/discrete_problem.h"
+#elif defined(H2D_REAL) || defined(H2D_COMPLEX)
   #include "../../hermes2d/src/discrete_problem.h"
 #elif defined(H3D_REAL) || defined(H3D_COMPLEX)
   #include "../../hermes3d/src/discrete_problem.h"

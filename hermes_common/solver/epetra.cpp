@@ -70,7 +70,7 @@ EpetraMatrix::~EpetraMatrix()
 #endif
 }
 
-void EpetraMatrix::prealloc(int n)
+void EpetraMatrix::prealloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -81,11 +81,12 @@ void EpetraMatrix::prealloc(int n)
 #endif
 }
 
-void EpetraMatrix::pre_add_ij(int row, int col)
+void EpetraMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
 #ifdef HAVE_EPETRA
-  grph->InsertGlobalIndices(row, 1, &col);
+  int col_to_pass = col;
+  grph->InsertGlobalIndices(row, 1, &col_to_pass);
 #endif
 }
 
@@ -128,7 +129,7 @@ void EpetraMatrix::free()
 #endif
 }
 
-scalar EpetraMatrix::get(int m, int n)
+scalar EpetraMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -136,12 +137,12 @@ scalar EpetraMatrix::get(int m, int n)
     std::vector<double> vals(n_entries);
     std::vector<int> idxs(n_entries);
     mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
-    for (int i = 0; i < n_entries; i++) if (idxs[i] == n) return vals[i];
+    for (int i = 0; i < n_entries; i++) if (idxs[i] == (int)n) return vals[i];
 #endif
     return 0.0;
 }
 
-int EpetraMatrix::get_num_row_entries(int row)
+int EpetraMatrix::get_num_row_entries(unsigned int row)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -151,11 +152,16 @@ int EpetraMatrix::get_num_row_entries(int row)
 #endif
 }
 
-void EpetraMatrix::extract_row_copy(int row, int len, int &n_entries, double *vals, int *idxs)
+void EpetraMatrix::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
 {
   _F_
 #ifdef HAVE_EPETRA
-  mat->ExtractGlobalRowCopy(row, len, n_entries, vals, idxs);
+  int* idxs_to_pass = new int[len];
+  for(unsigned int i = 0; i < len; i++)
+    idxs_to_pass[i] = idxs[i];
+  int n_entries_to_pass = n_entries;
+  mat->ExtractGlobalRowCopy(row, len, n_entries_to_pass, vals, idxs_to_pass);
+  delete [] idxs_to_pass;
 #endif
 }
 
@@ -170,20 +176,22 @@ void EpetraMatrix::zero()
 #endif
 }
 
-void EpetraMatrix::add(int m, int n, scalar v)
+void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (v != 0.0 && m >= 0 && n >= 0) {		// ignore dirichlet DOFs
+  if (v != 0.0) {		// ignore zero values
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-    int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n);
+    int n_to_pass = n;
+    int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
 #else
     double v_r = std::real<double>(v);
-    int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n);
+    int n_to_pass = n;
+    int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
     assert(ierr == 0);
     double v_i = std::imag<double>(v);
-    ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n);
+    ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
     assert(ierr == 0);
 #endif
   }
@@ -193,18 +201,19 @@ void EpetraMatrix::add(int m, int n, scalar v)
 /// Add a number to each diagonal entry.
 void EpetraMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i=0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void EpetraMatrix::add(int m, int n, scalar **mat, int *rows, int *cols)
+void EpetraMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (int i = 0; i < m; i++)				// rows
-    for (int j = 0; j < n; j++)			// cols
-      add(rows[i], cols[j], mat[i][j]);
+  for (unsigned int i = 0; i < m; i++)				// rows
+    for (unsigned int j = 0; j < n; j++)			// cols
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
@@ -216,7 +225,7 @@ bool EpetraMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   return false;
 }
 
-int EpetraMatrix::get_matrix_size() const
+unsigned int EpetraMatrix::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -236,7 +245,7 @@ double EpetraMatrix::get_fill_in() const
 #endif
 }
 
-int EpetraMatrix::get_nnz() const
+unsigned int EpetraMatrix::get_nnz() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -281,7 +290,7 @@ EpetraVector::~EpetraVector()
 #endif
 }
 
-void EpetraVector::alloc(int n)
+void EpetraVector::alloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -300,9 +309,9 @@ void EpetraVector::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (int i = 0; i < size; i++) (*vec)[i] = 0.0;
+  for (unsigned int i = 0; i < size; i++) (*vec)[i] = 0.0;
 #if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
-  for (int i = 0; i < size; i++) (*vec_im)[i] = 0.0;
+  for (unsigned int i = 0; i < size; i++) (*vec_im)[i] = 0.0;
 #endif
 #endif
 }
@@ -311,9 +320,9 @@ void EpetraVector::change_sign()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (int i = 0; i < size; i++) (*vec)[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) (*vec)[i] *= -1.;
 #if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
-  for (int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
 #endif
 #endif
 }
@@ -331,41 +340,37 @@ void EpetraVector::free()
 #endif
 }
 
-void EpetraVector::set(int idx, scalar y)
+void EpetraVector::set(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) (*vec)[idx] = y;
+  (*vec)[idx] = y;
 #else
-  if (idx >= 0) {
-    (*vec)[idx] = std::real(y);
-    (*vec_im)[idx] = std::imag(y);
-  }
+  (*vec)[idx] = std::real(y);
+  (*vec_im)[idx] = std::imag(y);
 #endif
 #endif
 }
 
-void EpetraVector::add(int idx, scalar y)
+void EpetraVector::add(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
 #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
-  if (idx >= 0) (*vec)[idx] += y;
+  (*vec)[idx] += y;
 #else
-  if (idx >= 0) {
-    (*vec)[idx] += std::real(y);
-    (*vec_im)[idx] += std::imag(y);
-  }
+  (*vec)[idx] += std::real(y);
+  (*vec_im)[idx] += std::imag(y);
 #endif
 #endif
 }
 
-void EpetraVector::add(int n, int *idx, scalar *y)
+void EpetraVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (int i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     add(idx[i], y[i]);
 #endif
 }

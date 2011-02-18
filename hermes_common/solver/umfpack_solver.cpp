@@ -65,7 +65,7 @@ CSCMatrix::CSCMatrix() {
   Ax = NULL;
 }
 
-CSCMatrix::CSCMatrix(int size) {
+CSCMatrix::CSCMatrix(unsigned int size) {
   _F_
   this->size = size;
   this->alloc();
@@ -76,7 +76,7 @@ CSCMatrix::~CSCMatrix() {
   free();
 }
 
-void CSCMatrix::multiply(scalar* vector_in, scalar* vector_out) 
+void CSCMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out) 
 {
   int n = this->size;
   for (int j=0; j<n; j++) vector_out[j] = 0;
@@ -87,11 +87,14 @@ void CSCMatrix::multiply(scalar* vector_in, scalar* vector_out)
   }
 }
 
+void CSCMatrix::multiply_with_scalar(scalar value) 
+{
+  for (unsigned int i = 0; i < this->nnz; i++) Ax[i] *= value;
+}
+
 void CSCMatrix::alloc() {
   _F_
   assert(pages != NULL);
-  if (size <= 0)
-      error("UMFPack failed, matrix size must be greater than 0.");
 
   // initialize the arrays Ap and Ai
   Ap = new int [size + 1];
@@ -101,7 +104,8 @@ void CSCMatrix::alloc() {
   MEM_CHECK(Ai);
 
   // sort the indices and remove duplicities, insert into Ai
-  int i, pos = 0;
+  unsigned int i;
+  int pos = 0;
   for (i = 0; i < size; i++) {
     Ap[i] = pos;
     pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
@@ -126,7 +130,7 @@ void CSCMatrix::free() {
   if (Ax != NULL) {delete [] Ax; Ax = NULL;}
 }
 
-scalar CSCMatrix::get(int m, int n)
+scalar CSCMatrix::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -143,9 +147,9 @@ void CSCMatrix::zero() {
   memset(Ax, 0, sizeof(scalar) * nnz);
 }
 
-void CSCMatrix::add(int m, int n, scalar v) {
+void CSCMatrix::add(unsigned int m, unsigned int n, scalar v) {
   _F_
-  if (v != 0.0 && m >= 0 && n >= 0)   // ignore dirichlet DOFs
+  if (v != 0.0)   // ignore zero values.
   {
     // Find m-th row in the n-th column.
     int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
@@ -164,7 +168,7 @@ void CSCMatrix::add_to_diagonal_blocks(int num_stages, CSCMatrix* mat_block)
 {
   _F_
   int ndof = mat_block->get_size();
-  if (this->get_size() != num_stages * ndof) 
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
     error("Incompatible matrix sizes in CSCMatrix::add_to_diagonal_blocks()");
 
   for (int i = 0; i < num_stages; i++) {
@@ -172,7 +176,7 @@ void CSCMatrix::add_to_diagonal_blocks(int num_stages, CSCMatrix* mat_block)
   }
 }
 
-void CSCMatrix::add_as_block(int offset_i, int offset_j, CSCMatrix* mat)
+void CSCMatrix::add_as_block(unsigned int offset_i, unsigned int offset_j, CSCMatrix* mat)
 {
   UMFPackIterator mat_it(mat);
   UMFPackIterator this_it(this);
@@ -236,16 +240,17 @@ void CSCMatrix::add_matrix(CSCMatrix* mat) {
 /// Add a number to each diagonal entry.
 void CSCMatrix::add_to_diagonal(scalar v) 
 {
-  for (int i=0; i<size; i++) {
+  for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void CSCMatrix::add(int m, int n, scalar **mat, int *rows, int *cols) {
+void CSCMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) {
   _F_
-  for (int i = 0; i < m; i++)       // rows
-    for (int j = 0; j < n; j++)     // cols
-      add(rows[i], cols[j], mat[i][j]);
+  for (unsigned int i = 0; i < m; i++)       // rows
+    for (unsigned int j = 0; j < n; j++)     // cols
+      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+        add(rows[i], cols[j], mat[i][j]);
 }
 
 /// dumping matrix and right-hand side
@@ -257,7 +262,7 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
               size, size, nnz, nnz);
-      for (int j = 0; j < size; j++)
+      for (unsigned int j = 0; j < size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -301,7 +306,7 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   }
 }
 
-int CSCMatrix::get_matrix_size() const {
+unsigned int CSCMatrix::get_matrix_size() const {
   return size;
 }
 
@@ -319,7 +324,7 @@ double CSCMatrix::get_fill_in() const {
   return nnz / (double) (size * size);
 }
 
-void CSCMatrix::create(int size, int nnz, int* ap, int* ai, scalar* ax) 
+void CSCMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax) 
 {
   _F_
   this->nnz = nnz;
@@ -327,11 +332,19 @@ void CSCMatrix::create(int size, int nnz, int* ap, int* ai, scalar* ax)
   this->Ap = new int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
   this->Ax = new scalar[nnz]; assert(this->Ax != NULL);
-  for (int i=0; i < size+1; i++) this->Ap[i] = ap[i];
-  for (int i=0; i < nnz; i++) {
+  for (unsigned int i = 0; i < size+1; i++) this->Ap[i] = ap[i];
+  for (unsigned int i = 0; i < nnz; i++) {
     this->Ax[i] = ax[i]; 
     this->Ai[i] = ai[i];
   } 
+}
+
+CSCMatrix* CSCMatrix::duplicate()
+{
+  _F_
+  CSCMatrix* new_matrix = new CSCMatrix();
+  create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
+  return new_matrix;
 }
 
 
@@ -343,7 +356,7 @@ UMFPackVector::UMFPackVector() {
   size = 0;
 }
 
-UMFPackVector::UMFPackVector(int size) {
+UMFPackVector::UMFPackVector(unsigned int size) {
   _F_
   v = NULL;
   this->size = size;
@@ -355,7 +368,7 @@ UMFPackVector::~UMFPackVector() {
   free();
 }
 
-void UMFPackVector::alloc(int n) {
+void UMFPackVector::alloc(unsigned int n) {
   _F_
   free();
   this->size = n;
@@ -371,7 +384,7 @@ void UMFPackVector::zero() {
 
 void UMFPackVector::change_sign() {
   _F_
-  for (int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 }
 
 void UMFPackVector::free() {
@@ -381,20 +394,20 @@ void UMFPackVector::free() {
   size = 0;
 }
 
-void UMFPackVector::set(int idx, scalar y) {
+void UMFPackVector::set(unsigned int idx, scalar y) {
   _F_
-  if (idx >= 0) v[idx] = y;
+  v[idx] = y;
 }
 
-void UMFPackVector::add(int idx, scalar y) {
+void UMFPackVector::add(unsigned int idx, scalar y) {
   _F_
-  if (idx >= 0) v[idx] += y;
+  v[idx] += y;
 }
 
-void UMFPackVector::add(int n, int *idx, scalar *y) {
+void UMFPackVector::add(unsigned int n, unsigned int *idx, scalar *y) {
   _F_
-  for (int i = 0; i < n; i++)
-    if (idx[i] >= 0) v[idx[i]] += y[i];
+  for (unsigned int i = 0; i < n; i++)
+    v[idx[i]] += y[i];
 }
 
 bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
@@ -403,7 +416,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < size; i++)
         fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;

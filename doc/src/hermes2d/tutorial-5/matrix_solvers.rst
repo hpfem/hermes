@@ -9,7 +9,7 @@ file into coordinate matrix structures, then passed into a SparseMatrix and Vect
 and finally solved using a LinearSolver of the user's choice.
 
 To use a solver, Hermes2D must be compiled with this solver enabled. This is done via
-compilation flags WITH_PETSC, WITH_UMFPACK, WITH_PARDISO, WITH_TRILINOS (for AztecOO and Amesos),
+compilation flags WITH_PETSC, WITH_UMFPACK, WITH_TRILINOS (for AztecOO and Amesos),
 WITH_MUMPS and WITH_SUPERLU that are set to default values in CMakeLists.txt. To change these settings, 
 use the CMake.vars file. For example, a line "set(WITH_MUMPS YES)" will override the 
 default value for the Mumps solver.
@@ -19,8 +19,8 @@ default value for the Mumps solver.
 
     matrix-solvers <matrix_solver> <input_text_file_with_matrix_and_vector> 
 
-**Available solvers:** petsc, petsc-block, umfpack, umfpack-block, pardiso, pardiso-block, 
-aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.
+**Available solvers:** petsc, petsc-block, umfpack, umfpack-block,  aztecoo, 
+aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.
 
 **Available input files:** linsys-1.txt, linsys-2.txt, linsys-3.txt,
 
