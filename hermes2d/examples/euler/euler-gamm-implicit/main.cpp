@@ -23,6 +23,9 @@ using namespace RefinementSelectors;
 // Setting this option to false saves the computation time.
 const bool CALC_TIME_DER = true;
 
+// Use of preconditioning.
+const bool PRECONDITIONING = true;
+
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
 const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
 double TAU = 1E-2;                                // Time step.
@@ -171,12 +174,6 @@ int main(int argc, char* argv[])
   wf.add_vector_form(2, callback(linear_form_2_time));
   wf.add_vector_form(3, callback(linear_form_3_time));
 
-  // Matrix form for preconditioning.
-  wf.add_matrix_form(0, 0, callback(bilinear_form_precon));
-  wf.add_matrix_form(1, 1, callback(bilinear_form_precon));
-  wf.add_matrix_form(2, 2, callback(bilinear_form_precon));
-  wf.add_matrix_form(3, 3, callback(bilinear_form_precon));
-
   // Unnecessary for FVM.
   if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
     // First flux.
@@ -235,6 +232,13 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL);
   wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL);
 
+  if(PRECONDITIONING) {
+    // Preconditioning forms.
+    wf.add_matrix_form(0, 0, callback(bilinear_form_precon));
+    wf.add_matrix_form(1, 1, callback(bilinear_form_precon));
+    wf.add_matrix_form(2, 2, callback(bilinear_form_precon));
+    wf.add_matrix_form(3, 3, callback(bilinear_form_precon));
+  }
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -271,6 +275,7 @@ int main(int argc, char* argv[])
 
   // Initialize NOX solver.
   NoxSolver solver(&dp);
+  solver.set_ls_tolerance(1E-2);
 
   // Select preconditioner.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
@@ -314,6 +319,7 @@ int main(int argc, char* argv[])
         time_der_out << iteration << '\t' << difference << std::endl;
       }
     }
+    
 
     // Visualization.
     pressure.reinit();
