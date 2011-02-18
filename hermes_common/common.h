@@ -85,7 +85,6 @@ enum MatrixSolverType
    SOLVER_UMFPACK = 0, 
    SOLVER_PETSC, 
    SOLVER_MUMPS,
-   SOLVER_PARDISO,
    SOLVER_SUPERLU,
    SOLVER_AMESOS,
    SOLVER_AZTECOO
@@ -97,7 +96,6 @@ const std::string MatrixSolverNames[7] = {
   "UMFPACK",
   "PETSc",
   "MUMPS",
-  "Pardiso",
   "SuperLU",
   "Trilinos/Amesos",
   "Trilinos/AztecOO"
@@ -106,7 +104,6 @@ const std::string MatrixSolverNames[7] = {
 #define UMFPACK_NOT_COMPILED  HERMES " was not built with UMFPACK support."
 #define PETSC_NOT_COMPILED    HERMES " was not built with PETSC support."
 #define MUMPS_NOT_COMPILED    HERMES " was not built with MUMPS support."
-#define PARDISO_NOT_COMPILED  HERMES " was not built with PARDISO support."
 #define SUPERLU_NOT_COMPILED  HERMES " was not built with SUPERLU support."
 #define NOX_NOT_COMPILED      HERMES " was not built with NOX support."
 #define AMESOS_NOT_COMPILED   HERMES " was not built with AMESOS support."

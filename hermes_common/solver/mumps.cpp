@@ -158,7 +158,7 @@ void MumpsMatrix::zero()
 void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
 {
   _F_
-  // WARNING: The additional condition v != 0.0 used in (Pardiso/Umfpack)Matrix
+  // WARNING: The additional condition v != 0.0 used in (Umfpack)Matrix
   //          produced an error in neutronics-2-group-adapt (although tutorial-07
   //          ran well).
   // Find m-th row in the n-th column.

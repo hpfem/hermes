@@ -51,10 +51,6 @@
 ///   -\c UMFPack - like the MT version of SuperLU, performs scaling and factorization in one step.
 ///                 \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
 ///                 \c HERMES_REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
-///   -\c Pardiso - performs reordering and scaling in one step, during the symbolic analysis. Both 
-///                 options \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and 
-///                 \c HERMES_REUSE_MATRIX_REORDERING have the same meaning, i.e. results of the 
-///                 symbolic phase will be reused and L, U will be computed anew.
 ///   -\c MUMPS   - If \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING is set, scaling is performed
 ///                 during analysis and only factorization is repeated during each solve.
 ///                 If \c HERMES_REUSE_MATRIX_REORDERING is set, scaling is performed during 
