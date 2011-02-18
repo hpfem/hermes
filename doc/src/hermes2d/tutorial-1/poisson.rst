@@ -211,7 +211,7 @@ Next one needs to choose a matrix solver::
 
     MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
 
-Besides UMFPACK, one can use SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PARDISO, SOLVER_PETSC, and
+Besides UMFPACK, one can use SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PETSC, and
 SOLVER_SUPERLU (and matrix-free SOLVER_NOX for nonlinear problems. this will be discussed
 later). 
 
