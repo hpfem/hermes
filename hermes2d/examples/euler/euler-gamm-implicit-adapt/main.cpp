@@ -21,12 +21,12 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 // Visualization.
-const bool HERMES_VISUALIZATION = true;          // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = true;                    // Set to "true" to enable VTK output.
-const unsigned int EVERY_NTH_STEP = 1;          // Set visual output for every nth step.
+const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
+const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // The calculation will stop when this indicator of a steady state is reached.
-const double TIME_DER_LIMIT = 1E-2;
+const double TIME_DER_LIMIT = 5E-2;
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
