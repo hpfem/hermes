@@ -1,6 +1,7 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
+#include <limits>
 
 using namespace Teuchos;
 using namespace RefinementSelectors;
@@ -19,16 +20,56 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = true;
+// Visualization.
+const bool HERMES_VISUALIZATION = true;          // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_OUTPUT = true;                    // Set to "true" to enable VTK output.
+const unsigned int EVERY_NTH_STEP = 1;          // Set visual output for every nth step.
+
+// The calculation will stop when this indicator of a steady state is reached.
+const double TIME_DER_LIMIT = 1E-2;
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
 
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.                       
 double TAU = 1E-2;                                // Time step.
+
+// Adaptivity.
+const int UNREF_FREQ = 5;                        // Every UNREF_FREQth time step the mesh is unrefined.
+int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
+                                                  // The mesh is not unrefined unless there has been a refinement since
+                                                  // last unrefinement.
+const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+                                                  // it has different meanings for various adaptive strategies (see below).
+const int STRATEGY = 1;                           // Adaptive strategy:
+                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+                                                  //   error is processed. If more elements have similar errors, refine
+                                                  //   all to keep the mesh symmetric.
+                                                  // STRATEGY = 1 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD times maximum element error.
+                                                  // STRATEGY = 2 ... refine all elements whose error is larger
+                                                  //   than THRESHOLD.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+                                                  // See User Documentation for details.
+const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+                                                  // Note that regular meshes are not supported, this is due to
+                                                  // their notoriously bad performance.
+const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
+                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+                                                  // fine mesh and coarse mesh solution in percent).
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+                                                  // this limit. This is mainly to prevent h-adaptivity to go on forever.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Matrix solver for orthogonal projections.
+                                                  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
@@ -137,12 +178,16 @@ static void calc_entropy_estimate_func(int n, Hermes::vector<scalar*> scalars, s
 int main(int argc, char* argv[])
 {
   // Load the mesh.
+  Mesh basemesh;
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &mesh);
+  mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) 
+    basemesh.refine_all_elements();
+  basemesh.refine_towards_boundary(1, 2);
+  mesh.copy(&basemesh);
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -155,11 +200,16 @@ int main(int argc, char* argv[])
   L2Space space_e(&mesh, &bc_types, P_INIT);
 
   // Initialize solutions, set initial conditions.
-  Solution prev_time_rho, prev_time_rho_v_x, prev_time_rho_v_y, prev_time_e;
-  prev_time_rho.set_exact(&mesh, ic_density);
-  prev_time_rho_v_x.set_exact(&mesh, ic_density_vel_x);
-  prev_time_rho_v_y.set_exact(&mesh, ic_density_vel_y);
-  prev_time_e.set_exact(&mesh, ic_energy);
+  Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e;
+  Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
+  sln_rho.set_exact(&mesh, ic_density);
+  sln_rho_v_x.set_exact(&mesh, ic_density_vel_x);
+  sln_rho_v_y.set_exact(&mesh, ic_density_vel_y);
+  sln_e.set_exact(&mesh, ic_energy);
+  prev_rho.set_exact(&mesh, ic_density);
+  prev_rho_v_x.set_exact(&mesh, ic_density_vel_x);
+  prev_rho_v_y.set_exact(&mesh, ic_density_vel_y);
+  prev_e.set_exact(&mesh, ic_energy);
 
   // Solutions for the time derivative estimate.
   Solution sln_temp_rho, sln_temp_rho_v_x, sln_temp_rho_v_y, sln_temp_e;
@@ -209,10 +259,10 @@ int main(int argc, char* argv[])
   }
 
   // Volumetric linear forms coming from the time discretization.
-  wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho);
-  wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho_v_x);
-  wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_time_rho_v_y);
-  wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_time_e);
+  wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_rho);
+  wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
+  wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
+  wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_e);
 
   // Surface linear forms - inner edges coming from the DG formulation.
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE);
@@ -239,33 +289,21 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(2, 2, callback(bilinear_form_precon));
     wf.add_matrix_form(3, 3, callback(bilinear_form_precon));
   }
-
-  // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
-  // If the FE problem is in fact a FV problem.
-  if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
-    dp.set_fvm();
-
-  // Project the initial solution on the FE space 
-  // in order to obtain initial vector for NOX. 
-  info("Projecting initial solution on the FE mesh.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e))];
-  OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-    Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
-
   // Filters for visualization of pressure and the two components of velocity.
-  SimpleFilter pressure(calc_pressure_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter u(calc_u_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter w(calc_w_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter Mach_number(calc_Mach_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
+  SimpleFilter pressure(calc_pressure_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter u(calc_u_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter w(calc_w_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter Mach_number(calc_Mach_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
   VectorView vview("Velocity", new WinGeom(700, 400, 600, 300));
+
+  // Initialize refinement selector.
+  L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Iteration number.
   int iteration = 0;
@@ -273,69 +311,174 @@ int main(int argc, char* argv[])
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
-  // Initialize NOX solver.
-  NoxSolver solver(&dp);
-  solver.set_ls_tolerance(1E-2);
-
   // Select preconditioner.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
-  solver.set_precond(pc);
 
-  for(t = 0.0; t < 10; t += TAU)
-  {
+  // Approximation of the time derivative.
+  // Set to a big value at the beginning.
+  double time_derivative = std::numeric_limits<double>::max();
+
+  while(time_derivative > TIME_DER_LIMIT) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
+    t += TAU;
 
-    OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-    Hermes::vector<MeshFunction*>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), coeff_vec);
+    // Periodic global derefinements.
+    if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
+      REFINEMENT_COUNT = 0;
+      info("Global mesh derefinement.");
+      mesh.unrefine_all_elements();
+      space_rho.set_uniform_order_internal(P_INIT);
+      space_rho_v_x.set_uniform_order_internal(P_INIT);
+      space_rho_v_y.set_uniform_order_internal(P_INIT);
+      space_e.set_uniform_order_internal(P_INIT);
+    }
 
-    info("Assembling by DiscreteProblem, solving by NOX.");
-    solver.set_init_sln(coeff_vec);
-    if (solver.solve())
-      Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
-      Hermes::vector<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e));
-    else
-      error("NOX failed.");
+    // Adaptivity loop:
+    int as = 1; 
+    bool done = false;
+    do {
+      info("---- Adaptivity step %d:", as);
+
+      // Construct globally refined reference mesh and setup reference space.
+      // Global polynomial order increase = 0;
+      int order_increase = 0;
+      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), order_increase);
+
+      // Project the previous time level solution onto the new fine mesh
+      // in order to obtain initial vector for NOX. 
+      info("Projecting initial solution on the FE mesh.");
+      scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
+      OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), coeff_vec);
+
+      if(as > 1) {
+        delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
+        delete rsln_rho_v_y.get_mesh();
+        delete rsln_e.get_mesh();
+      }
+      
+      // Initialize the FE problem.
+      bool is_linear = false;
+      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
+  
+      // If the FE problem is in fact a FV problem.
+      if(P_INIT.order_h == 0 && P_INIT.order_v == 0)
+        dp.set_fvm();
+      
+      // Initialize NOX solver.
+      NoxSolver solver(&dp);
+      solver.set_ls_tolerance(1E-2);
+      if(PRECONDITIONING)
+        solver.set_precond(pc);
+
+      info("Assembling by DiscreteProblem, solving by NOX.");
+      solver.set_init_sln(coeff_vec);
+      if (solver.solve())
+        Solution::vector_to_solutions(solver.get_solution(), *ref_spaces, 
+          Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+      else
+        error("NOX failed.");
+      
+      info("Number of nonlin iterations: %d (norm of residual: %g)", 
+        solver.get_num_iters(), solver.get_residual());
+      info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
+        solver.get_num_lin_iters(), solver.get_achieved_tol());
+
+      // Project the fine mesh solution onto the coarse mesh.
+      info("Projecting reference solution on coarse mesh.");
+      OGProjection::project_global(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
+                     Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), matrix_solver, 
+                     Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM)); 
+
+      // Calculate element errors and total error estimate.
+      info("Calculating error estimate.");
+      Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM));
+      double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e),
+							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e)) * 100;
+
+      // Report results.
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+        Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+
+      // If err_est too large, adapt the mesh.
+      if (err_est_rel_total < ERR_STOP) 
+        done = true;
+      else {
+        info("Adapting coarse mesh.");
+        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
+                                 THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+        REFINEMENT_COUNT++;
+        if (Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+          &space_rho_v_y, &space_e)) >= NDOF_STOP) 
+          done = true;
+        else
+          // Increase the counter of performed adaptivity steps.
+          as++;
+      }
+
+      // Clean up.
+      delete adaptivity;
+      for(unsigned int i = 0; i < ref_spaces->size(); i++)
+        delete (*ref_spaces)[i];
+    }
+    while (done == false);
 
     // Approximate the time derivative of the solution.
-    if(CALC_TIME_DER) {
-      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e));
-      bool solutions_for_adapt = false;
-      double difference = iteration == 1 ? 0 : 
-        adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&sln_temp_rho, &sln_temp_rho_v_x, &sln_temp_rho_v_y, &sln_temp_e), 
-                                              Hermes::vector<Solution *>(&prev_time_rho, &prev_time_rho_v_x, &prev_time_rho_v_y, &prev_time_e), 
-                                              (Hermes::vector<double>*) NULL, solutions_for_adapt, 
-                                              HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
-      delete adapt_for_time_der_calc;
-      sln_temp_rho.copy(&prev_time_rho);
-      sln_temp_rho_v_x.copy(&prev_time_rho_v_x);
-      sln_temp_rho_v_y.copy(&prev_time_rho_v_y);
-      sln_temp_e.copy(&prev_time_e);
-
-      // Info about the approximate time derivative.
-      if(iteration > 1)
-      {
-        info("Approximate the norm time derivative : %g.", difference);
-        time_der_out << iteration << '\t' << difference << std::endl;
-      }
+    Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
+    bool solutions_for_adapt = false;
+    time_derivative = iteration == 1 ? time_derivative : 
+      adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
+                                            Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
+                                            (Hermes::vector<double>*) NULL, solutions_for_adapt) / TAU;
+    delete adapt_for_time_der_calc;
+    
+    // Info about the approximate time derivative.
+    if(iteration > 1) {
+      info("Approximate the norm time derivative : %g.", time_derivative);
+      time_der_out << iteration << '\t' << time_derivative << std::endl;
     }
     
+    // Copy the solutions into previous time level ones.
+    prev_rho.copy(&rsln_rho);
+    prev_rho_v_x.copy(&rsln_rho_v_x);
+    prev_rho_v_y.copy(&rsln_rho_v_y);
+    prev_e.copy(&rsln_e);
 
     // Visualization.
-    pressure.reinit();
-    u.reinit();
-    w.reinit();
-    Mach_number.reinit();
-    entropy_estimate.reinit();
-    pressure_view.show(&pressure);
-    entropy_production_view.show(&entropy_estimate);
-    Mach_number_view.show(&Mach_number);
-    vview.show(&u, &w);
-
-    info("Number of nonlin iterations: %d (norm of residual: %g)", 
-      solver.get_num_iters(), solver.get_residual());
-    info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
-      solver.get_num_lin_iters(), solver.get_achieved_tol());
+    if((iteration - 1) % EVERY_NTH_STEP == 0) {
+      // Hermes visualization.
+      if(HERMES_VISUALIZATION) {
+        pressure.reinit();
+        u.reinit();
+        w.reinit();
+        Mach_number.reinit();
+        entropy_estimate.reinit();
+        pressure_view.show(&pressure);
+        entropy_production_view.show(&entropy_estimate);
+        Mach_number_view.show(&Mach_number);
+        vview.show(&u, &w);
+      }
+      // Output solution in VTK format.
+      if(VTK_OUTPUT) {
+        pressure.reinit();
+        Mach_number.reinit();
+        Linearizer lin;
+        char filename[40];
+        sprintf(filename, "pressure-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", false);
+        sprintf(filename, "pressure-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", true);
+        sprintf(filename, "Mach number-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", false);
+        sprintf(filename, "Mach number-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", true);
+      }
+    }
   }
   
   pressure_view.close();
