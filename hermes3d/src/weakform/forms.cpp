@@ -18,8 +18,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "forms.h"
-#include "../../hermes_common/callstack.h"
-#include "integrals/hcurl.h"
+#include "../../../hermes_common/callstack.h"
+#include "../integrals/hcurl.h"
 
 Geom<Ord> init_geom(int marker) {
 	_F_

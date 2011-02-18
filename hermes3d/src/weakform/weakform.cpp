@@ -20,12 +20,12 @@
 // This file was taken from hermes2d and adjusted for hermes3d
 //
 
-#include "h3d_common.h"
+#include "../h3d_common.h"
 #include "weakform.h"
-#include "../../hermes_common/matrix.h"
-#include "../../hermes_common/error.h"
-#include "../../hermes_common/trace.h"
-#include "../../hermes_common/callstack.h"
+#include "../../../hermes_common/matrix.h"
+#include "../../../hermes_common/error.h"
+#include "../../../hermes_common/trace.h"
+#include "../../../hermes_common/callstack.h"
 
 WeakForm::WeakForm(int neq, bool mat_free)
 {
