@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     case 8: butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded; break;
     case 9: butcher_table_type = Implicit_SDIRK_CASH_5_24_embedded; break;
     case 10: butcher_table_type = Implicit_SDIRK_CASH_5_34_embedded; break;
-    case 11: butcher_table_type = Implicit_DIRK_7_45_embedded; break;
+    case 11: butcher_table_type = Implicit_DIRK_ISMAIL_7_45_embedded; break;
 
     default: error("Admissible command-line options are from 1 to 11.");
   }
