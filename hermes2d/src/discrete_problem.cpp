@@ -787,25 +787,24 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
-
   // Determine the minimum mesh seq in this stage.
   min_dg_mesh_seq = 0;
   for(unsigned int i = 0; i < stage.meshes.size(); i++)
     if(stage.meshes[i]->get_seq() < min_dg_mesh_seq || i == 0)
       min_dg_mesh_seq = stage.meshes[i]->get_seq();
   
-    // Initialize the NeighborSearches.
+  // Initialize the NeighborSearches.
   // 5 is for bits per page in the array.
   LightArray<NeighborSearch*> neighbor_searches(5);
   init_neighbors(neighbor_searches, stage, isurf);
 
-    // Create a multimesh tree;
-    DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
-    build_multimesh_tree(root, neighbor_searches);
+  // Create a multimesh tree;
+  DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
+  build_multimesh_tree(root, neighbor_searches);
     
-    // Update all NeighborSearches according to the multimesh tree.
-    // After this, all NeighborSearches in neighbor_searches should have the same count of neighbors and proper set of transformations
-    // for the central and the neighbor element(s) alike.
+  // Update all NeighborSearches according to the multimesh tree.
+  // After this, all NeighborSearches in neighbor_searches should have the same count of neighbors and proper set of transformations
+  // for the central and the neighbor element(s) alike.
   // Also check that every NeighborSearch has the same number of neighbor elements.
   unsigned int num_neighbors = 0;
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
@@ -818,12 +817,12 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
         error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem::assemble_surface_integrals().");
     }
 
-    // Create neighbor psss, refmaps.
-    Hermes::vector<PrecalcShapeset *> npss;
-    Hermes::vector<PrecalcShapeset *> nspss;
-    Hermes::vector<RefMap *> nrefmap;
+  // Create neighbor psss, refmaps.
+  Hermes::vector<PrecalcShapeset *> npss;
+  Hermes::vector<PrecalcShapeset *> nspss;
+  Hermes::vector<RefMap *> nrefmap;
 
-    // Initialize neighbor precalc shapesets and refmaps.      
+  // Initialize neighbor precalc shapesets and refmaps.      
   // This is only needed when there are matrix DG forms present.
   if(DG_matrix_forms_present)
     for (unsigned int i = 0; i < stage.idx.size(); i++) {
@@ -835,11 +834,11 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
       nrefmap[i]->set_quad_2d(&g_quad_2d_std);
     }
 
-    for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
-      // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
-      // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
-      // will be marked as visited, even though the edge was not calculated.
-      bool processed = true;
+  for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
+    // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
+    // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
+    // will be marked as visited, even though the edge was not calculated.
+    bool processed = true;
     for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
       if(neighbor_searches.present(i))
         if(!neighbor_searches.get(i)->neighbors.at(neighbor_i)->visited)
@@ -1454,7 +1453,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-        rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
+      rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
     }
   }
 }
