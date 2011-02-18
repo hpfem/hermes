@@ -8,19 +8,19 @@ include (${hermes3d_SOURCE_DIR}/CMake.common)
 
 add_executable(${BIN_DIRICHLET}	main.cpp)
 set_common_target_properties(${BIN_DIRICHLET})
-
+get_target_property(CPFL ${BIN_DIRICHLET} COMPILE_FLAGS)
 set_target_properties(${BIN_DIRICHLET}
     PROPERTIES
-	COMPILE_FLAGS -DDIRICHLET)
+	COMPILE_FLAGS "${CPFL} -DDIRICHLET")
 
 # Newton ####
 
 add_executable(${BIN_NEWTON}	main.cpp)
 set_common_target_properties(${BIN_NEWTON})
-
+get_target_property(CPFL ${BIN_NEWTON} COMPILE_FLAGS)
 set_target_properties(${BIN_NEWTON}
     PROPERTIES
-	COMPILE_FLAGS -DNEWTON)
+	COMPILE_FLAGS "${CPFL} -DNEWTON")
 	
 # Tests
 
