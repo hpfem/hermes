@@ -70,6 +70,8 @@ public:
   void set_conv_iters(int iters)        { conv.max_iters = iters; }
   void set_conv_abs_resid(double resid) { conv_flag.absresid = 1; conv.abs_resid = resid; }
   void set_conv_rel_resid(double resid) { conv_flag.relresid = 1; conv.rel_resid = resid; }
+  void disable_abs_resid() { conv_flag.absresid = 0; }
+  void disable_rel_resid() { conv_flag.relresid = 0; }
   void set_conv_update(double update)   { conv_flag.update = 1; conv.update = update; }
   void set_conv_wrms(double rtol, double atol) 
   {

@@ -3,11 +3,11 @@
 	set PDD_OLD_DIR=%CD%
 
 	if exist inttypes.h goto INTTP_FOUND
-	echo A file 'inttypes.h' not found. Script not executed in MSVC2008 directory. Please, copy contents of a directory 'MSVC2008' to hermes2d and run the script 'prepare_dep_dir.bat'.
+	echo A file 'inttypes.h' not found. Script not executed in MSVC directory. Please, copy contents of a directory 'MSVC' to hermes2d and run the script 'prepare_dep_dir.bat'.
 	goto END
 :INTTP_FOUND
 
-	echo This script has to be executed in MSVC2008 directory.
+	echo This script has to be executed in MSVC directory.
 	cd ..\..
 	if not exist dependecies goto CREATE_DIR
 	echo Directory structure seems to exist already. Quiting.

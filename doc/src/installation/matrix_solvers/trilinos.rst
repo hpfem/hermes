@@ -48,21 +48,11 @@ Then execute::
 
 Windows
 ~~~~~~~
-| First, you need to install CLAPACK/CBLAS:
-| 
-| Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
-| 
-| Use cmake to configure and build the debug version of clapack.
-| 
-| Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
-| 
-| Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
- 
 | Download the sources for the latest version from the `Trilinos page <http://trilinos.sandia.gov/download/trilinos-10.6.html>`__ and unpack them in some temporary directory.
 | 
 | Go to the Trilinos source directory.
 | 
-| In the following, replace {CLAPACK_DIR} with the full path to your clapack-3.2.1-CMAKE directory without any quotes.
+| In the following, replace {CLAPACK_DIR} with the full path to your clapack-3.2.1-CMAKE directory (where you installed CLAPACK as a Hermes's dependency) without any quotes.
 Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
 
 

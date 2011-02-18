@@ -243,11 +243,13 @@ void ScalarView::show(MeshFunction* sln, double eps, int item,
   verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
   
   // Now we reset the active element if it was set before the MeshFunction sln entered this method.
-  if(active_element != NULL)
-    // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
-    // there is nothing to restore to.
-    if(active_element->active)
-      sln->set_active_element(active_element);
+  // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
+  if(dynamic_cast<Solution *>(sln) != NULL)
+    if(active_element != NULL)
+      // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
+      // there is nothing to restore to.
+      if(active_element->active)
+        sln->set_active_element(active_element);
 }
 
 void ScalarView::show_linearizer_data(double eps, int item)

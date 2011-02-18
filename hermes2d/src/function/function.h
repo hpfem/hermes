@@ -218,10 +218,6 @@ public:
   /// \brief Returns the current quadrature points.
   Quad2D* get_quad_2d() const { return quads[cur_quad]; }
 
-  /// See Transformable::pop_transform()
-  virtual void pop_transform();
-
-
   /// \brief Frees all precalculated tables.
   virtual void free() = 0;
 
@@ -362,15 +358,6 @@ void Function<TYPE>::set_quad_2d(Quad2D* quad_2d)
 
   error("too many quadratures.");
 }
-
-
-template<typename TYPE>
-void Function<TYPE>::pop_transform()
-{
-  Transformable::pop_transform();
-  update_nodes_ptr();
-}
-
 
 template<typename TYPE>
 int Function<TYPE>::idx2mask[6][2] =

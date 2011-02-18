@@ -28,6 +28,8 @@ Building Hermes
    If you have Cygwin installed, your might have an error "Coulld not create named generator Visual Studio 10". This is because your 
    cmake path is contaminated by Cygwin's cmake. Try to use absolute path for windows cmake.exe. 
 
+   You also need to copy the file 'my_hermes_root\\CMakeVars\\MSVC\\inttypes.h' to the include folder in your dependency folder.
+
  - Open the SLN file 'my_hermes_root\\hermes.sln' and build Hermes. Actually, this step is not necessary if you plan to use Hermes in your projects rather than explore tutorials.
 
 Configuration options
@@ -80,7 +82,7 @@ As the first step, create a  directory structure.
     - Open it using your version of MSVC (newer versions will automatically convert the solution file).
     - Now build the python project (default one) and from the same directory copy python26_d.lib to dependencies\\lib and python26_d.dll to dependencies\\bin.
     - Copy Python.h from Python-2.6.5\\Include\\ to dependencies\\include. This is for the Python library.
-    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64).
+    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64.
     - Install Python. You can install it into the same directory where you copied the downloaded source.
 	- Add the path to python.exe to your PATH environment variable.
     - Open a command prompt, execute python, and you will see something like::
@@ -105,23 +107,25 @@ As the first step, create a  directory structure.
       - Open a command prompt, got to 'my_Cython_root', and excute following::
 
             python.exe setup.py install
+			
+      - Add the path to 'my_Cython_root\\bin' to your system PATH.
 
   - PTHREAD(2.8.0)
 
     - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
     - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
 
-  - UMFPACK(ver-5.4.0)
+  - UMFPACK
 
     - UFConfig(ver-3.4.0):
 
-      - Download UFconfig source file package (http://www.cise.ufl.edu/research/sparse/UFconfig/), and unpack it. 
+      - Download the UFconfig source file package (http://www.cise.ufl.edu/research/sparse/UFconfig/), and unpack it. 
       - Copy UFconfig.h to 'include' dependecy directory.
 
     - AMD(ver-2.2.0):
 
       - Download AMD source file package (http://www.cise.ufl.edu/research/sparse/amd/).
-      - Unpack sources file into a directory that has the same parent as a directory where you unpacked UFconfig.
+      - Unpack source files into a directory that has the same parent as a directory where you unpacked UFconfig.
       - Copy the file 'my_hermes_root\\CMakeVars\\MSVC\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
       - Run MSVC command prompt and switch to 'my_amd_directory\\Lib'.
       - Compile AMD using 'nmake -f AMD.nmake'.
@@ -140,6 +144,13 @@ As the first step, create a  directory structure.
 
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
  
+  - CLAPACK
+    - First, you need to install CLAPACK/CBLAS:
+    - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
+    - Use cmake to configure and build the debug version of clapack.
+    - Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
+    - Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
+
   - OpenGL support (optional)
 
     - If a directive NOGLUT is used, this step and all its substeps can be skipped.

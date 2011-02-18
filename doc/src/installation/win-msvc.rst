@@ -28,6 +28,8 @@ Building Hermes
 
    If you have Cygwin installed, your might have an error "Coulld not create named generator Visual Studio 10". This is because your 
    cmake path is contaminated by Cygwin's cmake. Try to use absolute path for windows cmake.exe. 
+   
+   You also need to copy the file 'my_hermes_root\\CMakeVars\\MSVC\\inttypes.h' to the include folder in your dependency folder.
 
  - Open the SLN file 'my_hermes_root\\hermes.sln' and build Hermes. Actually, this step is not necessary if you plan to use Hermes in your projects rather than explore tutorials.
 
@@ -80,7 +82,7 @@ This list works for 32-bit version of Hermes.
     - Open it using your version of MSVC (newer versions will automatically convert the solution file).
     - Now build the python project (default one) and from the same directory copy python26_d.lib to dependencies\\lib and python26_d.dll to dependencies\\bin.
     - Copy Python.h from Python-2.6.5\\Include\\ to dependencies\\include. This is for the Python library.
-    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64)
+    - Download Python MSI installer http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi ( http://www.python.org/ftp/python/2.6.5/python-2.6.5.amd64.msi for AMD64.
     - Install Python. You can install it into the same directory where you copied the downloaded source.
 	- Add the path to python.exe to your PATH environment variable.
     - Open a command prompt, execute python, and you will see something like::
@@ -108,6 +110,8 @@ This list works for 32-bit version of Hermes.
       - Open a command prompt, got to 'my_Cython_root', and excute following::
 
             python.exe setup.py install
+
+      - Add the path to 'my_Cython_root\\bin' to your system PATH.
 
   - PTHREAD(2.8.0)
 
@@ -141,23 +145,22 @@ This list works for 32-bit version of Hermes.
 
   - CMAKE
 
-    - Download CMAKE (http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) version 2.6.4 source, and cmake 2.8.1 binary. 
-    - Since 2.8.1 came out after MSVC10, you need to download (http://www.cmake.org/files/v2.8/CMakeVS10FindMake.cmake) and 
-      replace your_cmake_2.8.1_root\\share\\cmake-2.8\\Modules\\CMakeVS10FindMake.cmake, If you are using MSVC10. 
-    - Double click cmake-gui (2.8.1), choose your_cmake_2.6.4_root as source directory, and your_cmake_2.6.4_tmp as build directory. 
-      click configure button, wait for a while.  After configuration is done, change CMAKE_INSTALL_PREFIX as: C:\\my_work\\dependencies 
-      so that cmake is installed under the 'dependencies\\bin' and accessible from every location. 
-    - Now, go to your_cmake_2.6.4_tmp (build dir), you will find a CMAKE.sln file asociated with MSVC. Open it with MSVC08/10, and 
-      find project "INSTALL", right click, choose "Build". 
- 
+    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
+
+  - CLAPACK
+    - First, you need to install CLAPACK/CBLAS:
+    - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
+    - Use cmake to configure and build the debug version of clapack.
+    - Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
+    - Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
+
   - OpenGL support (optional)
 
     - If a directive NOGLUT is used, this step and all its substeps can be skipped.
     - FREEGLUT 
 
       - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
-      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in MSVC08, MSVC08 will convert file into a newer format, 
-          i.e., SLN and VCPROJ (MSVC10 user could open the converted file freeglut.sln).
+      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
       - Compile Debug or Release version. Debug version is recommended in a case of debugging.
       - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
   

@@ -351,9 +351,11 @@ bool NoxSolver::solve()
      Teuchos::RCP<NOX::StatusTest::Combo> converged =
         Teuchos::rcp(new NOX::StatusTest::Combo(NOX::StatusTest::Combo::AND));
 
-     Teuchos::RCP<NOX::StatusTest::NormF> absresid =
+     if (conv_flag.absresid) {
+       Teuchos::RCP<NOX::StatusTest::NormF> absresid =
         Teuchos::rcp(new NOX::StatusTest::NormF(conv.abs_resid, conv.norm_type, conv.stype));
-     converged->addStatusTest(absresid);
+      converged->addStatusTest(absresid);
+     }
 
      if (conv_flag.relresid) {
        Teuchos::RCP<NOX::StatusTest::NormF> relresid = 
