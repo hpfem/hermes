@@ -24,7 +24,6 @@ set(SRC
   ${HERMES_COMMON_DIR}/solver/aztecoo.cpp 
   ${HERMES_COMMON_DIR}/solver/amesos.cpp
   ${HERMES_COMMON_DIR}/solver/mumps.cpp 
-  ${HERMES_COMMON_DIR}/solver/pardiso.cpp 
   ${HERMES_COMMON_DIR}/solver/petsc.cpp 
   ${HERMES_COMMON_DIR}/solver/umfpack_solver.cpp
   ${HERMES_COMMON_DIR}/solver/superlu.cpp
@@ -68,7 +67,6 @@ macro(LIBRARY_SETTINGS BIN)
       ${UMFPACK_LIBRARY}
       ${SUPERLU_LIBRARY}
       ${AMD_LIBRARY}
-      ${PARDISO_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_REAL_LIBRARIES}

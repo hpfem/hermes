@@ -34,8 +34,8 @@ const int NORM = 1;                     // To measure errors.
 double NEWTON_TOL_COARSE = 1e-6;        // Newton tolerance on coarse mesh.
 double NEWTON_TOL_REF = 1e-6;           // Newton tolerance on fine mesh.
 int NEWTON_MAX_ITER = 150;              // Maximum number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 double K = 1.0;                         // Equation parameter.

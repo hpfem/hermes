@@ -20,8 +20,8 @@ int N_SLN = 2;                                    // Number of solutions.
 double K_EFF = 1.0;                               // Initial approximation.
 
 // Geometry and materials.
-const int N_MAT = 3;			                        // Number of macroelements with different materials.
-const int N_GRP = 1;			                        // Number of energy groups in multigroup approximation.
+const int N_MAT = 3;			          // Number of macroelements with different materials.
+const int N_GRP = 1;			          // Number of energy groups in multigroup approximation.
 double interfaces[N_MAT+1] = { 0, 50, 100, 125 }; // Coordinates of material regions interfaces [cm].
 int Marker_inner = 0;                             // Material marker for inner core elements.
 int Marker_outer = 1;                             // Material marker for outer core elements.
@@ -32,26 +32,25 @@ double NEWTON_TOL = 1e-5;                         // Tolerance.
 int NEWTON_MAX_ITER = 150;                        // Max. number of Newton iterations.
 double TOL_SI = 1e-8;                             // Tolerance for the source (eigenvalue) iteration.
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
-
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // Boundary conditions.
-double Val_neumann_left = 0.0;		// Total reflection on the left (zero Neumann).
-double Val_albedo_right = 0.5; 		// Vacuum on the right.
+double Val_neumann_left = 0.0;		          // Total reflection on the left (zero Neumann).
+double Val_albedo_right = 0.5; 		          // Vacuum on the right.
 
 // Physical properties of each material type.
 static double D[N_GRP][N_MAT] = 	
-	{ { 0.650, 0.750, 1.150 } };		// Diffusion coefficient.
+	{ { 0.650, 0.750, 1.150 } };		  // Diffusion coefficient.
 static double Sa[N_GRP][N_MAT] = 	
-	{ { 0.120, 0.100, 0.010 } };		// Absorption cross-section.
+	{ { 0.120, 0.100, 0.010 } };		  // Absorption cross-section.
 static double nSf[N_GRP][N_MAT] = 
-	{ { 0.185, 0.150, 0.000 } };		// Fission-yield cross section (\nu \Sigma_f).
+	{ { 0.185, 0.150, 0.000 } };		  // Fission-yield cross section (\nu \Sigma_f).
 static double chi[N_GRP] = 
-	{ 1.0 };				                // Fission spectrum (for multigroup calculations).
+	{ 1.0 };				  // Fission spectrum (for multigroup calculations).
 
 // Other physical properties.
-static double nu = 2.43; 		      // Nean number of neutrons released by fission.
-static double eps = 3.204e-11;		// Nean energy release of each fission evt [J].
+static double nu = 2.43; 		         // Nean number of neutrons released by fission.
+static double eps = 3.204e-11;		         // Nean energy release of each fission evt [J].
 
 
 // Calculate \int \nu \Sigma_f(x) u(x) over an element 'e'.

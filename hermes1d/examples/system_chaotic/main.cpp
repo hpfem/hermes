@@ -37,8 +37,8 @@ double DAMPING = 1.0;       // DAMPING is an artificial param. used to
 double NEWTON_TOL = 1e-5;               // Tolerance.
 int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_MUMPS, 
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
 Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,1), new BCSpec(1,0), new BCSpec(2,0), new BCSpec(3,0));
