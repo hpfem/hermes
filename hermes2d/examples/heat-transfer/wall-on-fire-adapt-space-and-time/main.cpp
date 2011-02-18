@@ -1,34 +1,37 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
+#include "runge_kutta.h"
 
 using namespace RefinementSelectors;
 
-//  This example is analogous to examples 01-timedep-adapt-space-only and 
-//  02-timedep-adapt-time-only but it combines adaptive time stepping with 
-//  spatial adaptivity. If an embedded method is used, temporal error is 
-//  measured and visualized. Adaptive time stepping can be turned on or 
-//  off using the flag ADAPTIVE_TIME_STEP_ON. An embedded R-K method must be 
-//  used if ADAPTIVE_TIME_STEP_ON == true.
+//  This example models a nonstationary distribution of temperature within a wall
+//  exposed to ISO fire.
 //
-//  PDE: time-dependent heat transfer equation with nonlinear thermal
-//  conductivity:
+//  PDE: non-stationary heat transfer equation
+//       HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
+//  This equation is, however, written in such a way that the time-derivative 
+//  is on the left and everything else on the right:
 //
-//  du/dt - div[lambda(u)grad u] = f.
+//  dT/dt = LAMBDA * Laplace T / (HEATCAP * RHO).
 //
-//  Domain: square (-10,10)^2.
+//  We only need the weak formulation of the right-hand side.
 //
-//  BC:  Dirichlet, given by the function dir_lift() below.
-//  IC: Same function dir_lift().
+//  Domain: rectangle 4.0 x 0.5 (file wall.mesh).
 //
-//  Time-integration: Use an embedded method for adaptive time stepping. 
+//  IC:  T = TEMP_INIT.
+//  BC:  Bottom edge: dT/dn = ALPHA_BOTTOM*(T_fire(x, time) - T)
+//       Vertical edges: dT/dn = 0 
+//       Top edge: dT/dn = ALPHA_TOP*(TEMP_EXT_TOP - T)
+//
+//  Time-stepping: Arbitrary Runge-Kutta methods.
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-double time_step = 0.05;                          // Time step. 
-const double T_FINAL = 2.0;                       // Time interval length.
+const int P_INIT = 3;                             // Polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
+double time_step = 20;                            // Time step in seconds.
 
 // Spatial adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
@@ -70,17 +73,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
                                                   // The methods for the adaptive and fixed-step versions are set
                                                   // below. An embedded method must be used with adaptive time stepping. 
-const double TIME_ERR_TOL_UPPER = 1.0;            // If rel. temporal error is greater than this threshold, decrease time 
+const double TIME_ERR_TOL_UPPER = 1.0;                // If rel. temporal error is greater than this threshold, decrease time 
                                                   // step size and repeat time step.
-const double TIME_ERR_TOL_LOWER = 0.8;            // If rel. temporal error is less than this threshold, increase time step
+const double TIME_ERR_TOL_LOWER = 0.5;                // If rel. temporal error is less than this threshold, increase time step
                                                   // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
-const double TIME_STEP_DEC_RATIO = 0.6;           // Time step decrease ratio (applied when rel. temporal error is too large).
+const double TIME_STEP_DEC_RATIO = 0.8;           // Time step decrease ratio (applied when rel. temporal error is too large).
 
 // Newton's method.
-const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on fine mesh.
-const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
-const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
+const double NEWTON_TOL_COARSE = 0.001;           // Stopping criterion for Newton on fine mesh.
+const double NEWTON_TOL_FINE = 0.005;             // Stopping criterion for Newton on fine mesh.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
 // in the name of each method is its order. The one before last, if present, is the number of stages.
@@ -99,8 +102,24 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Model parameters.
-#include "model.cpp"
+// Boundary markers.
+const int BDY_BOTTOM = 1;
+const int BDY_RIGHT = 2;
+const int BDY_TOP = 3;
+const int BDY_LEFT = 4;
+
+// Problem parameters.
+const double TEMP_INIT = 20;       // Initial temperature.
+const double TEMP_EXT_TOP = 20;    // Exterior temperature top;
+
+const double ALPHA_BOTTOM = 25;    // Heat flux coefficient on the bottom edge.
+const double ALPHA_TOP = 8;        // Heat flux coefficient on the top edge.
+const double HEATCAP = 1020;       // Heat capacity.
+const double RHO = 2200;           // Material density.
+const double T_FINAL = 4000;       // Length of time interval in seconds.
+
+// Problem-specific functions.
+#include "extras.cpp"
 
 // Weak forms.
 #include "forms.cpp"
@@ -122,54 +141,59 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &basemesh);
+  mloader.load("wall.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
+  basemesh.refine_towards_boundary(BDY_BOTTOM, INIT_REF_NUM_BDY);
   mesh.copy(&basemesh);
 
   // Enter boundary markers.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_LEFT));
+  bc_types.add_bc_newton(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP));
 
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Initialize an H1 space with default shapeset.
+  H1Space space(&mesh, &bc_types, NULL, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-
+  info("ndof = %d.", ndof);
+ 
   // Convert initial condition into a Solution.
-  Solution* sln_prev_time = new Solution(&mesh, init_cond);
+  Solution* sln_prev_time = new Solution(&mesh, TEMP_INIT);
 
-  // Initialize the weak formulation.
+  // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_prev_time);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_prev_time);
+  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord, HERMES_NONSYM, HERMES_ANY, sln_prev_time);
+  wf.add_vector_form(stac_residual_vol, stac_residual_vol_ord, HERMES_ANY, sln_prev_time);
+  wf.add_matrix_form_surf(stac_jacobian_bottom, stac_jacobian_bottom_ord, BDY_BOTTOM, sln_prev_time);
+  wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, sln_prev_time);
+  wf.add_matrix_form_surf(stac_jacobian_top, stac_jacobian_top_ord, BDY_TOP, sln_prev_time);
+  wf.add_vector_form_surf(stac_residual_top, stac_residual_top_ord, BDY_TOP, sln_prev_time);
 
-  // Initialize the discrete problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, &space, is_linear);
+  // Initialize the FE problem.
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, &space, is_linear);
 
   // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Visualize initial condition.
   char title[100];
-  ScalarView sln_view("Initial condition", new WinGeom(0, 0, 440, 350));
-  OrderView ordview("Initial mesh", new WinGeom(445, 0, 440, 350));
-  ScalarView time_error_view("Temporal error", new WinGeom(0, 405, 440, 350));
-  ScalarView space_error_view("Spatial error", new WinGeom(445, 405, 440, 350));
-  sln_view.show(sln_prev_time);
+  ScalarView sln_view("Initial condition", new WinGeom(0, 0, 1500, 360));
+  OrderView ordview("Initial mesh", new WinGeom(0, 410, 1500, 360));
+  ScalarView time_error_view("Temporal error", new WinGeom(0, 800, 1500, 360));
+  time_error_view.fix_scale_width(40);
+  ScalarView space_error_view("Spatial error", new WinGeom(0, 1220, 1500, 360));
+  space_error_view.fix_scale_width(40);
+  sln_view.show(sln_prev_time, HERMES_EPS_VERYHIGH);
   ordview.show(&space);
 
   // Graph for time step history.
   SimpleGraph time_step_graph;
   if (ADAPTIVE_TIME_STEP_ON) info("Time step history will be saved to file time_step_history.dat.");
-  
-  // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+
+  // Time stepping loop:
+  double current_time = 0; int ts = 1;
   do 
   {
     info("Begin time step %d.", ts);
@@ -220,7 +244,7 @@ int main(int argc, char* argv[])
         sprintf(title, "Temporal error est, spatial adaptivity step %d", as);     
         time_error_view.set_title(title);
         time_error_view.show_mesh(false);
-        time_error_view.show(time_error_fn);
+        time_error_view.show(time_error_fn, HERMES_EPS_VERYHIGH);
 
         rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
         if (ADAPTIVE_TIME_STEP_ON == false) info("rel_err_time: %g%%", rel_err_time);
@@ -266,7 +290,7 @@ int main(int argc, char* argv[])
       space_error_view.set_title(title);
       space_error_view.show_mesh(false);
       AbsFilter abs_sef(space_error_fn);
-      space_error_view.show(&abs_sef);
+      space_error_view.show(&abs_sef, HERMES_EPS_VERYHIGH);
 
       // Calculate element errors and spatial error estimate.
       info("Calculating spatial error estimate.");
@@ -292,7 +316,7 @@ int main(int argc, char* argv[])
       }
       
       // Clean up.
-      delete adaptivity;
+      delete adaptivity; 
       delete ref_space;
       delete ref_dp;
       delete space_error_fn;
@@ -307,7 +331,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Solution, time %g s", current_time);
     sln_view.set_title(title);
     sln_view.show_mesh(false);
-    sln_view.show(&ref_sln);
+    sln_view.show(&ref_sln, HERMES_EPS_VERYHIGH);
     sprintf(title, "Mesh, time %g s", current_time);
     ordview.set_title(title);
     ordview.show(&space);

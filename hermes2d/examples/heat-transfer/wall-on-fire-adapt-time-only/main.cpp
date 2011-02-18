@@ -26,12 +26,18 @@
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
+const int P_INIT = 3;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
-const double time_step = 5;                       // Time step in seconds.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
+double time_step = 20;                            // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const double TIME_TOL_UPPER = 1.0;                // If rel. temporal error is greater than this threshold, decrease time 
+                                                  // step size and repeat time step.
+const double TIME_TOL_LOWER = 0.5;                // If rel. temporal error is less than this threshold, increase time step
+                                                  // but do not repeat time step (this might need further research).
+const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
+const double TIME_STEP_DEC_RATIO = 0.8;           // Time step decrease ratio (applied when rel. temporal error is too large).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -50,7 +56,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_Radau_IIA_3_5;
+ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
 // Boundary markers.
 const int BDY_BOTTOM = 1;
@@ -104,10 +110,11 @@ int main(int argc, char* argv[])
   // Previous and next time level solutions.
   Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
   Solution* sln_time_new = new Solution(&mesh);
+  Solution* time_error_fn = new Solution(&mesh, 0.0);
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord);
+  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord, HERMES_NONSYM, HERMES_ANY, sln_time_prev);
   wf.add_vector_form(stac_residual_vol, stac_residual_vol_ord, HERMES_ANY, sln_time_prev);
   wf.add_matrix_form_surf(stac_jacobian_bottom, stac_jacobian_bottom_ord, BDY_BOTTOM, sln_time_prev);
   wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, sln_time_prev);
@@ -119,11 +126,17 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, &space, is_linear);
 
   // Initialize views.
-  ScalarView Tview("Temperature", new WinGeom(0, 0, 1000, 250));
-  Tview.fix_scale_width(30);
+  ScalarView Tview("Temperature", new WinGeom(0, 0, 1500, 400));
+  Tview.fix_scale_width(40);
+  ScalarView eview("Temporal error", new WinGeom(0, 450, 1500, 400));
+  eview.fix_scale_width(40);
+
+  // Graph for time step history.
+  SimpleGraph time_step_graph;
+  info("Time step history will be saved to file time_step_history.dat.");
 
   // Time stepping loop:
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -131,13 +144,45 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, time_error_fn, &dp, matrix_solver,
 		      verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
-    // Show the new time level solution.
+    // Plot error function.
     char title[100];
+    sprintf(title, "Temporal error, t = %g", current_time);
+    eview.set_title(title);
+    AbsFilter abs_tef(time_error_fn);
+    eview.show(&abs_tef, HERMES_EPS_VERYHIGH);
+
+    // Calculate relative time stepping error and decide whether the 
+    // time step can be accepted. If not, then the time step size is 
+    // reduced and the entire time step repeated. If yes, then another
+    // check is run, and if the relative error is very low, time step 
+    // is increased.
+    double rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(sln_time_new, HERMES_H1_NORM) * 100;
+    info("rel_err_time = %g%%", rel_err_time);
+    if (rel_err_time > TIME_TOL_UPPER) {
+      info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and restarting time step.", 
+           TIME_TOL_UPPER, time_step, time_step * TIME_STEP_DEC_RATIO);
+      time_step *= TIME_STEP_DEC_RATIO;
+      continue;
+    }
+    if (rel_err_time < TIME_TOL_LOWER) {
+      info("rel_err_time = below lower limit %g%% -> increasing time step from %g to %g", 
+           TIME_TOL_UPPER, time_step, time_step * TIME_STEP_INC_RATIO);
+      time_step *= TIME_STEP_INC_RATIO;
+    }
+
+    // Add entry to the timestep graph.
+    time_step_graph.add_values(current_time, time_step);
+    time_step_graph.save("time_step_history.dat");
+
+    // Update time.
+    current_time += time_step;
+
+    // Show the new time level solution.
     sprintf(title, "Time %3.2f s", current_time);
     Tview.set_title(title);
     Tview.show(sln_time_new);
@@ -145,8 +190,7 @@ int main(int argc, char* argv[])
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);
 
-    // Increase current time and time step counter.
-    current_time += time_step;
+    // Increase counter of time steps.
     ts++;
   } 
   while (current_time < T_FINAL);
@@ -154,6 +198,7 @@ int main(int argc, char* argv[])
   // Cleanup.
   delete sln_time_prev;
   delete sln_time_new;
+  delete time_error_fn;
 
   // Wait for the view to be closed.
   View::wait();

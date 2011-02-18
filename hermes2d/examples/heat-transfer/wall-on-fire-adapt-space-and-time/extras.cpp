@@ -21,7 +21,7 @@ Real T_fire(Real x, Real t) {
 }
 
 // Thermal conductivity of the material.
-double lambda(double x, double y) {
+double lambda(double x, double y, double solution_value) {
   return 1.0;
 }
 
