@@ -215,14 +215,15 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Solution (initialized by the initial condition) and error function.
-  Solution* sln = new Solution(&mesh, init_cond);
-  Solution* error_fn = new Solution(&mesh, 0.0);
+  Solution* sln_time_prev = new Solution(&mesh, init_cond);
+  Solution* sln_time_new = new Solution(&mesh);
+  Solution* time_error_fn = new Solution(&mesh, 0.0);
   
   // Initialize the weak formulation.
   WeakForm wf;
   info("Registering forms for the Newton's method.");
-  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, sln);
-  wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, sln);
+  wf.add_matrix_form(jac_form_vol, jac_form_vol_ord, HERMES_NONSYM, HERMES_ANY, sln_time_prev);
+  wf.add_vector_form(res_form_vol, res_form_vol_ord, HERMES_ANY, sln_time_prev);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -241,7 +242,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, sln, space, error_fn, &dp, matrix_solver,
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, time_error_fn, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       info("Runge-Kutta time step failed, decreasing time step size from %g to %g days.", 
            time_step, time_step * time_step_dec);
@@ -255,7 +256,7 @@ int main(int argc, char* argv[])
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err_time = calc_norm(error_fn, HERMES_H1_NORM) / calc_norm(sln, HERMES_H1_NORM) * 100;
+    double rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(sln_time_new, HERMES_H1_NORM) * 100;
     info("rel_err_time = %g%%", rel_err_time);
     if (rel_err_time > time_tol_upper) {
       info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g days and repeating time step.", 
@@ -280,8 +281,11 @@ int main(int argc, char* argv[])
     char filename[100];
     sprintf(filename, "outputs/tsln_%f.dat", current_time);
     bool compress = false;   // Gzip compression not used as it only works on Linux.
-    sln->save(filename, compress);
+    sln_time_new->save(filename, compress);
     info("Solution at time %g saved to file %s.", current_time, filename);
+
+    // Save solution for the next time step.
+    sln_time_prev->copy(sln_time_new);
 
     // Increase counter of time steps.
     ts++;
@@ -290,8 +294,9 @@ int main(int argc, char* argv[])
 
   // Cleanup.
   delete space;
-  delete sln;
-  delete error_fn;
+  delete sln_time_prev;
+  delete sln_time_new;
+  delete time_error_fn;
 
   return ERR_FAILURE;
 
