@@ -113,8 +113,6 @@ Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom
 
 #if defined WITH_UMFPACK
 #define StiffMatrix		UMFPackMatrix
-#elif defined WITH_PARDISO
-#define StiffMatrix		PardisoMatrix
 #elif defined WITH_PETSC
 #define StiffMatrix		PetscMatrix
 #elif defined WITH_MUMPS
@@ -127,8 +125,6 @@ void test_mat(Mesh *mesh, StiffMatrix &mat)
 {
 #if defined WITH_UMFPACK
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;
-#elif defined WITH_PARDISO
-MatrixSolverType matrix_solver = SOLVER_PARDISO;
 #elif defined WITH_PETSC
 MatrixSolverType matrix_solver = SOLVER_PETSC;
 #elif defined WITH_MUMPS

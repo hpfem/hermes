@@ -21,10 +21,10 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
                                                
 // Problem parameters. 
-const double FINAL_TIME = 2 * M_PI;		            // Length of time interval in seconds. 
+const double FINAL_TIME = 2 * M_PI;		  // Length of time interval in seconds. 
 
 // Global time variable. 
 double TIME = TAU;

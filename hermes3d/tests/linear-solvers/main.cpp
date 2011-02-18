@@ -238,26 +238,6 @@ int main(int argc, char *argv[]) {
     solve(solver, n);
 #endif
   }
-  else if (strcasecmp(argv[1], "pardiso") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
-    solve(solver, n);
-#endif
-  }
-  else if (strcasecmp(argv[1], "pardiso-block") == 0) {
-#ifdef WITH_PARDISO
-    PardisoMatrix mat;
-    PardisoVector rhs;
-    build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
-
-    PardisoLinearSolver solver(&mat, &rhs);
-    solve(solver, n);
-#endif
-  }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
 #ifdef WITH_TRILINOS
     EpetraMatrix mat;

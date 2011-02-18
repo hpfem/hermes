@@ -26,7 +26,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 const double TOLERANCE = 0.001;		          // error tolerance in percent.
 const double THRESHOLD = 0.5;		          // error threshold for element refinement.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // The error should be smaller than this epsilon.
 #define EPS								10e-10F
