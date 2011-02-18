@@ -23,9 +23,9 @@
 #ifndef _WEAKFORM_H_
 #define _WEAKFORM_H_
 
-#include "function.h"
+#include "../function.h"
 #include "forms.h"
-#include "vector.h"
+#include "../../../hermes_common/vector.h"
 
 // Bilinear form symmetry flag, see WeakForm::add_matrix_form
 enum SymFlag {
