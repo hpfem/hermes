@@ -2,90 +2,83 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-//  This example solves the compressible Euler equations using a basic
-//  piecewise-constant finite volume method.
+// This example solves the compressible Euler equations coupled with an advection-diffution equation
+// using a basic piecewise-constant finite volume method for the flow and continuous FEM for the concentration
+// being advected by the flow.
 //
-//  Equations: Compressible Euler equations, perfect gas state equation.
+// Equations: Compressible Euler equations, perfect gas state equation, advection-diffusion equation.
 //
-//  Domain: GAMM channel, see mesh file GAMM-channel.mesh
+// Domains: GAMM channel, see mesh file GAMM-channel-4-bnds.mesh
+//          a rectangular channel, see mesh file channel-4-bnds.mesh
 //
-//  BC: Normal velocity component is zero on solid walls.
-//      Subsonic state prescribed on inlet and outlet.
+// BC: Normal velocity component is zero on solid walls.
+//     Subsonic state prescribed on inlet and outlet.
+//     Various conditions for the concentration.
+//     See the parameter INITIAL_CONCENTRATION_STATE.
 //
-//  IC: Constant subsonic state identical to inlet. 
+// IC: Constant subsonic state identical to inlet. 
+//     Various conditions for the concentration.
+//     See the parameter INITIAL_CONCENTRATION_STATE.
 //
-//  The following parameters can be changed:
+// The following parameters can be changed.
+// Some of them are not constants to be able to change them via command line arguments:
 
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = false;
+// This is the main parameter.
+// Meaning: 0 - concentration is kept constant at the bottom of the domain.
+//              at the beginning, concentration is equal throughout the whole
+//              domain and is equal to the value at the bottom.
+//          1 - concentration is kept constant at the bottom of the domain.
+//              at the beginning, concentration is zero throughout the domain.
+//          2 - concentration is kept constant at the inlet part of the domain.
+//              at the beginning, concentration is zero throughout the domain.
+// If not said otherwise, zero Neumann condition is imposed on all parts of the boundary.
+unsigned int INITIAL_CONCENTRATION_STATE = 0;
 
 const Ord2 P_INIT_FLOW = Ord2(0,0);               // Polynomial degree for the Euler equations (for the flow).
 const Ord2 P_INIT_CONCENTRATION = Ord2(1,1);      // Polynomial degree for the concentration.
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const unsigned int INIT_REF_NUM_FLOW = 2;         // Number of initial uniform mesh refinements of the mesh for the flow.
-const unsigned int INIT_REF_NUM_CONCENTRATION = 4;// Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 2;         // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 4;// Number of initial uniform mesh refinements of the mesh for the concentration.
 
 
 // Equation parameters.
-double P_EXT = 2.5;         // Exterior pressure (dimensionless).
-double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
-double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
-double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
-double KAPPA = 1.4;         // Kappa.
+const double P_EXT = 2.5;         // Exterior pressure (dimensionless).
+const double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
+const double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
+const double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
+const double KAPPA = 1.4;         // Kappa.
 
 // Diffusion parameter (diffusivity).
-double EPSILON = 0.01;
+const double EPSILON = 0.01;
 
 // Boundary (initial) value of the concentration.
-double CONCENTRATION_EXT = 1.0;
+const double CONCENTRATION_EXT = 1.0;
 
 // Time is zero at the beginning.
 double t = 0;
 
 // Boundary markers.
-const int BDY_SOLID_WALL = 1;
-const int BDY_INLET_OUTLET = 2;
+// Not meant to be changed.
+const int BDY_INLET = 1;
+const int BDY_OUTLET = 2;
+const int BDY_SOLID_WALL_BOTTOM = 3;
+const int BDY_SOLID_WALL_TOP = 4;
 
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
 
-// Inlet/outlet boundary conditions.
-double bc_density(double y)
-{
-  return RHO_EXT;
-}
-
-// Density * velocity in the x coordinate boundary condition.
-double bc_density_vel_x(double y)
-{
-  return RHO_EXT * V1_EXT;
-}
-
-// Density * velocity in the y coordinate boundary condition.
-double bc_density_vel_y(double y)
-{
-  return V2_EXT;
-}
-
-// Calculation of the pressure on the boundary.
-double bc_pressure(double y)
-{
-  return P_EXT;
-}
-
 // Energy boundary condition.
 double bc_energy(double y)
 {
-  double rho = bc_density(y);
-  double rho_v_x = bc_density_vel_x(y);
-  double rho_v_y = bc_density_vel_y(y);
-  double pressure = bc_pressure(y);
+  double rho = RHO_EXT;
+  double rho_v_x = RHO_EXT * V1_EXT;
+  double rho_v_y = RHO_EXT * V2_EXT;
+  double pressure = P_EXT;
   return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 }
 
@@ -130,7 +123,10 @@ double ic_energy(double x, double y, scalar& dx, scalar& dy)
 
 double ic_concentration(double x, double y, scalar& dx, scalar& dy)
 {
-  return CONCENTRATION_EXT;
+  if(INITIAL_CONCENTRATION_STATE == 0)
+    return CONCENTRATION_EXT;
+  else
+    return 0.0;
 }
 
 // Weak forms.
@@ -149,10 +145,20 @@ static void calc_entropy_estimate_func(int n, Hermes::vector<scalar*> scalars, s
 
 int main(int argc, char* argv[])
 {
+  // Provide a possibility to change INITIAL_CONCENTRATION_STATE through an argument.
+  if(argc > 1)
+    INITIAL_CONCENTRATION_STATE = atoi(argv[1]);
+
+  if(argc > 2)
+    INIT_REF_NUM_FLOW = atoi(argv[2]);
+
+  if(argc > 3)
+    INIT_REF_NUM_CONCENTRATION = atoi(argv[3]);
+
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &basemesh);
+  mloader.load("GAMM-channel-4-bnds.mesh", &basemesh);
 
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;
@@ -167,14 +173,28 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.  
   BCTypes bc_types_euler;
-  bc_types_euler.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
+  bc_types_euler.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL_TOP, BDY_SOLID_WALL_BOTTOM, BDY_INLET, BDY_OUTLET));
 
   BCTypes bc_types_concentration;
-  bc_types_concentration.add_bc_neumann(Hermes::vector<int>(BDY_INLET_OUTLET));
-  bc_types_concentration.add_bc_dirichlet(Hermes::vector<int>(BDY_SOLID_WALL));
-
   BCValues bc_values_concentration;
-  bc_values_concentration.add_const(Hermes::vector<int>(BDY_SOLID_WALL), CONCENTRATION_EXT);
+
+  switch(INITIAL_CONCENTRATION_STATE) {
+  case 0:
+    bc_types_concentration.add_bc_neumann(Hermes::vector<int>(BDY_INLET, BDY_OUTLET, BDY_SOLID_WALL_TOP));
+    bc_types_concentration.add_bc_dirichlet(Hermes::vector<int>(BDY_SOLID_WALL_BOTTOM));
+    bc_values_concentration.add_const(Hermes::vector<int>(BDY_SOLID_WALL_BOTTOM), CONCENTRATION_EXT);
+    break;
+  case 1:
+    bc_types_concentration.add_bc_neumann(Hermes::vector<int>(BDY_INLET, BDY_OUTLET, BDY_SOLID_WALL_TOP));
+    bc_types_concentration.add_bc_dirichlet(Hermes::vector<int>(BDY_SOLID_WALL_BOTTOM));
+    bc_values_concentration.add_const(Hermes::vector<int>(BDY_SOLID_WALL_BOTTOM), CONCENTRATION_EXT);
+    break;
+  case 2:
+    bc_types_concentration.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL_BOTTOM, BDY_OUTLET, BDY_SOLID_WALL_TOP));
+    bc_types_concentration.add_bc_dirichlet(Hermes::vector<int>(BDY_INLET));
+    bc_values_concentration.add_const(Hermes::vector<int>(BDY_INLET), CONCENTRATION_EXT);
+    break;
+  }
 
   // Create L2 spaces with default shapesets.
   // Spaces for the flow.
@@ -288,23 +308,41 @@ int main(int argc, char* argv[])
 
 
   // Surface linear forms - inlet / outlet edges.
-  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_INLET_OUTLET, 
+  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_INLET, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_INLET_OUTLET, 
+  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_INLET, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, BDY_INLET_OUTLET, 
+  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, BDY_INLET, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET_OUTLET, 
+  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_INLET, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  
+  wf.add_vector_form_surf(0, bdy_flux_inlet_outlet_comp_0, linear_form_order, BDY_OUTLET, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_inlet_outlet_comp_1, linear_form_order, BDY_OUTLET, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_inlet_outlet_comp_2, linear_form_order, BDY_OUTLET, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_inlet_outlet_comp_3, linear_form_order, BDY_OUTLET, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   
   // Surface linear forms - Solid wall edges.
-  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL, 
+  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL_TOP, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL, 
+  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL_TOP, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL, 
+  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL_TOP, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL, 
+  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL_TOP, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+
+  wf.add_vector_form_surf(0, bdy_flux_solid_wall_comp_0, linear_form_order, BDY_SOLID_WALL_BOTTOM, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(1, bdy_flux_solid_wall_comp_1, linear_form_order, BDY_SOLID_WALL_BOTTOM, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(2, bdy_flux_solid_wall_comp_2, linear_form_order, BDY_SOLID_WALL_BOTTOM, 
+                          Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL_BOTTOM, 
                           Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
   // Forms for concentration.
@@ -313,7 +351,10 @@ int main(int argc, char* argv[])
   wf.add_vector_form(4, callback(linear_form_concentration_convective), HERMES_ANY, 
                           Hermes::vector<MeshFunction*>(&prev_c, &prev_rho, &prev_rho_v_x, &prev_rho_v_y));
 
-  wf.add_vector_form_surf(4, callback(linear_form_concentration_inlet_outlet), BDY_INLET_OUTLET, 
+  wf.add_vector_form_surf(4, callback(linear_form_concentration_inlet_outlet), BDY_INLET, 
+                          Hermes::vector<MeshFunction*>(&prev_c, &prev_rho, &prev_rho_v_x, &prev_rho_v_y));
+
+  wf.add_vector_form_surf(4, callback(linear_form_concentration_inlet_outlet), BDY_OUTLET, 
                           Hermes::vector<MeshFunction*>(&prev_c, &prev_rho, &prev_rho_v_x, &prev_rho_v_y));
 
   wf.add_vector_form_surf(4, callback(linear_form_concentration_inner_edges), H2D_DG_INNER_EDGE, 
@@ -355,17 +396,14 @@ int main(int argc, char* argv[])
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
 
-  for(t = 0.0; t < 10; t += TAU) {
-    info("---- Time step %d, time %3.5f.", iteration, t);
-
-    iteration++;
+  for(t = 0.0; t < 3.0; t += TAU) {
+    info("---- Time step %d, time %3.5f.", iteration++, t);
 
     bool rhs_only = (iteration == 1 ? false : true);
     // Assemble stiffness matrix and rhs or just rhs.
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
     dp.assemble(matrix, rhs, rhs_only);
-
         
     // Solve the matrix problem.
     info("Solving the matrix problem.");
@@ -374,54 +412,6 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e, &space_c), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e, &sln_c));
     else
     error ("Matrix solver failed.\n");
-
-    // Approximate the time derivative of the solution.
-    if(CALC_TIME_DER) {
-      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
-      bool solutions_for_adapt = false;
-      double difference = iteration == 1 ? 0 : 
-        adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-					      Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
-                                              (Hermes::vector<double>*) NULL, solutions_for_adapt, 
-                                              HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
-      delete adapt_for_time_der_calc;
-
-      // Info about the approximate time derivative.
-      if(iteration > 1) {
-        info("Approximate the norm time derivative : %g.", difference);
-        time_der_out << iteration << '\t' << difference << std::endl;
-      }
-    }
-
-    // Determine the time step according to the CFL condition.
-    // Only mean values on an element of each solution component are taken into account.
-    /*
-    double *solution_vector = solver->get_solution();
-    double min_condition = 0;
-    Element *e;
-    for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
-          if (((e) = mesh.get_element_fast(_id))->used) \
-            if ((e)->active) {
-              AsmList al;
-              space_rho.get_element_assembly_list(e, &al);
-              double rho = solution_vector[al.dof[0]];
-              space_rho_v_x.get_element_assembly_list(e, &al);
-              double v1 = solution_vector[al.dof[0]] / rho;
-              space_rho_v_y.get_element_assembly_list(e, &al);
-              double v2 = solution_vector[al.dof[0]] / rho;
-              space_e.get_element_assembly_list(e, &al);
-              double energy = solution_vector[al.dof[0]];
-      
-              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
-      
-              if(condition < min_condition || min_condition == 0.)
-                min_condition = condition;
-            }
-    if(TAU > min_condition)
-      TAU = min_condition;
-    if(TAU < min_condition * 0.9)
-      TAU = min_condition;
-      */
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
@@ -442,6 +432,7 @@ int main(int argc, char* argv[])
     Mach_number_view.show(&Mach_number);
     vview.show(&u, &w);
     */
+
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
     s3.show(&prev_rho_v_y);

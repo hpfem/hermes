@@ -657,11 +657,11 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
     w_l[3] = ext->fn[3]->val[i];
 
-    w_r[0] = bc_density(e->y[i]);
+    w_r[0] = RHO_EXT;
 
-    w_r[1] = bc_density_vel_x(e->y[i]);
+    w_r[1] = RHO_EXT * V1_EXT;
 
-    w_r[2] = bc_density_vel_y(e->y[i]);
+    w_r[2] = RHO_EXT * V2_EXT;
 
     w_r[3] = bc_energy(e->y[i]);
     
