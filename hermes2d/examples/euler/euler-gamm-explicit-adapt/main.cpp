@@ -4,18 +4,18 @@
 
 using namespace RefinementSelectors;
 
-//  This example solves the compressible Euler equations using FVM and automatic adaptivity.
+// This example solves the compressible Euler equations using FVM and automatic h-adaptivity.
 //
-//  Equations: Compressible Euler equations, perfect gas state equation.
+// Equations: Compressible Euler equations, perfect gas state equation.
 //
-//  Domain: GAMM channel, see mesh file GAMM-channel.mesh
+// Domain: GAMM channel, see mesh file GAMM-channel.mesh
 //
-//  BC: Normal velocity component is zero on solid walls.
-//      Subsonic state prescribed on inlet and outlet.
+// BC: Normal velocity component is zero on solid walls.
+//     Subsonic state prescribed on inlet and outlet.
 //
-//  IC: Constant subsonic state identical to inlet. 
+// IC: Constant subsonic state identical to inlet. 
 //
-//  The following parameters can be changed:
+// The following parameters can be changed:
 
 const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
@@ -58,76 +58,24 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
-double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
-double RHO_EXT = 1.0;                             // Inlet density (dimensionless).   
-double V1_EXT = 1.25;                             // Inlet x-velocity (dimensionless).
-double V2_EXT = 0.0;                              // Inlet y-velocity (dimensionless).
-double KAPPA = 1.4;                               // Kappa.
-
-double t = 0;
-
-// Boundary markers.
-const int BDY_SOLID_WALL = 1;
-const int BDY_INLET_OUTLET = 2;
-
+const double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
+const double RHO_EXT = 1.0;                             // Inlet density (dimensionless).   
+const double V1_EXT = 1.25;                             // Inlet x-velocity (dimensionless).
+const double V2_EXT = 0.0;                              // Inlet y-velocity (dimensionless).
+const double KAPPA = 1.4;                               // Kappa.
 // Numerical flux.
 // For numerical fluxes, please see hermes2d/src/numerical_flux.h
 NumericalFlux num_flux(KAPPA);
 
-// Inlet/outlet boundary conditions.
-double bc_density(double y)
-{
-  return RHO_EXT;
-}
+// Utility functions for the Euler equations.
+#include "../euler-util.cpp"
 
-// Density * velocity in the x coordinate boundary condition.
-double bc_density_vel_x(double y)
-{
-  return RHO_EXT * V1_EXT;
-}
+// Calculated exterior energy.
+double ENERGY_EXT = calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT);
 
-// Density * velocity in the y coordinate boundary condition.
-double bc_density_vel_y(double y)
-{
-  return V2_EXT;
-}
-
-// Calculation of the pressure on the boundary.
-double bc_pressure(double y)
-{
-  return P_EXT;
-}
-
-// Energy boundary condition.
-double bc_energy(double y)
-{
-  double rho = bc_density(y);
-  double rho_v_x = bc_density_vel_x(y);
-  double rho_v_y = bc_density_vel_y(y);
-  double pressure = bc_pressure(y);
-  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-}
-
-// Calculates energy from other quantities.
-// FIXME: this should be in the src/ directory, not here.
-double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
-{
-  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-}
-
-// Calculates pressure from other quantities.
-// FIXME: this should be in the src/ directory, not here.
-double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
-{
-  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
-}
-
-// Calculates speed of sound.
-// FIXME: this should be in the src/ directory, not here.
-double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
-{
-  return std::sqrt(num_flux.kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy) / rho);
-}
+// Boundary markers.
+const int BDY_SOLID_WALL = 1;
+const int BDY_INLET_OUTLET = 2;
 
 // Constant initial state (matching the supersonic inlet state).
 double ic_density(double x, double y, scalar& dx, scalar& dy)
@@ -177,6 +125,9 @@ int criterion(Element * e)
   return -1;
 }
 
+// Time is zero at the beginning.
+double t = 0;
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -192,11 +143,11 @@ int main(int argc, char* argv[])
   basemesh.refine_by_criterion(criterion, 2);
   mesh.copy(&basemesh);
 
-  // Enter boundary markers.
+  // Boundary condition types;
   BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
 
-  // Create L2 spaces with default shapesets.
+  // Initialize boundary condition types and spaces with default shapesets.
+  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
   L2Space space_rho(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_x(&mesh, &bc_types, P_INIT);
   L2Space space_rho_v_y(&mesh, &bc_types, P_INIT);
@@ -218,14 +169,16 @@ int main(int argc, char* argv[])
   WeakForm wf(4);
 
   // Bilinear forms coming from time discretization by explicit Euler's method.
-  wf.add_matrix_form(0,0,callback(bilinear_form_0_0_time));
-  wf.add_matrix_form(1,1,callback(bilinear_form_1_1_time));
-  wf.add_matrix_form(2,2,callback(bilinear_form_2_2_time));
-  wf.add_matrix_form(3,3,callback(bilinear_form_3_3_time));
+  wf.add_matrix_form(0, 0, callback(bilinear_form_time));
+  wf.add_matrix_form(1, 1, callback(bilinear_form_time));
+  wf.add_matrix_form(2, 2, callback(bilinear_form_time));
+  wf.add_matrix_form(3, 3, callback(bilinear_form_time));
 
   // Volumetric linear forms.
   // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
   // from the previous time step.
+  // Unnecessary for FVM.
+  if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
   // First flux.
   wf.add_vector_form(0,callback(linear_form_0_1), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_x));
     
@@ -254,8 +207,8 @@ int main(int argc, char* argv[])
   wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   // Second flux.
+    wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_y));
   
-  wf.add_vector_form(0,callback(linear_form_0_2),HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
   wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
@@ -280,12 +233,13 @@ int main(int argc, char* argv[])
                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
   wf.add_vector_form(3, callback(linear_form_3_3_second_flux), HERMES_ANY, 
                       Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
+  }
 
   // Volumetric linear forms coming from the time discretization.
-  wf.add_vector_form(0,linear_form, linear_form_order, HERMES_ANY, &prev_rho);
-  wf.add_vector_form(1,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
-  wf.add_vector_form(2,linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
-  wf.add_vector_form(3,linear_form, linear_form_order, HERMES_ANY, &prev_e);
+  wf.add_vector_form(0, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho);
+  wf.add_vector_form(1, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho_v_x);
+  wf.add_vector_form(2, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho_v_y);
+  wf.add_vector_form(3, linear_form_time, linear_form_order, HERMES_ANY, &prev_e);
 
   // Surface linear forms - inner edges coming from the DG formulation.
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 
@@ -337,9 +291,7 @@ int main(int argc, char* argv[])
 
   for(t = 0.0; t < 10; t += TAU)
   {
-    info("---- Time step %d, time %3.5f.", iteration, t);
-
-    iteration++;
+    info("---- Time step %d, time %3.5f.", iteration++, t);
 
     // Periodic global derefinements.
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
@@ -370,13 +322,6 @@ int main(int argc, char* argv[])
       info("Projecting the previous time level solution onto the new fine mesh.");
       OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
                      Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver); 
-
-      if(as > 1) {
-        delete rsln_rho.get_mesh();
-        delete rsln_rho_v_x.get_mesh();
-        delete rsln_rho_v_y.get_mesh();
-        delete rsln_e.get_mesh();
-      }
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -435,6 +380,9 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
+      if(!done)
+        for(unsigned int i = 0; i < ref_spaces->size(); i++)
+          delete (*ref_spaces)[i]->get_mesh();
       for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i];
       delete dp;

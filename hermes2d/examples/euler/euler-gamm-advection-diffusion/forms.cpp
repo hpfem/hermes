@@ -644,7 +644,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
   // Right (boundary) state.
   double w_r[4];
   // Eulerian flux.
-  double flux[4];
+  //double flux[4];
 
   for (int i = 0; i < n; i++) 
   {
@@ -663,7 +663,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
     w_r[2] = RHO_EXT * V2_EXT;
 
-    w_r[3] = bc_energy(e->y[i]);
+    w_r[3] = ENERGY_EXT;
     
     /*
 

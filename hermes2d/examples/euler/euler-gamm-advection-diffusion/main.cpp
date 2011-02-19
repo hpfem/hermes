@@ -51,6 +51,15 @@ const double RHO_EXT = 1.0;       // Inlet density (dimensionless).
 const double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
 const double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;         // Kappa.
+// Numerical flux.
+// For numerical fluxes, please see hermes2d/src/numerical_flux.h
+NumericalFlux num_flux(KAPPA);
+
+// Utility functions for the Euler equations.
+#include "../euler-util.cpp"
+
+// Calculated exterior energy.
+double ENERGY_EXT = calc_energy(RHO_EXT, RHO_EXT*V1_EXT, RHO_EXT*V2_EXT, P_EXT);
 
 // Diffusion parameter (diffusivity).
 const double EPSILON = 0.01;
@@ -58,50 +67,11 @@ const double EPSILON = 0.01;
 // Boundary (initial) value of the concentration.
 const double CONCENTRATION_EXT = 1.0;
 
-// Time is zero at the beginning.
-double t = 0;
-
 // Boundary markers.
-// Not meant to be changed.
 const int BDY_INLET = 1;
 const int BDY_OUTLET = 2;
 const int BDY_SOLID_WALL_BOTTOM = 3;
 const int BDY_SOLID_WALL_TOP = 4;
-
-// Numerical flux.
-// For numerical fluxes, please see hermes2d/src/numerical_flux.h
-NumericalFlux num_flux(KAPPA);
-
-// Energy boundary condition.
-double bc_energy(double y)
-{
-  double rho = RHO_EXT;
-  double rho_v_x = RHO_EXT * V1_EXT;
-  double rho_v_y = RHO_EXT * V2_EXT;
-  double pressure = P_EXT;
-  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-}
-
-// Calculates energy from other quantities.
-// FIXME: this should be in the src/ directory, not here.
-double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
-{
-  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-}
-
-// Calculates pressure from other quantities.
-// FIXME: this should be in the src/ directory, not here.
-double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
-{
-  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
-}
-
-// Calculates speed of sound.
-// FIXME: this should be in the src/ directory, not here.
-double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
-{
-  return std::sqrt(num_flux.kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy) / rho);
-}
 
 // Constant initial state (matching the supersonic inlet state).
 double ic_density(double x, double y, scalar& dx, scalar& dy)
@@ -143,6 +113,9 @@ static void calc_entropy_estimate_func(int n, Hermes::vector<scalar*> scalars, s
     / pow((scalars.at(0)[i] / RHO_EXT), KAPPA));
 };
 
+// Time is zero at the beginning.
+double t = 0;
+
 int main(int argc, char* argv[])
 {
   // Provide a possibility to change INITIAL_CONCENTRATION_STATE through an argument.
@@ -171,7 +144,7 @@ int main(int argc, char* argv[])
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
 
-  // Enter boundary markers.  
+  // Initialize boundary condition types and spaces with default shapesets.
   BCTypes bc_types_euler;
   bc_types_euler.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL_TOP, BDY_SOLID_WALL_BOTTOM, BDY_INLET, BDY_OUTLET));
 
@@ -196,8 +169,6 @@ int main(int argc, char* argv[])
     break;
   }
 
-  // Create L2 spaces with default shapesets.
-  // Spaces for the flow.
   L2Space space_rho(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
   L2Space space_rho_v_x(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
   L2Space space_rho_v_y(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
@@ -260,9 +231,9 @@ int main(int argc, char* argv[])
                        Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     wf.add_vector_form(3, callback(linear_form_3_3_first_flux), HERMES_ANY, 
                        Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
-
     // Second flux.
     wf.add_vector_form(0, callback(linear_form_0_2), HERMES_ANY, Hermes::vector<MeshFunction*>(&prev_rho_v_y));
+    
     wf.add_vector_form(1, callback(linear_form_1_0_second_flux), HERMES_ANY, 
                        Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y));
     wf.add_vector_form(1, callback(linear_form_1_1_second_flux), HERMES_ANY, 
@@ -440,6 +411,11 @@ int main(int argc, char* argv[])
     s5.show(&prev_c);
   }
   
+  s1.close();
+  s2.close();
+  s3.close();
+  s4.close();
+  s5.close();
   time_der_out.close();
   return 0;
 }
