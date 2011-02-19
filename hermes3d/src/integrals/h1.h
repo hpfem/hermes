@@ -40,7 +40,18 @@ res_t int_u(int n, double *wt, Func<f_t> *u, Geom<f_t> *e) {
 	return result;
 }
 
-#define int_v(n, wt, u, e) int_u(n, wt, u, e)
+/// Integral \v
+///
+/// @ingroup h1integrals
+template<typename f_t, typename res_t>
+res_t int_v(int n, double *wt, Func<f_t> *v, Geom<f_t> *e) {
+	_F_
+	res_t result = 0;
+	for (int i = 0; i < n; i++)
+		result += wt[i] * (v->val[i]);
+	return result;
+}
+
 
 /// Integral \u \v
 ///
