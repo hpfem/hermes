@@ -16,13 +16,25 @@ Linux
 Using standard Debian packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-SuperLU is available in Ubuntu via the Synaptic Package Manager, just install
-packages libsuperlu3 and libsuperlu3-dev. In Ubuntu you can use the Synaptic package manager for that, or type::
+Install the `libsuperlu3` and `libsuperlu3-dev` packages. In Ubuntu 6.06 (Dapper)
+or newer, you can use the Synaptic package manager for that, or type::
 
   sudo apt-get install libsuperlu3 libsuperlu3-dev 
   
-Note that these packages are available since Ubuntu 6.06 (Dapper). If you have an older version of Ubuntu or want 
-an up-to date or specially tuned version of the library, please follow the instructions below.
+Now go to the directory with Hermes. Create the file CMake.vars with the
+following lines (or append to the existing one)::
+
+  set(WITH_SUPERLU YES)
+  set(SUPERLU_ROOT ~/solvers/superlu_mt) #(or your own installation destination)
+  set(SUPERLU_MT   NO)
+
+Finally execute::
+  
+  rm CMakeCache.txt
+  cmake .
+  make
+  
+Find more about :ref:`ref-usage-superlu`.
 
 Using the special Hermes/Femhub package
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,11 +56,11 @@ typical build scenarios that you may follow:
 
   - Build the default, optimized version of the library::
     
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install
+      ./standalone-install ~/solvers/superlu
     
   - Build the debug version of the library::
     
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --debug
+      ./standalone-install ~/solvers/superlu --debug
     
     .. __:
     
@@ -60,7 +72,7 @@ typical build scenarios that you may follow:
     
   - Build the non-optimized version of the library::
 
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --no-optimizations
+      ./standalone-install ~/solvers/superlu --no-optimizations
 
     .. __:
           
@@ -88,7 +100,7 @@ Now go to the directory with Hermes. Create the file CMake.vars with the
 following lines (or append to the existing one)::
 
   set(WITH_SUPERLU YES)
-  set(SUPERLU_ROOT ~/solvers/superlu) #(or your own installation destination)
+  set(SUPERLU_ROOT ~/solvers/superlu_mt) #(or your own installation destination)
   set(SUPERLU_MT   NO)
 
 Finally execute::
@@ -96,12 +108,8 @@ Finally execute::
   rm CMakeCache.txt
   cmake .
   make
-  
-You may now select ``SOLVER_SUPERLU`` as the matrix solver for your finite element problem, as detailed
-in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
-it just to solve a standalone matrix problem :math:`Ax = b` as in the 
-`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
-    
+
+Find more about :ref:`ref-usage-superlu`.  
 
 Multithreaded
 `````````````
@@ -131,39 +139,39 @@ There are two multithreading models supported by SuperLU on Linux
     
       sudo apt-get install libgomp1      
 
-Assuming the intended installation directory is ``~/solvers/superlu``, you may
+Assuming the intended installation directory is ``~/solvers/superlu_mt``, you may
 build a particular version of the multithreaded library by issuing one 
 of the following available build commands:
 
   - Build the default, optimized version of the library::
     
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-openmp
+      ./standalone-install ~/solvers/superlu_mt --with-openmp
       
     or
       
     ::
       
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-pthreads
+      ./standalone-install ~/solvers/superlu_mt --with-pthreads
     
   - Build the debug version of the library (see the `description above`__)::
     
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-openmp --debug
+     ./standalone-install ~/solvers/superlu_mt --with-openmp --debug
       
     or
       
     ::
       
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-pthreads --debug
+      ./standalone-install ~/solvers/superlu_mt --with-pthreads --debug
     
   - Build the non-optimized version of the library (see the `description above`__)::
   
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-openmp --no-optimizations  
+      ./standalone-install ~/solvers/superlu_mt --with-openmp --no-optimizations  
 
     or
       
     ::
     
-      SPKG_LOCAL=~/solvers/superlu ./spkg-install --with-pthreads --no-optimizations
+      ./standalone-install ~/solvers/superlu_mt --with-pthreads --no-optimizations
 
 You may choose any installation destination you like, provided that you have 
 write access to it (the target directory will be created if it doesn't exist).    
@@ -196,9 +204,11 @@ Finally execute::
   make
     
 Hermes will now be compiled and linked with the multithreaded SuperLU 
-library. Before running the parallel calculation, you just need to set the 
-environment variable ``OMP_NUM_THREADS`` to the number of threads you wish to 
-employ for solution of your system (this is typically the number of cores in your 
+library. You may now use the library for performing matrix computations in Hermes
+the same way as you would use the sequential version (see :ref:`ref-usage-superlu`).
+The only thing you need to do in order to take advantage of the multithreaded processing 
+is to set environment variable ``OMP_NUM_THREADS`` to the number of threads you wish to 
+employ for the calculation (this is typically the number of cores in your 
 multicore machine). For example, on my dual-core laptop I could run
 
 ::
@@ -218,3 +228,13 @@ MAC OS
 ~~~~~~
 
 http://www.bleedingmind.com/index.php/2010/07/31/compiling-superlu-on-os-x/
+
+.. _ref-usage-superlu:
+
+Using SUPERLU in Hermes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+You may now select ``SOLVER_SUPERLU`` as the matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.

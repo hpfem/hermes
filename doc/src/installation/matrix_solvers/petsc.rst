@@ -10,16 +10,16 @@ Linux
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/hpfem/solvers/raw/master/packages/petsc-3.1-p5.spkg --no-check-certificate
-  tar -jxvf petsc-3.1-p5.spkg
-  rm petsc-3.1-p5.spkg
-  cd petsc-3.1-p5
+  wget https://github.com/hpfem/solvers/raw/master/packages/petsc-3.1-p7.spkg --no-check-certificate
+  tar -jxvf petsc-3.1-p7.spkg
+  rm petsc-3.1-p7.spkg
+  cd petsc-3.1-p7
 
 In order to install the library into say ``~/solvers/petsc`` (you may choose any
 path you like, provided that you have write access to it; the target directory 
 will be created if it doesn't exist), type now into the terminal::
 
-  SPKG_LOCAL=~/solvers/petsc ./spkg-install
+  ./standalone-install ~/solvers/petsc
 
 For advanced configuration possibilities, please read the `manual`_ or visit the 
 `PETSc home page`_.
@@ -39,11 +39,8 @@ Finally execute::
   rm CMakeCache.txt
   cmake .
   make
-
-You may now select ``SOLVER_PETSC`` as the matrix solver for your finite element problem, as detailed
-in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
-it just to solve a standalone matrix problem :math:`Ax = b` as in the 
-`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
+  
+Find more about :ref:`ref-usage-petsc`.
 
 Windows MSVC
 ~~~~~~~~~~~~
@@ -55,3 +52,12 @@ Mac OS
 
 http://petsc.darwinports.com/
 
+.. _ref-usage-petsc:
+
+Using PETSC in Hermes
+~~~~~~~~~~~~~~~~~~~~~
+
+You may now select ``SOLVER_PETSC`` as the matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.

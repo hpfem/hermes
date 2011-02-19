@@ -1,10 +1,58 @@
 Trilinos
 --------
 
+.. _Trilinos home page: http://trilinos.sandia.gov/
+.. _solvers repository: https://github.com/hpfem/solvers
+.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/Trilinos10.6Tutorial.pdf
+
 Linux
 ~~~~~
 
-Download the sources for the latest version from the `Trilinos page <http://trilinos.sandia.gov/download/trilinos-10.6.html>`__ and unpack them in some temporary directory. Go to the Trilinos source directory and issue the following commands there::
+Using the special Hermes/Femhub package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Download the software package from the `solvers repository`_ and unpack 
+it in some temporary directory::
+  
+  wget https://github.com/hpfem/solvers/raw/master/packages/trilinos-10.6.2.spkg --no-check-certificate
+  tar -jxvf trilinos-10.6.2.spkg
+  rm trilinos-10.6.2.spkg
+  cd trilinos-10.6.2
+
+In order to install the library into say ``~/solvers/trilinos`` (you may choose any
+path you like, provided that you have write access to it; the target directory 
+will be created if it doesn't exist), type now into the terminal::
+
+  ./standalone-install ~/solvers/trilinos
+
+For advanced configuration possibilities, please read the `manual`_ or visit the 
+`Trilinos home page`_.
+
+Once the library has been built and installed, you may delete the temporary 
+directory with the unpacked package to save some disk space or 
+just remove the object files by executing the following command
+
+::
+
+  cd bin-dir; make clean
+
+Now go to the directory with Hermes. Create the file CMake.vars with the following lines (or append to the existing one)::
+
+    set(WITH_TRILINOS YES)
+    set(TRILINOS_ROOT ~/solvers/trilinos) #(or your modified CMAKE_INSTALL_PREFIX variable)
+
+Then execute::
+
+    rm CMakeCache.txt
+    cmake .
+    make
+    
+Find more about :ref:`ref-usage-trilinos`.
+
+Build from source
+^^^^^^^^^^^^^^^^^
+
+Download the sources for the latest version from the `Trilinos download page <http://trilinos.sandia.gov/download/trilinos-10.6.html>`__ and unpack them in some temporary directory. Go to the Trilinos source directory and issue the following commands there::
 
     mkdir build_dir
     cd build_dir
@@ -13,6 +61,8 @@ Download the sources for the latest version from the `Trilinos page <http://tril
      -D CMAKE_C_FLAGS:STRING="-fPIC -Wl,-V" \
      -D CMAKE_CXX_FLAGS:STRING="-fPIC -Wl,-V" \
      -D CMAKE_Fortran_FLAGS:STRING="-fPIC" \
+     -D BUILD_SHARED_LIBS:BOOL=ON \
+     -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
      -D Trilinos_ENABLE_Teuchos:BOOL=ON \
      -D Trilinos_ENABLE_Epetra:BOOL=ON \
      -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
@@ -35,7 +85,7 @@ Download the sources for the latest version from the `Trilinos page <http://tril
 
 (This installs the library into ~/solvers/trilinos directory. If you do not like this location, change the CMAKE_INSTALL_PREFIX variable to whatever you like.)
 
-Go to the directory with Hermes. Create the file CMake.vars with the following lines (or append to the existing one)::
+Now go to the directory with Hermes. Create the file CMake.vars with the following lines (or append to the existing one)::
 
     set(WITH_TRILINOS YES)
     set(TRILINOS_ROOT ~/solvers/trilinos) #(or your modified CMAKE_INSTALL_PREFIX variable)
@@ -45,6 +95,8 @@ Then execute::
     rm CMakeCache.txt
     cmake .
     make
+    
+Find more about :ref:`ref-usage-trilinos`.
 
 Windows
 ~~~~~~~
@@ -62,6 +114,7 @@ Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any ot
      -D CMAKE_BUILD_TYPE:STRING=DEBUG \
      -D CLAPACK_DIR:STRING={CLAPACK_DIR} \
      -D CMAKE_Fortran_FLAGS:STRING="-fPIC" \
+     -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
      -D Trilinos_ENABLE_Teuchos:BOOL=ON \
      -D Trilinos_ENABLE_Epetra:BOOL=ON \
      -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
@@ -101,7 +154,22 @@ Go to the directory with Hermes. Add the following lines into CMake.vars::
 	
 again, replace {CMAKE_INSTALL_PREFIX} with the folder where you installed Trilinos.
 
+Find more about :ref:`ref-usage-trilinos`.
+
 MAC OS
 ~~~~~~
 
 In preparation.
+
+.. _ref-usage-trilinos:
+
+Using TRILINOS in Hermes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You may now select either ``SOLVER_AMESOS`` as the direct matrix solver or 
+``SOLVER_AZTECOO`` as the iterative matrix solver for your finite element problem, as detailed
+in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
+Note that Trilinos is also required for using the advanced nonlinear solver ``NOX`` (see e.g. the 
+`Trilinos - Nonlinear tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-6/nonlinear.html>`__).

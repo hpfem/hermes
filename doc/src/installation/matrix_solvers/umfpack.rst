@@ -10,12 +10,23 @@ Linux
 
 Using standard Debian packages
 ``````````````````````````````
-Install the libsuitesparse-metis-3.1.0 and libsuitesparse-dev packages.
-In Ubuntu you can use the Synaptic package manager for that, or type::
+Install the `libsuitesparse-metis-3.1.0` and `libsuitesparse-dev` packages.
+In Ubuntu 9.10 (Karmic) or newer you can use the Synaptic package manager for that, or type::
 
     sudo apt-get install libsuitesparse-metis-3.1.0 libsuitesparse-dev
 
-Note that these packages are available since Ubuntu 9.10 (Karmic). If you have an older version of Ubuntu or want an up-to date version of the library, please follow the instructions below.
+Now go to the directory with Hermes. Create the file CMake.vars with the
+following lines (or append to the existing one)::
+
+  set(WITH_UMFPACK YES)
+
+and execute::
+
+  rm CMakeCache.txt
+  cmake .
+  make
+  
+Find more about :ref:`ref-usage-umfpack`.
 
 Using the special Hermes/Femhub package
 ```````````````````````````````````````
@@ -31,7 +42,7 @@ In order to install the library into say ``~/solvers/umfpack`` (you may choose a
 path you like, provided that you have write access to it; the target directory 
 will be created if it doesn't exist), type now into the terminal::
 
-  SPKG_LOCAL=~/solvers/umfpack ./spkg-install
+  ./standalone-install ~/solvers/umfpack
 
 For advanced configuration possibilities, please read the `manual`_ or visit the 
 `UMFPack home page`_.
@@ -44,10 +55,6 @@ just remove the object files by executing the following commands
 
   cd UFconfig; make clean
   cd AMD     ; make clean
-  cd CAMD    ; make clean
-  cd CCOLAMD ; make clean
-  cd COLAMD  ; make clean
-  cd CHOLMOD ; make clean
   cd UMFPACK ; make clean
 
 Now go to the directory with Hermes. Create the file CMake.vars with the
@@ -62,10 +69,7 @@ Finally execute::
   cmake .
   make
 
-You may now select ``SOLVER_UMFPACK`` as the matrix solver for your finite element problem, as detailed
-in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
-it just to solve a standalone matrix problem :math:`Ax = b` as in the 
-`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
+Find more about :ref:`ref-usage-umfpack`.
 
 Windows (Cygwin, MinGW, MSVC)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,4 +81,12 @@ Mac OS
 
 http://mywiki-science.wikispaces.com/UMFPACK
 
+.. _ref-usage-umfpack:
 
+Using UMFPACK in Hermes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+After the installation has been completed, you may select ``SOLVER_UMFPACK`` as the matrix solver for your finite element problem,
+as detailed in the `Poisson tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/poisson.html>`__, or use
+it just to solve a standalone matrix problem :math:`Ax = b` as in the 
+`Using Matrix Solvers tutorial <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/matrix_solvers.html>`__.
