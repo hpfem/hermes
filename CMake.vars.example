@@ -1,34 +1,32 @@
-# This file contains compilation options that 
-# let you customize Hermes on your system. 
-# NOTE: when specifying paths, always use 
-# absolute paths (such as "/home/pavel/something" 
-# instead of "~/something").
+# This is a sample CMake.vars file for Hermes.
+#
+# It contains compilation options that let you customize Hermes on your 
+# system. Options set here override the default ones set in CMakeLists.txt.
+#
+# NOTE: when specifying paths, always use absolute paths (such as 
+# "/home/pavel/something" instead of "~/something").
  
 # Enable Python
 set(WITH_PYTHON YES)
 
-# Enable UMFPACK (YES by default)
-# (linear solvers)
+# Enable UMFPACK (linear solvers, this option is YES by default)
 set(WITH_UMFPACK YES)
     # Nothing here if using the Debian package (e.g installed via Synaptic)
     # If you installed the .spkg file from the hpfem/solvers repository, add
     #   set(UMFPACK_ROOT /home/pavel/solvers/umfpack)
 
-# Enable MUMPS
-# (linear solvers)
+# Enable MUMPS (linear solver)
 set(WITH_MUMPS YES)
     # Nothing here if using the Debian package (e.g installed via Synaptic)
     # If you installed the .spkg file from the hpfem/solvers repository, add
     #   set(MUMPS_ROOT /home/pavel/solvers/mumps)
 
-# Enable PETSc
-# (linear solvers)
+# Enable PETSc (linear solver)
 set(WITH_PETSC YES)
-    set(PETSC_ROOT /home/pavel/solvers/petsc-3.1-p7)
+    set(PETSC_ROOT /home/pavel/solvers/petsc)
     set(PETSC_ARCH linux-cxx)
 
-# Enable SuperLU
-# (linear solvers)
+# Enable SuperLU (linear solver)
 set(WITH_SUPERLU YES)
     # Nothing here if using the Debian package (e.g installed via Synaptic)
     # If you installed the .spkg file from the hpfem/solvers repository, add
@@ -41,13 +39,11 @@ set(WITH_SUPERLU YES)
     # installation, you must also add:
     #   set(WITH_OPENMP  YES)
 
-# Enable Trilinos 
-# (linear and nonlinear solvers)
+# Enable Trilinos (linear and nonlinear solvers)
 set(WITH_TRILINOS YES)
     set(TRILINOS_ROOT /opt/packages/trilinos)
 
-# Enable ExodusII and NetCDF
-# (CUBIT mesh format support)
+# Enable ExodusII and NetCDF (CUBIT mesh format support)
 SET(WITH_EXODUSII YES)
 SET(EXODUSII_ROOT /opt/packages/exodusii)
 SET(NETCDF_ROOT /opt/packages/netcdf)

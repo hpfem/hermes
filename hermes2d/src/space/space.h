@@ -95,7 +95,7 @@ class Ord2;
 class HERMES_API Space
 {
 public:
-  // TODO: After successful testing, this will be the one constructor.
+  // TODO: After successful testing, this will be the only constructor.
   Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
 
   // Constructor.
