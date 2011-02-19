@@ -67,7 +67,7 @@ set(REPORT_WITH_LOGO        YES)
 
 #### Solvers ###
 # Standard UMFPACK.
-set(WITH_UMFPACK			YES)
+set(WITH_UMFPACK            YES)
 
 # First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
 # and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
@@ -86,7 +86,7 @@ set(SUPERLU_MT              NO)
 # if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
 #
 set(WITH_PETSC              NO)
-set(PETSC_ROOT              /opt/petsc/petsc-3.1-p4)
+set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
 set(PETSC_ARCH              petsc-arch-without-scalar-type)
 
 # Sequential version of MUMPS may be enabled by setting YES on the following line
@@ -101,16 +101,19 @@ set(WITH_MUMPS              NO)
 # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
 
 # Enable support for Trilinos solvers.
-set(WITH_TRILINOS			NO)
+set(WITH_TRILINOS           NO)
 
 
 ### Mesh format ###
 option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
 option(WITH_HDF5     "Enable support for HDF5" NO)
 
-
 ### Others ###
 # Parallel execution (tells the linker to use parallel versions of the selected solvers, if available):
+#
+# Enable OpenMP for shared memory processing.
+#  
+set(WITH_OPENMP             NO)
 
 # If MPI is enabled, the MPI library installed on the system should be found by 
 # CMake automatically. If the found library doesn't match the one used to compile the
