@@ -858,7 +858,7 @@ Scalar linear_form_concentration_inlet_outlet(int n, double *wt, Func<Real> *u_e
   for (int i = 0; i < n; i++)
     result += wt[i] * v->val[i] * concentration_prev->val[i] * ((density_vel_x_prev->val[i] * e->nx[i]) + (density_vel_y_prev->val[i] * e->ny[i]))
               / density_prev->val[i];
-  return - result * TAU;
+  return result * TAU;
 }
 
   
@@ -873,7 +873,7 @@ Scalar linear_form_concentration_inner_edges(int n, double *wt, Func<Real> *u_ex
 
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * v->val[i] * concentration_prev->val[i] * 
+    result += wt[i] * v->val[i] * concentration_prev->get_val_central(i) * 
               (
                 (
                   density_vel_x_prev->get_val_central(i) / density_prev->get_val_central(i)
@@ -887,5 +887,5 @@ Scalar linear_form_concentration_inner_edges(int n, double *wt, Func<Real> *u_ex
                   density_vel_y_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
                 ) * e->ny[i]
               );
-  return - result * TAU;
+  return result * TAU;
 }

@@ -27,7 +27,8 @@ double TAU = 1E-4;                                // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const unsigned int INIT_REF_NUM_CONCENTRATION = 2;// Number of initial uniform mesh refinements of the mesh for the concentration.
+const unsigned int INIT_REF_NUM_FLOW = 2;         // Number of initial uniform mesh refinements of the mesh for the flow.
+const unsigned int INIT_REF_NUM_CONCENTRATION = 4;// Number of initial uniform mesh refinements of the mesh for the concentration.
 
 
 // Equation parameters.
@@ -37,7 +38,7 @@ double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
 double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 double KAPPA = 1.4;         // Kappa.
 
-// Diffusion parameter
+// Diffusion parameter (diffusivity).
 double EPSILON = 0.01;
 
 // Boundary (initial) value of the concentration.
@@ -151,15 +152,18 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  mloader.load("channel.mesh", &basemesh);
+  mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Initialize the meshes.
-  Mesh mesh_euler, mesh_concentration;
-  mesh_euler.copy(&basemesh);
+  Mesh mesh_flow, mesh_concentration;
+  mesh_flow.copy(&basemesh);
   mesh_concentration.copy(&basemesh);
 
   for(unsigned int i = 0; i < INIT_REF_NUM_CONCENTRATION; i++)
     mesh_concentration.refine_all_elements();
+
+  for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
+    mesh_flow.refine_all_elements();
 
   // Enter boundary markers.  
   BCTypes bc_types_euler;
@@ -174,24 +178,24 @@ int main(int argc, char* argv[])
 
   // Create L2 spaces with default shapesets.
   // Spaces for the flow.
-  L2Space space_rho(&mesh_euler, &bc_types_euler, P_INIT_FLOW);
-  L2Space space_rho_v_x(&mesh_euler, &bc_types_euler, P_INIT_FLOW);
-  L2Space space_rho_v_y(&mesh_euler, &bc_types_euler, P_INIT_FLOW);
-  L2Space space_e(&mesh_euler, &bc_types_euler, P_INIT_FLOW);
+  L2Space space_rho(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
+  L2Space space_rho_v_x(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
+  L2Space space_rho_v_y(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
+  L2Space space_e(&mesh_flow, &bc_types_euler, P_INIT_FLOW);
   // Space for concentration.
   H1Space space_c(&mesh_concentration, &bc_types_concentration, &bc_values_concentration, P_INIT_CONCENTRATION);
 
   // Initialize solutions, set initial conditions.
   Solution sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e, sln_c, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e, prev_c;
-  sln_rho.set_exact(&mesh_euler, ic_density);
-  sln_rho_v_x.set_exact(&mesh_euler, ic_density_vel_x);
-  sln_rho_v_y.set_exact(&mesh_euler, ic_density_vel_y);
-  sln_e.set_exact(&mesh_euler, ic_energy);
+  sln_rho.set_exact(&mesh_flow, ic_density);
+  sln_rho_v_x.set_exact(&mesh_flow, ic_density_vel_x);
+  sln_rho_v_y.set_exact(&mesh_flow, ic_density_vel_y);
+  sln_e.set_exact(&mesh_flow, ic_energy);
   sln_c.set_exact(&mesh_concentration, ic_concentration);
-  prev_rho.set_exact(&mesh_euler, ic_density);
-  prev_rho_v_x.set_exact(&mesh_euler, ic_density_vel_x);
-  prev_rho_v_y.set_exact(&mesh_euler, ic_density_vel_y);
-  prev_e.set_exact(&mesh_euler, ic_energy);
+  prev_rho.set_exact(&mesh_flow, ic_density);
+  prev_rho_v_x.set_exact(&mesh_flow, ic_density_vel_x);
+  prev_rho_v_y.set_exact(&mesh_flow, ic_density_vel_y);
+  prev_e.set_exact(&mesh_flow, ic_energy);
   prev_c.set_exact(&mesh_concentration, ic_concentration);
 
   // Initialize weak formulation.
@@ -270,7 +274,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
   wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
   wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_e);
-  wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_c);
+  wf.add_vector_form(4, linear_form, linear_form_order, HERMES_ANY, &prev_c);
 
   // Surface linear forms - inner edges coming from the DG formulation.
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 
@@ -337,7 +341,7 @@ int main(int argc, char* argv[])
   ScalarView s1("w0", new WinGeom(0, 0, 600, 300));
   ScalarView s2("w1", new WinGeom(700, 0, 600, 300));
   ScalarView s3("w2", new WinGeom(0, 400, 600, 300));
-  ScalarView s4("w3", new WinGeom(0, 400, 600, 300));
+  ScalarView s4("w3", new WinGeom(700, 400, 600, 300));
   ScalarView s5("Concentration", new WinGeom(350, 200, 600, 300));
   
   // Iteration number.
@@ -367,7 +371,7 @@ int main(int argc, char* argv[])
     info("Solving the matrix problem.");
     if(solver->solve())
       Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+      &space_rho_v_y, &space_e, &space_c), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e, &sln_c));
     else
     error ("Matrix solver failed.\n");
 
@@ -424,6 +428,7 @@ int main(int argc, char* argv[])
     prev_rho_v_x.copy(&sln_rho_v_x);
     prev_rho_v_y.copy(&sln_rho_v_y);
     prev_e.copy(&sln_e);
+    prev_c.copy(&sln_c);
 
     // Visualization.
     /*
