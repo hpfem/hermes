@@ -147,6 +147,7 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 				case STATE_VERTICES_NUM:
 					if (read_num(row, vertex_count)) {
 						state = STATE_VERTICES;
+
 						if (vertex_count <= 0) throw E_READ_ERROR;
 						max_vertex_index = vertex_count; //vertices are counted from 1 in mesh3d format
 					}
@@ -159,7 +160,10 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 						mesh->add_vertex(buffer[0], buffer[1], buffer[2]);
 
 						vertex_count--;
-						if (vertex_count == 0) state = STATE_TETRAS_NUM;
+						if (vertex_count == 0)
+						{
+							 state = STATE_TETRAS_NUM;
+						}
 					}
 					else
 						throw E_READ_ERROR;
@@ -168,7 +172,9 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 				case STATE_TETRAS_NUM:
 					if (read_num(row, tetra_count)) {
 						state = STATE_TETRAS;
-						if (tetra_count <= 0) state = STATE_HEXES_NUM;
+						if (tetra_count <= 0){
+							 state = STATE_HEXES_NUM;
+						 }
 					}
 					else
 						throw E_READ_ERROR;
@@ -184,7 +190,9 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 						Tetra *tet = mesh->add_tetra(vs);
 						if (n > Tetra::NUM_VERTICES) tet->marker = vs[Tetra::NUM_VERTICES];
 						tetra_count--;
-						if (tetra_count == 0) state = STATE_HEXES_NUM;
+						if (tetra_count == 0){
+							 state = STATE_HEXES_NUM;
+						 }
 					}
 					else
 						throw E_READ_ERROR;
@@ -193,7 +201,9 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 				case STATE_HEXES_NUM:
 					if (read_num(row, hex_count)) {
 						state = STATE_HEXES;
-						if (hex_count <= 0) state = STATE_PRISMS_NUM;
+						if (hex_count <= 0){
+							 state = STATE_PRISMS_NUM;
+						 }
 					}
 					else
 						throw E_READ_ERROR;
@@ -206,10 +216,15 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 							throw E_READ_ERROR;
 						}
 
+					    //cout << " check: hex_count:  " << hex_count << endl;	
+
 						Hex *hex = mesh->add_hex(vs);
+						//Hex *hex;
 						if (n > Hex::NUM_VERTICES) hex->marker = vs[Hex::NUM_VERTICES];
 						hex_count--;
-						if (hex_count == 0) state = STATE_PRISMS_NUM;
+						if (hex_count == 0){
+							 state = STATE_PRISMS_NUM;
+						}
 					}
 					else
 						throw E_READ_ERROR;
@@ -270,7 +285,9 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 				case STATE_QUADS_NUM:
 					if (read_num(row, quad_count)) {
 						state = STATE_QUADS;
-						if (quad_count <= 0) state = STATE_QUADS;
+						if (quad_count <= 0){
+							 state = STATE_OK;
+						 }
 					}
 					else
 						throw E_READ_ERROR;
@@ -286,7 +303,9 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
 						unsigned int facet_idxs[Quad::NUM_VERTICES] = { vs[0], vs[1], vs[2], vs[3] };
 						mesh->add_quad_boundary(facet_idxs, vs[Quad::NUM_VERTICES]);
 						quad_count--;
-						if (quad_count == 0) state = STATE_OK;
+						if (quad_count == 0){
+							 state = STATE_OK;
+						}
 					}
 					else {
 						fprintf(stderr, "Not enough information for quads. You probably forgot to define boundary condition (line %d).", line_nr);
@@ -303,10 +322,12 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
     for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
       Facet *facet = it->second;
 
+		/*
       if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
 				fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
 				throw E_READ_ERROR;
 			}
+			*/
 		}
 
 		mesh->ugh();

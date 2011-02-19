@@ -45,16 +45,21 @@ using namespace std;
 
 struct _Node_
 {
+    unsigned id;
     double n[3];
+    bool zero_DBC;
 };
 
 struct _Hex_
 {
+    unsigned id;
     unsigned int n[8];
+    bool zero_DBC;
 };
 
 struct _Quad_
 {
+    unsigned id;
     unsigned int n[4];
 };
 
@@ -74,19 +79,19 @@ class CTUInfo
         {
             for(unsigned i=0;i<nodes.size();i++)
             {
-                delete[] nodes.at(i);
+                delete nodes.at(i);
             }
             nodes.clear();
 
             for(unsigned i=0;i<hexs.size();i++)
             {
-                delete[] hexs.at(i);
+                delete hexs.at(i);
             }
             hexs.clear();
 
             for(unsigned i=0;i<quads.size();i++)
             {
-                delete[] quads.at(i);
+                delete quads.at(i);
             }
             quads.clear();
         }
@@ -142,66 +147,171 @@ void Trim(string& str)
     }
 }
 
+void make_quad(_Hex_ *hex, CTUInfo *ci)
+{
+    _Node_ *n1 = ci->nodes.at(hex->n[6]-1);
+    _Node_ *n2 = ci->nodes.at(hex->n[7]-1);
+    _Node_ *n3 = ci->nodes.at(hex->n[4]-1);
+    _Node_ *n4 = ci->nodes.at(hex->n[5]-1);
+    _Node_ *n5 = ci->nodes.at(hex->n[2]-1);
+    _Node_ *n6 = ci->nodes.at(hex->n[3]-1);
+    _Node_ *n7 = ci->nodes.at(hex->n[0]-1);
+    _Node_ *n8 = ci->nodes.at(hex->n[1]-1);
+
+    if (n1->zero_DBC == true && n2->zero_DBC == true && n3->zero_DBC == true && n4->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+
+        quad->n[0] = hex->n[6];
+        quad->n[1] = hex->n[7];
+        quad->n[2] = hex->n[4];
+        quad->n[3] = hex->n[5];
+        
+        ci->quads.push_back(quad);
+    }
+
+    if (n1->zero_DBC == true && n2->zero_DBC == true && n6->zero_DBC == true && n5->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+        
+        quad->n[0] = hex->n[6];
+        quad->n[1] = hex->n[7];
+        quad->n[2] = hex->n[3];
+        quad->n[3] = hex->n[2];
+
+        ci->quads.push_back(quad);
+    }
+    
+    if (n2->zero_DBC == true && n3->zero_DBC == true && n7->zero_DBC == true && n6->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+        
+        quad->n[0] = hex->n[7];
+        quad->n[1] = hex->n[4];
+        quad->n[2] = hex->n[0];
+        quad->n[3] = hex->n[3];
+
+        ci->quads.push_back(quad);
+    }
+
+    if (n3->zero_DBC == true && n4->zero_DBC == true && n8->zero_DBC == true && n7->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+        
+        quad->n[0] = hex->n[4];
+        quad->n[1] = hex->n[5];
+        quad->n[2] = hex->n[1];
+        quad->n[3] = hex->n[0];
+
+        ci->quads.push_back(quad);
+    }
+
+    if (n4->zero_DBC == true && n1->zero_DBC == true && n5->zero_DBC == true && n8->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+        
+        quad->n[0] = hex->n[5];
+        quad->n[1] = hex->n[6];
+        quad->n[2] = hex->n[2];
+        quad->n[3] = hex->n[1];
+
+        ci->quads.push_back(quad);
+    }
+
+    if (n5->zero_DBC == true && n6->zero_DBC == true && n7->zero_DBC == true && n8->zero_DBC == true)
+    {
+        _Quad_ *quad = new _Quad_;
+        
+        quad->id = ci->quads.size()+1;
+        
+        quad->n[0] = hex->n[2];
+        quad->n[1] = hex->n[3];
+        quad->n[2] = hex->n[0];
+        quad->n[3] = hex->n[1];
+
+        ci->quads.push_back(quad);
+    }
+}
+
 void parse_ctuFormat(const char *file_name, CTUInfo *ctuInfo)
 {
     ifstream ctu_f(file_name);
-
-    bool point_start = true;
-    bool point_write = true;
-
     string line, str;
     vector<string> cols;
-    stringstream caster;
 
-    while(getline(ctu_f,line))
+    //read number of vertices
+    getline(ctu_f,line);
+
+    Trim(line);
+    int num_of_vertices = atoi(line.c_str());
+    
+    //read vertices
+    for(int i=0;i<num_of_vertices;i++)
     {
+        getline(ctu_f,line);
         Trim(line);
-
         Split(cols, line, " ",true);
 
-        if(cols.size() == 1)
-        {
-            if(point_start)
-            {
-                point_start = false;
-            }
-            else
-            {
-                point_write = false;
-            }
-        }
+        _Node_ *node = new _Node_;
+
+        node->id = atoi(cols[0].c_str());
+        node->n[0]  = atof(cols[1].c_str());
+        node->n[1]  = atof(cols[2].c_str());
+        node->n[2] = atof(cols[3].c_str());
+
+        int c = atoi(cols[cols.size()-1].c_str());
+
+        if( c >= 10 && c <= 16)
+            node->zero_DBC = true;
         else
-        {
-            if(point_write)
-            {
-                _Node_ *node = new _Node_;
+            node->zero_DBC = false;
 
-		node->n[0]  = atof(cols[1].c_str());
-		node->n[1]  = atof(cols[2].c_str());
-		node->n[2] = atof(cols[3].c_str());
+        ctuInfo->nodes.push_back(node);
+        cols.clear();
+    }
 
-                ctuInfo->nodes.push_back(node);
-            }
-            else
-            {
-                _Hex_ *hex = new _Hex_;
+    //read number of hexs
+    getline(ctu_f,line);
 
-		hex->n[0]  = atof(cols[2].c_str());
-		hex->n[1]  = atof(cols[3].c_str());
-		hex->n[2]  = atof(cols[4].c_str());
-		hex->n[3]  = atof(cols[5].c_str());
-		hex->n[4]  = atof(cols[6].c_str());
-		hex->n[5]  = atof(cols[7].c_str());
-		hex->n[6]  = atof(cols[8].c_str());
-		hex->n[7]  = atof(cols[9].c_str());
+    Trim(line);
+    int num_of_hexs = atoi(line.c_str());
 
-                ctuInfo->hexs.push_back(hex);
-            }
-        }
+    //read vertices
+    for(int i=0;i<num_of_hexs;i++)
+    {
+        getline(ctu_f,line);
+        Trim(line);
+        Split(cols, line, " ",true);
+
+        _Hex_ *hex = new _Hex_;
+
+        hex->id  = atoi(cols[0].c_str());
+        hex->n[0]  = atof(cols[2].c_str());
+        hex->n[1]  = atof(cols[3].c_str());
+        hex->n[2]  = atof(cols[4].c_str());
+        hex->n[3]  = atof(cols[5].c_str());
+        hex->n[4]  = atof(cols[6].c_str());
+        hex->n[5]  = atof(cols[7].c_str());
+        hex->n[6]  = atof(cols[8].c_str());
+        hex->n[7]  = atof(cols[9].c_str());
+        hex->zero_DBC  = false;
+
+        ctuInfo->hexs.push_back(hex);
+
+        make_quad(hex, ctuInfo);
 
         cols.clear();
     }
-    ctu_f.close();
 }
 
 CTUReader::CTUReader() {
@@ -222,6 +332,7 @@ bool CTUReader::load(const char *file_name, Mesh *mesh)
 
     vector<_Node_*>::iterator itv;
     vector<_Hex_*>::iterator ith;
+    vector<_Quad_*>::iterator itq;
 
     for(itv = ci.nodes.begin();itv != ci.nodes.end(); itv++)
     {
@@ -233,17 +344,10 @@ bool CTUReader::load(const char *file_name, Mesh *mesh)
         mesh->add_hex((*ith)->n);
     }
 
-    // check if all "outer" faces have defined boundary condition
-    for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++)
+    for(itq = ci.quads.begin();itq < ci.quads.end(); itq++)
     {
-        Facet *facet = it->second;
-
-        if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX))
-        {
-            fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
-            throw E_READ_ERROR;
-        }
-    }
+		mesh->add_quad_boundary((*ith)->n, 1);
+	}
 
     mesh->ugh();
     return true;
