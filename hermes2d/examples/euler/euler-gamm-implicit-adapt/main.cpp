@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
       OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), coeff_vec);
 
-      if(as > 1) {
+      if(as > 1 || iteration > 1) {
         delete rsln_rho.get_mesh();
         delete rsln_rho_v_x.get_mesh();
         delete rsln_rho_v_y.get_mesh();
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
     Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
     bool solutions_for_adapt = false;
     time_derivative = iteration == 1 ? time_derivative : 
-      adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
+      adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), 
                                             Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
                                             (Hermes::vector<double>*) NULL, solutions_for_adapt) / TAU;
     delete adapt_for_time_der_calc;
