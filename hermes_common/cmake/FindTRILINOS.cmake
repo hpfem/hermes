@@ -7,19 +7,64 @@
 # - Epetra, Teuchos
 #
 
+# You can specify your own version of the library instead of the one provided by
+# Femhub by specifying the environment variables MY_TRILINOS_LIB_DIRS and 
+# MY_TRILINOS_INC_DIRS.
+IF ("$ENV{MY_TRILINOS_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_TRILINOS_INC_DIRS}" STREQUAL "")
+  # When linking the library to stand-alone Hermes, you may also specify the 
+  # variables directly in CMake.vars
+  IF (NOT MY_TRILINOS_LIB_DIRS OR NOT MY_TRILINOS_INC_DIRS)
+    # Alternatively, you may simply specify TRILINOS_ROOT in CMake.vars. This is 
+    # the traditional way used also in the spkg files from the hpfem/solvers
+    # repository and in the Hermes spkg.
+    SET(MY_TRILINOS_LIB_DIRS ${TRILINOS_ROOT}/lib)
+    SET(MY_TRILINOS_INC_DIRS ${TRILINOS_ROOT}/include)
+  ENDIF (NOT MY_TRILINOS_LIB_DIRS OR NOT MY_TRILINOS_INC_DIRS)
+ELSE ("$ENV{MY_TRILINOS_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_TRILINOS_INC_DIRS}" STREQUAL "")
+  SET(MY_TRILINOS_LIB_DIRS $ENV{MY_TRILINOS_LIB_DIRS})
+  SET(MY_TRILINOS_INC_DIRS $ENV{MY_TRILINOS_INC_DIRS})
+ENDIF ("$ENV{MY_TRILINOS_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_TRILINOS_INC_DIRS}" STREQUAL "")
+
+# CMake maybe looks into the following paths by itself, but specifying them 
+# explicitly doesn't hurt either.
 SET(TRILINOS_INCLUDE_SEARCH_PATH
-	${TRILINOS_ROOT}/include
 	/usr/include
 	/usr/local/include/
 )
 
 SET(TRILINOS_LIB_SEARCH_PATH
-	${TRILINOS_ROOT}/lib
 	/usr/lib64
 	/usr/lib
 	/usr/local/lib/
 )
 
+FIND_PATH(AMESOS_INCLUDE_PATH       Amesos.h             ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(AZTECOO_INCLUDE_PATH      AztecOO.h            ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(EPETRA_INCLUDE_PATH       Epetra_Object.h      ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(IFPACK_INCLUDE_PATH       Ifpack.h             ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(LOCA_INCLUDE_PATH         LOCA.H               ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(ML_INCLUDE_PATH           MLAPI.h              ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(NOX_INCLUDE_PATH          NOX.H                ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(TEUCHOS_INCLUDE_PATH      Teuchos_Object.hpp   ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(KOMPLEX_INCLUDE_PATH      Komplex_Version.h    ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+
+FIND_PATH(LOCA_EPETRA_INCLUDE_PATH  LOCA_Epetra.H        ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(NOX_EPETRA_INCLUDE_PATH   NOX_Epetra.H         ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+FIND_PATH(EPETRAEXT_INCLUDE_PATH    EpetraExt_Version.h  ${MY_TRILINOS_INC_DIRS}  NO_DEFAULT_PATH)
+
+FIND_LIBRARY(AMESOS_LIBRARY         amesos               ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(AZTECOO_LIBRARY        aztecoo              ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(EPETRA_LIBRARY         epetra               ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(IFPACK_LIBRARY         ifpack               ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(LOCA_LIBRARY           loca                 ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(ML_LIBRARY             ml                   ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(NOX_LIBRARY            nox                  ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(TEUCHOS_LIBRARY        teuchos              ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(KOMPLEX_LIBRARY        komplex              ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+
+FIND_LIBRARY(LOCA_EPETRA_LIBRARY    locaepetra           ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(NOX_EPETRA_LIBRARY     noxepetra            ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
+FIND_LIBRARY(EPETRAEXT_LIBRARY      epetraext            ${MY_TRILINOS_LIB_DIRS}  NO_DEFAULT_PATH)
 
 FIND_PATH(AMESOS_INCLUDE_PATH       Amesos.h             ${TRILINOS_INCLUDE_SEARCH_PATH})
 FIND_PATH(AZTECOO_INCLUDE_PATH      AztecOO.h            ${TRILINOS_INCLUDE_SEARCH_PATH})
