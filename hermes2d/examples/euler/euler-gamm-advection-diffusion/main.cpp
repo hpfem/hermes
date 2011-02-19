@@ -270,11 +270,11 @@ int main(int argc, char* argv[])
   }
 
   // Volumetric linear forms coming from the time discretization.
-  wf.add_vector_form(0, linear_form, linear_form_order, HERMES_ANY, &prev_rho);
-  wf.add_vector_form(1, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_x);
-  wf.add_vector_form(2, linear_form, linear_form_order, HERMES_ANY, &prev_rho_v_y);
-  wf.add_vector_form(3, linear_form, linear_form_order, HERMES_ANY, &prev_e);
-  wf.add_vector_form(4, linear_form, linear_form_order, HERMES_ANY, &prev_c);
+  wf.add_vector_form(0, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho);
+  wf.add_vector_form(1, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho_v_x);
+  wf.add_vector_form(2, linear_form_time, linear_form_order, HERMES_ANY, &prev_rho_v_y);
+  wf.add_vector_form(3, linear_form_time, linear_form_order, HERMES_ANY, &prev_e);
+  wf.add_vector_form(4, callback(linear_form_time_concentration), HERMES_ANY, &prev_c);
 
   // Surface linear forms - inner edges coming from the DG formulation.
   wf.add_vector_form_surf(0, linear_form_interface_0, linear_form_order, H2D_DG_INNER_EDGE, 

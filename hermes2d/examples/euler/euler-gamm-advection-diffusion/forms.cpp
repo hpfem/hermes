@@ -562,10 +562,20 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 }
 
 // Volumetric linear forms. Coming from the time discretization.
-// One function used for all the components.
-double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+// One function used for all the components of the flow.
+double linear_form_time(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   return int_u_v<double,double>(n, wt, ext->fn[0], v);
+}
+
+// And a special form for conentration.
+template<typename Real, typename Scalar>
+Scalar linear_form_time_concentration(int n, double *wt, Func<Real> *ue[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (ext->fn[0]->val[i] * v->val[i]);
+  return result;
 }
 
 // Surface linear forms representing the solid part of the boundary.
@@ -826,7 +836,7 @@ template<typename Real, typename Scalar>
 Scalar linear_form_concentration_grad_grad(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Real>* concentration_prev = ext->fn[0];
-  return EPSILON * int_grad_u_grad_v<Real, Scalar>(n, wt, concentration_prev, v) * TAU;
+  return - EPSILON * int_grad_u_grad_v<Real, Scalar>(n, wt, concentration_prev, v) * TAU;
 }
 
 // Convective term.
@@ -842,7 +852,7 @@ Scalar linear_form_concentration_convective(int n, double *wt, Func<Scalar> *u_e
   for (int i = 0; i < n; i++)
     result += wt[i] * concentration_prev->val[i] * ((density_vel_x_prev->val[i] * v->dx[i]) + (density_vel_y_prev->val[i] * v->dy[i]))
               / density_prev->val[i];
-  return - result * TAU;
+  return result * TAU;
 }
 
 // Surface linear form (natural boundary condition).
@@ -856,9 +866,9 @@ Scalar linear_form_concentration_inlet_outlet(int n, double *wt, Func<Real> *u_e
 
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * v->val[i] * concentration_prev->val[i] * ((density_vel_x_prev->val[i] * e->nx[i]) + (density_vel_y_prev->val[i] * e->ny[i]))
+    result += wt[i] * v->val[i] * concentration_prev->val[i] * (density_vel_x_prev->val[i] * e->nx[i] + density_vel_y_prev->val[i] * e->ny[i])
               / density_prev->val[i];
-  return result * TAU;
+  return - result * TAU;
 }
 
   
@@ -873,19 +883,19 @@ Scalar linear_form_concentration_inner_edges(int n, double *wt, Func<Real> *u_ex
 
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * v->val[i] * concentration_prev->get_val_central(i) * 
+    result += wt[i] * v->val[i] *
               (
                 (
-                  density_vel_x_prev->get_val_central(i) / density_prev->get_val_central(i)
+                  density_vel_x_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
                   -
-                  density_vel_x_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                  density_vel_x_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
                 ) * e->nx[i]
                 + 
                 (
-                  density_vel_y_prev->get_val_central(i) / density_prev->get_val_central(i)
+                  density_vel_y_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
                   -
-                  density_vel_y_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                  density_vel_y_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
                 ) * e->ny[i]
               );
-  return result * TAU;
+  return - result * TAU;
 }
