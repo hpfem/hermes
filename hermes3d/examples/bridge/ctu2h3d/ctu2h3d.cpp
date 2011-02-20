@@ -361,7 +361,7 @@ int main()
 
     cout << "Generating VERTICES ..." << endl;
 
-    for(int i=0;i<ci.nodes.size();i++)
+    for(unsigned int i=0;i<ci.nodes.size();i++)
     {
         _Node_ *n = ci.nodes.at(i);
         h3d_f << n->n[0] << " " << n->n[1] << " " << n->n[2] << endl;
@@ -373,7 +373,7 @@ int main()
 
     cout << "Generating HEXS ..." << endl;
 
-    for (int i=0;i<ci.hexs.size();i++)
+    for (unsigned int i = 0; i < ci.hexs.size(); i++)
     {
         _Hex_ *h = ci.hexs.at(i);
         h3d_f <<  h->n[6] << " " << h->n[7] << " " << h->n[4] << " " << h->n[5] << " " << h->n[2] << " " << h->n[3] << " " << h->n[0] << " " << h->n[1] << endl;
@@ -385,7 +385,7 @@ int main()
     cout << "Generating QUADS ..." << endl;
     h3d_f << endl << "# quads" << endl << ci.quads.size() << endl;
 
-    for (int i=0;i<ci.quads.size();i++)
+    for (unsigned int i=0; i < ci.quads.size(); i++)
     {
         _Quad_ *q = ci.quads.at(i);
         h3d_f <<  q->n[0] << " " << q->n[1] << " " << q->n[2] << " " << q->n[3] << " 1" << endl;
