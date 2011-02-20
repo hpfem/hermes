@@ -35,24 +35,24 @@ using namespace RefinementSelectors;
 //          2 - concentration is kept constant at the inlet part of the domain.
 //              at the beginning, concentration is zero throughout the domain.
 // If not said otherwise, zero Neumann condition is imposed on all parts of the boundary.
-unsigned int INITIAL_CONCENTRATION_STATE = 1;
+unsigned int INITIAL_CONCENTRATION_STATE = 0;
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
 
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = false;                     // Set to "true" to enable VTK output.
+const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 const Ord2 P_INIT_FLOW = Ord2(0,0);               // Polynomial degree for the Euler equations (for the flow).
 const Ord2 P_INIT_CONCENTRATION = Ord2(1,1);      // Polynomial degree for the concentration.
-double TAU = 1E-2;                                // Time step.
+double TAU = 5E-2;                                // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 2;         // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 2;// Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 3;         // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 5;// Number of initial uniform mesh refinements of the mesh for the concentration.
 
 
 // Equation parameters.
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  if(INITIAL_CONCENTRATION_STATE == 1)
+  if(INITIAL_CONCENTRATION_STATE == 0)
     mloader.load("GAMM-channel-4-bnds.mesh", &basemesh);
   else
     mloader.load("channel-4-bnds.mesh", &basemesh);
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   bool is_matrix_free = true;
-  WeakForm wf(5);
+  WeakForm wf(5, is_matrix_free);
 
   // Volumetric linear forms.
   wf.add_vector_form(0, callback(linear_form_0_time));
