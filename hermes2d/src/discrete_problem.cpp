@@ -2595,6 +2595,8 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
         info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
         info("Newton solve not successful, returning false.");
       }
+      for (unsigned int i = 0; i < solutions.size(); i++)
+        delete solutions[i];
       return false;
     }
 
@@ -2610,6 +2612,9 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 
     it++;
   }
+
+  for (unsigned int i = 0; i < solutions.size(); i++)
+    delete solutions[i];
 
   if (it >= newton_max_iter) {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
