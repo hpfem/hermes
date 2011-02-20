@@ -159,16 +159,16 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
  
   // Convert initial condition into a Solution.
-  Solution* sln_prev_time = new Solution(&mesh, TEMP_INIT);
+  Solution sln_prev_time(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord, HERMES_NONSYM, HERMES_ANY, sln_prev_time);
-  wf.add_vector_form(stac_residual_vol, stac_residual_vol_ord, HERMES_ANY, sln_prev_time);
-  wf.add_matrix_form_surf(stac_jacobian_bottom, stac_jacobian_bottom_ord, BDY_BOTTOM, sln_prev_time);
-  wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, sln_prev_time);
-  wf.add_matrix_form_surf(stac_jacobian_top, stac_jacobian_top_ord, BDY_TOP, sln_prev_time);
-  wf.add_vector_form_surf(stac_residual_top, stac_residual_top_ord, BDY_TOP, sln_prev_time);
+  wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord, HERMES_NONSYM, HERMES_ANY, &sln_prev_time);
+  wf.add_vector_form(stac_residual_vol, stac_residual_vol_ord, HERMES_ANY, &sln_prev_time);
+  wf.add_matrix_form_surf(stac_jacobian_bottom, stac_jacobian_bottom_ord, BDY_BOTTOM, &sln_prev_time);
+  wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, &sln_prev_time);
+  wf.add_matrix_form_surf(stac_jacobian_top, stac_jacobian_top_ord, BDY_TOP, &sln_prev_time);
+  wf.add_vector_form_surf(stac_residual_top, stac_residual_top_ord, BDY_TOP, &sln_prev_time);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
   time_error_view.fix_scale_width(40);
   ScalarView space_error_view("Spatial error", new WinGeom(0, 1220, 1500, 360));
   space_error_view.fix_scale_width(40);
-  sln_view.show(sln_prev_time, HERMES_EPS_VERYHIGH);
+  sln_view.show(&sln_prev_time, HERMES_EPS_VERYHIGH);
   ordview.show(&space);
 
   // Graph for time step history.
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt->get_size());
       bool verbose = true;
       bool is_linear = false;
-      if (!rk_time_step(current_time, time_step, bt, sln_prev_time, &ref_sln, time_error_fn,
+      if (!rk_time_step(current_time, time_step, bt, &sln_prev_time, &ref_sln, time_error_fn,
                         ref_dp, matrix_solver, verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
         error("Runge-Kutta time step failed, try to decrease time step size.");
       }
@@ -286,10 +286,10 @@ int main(int argc, char* argv[])
 
       // Show spatial error.
       sprintf(title, "Spatial error est, spatial adaptivity step %d", as);  
-      DiffFilter* space_error_fn = new DiffFilter(Hermes::vector<MeshFunction*>(&ref_sln, &sln));   
+      DiffFilter space_error_fn(Hermes::vector<MeshFunction*>(&ref_sln, &sln));   
       space_error_view.set_title(title);
       space_error_view.show_mesh(false);
-      AbsFilter abs_sef(space_error_fn);
+      AbsFilter abs_sef(&space_error_fn);
       space_error_view.show(&abs_sef, HERMES_EPS_VERYHIGH);
 
       // Calculate element errors and spatial error estimate.
@@ -320,7 +320,6 @@ int main(int argc, char* argv[])
       if(!done) delete ref_space->get_mesh();
       delete ref_space;
       delete ref_dp;
-      delete space_error_fn;
     }
     while (done == false);
 
@@ -338,7 +337,7 @@ int main(int argc, char* argv[])
     ordview.show(&space);
 
     // Copy last reference solution into sln_prev_time.
-    sln_prev_time->copy(&ref_sln);
+    sln_prev_time.copy(&ref_sln);
 
     // Increase current time and counter of time steps.
     current_time += time_step;
@@ -347,7 +346,6 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Clean up.
-  delete sln_prev_time;
   delete bt;
 
   // Wait for all views to be closed.
