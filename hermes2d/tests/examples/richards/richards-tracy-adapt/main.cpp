@@ -295,12 +295,10 @@ int main(int argc, char* argv[])
       else {
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(&space) >= NDOF_STOP) {
+        if (Space::get_num_dofs(&space) >= NDOF_STOP) 
           done = true;
-          break;
-        }
-
-        as++;
+        
+        if (!done) as++;
       }
 
       // Cleanup.
@@ -309,6 +307,7 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
+      delete ref_space->get_mesh();
       delete ref_space;
     }
     while (!done);
