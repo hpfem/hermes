@@ -81,7 +81,9 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, b
 
   vector_valued_forms = false;
 
-  geom_ord = *init_geom_ord();
+  Geom<Ord> *tmp = init_geom_ord();
+  geom_ord = *tmp;
+  delete tmp;
 }
 
 DiscreteProblem::~DiscreteProblem()
