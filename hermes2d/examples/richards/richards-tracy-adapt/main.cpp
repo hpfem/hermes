@@ -177,11 +177,6 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   char title_init[200];
-  sprintf(title_init, "Projection of initial condition");
-  ScalarView* view_init = new ScalarView(title_init, new WinGeom(0, 0, 410, 300));
-  sprintf(title_init, "Initial mesh");
-  OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
-  view_init->fix_scale_width(80);
 
   // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.

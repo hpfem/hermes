@@ -503,9 +503,8 @@ int main(int argc, char* args[])
       {
         delete actual_sln_space->get_mesh();
         delete actual_sln_space;
+        as++;
       }
-      
-      as++;
     }
     
     delete dp;

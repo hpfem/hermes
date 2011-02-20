@@ -1093,7 +1093,7 @@ void Mesh::copy_converted(Mesh* mesh)
   //printf("Calling Mesh::free() in Mesh::copy_converted().\n");
   free();
   HashTable::copy(mesh);
-  // clear refernce for all nodes
+  // clear reference for all nodes
   for(int i = 0; i < nodes.get_size(); i++)
   {
     Node& node = nodes[i];
