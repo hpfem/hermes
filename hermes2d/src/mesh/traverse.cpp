@@ -513,7 +513,7 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
       error("Meshes not compatible in Traverse::begin().");
 
   // Test whether areas of corresponding elements are the same.
-  double *areas = (double*)malloc(base_elem_num*sizeof(double));
+  double *areas = new double [base_elem_num];
   if (areas == NULL) error("Not enough memory in Traverse::begin().");
   // Read base element areas from the first mesh,
   // Also get minimum element area.
@@ -540,6 +540,7 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
       counter++;
     }
   }
+  delete [] areas;
 #endif
 }
 
