@@ -335,6 +335,7 @@ protected:
   {
   public:
     MarkersConversion();
+    MarkersConversion(const MarkersConversion& src);  // Copy constructor.
     ~MarkersConversion();
 
     // Info about the maximum markers used so far, used in determining
