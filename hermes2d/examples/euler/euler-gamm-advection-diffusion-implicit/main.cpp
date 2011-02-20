@@ -51,8 +51,10 @@ double TAU = 5E-2;                                // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 3;         // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 5;// Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 2;               // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 2;      // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 5;  // Number of initial mesh refinements of the mesh for the concentration towards the 
+                                                  // part of the boundary where the concentration is prescribed.
 
 
 // Equation parameters.
@@ -137,6 +139,9 @@ int main(int argc, char* argv[])
 
   if(argc > 3)
     INIT_REF_NUM_CONCENTRATION = atoi(argv[3]);
+  
+  if(argc > 4)
+    INIT_REF_NUM_CONCENTRATION_BDY = atoi(argv[4]);
 
   // Load the mesh.
   Mesh basemesh;
@@ -154,6 +159,8 @@ int main(int argc, char* argv[])
 
   for(unsigned int i = 0; i < INIT_REF_NUM_CONCENTRATION; i++)
     mesh_concentration.refine_all_elements();
+
+  mesh_concentration.refine_towards_boundary(INITIAL_CONCENTRATION_STATE == 2 ? 1 : 3, INIT_REF_NUM_CONCENTRATION_BDY);
 
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
@@ -413,8 +420,6 @@ int main(int argc, char* argv[])
         lin.save_solution_vtk(&prev_c, filename, "concentration", false);
       }
     }
-
-
   }
   
   s1.close();
