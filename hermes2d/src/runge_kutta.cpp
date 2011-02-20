@@ -65,7 +65,7 @@
 
 void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
                      DiscreteProblem* dp, WeakForm* stage_wf_left, 
-                     WeakForm* stage_wf_right) 
+                     WeakForm* stage_wf_right, Solution** stage_time_sol) 
 {
   // First let's do the mass matrix (only one block ndof times ndof).
   WeakForm::MatrixFormVol mfv_00;
@@ -99,7 +99,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
   // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
   // SOLUTIONS IN ExtData.
-  Solution** stage_time_sol = new Solution*[num_stages];
   for (int i = 0; i < num_stages; i++) {
     stage_time_sol[i] = new Solution(mesh);
     stage_time_sol[i]->set_const(mesh, current_time + bt->get_C(i)*time_step);
@@ -313,7 +312,11 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   WeakForm stage_wf_left;                   // For the matrix M (size ndof times ndof).
   WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
                                             // size num_stages*ndof times num_stages*ndof.
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right); 
+
+  Solution** stage_time_sol = new Solution*[num_stages];
+                                            // This array will be filled by artificially created
+                                            // solutions to represent stage times.
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right, stage_time_sol); 
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
@@ -480,8 +483,11 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   // Delete all residuals.
   for (int i = 0; i < num_stages; i++) delete residuals[i];
 
-  // TODO: Delete stage_wf, in particular its external solutions
-  // stage_time_sol[i], i = 0, 1, ..., num_stages-1.
+  // Delete artificial Solutions with stage times.
+  for (int i = 0; i < num_stages; i++) {
+    delete stage_time_sol[i];
+  }
+  delete [] stage_time_sol;
 
   // Destroy multistage weak formulation.
   destroy_stage_wf(&stage_wf_left, &stage_wf_right); 

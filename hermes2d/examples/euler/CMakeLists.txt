@@ -1,6 +1,7 @@
 add_subdirectory(euler-forward-step)
 add_subdirectory(euler-gamm-explicit-adapt)
 add_subdirectory(euler-gamm-explicit)
+add_subdirectory(euler-gamm-advection-diffusion)
 
 if (WITH_TRILINOS)
   add_subdirectory(euler-gamm-implicit)

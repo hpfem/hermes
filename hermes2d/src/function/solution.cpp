@@ -321,6 +321,8 @@ void Solution::copy(const Solution* sln)
     cnst[0] = sln->cnst[0];
     cnst[1] = sln->cnst[1];
   }
+
+  element = NULL;
 }
 
 

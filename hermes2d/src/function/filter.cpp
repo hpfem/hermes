@@ -90,7 +90,7 @@ Filter::~Filter()
   {
     delete mesh;
     for (int i = 0; i < num; i++)
-      delete [] unidata[i];
+      ::free(unidata[i]);
     delete [] unidata;
   }
 }

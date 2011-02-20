@@ -263,34 +263,7 @@ Scalar A_2_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy)
 
 // Linear forms coming from time discretization.
 template<typename Real, typename Scalar>
-Scalar bilinear_form_0_0_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-    for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i];
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_1_1_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-    for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i];
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_2_2_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-    for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->val[i];
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_3_3_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar bilinear_form_time(int n, double *wt, Func<Real> *ue[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
     for (int i = 0; i < n; i++)
@@ -589,8 +562,8 @@ double linear_form_interface_3(int n, double *wt, Func<double> *ue[], Func<doubl
 }
 
 // Volumetric linear forms. Coming from the time discretization.
-// One function used for all the components.
-double linear_form(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
+// One function used for all the components of the flow.
+double linear_form_time(int n, double *wt, Func<scalar> *ue[], Func<double> *v, Geom<double> *e, ExtData<double> *ext)
 {
   return int_u_v<double,double>(n, wt, ext->fn[0], v);
 }
@@ -661,7 +634,7 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
   // Right (boundary) state.
   double w_r[4];
   // Eulerian flux.
-  double flux[4];
+  //double flux[4];
 
   for (int i = 0; i < n; i++) 
   {
@@ -674,13 +647,13 @@ double bdy_flux_inlet_outlet_comp(int element, int n, double *wt, Func<scalar> *
 
     w_l[3] = ext->fn[3]->val[i];
 
-    w_r[0] = bc_density(e->y[i]);
+    w_r[0] = RHO_EXT;
 
-    w_r[1] = bc_density_vel_x(e->y[i]);
+    w_r[1] = RHO_EXT * V1_EXT;
 
-    w_r[2] = bc_density_vel_y(e->y[i]);
+    w_r[2] = RHO_EXT * V2_EXT;
 
-    w_r[3] = bc_energy(e->y[i]);
+    w_r[3] = ENERGY_EXT;
     
     /*
 
