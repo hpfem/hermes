@@ -2135,24 +2135,23 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
   NeighborSearch* nbs_u = (neighbor_searches.get(neighbor_index_u));
   // Order that will be returned.
   int order;
-  int u_ext_length = u_ext.size();      // Number of external solutions.
-  int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-                                        // and there will be only u_ext_length - u_ext_offset of them.
+  
   if(this->is_fvm)
     order = ru->get_inv_ref_order();
   else {
     // Order of solutions from the previous Newton iteration.
-    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    int prev_size = u_ext.size() - mfs->u_ext_offset;
+    Func<Ord>** oi = new Func<Ord>*[prev_size];
     if (u_ext != Hermes::vector<Solution *>())
-      for (int i = u_ext_offset; i < u_ext_length; i++)
-        if (u_ext[i] != NULL) 
-          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + mfs->u_ext_offset] != NULL) 
+          oi[i] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
         else 
-          oi[i - u_ext_offset] = get_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
-      for (int i = u_ext_offset; i < u_ext_length; i++) 
-        oi[i - u_ext_offset] = get_fn_ord(0);
-
+      for (int i = 0; i < prev_size; i++) 
+        oi[i] = get_fn_ord(0);
+    
     // Order of shape functions.
     int inc = (fv->get_num_components() == 2) ? 1 : 0;
     DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_u);
@@ -2176,6 +2175,10 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
     limit_order(order);
 
     // Clean up.
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + mfs->u_ext_offset] != NULL) 
+          delete oi[i];
     delete [] oi;
     delete fake_e;
     delete ou;
@@ -2297,16 +2300,17 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
     order = rv->get_inv_ref_order();
   else {
     // Order of solutions from the previous Newton iteration.
-    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    int prev_size = u_ext.size() - vfs->u_ext_offset;
+    Func<Ord>** oi = new Func<Ord>*[prev_size];
     if (u_ext != Hermes::vector<Solution *>())
-      for (int i = u_ext_offset; i < u_ext_length; i++)
-        if (u_ext[i] != NULL) 
-          oi[i - u_ext_offset] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + vfs->u_ext_offset] != NULL) 
+          oi[i] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
         else 
-          oi[i - u_ext_offset] = get_fn_ord(0);
+          oi[i] = get_fn_ord(0);
     else
-      for (int i = u_ext_offset; i < u_ext_length; i++) 
-        oi[i - u_ext_offset] = get_fn_ord(0);
+      for (int i = 0; i < prev_size; i++) 
+        oi[i] = get_fn_ord(0);
 
     // Order of the shape function.
     // Determine the integration order.
@@ -2330,6 +2334,10 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
     limit_order(order);
 
     // Clean up.
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + vfs->u_ext_offset] != NULL) 
+          delete oi[i];
     delete [] oi;
     if (fake_ext != NULL) {
       for (int i = 0; i < fake_ext->nf; i++) {
