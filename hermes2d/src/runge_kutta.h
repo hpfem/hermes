@@ -25,9 +25,6 @@ void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTa
                                 DiscreteProblem* dp, WeakForm* stage_wf_left,
                                 WeakForm* stage_wf_right);
 
-/// Destroys augmented weak formulation.
-void HERMES_API create_stage_wf(WeakForm* stage_wf_left, WeakForm* stage_wf_right);
-
 /// Takes a matrix M of size ndof times ndof, extends it (formally) to
 /// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and
 /// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec

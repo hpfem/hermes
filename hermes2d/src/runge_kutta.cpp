@@ -245,12 +245,6 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   }
 }
 
-void destroy_stage_wf(WeakForm* stage_wf_left, WeakForm* stage_wf_right) 
-{
-
-}
-
-
 // This takes a matrix, and uses it to formally construct a block-diagonal
 // matrix. There are num_blocks blocks on the diagonal. The block diagonal
 // matrix is then multiplied with the vector source_vec.
@@ -436,9 +430,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   if (it >= newton_max_iter) {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
 
-    // Destroy multistage weak formulation.
-    destroy_stage_wf(&stage_wf_left, &stage_wf_right); 
-
     return false;
   }
 
@@ -488,9 +479,6 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     delete stage_time_sol[i];
   }
   delete [] stage_time_sol;
-
-  // Destroy multistage weak formulation.
-  destroy_stage_wf(&stage_wf_left, &stage_wf_right); 
 
   // Clean up.
   delete [] K_vector;
