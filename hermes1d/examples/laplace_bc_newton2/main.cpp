@@ -11,8 +11,8 @@
 //
 //  The following parameters can be changed:
 const int NEQ = 1;                      // Number of equations.
-const int NELEM = 3;                   // Number of elements.
-const double A = 0, B = 2*M_PI;             // Domain end points.
+const int NELEM = 3;                    // Number of elements.
+const double A = 0, B = 2*M_PI;         // Domain end points.
 const int P_INIT = 3;                   // Polynomial degree.
 
 // Newton's method.
@@ -36,7 +36,6 @@ double f(double x) {
 
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
-
 
 int main() 
 {

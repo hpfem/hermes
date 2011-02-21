@@ -399,15 +399,15 @@ Space::Space() {
 
 // Creates equidistant space with uniform polynomial degree of elements.
 // All elements will have the same (zero) marker.
-Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq, int
-      n_sln, bool print_banner)
+Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq, 
+             int n_sln, bool print_banner)
 {
   this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
 }
 
 Space::Space(double a, double b, int n_base_elem, Hermes::vector<std::pair<int, double> *> left_boundary_conditions, 
-        Hermes::vector<std::pair<int, double> *> right_boundary_conditions, int p_init, int n_eq, int
-        n_sln, bool print_banner)
+             Hermes::vector<std::pair<int, double> *> right_boundary_conditions, int p_init, int n_eq, int
+             n_sln, bool print_banner)
 {
   this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
 
@@ -477,11 +477,11 @@ Space::Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, in
 }
 
 void Space::init(double a, double b, int n_base_elem, int p_init, int n_eq, int
-                n_sln, bool print_banner)
+                 n_sln, bool print_banner)
 {
   // check maximum number of equations
   if(n_eq > MAX_EQN_NUM) 
-  error("Maximum number of equations exceeded (set in common.h)");
+  error("Maximum number of equations exceeded (set in common.h).");
 
   // all Space class variables
   this->left_endpoint = a;
@@ -523,7 +523,7 @@ void Space::refine_single_elem(int id, int3 cand)
             return;
         }
     }
-    error("refine_single_elem: Element not found.");
+    error("refine_single_elem(): Element not found.");
 }
 
 // performs space refinement using a list of elements to be 

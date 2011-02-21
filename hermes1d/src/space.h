@@ -26,7 +26,7 @@ public:
 	      int id, int active, int level, int n_eq, int n_sln, int marker);
     void copy_into(Element *e_trg);
     void copy_recursively_into(Element *e_trg);
-    double get_x_phys(double x_ref); // gets physical coordinate of a reference poin
+    double get_x_phys(double x_ref);             // Gets physical coordinate of a reference point.
     double calc_elem_norm_squared(int norm);
     void get_coeffs_from_vector(double *y, int sln=0);
     void copy_coeffs_to_vector(double *y, int sln=0);
@@ -35,7 +35,7 @@ public:
                            double val_phys[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], 
 			   double der_phys[MAX_EQN_NUM][MAX_QUAD_PTS_NUM], int sln=0);
     void get_solution_plot(double x_phys[MAX_PLOT_PTS_NUM], int pts_num,
-         double val_phys[MAX_EQN_NUM][MAX_PLOT_PTS_NUM], 
+                           double val_phys[MAX_EQN_NUM][MAX_PLOT_PTS_NUM], 
 			   double der_phys[MAX_EQN_NUM][MAX_PLOT_PTS_NUM], int sln=0);
     double get_solution_value(double x_phys, int c);
     double get_solution_deriv(double x_phys, int c);
@@ -64,21 +64,24 @@ public:
 
 typedef Element* ElemPtr2[2];
 
-void HERMES_API get_coeff_vector(Space *space, scalar *y, int sln=0);
-void HERMES_API set_coeff_vector(scalar *y, Space *space, int sln=0);
-void HERMES_API get_coeff_vector(Space *space, Vector *y, int sln=0);
-void HERMES_API set_coeff_vector(Vector *y, Space *space, int sln=0);
+void HERMES_API get_coeff_vector(Space *space, scalar *y, int sln = 0);
+void HERMES_API set_coeff_vector(scalar *y, Space *space, int sln = 0);
+void HERMES_API get_coeff_vector(Space *space, Vector *y, int sln = 0);
+void HERMES_API set_coeff_vector(Vector *y, Space *space, int sln =  0);
 
 class HERMES_API Space {
     public:
         Space();
         // Creates equidistant space with uniform polynomial degree of elements.
         // All elements will have the same (zero) marker.
-        Space(double a, double b, int n_base_elem, int p_init=1, int n_eq=1, int
-                n_sln=1, bool print_banner=true);
-        Space(double a, double b, int n_base_elem, Hermes::vector<std::pair<int, double> *> left_boundary_conditions = ( Hermes::vector<std::pair<int, double> *>() ), 
-	      Hermes::vector<std::pair<int, double> *> right_boundary_conditions = (Hermes::vector<std::pair<int, double> *>() ), int p_init=1, int n_eq=1, int
-          n_sln=1, bool print_banner=true);
+        Space(double a, double b, int n_base_elem, int p_init = 1, int n_eq = 1, 
+              int n_sln = 1, bool print_banner = true);
+        Space(double a, double b, int n_base_elem, 
+              Hermes::vector<std::pair<int, double> *> left_boundary_conditions = 
+              ( Hermes::vector<std::pair<int, double> *>() ), 
+	      Hermes::vector<std::pair<int, double> *> right_boundary_conditions = 
+              (Hermes::vector<std::pair<int, double> *>() ), int p_init = 1, int n_eq = 1, 
+              int n_sln = 1, bool print_banner = true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
         // pts_array[]...  array of macroelement grid points
@@ -86,10 +89,10 @@ class HERMES_API Space {
         // m_array[]...    array of macroelement material markers
         // div_array[]...  array of macroelement equidistant divisions
         Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
-             int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
+              int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
         
-        void init(double a, double b, int n_base_elem, int p_init, int n_eq, int
-                n_sln, bool print_banner);
+        void init(double a, double b, int n_base_elem, int p_init, int n_eq, 
+                  int n_sln, bool print_banner);
         ~Space();
 
         void free_elements();
@@ -108,9 +111,7 @@ class HERMES_API Space {
 
         static int get_num_dofs(Space* space);
 
-        int get_num_dofs() {
-            return Space::get_num_dofs(this);
-        };
+        int get_num_dofs() { return Space::get_num_dofs(this); };
 
         void set_n_dof(int n);
 

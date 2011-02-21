@@ -38,7 +38,7 @@ const int MESH_REGULARITY = -1;            // Maximum allowed level of hanging n
                                            // their notoriously bad performance.
 const double CONV_EXP = 0.5;               // Default value is 1.0. This parameter influences the selection of
                                            // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;               // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 20.0;              // Stopping criterion for adaptivity (rel. error tolerance between the
                                            // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -251,9 +251,9 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 1440);
+  printf("ndof allowed = %d\n", 260);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 1440) {      // ndofs was 1433 at the time this test was created.
+  if (ndof < 260) {      // ndofs was 247 at the time this test was created.
     printf("Success!\n");
     return ERROR_SUCCESS;
   }

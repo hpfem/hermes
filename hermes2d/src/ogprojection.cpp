@@ -67,7 +67,8 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
     if (norm == HERMES_H1_NORM)
     {
       found[i] = 1;
-      proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
+      proj_wf->add_matrix_form(i, i, (WeakForm::matrix_form_val_t)(H1projection_biform<double, scalar>), 
+                               (WeakForm::matrix_form_ord_t)(H1projection_biform<Ord, Ord>));
       proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
                                HERMES_ANY, source_meshfns[i]);
     }
