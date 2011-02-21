@@ -34,6 +34,8 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types, BCValues* bc_val
   this->was_assigned = false;
   this->ndof = 0;
 
+  this->own_bc_values = this->own_bc_types = false;
+  
   if(bc_types == NULL) error("BCTypes pointer cannot be NULL in Space::Space().");
 
   // Before adding, update the boundary variables with the user-supplied string markers
@@ -74,6 +76,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCTypes* bc_types,
   this->set_essential_bc_values(bc_value_callback_by_coord);
   this->set_essential_bc_values((scalar (*)(SurfPos*)) NULL);
 
+  this->own_bc_values = this->own_bc_types = false;
   this->bc_values = NULL;
 
   own_shapeset = (shapeset == NULL);
@@ -98,6 +101,9 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BCType (*bc_type_callback)(int),
   this->was_assigned = false;
   this->ndof = 0;
 
+  this->own_bc_values = false;
+  this->own_bc_types = true;
+  
   BCTypesCallback *bc_types = new BCTypesCallback();
   bc_types->register_callback(bc_type_callback);
   this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
@@ -122,6 +128,16 @@ void Space::free()
   free_extra_data();
   if (nsize) { ::free(ndata); ndata=NULL; }
   if (esize) { ::free(edata); edata=NULL; }
+  if (this->own_bc_values && this->bc_values != NULL)
+  {
+    delete this->bc_values;
+    this->own_bc_values = false;
+  }
+  if (this->own_bc_types && this->bc_types != NULL)
+  {
+    delete this->bc_types;
+    this->own_bc_types = false;
+  }
 }
 
 //// element orders ///////////////////////////////////////////////////////////////////////////////
@@ -604,8 +620,12 @@ void Space::copy_callbacks(const Space* space)
 {
   _F_
   this->bc_types = space->bc_types->dup();
+  this->own_bc_types = true; // New instance of BCTypes is dynamically allocated in 'dup'.
   if(space->bc_values != NULL)
+  {
     this->bc_values = space->bc_values->dup();
+    this->own_bc_values = true; // New instance of BCValues is dynamically allocated in 'dup'.
+  }
   this->bc_value_callback_by_coord = space->bc_value_callback_by_coord;
   this->bc_value_callback_by_edge  = space->bc_value_callback_by_edge;
 }
