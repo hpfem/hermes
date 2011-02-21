@@ -411,6 +411,9 @@ int main(int argc, char* argv[])
                        coeff_vec, matrix_solver_fine);
         
         // Deallocate the previous fine mesh.
+        // FIXME: This is terribly non-transparent. Solution::vector_to_solutions (called few lines below) deletes the solution's mesh 
+        // (and makes Solution::own_mesh = false), so phi_fine.get_mesh() actually points to memory originally allocated by phi's ref_space 
+        // (which however does not exist any more at this point as it gets deallocated at the end of the loop).
         delete T_fine.get_mesh();
         delete phi_fine.get_mesh();
       }
@@ -507,6 +510,9 @@ int main(int argc, char* argv[])
       }
       
       delete adaptivity;
+      
+      for (unsigned int i = 0; i < ref_spaces->size(); i++)
+        delete ref_spaces->at(i); // Mesh dynamically allocated for each space is held by the corresponding reference solution.
       delete ref_spaces;
     }
     while (!done);
@@ -532,7 +538,10 @@ int main(int argc, char* argv[])
     T_prev_time.copy(&T_fine);
     phi_prev_time.copy(&phi_fine);
   }
-   
+  
+  delete T_fine.get_mesh();
+  delete phi_fine.get_mesh();
+  
   delete rhs_coarse;
   delete matrix_coarse;
   delete solver_coarse;
