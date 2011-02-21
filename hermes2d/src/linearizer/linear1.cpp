@@ -774,8 +774,16 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     }
 
     int iv[4];
-    for (unsigned int i = 0; i < e->nvert; i++)
-      iv[i] = get_top_vertex(id2id[e->vn[i]->id], getval(i));
+    if(dynamic_cast<Solution*>(sln))
+      if(dynamic_cast<Solution*>(sln)->get_space_type() == HERMES_L2_SPACE)
+        for (unsigned int i = 0; i < e->nvert; i++)
+          iv[i] = get_vertex(-rand(), -rand(), verts[id2id[e->vn[i]->id]][0], verts[id2id[e->vn[i]->id]][1], getval(i));
+      else
+        for (unsigned int i = 0; i < e->nvert; i++)
+          iv[i] = get_top_vertex(id2id[e->vn[i]->id], getval(i));
+    else
+      for (unsigned int i = 0; i < e->nvert; i++)
+          iv[i] = get_top_vertex(id2id[e->vn[i]->id], getval(i));
 
     // we won't bother calculating physical coordinates from the refmap if this is not a curved element
     curved = e->is_curved();
