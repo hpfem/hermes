@@ -1,23 +1,12 @@
 #define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
-// This example shows how to solve a first simple PDE:
-//   - load the mesh,
-//   - perform initial refinements,
-//   - create a H1 space over the mesh,
-//   - define weak formulation,
-//   - initialize matrix solver,
-//   - assemble and solve the matrix system,
-//   - output the solution and element orders in VTK format 
-//     (to be visualized, e.g., using Paraview),
-//   - visualize the solution using Hermes' native OpenGL-based functionality.
+// This example shows how to turn on adaptive quadrature in the 
+// evaluation of weak forms. It is derived from example P01-linear/03-poisson.
 //
 // PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
 //      Dirichlet boundary conditions.
 //
-// You can change the constant right-hand side CONST_F, the
-// initial polynomial degree P_INIT, and play with various initial
-// mesh refinements at the beginning of the main() function.
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
@@ -56,10 +45,21 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
-  // Initialize the weak formulation.
+  // Initialize the weak formulation. Not providing the order determination form 
+  // (or callback) turns on adaptive numerical quadrature. The quadrature begins 
+  // with using a first-order rule in the entire element. Then the element is split 
+  // uniformly in space and the quadrature order is increased by "adapt_order_increase".
+  // Then the form is calculated again by employing the new quadrature in subelements. 
+  // This provides a more accurate result. If relative error is less than 
+  // "adapt_rel_error_tol", the computation stops, otherwise the same procedure is 
+  // applied recursively to all four subelements. 
+  int adapt_order_increase = 1;
+  double adapt_rel_error_tol = 1e-2;
   WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
+  wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+                     adapt_order_increase, adapt_rel_error_tol);
+  wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+                     adapt_order_increase, adapt_rel_error_tol);
 
   // Initialize the FE problem.
   bool is_linear = true;

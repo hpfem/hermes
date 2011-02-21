@@ -80,7 +80,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
   mfv_00.u_ext_offset = 0;
   mfv_00.adapt_eval = false;
   mfv_00.adapt_order_increase = -1;
-  mfv_00.adapt_rel_error = -1;
+  mfv_00.adapt_rel_error_tol = -1;
   stage_wf_left->add_matrix_form_internal(&mfv_00);
 
   // In the rest we will take the stationary jacobian and residual forms 
@@ -147,7 +147,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         // This form will not be integrated adaptively.
         mfv_ij.adapt_eval = false;
         mfv_ij.adapt_order_increase = -1;
-        mfv_ij.adapt_rel_error = -1;
+        mfv_ij.adapt_rel_error_tol = -1;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -186,7 +186,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
         // This form will not be integrated adaptively.
         mfs_ij.adapt_eval = false;
         mfs_ij.adapt_order_increase = -1;
-        mfs_ij.adapt_rel_error = -1;
+        mfs_ij.adapt_rel_error_tol = -1;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
@@ -223,7 +223,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       // This form will not be integrated adaptively.
       vfv_i.adapt_eval = false;
       vfv_i.adapt_order_increase = -1;
-      vfv_i.adapt_rel_error = -1;
+      vfv_i.adapt_rel_error_tol = -1;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
@@ -259,7 +259,7 @@ void create_stage_wf(double current_time, double time_step, ButcherTable* bt,
       // This form will not be integrated adaptively.
       vfs_i.adapt_eval = false;
       vfs_i.adapt_order_increase = -1;
-      vfs_i.adapt_rel_error = -1;
+      vfs_i.adapt_rel_error_tol = -1;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.

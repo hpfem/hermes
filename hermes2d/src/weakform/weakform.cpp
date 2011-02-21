@@ -55,7 +55,7 @@ void WeakForm::add_matrix_form_internal(MatrixFormVol* form)
 // Most general case, integer markers - internal
 void WeakForm::add_matrix_form_internal(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                         matrix_form_ord_t ord, SymFlag sym, int area, Hermes::vector<MeshFunction*>ext,
-                                        bool adapt, int order_increase, double rel_error)
+                                        bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   // Sanity checks.
@@ -75,7 +75,7 @@ void WeakForm::add_matrix_form_internal(unsigned int i, unsigned int j, matrix_f
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   MatrixFormVol form = { i, j, sym, area, fn, ord, ext, scaling_factor, u_ext_offset, 
-                         adapt, order_increase, rel_error };
+                         adapt, order_increase, rel_error_tol };
   mfvol.push_back(form);
   seq++;
 }
@@ -84,7 +84,7 @@ void WeakForm::add_matrix_form_internal(unsigned int i, unsigned int j, matrix_f
 void WeakForm::add_matrix_form_internal(unsigned int i, unsigned int j, matrix_form_val_t fn,
                                         matrix_form_ord_t ord, SymFlag sym, std::string area, 
                                         Hermes::vector<MeshFunction*>ext,
-                                        bool adapt, int order_increase, double rel_error)
+                                        bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   // Sanity checks.
@@ -102,7 +102,7 @@ void WeakForm::add_matrix_form_internal(unsigned int i, unsigned int j, matrix_f
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   MatrixFormVol form = { i, j, sym, 0, fn, ord, ext, scaling_factor, u_ext_offset, 
-                         adapt, order_increase, rel_error };
+                         adapt, order_increase, rel_error_tol };
   mfvol_string_temp.insert(std::pair<std::string, MatrixFormVol>(area, form));
   seq++;
 }
@@ -117,8 +117,8 @@ void WeakForm::add_matrix_form(unsigned int i, unsigned int j,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_internal(i, j, fn, ord, sym, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_internal(i, j, fn, ord, sym, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration.
@@ -131,8 +131,8 @@ void WeakForm::add_matrix_form(unsigned int i, unsigned int j,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_internal(i, j, fn, ord, sym, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_internal(i, j, fn, ord, sym, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
@@ -141,11 +141,11 @@ void WeakForm::add_matrix_form(unsigned int i, unsigned int j,
                                matrix_form_val_t fn,
 		               SymFlag sym, int area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_matrix_form_internal(i, j, fn, NULL, sym, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_internal(i, j, fn, NULL, sym, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
@@ -154,11 +154,11 @@ void WeakForm::add_matrix_form(unsigned int i, unsigned int j,
                                matrix_form_val_t fn,
 		               SymFlag sym, std::string area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_matrix_form_internal(i, j, fn, NULL, sym, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_internal(i, j, fn, NULL, sym, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation case.
@@ -188,11 +188,11 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn, matrix_form_ord_t ord,
 void WeakForm::add_matrix_form(matrix_form_val_t fn,
 		               SymFlag sym, int area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   int i = 0, j = 0;
-  add_matrix_form(i, j, fn, sym, area, ext, order_increase, rel_error);
+  add_matrix_form(i, j, fn, sym, area, ext, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation case.
@@ -200,11 +200,11 @@ void WeakForm::add_matrix_form(matrix_form_val_t fn,
 void WeakForm::add_matrix_form(matrix_form_val_t fn,
 		               SymFlag sym, std::string area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   int i = 0, j = 0;
-  add_matrix_form(i, j, fn, sym, area, ext, order_increase, rel_error);
+  add_matrix_form(i, j, fn, sym, area, ext, order_increase, rel_error_tol);
 }
 
 /* SURFACE MATRIX FORMS */
@@ -227,7 +227,7 @@ void WeakForm::add_matrix_form_surf_internal(MatrixFormSurf* form)
 void WeakForm::add_matrix_form_surf_internal(unsigned int i, unsigned int j, 
                                              matrix_form_val_t fn, matrix_form_ord_t ord,
                                              int area, Hermes::vector<MeshFunction*>ext,
-                                             bool adapt, int order_increase, double rel_error)
+                                             bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   //Sanity checks.
@@ -241,7 +241,7 @@ void WeakForm::add_matrix_form_surf_internal(unsigned int i, unsigned int j,
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   MatrixFormSurf form = { i, j, area, fn, ord, ext, scaling_factor, u_ext_offset,
-                          adapt, order_increase, rel_error };
+                          adapt, order_increase, rel_error_tol };
   mfsurf.push_back(form);
   seq++;
 }
@@ -250,7 +250,7 @@ void WeakForm::add_matrix_form_surf_internal(unsigned int i, unsigned int j,
 void WeakForm::add_matrix_form_surf_internal(unsigned int i, unsigned int j, 
                                              matrix_form_val_t fn, matrix_form_ord_t ord,
 			                     std::string area, Hermes::vector<MeshFunction*>ext,
-                                             bool adapt, int order_increase, double rel_error)
+                                             bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   // Sanity checks.
@@ -263,7 +263,7 @@ void WeakForm::add_matrix_form_surf_internal(unsigned int i, unsigned int j,
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   MatrixFormSurf form = { i, j, 0, fn, ord, ext, scaling_factor, u_ext_offset, 
-                          adapt, order_increase, rel_error };
+                          adapt, order_increase, rel_error_tol };
   mfsurf_string_temp.insert(std::pair<std::string, MatrixFormSurf>(area, form));
   seq++;
 }
@@ -278,8 +278,8 @@ void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration.
@@ -292,8 +292,8 @@ void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
@@ -301,11 +301,11 @@ void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j,
 void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, 
                                     int area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
@@ -313,11 +313,11 @@ void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_
 void WeakForm::add_matrix_form_surf(unsigned int i, unsigned int j, matrix_form_val_t fn, 
                                     std::string area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation case.
@@ -330,8 +330,8 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   int i = 0, j = 0;
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation case.
@@ -344,32 +344,32 @@ void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, matrix_form_ord_t ord,
   int i = 0, j = 0;
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_matrix_form_surf_internal(i, j, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation case.
 // Version with integer markers.
 void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, int area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   int i = 0, j = 0;
   bool adapt = true;
-  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation case.
 // Version with string markers.
 void WeakForm::add_matrix_form_surf(matrix_form_val_t fn, std::string area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   int i = 0, j = 0;
   bool adapt = true;
-  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_matrix_form_surf_internal(i, j, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 
@@ -391,7 +391,7 @@ void WeakForm::add_vector_form_internal(VectorFormVol* form)
 // Most general case, integer markers - internal.
 void WeakForm::add_vector_form_internal(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area, 
                                Hermes::vector<MeshFunction*>ext,
-                               bool adapt, int order_increase, double rel_error)
+                               bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   if (i >= neq)
@@ -402,7 +402,7 @@ void WeakForm::add_vector_form_internal(unsigned int i, vector_form_val_t fn, ve
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormVol form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset,
-                         adapt, order_increase, rel_error };
+                         adapt, order_increase, rel_error_tol };
   vfvol.push_back(form);
   seq++;
 }
@@ -412,7 +412,7 @@ void WeakForm::add_vector_form_internal(unsigned int i,
                               vector_form_val_t fn, vector_form_ord_t ord,
 		              std::string area, Hermes::vector<MeshFunction*>ext,
                               bool adapt, int order_increase, 
-                              double rel_error)
+                              double rel_error_tol)
 {
   _F_
   if (i >= neq) error("Invalid equation number.");
@@ -420,7 +420,7 @@ void WeakForm::add_vector_form_internal(unsigned int i,
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormVol form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset,
-                         adapt, order_increase, rel_error };
+                         adapt, order_increase, rel_error_tol };
   vfvol_string_temp.insert(std::pair<std::string, VectorFormVol>(area, form));
   seq++;
 }
@@ -433,8 +433,8 @@ void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration.
@@ -445,30 +445,30 @@ void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, vector_form
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
 // Version with integer markers.
 void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, int area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
 // Version with string markers.
 void WeakForm::add_vector_form(unsigned int i, vector_form_val_t fn, std::string area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation version.
@@ -479,8 +479,8 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation version.
@@ -491,30 +491,30 @@ void WeakForm::add_vector_form(vector_form_val_t fn, vector_form_ord_t ord,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation version.
 // Version with integer markers.
 void WeakForm::add_vector_form(vector_form_val_t fn, int area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation version.
 // Version with string markers.
 void WeakForm::add_vector_form(vector_form_val_t fn, std::string area,
                                Hermes::vector<MeshFunction*>ext,
-                               int order_increase, double rel_error)
+                               int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 
@@ -537,7 +537,7 @@ void WeakForm::add_vector_form_surf_internal(VectorFormSurf* form)
 // Most general case, integer markers - internal.
 void WeakForm::add_vector_form_surf_internal(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, int area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    bool adapt, int order_increase, double rel_error)
+                                    bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   if (i >= neq)
@@ -549,7 +549,7 @@ void WeakForm::add_vector_form_surf_internal(unsigned int i, vector_form_val_t f
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormSurf form = { i, area, fn, ord, ext, scaling_factor, u_ext_offset,
-                          adapt, order_increase, rel_error };
+                          adapt, order_increase, rel_error_tol };
   vfsurf.push_back(form);
   seq++;
 }
@@ -557,7 +557,7 @@ void WeakForm::add_vector_form_surf_internal(unsigned int i, vector_form_val_t f
 // Most general case, string markers - internal.
 void WeakForm::add_vector_form_surf_internal(unsigned int i, vector_form_val_t fn, vector_form_ord_t ord, std::string area,
                                              Hermes::vector<MeshFunction*>ext,
-                                             bool adapt, int order_increase, double rel_error)
+                                             bool adapt, int order_increase, double rel_error_tol)
 {
   _F_
   if (i >= neq) error("Invalid equation number.");
@@ -565,7 +565,7 @@ void WeakForm::add_vector_form_surf_internal(unsigned int i, vector_form_val_t f
   double scaling_factor = 1.0;
   int u_ext_offset = 0;
   VectorFormSurf form = { i, 0, fn, ord, ext, scaling_factor, u_ext_offset,
-                          adapt, order_increase, rel_error};
+                          adapt, order_increase, rel_error_tol};
   vfsurf_string_temp.insert(std::pair<std::string, VectorFormSurf>(area, form));
   seq++;
 }
@@ -578,8 +578,8 @@ void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_surf_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_surf_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration.
@@ -590,30 +590,30 @@ void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, vector
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_surf_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_surf_internal(i, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
 // Version with integer markers.
 void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, int area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_surf_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_surf_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration.
 // Version with string markers.
 void WeakForm::add_vector_form_surf(unsigned int i, vector_form_val_t fn, std::string area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_surf_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_surf_internal(i, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation version.
@@ -624,8 +624,8 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_surf_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_surf_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for non-adaptive numerical integration - single equation version.
@@ -636,30 +636,30 @@ void WeakForm::add_vector_form_surf(vector_form_val_t fn, vector_form_ord_t ord,
   _F_
   bool adapt = false;
   int order_increase = -1;
-  double rel_error = -1;
-  add_vector_form_surf_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error);
+  double rel_error_tol = -1;
+  add_vector_form_surf_internal(0, fn, ord, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation version.
 // Version with integer markers.
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, int area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_surf_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_surf_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Wrapper for adaptive numerical integration - single equation version.
 // Version with string markers.
 void WeakForm::add_vector_form_surf(vector_form_val_t fn, std::string area,
                                     Hermes::vector<MeshFunction*>ext,
-                                    int order_increase, double rel_error)
+                                    int order_increase, double rel_error_tol)
 {
   _F_
   bool adapt = true;
-  add_vector_form_surf_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error);
+  add_vector_form_surf_internal(0, fn, NULL, area, ext, adapt, order_increase, rel_error_tol);
 }
 
 // Sets external functions.
