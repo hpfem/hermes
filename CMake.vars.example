@@ -17,9 +17,7 @@ set(WITH_UMFPACK YES)
 
 # Enable MUMPS (linear solver)
 set(WITH_MUMPS YES)
-    # Nothing here if using the Debian package (e.g installed via Synaptic)
-    # If you installed the .spkg file from the hpfem/solvers repository, add
-    #   set(MUMPS_ROOT /home/pavel/solvers/mumps)
+    set(MUMPS_ROOT /home/pavel/solvers/mumps)
 
 # Enable PETSc (linear solver)
 set(WITH_PETSC YES)
