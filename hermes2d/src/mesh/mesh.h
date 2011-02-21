@@ -159,6 +159,7 @@ public:
   ~Mesh() {
     free();
     dump_hash_stat();
+    delete markers_conversion;
   }
   /// Creates a copy of another mesh.
   void copy(const Mesh* mesh);
