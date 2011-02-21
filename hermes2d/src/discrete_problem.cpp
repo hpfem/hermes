@@ -1763,23 +1763,27 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   return res;
 }
 
-// Evaluates weak form on element given in the RefMap, using non-adaptive 
-// or adaptive numerical integration.
+// Evaluates weak form on element given by the RefMap, using non-adaptive 
+// or adaptive numerical quadrature.
 scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
   scalar result = 0;
 
-  // Decide whether integration is adaptive.
   if (mfv->adapt_eval == false) {
     // Determine the integration order.
     int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+    // Perform non-adaptive numerical quadrature.
     result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
   }
   else {
-    //Element* elem = ru->get_active_element();
-    //refine_element_id(elem->id);  // Refine element uniformly.
+    // Perform adaptive numerical quadrature.
+    // IN PROGRESS.
+
+    Element* elem = ru->get_active_element();
+    int refinement = 0;
+    refine_element(NULL, elem, refinement);  // Refine element uniformly.
 
     // Set active element to reference mappings.
     //refmap[j]->set_active_element(e[i]);

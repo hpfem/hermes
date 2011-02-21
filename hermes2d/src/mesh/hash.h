@@ -49,6 +49,16 @@ public:
   /// Returns an edge node with parent id's p1 and p2 if it exists, NULL otherwise.
   Node* peek_edge_node(int p1, int p2);
 
+  /// The central function: obtains a vertex node pointer given the id
+  /// numbers of its parents. If the vertex node does not exist, it is
+  /// created first.
+  Node* get_vertex_node(int p1, int p2);
+
+  /// The central function: obtains an edge node pointer given the id
+  /// numbers of its parents. If the edge node does not exist, it is
+  /// created first.
+  Node* get_edge_node(int p1, int p2);
+
   // The following functions are used by the derived class Mesh:
 protected:
   Array<Node> nodes; ///< Array storing all nodes
@@ -70,16 +80,6 @@ protected:
 
   /// Prints hash table statistics for debugging purposes.
   void dump_hash_stat();
-
-  /// The central function: obtains a vertex node pointer given the id
-  /// numbers of its parents. If the vertex node does not exist, it is
-  /// created first.
-  Node* get_vertex_node(int p1, int p2, bool do_not_add = false);
-
-  /// The central function: obtains an edge node pointer given the id
-  /// numbers of its parents. If the edge node does not exist, it is
-  /// created first.
-  Node* get_edge_node(int p1, int p2, bool do_not_add = false);
 
   /// Removes a vertex node with parent id's p1 and p2.
   void remove_vertex_node(int id);

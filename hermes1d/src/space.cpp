@@ -403,6 +403,7 @@ Space::Space(double a, double b, int n_base_elem, int p_init, int n_eq,
              int n_sln, bool print_banner)
 {
   this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
+  this->assign_dofs();
 }
 
 Space::Space(double a, double b, int n_base_elem, Hermes::vector<std::pair<int, double> *> left_boundary_conditions, 

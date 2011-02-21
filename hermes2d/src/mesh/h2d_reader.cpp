@@ -287,12 +287,12 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
     if(nv == 4) {
         check_triangle(i, v0, v1, v2);
-        mesh->create_triangle(marker, v0, v1, v2, NULL);
+        create_triangle(mesh, marker, v0, v1, v2, NULL);
       }
       else {
         Node *v3 = &mesh->nodes[idx[3]];
         check_quad(i, v0, v1, v2, v3);
-        mesh->create_quad(marker, v0, v1, v2, v3, NULL);
+        create_quad(mesh, marker, v0, v1, v2, v3, NULL);
       }
 
     mesh->nactive++;

@@ -63,8 +63,8 @@ void Mesh::regularize_triangle(Element* e)
       nactive += 1;
       e->unref_all_nodes(this);
 
-      t[0] = create_triangle(e->marker, e->vn[k], v4, e->vn[k2], NULL);
-      t[1] = create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], NULL);
+      t[0] = create_triangle(this, e->marker, e->vn[k], v4, e->vn[k2], NULL);
+      t[1] = create_triangle(this, e->marker, v4, e->vn[k1], e->vn[k2], NULL);
 
       // set correct boundary status and markers for the new nodes
       t[0]->en[2]->bnd = bnd[k2];
@@ -91,9 +91,9 @@ void Mesh::regularize_triangle(Element* e)
       nactive += 2;
       e->unref_all_nodes(this);
 
-      t[0] = create_triangle(e->marker, e->vn[k], e->vn[k1], v4,  NULL);
-      t[1] = create_triangle(e->marker, v4, v5, e->vn[k], NULL);
-      t[2] = create_triangle(e->marker, v4, e->vn[k2], v5, NULL);
+      t[0] = create_triangle(this, e->marker, e->vn[k], e->vn[k1], v4,  NULL);
+      t[1] = create_triangle(this, e->marker, v4, v5, e->vn[k], NULL);
+      t[2] = create_triangle(this, e->marker, v4, e->vn[k2], v5, NULL);
 
       // set correct boundary status and markers for the new nodes
       t[0]->en[0]->bnd = bnd[k];
@@ -151,9 +151,9 @@ void Mesh::regularize_quad(Element* e)
       nactive += 2;
       e->unref_all_nodes(this);
 
-      t[0] = create_triangle(e->marker, e->vn[k], v4, e->vn[k3], NULL);
-      t[1] = create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], NULL);
-      t[2] = create_triangle(e->marker, v4, e->vn[k2], e->vn[k3], NULL);
+      t[0] = create_triangle(this, e->marker, e->vn[k], v4, e->vn[k3], NULL);
+      t[1] = create_triangle(this, e->marker, v4, e->vn[k1], e->vn[k2], NULL);
+      t[2] = create_triangle(this, e->marker, v4, e->vn[k2], e->vn[k3], NULL);
 
       // set correct boundary status and markers for the new nodes
       t[0]->en[2]->bnd = bnd[k3];
@@ -187,10 +187,10 @@ void Mesh::regularize_quad(Element* e)
         nactive += 3;
         e->unref_all_nodes(this);
 
-        t[0] = create_triangle(e->marker, e->vn[k1], v5, v4, NULL);
-        t[1] = create_triangle(e->marker, v5, e->vn[k2], e->vn[k3], NULL);
-        t[2] = create_triangle(e->marker, v4, v5, e->vn[k3], NULL);
-        t[3] = create_triangle(e->marker, v4, e->vn[k3], e->vn[k], NULL);
+        t[0] = create_triangle(this, e->marker, e->vn[k1], v5, v4, NULL);
+        t[1] = create_triangle(this, e->marker, v5, e->vn[k2], e->vn[k3], NULL);
+        t[2] = create_triangle(this, e->marker, v4, v5, e->vn[k3], NULL);
+        t[3] = create_triangle(this, e->marker, v4, e->vn[k3], e->vn[k], NULL);
 
         t[1]->en[1]->bnd = bnd[k2];
         t[3]->en[1]->bnd = bnd[k3];
