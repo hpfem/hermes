@@ -159,6 +159,7 @@ public:
   ~Mesh() {
     free();
     dump_hash_stat();
+    delete markers_conversion;
   }
   /// Creates a copy of another mesh.
   void copy(const Mesh* mesh);
@@ -337,6 +338,7 @@ protected:
   {
   public:
     MarkersConversion();
+    MarkersConversion(const MarkersConversion& src);  // Copy constructor.
     ~MarkersConversion();
 
     // Info about the maximum markers used so far, used in determining

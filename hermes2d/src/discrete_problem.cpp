@@ -81,7 +81,9 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, b
 
   vector_valued_forms = false;
 
-  geom_ord = *init_geom_ord();
+  Geom<Ord> *tmp = init_geom_ord();
+  geom_ord = *tmp;
+  delete tmp;
 }
 
 DiscreteProblem::~DiscreteProblem()
@@ -91,6 +93,7 @@ DiscreteProblem::~DiscreteProblem()
   if (sp_seq != NULL) delete [] sp_seq;
   for(int i = 0; i < num_user_pss; i++)
     delete pss[i];
+  delete [] pss;
 }
 
 void DiscreteProblem::free()
@@ -1706,15 +1709,18 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   {
     cache_e[order] = init_geom_vol(ru, order);
     double* jac;
-    if(ru->is_jacobian_const()) {
-      jac = new double[np];
-      double const_jacobian = ru->get_const_jacobian();
-      for(int i = 0; i < np; i++) jac[i] = const_jacobian;
+    if(!ru->is_jacobian_const()) 
+    {
+      jac = ru->get_jacobian(order);
     }
-    else jac = ru->get_jacobian(order);
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) cache_jwt[order][i] = pt[i][2] * jac[i];
-    if(ru->is_jacobian_const()) delete [] jac;
+    for(int i = 0; i < np; i++) 
+    {
+      if(ru->is_jacobian_const())
+        cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
+      else
+        cache_jwt[order][i] = pt[i][2] * jac[i];
+    }
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
@@ -1861,19 +1867,18 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
   {
     cache_e[order] = init_geom_vol(rv, order);
     double* jac;
-    if(rv->is_jacobian_const()) {
-      jac = new double[np];
-      double const_jacobian = rv->get_const_jacobian();
-      for(int i = 0; i < np; i++)
-        jac[i] = const_jacobian;
-    }
-    else
+    if(!rv->is_jacobian_const()) 
+    {
       jac = rv->get_jacobian(order);
+    }
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++)
-      cache_jwt[order][i] = pt[i][2] * jac[i];
-    if(rv->is_jacobian_const())
-      delete [] jac;
+    for(int i = 0; i < np; i++) 
+    {
+      if(rv->is_jacobian_const())
+        cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
+      else
+        cache_jwt[order][i] = pt[i][2] * jac[i];
+    }
   }
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
@@ -2576,7 +2581,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
   Hermes::vector<Solution*> solutions;
   Hermes::vector<bool> dir_lift_false;
   for (int i=0; i < num_spaces; i++) {
-    solutions.push_back(new Solution());
+    if (residual_as_function) solutions.push_back(new Solution());
     dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
   }
 
@@ -2621,6 +2626,8 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
         info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
         info("Newton solve not successful, returning false.");
       }
+      for (unsigned int i = 0; i < solutions.size(); i++)
+        delete solutions[i];
       return false;
     }
 
@@ -2636,6 +2643,9 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 
     it++;
   }
+
+  for (unsigned int i = 0; i < solutions.size(); i++)
+    delete solutions[i];
 
   if (it >= newton_max_iter) {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");

@@ -153,6 +153,9 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY);
+  if (UNREF_LEVEL != 1) basemesh.copy(&mesh); //FIXME: Weird compatibility issue when
+                                              // one solution lives on basemesh and the 
+                                              // other on its descendant.
 
   // Enter boundary markers.
   BCTypes bc_types;
@@ -166,26 +169,15 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
-  // Create an H1 space for the initial coarse mesh solution.
-  H1Space init_space(&basemesh, &bc_types, &bc_values, P_INIT);
-
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Solutions for the time stepping and adaptivity.
   Solution sln_prev_time, sln, ref_sln;
 
-  // Initialize views.
-  char title_init[200];
-  sprintf(title_init, "Projection of initial condition");
-  ScalarView* view_init = new ScalarView(title_init, new WinGeom(0, 0, 410, 300));
-  sprintf(title_init, "Initial mesh");
-  OrderView* ordview_init = new OrderView(title_init, new WinGeom(420, 0, 350, 300));
-  view_init->fix_scale_width(80);
-
   // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.
-  sln_prev_time.set_exact(&basemesh, init_cond);
+  sln_prev_time.set_exact(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -207,6 +199,9 @@ int main(int argc, char* argv[])
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)];
   OGProjection::project_global(&space, init_cond, coeff_vec_coarse, matrix_solver);
 
+  // Initialize views.
+  char title_init[200];
+  
   ScalarView view("Projection of initial condition", new WinGeom(0, 0, 410, 300));
   OrderView ordview("Initial mesh", new WinGeom(420, 0, 350, 300));
   view.fix_scale_width(80);
@@ -279,7 +274,7 @@ int main(int argc, char* argv[])
       else {
         info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
         OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
-        delete ref_sln.get_mesh();
+        delete ref_sln.get_mesh(); // This deletes the mesh allocated by previous construct_refined_space.
       }
 
       // Initialize the FE problem.
@@ -336,12 +331,10 @@ int main(int argc, char* argv[])
       else {
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-        if (Space::get_num_dofs(&space) >= NDOF_STOP) {
+        if (Space::get_num_dofs(&space) >= NDOF_STOP)
           done = true;
-          break;
-        }
-
-        as++;
+        else
+          as++;
       }
 
       // Cleanup.
@@ -362,10 +355,14 @@ int main(int argc, char* argv[])
     sprintf(title, "Mesh, time level %d", ts);
     ordview.set_title(title);
     ordview.show(&space);
-
+    
     // Copy new time level solution into sln_prev_time.
-    sln_prev_time.copy(&ref_sln);
+    sln_prev_time.copy(&ref_sln); // Mesh in sln_prev_time is deleted, 
+                                  // replaced by one newly allocated and 
+                                  // the mesh of ref_sln is copied into it.
   }
+  
+  delete ref_sln.get_mesh();
 
   // Wait for all views to be closed.
   View::wait();
