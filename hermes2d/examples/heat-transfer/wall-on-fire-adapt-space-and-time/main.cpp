@@ -219,6 +219,9 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh and setup reference space.
       Space* ref_space = construct_refined_space(&space);
 
+      OGProjection::project_global(ref_space, Hermes::vector<Solution *>(&sln_prev_time), 
+                     Hermes::vector<Solution *>(&sln_prev_time), matrix_solver); 
+
       // Initialize discrete problem on reference mesh.
       DiscreteProblem* ref_dp = new DiscreteProblem(&wf, ref_space);
 
