@@ -38,9 +38,6 @@ static int find_position(int *Ai, int Alen, int idx) {
   assert (Alen > 0);
   assert (idx >= 0);
   
-  printf("idx = %d\n", idx);
-  printf("Alen = %d\n", Alen);
-
   register int lo = 0, hi = Alen - 1, mid;
   
   while (true) 
