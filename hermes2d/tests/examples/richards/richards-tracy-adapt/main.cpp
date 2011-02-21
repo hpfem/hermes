@@ -126,7 +126,8 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY);
-
+  basemesh.copy(&mesh);
+  
   // Enter boundary markers.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_REST));
@@ -139,9 +140,6 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
-  // Create an H1 space for the initial coarse mesh solution.
-  H1Space init_space(&basemesh, &bc_types, &bc_values, P_INIT);
-
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -150,7 +148,7 @@ int main(int argc, char* argv[])
 
   // Initialize sln_prev_time.
   // Note: only if adaptivity to initial condition is not done.
-  sln_prev_time.set_exact(&basemesh, init_cond);
+  sln_prev_time.set_exact(&mesh, init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -297,8 +295,8 @@ int main(int argc, char* argv[])
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
         if (Space::get_num_dofs(&space) >= NDOF_STOP) 
           done = true;
-        
-        if (!done) as++;
+        else
+          as++;
       }
 
       // Cleanup.
@@ -307,7 +305,6 @@ int main(int argc, char* argv[])
       delete matrix;
       delete rhs;
       delete adaptivity;
-      delete ref_space->get_mesh();
       delete ref_space;
     }
     while (!done);
@@ -316,6 +313,8 @@ int main(int argc, char* argv[])
     sln_prev_time.copy(&ref_sln);
   }
 
+  delete ref_sln.get_mesh();
+  
   int ndof_allowed = 35;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
