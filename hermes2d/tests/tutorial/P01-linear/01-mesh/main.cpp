@@ -13,10 +13,10 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();          // Refines all elements.
   mesh.refine_towards_vertex(3, 4);    // Refines mesh towards vertex #3 (4x).
   mesh.refine_towards_boundary(2, 4);  // Refines all elements along boundary 2 (4x).
-  mesh.refine_element(86, 0);          // Refines element #86 isotropically.
-  mesh.refine_element(112, 0);         // Refines element #112 isotropically.
-  mesh.refine_element(84, 2);          // Refines element #84 anisotropically.
-  mesh.refine_element(114, 1);         // Refines element #114 anisotropically.
+  mesh.refine_element_id(86, 0);          // Refines element #86 isotropically.
+  mesh.refine_element_id(112, 0);         // Refines element #112 isotropically.
+  mesh.refine_element_id(84, 2);          // Refines element #84 anisotropically.
+  mesh.refine_element_id(114, 1);         // Refines element #114 anisotropically.
 
   // new code for the test
   int n_elem = mesh.get_num_elements();

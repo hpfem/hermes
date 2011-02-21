@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  mesh.refine_element(0);
+  mesh.refine_element_id(0);
 
   // Enter boundary markers.
   BCTypes bc_types;

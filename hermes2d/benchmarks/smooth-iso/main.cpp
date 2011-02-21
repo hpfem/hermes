@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   // Avoid zero ndof situation.
   if (P_INIT == 1) {
     if (is_hp(CAND_LIST)) P_INIT++;
-    else mesh.refine_element(0, 0);
+    else mesh.refine_element_id(0, 0);
   }
 
   // Enter boundary markers.

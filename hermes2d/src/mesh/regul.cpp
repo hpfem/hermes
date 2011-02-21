@@ -42,7 +42,7 @@ void Mesh::regularize_triangle(Element* e)
   int sum = eo[0] + eo[1] + eo[2];
   if (sum == 3)
   {
-    refine_element(e->id);
+    refine_element_id(e->id);
   }
   else if (sum > 0)
   {
@@ -130,7 +130,7 @@ void Mesh::regularize_quad(Element* e)
   int sum = eo[0] + eo[1] + eo[2] + eo[3];
   if (sum == 4)
   {
-    refine_element(e->id);
+    refine_element_id(e->id);
   }
   else if (sum > 0)
   {
@@ -171,8 +171,8 @@ void Mesh::regularize_quad(Element* e)
     else if (sum == 2)
     {
       // two hanging nodes opposite to each other
-      if (eo[0] == 1 && eo[2] == 1) refine_element(e->id, 2);
-      else if (eo[1] == 1 && eo[3] == 1) refine_element(e->id, 1);
+      if (eo[0] == 1 && eo[2] == 1) refine_element_id(e->id, 2);
+      else if (eo[1] == 1 && eo[3] == 1) refine_element_id(e->id, 1);
       else // two hanging nodes next to each other
       {
         for(i = 0; i < 4; i++)
@@ -207,14 +207,14 @@ void Mesh::regularize_quad(Element* e)
     {
        if (eo[0] == 1 && eo[2] == 1)
        {
-         refine_element(e->id, 2);
+         refine_element_id(e->id, 2);
          for (i = 0; i < 4; i++)
            assign_parent(e, i);
          n = 2; m = 3;
        }
        else if (eo[1] == 1 && eo[3] == 1)
        {
-         refine_element(e->id, 1);
+         refine_element_id(e->id, 1);
          for (i = 0; i < 4; i++)
            assign_parent(e, i);
          n = 0; m = 1;
@@ -339,7 +339,7 @@ int* Mesh::regularize(int n)
 
       if (iso >= 0)
       {
-        refine_element(e->id, iso);
+        refine_element_id(e->id, iso);
         for (int i = 0; i < 4; i++)
           assign_parent(e, i);
       }

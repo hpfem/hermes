@@ -436,7 +436,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       p.exec("id, ref = refinements[i]");
       id = p.pull_int("id");
       ref = p.pull_int("ref");
-      mesh->refine_element(id, ref);
+      mesh->refine_element_id(id, ref);
     }
   }
   mesh->ninitial = mesh->elements.get_num_items();

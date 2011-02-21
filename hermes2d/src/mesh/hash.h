@@ -74,12 +74,12 @@ protected:
   /// The central function: obtains a vertex node pointer given the id
   /// numbers of its parents. If the vertex node does not exist, it is
   /// created first.
-  Node* get_vertex_node(int p1, int p2);
+  Node* get_vertex_node(int p1, int p2, bool do_not_add = false);
 
   /// The central function: obtains an edge node pointer given the id
   /// numbers of its parents. If the edge node does not exist, it is
   /// created first.
-  Node* get_edge_node(int p1, int p2);
+  Node* get_edge_node(int p1, int p2, bool do_not_add = false);
 
   /// Removes a vertex node with parent id's p1 and p2.
   void remove_vertex_node(int id);

@@ -136,7 +136,7 @@ inline Node* HashTable::search_list(Node* node, int p1, int p2)
 }
 
 
-Node* HashTable::get_vertex_node(int p1, int p2)
+Node* HashTable::get_vertex_node(int p1, int p2, bool do_not_add)
 {
   // search for the node in the vertex hashtable
   if (p1 > p2) std::swap(p1, p2);
@@ -145,7 +145,11 @@ Node* HashTable::get_vertex_node(int p1, int p2)
   if (node != NULL) return node;
 
   // not found - create a new one
-  Node* newnode = nodes.add();
+  Node* newnode;
+  if (do_not_add == true) newnode = new Node(); 
+  else newnode = nodes.add();
+
+  // initialize the new Node
   newnode->type = HERMES_TYPE_VERTEX;
   newnode->ref = 0;
   newnode->bnd = 0;
@@ -156,14 +160,15 @@ Node* HashTable::get_vertex_node(int p1, int p2)
   newnode->y = (nodes[p1].y + nodes[p2].y) * 0.5;
 
   // insert into hashtable
-  newnode->next_hash = v_table[i];
-  v_table[i] = newnode;
+  if (do_not_add == false) {
+    newnode->next_hash = v_table[i];
+    v_table[i] = newnode;
+  }
 
   return newnode;
 }
 
-
-Node* HashTable::get_edge_node(int p1, int p2)
+Node* HashTable::get_edge_node(int p1, int p2, bool do_not_add)
 {
   // search for the node in the edge hashtable
   if (p1 > p2) std::swap(p1, p2);
@@ -172,7 +177,11 @@ Node* HashTable::get_edge_node(int p1, int p2)
   if (node != NULL) return node;
 
   // not found - create a new one
-  Node* newnode = nodes.add();
+  Node* newnode;
+  if (do_not_add == true) newnode = new Node();
+  else newnode = nodes.add();
+
+  // initialize the new node
   newnode->type = HERMES_TYPE_EDGE;
   newnode->ref = 0;
   newnode->bnd = 0;
@@ -182,8 +191,10 @@ Node* HashTable::get_edge_node(int p1, int p2)
   newnode->elem[0] = newnode->elem[1] = NULL;
 
   // insert into hashtable
-  newnode->next_hash = e_table[i];
-  e_table[i] = newnode;
+  if (do_not_add == false) {
+    newnode->next_hash = e_table[i];
+    e_table[i] = newnode;
+  }
 
   return newnode;
 }

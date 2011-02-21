@@ -223,10 +223,12 @@ public:
   /// is a quad, 0 means refine in both directions, 1 means refine
   /// horizontally (with respect to the reference domain), 2 means
   /// refine vertically.
-  void refine_element(int id, int refinement = 0);
+  void refine_element_id(int id, int refinement = 0);
+  /// Used by refine_element_id().
+  void refine_element(Element* e, int refinement = 0);
 
   /// Refines all elements.
-  /// \param refinement [in] Same meaning as in refine_element().
+  /// \param refinement [in] Same meaning as in refine_element_id().
   void refine_all_elements(int refinement = 0);
 
   /// Selects elements to refine according to a given criterion and
@@ -263,7 +265,7 @@ public:
 
   /// Recursively removes all son elements of the given element and
   /// makes it active.
-  void unrefine_element(int id);
+  void unrefine_element_id(int id);
 
   /// Unrefines all elements with immediate active sons. In effect, this
   /// shaves off one layer of refinements from the mesh. If done immediately
@@ -306,8 +308,8 @@ protected:
   int nactive, ninitial;
   unsigned seq;
 
-  Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm);
-  Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm);
+  Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, bool do_not_add = false);
+  Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm, bool do_not_add = false);
 
   void refine_triangle_to_triangles(Element* e);
   void refine_quad(Element* e, int refinement);
@@ -326,10 +328,10 @@ protected:
   void flatten();
 
   void refine_triangle_to_quads(Element* e);
-  void refine_element_to_quads(int id);
+  void refine_element_to_quads_id(int id);
 
   void refine_quad_to_triangles(Element* e);
-  void refine_element_to_triangles(int id);
+  void refine_element_to_triangles_id(int id);
 
   class MarkersConversion
   {

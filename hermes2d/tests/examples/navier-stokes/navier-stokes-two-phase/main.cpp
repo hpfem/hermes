@@ -128,7 +128,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
     err = elist[i].error;
 
     e = mesh->get_element(elist[i].id);
-    mesh->refine_element(elist[i].id);
+    mesh->refine_element_id(elist[i].id);
     for (j = 0; j < 4; j++)
       space->set_element_order(e->sons[j]->id, space->get_element_order(elist[i].id));
 
@@ -214,12 +214,12 @@ bool adapt_solution(H1OrthoHP* h1hp, Mesh* mesh, Mesh* rmesh, Solution* sln, Sol
     if (split == -1)
       space->set_element_order(elist[i].id, p[0]);
     else if (split == 0){
-      mesh->refine_element(elist[i].id);
+      mesh->refine_element_id(elist[i].id);
       for (j = 0; j < 4; j++)
         space->set_element_order(e->sons[j]->id, p[j]);
     }
     else {
-      mesh->refine_element(elist[i].id, split);
+      mesh->refine_element_id(elist[i].id, split);
       for (j = 0; j < 2; j++)
         space->set_element_order(e->sons[ (split == 1) ? j : j+2 ]->id, p[j]);
     }    
@@ -260,7 +260,7 @@ bool adapt_solution(H1OrthoHP* h1hp, Mesh* mesh, Mesh* rmesh, Solution* sln, Sol
       list[k++] = e->id;
   }
   for (int i = 0; i < k; i++)
-    mesh->refine_element(list[i]);
+    mesh->refine_element_id(list[i]);
   
 
 }

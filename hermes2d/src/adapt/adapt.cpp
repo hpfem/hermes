@@ -394,13 +394,13 @@ void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
     space->set_element_order_internal(elem_ref.id, elem_ref.p[0]);
   else if (elem_ref.split == H2D_REFINEMENT_H) {
     if (e->active)
-      mesh->refine_element(elem_ref.id);
+      mesh->refine_element_id(elem_ref.id);
     for (int j = 0; j < 4; j++)
       space->set_element_order_internal(e->sons[j]->id, elem_ref.p[j]);
   }
   else {
     if (e->active)
-      mesh->refine_element(elem_ref.id, elem_ref.split);
+      mesh->refine_element_id(elem_ref.id, elem_ref.split);
     for (int j = 0; j < 2; j++)
       space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j+2 ]->id, elem_ref.p[j]);
   }
@@ -447,8 +447,8 @@ void Adapt::unrefine(double thr)
         if ((sum1_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]) &&
              (sum2_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]))
         {
-          mesh[0]->unrefine_element(e->id);
-          mesh[1]->unrefine_element(e->id);
+          mesh[0]->unrefine_element_id(e->id);
+          mesh[1]->unrefine_element_id(e->id);
           errors[0][e->id] = sum1_squared;
           errors[1][e->id] = sum2_squared;
           this->spaces[0]->set_element_order_internal(e->id, max1);
@@ -494,7 +494,7 @@ void Adapt::unrefine(double thr)
           if ((sum_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]))
           //if ((sum < 0.1 * thr))
           {
-            mesh[m]->unrefine_element(e->id);
+            mesh[m]->unrefine_element_id(e->id);
             errors[m][e->id] = sum_squared;
             this->spaces[m]->set_element_order_internal(e->id, max);
             k++; // number of unrefined elements

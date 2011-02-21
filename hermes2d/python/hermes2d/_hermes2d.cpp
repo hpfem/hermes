@@ -1211,7 +1211,7 @@ static char __pyx_k_40[] = "get_polygonal_boundary";
 static char __pyx_k_41[] = "Mesh.load_hermes (line 527)";
 static char __pyx_k_42[] = "Mesh.get_elements_order (line 539)";
 static char __pyx_k_43[] = "Mesh.create (line 564)";
-static char __pyx_k_44[] = "Mesh.refine_element (line 625)";
+static char __pyx_k_44[] = "Mesh.refine_element_id (line 625)";
 static char __pyx_k_45[] = "Mesh.refine_all_elements (line 676)";
 static char __pyx_k_46[] = "Mesh.refine_towards_vertex (line 732)";
 static char __pyx_k_47[] = "Mesh.plot (line 794)";
@@ -1424,7 +1424,7 @@ static char __pyx_k__catch_warnings[] = "catch_warnings";
 static char __pyx_k__get_matrix_csc[] = "get_matrix_csc";
 static char __pyx_k__get_num_dashes[] = "get_num_dashes";
 static char __pyx_k__max_element_id[] = "max_element_id";
-static char __pyx_k__refine_element[] = "refine_element";
+static char __pyx_k__refine_element_id[] = "refine_element_id";
 static char __pyx_k__active_elements[] = "active_elements";
 static char __pyx_k__get_vertex_node[] = "get_vertex_node";
 static char __pyx_k__nodes_vertex_id[] = "nodes_vertex_id";
@@ -1662,7 +1662,7 @@ static PyObject *__pyx_n_s__range;
 static PyObject *__pyx_n_s__read_hermes_format;
 static PyObject *__pyx_n_s__ref;
 static PyObject *__pyx_n_s__refine_all_elements;
-static PyObject *__pyx_n_s__refine_element;
+static PyObject *__pyx_n_s__refine_element_id;
 static PyObject *__pyx_n_s__refinement;
 static PyObject *__pyx_n_s__regularize;
 static PyObject *__pyx_n_s__reshape;
@@ -7014,7 +7014,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_save(PyObject *__pyx_v_self
  *     def save(self, char* filename):
  *         self.thisptr.save(filename)             # <<<<<<<<<<<<<<
  * 
- *     def refine_element(self, int id, int refinement=0):
+ *     def refine_element_id(self, int id, int refinement=0):
  */
   ((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)__pyx_v_self)->thisptr->save(__pyx_v_filename);
 
@@ -7027,19 +7027,19 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_save(PyObject *__pyx_v_self
 /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":625
  *         self.thisptr.save(filename)
  * 
- *     def refine_element(self, int id, int refinement=0):             # <<<<<<<<<<<<<<
+ *     def refine_element_id(self, int id, int refinement=0):             # <<<<<<<<<<<<<<
  *         """
  *         Refines the element of interest.
  */
 
-static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_element[] = "\n        Refines the element of interest.\n\n        The first parameter takes your element of interest, and the second \n        parameter takes your refinement option.  0:isotropically  1:anisotropically\n\n        Example:\n\n        >>> import hermes2d\n        >>> m = hermes2d.Mesh()\n        >>> m.create([\n        ...         [0, -1],\n        ...         [1, -1],\n        ...         [-1, 0],\n        ...         [0, 0],\n        ...         [1, 0],\n        ...         [-1, 1],\n        ...         [0, 1],\n        ...         [0.707106781, 0.707106781],\n        ...     ], [\n        ...         [0, 1, 4, 3, 0],\n        ...         [3, 4, 7, 0],\n        ...         [3, 7, 6, 0],\n        ...         [2, 3, 6, 5, 0],\n        ...     ], [\n        ...         [0, 1, 1],\n        ...         [1, 4, 2],\n        ...         [3, 0, 4],\n        ...         [4, 7, 2],\n        ...         [7, 6, 2],\n        ...         [2, 3, 4],\n        ...         [6, 5, 2],\n        ...         [5, 2, 3],\n        ...     ], [\n        ...         [4, 7, 45],\n        ...         [7, 6, 45],\n        ...     ])\n        >>> m.refine_element(0,0);\n        >>> m.elements \n        [[3, 4, 7], [3, 7, 6], [2, 3, 6, 5], [0, 11, 20, 19], [11, 1, 9, 20],\n        [20, 9, 4, 8], [19, 20, 8, 3]]\n\n        As can be seen from the example above, more elements were created after the\n        refinement of the element of interest; in this case element \"0\" with refinement\n        option \"0\".  Originally we had four elements, but after the refinement of the\n        element of interest we now have seven.               \n\n        ";
-static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element_id(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_element_id[] = "\n        Refines the element of interest.\n\n        The first parameter takes your element of interest, and the second \n        parameter takes your refinement option.  0:isotropically  1:anisotropically\n\n        Example:\n\n        >>> import hermes2d\n        >>> m = hermes2d.Mesh()\n        >>> m.create([\n        ...         [0, -1],\n        ...         [1, -1],\n        ...         [-1, 0],\n        ...         [0, 0],\n        ...         [1, 0],\n        ...         [-1, 1],\n        ...         [0, 1],\n        ...         [0.707106781, 0.707106781],\n        ...     ], [\n        ...         [0, 1, 4, 3, 0],\n        ...         [3, 4, 7, 0],\n        ...         [3, 7, 6, 0],\n        ...         [2, 3, 6, 5, 0],\n        ...     ], [\n        ...         [0, 1, 1],\n        ...         [1, 4, 2],\n        ...         [3, 0, 4],\n        ...         [4, 7, 2],\n        ...         [7, 6, 2],\n        ...         [2, 3, 4],\n        ...         [6, 5, 2],\n        ...         [5, 2, 3],\n        ...     ], [\n        ...         [4, 7, 45],\n        ...         [7, 6, 45],\n        ...     ])\n        >>> m.refine_element_id(0,0);\n        >>> m.elements \n        [[3, 4, 7], [3, 7, 6], [2, 3, 6, 5], [0, 11, 20, 19], [11, 1, 9, 20],\n        [20, 9, 4, 8], [19, 20, 8, 3]]\n\n        As can be seen from the example above, more elements were created after the\n        refinement of the element of interest; in this case element \"0\" with refinement\n        option \"0\".  Originally we had four elements, but after the refinement of the\n        element of interest we now have seven.               \n\n        ";
+static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element_id(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   int __pyx_v_id;
   int __pyx_v_refinement;
   PyObject *__pyx_r = NULL;
   static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__id,&__pyx_n_s__refinement,0};
-  __Pyx_RefNannySetupContext("refine_element");
+  __Pyx_RefNannySetupContext("refine_element_id");
   if (unlikely(__pyx_kwds)) {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
     PyObject* values[2] = {0,0};
@@ -7061,7 +7061,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element(PyObject *__
       }
     }
     if (unlikely(kw_args > 0)) {
-      if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "refine_element") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "refine_element_id") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_id = __Pyx_PyInt_AsInt(values[0]); if (unlikely((__pyx_v_id == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[1]) {
@@ -7080,20 +7080,20 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element(PyObject *__
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("refine_element", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("refine_element_id", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("hermes2d._hermes2d.Mesh.refine_element");
+  __Pyx_AddTraceback("hermes2d._hermes2d.Mesh.refine_element_id");
   return NULL;
   __pyx_L4_argument_unpacking_done:;
 
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":674
  * 
  *         """
- *         self.thisptr.refine_element(id, refinement)             # <<<<<<<<<<<<<<
+ *         self.thisptr.refine_element_id(id, refinement)             # <<<<<<<<<<<<<<
  * 
  *     def refine_all_elements(self):
  */
-  ((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)__pyx_v_self)->thisptr->refine_element(__pyx_v_id, __pyx_v_refinement);
+  ((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)__pyx_v_self)->thisptr->refine_element_id(__pyx_v_id, __pyx_v_refinement);
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   __Pyx_XGIVEREF(__pyx_r);
@@ -7102,7 +7102,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element(PyObject *__
 }
 
 /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":676
- *         self.thisptr.refine_element(id, refinement)
+ *         self.thisptr.refine_element_id(id, refinement)
  * 
  *     def refine_all_elements(self):             # <<<<<<<<<<<<<<
  *         """
@@ -18216,7 +18216,7 @@ static PyMethodDef __pyx_methods_8hermes2d_9_hermes2d_Mesh[] = {
   {__Pyx_NAMESTR("get_elements_order"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_get_elements_order, METH_O, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_get_elements_order)},
   {__Pyx_NAMESTR("create"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_create, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_create)},
   {__Pyx_NAMESTR("save"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_save, METH_O, __Pyx_DOCSTR(0)},
-  {__Pyx_NAMESTR("refine_element"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_element)},
+  {__Pyx_NAMESTR("refine_element_id"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_element_id, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_element_id)},
   {__Pyx_NAMESTR("refine_all_elements"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_all_elements, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_all_elements)},
   {__Pyx_NAMESTR("refine_towards_boundary"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_towards_boundary, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(0)},
   {__Pyx_NAMESTR("refine_towards_vertex"), (PyCFunction)__pyx_pf_8hermes2d_9_hermes2d_4Mesh_refine_towards_vertex, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_8hermes2d_9_hermes2d_4Mesh_refine_towards_vertex)},
@@ -21543,7 +21543,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s__read_hermes_format, __pyx_k__read_hermes_format, sizeof(__pyx_k__read_hermes_format), 0, 0, 1, 1},
   {&__pyx_n_s__ref, __pyx_k__ref, sizeof(__pyx_k__ref), 0, 0, 1, 1},
   {&__pyx_n_s__refine_all_elements, __pyx_k__refine_all_elements, sizeof(__pyx_k__refine_all_elements), 0, 0, 1, 1},
-  {&__pyx_n_s__refine_element, __pyx_k__refine_element, sizeof(__pyx_k__refine_element), 0, 0, 1, 1},
+  {&__pyx_n_s__refine_element_id, __pyx_k__refine_element_id, sizeof(__pyx_k__refine_element_id), 0, 0, 1, 1},
   {&__pyx_n_s__refinement, __pyx_k__refinement, sizeof(__pyx_k__refinement), 0, 0, 1, 1},
   {&__pyx_n_s__regularize, __pyx_k__regularize, sizeof(__pyx_k__regularize), 0, 0, 1, 1},
   {&__pyx_n_s__reshape, __pyx_k__reshape, sizeof(__pyx_k__reshape), 0, 0, 1, 1},
@@ -23100,7 +23100,7 @@ PyMODINIT_FUNC PyInit__hermes2d(void)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = PyObject_GetAttr(__pyx_m, __pyx_n_s__Mesh); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = PyObject_GetAttr(__pyx_t_4, __pyx_n_s__refine_element); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(__pyx_t_4, __pyx_n_s__refine_element_id); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = __Pyx_GetAttrString(__pyx_t_2, "__doc__"); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}

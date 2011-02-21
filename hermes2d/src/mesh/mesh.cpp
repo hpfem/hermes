@@ -239,10 +239,14 @@ int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
 
 */
 
-Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm)
+Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, bool do_not_add)
 {
   // create a new element
-  Element* e = elements.add();
+  Element* e;
+  if (do_not_add == true) e = new Element();
+  else e = elements.add();
+
+  // initialize the new element
   e->active = 1;
   e->marker = marker;
   e->userdata = 0;
@@ -256,21 +260,24 @@ Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap
   e->vn[0] = v0;
   e->vn[1] = v1;
   e->vn[2] = v2;
-  e->en[0] = get_edge_node(v0->id, v1->id);
-  e->en[1] = get_edge_node(v1->id, v2->id);
-  e->en[2] = get_edge_node(v2->id, v0->id);
+  e->en[0] = get_edge_node(v0->id, v1->id, do_not_add);
+  e->en[1] = get_edge_node(v1->id, v2->id, do_not_add);
+  e->en[2] = get_edge_node(v2->id, v0->id, do_not_add);
 
   // register in the nodes
-  e->ref_all_nodes();
+  if (do_not_add == false) e->ref_all_nodes();
 
   return e;
 }
 
-
-Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm)
+Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm, bool do_not_add)
 {
   // create a new element
-  Element* e = elements.add();
+  Element* e;
+  if (do_not_add == true) e = new Element();
+  else e = elements.add();
+
+  // initialize the new element
   e->active = 1;
   e->marker = marker;
   e->userdata = 0;
@@ -285,17 +292,16 @@ Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, C
   e->vn[1] = v1;
   e->vn[2] = v2;
   e->vn[3] = v3;
-  e->en[0] = get_edge_node(v0->id, v1->id);
-  e->en[1] = get_edge_node(v1->id, v2->id);
-  e->en[2] = get_edge_node(v2->id, v3->id);
-  e->en[3] = get_edge_node(v3->id, v0->id);
+  e->en[0] = this->get_edge_node(v0->id, v1->id, do_not_add);
+  e->en[1] = this->get_edge_node(v1->id, v2->id, do_not_add);
+  e->en[2] = this->get_edge_node(v2->id, v3->id, do_not_add);
+  e->en[3] = this->get_edge_node(v3->id, v0->id, do_not_add);
 
   // register in the nodes
-  e->ref_all_nodes();
+  if (do_not_add == false) e->ref_all_nodes();
 
   return e;
 }
-
 
 static CurvMap* create_son_curv_map(Element* e, int son)
 {
@@ -331,9 +337,9 @@ void Mesh::refine_triangle_to_triangles(Element* e)
   int mrk[3] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker };
 
   // obtain three mid-edge vertex nodes
-  Node* x0 = get_vertex_node(e->vn[0]->id, e->vn[1]->id);
-  Node* x1 = get_vertex_node(e->vn[1]->id, e->vn[2]->id);
-  Node* x2 = get_vertex_node(e->vn[2]->id, e->vn[0]->id);
+  Node* x0 = this->get_vertex_node(e->vn[0]->id, e->vn[1]->id);
+  Node* x1 = this->get_vertex_node(e->vn[1]->id, e->vn[2]->id);
+  Node* x2 = this->get_vertex_node(e->vn[2]->id, e->vn[0]->id);
 
   CurvMap* cm[4];
   memset(cm, 0, sizeof(cm));
@@ -401,7 +407,7 @@ void Mesh::refine_quad(Element* e, int refinement)
 
   // deactivate this element and unregister from its nodes
   e->active = false;
-  nactive--;
+  this->nactive--;
   e->unref_all_nodes(this);
   // now the original edge nodes may no longer exist...
 
@@ -411,12 +417,12 @@ void Mesh::refine_quad(Element* e, int refinement)
   // default refinement: one quad to four quads
   if (refinement == 0)
   {
-    // obtain four mid-edge vertex nodes and one mid-element vetex node
-    Node* x0 = get_vertex_node(e->vn[0]->id, e->vn[1]->id);
-    Node* x1 = get_vertex_node(e->vn[1]->id, e->vn[2]->id);
-    Node* x2 = get_vertex_node(e->vn[2]->id, e->vn[3]->id);
-    Node* x3 = get_vertex_node(e->vn[3]->id, e->vn[0]->id);
-    Node* mid = get_vertex_node(x0->id, x2->id);
+    // obtain four mid-edge vertex nodes and one mid-element vertex node
+    Node* x0 = this->get_vertex_node(e->vn[0]->id, e->vn[1]->id);
+    Node* x1 = this->get_vertex_node(e->vn[1]->id, e->vn[2]->id);
+    Node* x2 = this->get_vertex_node(e->vn[2]->id, e->vn[3]->id);
+    Node* x3 = this->get_vertex_node(e->vn[3]->id, e->vn[0]->id);
+    Node* mid = this->get_vertex_node(x0->id, x2->id);
 
     // adjust mid-edge coordinates if this is a curved element
     if (e->is_curved())
@@ -435,10 +441,10 @@ void Mesh::refine_quad(Element* e, int refinement)
     }
 
     // create the four sons
-    sons[0] = create_quad(e->marker, e->vn[0], x0, mid, x3, cm[0]);
-    sons[1] = create_quad(e->marker, x0, e->vn[1], x1, mid, cm[1]);
-    sons[2] = create_quad(e->marker, mid, x1, e->vn[2], x2, cm[2]);
-    sons[3] = create_quad(e->marker, x3, mid, x2, e->vn[3], cm[3]);
+    sons[0] = this->create_quad(e->marker, e->vn[0], x0, mid, x3, cm[0]);
+    sons[1] = this->create_quad(e->marker, x0, e->vn[1], x1, mid, cm[1]);
+    sons[2] = this->create_quad(e->marker, mid, x1, e->vn[2], x2, cm[2]);
+    sons[3] = this->create_quad(e->marker, x3, mid, x2, e->vn[3], cm[3]);
     nactive += 4;
 
     // set correct boundary markers for the new edge nodes
@@ -453,8 +459,8 @@ void Mesh::refine_quad(Element* e, int refinement)
   // refinement '1': one quad to two 'horizontal' quads
   else if (refinement == 1)
   {
-    Node* x1 = get_vertex_node(e->vn[1]->id, e->vn[2]->id);
-    Node* x3 = get_vertex_node(e->vn[3]->id, e->vn[0]->id);
+    Node* x1 = this->get_vertex_node(e->vn[1]->id, e->vn[2]->id);
+    Node* x3 = this->get_vertex_node(e->vn[3]->id, e->vn[0]->id);
 
     // adjust mid-edge coordinates if this is a curved element
     if (e->is_curved())
@@ -486,8 +492,8 @@ void Mesh::refine_quad(Element* e, int refinement)
   // refinement '2': one quad to two 'vertical' quads
   else if (refinement == 2)
   {
-    Node* x0 = get_vertex_node(e->vn[0]->id, e->vn[1]->id);
-    Node* x2 = get_vertex_node(e->vn[2]->id, e->vn[3]->id);
+    Node* x0 = this->get_vertex_node(e->vn[0]->id, e->vn[1]->id);
+    Node* x2 = this->get_vertex_node(e->vn[2]->id, e->vn[3]->id);
 
     // adjust mid-edge coordinates if this is a curved element
     if (e->is_curved())
@@ -503,8 +509,8 @@ void Mesh::refine_quad(Element* e, int refinement)
     }
 
     sons[0] = sons[1] = NULL;
-    sons[2] = create_quad(e->marker, e->vn[0], x0, x2, e->vn[3], cm[0]);
-    sons[3] = create_quad(e->marker, x0, e->vn[1], e->vn[2], x2, cm[1]);
+    sons[2] = this->create_quad(e->marker, e->vn[0], x0, x2, e->vn[3], cm[0]);
+    sons[3] = this->create_quad(e->marker, x0, e->vn[1], e->vn[2], x2, cm[1]);
     nactive += 2;
 
     sons[2]->en[0]->bnd = bnd[0];  sons[2]->en[0]->marker = mrk[0];
@@ -531,8 +537,7 @@ void Mesh::refine_quad(Element* e, int refinement)
 
   //set pointers to parent element for sons
   for(int i = 0; i < 4; i++)
-	  if(sons[i] != NULL)
-		  sons[i]->parent = e;
+    if(sons[i] != NULL) sons[i]->parent = e;
 
   // copy son pointers (could not have been done earlier because of the union)
   memcpy(e->sons, sons, sizeof(sons));
@@ -587,32 +592,33 @@ void Mesh::unrefine_element_internal(Element* e)
 
 //// high-level element refinement /////////////////////////////////////////////////////////////////
 
-void Mesh::refine_element(int id, int refinement)
+void Mesh::refine_element(Element* e, int refinement)
 {
-  Element* e = get_element(id);
-  if (!e->used) error("Invalid element id number.");
-  if (!e->active) error("Attempt to refine element #%d which has been refined already.", e->id);
-
   if (e->is_triangle()) {
-    if (refinement == 3) refine_triangle_to_quads(e);
-    else refine_triangle_to_triangles(e);
+    if (refinement == 3) this->refine_triangle_to_quads(e);
+    else this->refine_triangle_to_triangles(e);
   }
-  else
-    refine_quad(e, refinement);
+  else this->refine_quad(e, refinement);
 
   seq = g_mesh_seq++;
 }
 
+void Mesh::refine_element_id(int id, int refinement)
+{
+  Element* e = this->get_element(id);
+  if (!e->used) error("Invalid element id number.");
+  if (!e->active) error("Attempt to refine element #%d which has been refined already.", e->id);
+  this->refine_element(e, refinement);
+}
 
 void Mesh::refine_all_elements(int refinement)
 {
   Element* e;
   elements.set_append_only(true);
   for_all_active_elements(e, this)
-    refine_element(e->id, refinement);
+    refine_element_id(e->id, refinement);
   elements.set_append_only(false);
 }
-
 
 void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
 {
@@ -620,7 +626,7 @@ void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
   elements.set_append_only(true);
   for (int r, i = 0; i < depth; i++) {
     for_all_active_elements(e, this) {
-      if ((r = criterion(e)) >= 0) refine_element(e->id, r);
+      if ((r = criterion(e)) >= 0) refine_element_id(e->id, r);
     }
   }
   elements.set_append_only(false);
@@ -712,7 +718,7 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso)
 }
 
 
-void Mesh::unrefine_element(int id)
+void Mesh::unrefine_element_id(int id)
 {
   Element* e = get_element(id);
   if (!e->used) error("Invalid element id number.");
@@ -720,7 +726,7 @@ void Mesh::unrefine_element(int id)
 
   for (int i = 0; i < 4; i++)
     if (e->sons[i] != NULL)
-      unrefine_element(e->sons[i]->id);
+      unrefine_element_id(e->sons[i]->id);
 
   unrefine_element_internal(e);
   seq = g_mesh_seq++;
@@ -745,7 +751,7 @@ void Mesh::unrefine_all_elements(bool keep_initial_refinements)
 
   // unrefine the found elements
   for (unsigned int i = 0; i < list.size(); i++)
-    unrefine_element(list[i]);
+    unrefine_element_id(list[i]);
 }
 
 /// Returns a NURBS curve with reversed control points and inverted knot vector.
@@ -1183,7 +1189,7 @@ void Mesh::convert_triangles_to_quads()
 
   elements.set_append_only(true);
   for_all_active_elements(e, this)
-    refine_element_to_quads(e->id);
+    refine_element_to_quads_id(e->id);
   elements.set_append_only(false);
 
   tmp.copy_converted(this);
@@ -1212,7 +1218,7 @@ void Mesh::convert_quads_to_triangles()
 
   elements.set_append_only(true);
   for_all_active_elements(e, this)
-    refine_element_to_triangles(e->id);
+    refine_element_to_triangles_id(e->id);
   elements.set_append_only(false);
 
   tmp.copy_converted(this);
@@ -1245,10 +1251,10 @@ void Mesh::refine_triangle_to_quads(Element* e)
   e->unref_all_nodes(this);
 
   // obtain three mid-edge and one gravity vertex nodes
-  Node* x0 = get_vertex_node(e->vn[0]->id, e->vn[1]->id);
-  Node* x1 = get_vertex_node(e->vn[1]->id, e->vn[2]->id);
-  Node* x2 = get_vertex_node(e->vn[2]->id, e->vn[0]->id);
-  Node* mid = get_vertex_node(x0->id, e->vn[1]->id);
+  Node* x0 = this->get_vertex_node(e->vn[0]->id, e->vn[1]->id);
+  Node* x1 = this->get_vertex_node(e->vn[1]->id, e->vn[2]->id);
+  Node* x2 = this->get_vertex_node(e->vn[2]->id, e->vn[0]->id);
+  Node* mid = this->get_vertex_node(x0->id, e->vn[1]->id);
 
   mid->x = (nodes[x0->id].x + nodes[x1->id].x + nodes[x2->id].x)/3;
   mid->y = (nodes[x0->id].y + nodes[x1->id].y + nodes[x2->id].y)/3;
@@ -1287,7 +1293,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
     if (e->cm->nurbs[idx] != NULL)
     {
       angle2 = e->cm->nurbs[idx]->angle/2;
-      Node* node_temp = get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
+      Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
 
       for (int k = 0; k < 2; k++)
       {
@@ -1366,7 +1372,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
     if (e->cm->nurbs[idx] != NULL)
     {
       angle2 = e->cm->nurbs[idx]->angle/2;
-      Node* node_temp = get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
+      Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
       for (int k = 0; k < 2; k++)
       {
         int p1, p2;
@@ -1477,8 +1483,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
   memcpy(e->sons, sons, 4 * sizeof(Element*));
 }
 
-
-void Mesh::refine_element_to_quads(int id)
+void Mesh::refine_element_to_quads_id(int id)
 {
   Element* e = get_element(id);
   if (!e->used) error("Invalid element id number.");
@@ -1678,8 +1683,7 @@ void Mesh::refine_quad_to_triangles(Element* e)
   memcpy(e->sons, sons, 4 * sizeof(Element*));
 }
 
-
-void Mesh::refine_element_to_triangles(int id)
+void Mesh::refine_element_to_triangles_id(int id)
 {
   Element* e = get_element(id);
   if (!e->used) error("Invalid element id number.");

@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
   // load the mesh file
   Mesh mesh;
   mesh.load("domain.mesh");
-  mesh.refine_element(0);
+  mesh.refine_element_id(0);
 
   // create an H1 space
   H1Space space(&mesh);

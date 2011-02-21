@@ -15,7 +15,7 @@ domain_mesh = get_example_mesh()
 def test_ScalarView_mpl_default():
     mesh = Mesh()
     mesh.load(domain_mesh)
-    mesh.refine_element(0)
+    mesh.refine_element_id(0)
     shapeset = H1Shapeset()
     pss = PrecalcShapeset(shapeset)
 
@@ -48,7 +48,7 @@ def test_ScalarView_mpl_default():
 def test_ScalarView_mpl_default():
     mesh = Mesh()
     mesh.load(domain_mesh)
-    mesh.refine_element(0)
+    mesh.refine_element_id(0)
     shapeset = H1Shapeset()
     pss = PrecalcShapeset(shapeset)
 
@@ -81,7 +81,7 @@ def test_ScalarView_mpl_default():
 def test_ScalarView_mpl_unknown():
     mesh = Mesh()
     mesh.load(domain_mesh)
-    mesh.refine_element(0)
+    mesh.refine_element_id(0)
     shapeset = H1Shapeset()
     pss = PrecalcShapeset(shapeset)
 
@@ -142,7 +142,7 @@ def test_plot_mesh1c():
 def test_plot_mesh2():
     mesh = Mesh()
     mesh.load(domain_mesh)
-    mesh.refine_element(0)
+    mesh.refine_element_id(0)
 
     view = MeshView("Solution")
     view.show(mesh, lib="mpl", method="simple", show=False)

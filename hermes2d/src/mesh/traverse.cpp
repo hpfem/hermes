@@ -638,7 +638,7 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
   if (tri)
   {
     // visit all sons of the triangle
-    unimesh->refine_element(uni->id);
+    unimesh->refine_element_id(uni->id);
     for (son = 0; son <= 3; son++)
     {
       for (i = 0; i < num; i++)
@@ -663,7 +663,7 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
     // both splits: recur to four sons
     if (split == 3)
     {
-      unimesh->refine_element(uni->id, 0);
+      unimesh->refine_element_id(uni->id, 0);
 
       for (son = 0; son <= 3; son++)
       {
@@ -685,7 +685,7 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
     // v or h split, recur to two sons
     else if (split > 0)
     {
-      unimesh->refine_element(uni->id, split);
+      unimesh->refine_element_id(uni->id, split);
 
       int son0 = 4, son1 = 5;
       if (split == 2) { son0 = 6; son1 = 7; }

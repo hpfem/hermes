@@ -570,12 +570,12 @@ void L2OrthoHP::adapt(double thr, int strat, bool h_only, bool iso_only, double 
       spaces[comp]->set_element_order_internal(id, p[0]);
     }
     else if (split == 0) {
-      mesh[comp]->refine_element(id);
+      mesh[comp]->refine_element_id(id);
       for (j = 0; j < 4; j++)
         spaces[comp]->set_element_order_internal(e->sons[j]->id, p[j]);
     }
     else {
-      mesh[comp]->refine_element(id, split);
+      mesh[comp]->refine_element_id(id, split);
       for (j = 0; j < 2; j++)
         spaces[comp]->set_element_order_internal(e->sons[ (split == 1) ? j : j+2 ]->id, p[j]);
     }

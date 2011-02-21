@@ -21,10 +21,10 @@ int main(int argc, char* argv[])
 
   Mesh mesh1;
   mesh1.load("../data/square1.mesh");
-  mesh1.refine_element(0, 2);
-  mesh1.refine_element(2, 2);
-  /*mesh1.refine_element(4, 2);
-  mesh1.refine_element(6, 2);*/
+  mesh1.refine_element_id(0, 2);
+  mesh1.refine_element_id(2, 2);
+  /*mesh1.refine_element_id(4, 2);
+  mesh1.refine_element_id(6, 2);*/
 
   H1Space space1(&mesh1, &shapeset);
   space1.set_uniform_order(3);
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 
   Mesh mesh2;
   mesh2.load("../data/square1.mesh");
-  //mesh2.refine_element(0, 1);
+  //mesh2.refine_element_id(0, 1);
 
   H1Space space2(&mesh2, &shapeset);
   space2.set_uniform_order(3);

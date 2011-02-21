@@ -84,8 +84,8 @@ int main(int argc, char* argv[])
   mloader.load("bracket.mesh", &u_mesh);
 
   // Initial mesh refinements.
-  u_mesh.refine_element(1);
-  u_mesh.refine_element(4);
+  u_mesh.refine_element_id(1);
+  u_mesh.refine_element_id(4);
 
   // Create initial mesh for the vertical displacement component.
   // This also initializes the multimesh hp-FEM.

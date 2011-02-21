@@ -126,7 +126,7 @@ bool adapt_velocity(Mesh* mesh,  Mesh* rmesh, MeshFunction* sln, MeshFunction* r
     err = elist[i].error;
 
     e = mesh->get_element(elist[i].id);
-    mesh->refine_element(elist[i].id);
+    mesh->refine_element_id(elist[i].id);
     for (j = 0; j < 4; j++)
       space->set_element_order(e->sons[j]->id, space->get_element_order(elist[i].id));
 

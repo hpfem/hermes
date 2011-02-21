@@ -53,10 +53,10 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_OUTER, 4);  // Four refinements towards boundary with marker 2.
 
   // Refine individual elements (optional).
-  mesh.refine_element(86, 0);          // 0... isotropic refinement.
-  mesh.refine_element(112, 0);         // 0... isotropic refinement.
-  mesh.refine_element(84, 2);          // 2... anisotropic refinement.
-  mesh.refine_element(114, 1);         // 1... anisotropic refinement.
+  mesh.refine_element_id(86, 0);          // 0... isotropic refinement.
+  mesh.refine_element_id(112, 0);         // 0... isotropic refinement.
+  mesh.refine_element_id(84, 2);          // 2... anisotropic refinement.
+  mesh.refine_element_id(114, 1);         // 1... anisotropic refinement.
 
   // Display the mesh.
   // (0, 0) is the upper left corner position, 

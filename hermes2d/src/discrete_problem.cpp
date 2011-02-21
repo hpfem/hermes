@@ -440,7 +440,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   std::vector<WeakForm::Stage> stages = std::vector<WeakForm::Stage>();
   wf->get_stages(spaces, u_ext, stages, rhsonly);
 
-
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
   // In such a case, the matrix forms are assembled over one mesh, and only the rhs
@@ -468,7 +467,6 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // Delete the vector u_ext.
   for(std::vector<Solution *>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
     delete *it;
-
 }
 
 void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage, 
@@ -507,7 +505,8 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
     // One state is a collection of (virtual) elements sharing the same physical location on (possibly) different meshes.
     // This is then the same element of the virtual union mesh. The proper sub-element mappings to all the functions of
     // this stage is supplied by the function Traverse::get_next_state() called in the while loop.
-    assemble_one_state(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, e, bnd, surf_pos, trav.get_base());
+    assemble_one_state(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, 
+                       u_ext, e, bnd, surf_pos, trav.get_base());
 
   if (mat != NULL) mat->finish();
   if (rhs != NULL) rhs->finish();
@@ -559,9 +558,10 @@ Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<Prec
 }
 
 void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, Element** e, 
-        bool* bnd, SurfPos* surf_pos, Element* trav_base)
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
+      Hermes::vector<Solution *>& u_ext, Element** e, 
+      bool* bnd, SurfPos* surf_pos, Element* trav_base)
 {
   _F_
   // Assembly list vector.
@@ -606,9 +606,11 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
 }
 
 void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
+                      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+                      Table* block_weights,
+                      Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
+                      Hermes::vector<Solution *>& u_ext, Hermes::vector<bool>& isempty, 
+                      int marker, Hermes::vector<AsmList *>& al)
 {
   _F_
   if (mat != NULL) {
@@ -1630,7 +1632,7 @@ DiscontinuousFunc<Ord>* DiscreteProblem::init_ext_fn_ord(NeighborSearch* ns, Mes
 
 //  Evaluation of forms  ///////////////////////////////////////////////////////////////////////
 int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+                                                PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
   // Order that will be returned.
@@ -1687,14 +1689,13 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
   return order;
 }
 
-// Actual evaluation of volume matrix form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+// Calculates integral over element that is given in the RefMap
+// using quadrature of order "order".
+scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol *mfv, 
+                                             Hermes::vector<Solution *> u_ext,
+                                             PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                                             RefMap *ru, RefMap *rv)
 {
-  _F_
-  // Determine the integration order.
-  int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
-
   // Evaluate the form using the quadrature of the just calculated order.
   Quad2D* quad = fu->get_quad_2d();
   double3* pt = quad->get_points(order);
@@ -1756,8 +1757,36 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<S
   return res;
 }
 
+// Evaluates weak form on element given in the RefMap, using non-adaptive 
+// or adaptive numerical integration.
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+{
+  _F_
+  scalar result = 0;
+
+  // Decide whether integration is adaptive.
+  if (mfv->adapt_eval == false) {
+    // Determine the integration order.
+    int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+    result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
+  }
+  else {
+    //Element* elem = ru->get_active_element();
+    //refine_element_id(elem->id);  // Refine element uniformly.
+
+    // Set active element to reference mappings.
+    //refmap[j]->set_active_element(e[i]);
+    //refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
+
+
+  }
+
+  return result;
+}
+
 int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fv, RefMap *rv)
+                                                PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
   // Order that will be returned.

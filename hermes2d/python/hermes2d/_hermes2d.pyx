@@ -622,7 +622,7 @@ cdef class Mesh:
     def save(self, char* filename):
         self.thisptr.save(filename)
 
-    def refine_element(self, int id, int refinement=0):
+    def refine_element_id(self, int id, int refinement=0):
         """
         Refines the element of interest.
 
@@ -660,7 +660,7 @@ cdef class Mesh:
         ...         [4, 7, 45],
         ...         [7, 6, 45],
         ...     ])
-        >>> m.refine_element(0,0);
+        >>> m.refine_element_id(0,0);
         >>> m.elements 
         [[3, 4, 7], [3, 7, 6], [2, 3, 6, 5], [0, 11, 20, 19], [11, 1, 9, 20],
         [20, 9, 4, 8], [19, 20, 8, 3]]
@@ -671,7 +671,7 @@ cdef class Mesh:
         element of interest we now have seven.               
 
         """
-        self.thisptr.refine_element(id, refinement)
+        self.thisptr.refine_element_id(id, refinement)
 
     def refine_all_elements(self):
         """

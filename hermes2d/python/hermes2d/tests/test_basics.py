@@ -22,7 +22,7 @@ def test_matrix():
 
     mesh = Mesh()
     mesh.load(domain_mesh)
-    mesh.refine_element(0)
+    mesh.refine_element_id(0)
 
     # create an H1 space with default shapeset
     space = H1Space(mesh, 1)

@@ -148,14 +148,14 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, 1);
-  mesh.refine_element(1053);
-  mesh.refine_element(1054);
-  mesh.refine_element(1087);
-  mesh.refine_element(1088);
-  mesh.refine_element(1117);
-  mesh.refine_element(1118);
-  mesh.refine_element(1151);
-  mesh.refine_element(1152);
+  mesh.refine_element_id(1053);
+  mesh.refine_element_id(1054);
+  mesh.refine_element_id(1087);
+  mesh.refine_element_id(1088);
+  mesh.refine_element_id(1117);
+  mesh.refine_element_id(1118);
+  mesh.refine_element_id(1151);
+  mesh.refine_element_id(1152);
 
   // Enter boundary markers.  
   BCTypes bc_types;
