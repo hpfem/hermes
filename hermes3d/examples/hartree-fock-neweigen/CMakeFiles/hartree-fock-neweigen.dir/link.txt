@@ -1,1 +1,0 @@
-/usr/bin/c++   -W -Wall -Wno-switch-enum -Wno-switch -Wno-switch-default -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -g  -g -D_DEBUG   CMakeFiles/hartree-fock-neweigen.dir/main.cpp.o  -o hartree-fock-neweigen -rdynamic ../../src/libhermes3d-debug.so -lrt -lumfpack -lamd -llapack -lblas -lpthread -lpython2.6 -Wl,-rpath,/home/braunm/hermes/hermes3d/src 
