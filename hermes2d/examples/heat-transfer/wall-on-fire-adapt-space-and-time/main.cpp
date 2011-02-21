@@ -210,9 +210,7 @@ int main(int argc, char* argv[])
     // Spatial adaptivity loop. Note: sln_prev_time must not be 
     // changed during spatial adaptivity. 
     Solution ref_sln;
-    Solution* time_error_fn;
-    if (bt->is_embedded() == true) time_error_fn = new Solution(&mesh);
-    else time_error_fn = NULL;
+    Solution time_error_fn(&mesh);
     bool done = false; int as = 1;
     double err_est;
     do {
@@ -220,8 +218,10 @@ int main(int argc, char* argv[])
       Space* ref_space = construct_refined_space(&space);
 
       OGProjection::project_global(ref_space, Hermes::vector<Solution *>(&sln_prev_time), 
-                     Hermes::vector<Solution *>(&sln_prev_time), matrix_solver); 
-
+                     Hermes::vector<Solution *>(&sln_prev_time), matrix_solver);
+      
+      delete ref_sln.get_mesh();
+      
       // Initialize discrete problem on reference mesh.
       DiscreteProblem* ref_dp = new DiscreteProblem(&wf, ref_space);
 
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt->get_size());
       bool verbose = true;
       bool is_linear = false;
-      if (!rk_time_step(current_time, time_step, bt, &sln_prev_time, &ref_sln, time_error_fn,
+      if (!rk_time_step(current_time, time_step, bt, &sln_prev_time, &ref_sln, bt->is_embedded() ? &time_error_fn : NULL,
                         ref_dp, matrix_solver, verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
         error("Runge-Kutta time step failed, try to decrease time step size.");
       }
@@ -247,9 +247,9 @@ int main(int argc, char* argv[])
         sprintf(title, "Temporal error est, spatial adaptivity step %d", as);     
         time_error_view.set_title(title);
         time_error_view.show_mesh(false);
-        time_error_view.show(time_error_fn, HERMES_EPS_VERYHIGH);
+        time_error_view.show(&time_error_fn, HERMES_EPS_VERYHIGH);
 
-        rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
+        rel_err_time = calc_norm(&time_error_fn, HERMES_H1_NORM) / calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
         if (ADAPTIVE_TIME_STEP_ON == false) info("rel_err_time: %g%%", rel_err_time);
       }
 
@@ -320,14 +320,10 @@ int main(int argc, char* argv[])
       
       // Clean up.
       delete adaptivity;
-      if(!done) delete ref_space->get_mesh();
       delete ref_space;
       delete ref_dp;
     }
     while (done == false);
-
-    // Clean up.
-    if (time_error_fn != NULL) delete time_error_fn;
 
     // Visualize the solution and mesh.
     char title[100];
