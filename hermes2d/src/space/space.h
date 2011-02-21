@@ -309,6 +309,11 @@ protected: //debugging support
   // Function which according to the conversion table provided, updates the members in BCTypes.
   void update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion);
   void update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion);
+  
+  // The following two flags will be set to true if bc_types/bc_values have been dynamically allocated 
+  // without user's intervention and the class itself is thus responsible for their proper freeing.
+  bool own_bc_values;
+  bool own_bc_types;
 
   std::vector<void*> extra_data;
   void free_extra_data();
@@ -334,13 +339,13 @@ extern HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces)
 extern HERMES_API void update_essential_bc_values(Space *s);    // one space
 
 class Ord2
-  {
+{
   public:
     Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
     Ord2(int order) : order_h(order), order_v(order) {};
     int order_h;
     int order_v;
-  };
+};
 
 
 #endif
