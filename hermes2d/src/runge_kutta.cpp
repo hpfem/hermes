@@ -498,9 +498,8 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   for (int i = 0; i < num_stages; i++) delete residuals[i];
 
   // Delete artificial Solutions with stage times.
-  for (int i = 0; i < num_stages; i++) {
+  for (int i = 0; i < num_stages; i++)
     delete stage_time_sol[i];
-  }
   delete [] stage_time_sol;
 
   // Clean up.

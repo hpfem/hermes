@@ -120,6 +120,9 @@ int main(int argc, char* argv[])
   wf.add_vector_form(2, callback(linear_form_2_time));
   wf.add_vector_form(3, callback(linear_form_3_time));
 
+  // Volumetric linear forms.
+  // Linear forms coming from the linearization by taking the Eulerian fluxes' Jacobian matrices 
+  // from the previous time step.
   // Unnecessary for FVM.
   if(P_INIT.order_h > 0 || P_INIT.order_v > 0) {
     // First flux.
@@ -227,7 +230,7 @@ int main(int argc, char* argv[])
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
   solver.set_precond(pc);
 
-  for(t = 0.0; t < 10; t += TAU)
+  for(t = 0.0; t < 3.0; t += TAU)
   {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
