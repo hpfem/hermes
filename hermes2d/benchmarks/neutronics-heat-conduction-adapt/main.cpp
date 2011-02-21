@@ -367,7 +367,9 @@ int main(int argc, char* argv[])
           info("Projecting fine mesh solutions from previous time step onto globally derefined meshes.");
           OGProjection::project_global(spaces, fine_mesh_solutions, coarse_mesh_solutions, matrix_solver_coarse); 
         }
-      } 
+      }
+      delete T_fine.get_mesh();
+      delete phi_fine.get_mesh();
     }
 
     // Adaptivity loop:
