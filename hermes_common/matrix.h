@@ -234,7 +234,8 @@ enum EMatrixDumpFormat {
 	DF_MATLAB_SPARSE,
 	DF_PLAIN_ASCII,
 	DF_HERMES_BIN,
-	DF_NATIVE					// native format for the linear solver
+	DF_NATIVE,	 // native format for the linear solver,
+	DF_MATRIX_MARKET // Matrix Market which can be read by pysparse library
 };
 
 class HERMES_API Matrix {

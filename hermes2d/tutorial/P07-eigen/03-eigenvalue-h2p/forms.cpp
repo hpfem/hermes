@@ -18,9 +18,9 @@ Scalar bilinear_form_H(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
 Ord bilinear_form_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                   Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return u->val[0] * v->val[0] *\
- e->x[0] * e->x[0] * e->x[0] * e->x[0] *\
- e->x[0] * e->x[0] * e->x[0] * e->x[0]; 
+  return u->val[0] * v->val[0] *		\
+e->x[0] * e->x[0] * e->x[0] * e->x[0] *	\
+e->x[0] * e->x[0] * e->x[0] * e->x[0]; 
 // returning the sum of the degrees of the basis
 // and test function plus eight
 }
