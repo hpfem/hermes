@@ -275,13 +275,13 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
     {
       fprintf(file,"%%%%MatrixMarket matrix coordinate real symmetric\n");
       int nnz_sym=0;
-      for (int j = 0; j < size; j++)
+      for (int j = 0; j < (int)size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           if (j <= Ai[i]) nnz_sym++;
       fprintf(file,"%d %d %d\n", size, size, nnz_sym);
-      for (int j = 0; j < size; j++)
+      for (int j = 0; j < (int)size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1 ,Ax[i]);
+          if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
 
       return true;
     }
