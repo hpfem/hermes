@@ -160,7 +160,10 @@ int main(int argc, char* argv[])
   for(unsigned int i = 0; i < INIT_REF_NUM_CONCENTRATION; i++)
     mesh_concentration.refine_all_elements();
 
-  mesh_concentration.refine_towards_boundary(INITIAL_CONCENTRATION_STATE == 2 ? 1 : 3, INIT_REF_NUM_CONCENTRATION_BDY);
+  if(INITIAL_CONCENTRATION_STATE != 2)
+    mesh_concentration.refine_towards_boundary(3, INIT_REF_NUM_CONCENTRATION_BDY);
+  
+  mesh_concentration.refine_towards_boundary(1, INIT_REF_NUM_CONCENTRATION_BDY, false);
 
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
