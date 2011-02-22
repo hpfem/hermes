@@ -400,6 +400,7 @@ void refine_element(Mesh* mesh, Element* e, int refinement);
 void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out = NULL);
 void refine_triangle_to_triangles(Mesh* mesh, Element* e, Element** sons = NULL);
 Node* get_vertex_node(Node* v1, Node* v2);
+Node* get_edge_node();
 
 // Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
 #define for_all_elements(e, mesh) \

@@ -649,7 +649,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
           continue;
         spss[m]->set_active_shape(al[m]->idx[i]);
         
-        // Unsymmetric block .
+        // Unsymmetric block.
         if (!sym) {
           for (unsigned int j = 0; j < al[n]->cnt; j++) {
             
@@ -658,15 +658,24 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
               if (rhs != NULL && this->is_linear) {
-                scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                        refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                if(al[m]->dof[i] >= 0)
+                // Numerical integration performed only if all coefficients are nonzero
+                // and if the basis function is active.
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
+                    && al[m]->dof[i] >= 0) {
+                  scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
+                                         refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
                   rhs->add(al[m]->dof[i], -val);
+                }
               }
             }
             else if (rhsonly == false) {
-              scalar val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
+              scalar val = 0;
+              // Numerical integration performed only if all coefficients are nonzero.
+              if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
+                  && std::abs(al[n]->coef[j]) > 1e-12) {
+                val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
+                                                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
+              }
               local_stiffness_matrix[i][j] = val;
             }
           }
@@ -682,15 +691,34 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
               if (rhs != NULL && this->is_linear) {
-                scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                        refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                if(al[m]->dof[i] >= 0)
+                // Numerical integration performed only if all coefficients are nonzero
+                // and if basis function is active.
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
+                    && al[m]->dof[i] >= 0) {
+
+                  // Debug.
+                  //printf("Eval form I: al[%d]->dof[%d] = %d, al[%d]->dof[%d] = %d\n", 
+                  //       m, i, al[m]->dof[i], n, j, al[n]->dof[j]);
+
+                  scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m]) * 
+                                         al[n]->coef[j] * al[m]->coef[i];
                   rhs->add(al[m]->dof[i], -val);
+		}
               }
             }
             else if (rhsonly == false) {
-              scalar val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
+              scalar val = 0;
+              // Numerical integration performed only if all coefficients are nonzero.
+              if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
+                  && std::abs(al[n]->coef[j]) > 1e-12) {
+
+                // Debug.
+                //printf("Eval form II: al[%d]->dof[%d] = %d, al[%d]->dof[%d] = %d\n", 
+                //       m, i, al[m]->dof[i], n, j, al[n]->dof[j]);
+
+                val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
+                                                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
+              }
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
           }
@@ -740,11 +768,14 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       continue;
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
-      if (al[m]->dof[i] < 0) 
-        continue;
+      if (al[m]->dof[i] < 0) continue;
       
       spss[m]->set_active_shape(al[m]->idx[i]);
-          rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
+
+      // Numerical integration performed only if the coefficient is nonzero.
+      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+        rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
+      }
     }
   }
 }
@@ -1299,14 +1330,24 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
         if (al[n]->dof[j] < 0) {
           // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
           if (rhs != NULL && this->is_linear) {
-            scalar val = eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
-                    refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
-            rhs->add(al[m]->dof[i], -val);
+            // Numerical integration performed only if all coefficients are nonzero
+            // and if the basis function is active.
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
+                && al[m]->dof[i] >= 0) {
+              scalar val = eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
+                                     refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
+              rhs->add(al[m]->dof[i], -val);
+            }
           }
         }
         else if (rhsonly == false) {
-          scalar val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
-                  refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
+          scalar val = 0;
+          // Numerical integration performed only if all coefficients are nonzero.
+          if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
+              && std::abs(al[n]->coef[j]) > 1e-12) {
+            val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
+                                                  refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
+          }
           local_stiffness_matrix[i][j] = val;
         }
       }
@@ -1339,8 +1380,13 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
+
       spss[m]->set_active_shape(al[m]->idx[i]);
-      rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
+
+      // Numerical integration performed only if the coefficient is nonzero.
+      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+        rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
+      }
     }
   }
 }
@@ -1420,7 +1466,9 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
         if (ext_asmlist_u->dof[j] < 0) {
           if (rhs != NULL && this->is_linear) {
             // Evaluate the form with the activated discontinuous shape functions.
-            scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
+            scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
+                                      &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
+                                      stage.meshes[m]->get_seq() - min_dg_mesh_seq)
               * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
               * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
             // Add the contribution to the global dof index.
@@ -1699,6 +1747,13 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
                                              PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                              RefMap *ru, RefMap *rv)
 {
+  // Debug.
+  //Element* elem = ru->get_active_element();
+  //printf("Evaluating form in element (%g, %g), (%g, %g), (%g, %g), (%g, %g)\n", 
+  //       elem->vn[0]->x, elem->vn[0]->y, elem->vn[1]->x, elem->vn[1]->y, 
+  //       elem->vn[2]->x, elem->vn[2]->y, elem->vn[3]->x, elem->vn[3]->y); 
+  //printf("Order = %d\n", order);
+
   // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fu->get_quad_2d();
   double3* pt = quad->get_points(order);
@@ -1761,6 +1816,9 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
     delete ext;
   }
 
+  // Debug.
+  //printf("Result = %g\n", res);
+
   return res;
 }
 
@@ -1777,6 +1835,13 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
   // Get element pointer from the reference map "ru".
   // THIS WILL NOT WORK IN MULTIMESH !
   Element* elem = ru->get_active_element();
+
+
+  // Debug.
+  //printf("Adaptivity in element (%g, %g), (%g, %g), (%g, %g), (%g, %g)\n", 
+  //       elem->vn[0]->x, elem->vn[0]->y, elem->vn[1]->x, elem->vn[1]->y, 
+  //       elem->vn[2]->x, elem->vn[2]->y, elem->vn[3]->x, elem->vn[3]->y); 
+
 
   // Refine element uniformly.
   int num_of_sons = 0;
@@ -1805,18 +1870,50 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     refmap_v[i]->set_active_element(sons[i]);       // THIS WILL NOT WORK IN MULTIMESH !
     refmap_u[i]->force_transform(fu->get_transform(), fu->get_ctm());
     refmap_v[i]->force_transform(fv->get_transform(), fv->get_ctm());
+
+    // Debug.
+    Element* elem = ru->get_active_element();
+    //printf("Evaluating form in sons[%d]\n", i); 
+
     son_value[i] = eval_form_subelement(order_init + order_increase, mfv, 
                                         u_ext, fu, fv, refmap_u[i], refmap_v[i]);  
+
+    // Debug.
+    //printf("son_value[%d] = %g\n", i, son_value[i]);
   }
  
   // Add up contributions of sons and if the relative error is above 
   // tolerance, continue adaptive evaluation recursively in subelements.
   scalar sum = 0;
   for (int i=0; i < num_of_sons; i++) sum += son_value[i];
-  if (std::abs(sum) < 1e-12) return sum;
+
+  // Debug.
+  //printf("Sum = %g\n", sum);
+
+  if (std::abs(sum) < 1e-12) {
+    
+    // Debug.
+    //printf("**** Returning zero integral.\n");
+
+    return sum;
+  }
   double rel_error = std::abs(sum - result_init) / std::abs(sum);
-  if (rel_error < rel_err_tol) return sum;
+
+  // Debug.
+  //printf("rel_err = %g\n", rel_error);
+
+  if (rel_error < rel_err_tol) {
+
+    // Debug.
+    //printf("**** Returning sum = %g\n", sum);
+
+    return sum;
+  }
   else {
+
+    // Debug.
+    //printf("Evaluating all sons adaptively.\n");
+
     // Call the function eval_form_adaptive() recursively in all sons.
     scalar val_final[4] = {0, 0, 0, 0};
     for (int i = 0; i < num_of_sons; i++) {
@@ -1826,6 +1923,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
   }
 
   // Clean up.
+  for (int i=0; i < num_of_sons; i++) delete sons[i];
   delete [] sons;
 
   return result;
@@ -1851,7 +1949,7 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
   else {
     // Perform adaptive numerical quadrature starting with order = 1.
     // TODO: the choice of initial order matters a lot, this can be improved.
-    int order_init = 1;
+    int order_init = 5;
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
     result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
                                 mfv, u_ext, fu, fv, ru, rv);

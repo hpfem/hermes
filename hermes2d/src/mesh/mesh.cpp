@@ -263,6 +263,11 @@ Element* create_triangle(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, C
     e->en[1] = mesh->get_edge_node(v1->id, v2->id);
     e->en[2] = mesh->get_edge_node(v2->id, v0->id);
   }
+  else {
+    e->en[0] = get_edge_node();
+    e->en[1] = get_edge_node();
+    e->en[2] = get_edge_node();
+  }
 
   // register in the nodes
   if (mesh != NULL) e->ref_all_nodes();
@@ -270,7 +275,8 @@ Element* create_triangle(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, C
   return e;
 }
 
-Element* create_quad(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm)
+Element* create_quad(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, Node* v3, 
+                     CurvMap* cm)
 {
   // create a new element
   Element* e;
@@ -297,6 +303,12 @@ Element* create_quad(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, Node*
     e->en[1] = mesh->get_edge_node(v1->id, v2->id);
     e->en[2] = mesh->get_edge_node(v2->id, v3->id);
     e->en[3] = mesh->get_edge_node(v3->id, v0->id);
+  }
+  else {
+    e->en[0] = get_edge_node();
+    e->en[1] = get_edge_node();
+    e->en[2] = get_edge_node();
+    e->en[3] = get_edge_node();
   }
 
   // register in the nodes
@@ -400,9 +412,9 @@ void refine_triangle_to_triangles(Mesh* mesh, Element* e, Element** sons_out)
   sons[3]->vn[2]->bnd = bnd[0];
 
   //set pointers to parent element for sons
-  for(int i = 0; i < 4; i++)
-    if(sons[i] != NULL)
-      sons[i]->parent = e;
+  for(int i = 0; i < 4; i++) {
+    if(sons[i] != NULL) sons[i]->parent = e;
+  }
 
   // copy son pointers (could not have been done earlier because of the union)
   memcpy(e->sons, sons, 4 * sizeof(Element*));
@@ -428,6 +440,21 @@ Node* get_vertex_node(Node* v1, Node* v2)
   return newnode;
 }
 
+Node* get_edge_node()
+{
+  // initialize the new Node
+  Node* newnode = new Node();
+  newnode->type = HERMES_TYPE_EDGE;
+  newnode->ref = 0;
+  newnode->bnd = 0;
+  newnode->p1 = NULL;
+  newnode->p2 = NULL;
+  newnode->marker = 0;
+  newnode->elem[0] = newnode->elem[1] = NULL;
+
+  return newnode;
+}
+
 // Refines a quad element into four quads, or two quads (horizontally or 
 // vertically. If mesh != NULL, the new elements are incorporated into
 // the mesh. The option mesh == NULL is used to perform adaptive numerical 
@@ -439,7 +466,7 @@ void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out)
   Element* sons[4];
 
   // remember the markers of the edge nodes
-  int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
+  int bnd[4] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
   int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
   // deactivate this element and unregister from its nodes
@@ -537,6 +564,7 @@ void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out)
     sons[0] = create_quad(mesh, e->marker, e->vn[0], e->vn[1], x1, x3, cm[0]);
     sons[1] = create_quad(mesh, e->marker, x3, x1, e->vn[2], e->vn[3], cm[1]);
     sons[2] = sons[3] = NULL;
+
     if (mesh != NULL) mesh->nactive += 2;
 
     sons[0]->en[0]->bnd = bnd[0];  sons[0]->en[0]->marker = mrk[0];
@@ -578,6 +606,7 @@ void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out)
     sons[0] = sons[1] = NULL;
     sons[2] = create_quad(mesh, e->marker, e->vn[0], x0, x2, e->vn[3], cm[0]);
     sons[3] = create_quad(mesh, e->marker, x0, e->vn[1], e->vn[2], x2, cm[1]);
+
     if (mesh != NULL) mesh->nactive += 2;
 
     sons[2]->en[0]->bnd = bnd[0];  sons[2]->en[0]->marker = mrk[0];

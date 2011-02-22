@@ -8,9 +8,10 @@
 //      Dirichlet boundary conditions.
 //
 
+const bool ADAPTIVE_QUADRATURE = false;            // Evaluate weak forms using adaptive quadrature.
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
-const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
+const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -56,10 +57,17 @@ int main(int argc, char* argv[])
   int adapt_order_increase = 1;
   double adapt_rel_error_tol = 1e-2;
   WeakForm wf;
-  wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
-                     adapt_order_increase, adapt_rel_error_tol);
-  wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
-                     adapt_order_increase, adapt_rel_error_tol);
+  if (ADAPTIVE_QUADRATURE) {
+    wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+                       adapt_order_increase, adapt_rel_error_tol);
+    //wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+    //                   adapt_order_increase, adapt_rel_error_tol);
+  }
+  else {
+    wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
+  }
+
+  wf.add_vector_form(callback(linear_form));
 
   // Initialize the FE problem.
   bool is_linear = true;

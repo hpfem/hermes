@@ -49,12 +49,12 @@ public:
   /// Returns an edge node with parent id's p1 and p2 if it exists, NULL otherwise.
   Node* peek_edge_node(int p1, int p2);
 
-  /// The central function: obtains a vertex node pointer given the id
+  /// Central function: obtains a vertex node pointer given the id
   /// numbers of its parents. If the vertex node does not exist, it is
   /// created first.
   Node* get_vertex_node(int p1, int p2);
 
-  /// The central function: obtains an edge node pointer given the id
+  /// Central function: obtains an edge node pointer given the id
   /// numbers of its parents. If the edge node does not exist, it is
   /// created first.
   Node* get_edge_node(int p1, int p2);
