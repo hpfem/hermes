@@ -1,5 +1,5 @@
-Tutorial Part VIII (Fvm-and-dg Problems)
-=================================
+Tutorial Part VIII (FVM and DG)
+===============================
 
 .. toctree::
     :maxdepth: 2

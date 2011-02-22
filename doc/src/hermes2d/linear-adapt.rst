@@ -1,5 +1,5 @@
-Tutorial Part IV (Automatic Adaptivity)
-=======================================
+Tutorial Part IV (Adaptive Solution of Linear Problems)
+=======================================================
 
 So far we have not paid any attention to the accuracy of results. In general, 
 a computation on a fixed mesh is not likely to be very accurate. There is a need 
@@ -10,7 +10,6 @@ error is large.
 .. toctree::
     :maxdepth: 2
 
-    
     linear-adapt/adapt   
     linear-adapt/conv   
     linear-adapt/micromotor 

@@ -1,5 +1,5 @@
-Tutorial Part V (Nonlinear-adapt Problems)
-=======================================
+Tutorial Part V (Adaptive Solution of Nonlinear Problems)
+=========================================================
 
 .. toctree::
     :maxdepth: 2

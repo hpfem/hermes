@@ -1,5 +1,5 @@
-Tutorial Part VII (Eigen Problems)
-=================================
+Tutorial Part VII (Eigenvalue Problems)
+=======================================
 
 .. toctree::
     :maxdepth: 2

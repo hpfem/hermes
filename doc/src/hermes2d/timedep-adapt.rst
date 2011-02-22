@@ -1,5 +1,5 @@
-Tutorial Part VI (Adaptivity for Time-Dependent Problems)
-=========================================================
+Tutorial Part VI (Adaptive Solution of Time-Dependent Problems)
+===============================================================
 
 Adaptive *hp*-FEM with dynamical meshes for time-dependent 
 PDE and PDE systems is one of the most advanced techniques in Hermes. 
