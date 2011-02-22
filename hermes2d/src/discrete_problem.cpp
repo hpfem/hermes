@@ -1699,7 +1699,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
                                              PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                              RefMap *ru, RefMap *rv)
 {
-  // Evaluate the form using the quadrature of the just calculated order.
+  // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fu->get_quad_2d();
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
@@ -1725,7 +1725,8 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   Geom<double>* e = cache_e[order];
   double* jwt = cache_jwt[order];
 
-  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  // Values of the previous Newton iteration, shape functions 
+  // and external functions in quadrature points.
   int prev_size = u_ext.size() - mfv->u_ext_offset;
   Func<scalar>** prev = new Func<scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution *>())
@@ -1763,39 +1764,104 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   return res;
 }
 
-// Evaluates weak form on element given by the RefMap, using non-adaptive 
-// or adaptive numerical quadrature.
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+// Evaluates weak form on element given by the RefMap, 
+// using adaptive numerical quadrature.
+scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, double rel_err_tol, 
+                                           WeakForm::MatrixFormVol *mfv, 
+                                           Hermes::vector<Solution *> u_ext,
+                                           PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                                           RefMap *ru, RefMap *rv)
+{
+  scalar result = 0;
+
+  // Get element pointer from the reference map "ru".
+  // THIS WILL NOT WORK IN MULTIMESH !
+  Element* elem = ru->get_active_element();
+
+  // Refine element uniformly.
+  int num_of_sons = 0;
+  Element** sons = new Element*[4];
+  if (elem->is_triangle()) {
+    num_of_sons = 3;
+    refine_triangle_to_triangles(NULL, elem, sons);  // Refine triangle uniformly
+                                                     // without altering Mesh.
+  }
+  else {
+    num_of_sons = 4;
+    int refinement = 0;
+    refine_quad(NULL, elem, refinement, sons);  // Refine quad uniformly
+                                                // without altering Mesh.
+  }
+
+  // Calculate the values in each element son.
+  int order_increase = mfv->adapt_order_increase;
+  scalar son_value[4];
+  RefMap *refmap_u[4];
+  RefMap *refmap_v[4];
+  for (int i=0; i < num_of_sons; i++) {
+    refmap_u[i] = new RefMap();
+    refmap_v[i] = new RefMap();
+    refmap_u[i]->set_active_element(sons[i]);       // THIS WILL NOT WORK IN MULTIMESH !
+    refmap_v[i]->set_active_element(sons[i]);       // THIS WILL NOT WORK IN MULTIMESH !
+    refmap_u[i]->force_transform(fu->get_transform(), fu->get_ctm());
+    refmap_v[i]->force_transform(fv->get_transform(), fv->get_ctm());
+    son_value[i] = eval_form_subelement(order_init + order_increase, mfv, 
+                                        u_ext, fu, fv, refmap_u[i], refmap_v[i]);  
+  }
+ 
+  // Add up contributions of sons and if the relative error is above 
+  // tolerance, continue adaptive evaluation recursively in subelements.
+  scalar sum = 0;
+  for (int i=0; i < num_of_sons; i++) sum += son_value[i];
+  if (std::abs(sum) < 1e-12) return sum;
+  double rel_error = std::abs(sum - result_init) / std::abs(sum);
+  if (rel_error < rel_err_tol) return sum;
+  else {
+    // Call the function eval_form_adaptive() recursively in all sons.
+    scalar val_final[4] = {0, 0, 0, 0};
+    for (int i = 0; i < num_of_sons; i++) {
+      val_final[i] = eval_form_adaptive(order_init + order_increase, son_value[i], rel_err_tol,
+                                        mfv, u_ext, fu, fv, refmap_u[i], refmap_v[i]);
+    }
+  }
+
+  // Clean up.
+  delete [] sons;
+
+  return result;
+}
+
+// Main function for the evaluation of weak forms. 
+// Evaluates weak form on element given by the RefMap, 
+// using either non-adaptive or adaptive numerical quadrature.
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, 
+                                  Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                                  RefMap *ru, RefMap *rv)
 {
   _F_
   scalar result = 0;
 
   if (mfv->adapt_eval == false) {
-    // Determine the integration order.
+    // Determine the integration order by parsing the form.
     int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
-    // Perform non-adaptive numerical quadrature.
+    // Perform non-adaptive numerical quadrature of order "order".
     result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
   }
   else {
-    // Perform adaptive numerical quadrature.
-    // IN PROGRESS.
-
-    Element* elem = ru->get_active_element();
-    int refinement = 0;
-    refine_element(NULL, elem, refinement);  // Refine element uniformly.
-
-    // Set active element to reference mappings.
-    //refmap[j]->set_active_element(e[i]);
-    //refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
-
-
+    // Perform adaptive numerical quadrature starting with order = 1.
+    // TODO: the choice of initial order matters a lot, this can be improved.
+    int order_init = 1;
+    scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
+    result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
+                                mfv, u_ext, fu, fv, ru, rv);
   }
 
   return result;
 }
 
-int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
+int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, 
+                                                Hermes::vector<Solution *> u_ext,
                                                 PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
@@ -1830,7 +1896,8 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, He
     // Order of additional external functions.
     ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
 
-    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    // Order of geometric attributes (eg. for multiplication of 
+    // a solution with coordinates, normals, etc.).
     double fake_wt = 1.0;
 
     // Total order of the vector form.

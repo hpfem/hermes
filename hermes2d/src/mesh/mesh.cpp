@@ -332,7 +332,7 @@ static CurvMap* create_son_curv_map(Element* e, int son)
   return cm;
 }
 
-void refine_triangle_to_triangles(Mesh* mesh, Element* e)
+void refine_triangle_to_triangles(Mesh* mesh, Element* e, Element** sons_out)
 {
   // remember the markers of the edge nodes
   int bnd[3] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd    };
@@ -406,6 +406,11 @@ void refine_triangle_to_triangles(Mesh* mesh, Element* e)
 
   // copy son pointers (could not have been done earlier because of the union)
   memcpy(e->sons, sons, 4 * sizeof(Element*));
+
+  // If sons_out != NULL, copy son pointers there.
+  if (sons_out != NULL) {
+    for(int i = 0; i < 3; i++) sons_out[i] = sons[i];
+  }
 }
 
 Node* get_vertex_node(Node* v1, Node* v2)
@@ -426,8 +431,9 @@ Node* get_vertex_node(Node* v1, Node* v2)
 // Refines a quad element into four quads, or two quads (horizontally or 
 // vertically. If mesh != NULL, the new elements are incorporated into
 // the mesh. The option mesh == NULL is used to perform adaptive numerical 
-// quadrature.
-void refine_quad(Mesh* mesh, Element* e, int refinement)
+// quadrature. If sons_out != NULL, pointers to the new elements will be 
+// saved there.
+void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out)
 {
   int i, j;
   Element* sons[4];
@@ -602,6 +608,11 @@ void refine_quad(Mesh* mesh, Element* e, int refinement)
 
   // copy son pointers (could not have been done earlier because of the union)
   memcpy(e->sons, sons, sizeof(sons));
+
+  // If sons_out != NULL, copy son pointers there.
+  if (sons_out != NULL) {
+    for(int i = 0; i < 4; i++) sons_out[i] = sons[i];
+  }
 }
 
 void Mesh::unrefine_element_internal(Element* e)
@@ -629,7 +640,7 @@ void Mesh::unrefine_element_internal(Element* e)
       son->unref_all_nodes(this);
       if (son->cm != NULL) delete son->cm;
       elements.remove(son->id);
-      nactive--;
+      this->nactive--;
     }
   }
 

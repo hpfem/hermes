@@ -221,8 +221,17 @@ protected:
   int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
 
-  // Evaluates volumetric matrix form over an element 
-  // using either non-adaptive or adaptive quadrature.
+  // Evaluates weak form on element given by the RefMap, using adaptive 
+  // numerical quadrature.
+  scalar eval_form_adaptive(int order_init, scalar result_init, double rel_err_tol, 
+                            WeakForm::MatrixFormVol *mfv, 
+                            Hermes::vector<Solution *> u_ext,
+                            PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                            RefMap *ru, RefMap *rv);
+
+  // Main function for the evaluation of weak forms. 
+  // Evaluates weak form on element given by the RefMap, 
+  // using either non-adaptive or adaptive numerical quadrature.
   scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                    PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
   

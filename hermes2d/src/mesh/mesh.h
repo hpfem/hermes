@@ -397,11 +397,11 @@ protected:
 Element* create_quad(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm);
 Element* create_triangle(Mesh* mesh, int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm);
 void refine_element(Mesh* mesh, Element* e, int refinement);
-void refine_quad(Mesh* mesh, Element* e, int refinement);
-void refine_triangle_to_triangles(Mesh* mesh, Element* e);
+void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out = NULL);
+void refine_triangle_to_triangles(Mesh* mesh, Element* e, Element** sons = NULL);
 Node* get_vertex_node(Node* v1, Node* v2);
 
-// helper macros for easy iteration through all elements, nodes etc. in a mesh
+// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
 #define for_all_elements(e, mesh) \
         for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
           if (((e) = (mesh)->get_element_fast(_id))->used)
