@@ -1765,12 +1765,9 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
     cache_e[order] = init_geom_vol(ru, order);
     double* jac;
     if(!ru->is_jacobian_const()) 
-    {
       jac = ru->get_jacobian(order);
-    }
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) 
-    {
+    for(int i = 0; i < np; i++) {
       if(ru->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
       else
@@ -1810,8 +1807,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
     }
   delete [] prev;
 
-  if (ext != NULL) 
-  {
+  if (ext != NULL) {
     ext->free(); 
     delete ext;
   }
@@ -2037,12 +2033,9 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
     cache_e[order] = init_geom_vol(rv, order);
     double* jac;
     if(!rv->is_jacobian_const()) 
-    {
       jac = rv->get_jacobian(order);
-    }
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) 
-    {
+    for(int i = 0; i < np; i++) {
       if(rv->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
       else
@@ -2282,8 +2275,7 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
   int np = quad->get_num_points(eo);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL)
-  {
+  if (cache_e[eo] == NULL) {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -2420,8 +2412,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   assert(surf_pos->surf_num == neighbor_searches.get(neighbor_index_u)->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL)
-  {
+  if (cache_e[eo] == NULL) {
     cache_e[eo] = init_geom_surf(ru_central, surf_pos, eo);
     double3* tan = ru_central->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -2573,8 +2564,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
   assert(surf_pos->surf_num == nbs_v->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL)
-  {
+  if (cache_e[eo] == NULL) {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
