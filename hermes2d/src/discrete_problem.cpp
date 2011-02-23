@@ -32,8 +32,8 @@
 #include "views/scalar_view.h"
 #include "views/base_view.h"
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear) :
-  wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, 
+         bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
   _F_
   // Sanity checks.
@@ -124,7 +124,7 @@ scalar** DiscreteProblem::get_matrix_buffer(int n)
   return (matrix_buffer = new_matrix<scalar>(n, n));
 }
 
-//// matrix structure precalculation ///////////////////////////////////////////////////////////////
+//// matrix structure precalculation /////////////////////////////////////////
 
 // This functions is identical in H2D and H3D.
 bool DiscreteProblem::is_up_to_date()
@@ -147,9 +147,9 @@ bool DiscreteProblem::is_up_to_date()
   return up_to_date;
 }
 
-//// matrix creation ///////////////////////////////////////////////////////////////////////////////
-void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bool rhsonly,
-                             bool force_diagonal_blocks, Table* block_weights)
+//// matrix creation /////////////////////////////////////////////////////////
+void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, 
+       bool rhsonly, bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
 
@@ -164,7 +164,8 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
     return;
   }
 
-  // For DG, the sparse structure is different as we have to account for over-edge calculations.
+  // For DG, the sparse structure is different as we have to 
+  // account for over-edge calculations.
   bool is_DG = false;
   for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) {
     if(this->wf->mfsurf[i].area == H2D_DG_INNER_EDGE) {
@@ -277,7 +278,8 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
           }
         }
 
-        // Deallocation an array of arrays of neighboring elements for every mesh x edge.
+        // Deallocation an array of arrays of neighboring elements 
+        // for every mesh x edge.
         for(unsigned int el = 0; el < wf->get_neq(); el++) {
           for(int ed = 0; ed < num_edges; ed++)
             delete [] neighbor_elems_arrays[el][ed];
@@ -343,7 +345,7 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs, bo
   have_matrix = true;
 }
 
-//// assembly //////////////////////////////////////////////////////////////////////////////////////
+//// assembly ////////////////////////////////////////////////////////////////////
 
 // Light version for linear problems.
 // The Table is here for optional weighting of matrix blocks in systems.
@@ -353,7 +355,8 @@ void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly,
   _F_
   scalar* coeff_vec = NULL;
   bool add_dir_lift = false;
-  assemble(coeff_vec, mat, rhs, rhsonly, force_diagonal_blocks, add_dir_lift, block_weights);
+  assemble(coeff_vec, mat, rhs, rhsonly, force_diagonal_blocks, 
+           add_dir_lift, block_weights);
 }
 
 
@@ -408,8 +411,10 @@ void DiscreteProblem::initialize_refmaps(Hermes::vector<RefMap *>& refmap)
 // light version above.
 // The Table is here for optional weighting of matrix blocks in systems.
 
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
-                               bool force_diagonal_blocks, bool add_dir_lift, Table* block_weights)
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, 
+                               Vector* rhs, bool rhsonly,
+                               bool force_diagonal_blocks, bool add_dir_lift, 
+                               Table* block_weights)
 {
   _F_
   // Sanity checks.
@@ -449,11 +454,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // traverses through the union mesh. On the other hand, if you don't use multi-mesh
   // at all, there will always be only one stage in which all forms are assembled as usual.
   for (unsigned ss = 0; ss < stages.size(); ss++) 
-    // Assemble one stage. One stage is a collection of functions, and meshes that can not be further minimized.
-    // E.g. if a linear form uses two external solution, each of which is defined on a different mesh, and different to the
-    // mesh of the current test function, then the stage would have three meshes.
-    // By stage functions, all functions are meant: shape function (their precalculated values), and mesh functions.
-    assemble_one_stage(stages[ss], mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext);
+    // Assemble one stage. One stage is a collection of functions, 
+    // and meshes that can not be further minimized.
+    // E.g. if a linear form uses two external solution, each of 
+    // which is defined on a different mesh, and different to the
+    // mesh of the current test function, then the stage would have 
+    // three meshes. By stage functions, all functions are meant: shape 
+    // function (their precalculated values), and mesh functions.
+    assemble_one_stage(stages[ss], mat, rhs, rhsonly, force_diagonal_blocks, 
+                       block_weights, spss, refmap, u_ext);
   
   // Deinitialize matrix buffer.
   if(matrix_buffer != NULL)
@@ -473,11 +482,15 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 }
 
 void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext)
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+       bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, 
+       Hermes::vector<Solution *>& u_ext)
 {
   _F_
-  // Boundary flags. bnd[i] == true := i-th edge of the current Element is a boundary edge.
+  // Boundary flags. bnd[i] == true := i-th edge of the current 
+  // Element is a boundary edge.
   bool bnd[4];
 
   // Info about the boundary edge.
@@ -505,10 +518,14 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   // Assemble each one.
   Element** e;
   while ((e = trav.get_next_state(bnd, surf_pos)) != NULL)
-    // One state is a collection of (virtual) elements sharing the same physical location on (possibly) different meshes.
-    // This is then the same element of the virtual union mesh. The proper sub-element mappings to all the functions of
-    // this stage is supplied by the function Traverse::get_next_state() called in the while loop.
-    assemble_one_state(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, 
+    // One state is a collection of (virtual) elements sharing 
+    // the same physical location on (possibly) different meshes.
+    // This is then the same element of the virtual union mesh. 
+    // The proper sub-element mappings to all the functions of
+    // this stage is supplied by the function Traverse::get_next_state() 
+    // called in the while loop.
+    assemble_one_state(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
+                       block_weights, spss, refmap, 
                        u_ext, e, bnd, surf_pos, trav.get_base());
 
   if (mat != NULL) mat->finish();
@@ -561,8 +578,9 @@ Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<Prec
 }
 
 void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
-      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, 
+      bool force_diagonal_blocks, Table* block_weights, 
+      Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
       Hermes::vector<Solution *>& u_ext, Element** e, 
       bool* bnd, SurfPos* surf_pos, Element* trav_base)
 {
@@ -577,7 +595,8 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
     nat.push_back(false);
 
-  // Element usage flag: iempty[i] == true := The current state does not posses an active element in the i-th space.
+  // Element usage flag: iempty[i] == true := The current state does 
+  // not posses an active element in the i-th space.
   Hermes::vector<bool> isempty;
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
     isempty.push_back(false);
@@ -590,16 +609,22 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   init_cache();
 
   /// Assemble volume matrix forms.
-  assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, rep_element->marker, al);
+  assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
+                               block_weights, spss, refmap, u_ext, isempty, 
+                               rep_element->marker, al);
 
   /// Assemble volume vector forms.
   if (rhs != NULL)
-    assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, rep_element->marker, al);
+    assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
+                                 block_weights, spss, refmap, u_ext, isempty, 
+                                 rep_element->marker, al);
 
   // Assemble surface integrals now: loop through surfaces of the element.
   for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++)
-   assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
-   surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf], nat, isurf, e, trav_base, rep_element);
+   assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
+                              block_weights, spss, refmap, u_ext, isempty, 
+                              surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf], 
+                              nat, isurf, e, trav_base, rep_element);
   
   // Delete assembly lists.
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
@@ -658,7 +683,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
               if (rhs != NULL && this->is_linear) {
-                // Numerical integration performed only if all coefficients are nonzero
+                // Numerical integration performed only if all 
+                // coefficients multiplying the form are nonzero
                 // and if the basis function is active.
                 if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
                     && al[m]->dof[i] >= 0) {
@@ -670,7 +696,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             }
             else if (rhsonly == false) {
               scalar val = 0;
-              // Numerical integration performed only if all coefficients are nonzero.
+              // Numerical integration performed only if all 
+              // coefficients multiplying the form are nonzero.
               if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
                   && std::abs(al[n]->coef[j]) > 1e-12) {
                 val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
@@ -691,7 +718,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
               if (rhs != NULL && this->is_linear) {
-                // Numerical integration performed only if all coefficients are nonzero
+                // Numerical integration performed only if all 
+                // coefficients multiplying the form are nonzero
                 // and if basis function is active.
                 if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
                     && al[m]->dof[i] >= 0) {
@@ -708,7 +736,8 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             }
             else if (rhsonly == false) {
               scalar val = 0;
-              // Numerical integration performed only if all coefficients are nonzero.
+              // Numerical integration performed only if all coefficients 
+              // multiplying the form are nonzero.
               if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
                   && std::abs(al[n]->coef[j]) > 1e-12) {
 
@@ -752,9 +781,10 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
 }
 
 void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+      Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
 {
   _F_
   for (unsigned int ww = 0; ww < stage.vfvol.size(); ww++) {
@@ -772,7 +802,8 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       
       spss[m]->set_active_shape(al[m]->idx[i]);
 
-      // Numerical integration performed only if the coefficient is nonzero.
+      // Numerical integration performed only if the coefficient 
+      // multiplying the form is nonzero.
       if (std::abs(al[m]->coef[i]) > 1e-12) {   
         rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
       }
@@ -781,10 +812,12 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
 }
 
 void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, 
-       Hermes::vector<bool>& nat, int isurf, Element** e, Element* trav_base, Element* rep_element)
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, 
+       Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
   // Obtain the list of shape functions which are nonzero on this surface.
@@ -803,23 +836,28 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   // Assemble boundary edges: 
   if(bnd == 1) {
     if (mat != NULL)
-      assemble_surface_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
-        marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
+      assemble_surface_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                                    spss, refmap, u_ext, isempty, 
+                                    marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
     if (rhs != NULL)
-      assemble_surface_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
-        marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
+      assemble_surface_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                                    spss, refmap, u_ext, isempty, 
+                                    marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else
     if(DG_vector_forms_present || DG_matrix_forms_present)
-    assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, u_ext, isempty, 
-          marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+    assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                      spss, refmap, u_ext, isempty, 
+                      marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
   }
 
 void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_
@@ -839,7 +877,8 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
   build_multimesh_tree(root, neighbor_searches);
     
   // Update all NeighborSearches according to the multimesh tree.
-  // After this, all NeighborSearches in neighbor_searches should have the same count of neighbors and proper set of transformations
+  // After this, all NeighborSearches in neighbor_searches should have the same count 
+  // of neighbors and proper set of transformations
   // for the central and the neighbor element(s) alike.
   // Also check that every NeighborSearch has the same number of neighbor elements.
   unsigned int num_neighbors = 0;
@@ -990,7 +1029,8 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
   }
 }
 
-void DiscreteProblem::init_neighbors(LightArray<NeighborSearch*>& neighbor_searches, const WeakForm::Stage& stage, const int& isurf)
+void DiscreteProblem::init_neighbors(LightArray<NeighborSearch*>& neighbor_searches, 
+                                     const WeakForm::Stage& stage, const int& isurf)
 {
   _F_
   // Initialize the NeighborSearches.
@@ -1003,7 +1043,8 @@ void DiscreteProblem::init_neighbors(LightArray<NeighborSearch*>& neighbor_searc
   }
 
   // Calculate respective neighbors.
-  // Also clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
+  // Also clear the initial_sub_idxs from the central element transformations 
+  // of NeighborSearches with multiple neighbors.
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
     if(neighbor_searches.present(i)) {
       neighbor_searches.get(i)->set_active_edge_multimesh(isurf);
@@ -1012,7 +1053,8 @@ void DiscreteProblem::init_neighbors(LightArray<NeighborSearch*>& neighbor_searc
   return;
 }
 
-void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, LightArray<NeighborSearch*>& neighbor_searches)
+void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
+                                           LightArray<NeighborSearch*>& neighbor_searches)
 {
   _F_
     for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
@@ -1025,7 +1067,9 @@ void DiscreteProblem::build_multimesh_tree(DiscreteProblem::NeighborNode* root, 
       }
 }
 
-void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, unsigned int transformations [NeighborSearch::max_n_trans], unsigned int transformation_count)
+void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, 
+                      unsigned int transformations [NeighborSearch::max_n_trans],  
+                      unsigned int transformation_count)
 {
   _F_
   // If we are already in the leaf.
@@ -1056,7 +1100,8 @@ void DiscreteProblem::insert_into_multimesh_tree(NeighborNode* node, unsigned in
   }
 }
 
-/* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
+/* This function is not used. It may be used when the implementation changes. 
+   Will be deleted when found not necessary.*/
 Hermes::vector<Hermes::vector<unsigned int>*> DiscreteProblem::get_multimesh_neighbors_transformations(DiscreteProblem::NeighborNode* multimesh_tree)
 {
   _F_
@@ -1069,8 +1114,10 @@ Hermes::vector<Hermes::vector<unsigned int>*> DiscreteProblem::get_multimesh_nei
   return running_transformations;
 }
 
-/* This function is not used. It may be used when the implementation changes. Will be deleted when found not necessary.*/
-void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations)
+/* This function is not used. It may be used when the implementation changes. 
+   Will be deleted when found not necessary.*/
+void DiscreteProblem::traverse_multimesh_tree(DiscreteProblem::NeighborNode* node, 
+                      Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations)
 {
   _F_
   // If we are in the root.
@@ -1124,7 +1171,9 @@ void DiscreteProblem::update_neighbor_search(NeighborSearch* ns, NeighborNode* m
   }
 }
 
-DiscreteProblem::NeighborNode* DiscreteProblem::find_node(unsigned int* transformations, unsigned int transformation_count, DiscreteProblem::NeighborNode* node)
+DiscreteProblem::NeighborNode* DiscreteProblem::find_node(unsigned int* transformations, 
+                                                          unsigned int transformation_count, 
+                                                          DiscreteProblem::NeighborNode* node)
 {
   _F_
   // If there are no transformations left.
@@ -1145,7 +1194,8 @@ DiscreteProblem::NeighborNode* DiscreteProblem::find_node(unsigned int* transfor
   return NULL;
 }
     
-unsigned int DiscreteProblem::update_ns_subtree(NeighborSearch* ns, DiscreteProblem::NeighborNode* node, unsigned int ith_neighbor)
+unsigned int DiscreteProblem::update_ns_subtree(NeighborSearch* ns, 
+             DiscreteProblem::NeighborNode* node, unsigned int ith_neighbor)
 {
   _F_
   // No subtree => no work.
@@ -1180,9 +1230,13 @@ unsigned int DiscreteProblem::update_ns_subtree(NeighborSearch* ns, DiscreteProb
 
   // Move down the subtree.
   if(node->get_left_son() != NULL)
-    traverse_multimesh_subtree(node->get_left_son(), running_central_transformations, running_neighbor_transformations, edge_info, ns->active_edge, ns->central_el->get_mode());
+    traverse_multimesh_subtree(node->get_left_son(), running_central_transformations, 
+                               running_neighbor_transformations, edge_info, ns->active_edge, 
+                               ns->central_el->get_mode());
   if(node->get_right_son() != NULL)
-    traverse_multimesh_subtree(node->get_right_son(), running_central_transformations, running_neighbor_transformations, edge_info, ns->active_edge, ns->central_el->get_mode());
+    traverse_multimesh_subtree(node->get_right_son(), running_central_transformations, 
+                               running_neighbor_transformations, edge_info, ns->active_edge, 
+                               ns->central_el->get_mode());
 
   // Delete the last neighbors' info (this is a dead end, caused by the function traverse_multimesh_subtree.
   running_central_transformations.pop_back();
@@ -1205,8 +1259,10 @@ unsigned int DiscreteProblem::update_ns_subtree(NeighborSearch* ns, DiscreteProb
   return - 1;
 }
 
-void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
+void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* node, 
+      Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
+      Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, 
+      const NeighborSearch::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
 {
   _F_
   // If we are in a leaf.
@@ -1292,9 +1348,11 @@ void DiscreteProblem::traverse_multimesh_subtree(DiscreteProblem::NeighborNode* 
 
 
 void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base)
 {
   _F_
@@ -1330,7 +1388,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
         if (al[n]->dof[j] < 0) {
           // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
           if (rhs != NULL && this->is_linear) {
-            // Numerical integration performed only if all coefficients are nonzero
+            // Numerical integration performed only if all coefficients multiplying the form are nonzero
             // and if the basis function is active.
             if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
                 && al[m]->dof[i] >= 0) {
@@ -1342,7 +1400,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
         }
         else if (rhsonly == false) {
           scalar val = 0;
-          // Numerical integration performed only if all coefficients are nonzero.
+          // Numerical integration performed only if all coefficients multiplying the form are nonzero.
           if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
               && std::abs(al[n]->coef[j]) > 1e-12) {
             val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
@@ -1358,9 +1416,11 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
 }
 
 void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base)
 {
   _F_
@@ -1383,7 +1443,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
 
       spss[m]->set_active_shape(al[m]->idx[i]);
 
-      // Numerical integration performed only if the coefficient is nonzero.
+      // Numerical integration performed only if the coefficient multiplying the form is nonzero.
       if (std::abs(al[m]->coef[i]) > 1e-12) {   
         rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
       }
@@ -1392,11 +1452,14 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
 }
 
 void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
-       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
-       int isurf, Element** e, Element* trav_base, Element* rep_element)
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, 
+       LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, 
+       SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 
+       Element* trav_base, Element* rep_element)
 { 
   _F_
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
