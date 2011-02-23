@@ -35,7 +35,7 @@ using namespace RefinementSelectors;
 //          2 - concentration is kept constant at the inlet part of the domain.
 //              at the beginning, concentration is zero throughout the domain.
 // If not said otherwise, zero Neumann condition is imposed on all parts of the boundary.
-unsigned int INITIAL_CONCENTRATION_STATE = 0;
+unsigned int INITIAL_CONCENTRATION_STATE = 1;
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  if(INITIAL_CONCENTRATION_STATE == 0)
+  if(INITIAL_CONCENTRATION_STATE == 1)
     mloader.load("GAMM-channel-4-bnds.mesh", &basemesh);
   else
     mloader.load("channel-4-bnds.mesh", &basemesh);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
   if(INITIAL_CONCENTRATION_STATE != 2)
     mesh_concentration.refine_towards_boundary(3, INIT_REF_NUM_CONCENTRATION_BDY);
   
-  mesh_concentration.refine_towards_boundary(1, INIT_REF_NUM_CONCENTRATION_BDY, false);
+  //mesh_concentration.refine_towards_boundary(1, INIT_REF_NUM_CONCENTRATION_BDY, false);
 
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
@@ -297,15 +297,17 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(3, bdy_flux_solid_wall_comp_3, linear_form_order, BDY_SOLID_WALL_TOP);
 
   // Forms for concentration.
-  wf.add_vector_form(4, callback(linear_form_concentration_grad_grad), HERMES_ANY);
+  wf.add_vector_form(4, callback(volume_linear_form_concentration_grad_grad), HERMES_ANY);
   
-  wf.add_vector_form(4, callback(linear_form_concentration_convective), HERMES_ANY);
+  wf.add_vector_form(4, callback(volume_linear_form_concentration_convective), HERMES_ANY);
 
-  wf.add_vector_form_surf(4, callback(linear_form_concentration_inlet_outlet), BDY_INLET);
+  wf.add_vector_form_surf(4, callback(surface_linear_form_concentration_inlet_outlet), BDY_INLET);
 
-  wf.add_vector_form_surf(4, callback(linear_form_concentration_inlet_outlet), BDY_OUTLET);
+  wf.add_vector_form_surf(4, callback(surface_linear_form_concentration_inlet_outlet), BDY_OUTLET);
 
-  wf.add_vector_form_surf(4, callback(linear_form_concentration_inner_edges), H2D_DG_INNER_EDGE);
+  wf.add_vector_form_surf(4, callback(surface_linear_form_concentration_solid_wall), BDY_SOLID_WALL_TOP);
+
+  wf.add_vector_form_surf(4, callback(inner_linear_form_concentration), H2D_DG_INNER_EDGE);
 
   if(PRECONDITIONING) {
     // Preconditioning forms.

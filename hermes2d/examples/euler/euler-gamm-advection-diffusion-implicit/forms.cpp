@@ -876,7 +876,7 @@ double bdy_flux_inlet_outlet_comp_3(int n, double *wt, Func<scalar> *ue[], Func<
 
 // Laplacian.
 template<typename Real, typename Scalar>
-Scalar linear_form_concentration_grad_grad(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar volume_linear_form_concentration_grad_grad(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Real>* concentration_prev = u_ext[4];
   return - EPSILON * int_grad_u_grad_v<Real, Scalar>(n, wt, concentration_prev, v) * TAU;
@@ -884,7 +884,7 @@ Scalar linear_form_concentration_grad_grad(int n, double *wt, Func<Scalar> *u_ex
 
 // Convective term.
 template<typename Real, typename Scalar>
-Scalar linear_form_concentration_convective(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar volume_linear_form_concentration_convective(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Real>* density_prev = u_ext[0];
   Func<Real>* density_vel_x_prev = u_ext[1];
@@ -900,7 +900,7 @@ Scalar linear_form_concentration_convective(int n, double *wt, Func<Scalar> *u_e
 
 // Surface linear form (natural boundary condition).
 template<typename Real, typename Scalar>
-Scalar linear_form_concentration_inlet_outlet(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar surface_linear_form_concentration_solid_wall(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Real>* density_prev = u_ext[0];
   Func<Real>* density_vel_x_prev = u_ext[1];
@@ -914,10 +914,22 @@ Scalar linear_form_concentration_inlet_outlet(int n, double *wt, Func<Real> *u_e
   return - result * TAU;
 }
 
+// Surface linear form (natural boundary condition).
+template<typename Real, typename Scalar>
+Scalar surface_linear_form_concentration_inlet_outlet(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+{
+  Func<Real>* concentration_prev = u_ext[4];
+
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * v->val[i] * concentration_prev->val[i] * (V1_EXT * e->nx[i] + V2_EXT * e->ny[i]);
+  return - result * TAU;
+}
+
   
 // Surface linear forms (inner edges).
 template<typename Real, typename Scalar>
-Scalar linear_form_concentration_inner_edges(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar inner_linear_form_concentration(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Real>* density_prev = u_ext[0];
   Func<Real>* density_vel_x_prev = u_ext[1];
@@ -926,18 +938,18 @@ Scalar linear_form_concentration_inner_edges(int n, double *wt, Func<Real> *u_ex
 
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * v->val[i] *
+    result += wt[i] * v->val[i] * concentration_prev->get_val_central(i) * 0.5 *
               (
                 (
-                  density_vel_x_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
-                  -
-                  density_vel_x_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                  density_vel_x_prev->get_val_central(i) / density_prev->get_val_central(i)
+                  +
+                  density_vel_x_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
                 ) * e->nx[i]
                 + 
                 (
-                  density_vel_y_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
-                  -
-                  density_vel_y_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                  density_vel_y_prev->get_val_central(i) / density_prev->get_val_central(i)
+                  +
+                  density_vel_y_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
                 ) * e->ny[i]
               );
   return - result * TAU;
