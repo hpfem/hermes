@@ -242,6 +242,6 @@ As a last step, we clean up as usual::
 Sample results
 ~~~~~~~~~~~~~~
 
-The results are exactly the same as in the Picard's example 15. 
+The results are exactly the same as in the Picard's example 01-picard. 
 Notice that the Newton's method uses very few iterations compared
 to Picard.

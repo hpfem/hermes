@@ -11,7 +11,7 @@ as final.
 .. toctree::
     :maxdepth: 2
 
-    timedep-adapt/parab   
-    timedep-adapt/timedep-adapt-space-and-time
+    timedep-adapt/timedep-adapt-space-only  
     timedep-adapt/heat-and-moisture-adapt 
+    timedep-adapt/gross-pitaevski-adapt
 

@@ -13,27 +13,27 @@ exact solution that contains a strong singularity.
 Equation solved: Time-harmonic Maxwell's equations
 
 .. math::
-    :label: example-14
+    :label: example-05-hcurl-adapt
 
     \frac{1}{\mu_r} \nabla \times \nabla \times E - \kappa^2 \epsilon_r E = \Phi.
 
 Domain of interest is the square $(-10, 10)^2$ missing the quarter lying in the 
 fourth quadrant. It is filled with air:
 
-.. image:: 14/domain.png
+.. image:: maxwell-adapt/domain.png
    :align: center
    :width: 490
    :height: 490
    :alt: Computational domain.
 
 Boundary conditions: Combined essential and natural, see the 
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/main.cpp>`_ file.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P04-linear-adapt/05-hcurl-adapt/main.cpp>`_ file.
 
 Exact solution
 ~~~~~~~~~~~~~~
 
 .. math::
-    :label: example-14-exact
+    :label: example-05-hcurl-adapt-exact
 
     E(x, y) = \nabla \times J_{\alpha} (r) \cos(\alpha \theta)
 
@@ -65,7 +65,7 @@ computer code, this reads:
     }  
 
 Here jv() is the Bessel function $\bfJ_{\alpha}$. For its source code see the 
-`forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/14-hcurl-adapt/forms.cpp>`_ file.
+`forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P04-linear-adapt/05-hcurl-adapt/forms.cpp>`_ file.
 
 Creating an Hcurl space
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,12 +157,13 @@ Weak forms
     Ord linear_form_surf_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {  return Ord(v->val[0].get_max_order());  }
 
+
 Sample results
 ~~~~~~~~~~~~~~
 
 Solution:
 
-.. image:: 14/solution.png
+.. image:: maxwell-adapt/solution.png
    :align: center
    :width: 500
    :height: 420
@@ -170,7 +171,7 @@ Solution:
 
 Final mesh (h-FEM with linear elements):
 
-.. image:: 14/mesh-h1.png
+.. image:: maxwell-adapt/mesh-h1.png
    :align: center
    :width: 460
    :height: 390
@@ -182,7 +183,7 @@ of approximation on element interfaces, not to polynomial degrees inside the ele
 
 Final mesh (h-FEM with quadratic elements):
 
-.. image:: 14/mesh-h2.png
+.. image:: maxwell-adapt/mesh-h2.png
    :align: center
    :width: 460
    :height: 390
@@ -190,7 +191,7 @@ Final mesh (h-FEM with quadratic elements):
 
 Final mesh (hp-FEM):
 
-.. image:: 14/mesh-hp.png
+.. image:: maxwell-adapt/mesh-hp.png
    :align: center
    :width: 460
    :height: 390
@@ -198,7 +199,7 @@ Final mesh (hp-FEM):
 
 DOF convergence graphs:
 
-.. image:: 14/conv_dof.png
+.. image:: maxwell-adapt/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -206,8 +207,9 @@ DOF convergence graphs:
 
 CPU time convergence graphs:
 
-.. image:: 14/conv_cpu.png
+.. image:: maxwell-adapt/conv_cpu.png
    :align: center
    :width: 600
    :height: 400
    :alt: CPU convergence graph.
+

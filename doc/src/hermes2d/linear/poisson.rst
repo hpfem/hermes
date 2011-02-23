@@ -103,7 +103,7 @@ Using predefined integrals
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases, such as in this one, one can replace the above code with predefined integrals
-that can be found in the file `integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_::
+that can be found in the file `src/integrals/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals/integrals_h1.h>`_::
 
     // Return the value \int \nabla u . \nabla v dx.
     template<typename Real, typename Scalar>

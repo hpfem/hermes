@@ -5,7 +5,7 @@ In multiphysics PDE problems (and other PDE systems) it often happens that one
 physical field (solution component) has a singularity or a boundary layer 
 where other fields are smooth. If one approximates all of them on the 
 same mesh, then some of them will be refined where this is absolutely not needed.
-This can be extremely wasteful, as we will see in the tutorial example 11. 
+This can be extremely wasteful, as we will see in the tutorial example 02-system-adapt. 
 But first let us introduce the multimesh discretization method that we developed 
 to circumvent this problem.
 
@@ -22,7 +22,7 @@ This is illustrated in the following figure, where (A) is the master mesh,
 (B) - (D) three different meshes (say, for a coupled problem with three
 equations), and (E) is the virtual *union mesh* that is used for assembling.
 
-.. image:: 11/multimesh.png
+.. image:: multimesh-example/multimesh.png
    :align: center
    :width: 750
    :alt: Multimesh
@@ -34,7 +34,7 @@ The following figure shows the integration over an element $Q_k$ of the
 virtual union mesh, and what are the appropriate subelements of the 
 existing elements where this integration is performed:
 
-.. image:: 11/multimesh2.png
+.. image:: multimesh-example/multimesh2.png
    :align: center
    :width: 600
    :alt: Multimesh

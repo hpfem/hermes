@@ -26,7 +26,7 @@ This is illustrated in the following graphs that compare typical convergences
 of adaptive FEM with linear elements, adaptive FEM with quadratic elements, and 
 adaptive hp-FEM:
 
-.. image:: conv_dof.png
+.. image:: conv-intro/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -37,7 +37,7 @@ linear FEM would need in the order of 1,000,000,000,000,000,000 degrees of freed
 (DOF) to reach a level of accuracy where the hp-FEM is with less than 10,000 DOF. 
 A similar effect can be observed in the CPU-time convergence graph:
 
-.. image:: conv_cpu.png
+.. image:: conv-intro/conv_cpu.png
    :align: center
    :width: 600
    :height: 400
@@ -69,7 +69,7 @@ the following facts:
   that can refine meshes anisotropically both in $h$ and $p$. This is illustrated 
   in  benchmarks 
   `smooth-aniso-x <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/smooth-aniso-x.html>`_  
-  and `line singularity <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks/line-singularity.html>`_.
+  and `nist-07(line singularity) <http://hpfem.org/hermes/doc/src/hermes2d/nist/nist-07.html>`_.
 
 What it takes to do adaptive hp-FEM
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

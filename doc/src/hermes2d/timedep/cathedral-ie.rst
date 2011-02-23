@@ -11,7 +11,7 @@ heat transfer model that describes, in a naive approximation, how the St. Vitus
 cathedral in Prague responds to changes in the surrounding air temperature
 during one 24-hour cycle. The geometry is shown below:
 
-.. image:: 09/vitus1.png
+.. image:: cathedral-ie/vitus1.png
    :align: center
    :width: 400
    :height: 500

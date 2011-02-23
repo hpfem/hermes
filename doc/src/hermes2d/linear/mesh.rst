@@ -110,8 +110,8 @@ If we wanted to use strings as markers, we could do::
 
 For historical reasons, most Hermes examples are based on integer markers. 
 String markers are used in tutorial examples 
-`07-general <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/general.html>`_ 
-and `09-timedep <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/timedep.html>`_
+`07-general <http://hpfem.org/hermes/doc/src/hermes2d/linear/general.html>`_ 
+and `P03-timedep/01-cathedral-ie <http://hpfem.org/hermes/doc/src/hermes2d/timedep/cathedral-ie.html>`_
 for illustration.
 
 Finally, the mesh file can also include the variable ``curves`` which lists all
@@ -123,7 +123,7 @@ NURBS curves
 ~~~~~~~~~~~~
 
 For the treatment of full-featured Non-Uniform Rational B-Splines (NURBS)
-boundaries see example `37-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-5/nurbs.html>`_. To simplify the most common case of a curved boundary, Hermes has a special format for circular arcs.
+boundaries see example `P10-miscellaneous/35-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/miscellaneous/nurbs.html>`_. To simplify the most common case of a curved boundary, Hermes has a special format for circular arcs.
 
 Circular arcs
 ~~~~~~~~~~~~~
@@ -143,7 +143,7 @@ Loading meshes in Hermes2D format
 
 As a ''Hello world'' example, let us load the mesh we have just created, and display it in a window. 
 Every main.cpp file in the git repository contains lots of comments and instructions. Skipping those, 
-the `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/01-mesh/main.cpp>`_ 
+the `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/01-mesh/main.cpp>`_ 
 file begins with creating an instance of the class Mesh. In order to load
 the mesh file, you have to create a mesh loader class (in our case that is ``H2DReader``) and
 call the method ``load()``::
@@ -165,7 +165,7 @@ This is a widely used format that can be generated, for example,
 with `Cubit <http://cubit.sandia.gov/>`_. To load an ExodusII mesh file, 
 one has to use the ``ExodusIIReader`` class instead of the ``H2DReader`` class above.
 We will encounter meshes in the ExodusII format in example 
-`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples/iron-water.html>`_. 
+`iron-water <http://hpfem.org/hermes/doc/src/hermes2d/examples/neutronics-iron-water.html>`_. 
 
 Manual mesh refinements
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,7 +235,7 @@ All elements in the mesh can be unrefined using::
 
     Mesh::unrefine_all_elements();
 
-See the file `src/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh.cpp>`_ for more details. 
+See the file `src/mesh/mesh.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh/mesh.cpp>`_ for more details. 
 
 Visualizing the mesh
 ~~~~~~~~~~~~~~~~~~~~

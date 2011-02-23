@@ -31,7 +31,8 @@ marker, the Tuple reduces to a single integer::
 Nonzero Dirichlet BC (example 04)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `04-bc-dirichlet <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/04-bc-dirichlet>`_. 
+**Git reference:** Tutorial example `04-bc-dirichlet 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet>`_. 
 
 Suppose that we would like to modify the boundary conditions for 
 example 03-poisson as follows:
@@ -122,7 +123,8 @@ J. Wiley & Sons, 2005.
 Neumann BC (example 05)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `05-bc-neumann <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/05-bc-neumann>`_. 
+**Git reference:** Tutorial example `05-bc-neumann 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/05-bc-neumann>`_. 
 
 Next, let us consider Neumann boundary conditions. The new model problem
 will have the form
@@ -148,7 +150,7 @@ surface integrals. In the case of the linear form $l(v)$, this means
     l(v) = \sum_m l_m^{\,\rm vol}(v) + \sum_n l_n^{\,\rm surf}(v).
 
 We have already seen volumetric linear forms in example 
-`03-poisson <http://hpfem.org/hermes2d/doc/src/tutorial-1.html#solving-poisson-equation-03>`_. 
+`03-poisson <http://hpfem.org/hermes2d/doc/src/hermes2d/linear/poisson.html>`_. 
 Surface linear forms are implemented similarly. Our new right-hand side is
 represented by two functions with the following prototypes::
 
@@ -175,7 +177,7 @@ The surface linear form is defined as::
     }
 
 Here, we have used the predefined surface integral int_v (see the
-file `src/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_). 
+file `src/integrals/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals/integrals_h1.h>`_). 
 If the boundary conditions were more complicated, we could also
 have used int_F_v, where F stands for an arbitrary user-supplied
 function returning the value $\partial u/\partial n$.
@@ -220,7 +222,8 @@ shown in the following figures:
 Newton BC (example 06)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**Git reference:** Tutorial example `06-bc-newton <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/06-bc-newton>`_. 
+**Git reference:** Tutorial example `06-bc-newton 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/06-bc-newton>`_. 
 
 Another common natural boundary condition is the Newton (sometimes called Robin) condition
 of the form
@@ -242,7 +245,7 @@ The surface bilinear form must have the following prototype:
 
 Inside this function you can use predefined
 forms such as int_u_v, int_F_u_v (see the
-file `src/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals_h1.h>`_) or your custom forms.
+file `src/integrals/integrals_h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals/integrals_h1.h>`_) or your custom forms.
 
 The following code snippet contains the linear and bilinear forms:
 ::

@@ -33,8 +33,8 @@ Manual setting of integration orders in weak forms
 
 The weak formulation contains both volumetric and surface integrals. 
 
-The Ord class in Hermes (see the file `src/forms.h 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_) provides
+The Ord class in Hermes (see the file `src/weakform/forms.h 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/forms.h>`_) provides
 an automatic parser of weak forms that is able to determine the integration orders for 
 algebraic expressions. So, in order to define an integration order explicitly, one can 
 provide on top the weak form another function that defines a simple algebraic expression 
