@@ -240,8 +240,9 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       if (p.pull_int("marker_str"))
         el_marker = p.pull_str("marker");
       else {
-        char dst_buff[100];
-        el_marker = itoa(p.pull_int("b"), dst_buff, 10);
+        std::ostringstream string_stream;
+        string_stream << p.pull_int("marker");
+        el_marker = string_stream.str();
       }
     } 
     else {
@@ -254,8 +255,9 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       if (p.pull_int("marker_str"))
         el_marker = p.pull_str("marker");
       else {
-        char dst_buff[100];
-        el_marker = itoa(p.pull_int("marker"), dst_buff, 10);
+        std::ostringstream string_stream;
+        string_stream << p.pull_int("marker");
+        el_marker = string_stream.str();
       }
     }
     for (j = 0; j < nv-1; j++)
@@ -311,8 +313,9 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       if (p.pull_int("marker_str"))
         bnd_marker = p.pull_str("marker");
       else {
-        char dst_buff[100];
-        bnd_marker = itoa(p.pull_int("marker"), dst_buff, 10);
+        std::ostringstream string_stream;
+        string_stream << p.pull_int("marker");
+        bnd_marker = string_stream.str();
       }
 
       // This functions check if the user-supplied marker on this element has been
