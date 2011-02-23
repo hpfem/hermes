@@ -1,5 +1,7 @@
-project(eigenvalue-h2p)
+project(P07-03-eigenvalue-h2p)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
 set_common_target_properties(${PROJECT_NAME})
+
+add_subdirectory(tests)

@@ -1,7 +1,6 @@
 add_subdirectory(quadrature)
 add_subdirectory(bubbles)
 add_subdirectory(mesh)
-add_subdirectory(tutorial)
 add_subdirectory(benchmarks)
 add_subdirectory(examples)
 add_subdirectory(adaptivity)
