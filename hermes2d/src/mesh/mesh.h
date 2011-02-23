@@ -362,13 +362,6 @@ protected:
     // An analogy for boundary markers.
     int get_internal_boundary_marker(std::string user_marker);
 
-    // Make sure that the internal markers do not collide.
-    // This function is called whenever user supplies his own integral label.
-    // This is done with respect to the task to preserve user-supplied integral markers.
-    void check_boundary_marker(int marker);
-    // An analogy for element markers.
-    void check_element_marker(int marker);
-
   private:
     // Conversion tables between the std::string markers the user sets and
     // the markers used internally as members of Elements, Nodes.

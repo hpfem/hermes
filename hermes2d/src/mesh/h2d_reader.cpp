@@ -225,65 +225,51 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     int nv = p.pull_int("nv");
     int idx[5];
     std::string el_marker;
-    if (!nv) { mesh->elements.skip_slot(); continue; }
+    if (!nv) { 
+      mesh->elements.skip_slot(); 
+      continue; 
+    }
     if (nv < 4 || nv > 5)
       error("File %s: element #%d: wrong number of vertex indices.", filename, i);
     if (nv == 4) {
-      p.exec("n1, n2, n3, b = elements[i]");
+      p.exec("n1, n2, n3, marker = elements[i]");
       idx[0] = p.pull_int("n1");
       idx[1] = p.pull_int("n2");
       idx[2] = p.pull_int("n3");
-      p.exec("b_str = 1 if isinstance(b, str) else 0");
-      if (p.pull_int("b_str"))
-          el_marker = p.pull_str("b");
-      else
-          idx[3] = p.pull_int("b");
-    } else {
-      p.exec("n1, n2, n3, n4, b = elements[i]");
+      p.exec("marker_str = 1 if isinstance(marker, str) else 0");
+      if (p.pull_int("marker_str"))
+        el_marker = p.pull_str("marker");
+      else {
+        char dst_buff[100];
+        el_marker = itoa(p.pull_int("b"), dst_buff, 10);
+      }
+    } 
+    else {
+      p.exec("n1, n2, n3, n4, marker = elements[i]");
       idx[0] = p.pull_int("n1");
       idx[1] = p.pull_int("n2");
       idx[2] = p.pull_int("n3");
       idx[3] = p.pull_int("n4");
-      p.exec("b_str = 1 if isinstance(b, str) else 0");
-      if (p.pull_int("b_str"))
-          el_marker = p.pull_str("b");
-      else
-          idx[4] = p.pull_int("b");
+      p.exec("marker_str = 1 if isinstance(marker, str) else 0");
+      if (p.pull_int("marker_str"))
+        el_marker = p.pull_str("marker");
+      else {
+        char dst_buff[100];
+        el_marker = itoa(p.pull_int("marker"), dst_buff, 10);
+      }
     }
     for (j = 0; j < nv-1; j++)
       if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
         error("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
 
     Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
+    
     int marker;
 
-    // If we are dealing with a string as a marker.
-    if (el_marker != "") {
-      // This functions check if the user-supplied marker on this element has been
-      // already used, and if not, inserts it in the appropriate structure.
-      mesh->markers_conversion->insert_element_marker(mesh->markers_conversion->min_element_marker_unused, el_marker);
-      marker = mesh->markers_conversion->get_internal_element_marker(el_marker);
-    }
-    else {
-      if(nv == 4) {
-        // If we have some string-labeled boundary markers.
-        if(mesh->markers_conversion != NULL) {
-          // We need to make sure that the internal markers do not collide.
-          mesh->markers_conversion->check_element_marker(idx[3]);
-          mesh->markers_conversion->insert_element_marker(idx[3], "");
-        }
-        marker = idx[3];
-      }
-      else {
-        // If we have some string-labeled boundary markers.
-        if(mesh->markers_conversion != NULL) {
-          // We need to make sure that the internal markers do not collide.
-          mesh->markers_conversion->check_element_marker(idx[4]);
-          mesh->markers_conversion->insert_element_marker(idx[4], "");
-        }
-        marker = idx[4];
-      }
-    }
+    // This functions check if the user-supplied marker on this element has been
+    // already used, and if not, inserts it in the appropriate structure.
+    mesh->markers_conversion->insert_element_marker(mesh->markers_conversion->min_element_marker_unused, el_marker);
+    marker = mesh->markers_conversion->get_internal_element_marker(el_marker);
 
     if(nv == 4) {
         check_triangle(i, v0, v1, v2);
@@ -319,34 +305,26 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       if (en == NULL)
         error("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
 
-      int marker_to_set;
+      std::string bnd_marker;
       p.exec("marker_str = 1 if isinstance(marker, str) else 0");
-      int marker_str = p.pull_int("marker_str");
 
-      // If we are dealing with a string as a marker.
-      if (marker_str) {
-        // This functions check if the user-supplied marker on this element has been
-        // already used, and if not, inserts it in the appropriate structure.
-        std::string smarker = p.pull_str("marker");
-        mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, smarker);
-        marker_to_set = mesh->markers_conversion->get_internal_boundary_marker(smarker);
-      }
+      if (p.pull_int("marker_str"))
+        bnd_marker = p.pull_str("marker");
       else {
-        marker = p.pull_int("marker");
-        // If we have some string-labeled boundary markers.
-        if(mesh->markers_conversion != NULL) {
-          // We need to make sure that the internal markers do not collide.
-          mesh->markers_conversion->check_boundary_marker(marker);
-          mesh->markers_conversion->insert_boundary_marker(marker, "");
-        }
-        marker_to_set = marker;
+        char dst_buff[100];
+        bnd_marker = itoa(p.pull_int("marker"), dst_buff, 10);
       }
 
-      en->marker = marker_to_set;
+      // This functions check if the user-supplied marker on this element has been
+      // already used, and if not, inserts it in the appropriate structure.
+      mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, bnd_marker);
+      marker = mesh->markers_conversion->get_internal_boundary_marker(bnd_marker);
+      
+      en->marker = marker;
 
       // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
       // for the inner edges.
-      if (marker_to_set > 0)
+      if (marker > 0)
       {
         mesh->nodes[v1].bnd = 1;
         mesh->nodes[v2].bnd = 1;
