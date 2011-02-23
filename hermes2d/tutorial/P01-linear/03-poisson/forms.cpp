@@ -20,7 +20,10 @@ private:
   class MatrixFormVolTutorial : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j) {}
+    MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j) 
+    {
+      adapt_eval = false;
+    }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -42,7 +45,10 @@ private:
   class VectorFormVolTutorial : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) {}
+    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i)
+    {
+      adapt_eval = false;
+    }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
