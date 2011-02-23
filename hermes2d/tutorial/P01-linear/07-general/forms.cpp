@@ -29,6 +29,7 @@ public:
     MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j)
     {
       sym = HERMES_SYM;
+      adapt_eval = false;
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
@@ -58,7 +59,10 @@ public:
   class VectorFormVolTutorial : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) {}
+    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) 
+    {
+      adapt_eval = false;
+    }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
@@ -77,7 +81,10 @@ public:
   class VectorFormSurfTutorial : public WeakForm::VectorFormSurf
   {
   public:
-    VectorFormSurfTutorial(int i, int area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) {}
+    VectorFormSurfTutorial(int i, int area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) 
+    {
+      adapt_eval = false;
+    }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
@@ -95,7 +102,7 @@ public:
 
   class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
   public:
-    DirichletFunctionBoundaryConditionTutorial(Hermes::vector<int> markers)
+    DirichletFunctionBoundaryConditionTutorial(Hermes::vector<int> markers) : DirichletBoundaryCondition()
     {
       this->markers = markers;
     }
