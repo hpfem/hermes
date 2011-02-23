@@ -1956,11 +1956,16 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
 
     return sum;
   }
+
+  // If reference integral is not zero, it is possible 
+  // to calculate relative error.
   double rel_error = std::abs(sum - result_init) / std::abs(sum);
 
   // Debug.
   //printf("rel_err = %g\n", rel_error);
 
+  // If relative error is within given tolerance, 
+  // stop adaptivity and return the reference value.
   if (rel_error < rel_err_tol) {
 
     // Debug.
@@ -1969,6 +1974,9 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     return sum;
   }
   else {
+    // Relative error exceeds allowed tolerance: Call the function 
+    // eval_form_adaptive() in each subelement, with initial values
+    // son_value[i].
 
     // Debug.
     //printf("Evaluating all sons adaptively.\n");
@@ -1979,6 +1987,10 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
       val_final[i] = eval_form_adaptive(order_init + order_increase, son_value[i], rel_err_tol,
                                         mfv, u_ext, fu, fv, refmap_u[i], refmap_v[i]);
     }
+
+    // Add up final values in subelements.
+    result = 0;
+    for (int i = 0; i < num_of_sons; i++) result += val_final[i];
   }
 
   // Clean up.
@@ -2006,10 +2018,15 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
     result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
   }
   else {
-    // Perform adaptive numerical quadrature starting with order = 1.
-    // TODO: the choice of initial order matters a lot, this can be improved.
-    int order_init = 5;
+    // Perform adaptive numerical quadrature starting with order = 2.
+    // TODO: The choice of initial order matters a lot of efficiency,
+    //       we should figure out a smart way to choose the initial order.
+    int order_init = 2;
+    // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
+    // Calculate the value of the form using adaptive quadrature.
+    // TODO; So far this function is recursive and thus slow. 
+    //       It should be rewritten in a non-recursive way. 
     result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
                                 mfv, u_ext, fu, fv, ru, rv);
   }
