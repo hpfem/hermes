@@ -1909,7 +1909,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
-                                        u_ext, fu, fv, ru, rv);
+                                              u_ext, fu, fv, ru, rv);
 
     result_current_subelements += subs_value[sons_i];
 

@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
   }
 
+  // Linear form is not done adaptively yet.
   wf.add_vector_form(callback(linear_form));
 
   // Initialize the FE problem.
