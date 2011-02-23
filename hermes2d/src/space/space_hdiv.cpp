@@ -75,6 +75,7 @@ Space* HdivSpace::dup(Mesh* mesh, int order_increase) const
   // space->copy_callbacks(this);
   // space->copy_orders(this, order_increase);
   // return space;
+  return NULL;
 }
 
 void HdivSpace::set_shapeset(Shapeset *shapeset)

@@ -74,6 +74,7 @@ Space* HcurlSpace::dup(Mesh* mesh, int order_increase) const
   // HcurlSpace* space = new HcurlSpace(mesh, boundary_conditions, 0, this->shapeset);
   // space->copy_orders(this, order_increase);
   // return space;
+  return NULL;
 }
 
 void HcurlSpace::set_shapeset(Shapeset *shapeset)
