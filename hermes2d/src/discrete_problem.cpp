@@ -1902,7 +1902,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     fv->push_transform(sons_i);
     for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
       mfv->ext[ext_i]->push_transform(sons_i);
-    for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+    for(unsigned int u_ext_i = 0; (u_ext_i = u_ext.size()); u_ext_i++)
       u_ext[u_ext_i]->push_transform(sons_i);
     ru->push_transform(sons_i);
     rv->push_transform(sons_i);
@@ -1918,7 +1918,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     fv->pop_transform();
     for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
       mfv->ext[ext_i]->pop_transform();
-    for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+    for(unsigned int u_ext_i = 0; (u_ext_i = u_ext.size()); u_ext_i++)
       u_ext[u_ext_i]->pop_transform();
     ru->pop_transform();
     rv->pop_transform();
@@ -1952,7 +1952,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
       fv->push_transform(sons_i);
       for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
         mfv->ext[ext_i]->push_transform(sons_i);
-      for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+      for(unsigned int u_ext_i = 0; (u_ext_i = u_ext.size()); u_ext_i++)
         u_ext[u_ext_i]->push_transform(sons_i);
       ru->push_transform(sons_i);
       rv->push_transform(sons_i);
@@ -1968,7 +1968,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
       fv->pop_transform();
       for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
         mfv->ext[ext_i]->pop_transform();
-      for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+      for(unsigned int u_ext_i = 0; (u_ext_i = u_ext.size()); u_ext_i++)
         u_ext[u_ext_i]->pop_transform();
       ru->pop_transform();
       rv->pop_transform();

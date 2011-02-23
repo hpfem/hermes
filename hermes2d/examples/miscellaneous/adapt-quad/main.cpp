@@ -8,7 +8,7 @@
 //      Dirichlet boundary conditions.
 //
 
-const bool ADAPTIVE_QUADRATURE = false;            // Evaluate weak forms using adaptive quadrature.
+const bool ADAPTIVE_QUADRATURE = true;            // Evaluate weak forms using adaptive quadrature.
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
