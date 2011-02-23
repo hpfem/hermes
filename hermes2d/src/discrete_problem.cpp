@@ -1803,20 +1803,13 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
   return order;
 }
 
-// Calculates integral over element that is given in the RefMap
+// Calculates integral over subelement that is given in the RefMap
 // using quadrature of order "order".
 scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol *mfv, 
                                              Hermes::vector<Solution *> u_ext,
                                              PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                              RefMap *ru, RefMap *rv)
 {
-  // Debug.
-  //Element* elem = ru->get_active_element();
-  //printf("Evaluating form in element (%g, %g), (%g, %g), (%g, %g), (%g, %g)\n", 
-  //       elem->vn[0]->x, elem->vn[0]->y, elem->vn[1]->x, elem->vn[1]->y, 
-  //       elem->vn[2]->x, elem->vn[2]->y, elem->vn[3]->x, elem->vn[3]->y); 
-  //printf("Order = %d\n", order);
-
   // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fu->get_quad_2d();
   double3* pt = quad->get_points(order);
@@ -1890,114 +1883,99 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
                                            RefMap *ru, RefMap *rv)
 {
   scalar result = 0;
+  
+  unsigned int num_sons = (ru->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
 
-  // Get element pointer from the reference map "ru".
-  // THIS WILL NOT WORK IN MULTIMESH !
-  Element* elem = ru->get_active_element();
-
-
-  // Debug.
-  //printf("Adaptivity in element (%g, %g), (%g, %g), (%g, %g), (%g, %g)\n", 
-  //       elem->vn[0]->x, elem->vn[0]->y, elem->vn[1]->x, elem->vn[1]->y, 
-  //       elem->vn[2]->x, elem->vn[2]->y, elem->vn[3]->x, elem->vn[3]->y); 
-
-
-  // Refine element uniformly.
-  int num_of_sons = 0;
-  Element** sons = new Element*[4];
-  if (elem->is_triangle()) {
-    num_of_sons = 3;
-    refine_triangle_to_triangles(NULL, elem, sons);  // Refine triangle uniformly
-                                                     // without altering Mesh.
-  }
-  else {
-    num_of_sons = 4;
-    int refinement = 0;
-    refine_quad(NULL, elem, refinement, sons);  // Refine quad uniformly
-                                                // without altering Mesh.
-  }
-
-  // Calculate the values in each element son.
   int order_increase = mfv->adapt_order_increase;
-  scalar son_value[4];
-  RefMap *refmap_u[4];
-  RefMap *refmap_v[4];
-  for (int i=0; i < num_of_sons; i++) {
-    refmap_u[i] = new RefMap();
-    refmap_v[i] = new RefMap();
-    refmap_u[i]->set_active_element(sons[i]);       // THIS WILL NOT WORK IN MULTIMESH !
-    refmap_v[i]->set_active_element(sons[i]);       // THIS WILL NOT WORK IN MULTIMESH !
-    refmap_u[i]->force_transform(fu->get_transform(), fu->get_ctm());
-    refmap_v[i]->force_transform(fv->get_transform(), fv->get_ctm());
 
-    // Debug.
-    Element* elem = ru->get_active_element();
-    //printf("Evaluating form in sons[%d]\n", i); 
+  scalar subs_value[4];
 
-    son_value[i] = eval_form_subelement(order_init + order_increase, mfv, 
-                                        u_ext, fu, fv, refmap_u[i], refmap_v[i]);  
+#if !defined(H2D_COMPLEX)
+  scalar result_current_subelements = 0;
+#else
+  scalar result_current_subelements = std::complex<double>(0, 0);
+#endif
 
-    // Debug.
-    //printf("son_value[%d] = %g\n", i, son_value[i]);
-  }
- 
-  // Add up contributions of sons and if the relative error is above 
-  // tolerance, continue adaptive evaluation recursively in subelements.
-  scalar sum = 0;
-  for (int i=0; i < num_of_sons; i++) sum += son_value[i];
-
-  // Debug.
-  //printf("Sum = %g\n", sum);
-
-  if (std::abs(sum) < 1e-12) {
+  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    // Push the transformation to the current son to all functions and reference mappings involved.
+    fu->push_transform(sons_i);
+    fv->push_transform(sons_i);
+    for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
+      mfv->ext[ext_i]->push_transform(sons_i);
+    for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+      u_ext[u_ext_i]->push_transform(sons_i);
+    ru->push_transform(sons_i);
+    rv->push_transform(sons_i);
     
-    // Debug.
-    //printf("**** Returning zero integral.\n");
+    // The actual calculation.
+    subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
+                                        u_ext, fu, fv, ru, rv);
 
-    return sum;
+    result_current_subelements += subs_value[sons_i];
+
+    // Reset the transformation.
+    fu->pop_transform();
+    fv->pop_transform();
+    for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
+      mfv->ext[ext_i]->pop_transform();
+    for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+      u_ext[u_ext_i]->pop_transform();
+    ru->pop_transform();
+    rv->pop_transform();
   }
 
-  // If reference integral is not zero, it is possible 
-  // to calculate relative error.
-  double rel_error = std::abs(sum - result_init) / std::abs(sum);
+  // Tolerance checking.
+  // First, if the result is negligible.
+  if (std::abs(result_current_subelements) < 1e-12)
+    return result_current_subelements;
 
-  // Debug.
-  //printf("rel_err = %g\n", rel_error);
+  // Relative error.
+  double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
 
-  // If relative error is within given tolerance, 
-  // stop adaptivity and return the reference value.
-  if (rel_error < rel_err_tol) {
-
-    // Debug.
-    //printf("**** Returning sum = %g\n", sum);
-
-    return sum;
-  }
+  if (rel_error < rel_err_tol)
+    // Relative error in tolerance.
+    return result_current_subelements;
   else {
+#if !defined(H2D_COMPLEX)
+    scalar result_recursion = 0;
+#else
+    scalar result_recursion = std::complex<double>(0, 0);
+#endif
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
-    // son_value[i].
-
-    // Debug.
-    //printf("Evaluating all sons adaptively.\n");
-
+    // subs_value[sons_i].
+    
     // Call the function eval_form_adaptive() recursively in all sons.
-    scalar val_final[4] = {0, 0, 0, 0};
-    for (int i = 0; i < num_of_sons; i++) {
-      val_final[i] = eval_form_adaptive(order_init + order_increase, son_value[i], rel_err_tol,
-                                        mfv, u_ext, fu, fv, refmap_u[i], refmap_v[i]);
+    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+      // Push the transformation to the current son to all functions and reference mappings involved.
+      fu->push_transform(sons_i);
+      fv->push_transform(sons_i);
+      for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
+        mfv->ext[ext_i]->push_transform(sons_i);
+      for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+        u_ext[u_ext_i]->push_transform(sons_i);
+      ru->push_transform(sons_i);
+      rv->push_transform(sons_i);
+    
+      // Recursion.
+      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i], rel_err_tol,
+                                          mfv, u_ext, fu, fv, ru, rv);
+
+      result_recursion += subs_value[sons_i];
+
+      // Reset the transformation.
+      fu->pop_transform();
+      fv->pop_transform();
+      for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
+        mfv->ext[ext_i]->pop_transform();
+      for(unsigned int u_ext_i = 0; u_ext_i = u_ext.size(); u_ext_i++)
+        u_ext[u_ext_i]->pop_transform();
+      ru->pop_transform();
+      rv->pop_transform();
     }
 
-    // Add up final values in subelements.
-    result = 0;
-    for (int i = 0; i < num_of_sons; i++) result += val_final[i];
+    return result_recursion;
   }
-
-  // Clean up.
-  for (int i=0; i < num_of_sons; i++) delete sons[i];
-  delete [] sons;
-
-  return result;
 }
 
 // Main function for the evaluation of weak forms. 
@@ -2026,7 +2004,8 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
     // Calculate the value of the form using adaptive quadrature.
     // TODO; So far this function is recursive and thus slow. 
-    //       It should be rewritten in a non-recursive way. 
+    //       It should be rewritten in a non-recursive way.
+    
     result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
                                 mfv, u_ext, fu, fv, ru, rv);
   }
