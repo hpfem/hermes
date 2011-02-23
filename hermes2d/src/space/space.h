@@ -96,12 +96,6 @@ class BoundaryConditions;
 class HERMES_API Space
 {
 public:
-<<<<<<< HEAD
-  // TODO: After successful testing, this will be the only constructor.
-  Space(Mesh* mesh, Shapeset* shapeset, BCTypes *bc_types, BCValues* bc_values, Ord2 p_init);
-
-=======
->>>>>>> Partially removed BCValue class
   Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init);
 
   virtual ~Space();
