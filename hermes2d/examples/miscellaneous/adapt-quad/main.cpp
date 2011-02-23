@@ -62,13 +62,12 @@ int main(int argc, char* argv[])
                        adapt_order_increase, adapt_rel_error_tol);
     //wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
     //                   adapt_order_increase, adapt_rel_error_tol);
+    wf.add_vector_form(callback(linear_form));  // Still non-adaptive.
   }
   else {
     wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
+    wf.add_vector_form(callback(linear_form));
   }
-
-  // Linear form is not done adaptively yet.
-  wf.add_vector_form(callback(linear_form));
 
   // Initialize the FE problem.
   bool is_linear = true;
