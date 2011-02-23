@@ -128,7 +128,7 @@ public:
   /// Constructor.
   NeumannValueBoundaryCondition(Hermes::vector<int> markers, scalar value);
 
-  /// Function giving info that u_Dirichlet is a constant.
+  /// Function giving info that u_Neumann is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
 };
 
