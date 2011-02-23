@@ -56,7 +56,7 @@ Scalar newton_bilinear_form_0_0(int n, double *wt, Func<Real> *u_ext[],
   Scalar result = 0;
   Func<Real>* domegadt = ext->fn[0];
   for (int i = 0; i < n; i++)
-    result += wt[i] * (  1.5 * vj->val[i] * vi->val[i] / TAU
+    result += wt[i] * (  1.5 * vj->val[i] * vi->val[i] / time_step
                       +  vj->dx[i] * vi->dx[i] + vj->dy[i] * vi->dy[i]
                       - domegadt->val[i] * vj->val[i] * vi->val[i] );
   return result;
@@ -101,7 +101,7 @@ Scalar newton_bilinear_form_1_1(int n, double *wt, Func<Real> *u_ext[],
   Scalar result = 0;
   Func<Real>* domegady = ext->fn[0];
   for (int i = 0; i < n; i++)
-    result += wt[i] * (  1.5 * vj->val[i] * vi->val[i] / TAU
+    result += wt[i] * (  1.5 * vj->val[i] * vi->val[i] / time_step
                       +  (vj->dx[i] * vi->dx[i] + vj->dy[i] * vi->dy[i]) / Le
                       + domegady->val[i] * vj->val[i] * vi->val[i] );
   return result;
@@ -119,7 +119,7 @@ Scalar newton_linear_form_0(int n, double *wt, Func<Real> *u_ext[],
   Func<Real>* omega = ext->fn[2];
   for (int i = 0; i < n; i++)
     result += wt[i] * ( (3.0 * titer->val[i] - 4.0 * t_prev_time_1->val[i] 
-                         + t_prev_time_2->val[i]) * vi->val[i] / (2.0 * TAU) +
+                         + t_prev_time_2->val[i]) * vi->val[i] / (2.0 * time_step) +
                         (titer->dx[i] * vi->dx[i] + titer->dy[i] * vi->dy[i]) -
                         omega->val[i] * vi->val[i]);
   return result;
@@ -147,7 +147,7 @@ Scalar newton_linear_form_1(int n, double *wt, Func<Real> *u_ext[],
   Func<Real>* omega = ext->fn[2];
   for (int i = 0; i < n; i++)
 		result += wt[i] * ( (3.0 * c_prev_newton->val[i] - 4.0 * c_prev_time_1->val[i] + c_prev_time_2->val[i])
-                         * vi->val[i] / (2.0 * TAU) +
+                         * vi->val[i] / (2.0 * time_step) +
                         (c_prev_newton->dx[i] * vi->dx[i] + c_prev_newton->dy[i] * vi->dy[i]) / Le +
                         omega->val[i] * vi->val[i]);
   return result;

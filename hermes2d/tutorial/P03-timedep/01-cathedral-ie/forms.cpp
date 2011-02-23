@@ -25,5 +25,5 @@ template<typename Real, typename Scalar>
 Scalar linear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                         Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  return LAMBDA * ALPHA * temp_ext(current_time) * int_v<Real, Scalar>(n, wt, v);
+  return LAMBDA * ALPHA * temp_ext(current_time + time_step) * int_v<Real, Scalar>(n, wt, v);
 }

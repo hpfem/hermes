@@ -23,7 +23,7 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 1;                             // Initial polynomial degree.
-const double TAU = 0.5;                           // Time step.
+const double time_step = 0.5;                     // Time step.
 const double T_FINAL = 60.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     rview.show(&omega_view);
 
     // Update current time.
-    current_time += TAU;
+    current_time += time_step;
 
     // Store two time levels of previous solutions.
     t_prev_time_2.copy(&t_prev_time_1);

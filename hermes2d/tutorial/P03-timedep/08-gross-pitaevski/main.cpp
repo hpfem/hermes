@@ -23,9 +23,9 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform refinements.
 const int P_INIT = 4;                             // Initial polynomial degree.
-const double TAU = 0.005;                         // Time step.
+const double time_step = 0.005;                   // Time step.
 const double T_FINAL = 2;                         // Time interval length.
-const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int TIME_INTEGRATION = 2;                   // 1 for implicit Euler, 2 for Crank-Nicolson.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakForm wf;
-  if(TIME_DISCR == 1) {
+  if(TIME_INTEGRATION == 1) {
     wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
     wf.add_vector_form(callback(F_euler), HERMES_ANY, &psi_prev_time);
   }
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
   OGProjection::project_global(&space, &psi_prev_time, coeff_vec, matrix_solver);
   
   // Time stepping loop:
-  int nstep = (int)(T_FINAL/TAU + 0.5);
+  int nstep = (int)(T_FINAL/time_step + 0.5);
   for(int ts = 1; ts <= nstep; ts++)
   {
     info("Time step %d:", ts);

@@ -42,7 +42,7 @@ const double LAMBDA = 1e5;         // Thermal conductivity of the material.
 const double HEATCAP = 1e6;        // Heat capacity.
 const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
-double current_time = time_step;
+double current_time = 0;
 
 // Time-dependent exterior temperature.
 template<typename Real>

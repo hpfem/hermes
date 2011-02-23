@@ -35,7 +35,7 @@ double BUTCHER_C_2 = 1.;
 const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 const int P_INIT = 2;                             // Initial polynomial degree.
-double TAU = 0.2;                                 // Time step.
+double time_step = 0.2;                           // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -43,7 +43,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal ocnductivity.
-double TIME = 0.0;
+double current_time = 0.0;
 
 // Model parameters.
 #include "model.cpp"
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
   int ts = 1;
   do {
     // Perform Newton's iteration for sdirk_stage_sol.
-    info("SDIRK-22 time step (t = %g, tau = %g)", TIME, TAU);
+    info("SDIRK-22 time step (t = %g, tau = %g)", current_time, time_step);
     info("---- Stage I:");
     bool verbose = true;
     if (!solve_newton(coeff_vec1, dp1, solver, matrix,
@@ -141,16 +141,16 @@ int main(int argc, char* argv[])
     Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
   
     // Update time.
-    TIME = TIME + TAU;
+    current_time += time_step;
 
     // Show the new time level solution.
     char title[100];
-    sprintf(title, "Solution, t = %g", TIME);
+    sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
     sview.show(&u_prev_time);
 
     ts++;
-  } while (TIME < T_FINAL);
+  } while (current_time < T_FINAL);
 
   // Clean up.
   delete [] coeff_vec1;

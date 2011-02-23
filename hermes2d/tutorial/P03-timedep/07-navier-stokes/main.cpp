@@ -49,7 +49,7 @@ const double RE = 200.0;                          // Reynolds number.
 const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
 const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
                                                   // from 0 to VEL_INLET, then it stays constant.
-const double TAU = 0.1;                           // Time step.
+const double time_step = 0.1;                     // Time step.
 const double T_FINAL = 30000.0;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
@@ -66,7 +66,7 @@ const int BDY_LEFT = 4;
 const int BDY_OBSTACLE = 5;
 
 // Current time (used in weak forms).
-double TIME = 0;
+double current_time = 0;
 
 // Essential (Dirichlet) boundary condition values for x-velocity.
 scalar essential_bc_values_xvel(double x, double y, double time) {
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   yvel_bc_type.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
 
   // Enter Dirichlet boundary values.
-  BCValues bc_values_x(&TIME);
+  BCValues bc_values_x(&current_time);
   bc_values_x.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
   bc_values_x.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
   
@@ -198,14 +198,14 @@ int main(int argc, char* argv[])
 
   // Time-stepping loop:
   char title[100];
-  int num_time_steps = T_FINAL / TAU;
+  int num_time_steps = T_FINAL / time_step;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    TIME += TAU;
-    info("---- Time step %d, time = %g:", ts, TIME);
+    current_time += time_step;
+    info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BC are used.
-    if (TIME <= STARTUP_TIME) {
+    if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
       update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
     }
@@ -235,10 +235,10 @@ int main(int argc, char* argv[])
     }
 
     // Show the solution at the end of time step.
-    sprintf(title, "Velocity, time %g", TIME);
+    sprintf(title, "Velocity, time %g", current_time);
     vview.set_title(title);
     vview.show(&xvel_prev_time, &yvel_prev_time, HERMES_EPS_LOW);
-    sprintf(title, "Pressure, time %g", TIME);
+    sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
  }

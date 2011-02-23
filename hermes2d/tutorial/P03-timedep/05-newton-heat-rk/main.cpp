@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   oview.show(space);
 
   // Time stepping loop:
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.

@@ -76,7 +76,7 @@ int NEWTON_MAX_ITER = 10;                         // Maximum allowed number of N
 const double STARTUP_TIME = 5.0;                  // Start-up time for time-dependent Dirichlet boundary condition.
 const double T_FINAL = 1000.0;                    // Time interval length.
 const double PULSE_END_TIME = 1000.0;             // Time interval of the top layer infiltration.
-double current_time = time_step;                  // Global time variable initialized with first time step.
+double current_time = 0;                          // Global time variable.
 
 // Problem parameters.
 double H_INIT = -15.0;                            // Initial pressure head.

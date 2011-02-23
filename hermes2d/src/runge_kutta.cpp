@@ -19,6 +19,10 @@
 
 // TODO LIST: 
 //
+// BUG: If time-dependent Ditichlet boundary conditions are used, the 
+//      Dirichlet lift is not updated for different stage times as it should 
+//      be. 
+//
 // (1) With explicit and diagonally implicit methods, the matrix is treated
 //     in the same way as with fully implicit ones. To make this more 
 //     efficient, with explicit and diagonally implicit methods one should 

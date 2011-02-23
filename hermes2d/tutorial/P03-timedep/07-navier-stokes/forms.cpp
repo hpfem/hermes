@@ -5,7 +5,7 @@ Scalar bilinear_form_sym_0_0_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<
 {
   return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) / RE 
 #ifndef STOKES
-    + int_u_v<Real, Scalar>(n, wt, u, v) / TAU
+    + int_u_v<Real, Scalar>(n, wt, u, v) / time_step
 #endif
     ;
 }
@@ -28,7 +28,7 @@ Scalar simple_linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *
   Scalar result = 0;
 #ifndef STOKES
   Func<Scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
-  result = int_u_v<Real, Scalar>(n, wt, vel_prev_time, v) / TAU;
+  result = int_u_v<Real, Scalar>(n, wt, vel_prev_time, v) / time_step;
 #endif
   return result;
 }
@@ -115,7 +115,7 @@ Scalar newton_F_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<
     result += wt[i] * (
                        (xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / RE 
 #ifndef STOKES
-		       + (xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / TAU 
+		       + (xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step 
                        + (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i] 
 #endif
                        - (p_prev_newton->val[i] * v->dx[i]));
@@ -135,7 +135,7 @@ Scalar newton_F_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<
     result += wt[i] * (
                        (yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / RE 
 #ifndef STOKES
-                       + (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / TAU
+                       + (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step
                        + (xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i] 
 #endif
                        - (p_prev_newton->val[i] * v->dy[i]));
