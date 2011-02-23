@@ -43,7 +43,7 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
 };
 
 // Dirichlet BC Value
-DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<int> markers, scalar value) : DirichletBoundaryCondition() {
+DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition() {
   this->value = value;
   this->markers = markers;
 }
@@ -61,7 +61,7 @@ scalar NeumannBoundaryCondition::function(double x, double y) const {
 };
 
 // Neumann BC Value
-NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<int> markers, scalar value) : NeumannBoundaryCondition() {
+NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition() {
   this->value = value;
   this->markers = markers;
 }
@@ -135,17 +135,17 @@ Hermes::vector<NewtonBoundaryCondition *>::const_iterator BoundaryConditions::ne
 Hermes::vector<NewtonBoundaryCondition *>::const_iterator BoundaryConditions::newton_end() const {
   return newton.end();
 }
-std::map<int, BoundaryCondition *>::const_iterator BoundaryConditions::markers_begin() const {
+std::map<std::string, BoundaryCondition *>::const_iterator BoundaryConditions::markers_begin() const {
   return markers.begin();
 }
-std::map<int, BoundaryCondition *>::const_iterator BoundaryConditions::markers_end() const {
+std::map<std::string, BoundaryCondition *>::const_iterator BoundaryConditions::markers_end() const {
   return markers.end();
 }
 BoundaryConditions::~BoundaryConditions() {};
 
 void BoundaryConditions::create_marker_cache() {
   for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
-    for(Hermes::vector<int>::const_iterator it = (*all_iterator)->markers.begin(); it != (*all_iterator)->markers.end(); it++)
+    for(Hermes::vector<std::string>::const_iterator it = (*all_iterator)->markers.begin(); it != (*all_iterator)->markers.end(); it++)
     {
       // FIXME - check consistency
       if (markers[*it])
@@ -160,6 +160,6 @@ void BoundaryConditions::create_marker_cache() {
 }
 
 
-BoundaryCondition* BoundaryConditions::get_boundary_condition(int marker) {
+BoundaryCondition* BoundaryConditions::get_boundary_condition(std::string marker) {
   return markers[marker];
 }

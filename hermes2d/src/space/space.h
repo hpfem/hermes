@@ -123,10 +123,10 @@ public:
   int get_element_order(int id) const;
   /// Sets the same polynomial order for all elements in the mesh. Intended for
   /// the user and thus assign_dofs() is called at the end of this function.
-  void set_uniform_order(int order, int marker = HERMES_ANY);
+  void set_uniform_order(int order, std::string marker = HERMES_ANY);
   /// Sets the same polynomial order for all elements in the mesh. Does not
   /// call assign_dofs(). For internal use.
-  void set_uniform_order_internal(Ord2 order, int marker = HERMES_ANY);
+  void set_uniform_order_internal(Ord2 order, int marker);
   /// Sets the order automatically assigned to all newly created elements.
   /// (The order of these is normally undefined and has to be set explicitly.)
   void set_default_order(int tri_order, int quad_order = -1);

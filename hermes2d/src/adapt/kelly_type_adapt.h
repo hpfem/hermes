@@ -39,7 +39,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
   protected:
     struct ErrorEstimatorForm
     {
-      int i, area;
+      int i;
+      std::string area;
       WeakForm::error_vector_form_val_t fn;
       WeakForm::error_vector_form_ord_t ord;
       Hermes::vector<MeshFunction *> ext;
@@ -69,6 +70,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_vol;
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_surf;
+
+    Mesh::MarkersConversion markers_conversion;
 
     /// Scaling of the interface error estimates. May be specified by the user during construction.
     ///
@@ -157,10 +160,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     void add_error_estimator_vol( int i,
                                   WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  int area = HERMES_ANY,
+                                  std::string area = HERMES_ANY,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  );
     void add_error_estimator_vol( WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  int area = HERMES_ANY,
+                                  std::string area = HERMES_ANY,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  )
     {
       add_error_estimator_vol(0, vfv, vfo, area, ext);
@@ -175,10 +178,10 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     void add_error_estimator_surf(int i,
                                   WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  int area = H2D_DG_INNER_EDGE,
+                                  std::string area = H2D_DG_INNER_EDGE,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
     void add_error_estimator_surf(WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  int area = H2D_DG_INNER_EDGE,
+                                  std::string area = H2D_DG_INNER_EDGE,
                                   Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
     {
       add_error_estimator_surf(0, vfv, vfo, area, ext);

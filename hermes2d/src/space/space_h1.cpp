@@ -42,7 +42,7 @@ void H1Space::init(Shapeset* shapeset, Ord2 p_init)
 
   // set uniform poly order in elements
   if (p_init.order_h < 1 || p_init.order_v < 1) error("P_INIT must be >=  1 in an H1 space.");
-  else this->set_uniform_order_internal(p_init);
+  else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
   // enumerate basis functions
   this->assign_dofs();
@@ -139,7 +139,7 @@ void H1Space::assign_vertex_dofs()
             nd->n = ndofs;
 
             if (en->bnd
-                && boundary_conditions->get_boundary_condition(e->en[i]->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
+              && boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
             {
               nd->dof = H2D_CONSTRAINED_DOF;
             }
@@ -252,7 +252,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(surf_pos->marker));
+  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(surf_pos->marker)));
 
   if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
   {
@@ -293,7 +293,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(surf_pos->marker));
+        DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(surf_pos->marker)));
 
         if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)

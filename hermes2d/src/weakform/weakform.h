@@ -89,12 +89,12 @@ public:
   class HERMES_API Form
   {
   public:
-    Form(int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+    Form(std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     inline void set_weakform(WeakForm* wf) { this->wf = wf; }
 
-    int area;
+    std::string area;
     Hermes::vector<MeshFunction *> ext;
     // Form will be always multiplied (scaled) with this number.
     double scaling_factor;
@@ -120,7 +120,7 @@ public:
   class HERMES_API MatrixFormVol : public Form
   {
   public:
-    MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym = HERMES_NONSYM, int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+    MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym = HERMES_NONSYM, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     unsigned int i, j;
@@ -135,7 +135,7 @@ public:
   class HERMES_API MatrixFormSurf : public Form
   {
   public:
-    MatrixFormSurf(unsigned int i, unsigned int j, int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+    MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     unsigned int i, j;
@@ -149,7 +149,7 @@ public:
   class HERMES_API VectorFormVol : public Form
   {
   public:
-    VectorFormVol(unsigned int i, int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+    VectorFormVol(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     unsigned int i;
@@ -161,7 +161,7 @@ public:
   class HERMES_API VectorFormSurf : public Form
   {
   public:
-    VectorFormSurf(unsigned int i, int area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+    VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     unsigned int i;
@@ -213,7 +213,7 @@ protected:
   bool is_matfree;
   BoundaryConditions* boundary_conditions;
 
-  struct Area  {  /*std::string name;*/  Hermes::vector<int> markers;  };
+  struct Area  { Hermes::vector<std::string> markers;  };
 
   Hermes::vector<Area> areas;
 
@@ -224,14 +224,12 @@ public:
   Hermes::vector<VectorFormVol *> vfvol;
   Hermes::vector<VectorFormSurf *> vfsurf;
 
-  // These members are used temporarily for storing markers defined by user-supplied strings.
+  // Storage of forms according to user-supplied strings.
   std::map<std::string, MatrixFormVol>  mfvol_string_temp;
   std::map<std::string, MatrixFormSurf> mfsurf_string_temp;
   std::map<std::string, VectorFormVol>  vfvol_string_temp;
   std::map<std::string, VectorFormSurf> vfsurf_string_temp;
 
-  // Function which according to the conversion table provided, updates the above members.
-  void update_markers_acc_to_conversion(Mesh::MarkersConversion* markers_conversion);
 
   struct Stage
   {
@@ -255,13 +253,19 @@ public:
                   std::vector< WeakForm::Stage >& stages, bool rhsonly);
   bool** get_blocks(bool force_diagonal_blocks);
 
-  bool is_in_area(int marker, int area) const
-  { return area >= 0 ? area == marker : is_in_area_2(marker, area); }
+  bool is_in_area(std::string marker, std::string area) const
+  { return area == marker; }
 
   bool is_sym() const { return false; /* not impl. yet */ }
 
   friend class DiscreteProblem;
   friend class Precond;
+
+  // To be called only by the constructor of DiscreteProblem.
+  void set_markers_conversion(Mesh::MarkersConversion* markers_conversion)
+  {
+    this->markers_conversion = *markers_conversion;
+  }
 
 private:
 
@@ -269,7 +273,9 @@ private:
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
 
-  bool is_in_area_2(int marker, int area) const;
+  // Function which according to the conversion table provided, updates the above members.
+  Mesh::MarkersConversion markers_conversion;
+
 };
 
 #endif

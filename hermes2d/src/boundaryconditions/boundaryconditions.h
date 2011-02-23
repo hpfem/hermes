@@ -58,7 +58,7 @@ protected:
 
   /// Markers where this boundary condition is present.
   /// This facilitates the creation, that one condition can be imposed on multiple parts of the boundary.
-  Hermes::vector<int> markers;
+  Hermes::vector<std::string> markers;
 
   /// Friend class.
   friend class BoundaryConditions;
@@ -92,7 +92,7 @@ public:
 class HERMES_API DirichletValueBoundaryCondition : public DirichletBoundaryCondition {
 public:
   /// Constructor.
-  DirichletValueBoundaryCondition(Hermes::vector<int> markers, scalar value);
+  DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
 
   /// Function giving info that u_Dirichlet is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
@@ -126,7 +126,7 @@ public:
 class HERMES_API NeumannValueBoundaryCondition : public NeumannBoundaryCondition {
 public:
   /// Constructor.
-  NeumannValueBoundaryCondition(Hermes::vector<int> markers, scalar value);
+  NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
 
   /// Function giving info that u_Neumann is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
@@ -198,11 +198,11 @@ public:
   Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_begin() const;
   Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_end() const;
 
-  std::map<int, BoundaryCondition *>::const_iterator markers_iterator;
-  std::map<int, BoundaryCondition *>::const_iterator markers_begin() const;
-  std::map<int, BoundaryCondition *>::const_iterator markers_end() const;
+  std::map<std::string, BoundaryCondition *>::const_iterator markers_iterator;
+  std::map<std::string, BoundaryCondition *>::const_iterator markers_begin() const;
+  std::map<std::string, BoundaryCondition *>::const_iterator markers_end() const;
 
-  BoundaryCondition* get_boundary_condition(int marker);
+  BoundaryCondition* get_boundary_condition(std::string marker);
 
 private:
   /// All boundary conditions together.
@@ -218,7 +218,7 @@ private:
   Hermes::vector<NewtonBoundaryCondition *> newton;
 
   /// Boundary markers cache
-  std::map<int, BoundaryCondition *> markers;
+  std::map<std::string, BoundaryCondition *> markers;
 
   /// Create boundary markers cache for assembling
   void create_marker_cache();

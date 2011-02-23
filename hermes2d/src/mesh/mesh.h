@@ -382,7 +382,12 @@ protected:
   friend class BCValues;
   friend class WeakForm;
   friend class Space;
+  friend class H1Space;
+  friend class L2Space;
+  friend class HcurlSpace;
+  friend class HdivSpace;
   friend class DiscreteProblem;
+  friend class KellyTypeAdapt;
 };
 
 // Elementary functions to create a quad / triangle element. If mesh != NULL,

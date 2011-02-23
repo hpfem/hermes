@@ -414,6 +414,8 @@ protected:
   /// Members.
   WeakForm* wf;
 
+  Mesh::MarkersConversion markers_conversion;
+
   Geom<Ord> geom_ord;
 
   /// If the problem has only constant test functions, there is no need for order calculation,

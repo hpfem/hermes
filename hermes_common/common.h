@@ -398,8 +398,17 @@ typedef unsigned long long int uint64;
 #define M_PI           3.14159265358979323846
 #endif
 
-const int HERMES_ANY = -1234;
-//   
+const std::string HERMES_ANY = "-1234";
+// For internal use.
+const int HERMES_ANY_INT = -1234;
+/// This defines the edge types used by discontinuous Galerkin weak forms.
+const std::string H2D_DG_BOUNDARY_EDGE = "-12345";  ///< This is to be used by weak forms on the boundary. 
+                                    ///< It complements H2D_ANY in that it ensures the forms are evaluated also on non-natural
+                                    ///< boundaries (essential conditions may be enforced weakly in some DG methods).
+const std::string H2D_DG_INNER_EDGE = "-1234567";    ///< This is to be used by weak forms specifying numerical flux through interior edges.
+                                    ///< Forms with this identifier will receive DiscontinuousFunc representations of shape
+                                    ///< and ext. functions, which they may query for values on either side of given interface.
+
 const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with number -1.
 
 /// This class makes command line arguments available to any other method in Hermes.

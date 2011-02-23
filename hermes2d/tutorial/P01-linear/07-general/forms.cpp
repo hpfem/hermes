@@ -81,7 +81,7 @@ public:
   class VectorFormSurfTutorial : public WeakForm::VectorFormSurf
   {
   public:
-    VectorFormSurfTutorial(int i, int area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) 
+    VectorFormSurfTutorial(int i, std::string area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) 
     {
       adapt_eval = false;
     }
@@ -102,7 +102,7 @@ public:
 
   class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
   public:
-    DirichletFunctionBoundaryConditionTutorial(Hermes::vector<int> markers) : DirichletBoundaryCondition()
+    DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string> markers) : DirichletBoundaryCondition()
     {
       this->markers = markers;
     }

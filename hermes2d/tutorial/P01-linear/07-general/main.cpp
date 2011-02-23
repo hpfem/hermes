@@ -31,7 +31,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
 // Boundary markers.
-const int BDY_HORIZONTAL = 1, BDY_VERTICAL = 2;
+const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Boundary vertical";
 
 // Weak forms.
 #include "forms.cpp"
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial *bc1
-      = new WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial(Hermes::vector<int>(BDY_HORIZONTAL));
-  NeumannValueBoundaryCondition *bc2 = new NeumannValueBoundaryCondition(Hermes::vector<int>(BDY_VERTICAL), 0.0);
+    = new WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string>("Boundary horizontal"));
+  NeumannValueBoundaryCondition *bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>("Boundary vertical"), 0.0);
   BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
 
   // doesn't work and I don't know why

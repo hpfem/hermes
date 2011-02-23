@@ -19,6 +19,8 @@ KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
   interface_scaling_fns = interface_scaling_fns_;
   interface_scaling_const = boundary_scaling_const = volumetric_scaling_const = 1.0;
   ignore_visited_segments = ignore_visited_segments_;
+
+  markers_conversion = *spaces_[0]->get_mesh()->markers_conversion;
 }
 
 bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_processed)
@@ -33,13 +35,11 @@ bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_p
 
 void KellyTypeAdapt::add_error_estimator_vol( int i,
                                               WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                              int area,
+                                              std::string area,
                                               Hermes::vector<MeshFunction*> ext )
 {
   error_if(i < 0 || i >= this->num,
            "Invalid component number (%d), max. supported components: %d", i, H2D_MAX_COMPONENTS);
-  error_if(area != HERMES_ANY && area < 0,
-           "Invalid area number.");
 
   KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
   this->error_estimators_vol.push_back(form);
@@ -47,13 +47,11 @@ void KellyTypeAdapt::add_error_estimator_vol( int i,
 
 void KellyTypeAdapt::add_error_estimator_surf(int i,
                                               WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                              int area,
+                                              std::string area,
                                               Hermes::vector<MeshFunction*> ext)
 {
   error_if (i < 0 || i >= this->num,
             "Invalid equation number.");
-  error_if (area != HERMES_ANY && area != H2D_DG_INNER_EDGE && area < 0,
-            "Invalid area number.");
 
   KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
   this->error_estimators_surf.push_back(form);
@@ -161,8 +159,10 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
         // different from that of the current active element.
         if (error_estimators_vol[iest].i != i)
           continue;
-        if (error_estimators_vol[iest].area >= 0 && error_estimators_vol[iest].area != ee[i]->marker)
+        /*
+        if (error_estimators_vol[iest].area != ee[i]->marker)
           continue;
+          */
         else if (error_estimators_vol[iest].area != HERMES_ANY)
           continue;
 
@@ -177,12 +177,13 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
 
         for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
         {
+          /*
           if (error_estimators_surf[iest].area > 0 &&
               error_estimators_surf[iest].area != surf_pos[isurf].marker) continue;
-
+          */
           if (bnd[isurf])   // Boundary
           {
-            if (error_estimators_surf[iest].area < 0 &&
+            if (markers_conversion.get_internal_boundary_marker(error_estimators_surf[iest].area) < 0 &&
                 error_estimators_surf[iest].area != HERMES_ANY) continue;
 
             err += eval_boundary_estimator(&error_estimators_surf[iest], rm, surf_pos);

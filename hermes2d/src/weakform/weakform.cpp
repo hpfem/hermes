@@ -20,7 +20,7 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::Form::Form(int area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) :
+WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) :
   area(area), ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
 }
@@ -40,7 +40,7 @@ Ord WeakForm::MatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
 }
 
 WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
-                                       int area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+                                       std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
 {
 }
 
@@ -58,7 +58,7 @@ Ord WeakForm::MatrixFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
   return Ord();
 }
 
-WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, int area,
+WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
                                          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
 {
 }
@@ -75,12 +75,12 @@ Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
   return Ord();
 }
 
-WeakForm::VectorFormVol::VectorFormVol(unsigned int i, int area,
+WeakForm::VectorFormVol::VectorFormVol(unsigned int i, std::string area,
                                        Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
 {
 }
 
-WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, int area,
+WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, std::string area,
                                          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
 {
 }
@@ -110,14 +110,12 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
 {
   _F_
 
-      if (form->i >= neq || form->j >= neq)
-      error("Invalid equation number.");
+  if (form->i >= neq || form->j >= neq)
+    error("Invalid equation number.");
   if (form->sym < -1 || form->sym > 1)
     error("\"sym\" must be -1, 0 or 1.");
   if (form->sym < 0 && form->i == form->j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
-    error("Invalid area number.");
   if (mfvol.size() > 100) {
     warn("Large number of forms (> 100). Is this the intent?");
   }
@@ -130,11 +128,8 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
 void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 {
   _F_
-      if (form->i >= neq || form->j >= neq)
-      error("Invalid equation number.");
-  if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
-      H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
-    error("Invalid area number.");
+  if (form->i >= neq || form->j >= neq)
+    error("Invalid equation number.");
 
   form->set_weakform(this);
   mfsurf.push_back(form);
@@ -144,11 +139,8 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
 void WeakForm::add_vector_form(VectorFormVol* form)
 {
   _F_
-      if (form->i >= neq)
-      error("Invalid equation number.");
-  if (form->area != HERMES_ANY && form->area < 0 && (unsigned) (-form->area) > areas.size())
-    error("Invalid area number.");
-
+  if (form->i >= neq)
+    error("Invalid equation number.");
   form->set_weakform(this);
   vfvol.push_back(form);
   seq++;
@@ -157,11 +149,8 @@ void WeakForm::add_vector_form(VectorFormVol* form)
 void WeakForm::add_vector_form_surf(VectorFormSurf* form)
 {
   _F_
-      if (form->i >= neq)
-      error("Invalid equation number.");
-  if (form->area != HERMES_ANY && form->area != H2D_DG_BOUNDARY_EDGE && form->area !=
-      H2D_DG_INNER_EDGE && form->area < 0 && (unsigned) (-form->area) > areas.size())
-    error("Invalid area number.");
+  if (form->i >= neq)
+    error("Invalid equation number.");
 
   form->set_weakform(this);
   vfsurf.push_back(form);
@@ -186,7 +175,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
                           std::vector<WeakForm::Stage>& stages, bool rhsonly)
 {
   _F_
-      unsigned int i;
+  unsigned int i;
   stages.clear();
 
   // process volume matrix forms
@@ -269,8 +258,8 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
                                       Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
 {
   _F_
-      // first create a list of meshes the form uses
-      std::set<unsigned> seq;
+  // first create a list of meshes the form uses
+  std::set<unsigned> seq;
   seq.insert(m1->get_seq());
   seq.insert(m2->get_seq());
   Mesh *mmm;
@@ -324,7 +313,7 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
 bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 {
   _F_
-      bool** blocks = new_matrix<bool>(neq, neq);
+  bool** blocks = new_matrix<bool>(neq, neq);
   for (unsigned int i = 0; i < neq; i++) {
     for (unsigned int j = 0; j < neq; j++) {
       blocks[i][j] = false;
@@ -342,61 +331,4 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
     if (fabs(mfsurf[i]->scaling_factor) > 1e-12) blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
   }
   return blocks;
-}
-
-
-//// areas /////////////////////////////////////////////////////////////////////////////////////////
-
-bool WeakForm::is_in_area_2(int marker, int area) const
-{
-  _F_
-      if (-area > (int)(areas.size())) error("Invalid area number.");
-  const Area* a = &areas[-area-1];
-
-  for (unsigned int i = 0; i < a->markers.size(); i++)
-    if (a->markers[i] == marker)
-      return true;
-
-  return false;
-}
-
-// Function which according to the conversion table provided, updates the above members.
-void WeakForm::update_markers_acc_to_conversion(Mesh::MarkersConversion* markers_conversion)
-{
-  Hermes::vector<MeshFunction*> vector_to_pass;
-  // FIXME
-  /*
-    std::map<std::string, MatrixFormVol>::iterator it_mfv;
-    for(it_mfv = mfvol_string_temp.begin(); it_mfv != mfvol_string_temp.end(); it_mfv++) {
-    vector_to_pass = it_mfv->second.ext;
-    add_matrix_form(it_mfv->second.i, it_mfv->second.j, it_mfv->second.fn,
-        it_mfv->second.ord, (SymFlag)it_mfv->second.sym,
-        markers_conversion->get_internal_boundary_marker(it_mfv->first),
-        vector_to_pass);
-    }
-    std::map<std::string, MatrixFormSurf>::iterator it_mfs;
-    for(it_mfs = mfsurf_string_temp.begin(); it_mfs != mfsurf_string_temp.end(); it_mfs++) {
-    vector_to_pass = it_mfs->second.ext;
-    add_matrix_form_surf(it_mfs->second.i, it_mfs->second.j,
-             it_mfs->second.fn, it_mfs->second.ord,
-             markers_conversion->get_internal_boundary_marker(it_mfs->first),
-             vector_to_pass);
-    }
-
-    std::map<std::string, VectorFormVol>::iterator it_vfv;
-    for(it_vfv = vfvol_string_temp.begin(); it_vfv != vfvol_string_temp.end(); it_vfv++) {
-    vector_to_pass = it_vfv->second.ext;
-    add_vector_form(it_vfv->second.i, it_vfv->second.fn, it_vfv->second.ord,
-        markers_conversion->get_internal_boundary_marker(it_vfv->first),
-        vector_to_pass);
-    }
-
-    std::map<std::string, VectorFormSurf>::iterator it_vfs;
-    for(it_vfs = vfsurf_string_temp.begin(); it_vfs != vfsurf_string_temp.end(); it_vfs++) {
-    vector_to_pass = it_vfs->second.ext;
-    add_vector_form_surf(it_vfs->second.i, it_vfs->second.fn, it_vfs->second.ord,
-             markers_conversion->get_internal_boundary_marker(it_vfs->first),
-             vector_to_pass);
-    }
-    */
 }

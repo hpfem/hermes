@@ -163,10 +163,13 @@ int Space::get_element_order(int id) const
 }
 
 
-void Space::set_uniform_order(int order, int marker)
+void Space::set_uniform_order(int order, std::string marker)
 {
   _F_
-  set_uniform_order_internal(Ord2(order,order), marker);
+  if(marker == HERMES_ANY)
+    set_uniform_order_internal(Ord2(order,order), -1234);
+  else
+    set_uniform_order_internal(Ord2(order,order), mesh->markers_conversion->get_internal_element_marker(marker));
 
   // since space changed, enumerate basis functions
   this->assign_dofs();
@@ -185,7 +188,7 @@ void Space::set_uniform_order_internal(Ord2 order, int marker)
   Element* e;
   for_all_active_elements(e, mesh)
   {
-    if (marker == HERMES_ANY || e->marker == marker)
+    if (marker == HERMES_ANY_INT || e->marker == marker)
     {
       ElementData* ed = &edata[e->id];
       if (e->is_triangle())
@@ -422,7 +425,7 @@ void Space::reset_dof_assignment()
     for (unsigned int i = 0; i < e->nvert; i++)
     {
       if (e->en[i]->bnd
-          && boundary_conditions->get_boundary_condition(e->en[i]->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
       {
         j = e->next_vert(i);
         ndata[e->vn[i]->id].n = BC_ESSENTIAL;
@@ -488,22 +491,6 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-
-static scalar default_bc_value_by_coord(int marker, double x, double y)
-{
-  return 0;
-}
-
-scalar default_bc_value_by_edge(SurfPos* surf_pos)
-{
-  double x, y;
-  Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-  nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
-
-  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(surf_pos->space->get_boundary_conditions()->get_boundary_condition(surf_pos->marker));
-  return bc->function(x, y);
-}
-
 void Space::set_bc_types_init(BCTypes* bc_types)
 {
   _F_
@@ -571,7 +558,7 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 
     if (nd->dof != H2D_UNASSIGNED_DOF
         && en->bnd
-        && boundary_conditions->get_boundary_condition(en->marker)->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(en->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
     {
       int order = get_edge_order_internal(en);
       surf_pos->marker = en->marker;
