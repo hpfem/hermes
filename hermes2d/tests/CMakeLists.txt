@@ -1,8 +1,6 @@
 add_subdirectory(quadrature)
 add_subdirectory(bubbles)
 add_subdirectory(mesh)
-add_subdirectory(benchmarks)
-add_subdirectory(examples)
 add_subdirectory(adaptivity)
 if(H2D_WITH_GLUT)
   add_subdirectory(view)
