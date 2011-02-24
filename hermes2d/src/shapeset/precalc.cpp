@@ -181,3 +181,17 @@ PrecalcShapeset::~PrecalcShapeset()
 {
   free();
 }
+
+void PrecalcShapeset::push_transform(int son)
+{
+  Transformable::push_transform(son);
+  if(sub_tables != NULL)
+    update_nodes_ptr();
+}
+
+void PrecalcShapeset::pop_transform()
+{
+  Transformable::pop_transform();
+  if(sub_tables != NULL)
+    update_nodes_ptr();
+}
