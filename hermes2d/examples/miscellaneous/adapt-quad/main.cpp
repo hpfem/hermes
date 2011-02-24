@@ -26,9 +26,6 @@ const double CONST_F = 2.0;
 
 int main(int argc, char* argv[])
 {
-  if (ADAPTIVE_QUADRATURE) info("Adaptive quadrature ON.");
-  else info("Adaptive quadrature OFF.");
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -61,14 +58,18 @@ int main(int argc, char* argv[])
   double adapt_rel_error_tol = 1e1;
   WeakForm wf;
   if (ADAPTIVE_QUADRATURE) {
-    wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+    info("Adaptive quadrature ON.");    
+    wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, 
+                       Hermes::vector<MeshFunction*>(), 
                        adapt_order_increase, adapt_rel_error_tol);
     wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
                        adapt_order_increase, adapt_rel_error_tol);
   }
   else {
-    wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
-    wf.add_vector_form(callback(linear_form));
+    info("Adaptive quadrature OFF.");    
+    wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>, 
+                       HERMES_SYM, HERMES_ANY);
+    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>);
   }
 
   // Initialize the FE problem.
