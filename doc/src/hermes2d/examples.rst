@@ -7,23 +7,21 @@ Its purpose is to complement rather than duplicate the information
 in the source code.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   examples/elasticity-crack
-   examples/elasticity-bracket
+   examples/linear-elasticity
    examples/thermoelasticity
-   examples/neutronics-saphir
-   examples/neutronics-iron-water
-   examples/neutronics-4-group-adapt
-   examples/maxwell-waveguide
-   examples/helmholtz-waveguide
-   examples/navier-stokes-timedep-adapt
-   examples/navier-stokes-bearing
-   examples/nernst-planck-timedep-adapt
-   examples/singular-perturbation
-   examples/linear-advection-diffusion
-   examples/richards-basic
-   examples/richards-tracy-adapt
-   examples/richards-seepage-adapt
-   examples/richards-capillary-barrier-adapt
+   examples/neutronics
+   examples/maxwell
+   examples/helmholtz
+   examples/navier-stokes
+   examples/nernst-planck
+   examples/advection-diffusion-reaction/
+   examples/richards
+   examples/euler
+   examples/heat-transfer
+   examples/poisson
+   examples/schroedinger
+   examples/wave-equation
+   examples/miscellaneous
 	

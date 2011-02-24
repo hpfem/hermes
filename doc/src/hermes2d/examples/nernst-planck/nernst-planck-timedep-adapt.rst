@@ -1,8 +1,7 @@
-
 Nernst-Planck Equation System
 -----------------------------
 
-**Git reference:** Example `nernst-planck-timedep-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/nernst-planck-timedep-adapt>`_.
+**Git reference:** Example `nernst-planck-timedep-adapt <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/nernst-planck/nernst-planck-timedep-adapt>`_.
 
 **Equation reference:** The first version of the following derivation was published in:
 *IPMC: recent progress in modeling, manufacturing, and new applications 
@@ -310,7 +309,7 @@ Simulation
 ^^^^^^^^^^
 
 To begin with simulations in Hermes2D, the equations :eq:`Fic` - :eq:`bilin4` were be implemented.
-It was done by implementing the callback functions found in  `nernst-planck-timedep-adapt/forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck-timedep-adapt/forms.cpp>`_.
+It was done by implementing the callback functions found in  `nernst-planck-timedep-adapt/forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck/nernst-planck-timedep-adapt/forms.cpp>`_.
 
 .. highlight:: c
 
@@ -360,7 +359,7 @@ time step, respectively.
 
 When it comes to meshing, it should be considered that the gradient of $C$ near the boundaries will
 be higher than gradients of $\phi$. This allows us to create different meshes for those variables. In
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck-timedep-adapt/main.cpp>`_.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck/nernst-planck-timedep-adapt/main.cpp>`_.
 the following code in the *main()* function enables multimeshing
 
 
@@ -370,7 +369,7 @@ the following code in the *main()* function enables multimeshing
     H1Space C(&Cmesh, C_bc_types, C_essential_bc_values, P_INIT);
     H1Space phi(MULTIMESH ? &phimesh : &Cmesh, phi_bc_types, phi_essential_bc_values, P_INIT);
 
-When ``MULTIMESH`` is defined in `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck-timedep-adapt/main.cpp>`_.
+When ``MULTIMESH`` is defined in `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/nernst-planck/nernst-planck-timedep-adapt/main.cpp>`_.
 then different H1Spaces for ``phi`` and ``C`` are created. It must be noted that when adaptivity
 is not used, the multimeshing in this example does not have any advantage, however, when
 adaptivity is turned on, then mesh for H1Space ``C`` is refined much more than for ``phi``.
@@ -400,3 +399,4 @@ Adaptive solution
 ^^^^^^^^^^^^^^^^^
 
 To be added soon.
+

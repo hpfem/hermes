@@ -1,7 +1,7 @@
-Saphir (Neutronics)
--------------------
+Saphir 
+------
 
-**Git reference:** Example `neutronics-saphir <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics-saphir>`_.
+**Git reference:** Example `neutronics-saphir <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics/neutronics-saphir>`_.
 
 This is a standard nuclear engineering benchmark (IAEA number EIR-2) describing 
 an external-force-driven configuration without fissile materials present, using one-group 
@@ -72,8 +72,8 @@ for each material:
 
 Recall that this is not the only way to handle spatially-dependent material parameters. Alternatively, one can define 
 a global function returning material parameters as a function of spatial coordinates. This was done, e.g., 
-in the tutorial examples `07 <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/07-general>`_ 
-and `12 <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/12-adapt-general>`_.
+in the tutorial examples `P01-linear/07-general <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/07-general>`_ 
+and `P04-linear-adapt/03-general-adapt <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P04-linear-adapt/03-general-adapt>`_.
 
 The weak forms are associated with element material flags (coming from the mesh file) as follows:
 
@@ -162,3 +162,4 @@ CPU time convergence graphs:
    :width: 600
    :height: 400
    :alt: CPU convergence graph for example saphir.
+

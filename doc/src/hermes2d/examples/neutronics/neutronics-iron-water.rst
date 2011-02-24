@@ -1,7 +1,7 @@
-Iron-Water (Neutronics)
------------------------
+Iron-Water
+----------
 
-**Git reference:** Example `neutronics-iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics-iron-water>`_.
+**Git reference:** Example `neutronics-iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics/neutronics-iron-water>`_.
 
 This example is very similar to the example "saphir", the main difference being that 
 it reads a mesh file in the exodusii format (created by Cubit). This example only builds 
@@ -17,7 +17,7 @@ The latter can be done, for example, in the CMake.vars file as follows:
     SET(NETCDF_ROOT   /opt/packages/netcdf)
 
 The mesh is now loaded using the ExodusIIReader (see 
-the `mesh_loader.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh_loader.h>`_ file):
+the `mesh_loader.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/mesh/mesh_loader.h>`_ file):
 
 ::
 

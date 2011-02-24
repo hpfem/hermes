@@ -1,10 +1,10 @@
 Bracket (Linear Elasticity)
 ---------------------------
 
-**Git reference:** Example `elasticity-bracket <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/elasticity-bracket>`_.
+**Git reference:** Example `elasticity-bracket <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/linear-elasticity/elasticity-bracket>`_.
 
 This example employs the adaptive multimesh hp-FEM to solve equations of linear elasticity. The code is
-basically the same as in `example crack <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/examples/crack.html>`_
+basically the same as in `example crack <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/examples/linear-elasticity/elasticity-crack.html>`_
 and thus we do not discuss it in great detail.
 
 Model problem
@@ -51,7 +51,7 @@ degrees after several adaptive steps:
 Note that the meshes are slightly different, not only in
 polynomial degrees, but also in element refinements. This is 
 possible in Hermes thanks to 
-`adaptive multi-mesh hp-FEM <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/tutorial-2/multimesh.html>`_.
+`adaptive multi-mesh hp-FEM <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/linear-adapt/multimesh.html>`_.
 
 Convergence comparison
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -91,4 +91,4 @@ In this example the difference between the multimesh *hp*-FEM and the single-mes
 version was not extremely large since the two elasticity equations are very 
 strongly coupled and have singularities at the same points. 
 To see more significant differences, look at the tutorial 
-example `11-adapt-system <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/tutorial-2/multimesh-example.html>`_.
+example `P04-linear-adapt/02-system-adapt <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/linear-adapt/multimesh-example.html>`_.
