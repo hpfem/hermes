@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   // "adapt_rel_error_tol", the computation stops, otherwise the same procedure is 
   // applied recursively to all four subelements. 
   int adapt_order_increase = 1;
-  double adapt_rel_error_tol = 1e-2;
+  double adapt_rel_error_tol = 1e1;
   WeakForm wf;
   if (ADAPTIVE_QUADRATURE) {
     wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
