@@ -43,7 +43,7 @@ bool read_n_nums(char *row, int n, double values[]) {
   char *token = strtok(row, delims);
   while (token != NULL && i < n) {
     double entry_buffer;
-    sscanf(token, "%d", &entry_buffer);
+    sscanf(token, "%lf", &entry_buffer);
     values[i++] = entry_buffer;
 
     token = strtok(NULL, delims);
