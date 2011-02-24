@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 #ifndef H3D_COMPLEX
   if (argc < 3) error("Not enough parameters.");
 #else
-  if (argc < 2) error("Not enough parameters.");
+  if (argc < 3) error("Not enough parameters.");
 #endif
 
   int n;
