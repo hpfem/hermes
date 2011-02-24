@@ -40,6 +40,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakFormTutorial wf(&mesh);
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(&bc));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
