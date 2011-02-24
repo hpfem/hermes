@@ -8,7 +8,7 @@
 //      Dirichlet boundary conditions.
 //
 
-const bool ADAPTIVE_QUADRATURE = true;            // Evaluate weak forms using adaptive quadrature.
+const bool ADAPTIVE_QUADRATURE = false;            // Evaluate weak forms using adaptive quadrature.
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
@@ -63,9 +63,8 @@ int main(int argc, char* argv[])
   if (ADAPTIVE_QUADRATURE) {
     wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
                        adapt_order_increase, adapt_rel_error_tol);
-    //wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
-    //                   adapt_order_increase, adapt_rel_error_tol);
-    wf.add_vector_form(callback(linear_form));  // Still non-adaptive.
+    wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
+                       adapt_order_increase, adapt_rel_error_tol);
   }
   else {
     wf.add_matrix_form(callback(bilinear_form), HERMES_SYM, HERMES_ANY);
