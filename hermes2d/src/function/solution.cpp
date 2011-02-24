@@ -84,6 +84,12 @@ void MeshFunction::push_transform(int son)
   update_nodes_ptr();
 }
 
+void MeshFunction::pop_transform()
+{
+  Transformable::pop_transform();
+  update_nodes_ptr();
+}
+
 //// Quad2DCheb ////////////////////////////////////////////////////////////////////////////////////
 
 static double3* cheb_tab_tri[11];

@@ -731,7 +731,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
                   scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m]) * 
                                          al[n]->coef[j] * al[m]->coef[i];
                   rhs->add(al[m]->dof[i], -val);
-		}
+		            }
               }
             }
             else if (rhsonly == false) {
@@ -1935,8 +1935,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
   scalar result = 0;
   
-  unsigned int num_sons = (ru->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
-
   int order_increase = mfv->adapt_order_increase;
 
   scalar subs_value[4];
@@ -1950,17 +1948,13 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
-
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
 
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
                                               u_ext, fu, fv, ru, rv);
-
     
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
@@ -1995,7 +1989,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // subs_value[sons_i].
     
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
     
@@ -2183,8 +2177,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
   scalar result = 0;
   
-  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
-
   int order_increase = vfv->adapt_order_increase;
 
   scalar subs_value[4];
@@ -2198,18 +2190,14 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
-
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
 
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfv, 
                                               u_ext, fv, rv);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
@@ -2243,7 +2231,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // subs_value[sons_i].
     
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
     
@@ -2430,8 +2418,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
   scalar result = 0;
   
-  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
-
   int order_increase = mfs->adapt_order_increase;
 
   scalar subs_value[4];
@@ -2445,18 +2431,14 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
-
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
 
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfs, 
                                               u_ext, fu, fv, ru, rv, surf_pos);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
@@ -2490,7 +2472,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // subs_value[sons_i].
     
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
     
@@ -2672,8 +2654,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
   scalar result = 0;
   
-  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
-
   int order_increase = vfs->adapt_order_increase;
 
   scalar subs_value[4];
@@ -2687,18 +2667,14 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
-
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
 
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfs, 
                                               u_ext, fv, rv, surf_pos);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
@@ -2732,7 +2708,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // subs_value[sons_i].
     
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
     
