@@ -1954,13 +1954,9 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
-
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
                                               u_ext, fu, fv, ru, rv);
-
     
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
@@ -2202,14 +2198,10 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
-
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfv, 
                                               u_ext, fv, rv);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
@@ -2449,14 +2441,10 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
-
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfs, 
                                               u_ext, fu, fv, ru, rv, surf_pos);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
@@ -2691,14 +2679,10 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
-    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
-    // further division to subelements must be only local.
-
     // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfs, 
                                               u_ext, fv, rv, surf_pos);
 
-    
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
