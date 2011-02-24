@@ -10,7 +10,7 @@ public:
 
   WeakFormTutorial(Mesh *mesh) : WeakForm(1)
   {
-    set_markers_conversion(mesh->get_markers_conversion());
+    set_markers_conversion(mesh->get_element_markers_conversion(), mesh->get_boundary_markers_conversion());
 
     CONST_F = 2.0;
 

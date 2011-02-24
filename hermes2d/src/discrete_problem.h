@@ -414,8 +414,8 @@ protected:
   /// Members.
   WeakForm* wf;
 
-  Mesh::ElementMarkersConversion element_markers_conversion;
-  Mesh::BoundaryMarkersConversion boundary_markers_conversion;
+  Mesh::ElementMarkersConversion* element_markers_conversion;
+  Mesh::BoundaryMarkersConversion* boundary_markers_conversion;
 
   Geom<Ord> geom_ord;
 

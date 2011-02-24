@@ -265,7 +265,7 @@ public:
   friend class Precond;
 
   // To be called only by the constructor of DiscreteProblem.
-  void set_markers_conversion(Mesh::ElementMarkersConversion& element_markers_conversion, Mesh::BoundaryMarkersConversion& boundary_markers_conversion)
+  void set_markers_conversion(Mesh::ElementMarkersConversion* element_markers_conversion, Mesh::BoundaryMarkersConversion* boundary_markers_conversion)
   {
     this->element_markers_conversion = element_markers_conversion;
     this->boundary_markers_conversion = boundary_markers_conversion;
@@ -277,8 +277,8 @@ private:
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
 
-  Mesh::ElementMarkersConversion element_markers_conversion;
-  Mesh::BoundaryMarkersConversion boundary_markers_conversion;
+  Mesh::ElementMarkersConversion* element_markers_conversion;
+  Mesh::BoundaryMarkersConversion* boundary_markers_conversion;
 };
 
 #endif
