@@ -2,7 +2,7 @@ Linear Advection-Diffusion
 --------------------------
 
 **Git reference:** Example `linear-advection-diffusion 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/linear-advection-diffusion>`_.
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/advection-diffusion-reaction/linear-advection-diffusion>`_.
 
 This example solves the equation 
 
@@ -171,9 +171,4 @@ and hp-FEM are shown below.
    :width: 600
    :height: 400
    :alt: DOF convergence graph.
-
-
-
-
-
 

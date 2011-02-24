@@ -1,11 +1,11 @@
 Crack (Linear Elasticity)
 -------------------------
 
-**Git reference:** Example `elasticity-crack <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/elasticity-crack>`_.
+**Git reference:** Example `elasticity-crack <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/linear-elasticity/elasticity-crack>`_.
 
 This example employs the adaptive multimesh hp-FEM to solve
 equations of linear elasticity that we already saw in the tutorial example
-`08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/08-system>`_.
+`P01-linear/08-system <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/08-system>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -20,7 +20,7 @@ cracks, as shown in the following figure:
 
 The cracks have a flat diamond-like shape and their width along with some other parameters 
 can be changed in the mesh file `crack.mesh 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/elasticity-crack/crack.mesh>`_:
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/linear-elasticity/elasticity-crack/crack.mesh>`_:
 
 ::
 
@@ -213,7 +213,7 @@ Calculating element error and a global error estimate
                                HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS, &err_est_rel) * 100;
 
 The rest is straightforward and details can be found in the 
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/elasticity-crack/main.cpp>`_ file.
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/linear-elasticity/elasticity-crack/main.cpp>`_ file.
 
 Sample results
 ~~~~~~~~~~~~~~
@@ -300,4 +300,5 @@ In this example the difference between the multimesh *hp*-FEM and the single-mes
 version was not extremely large since the two elasticity equations are very 
 strongly coupled and have singularities at the same points. 
 To see more significant differences, look at the tutorial 
-example `11-adapt-system <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/tutorial-2/multimesh-example.html>`_.
+example `P04-linear-adapt/02-system-adapt <file:///home/pavel/repos/hermes/doc/_build/html/src/hermes2d/linear-adapt/multimesh-example.html>`_.
+
