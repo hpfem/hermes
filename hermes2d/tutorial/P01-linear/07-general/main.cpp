@@ -30,9 +30,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
-// Boundary markers.
-const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Boundary vertical";
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -50,24 +47,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions
-  WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial *bc1
-    = new WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string>("Boundary horizontal"));
-  NeumannValueBoundaryCondition *bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>("Boundary vertical"), 0.0);
-  BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
-
-  // doesn't work and I don't know why
-  // DirichletFunctionBoundaryConditionTutorial bc1(Hermes::vector<int>(BDY_HORIZONTAL));
-  // NeumannValueBoundaryCondition bc2(Hermes::vector<int>(BDY_VERTICAL), 0.0);
-  // BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bcs, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d", ndof);
-
   // Initialize the weak formulation.
   WeakFormTutorial wf;
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the FE problem.
   bool is_linear = true;

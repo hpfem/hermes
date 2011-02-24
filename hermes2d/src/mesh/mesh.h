@@ -24,7 +24,6 @@ class HashTable;
 class Space;
 struct MItem;
 
-
 /// \brief Stores one node of a mesh.
 ///
 /// There are are two variants of this structure, depending on the value of
@@ -388,6 +387,11 @@ protected:
   friend class HdivSpace;
   friend class DiscreteProblem;
   friend class KellyTypeAdapt;
+
+public:
+  // FIXME - cannot be here
+  /// Return markers_conversion class
+  MarkersConversion* get_markers_conversion() { return markers_conversion; }
 };
 
 // Elementary functions to create a quad / triangle element. If mesh != NULL,

@@ -7,9 +7,31 @@ class WeakFormTutorial : public WeakForm
 public:
   WeakFormTutorial() : WeakForm(1)
   {
+    // Boundary markers.
+    BDY_HORIZONTAL = "Boundary horizontal";
+    BDY_VERTICAL = "Boundary vertical";
+
     add_matrix_form(new MatrixFormVolTutorial(0, 0));
     add_vector_form(new VectorFormVolTutorial(0));
     add_vector_form_surf(new VectorFormSurfTutorial(0, BDY_VERTICAL));
+
+    set_boundary_conditions();
+  }
+
+  ~WeakFormTutorial()
+  {
+    delete bc1;
+    delete bc2;
+  }
+
+private:
+  void set_boundary_conditions()
+  {
+    // Initialize boundary conditions
+    bc1 = new WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string>(BDY_HORIZONTAL));
+    bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
+
+    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
   }
 
   // Problem parameters.
@@ -29,7 +51,6 @@ public:
     MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j)
     {
       sym = HERMES_SYM;
-      adapt_eval = false;
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
@@ -59,10 +80,7 @@ public:
   class VectorFormVolTutorial : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) 
-    {
-      adapt_eval = false;
-    }
+    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) {}
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
@@ -114,4 +132,10 @@ public:
 
     inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
   };
+
+  std::string BDY_HORIZONTAL;
+  std::string BDY_VERTICAL;
+
+  DirichletFunctionBoundaryConditionTutorial *bc1;
+  NeumannValueBoundaryCondition *bc2;
 };

@@ -8,22 +8,36 @@ public:
   // Problem parameters.
   double CONST_F;
 
-  WeakFormTutorial() : WeakForm(1)
+  WeakFormTutorial(Mesh *mesh) : WeakForm(1)
   {
+    set_markers_conversion(mesh->get_markers_conversion());
+
     CONST_F = 2.0;
 
     add_matrix_form(new MatrixFormVolTutorial(0, 0));
     add_vector_form(new VectorFormVolTutorial(0));
+
+    set_boundary_conditions();
+  }
+
+  ~WeakFormTutorial()
+  {
+    delete bc;
   }
 
 private:
+  void set_boundary_conditions()
+  {
+    // Initialize boundary conditions
+    bc = new DirichletValueBoundaryCondition(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+
+    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc));
+  }
+
   class MatrixFormVolTutorial : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j) 
-    {
-      adapt_eval = false;
-    }
+    MatrixFormVolTutorial(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -45,10 +59,7 @@ private:
   class VectorFormVolTutorial : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i)
-    {
-      adapt_eval = false;
-    }
+    VectorFormVolTutorial(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -66,4 +77,6 @@ private:
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
   };
+
+  DirichletValueBoundaryCondition* bc;
 };

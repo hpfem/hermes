@@ -75,16 +75,46 @@ public:
 class WeakFormTutorial : public WeakFormElectrostatic
 {
 public:
-  WeakFormTutorial() : WeakFormElectrostatic()
+  WeakFormTutorial(Mesh *mesh) : WeakFormElectrostatic()
   {
-    // Problem parameters.
-    const int MATERIAL_1 = 1;
-    const int MATERIAL_2 = 2;
+    set_markers_conversion(mesh->get_markers_conversion());
 
-    eps_r[MATERIAL_1] = 1.0;
-    eps_r[MATERIAL_2] = 10.0;
+    // Set material properties
+    set_materials();
 
-    rho[MATERIAL_1] = 0.0;
-    rho[MATERIAL_2] = 0.0;
+    // Set boundary conditions
+    set_boundary_conditions();
   }
+
+private:
+  void set_materials()
+  {
+    // Element markers.
+    int EL1 = markers_conversion.get_internal_element_marker("1");
+    int EL2 = markers_conversion.get_internal_element_marker("2");
+
+    eps_r[EL1] = 1.0;
+    eps_r[EL2] = 10.0;
+
+    rho[EL1] = 0.0;
+    rho[EL2] = 0.0;
+  }
+
+  void set_boundary_conditions()
+  {
+    // Boundary markers.
+    std::string OUTER_BDY = "1";
+    std::string STATOR_BDY = "2";
+
+    // Voltage on the stator
+    double VOLTAGE = 50;
+
+    bc_out = new DirichletValueBoundaryCondition(Hermes::vector<std::string>(OUTER_BDY), 0.0);
+    bc_stator = new DirichletValueBoundaryCondition(Hermes::vector<std::string>(STATOR_BDY), VOLTAGE);
+
+    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc_out, bc_stator));
+  }
+
+  DirichletValueBoundaryCondition *bc_out;
+  DirichletValueBoundaryCondition *bc_stator;
 };

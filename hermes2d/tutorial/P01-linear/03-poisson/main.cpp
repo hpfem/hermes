@@ -38,17 +38,13 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   //mesh.refine_all_elements();
 
-  // Initialize boundary conditions
-  DirichletValueBoundaryCondition bc(Hermes::vector<int>(1, 2, 3, 4), 0.0);
-  BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(&bc));
+  // Initialize the weak formulation.
+  WeakFormTutorial wf(&mesh);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bcs, P_INIT);
+  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
-
-  // Initialize the weak formulation.
-  WeakFormTutorial wf;
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -15,6 +15,7 @@
 
 #include "../h2d_common.h"
 #include "weakform.h"
+#include "../boundaryconditions/boundaryconditions.h"
 #include "../../../hermes_common/matrix.h"
 #include "forms.h"
 
@@ -23,6 +24,7 @@
 WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) :
   area(area), ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
+  adapt_eval = false;
 }
 
 scalar WeakForm::MatrixFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
@@ -101,9 +103,16 @@ Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 WeakForm::WeakForm(unsigned int neq, bool mat_free)
 {
   _F_
-      this->neq = neq;
-  seq = 0;
+
+  this->neq = neq;
+  this->seq = 0;
   this->is_matfree = mat_free;
+  this->boundary_conditions = new BoundaryConditions();
+}
+
+WeakForm::~WeakForm()
+{
+  delete this->boundary_conditions;
 }
 
 void WeakForm::add_matrix_form(MatrixFormVol* form)

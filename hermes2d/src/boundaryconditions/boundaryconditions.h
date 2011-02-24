@@ -181,6 +181,9 @@ public:
   /// Default destructor.
   ~BoundaryConditions();
 
+  /// Add all boundary conditions of a problem.
+  void add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions);
+
   /// Public iterators for the private data structures.
   Hermes::vector<BoundaryCondition *>::const_iterator all_iterator;
   Hermes::vector<BoundaryCondition *>::const_iterator all_begin() const;

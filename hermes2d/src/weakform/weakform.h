@@ -61,6 +61,7 @@ class HERMES_API WeakForm
 public:
 
   WeakForm(unsigned int neq = 1, bool mat_free = false);
+  ~WeakForm();
 
   // General case.
   typedef scalar (*vector_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi,
@@ -258,6 +259,8 @@ public:
 
   bool is_sym() const { return false; /* not impl. yet */ }
 
+  BoundaryConditions* get_boundary_conditions() { return boundary_conditions; }
+
   friend class DiscreteProblem;
   friend class Precond;
 
@@ -267,14 +270,15 @@ public:
     this->markers_conversion = *markers_conversion;
   }
 
+protected:
+  // Function which according to the conversion table provided, updates the above members.
+  Mesh::MarkersConversion markers_conversion;
+
 private:
 
   Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
-
-  // Function which according to the conversion table provided, updates the above members.
-  Mesh::MarkersConversion markers_conversion;
 
 };
 

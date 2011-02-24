@@ -90,6 +90,10 @@ scalar NewtonBoundaryCondition::function_g(double x, double y) const {
 BoundaryConditions::BoundaryConditions() {};
 
 BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
+  add_boundary_conditions(boundary_conditions);
+}
+
+void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
   all = boundary_conditions;
   for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
     switch((*all_iterator)->get_type()) {

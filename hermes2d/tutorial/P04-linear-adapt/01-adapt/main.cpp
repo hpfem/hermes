@@ -61,11 +61,6 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const int OUTER_BDY = 1, STATOR_BDY = 2;
-// Voltage on the stator
-const double VOLTAGE = 50.0;
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -76,16 +71,11 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("motor.mesh", &mesh);
 
-  // Initialize boundary conditions
-  DirichletValueBoundaryCondition *bc_out = new DirichletValueBoundaryCondition(Hermes::vector<int>(OUTER_BDY), 0.0);
-  DirichletValueBoundaryCondition *bc_stator = new DirichletValueBoundaryCondition(Hermes::vector<int>(STATOR_BDY), VOLTAGE);
-  BoundaryConditions *bcs = new BoundaryConditions(Hermes::vector<BoundaryCondition *>(bc_out, bc_stator));
+  // Initialize the weak formulation.
+  WeakFormTutorial wf(&mesh);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, bcs, P_INIT);
-
-  // Initialize the weak formulation.
-  WeakFormTutorial wf;
+  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -132,8 +122,10 @@ int main(int argc, char* argv[])
 
     // Solve the linear system of the reference problem.
     // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    if(solver->solve())
+        Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else
+        error ("Matrix solver failed.\n");
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
