@@ -71,7 +71,7 @@ bool read_matrix_and_rhs(char *file_name, int &n,
     STATE_RHS,
   } state = STATE_N;
 
-  double buffer[3];
+  double buffer[4]; // increased by one
   char row[MAX_ROW_LEN];
   while (fgets(row, MAX_ROW_LEN, file) != NULL) {
     switch (state) {
@@ -81,6 +81,8 @@ bool read_matrix_and_rhs(char *file_name, int &n,
           state = STATE_MATRIX;
         } 
       break;
+
+#ifndef H2D_COMPLEX
 
       case STATE_MATRIX:
         if (read_n_numbers(row, 3, buffer)) {
@@ -99,6 +101,32 @@ bool read_matrix_and_rhs(char *file_name, int &n,
       break;
     }
   }
+
+#else
+
+//read file with complex MatrixEntry and complex rhs VectorEntry
+
+      case STATE_MATRIX:
+        if (read_n_numbers(row, 4, buffer)) {
+          complex<double> cmplx_buffer(buffer[2], buffer[3]);
+          MatrixEntry* me = mat.add();
+          me->set((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer);
+        }
+	else
+        state = STATE_RHS;
+      break;
+
+      case STATE_RHS:
+        if (read_n_numbers(row, 3, buffer)) {
+          complex<double> cmplx_buffer(buffer[1], buffer[2]);
+          VectorEntry* ve = rhs.add();
+          ve->set((int) buffer[0], (scalar) cmplx_buffer);
+        }
+      break;
+    }
+  }
+
+#endif
 
   fclose(file);
 
