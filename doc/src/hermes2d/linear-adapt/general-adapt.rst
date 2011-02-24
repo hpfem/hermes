@@ -16,7 +16,7 @@ Sample results
 
 Solution:
 
-.. image:: 12/12-solution.png
+.. image:: general-adapt/12-solution.png
    :align: center
    :width: 465
    :height: 400
@@ -24,7 +24,7 @@ Solution:
 
 Final hp-mesh:
 
-.. image:: 12/12-mesh.png
+.. image:: general-adapt/12-mesh.png
    :align: center
    :width: 450
    :height: 400
@@ -33,7 +33,7 @@ Final hp-mesh:
 Convergence graphs of adaptive h-FEM with linear elements, h-FEM with quadratic elements
 and hp-FEM.
 
-.. image:: 12/conv_dof.png
+.. image:: general-adapt/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -41,8 +41,9 @@ and hp-FEM.
 
 Convergence comparison in terms of CPU time. 
 
-.. image:: 12/conv_cpu.png
+.. image:: general-adapt/conv_cpu.png
    :align: center
    :width: 600
    :height: 400
    :alt: CPU convergence graph for tutorial example 12-general-adapt.
+

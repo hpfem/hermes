@@ -161,7 +161,7 @@ Sample results
 
 Approximate solution $u$ for $\alpha = 2$: 
 
-.. image:: 16/newton-ellipt-1-2.png
+.. image:: picard/newton-ellipt-1-2.png
    :align: center
    :width: 600
    :height: 400
@@ -169,7 +169,7 @@ Approximate solution $u$ for $\alpha = 2$:
 
 Approximate solution $u$ for $\alpha = 4$: 
 
-.. image:: 16/newton-ellipt-1-4.png
+.. image:: picard/newton-ellipt-1-4.png
    :align: center
    :width: 600
    :height: 400

@@ -156,17 +156,17 @@ following convergence comparison:
 
 Convergence in the number of DOF (with and without Newton solve on the new coarse mesh):
 
-.. image:: 18/conv_dof_compar.png
+.. image:: newton-adapt/conv_dof_compar.png
    :align: center
    :width: 600
    :height: 400
-   :alt: DOF convergence graph for tutorial example 18.
+   :alt: DOF convergence graph for tutorial example 01-newton-adapt.
 
 Convergence in CPU time (with and without Newton solve on coarse mesh):
 
-.. image:: 18/conv_cpu_compar.png
+.. image:: newton-adapt/conv_cpu_compar.png
    :align: center
    :width: 600
    :height: 400
-   :alt: CPU convergence graph for tutorial example 18.
+   :alt: CPU convergence graph for tutorial example 01-newton-adapt.
 

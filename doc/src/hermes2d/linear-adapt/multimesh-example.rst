@@ -62,13 +62,13 @@ The following two figures show the solutions $u$ and $v$. Notice their
 large qualitative differences: While $u$ is smooth in the entire domain, 
 $v$ has a thin boundary layer along the boundary:
 
-.. image:: 11/solution_u.png
+.. image:: multimesh-example/solution_u.png
    :align: center
    :width: 465
    :height: 400
    :alt: Solution
 
-.. image:: 11/solution_v.png
+.. image:: multimesh-example/solution_v.png
    :align: center
    :width: 465
    :height: 400
@@ -99,7 +99,7 @@ are not too bad either::
     }
 
 The weak forms can be found in the 
-file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/11-system-adapt/forms.cpp>`_ and 
+file `forms.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P04-linear-adapt/02-system-adapt/forms.cpp>`_ and 
 they are registered as follows::
 
 Registering weak forms
@@ -118,12 +118,12 @@ Registering weak forms
 
 Beware that although each of the forms is actually symmetric, one cannot use the HERMES_SYM flag as in the 
 elasticity equations, since it has a slightly different 
-meaning (see example `08-system <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/system.html>`_).
+meaning (see example `P01-linear/08-system <http://hpfem.org/hermes/doc/src/hermes2d/linear/system.html>`_).
 
 Computing multiple reference solutions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The adaptivity workflow is the same as in example `10-adapt <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-2/micromotor.html>`_: The adaptivity loop starts with a global refinement of each mesh::
+The adaptivity workflow is the same as in example `01-adapt <http://hpfem.org/hermes/doc/src/hermes2d/linear-adapt/micromotor.html>`_: The adaptivity loop starts with a global refinement of each mesh::
 
     // Construct globally refined reference mesh and setup reference space.
     Tuple<Space *>* ref_spaces = construct_refined_spaces(Tuple<Space *>(&u_space, &v_space));
@@ -232,12 +232,12 @@ Now we can show some numerical results.
 First let us show the resulting meshes for $u$ and $v$ obtained using 
 conventional (single-mesh) hp-FEM: **9,330 DOF** (4665 for each solution component). 
 
-.. image:: 11/mesh_single.png
+.. image:: multimesh-example/mesh_single.png
    :align: left
    :width: 465
    :alt: Mesh
 
-.. image:: 11/mesh_single.png
+.. image:: multimesh-example/mesh_single.png
    :align: right
    :width: 465
    :alt: Mesh
@@ -249,13 +249,13 @@ conventional (single-mesh) hp-FEM: **9,330 DOF** (4665 for each solution compone
 Next we show the resulting meshes for $u$ and $v$ obtained using 
 the multimesh hp-FEM: **1,723 DOF** (49 DOF for $u$ and $1,673$ for $v$). 
 
-.. image:: 11/mesh_multi_u.png
+.. image:: multimesh-example/mesh_multi_u.png
    :align: left
    :width: 465
    :height: 400
    :alt: Mesh
 
-.. image:: 11/mesh_multi_v.png
+.. image:: multimesh-example/mesh_multi_v.png
    :align: right
    :width: 465
    :height: 400
@@ -270,7 +270,7 @@ for both cases:
 
 DOF convergence graphs:
 
-.. image:: 11/conv_dof.png
+.. image:: multimesh-example/conv_dof.png
    :align: center
    :width: 600
    :height: 400
@@ -278,7 +278,7 @@ DOF convergence graphs:
 
 CPU time convergence graphs:
 
-.. image:: 11/conv_cpu.png
+.. image:: multimesh-example/conv_cpu.png
    :align: center
    :width: 600
    :height: 400

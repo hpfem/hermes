@@ -53,8 +53,8 @@ and registered using the callback() macro,
     wf.add_matrix_form(callback(bilinear_form));
     wf.add_vector_form(callback(linear_form));
    
-The callback() macro, defined in `src/forms.h 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_ by
+The callback() macro, defined in `src/weakform/forms.h 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/forms.h>`_ by
 
 ::
 
@@ -88,8 +88,8 @@ the bilinear form defined above gives
 
 The <double, scalar> copy is used to obtain the result of the numerical integration,
 the <Ord, Ord> copy for automatic evaluation of the quadrature order. 
-The parser (see `src/forms.h 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/forms.h>`_) 
+The parser (see `src/weakform/forms.h 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/forms.h>`_) 
 works well for algebraic expressions. If the weak form bilinear_form() is complicated, 
 one can create and register a simpler weak form bilinear_form_order() for the parser,
 that provides an arbitrary expression with the same polynomial degree as 
@@ -133,7 +133,7 @@ It is also possible to return a constant order (for example 5) by using
 
 Currently, one cannot make the integration order dependent on spatial coordinates and such. However,
 one can assign different weak forms to elements with different material markers. This is
-described in examples `iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/iron-water>`_,
-`saphir <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/saphir/main.cpp>`_ and others.
+described in examples `neutronics-iron-water <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/examples/neutronics-iron-water.html>`_,
+`neutronics-saphir <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/examples/neutronics-saphir.html>`_ and others.
 
 The following example 07-general handles quadrature orders manually. 

@@ -71,7 +71,7 @@ Model problem
 ~~~~~~~~~~~~~
 
 The model problem is the same as in example
-`09-timedep-basic <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/timedep-basic.html>`_ 
+`01-cathedral-ie <http://hpfem.org/hermes/doc/src/hermes2d/timedep/cathedral-ie.html>`_ 
 However, for the purpose of using Runge-Kutta methods, the equation has to be 
 formulated in such a way that the time derivative stands solo on the left-hand side and 
 everything else is on the right
@@ -91,13 +91,13 @@ The weak formulation is only needed for the right-hand side
      F(T) = - \int_{\Omega} \frac{\lambda}{c \varrho} \nabla T\cdot \nabla v
             + \int_{\Gamma_{air}} \frac{\alpha \lambda}{c \varrho} (T_{ext}(t) - T)v.
 
-This is different from example `09-timedep-basic <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-1/timedep-basic.html>`_
+This is different from example `01-cathedral-ie <http://hpfem.org/hermes/doc/src/hermes2d/timedep/cathedral-ie.html>`_ 
 where the discretization of the time derivative term was part of the weak formulation. The approach presented
 here makes the method more modular.
 
 The function $F$ above is the stationary residual of the equation (i.e., the weak form of the right-hand side).
 Since the Runge-Kutta equations are solved using the Newton's method, the reader may want to have a brief 
-look ahead to the `Newton's method section <http://hpfem.org/hermes/doc/src/hermes2d/tutorial-3/newton.html>`_.
+look ahead to the `Newton's method section <http://hpfem.org/hermes/doc/src/hermes2d/nonlinear/newton.html>`_.
 Then it will be easy to see that the weak form of the Jacobian matrix of the stationary residual is
 
 .. math::

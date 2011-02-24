@@ -54,7 +54,7 @@ Mesh adaptation is standard as well::
 
 Sample solution and mesh are shown below:
 
-.. image:: 33/img.png
+.. image:: adapt_exact/img.png
    :align: center
    :width: 800
    :alt: Resulting solution and mesh

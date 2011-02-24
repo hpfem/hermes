@@ -76,7 +76,7 @@ Sample results
 
 The following figure shows the $H^1$-projection of the initial condition init_cond():
 
-.. image:: 17/proj-h1.png
+.. image:: general-ic/proj-h1.png
    :align: center
    :width: 600
    :height: 350
@@ -84,8 +84,9 @@ The following figure shows the $H^1$-projection of the initial condition init_co
 
 The converged solution looks as follows:
 
-.. image:: 17/solution.png
+.. image:: general-ic/solution.png
    :align: center
    :width: 600
    :height: 350
    :alt: approximate solution
+

@@ -48,7 +48,7 @@ Example
 ~~~~~~~
 
 Up to some comments, the following is the complete
-`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/02-space/main.cpp>`_ file
+`main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/02-space/main.cpp>`_ file
 of the example 02-space::
 
     #include "hermes2d.h"

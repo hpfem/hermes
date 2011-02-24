@@ -22,14 +22,15 @@ This example solves a complex-valued vector potential problem
 in a two-dimensional cross-section containing a conductor and an iron object.
 Note: in 2D this is a scalar problem. A scheme is shown in the following picture:
 
-.. image:: 13/domain.png
+.. image:: complex-adapt/domain.png
    :align: center
    :height: 500
    :alt: Domain.
 
 The computational domain is a rectangle of height 0.003 and width 0.004. 
 Different material markers are used for the wire, air, and iron 
-(see mesh file `domain2.mesh <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/13-complex-adapt/domain2.mesh>`_).
+(see mesh file `domain2.mesh 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P04-linear-adapt/04-complex-adapt/domain2.mesh>`_).
 
 Boundary conditions are zero Dirichlet on the top and right edges, and zero Neumann
 elsewhere.
@@ -84,7 +85,7 @@ Next we select an iterative solver and preconditioner::
     }
 
 Otherwise everything works in the same way as in example 
-`10-adapt <file:///home/pavel/hermes/doc/_build/html/src/hermes2d/tutorial-2/micromotor.html>`_. 
+`01-adapt <http://hpfem.org/hermes/doc/src/hermes2d/linear-adapt/micromotor.html>'_.
 At the end, after the adaptivity loop is finished, we clean up::
 
     // Clean up.
@@ -98,7 +99,7 @@ Sample results
 
 Solution:
 
-.. image:: 13/solution.png
+.. image:: complex-adapt/solution.png
    :align: center
    :height: 400
    :alt: Solution.
@@ -107,21 +108,21 @@ Let us compare adaptive $h$-FEM with linear and quadratic elements and the $hp$-
 
 Final mesh for $h$-FEM with linear elements: 18694 DOF, error = 1.02 \%
 
-.. image:: 13/mesh-h1.png
+.. image:: complex-adapt/mesh-h1.png
    :align: center
    :height: 400
    :alt: Mesh.
 
 Final mesh for $h$-FEM with quadratic elements: 46038 DOF, error = 0.018 \%
 
-.. image:: 13/mesh-h2.png
+.. image:: complex-adapt/mesh-h2.png
    :align: center
    :height: 400
    :alt: Mesh.
 
 Final mesh for $hp$-FEM: 4787 DOF, error = 0.00918 \%
 
-.. image:: 13/mesh-hp.png
+.. image:: complex-adapt/mesh-hp.png
    :align: center
    :height: 400
    :alt: Mesh.
@@ -129,8 +130,9 @@ Final mesh for $hp$-FEM: 4787 DOF, error = 0.00918 \%
 Convergence graphs of adaptive h-FEM with linear elements, h-FEM with quadratic elements
 and hp-FEM are shown below.
 
-.. image:: 13/conv_compar_dof.png
+.. image:: complex-adapt/conv_compar_dof.png
    :align: center
    :width: 600
    :height: 400
    :alt: DOF convergence graph.
+

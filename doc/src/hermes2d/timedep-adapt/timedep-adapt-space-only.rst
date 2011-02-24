@@ -1,8 +1,8 @@
-Nonlinear Parabolic Problem (newton-timedep-heat-adapt)
+Nonlinear Parabolic Problem (01-timedep-adapt-space-only)
 --------------------------------
 
-**Git reference:** Tutorial example `22-newton-timedep-heat-adapt 
-<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/22-newton-timedep-heat-adapt>`_.
+**Git reference:** Tutorial example `01-timedep-adapt-space-only 
+<http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P06-timedep-adapt/01-timedep-adapt-space-only>`_.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -301,35 +301,35 @@ Sample results
 
 Initial condition and initial mesh:
 
-.. image:: 22/1.png
+.. image:: timedep-adapt-space-only/1.png
    :align: center
    :width: 800
    :alt: Sample screenshot
 
 Solution and mesh at t = 0.5:
 
-.. image:: 22/2.png
+.. image:: timedep-adapt-space-only/2.png
    :align: center
    :width: 800
    :alt: Sample screenshot
 
 Solution and mesh at t = 1.0:
 
-.. image:: 22/3.png
+.. image:: timedep-adapt-space-only/3.png
    :align: center
    :width: 800
    :alt: Sample screenshot
 
 Solution and mesh at t = 1.5:
 
-.. image:: 22/4.png
+.. image:: timedep-adapt-space-only/4.png
    :align: center
    :width: 800
    :alt: Sample screenshot
 
 Solution and mesh at t = 2.0:
 
-.. image:: 22/5.png
+.. image:: timedep-adapt-space-only/5.png
    :align: center
    :width: 800
    :alt: Sample screenshot
