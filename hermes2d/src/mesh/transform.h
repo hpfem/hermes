@@ -123,6 +123,8 @@ public:
   /// \return The depth of the current transformation.
   unsigned int get_depth() const { return top; }
 
+  static void push_transforms(std::set<Transformable *>& transformables, int son);
+  static void pop_transforms(std::set<Transformable *>& transformables);
 protected:
 
   /// The active element.

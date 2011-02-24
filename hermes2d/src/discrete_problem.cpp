@@ -1708,6 +1708,16 @@ void DiscreteProblem::init_cache()
   }
 }
 
+void DiscreteProblem::delete_single_geom_cache(int order)
+{
+  if (cache_e[order] != NULL) {
+    cache_e[order]->free();
+    delete cache_e[order];
+    cache_e[order] = NULL;
+    delete [] cache_jwt[order];
+  }
+}
+
 void DiscreteProblem::delete_cache()
 {
   _F_
@@ -1745,6 +1755,42 @@ DiscontinuousFunc<Ord>* DiscreteProblem::init_ext_fn_ord(NeighborSearch* ns, Mes
 }
 
 //  Evaluation of forms  ///////////////////////////////////////////////////////////////////////
+
+// Volume matrix forms.
+
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, 
+                                  Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                                  RefMap *ru, RefMap *rv)
+{
+  _F_
+  scalar result = 0;
+
+  if (mfv->adapt_eval == false) {
+    // Determine the integration order by parsing the form.
+    int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+    // Perform non-adaptive numerical quadrature of order "order".
+    result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
+  }
+  else {
+    // Perform adaptive numerical quadrature starting with order = 2.
+    // TODO: The choice of initial order matters a lot for efficiency,
+    //       this needs more research.
+    int order_init = 4;
+
+    // Calculate initial value of the form on coarse element.
+    scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
+
+    //printf("Eval_form: initial result = %g\n", result_init);
+
+    // Calculate the value of the form using adaptive quadrature.    
+    result = eval_form_adaptive(order_init, result_init,
+                                mfv, u_ext, fu, fv, ru, rv);
+  }
+
+  return result;
+}
+
 int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                                 PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
@@ -1803,8 +1849,6 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
   return order;
 }
 
-// Calculates integral over subelement that is given in the RefMap
-// using quadrature of order "order".
 scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol *mfv, 
                                              Hermes::vector<Solution *> u_ext,
                                              PrecalcShapeset *fu, PrecalcShapeset *fv, 
@@ -1874,15 +1918,20 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   return res;
 }
 
-// Evaluates weak form on element given by the RefMap, 
-// using adaptive numerical quadrature.
-scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, double rel_err_tol, 
+scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
                                            WeakForm::MatrixFormVol *mfv, 
                                            Hermes::vector<Solution *> u_ext,
                                            PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                            RefMap *ru, RefMap *rv)
 {
-  //printf("Entered eval_form_adaptive.\n");
+  // Initialize set of all transformable entities.
+  std::set<Transformable *> transformable_entities;
+  transformable_entities.insert(fu);
+  transformable_entities.insert(fv);
+  transformable_entities.insert(ru);
+  transformable_entities.insert(rv);
+  transformable_entities.insert(mfv->ext.begin(), mfv->ext.end());
+  transformable_entities.insert(u_ext.begin(), u_ext.end());
 
   scalar result = 0;
   
@@ -1897,42 +1946,31 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
 #else
   scalar result_current_subelements = std::complex<double>(0, 0);
 #endif
-
+  
+  // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
+  // as the further division to subelements must be only local.
+  this->delete_single_geom_cache(order_init + order_increase);
   for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
     // Push the transformation to the current son to all functions and reference mappings involved.
-    fu->push_transform(sons_i);
-    fv->push_transform(sons_i);
-    for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
-      mfv->ext[ext_i]->push_transform(sons_i);
+    Transformable::push_transforms(transformable_entities, sons_i);
 
-    for(unsigned int u_ext_i = 0; u_ext_i < u_ext.size(); u_ext_i++)
-      if(u_ext[u_ext_i] != NULL)
-        u_ext[u_ext_i]->push_transform(sons_i);
+    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
+    // further division to subelements must be only local.
 
-    ru->push_transform(sons_i);
-    rv->push_transform(sons_i);
-    
-    // The actual calculation. \prd
-    //printf("Evaluating subelement with order = %d\n", order_init + order_increase);
+    // The actual calculation.
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
                                               u_ext, fu, fv, ru, rv);
+
+    
+    // Clear of the geometry cache for the current active subelement.
+    this->delete_single_geom_cache(order_init + order_increase);
 
     //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
 
     result_current_subelements += subs_value[sons_i];
 
     // Reset the transformation.
-    fu->pop_transform();
-    fv->pop_transform();
-    for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
-      mfv->ext[ext_i]->pop_transform();
-
-    for(unsigned int u_ext_i = 0; u_ext_i < u_ext.size(); u_ext_i++)
-      if(u_ext[u_ext_i] != NULL)
-        u_ext[u_ext_i]->pop_transform();
-
-    ru->pop_transform();
-    rv->pop_transform();
+    Transformable::pop_transforms(transformable_entities);
   }
 
   // Tolerance checking.
@@ -1943,7 +1981,7 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
   // Relative error.
   double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
 
-  if (rel_error < rel_err_tol)
+  if (rel_error < mfv->adapt_rel_error_tol)
     // Relative error in tolerance.
     return result_current_subelements;
   else {
@@ -1959,58 +1997,37 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     // Call the function eval_form_adaptive() recursively in all sons.
     for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
       // Push the transformation to the current son to all functions and reference mappings involved.
-      fu->push_transform(sons_i);
-      fv->push_transform(sons_i);
-      for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
-        mfv->ext[ext_i]->push_transform(sons_i);
-
-      for(unsigned int u_ext_i = 0; u_ext_i < u_ext.size(); u_ext_i++)
-        if(u_ext[u_ext_i] != NULL)
-          u_ext[u_ext_i]->push_transform(sons_i);
-
-      ru->push_transform(sons_i);
-      rv->push_transform(sons_i);
+      Transformable::push_transforms(transformable_entities, sons_i);
     
       // Recursion.
-      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i], rel_err_tol,
+      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
                                           mfv, u_ext, fu, fv, ru, rv);
 
       result_recursion += subs_value[sons_i];
 
       // Reset the transformation.
-      fu->pop_transform();
-      fv->pop_transform();
-      for(unsigned int ext_i = 0; ext_i < mfv->ext.size(); ext_i++)
-        mfv->ext[ext_i]->pop_transform();
-
-      for(unsigned int u_ext_i = 0; u_ext_i < u_ext.size(); u_ext_i++)
-        if(u_ext[u_ext_i] != NULL)
-          u_ext[u_ext_i]->pop_transform();
-
-      ru->pop_transform();
-      rv->pop_transform();
+      Transformable::pop_transforms(transformable_entities);
     }
 
     return result_recursion;
   }
 }
 
-// Main function for the evaluation of weak forms. 
-// Evaluates weak form on element given by the RefMap, 
-// using either non-adaptive or adaptive numerical quadrature.
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv, 
-                                  Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, 
-                                  RefMap *ru, RefMap *rv)
+
+// Volume vector forms.
+
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
   scalar result = 0;
 
-  if (mfv->adapt_eval == false) {
+  if (vfv->adapt_eval == false) {
     // Determine the integration order by parsing the form.
-    int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+    int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
     // Perform non-adaptive numerical quadrature of order "order".
-    result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
+    result = eval_form_subelement(order, vfv, u_ext, fv, rv);
   }
   else {
     // Perform adaptive numerical quadrature starting with order = 2.
@@ -2019,13 +2036,13 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
     int order_init = 4;
 
     // Calculate initial value of the form on coarse element.
-    scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
+    scalar result_init = eval_form_subelement(order_init, vfv, u_ext, fv, rv);
 
     //printf("Eval_form: initial result = %g\n", result_init);
 
     // Calculate the value of the form using adaptive quadrature.    
-    result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
-                                mfv, u_ext, fu, fv, ru, rv);
+    result = eval_form_adaptive(order_init, result_init,
+                                vfv, u_ext, fv, rv);
   }
 
   return result;
@@ -2090,16 +2107,12 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv,
   return order;
 }
 
-// Actual evaluation of volume vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv, 
+scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormVol *vfv, 
                                   Hermes::vector<Solution *> u_ext, 
                                   PrecalcShapeset *fv, RefMap *rv)
 {
   _F_
-  // Determine the integration order.
-  int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);;
-
-  // Evaluate the form using the quadrature of the just calculated order.
+  // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fv->get_quad_2d();
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
@@ -2155,6 +2168,132 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
   }
 
   return res;
+}
+
+scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
+                                           WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
+                                           PrecalcShapeset *fv, RefMap *rv)
+{
+  // Initialize set of all transformable entities.
+  std::set<Transformable *> transformable_entities;
+  transformable_entities.insert(fv);
+  transformable_entities.insert(rv);
+  transformable_entities.insert(vfv->ext.begin(), vfv->ext.end());
+  transformable_entities.insert(u_ext.begin(), u_ext.end());
+
+  scalar result = 0;
+  
+  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
+
+  int order_increase = vfv->adapt_order_increase;
+
+  scalar subs_value[4];
+
+#if !defined(H2D_COMPLEX)
+  scalar result_current_subelements = 0;
+#else
+  scalar result_current_subelements = std::complex<double>(0, 0);
+#endif
+  
+  // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
+  // as the further division to subelements must be only local.
+  this->delete_single_geom_cache(order_init + order_increase);
+  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    // Push the transformation to the current son to all functions and reference mappings involved.
+    Transformable::push_transforms(transformable_entities, sons_i);
+
+    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
+    // further division to subelements must be only local.
+
+    // The actual calculation.
+    subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfv, 
+                                              u_ext, fv, rv);
+
+    
+    // Clear of the geometry cache for the current active subelement.
+    this->delete_single_geom_cache(order_init + order_increase);
+
+    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
+
+    result_current_subelements += subs_value[sons_i];
+
+    // Reset the transformation.
+    Transformable::pop_transforms(transformable_entities);
+  }
+
+  // Tolerance checking.
+  // First, if the result is negligible.
+  if (std::abs(result_current_subelements) < 1e-6)
+    return result_current_subelements;
+
+  // Relative error.
+  double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
+
+  if (rel_error < vfv->adapt_rel_error_tol)
+    // Relative error in tolerance.
+    return result_current_subelements;
+  else {
+#if !defined(H2D_COMPLEX)
+    scalar result_recursion = 0;
+#else
+    scalar result_recursion = std::complex<double>(0, 0);
+#endif
+    // Relative error exceeds allowed tolerance: Call the function 
+    // eval_form_adaptive() in each subelement, with initial values
+    // subs_value[sons_i].
+    
+    // Call the function eval_form_adaptive() recursively in all sons.
+    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+      // Push the transformation to the current son to all functions and reference mappings involved.
+      Transformable::push_transforms(transformable_entities, sons_i);
+    
+      // Recursion.
+      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
+                                          vfv, u_ext, fv, rv);
+
+      result_recursion += subs_value[sons_i];
+
+      // Reset the transformation.
+      Transformable::pop_transforms(transformable_entities);
+    }
+
+    return result_recursion;
+  }
+}
+
+
+// Surface matrix forms.
+
+scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
+{
+  _F_
+  scalar result = 0;
+
+  if (mfs->adapt_eval == false) {
+    // Determine the integration order by parsing the form.
+    int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
+    // Perform non-adaptive numerical quadrature of order "order".
+    result = eval_form_subelement(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
+  }
+  else {
+    // Perform adaptive numerical quadrature starting with order = 2.
+    // TODO: The choice of initial order matters a lot for efficiency,
+    //       this needs more research.
+    int order_init = 4;
+
+    // Calculate initial value of the form on coarse element.
+    scalar result_init = eval_form_subelement(order_init, mfs, u_ext, fu, fv, ru, rv, surf_pos);
+
+    //printf("Eval_form: initial result = %g\n", result_init);
+
+    // Calculate the value of the form using adaptive quadrature.    
+    result = eval_form_adaptive(order_init, result_init,
+                                mfs, u_ext, fu, fv, ru, rv, surf_pos);
+  }
+
+  return result;
 }
 
 int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
@@ -2215,15 +2354,11 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
   return order;
 }
 
-// Actual evaluation of surface matrix forms (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
-  // Determine the integration order.
-  int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
-  
-  // Evaluate the form using the quadrature of the just calculated order.
+  // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fu->get_quad_2d();
 
   int eo = quad->get_edge_points(surf_pos->surf_num, order);
@@ -2278,6 +2413,134 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<
   return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
+}
+
+scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
+                                           WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                           PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
+{
+  // Initialize set of all transformable entities.
+  std::set<Transformable *> transformable_entities;
+  transformable_entities.insert(fu);
+  transformable_entities.insert(fv);
+  transformable_entities.insert(ru);
+  transformable_entities.insert(rv);
+  transformable_entities.insert(mfs->ext.begin(), mfs->ext.end());
+  transformable_entities.insert(u_ext.begin(), u_ext.end());
+
+  scalar result = 0;
+  
+  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
+
+  int order_increase = mfs->adapt_order_increase;
+
+  scalar subs_value[4];
+
+#if !defined(H2D_COMPLEX)
+  scalar result_current_subelements = 0;
+#else
+  scalar result_current_subelements = std::complex<double>(0, 0);
+#endif
+  
+  // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
+  // as the further division to subelements must be only local.
+  this->delete_single_geom_cache(order_init + order_increase);
+  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    // Push the transformation to the current son to all functions and reference mappings involved.
+    Transformable::push_transforms(transformable_entities, sons_i);
+
+    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
+    // further division to subelements must be only local.
+
+    // The actual calculation.
+    subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfs, 
+                                              u_ext, fu, fv, ru, rv, surf_pos);
+
+    
+    // Clear of the geometry cache for the current active subelement.
+    this->delete_single_geom_cache(order_init + order_increase);
+
+    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
+
+    result_current_subelements += subs_value[sons_i];
+
+    // Reset the transformation.
+    Transformable::pop_transforms(transformable_entities);
+  }
+
+  // Tolerance checking.
+  // First, if the result is negligible.
+  if (std::abs(result_current_subelements) < 1e-6)
+    return result_current_subelements;
+
+  // Relative error.
+  double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
+
+  if (rel_error < mfs->adapt_rel_error_tol)
+    // Relative error in tolerance.
+    return result_current_subelements;
+  else {
+#if !defined(H2D_COMPLEX)
+    scalar result_recursion = 0;
+#else
+    scalar result_recursion = std::complex<double>(0, 0);
+#endif
+    // Relative error exceeds allowed tolerance: Call the function 
+    // eval_form_adaptive() in each subelement, with initial values
+    // subs_value[sons_i].
+    
+    // Call the function eval_form_adaptive() recursively in all sons.
+    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+      // Push the transformation to the current son to all functions and reference mappings involved.
+      Transformable::push_transforms(transformable_entities, sons_i);
+    
+      // Recursion.
+      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
+                                          mfs, u_ext, fu, fv, ru, rv, surf_pos);
+
+      result_recursion += subs_value[sons_i];
+
+      // Reset the transformation.
+      Transformable::pop_transforms(transformable_entities);
+    }
+
+    return result_recursion;
+  }
+}
+
+
+// Surface vector forms.
+
+scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
+{
+  _F_
+  scalar result = 0;
+
+  if (vfs->adapt_eval == false) {
+    // Determine the integration order by parsing the form.
+    int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
+    // Perform non-adaptive numerical quadrature of order "order".
+    result = eval_form_subelement(order, vfs, u_ext, fv, rv, surf_pos);
+  }
+  else {
+    // Perform adaptive numerical quadrature starting with order = 2.
+    // TODO: The choice of initial order matters a lot for efficiency,
+    //       this needs more research.
+    int order_init = 4;
+
+    // Calculate initial value of the form on coarse element.
+    scalar result_init = eval_form_subelement(order_init, vfs, u_ext, fv, rv, surf_pos);
+
+    //printf("Eval_form: initial result = %g\n", result_init);
+
+    // Calculate the value of the form using adaptive quadrature.    
+    result = eval_form_adaptive(order_init, result_init,
+                                vfs, u_ext, fv, rv, surf_pos);
+  }
+
+  return result;
 }
 
 int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
@@ -2336,15 +2599,12 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
   }
   return order;
 }
-// Actual evaluation of surface vector form (calculates integral)
-scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+
+scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
-  // Determine the integration order.
-  int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
-
-  // Evaluate the form using the quadrature of the just calculated order.
+  // Evaluate the form using numerical quadrature of order "order".
   Quad2D* quad = fv->get_quad_2d();
 
   int eo = quad->get_edge_points(surf_pos->surf_num, order);
@@ -2399,6 +2659,99 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
                     // the weights.
 }
 
+scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
+                                           WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                           PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
+{
+  // Initialize set of all transformable entities.
+  std::set<Transformable *> transformable_entities;
+  transformable_entities.insert(fv);
+  transformable_entities.insert(rv);
+  transformable_entities.insert(vfs->ext.begin(), vfs->ext.end());
+  transformable_entities.insert(u_ext.begin(), u_ext.end());
+
+  scalar result = 0;
+  
+  unsigned int num_sons = (rv->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
+
+  int order_increase = vfs->adapt_order_increase;
+
+  scalar subs_value[4];
+
+#if !defined(H2D_COMPLEX)
+  scalar result_current_subelements = 0;
+#else
+  scalar result_current_subelements = std::complex<double>(0, 0);
+#endif
+  
+  // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
+  // as the further division to subelements must be only local.
+  this->delete_single_geom_cache(order_init + order_increase);
+  for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+    // Push the transformation to the current son to all functions and reference mappings involved.
+    Transformable::push_transforms(transformable_entities, sons_i);
+
+    // Clear of the geometry cache for the current active subelement. This needs to be done as the 
+    // further division to subelements must be only local.
+
+    // The actual calculation.
+    subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfs, 
+                                              u_ext, fv, rv, surf_pos);
+
+    
+    // Clear of the geometry cache for the current active subelement.
+    this->delete_single_geom_cache(order_init + order_increase);
+
+    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
+
+    result_current_subelements += subs_value[sons_i];
+
+    // Reset the transformation.
+    Transformable::pop_transforms(transformable_entities);
+  }
+
+  // Tolerance checking.
+  // First, if the result is negligible.
+  if (std::abs(result_current_subelements) < 1e-6)
+    return result_current_subelements;
+
+  // Relative error.
+  double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
+
+  if (rel_error < vfs->adapt_rel_error_tol)
+    // Relative error in tolerance.
+    return result_current_subelements;
+  else {
+#if !defined(H2D_COMPLEX)
+    scalar result_recursion = 0;
+#else
+    scalar result_recursion = std::complex<double>(0, 0);
+#endif
+    // Relative error exceeds allowed tolerance: Call the function 
+    // eval_form_adaptive() in each subelement, with initial values
+    // subs_value[sons_i].
+    
+    // Call the function eval_form_adaptive() recursively in all sons.
+    for(unsigned int sons_i = 0; sons_i < num_sons; sons_i++) {
+      // Push the transformation to the current son to all functions and reference mappings involved.
+      Transformable::push_transforms(transformable_entities, sons_i);
+    
+      // Recursion.
+      subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
+                                          vfs, u_ext, fv, rv, surf_pos);
+
+      result_recursion += subs_value[sons_i];
+
+      // Reset the transformation.
+      Transformable::pop_transforms(transformable_entities);
+    }
+
+    return result_recursion;
+  }
+}
+
+
+// DG forms.
 
 int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
@@ -2554,9 +2907,6 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
                     // the weights.
 }
 
-
-// Actual evaluation of surface linear form, just in case using information from neighbors.
-// Used only for inner edges.
 int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos,
                                   LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v)

@@ -218,49 +218,87 @@ protected:
 
   DiscontinuousFunc<Ord>* init_ext_fn_ord(NeighborSearch* ns, MeshFunction* fu);
 
-  int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
-
-  // Evaluates weak form on element given by the RefMap, using adaptive 
-  // numerical quadrature.
-  scalar eval_form_adaptive(int order_init, scalar result_init, double rel_err_tol, 
-                            WeakForm::MatrixFormVol *mfv, 
-                            Hermes::vector<Solution *> u_ext,
-                            PrecalcShapeset *fu, PrecalcShapeset *fv, 
-                            RefMap *ru, RefMap *rv);
+  // Matrix volume forms.
 
   // Main function for the evaluation of weak forms. 
   // Evaluates weak form on element given by the RefMap, 
   // using either non-adaptive or adaptive numerical quadrature.
   scalar eval_form(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                    PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
+
+  int calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv);
   
   // Elementary function used in eval_form() in adaptive mode.
   scalar eval_form_subelement(int order, WeakForm::MatrixFormVol *mfv, 
                               Hermes::vector<Solution *> u_ext,
                               PrecalcShapeset *fu, PrecalcShapeset *fv, 
                               RefMap *ru, RefMap *rv);
+  
+  // Evaluates weak form on element given by the RefMap, using adaptive 
+  // numerical quadrature.
+  scalar eval_form_adaptive(int order_init, scalar result_init,
+                            WeakForm::MatrixFormVol *mfv, 
+                            Hermes::vector<Solution *> u_ext,
+                            PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                            RefMap *ru, RefMap *rv);
 
-  // Elementary function used in eval_form() in non-adaptive mode.
-  int calc_order_vector_form_vol(WeakForm::VectorFormVol *mfv, Hermes::vector<Solution *> u_ext,
-                                  PrecalcShapeset *fv, RefMap *rv);
+  // Vector volume forms. The functions provide the same functionality as the
+  // parallel ones for matrix volume forms.
 
   scalar eval_form(WeakForm::VectorFormVol *vfv, Hermes::vector<Solution *> u_ext,
                    PrecalcShapeset *fv, RefMap *rv);
+
+  int calc_order_vector_form_vol(WeakForm::VectorFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv);
   
+  scalar eval_form_subelement(int order, WeakForm::VectorFormVol *vfv, 
+                              Hermes::vector<Solution *> u_ext,
+                              PrecalcShapeset *fv, RefMap *rv);
+  
+  scalar eval_form_adaptive(int order_init, scalar result_init,
+                            WeakForm::VectorFormVol *vfv, 
+                            Hermes::vector<Solution *> u_ext,
+                            PrecalcShapeset *fv, RefMap *rv);
+ 
+  // Matrix surface forms. The functions provide the same functionality as the
+  // parallel ones for matrix volume forms.
+  
+  scalar eval_form(WeakForm::MatrixFormSurf *mfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
+
   int calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
                                   Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                   RefMap *ru, RefMap *rv, SurfPos* surf_pos);
 
-  scalar eval_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
-         PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
-  
-  int calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
-         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+  scalar eval_form_subelement(int order, WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                              PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos);
 
-  scalar eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
-         PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+  scalar eval_form_adaptive(int order_init, scalar result_init,
+                                             WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                             PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, 
+                                             RefMap *rv, SurfPos* surf_pos);
+
+  // Vector surface forms. The functions provide the same functionality as the
+  // parallel ones for matrix volume forms.
+  
+  scalar eval_form(WeakForm::VectorFormSurf *vfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  int calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  scalar eval_form_subelement(int order, WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                              PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  scalar eval_form_adaptive(int order_init, scalar result_init,
+                                             WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                             PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos);
+
+  // DG forms.
 
   int calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
@@ -390,6 +428,7 @@ protected:
   /// Functions handling the above caches, and also other caches.
   void init_cache();
   void delete_cache();
+  void delete_single_geom_cache(int order);
 
   /// Class handling various caches used in assembling.
   class AssemblingCaches {

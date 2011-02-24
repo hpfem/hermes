@@ -58,3 +58,16 @@ void Transformable::set_transform(uint64_t idx)
   for (int k = i-1; k >= 0; k--)
     push_transform(son[k]);
 }
+
+void Transformable::push_transforms(std::set<Transformable *>& transformables, int son)
+{
+  for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); it++)
+    if(*it != NULL)
+      (*it)->push_transform(son);
+}
+void Transformable::pop_transforms(std::set<Transformable *>& transformables)
+{
+  for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); it++)
+    if(*it != NULL)
+      (*it)->pop_transform();
+}
