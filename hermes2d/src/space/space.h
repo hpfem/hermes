@@ -101,15 +101,7 @@ public:
   virtual ~Space();
   virtual void free();
 
-  /// Sets the BCTypes variable. Calls assign_dofs() since the
-  /// Space changes. The user can call this when changing BC types at runtime.
-  void set_bc_types(BCTypes *bc_types);
-  /// DEPRECATED
-  void set_bc_types(BCType (*bc_type_callback)(int marker));
-  /// Sets the BCTypes variable; does not call assign_dofs(). To be
-  /// used in constructor of the Space class only.
-  void set_bc_types_init(BCTypes *bc_types);
-  /// Sets the BC
+  /// Sets the Boundary condition.
   void set_boundary_conditions(BoundaryConditions* boundary_conditions);
   /// Sets element polynomial order. Can be called by the user. Should not be called
   /// for many elements at once, since assign_dofs() is called at the end of this function.
@@ -297,15 +289,6 @@ protected: //debugging support
   /// Auxiliary function the descendants may implement to perform additional tasks after
   /// the DOFs have been assigned.
   virtual void post_assign() {}
-
-  // Function which according to the conversion table provided, updates the members in BCTypes.
-  void update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion);
-  void update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion);
-  
-  // The following two flags will be set to true if bc_types/bc_values have been dynamically allocated 
-  // without user's intervention and the class itself is thus responsible for their proper freeing.
-  bool own_bc_values;
-  bool own_bc_types;
 
   std::vector<void*> extra_data;
   void free_extra_data();

@@ -265,9 +265,10 @@ public:
   friend class Precond;
 
   // To be called only by the constructor of DiscreteProblem.
-  void set_markers_conversion(Mesh::MarkersConversion* markers_conversion)
+  void set_markers_conversion(Mesh::ElementMarkersConversion& element_markers_conversion, Mesh::BoundaryMarkersConversion& boundary_markers_conversion)
   {
-    this->markers_conversion = *markers_conversion;
+    this->element_markers_conversion = element_markers_conversion;
+    this->boundary_markers_conversion = boundary_markers_conversion;
   }
 
 protected:
@@ -279,6 +280,10 @@ private:
   Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
+
+  // Function which according to the conversion table provided, updates the above members.
+  Mesh::ElementMarkersConversion element_markers_conversion;
+  Mesh::BoundaryMarkersConversion boundary_markers_conversion;
 
 };
 

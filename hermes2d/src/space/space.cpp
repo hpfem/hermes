@@ -38,17 +38,6 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_condit
   if(boundary_conditions == NULL) error("Boundary conditions pointer cannot be NULL in Space::Space().");
   this->boundary_conditions = boundary_conditions;
 
-  // Before adding, update the boundary variables with the user-supplied string markers
-  // according to the conversion table contained in the mesh.
-  // FIXME
-  /*
-  this->update_markers_acc_to_conversion(bc_types, mesh->markers_conversion);
-  if(bc_values != NULL)
-    this->update_markers_acc_to_conversion(bc_values, mesh->markers_conversion);
-  this->set_bc_types_init(bc_types);
-  this->set_essential_bc_values(bc_values);
-  */
-
   own_shapeset = (shapeset == NULL);
 }
 
@@ -64,16 +53,6 @@ void Space::free()
   free_extra_data();
   if (nsize) { ::free(ndata); ndata=NULL; }
   if (esize) { ::free(edata); edata=NULL; }
-  if (this->own_bc_values && this->bc_values != NULL)
-  {
-    delete this->bc_values;
-    this->own_bc_values = false;
-  }
-  if (this->own_bc_types && this->bc_types != NULL)
-  {
-    delete this->bc_types;
-    this->own_bc_types = false;
-  }
 }
 
 //// element orders ///////////////////////////////////////////////////////////////////////////////
@@ -169,7 +148,7 @@ void Space::set_uniform_order(int order, std::string marker)
   if(marker == HERMES_ANY)
     set_uniform_order_internal(Ord2(order,order), -1234);
   else
-    set_uniform_order_internal(Ord2(order,order), mesh->markers_conversion->get_internal_element_marker(marker));
+    set_uniform_order_internal(Ord2(order,order), mesh->element_markers_conversion.get_internal_marker(marker));
 
   // since space changed, enumerate basis functions
   this->assign_dofs();
@@ -425,7 +404,7 @@ void Space::reset_dof_assignment()
     for (unsigned int i = 0; i < e->nvert; i++)
     {
       if (e->en[i]->bnd
-        && boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
       {
         j = e->next_vert(i);
         ndata[e->vn[i]->id].n = BC_ESSENTIAL;
@@ -491,18 +470,6 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-void Space::set_bc_types_init(BCTypes* bc_types)
-{
-  _F_
-  if (bc_types == NULL)
-      this->bc_types = new BCTypes(); // This will use BC_NATURAL by default
-  else {
-      this->bc_types = bc_types;
-      this->bc_types->check_consistency();
-  }
-  seq++;
-}
-
 void Space::set_boundary_conditions(BoundaryConditions* boundary_conditions)
 {
   _F_
@@ -558,7 +525,7 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 
     if (nd->dof != H2D_UNASSIGNED_DOF
         && en->bnd
-        && boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(en->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
     {
       int order = get_edge_order_internal(en);
       surf_pos->marker = en->marker;
@@ -661,41 +628,6 @@ int Space::assign_dofs(Hermes::vector<Space*> spaces)
   }
 
   return ndof;
-}
-
-void Space::update_markers_acc_to_conversion(BCTypes* bc_types, Mesh::MarkersConversion* markers_conversion)
-{
-  for(unsigned int i = 0; i < bc_types->markers_neumann_string_temp.size(); i++)
-    bc_types->markers_neumann.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_neumann_string_temp[i]));
-
-  for(unsigned int i = 0; i < bc_types->markers_newton_string_temp.size(); i++)
-    bc_types->markers_newton.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_newton_string_temp[i]));
-
-  for(unsigned int i = 0; i < bc_types->markers_dirichlet_string_temp.size(); i++)
-    bc_types->markers_dirichlet.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_dirichlet_string_temp[i]));
-
-  for(unsigned int i = 0; i < bc_types->markers_none_string_temp.size(); i++)
-    bc_types->markers_none.push_back(markers_conversion->get_internal_boundary_marker(bc_types->markers_none_string_temp[i]));
-
-}
-
-void Space::update_markers_acc_to_conversion(BCValues* bc_values, Mesh::MarkersConversion* markers_conversion)
-{
-  std::map<std::string, BCValues::value_callback>::iterator it;
-  for(it = bc_values->value_callbacks_string_temp.begin(); it != bc_values->value_callbacks_string_temp.end(); it++)
-    bc_values->add_function(markers_conversion->get_internal_boundary_marker(it->first), it->second);
-
-  std::map<std::string, BCValues::value_callback_time>::iterator it_time;
-  for(it_time = bc_values->value_callbacks_time_string_temp.begin(); it_time != bc_values->value_callbacks_time_string_temp.end(); it_time++)
-    bc_values->add_timedep_function(markers_conversion->get_internal_boundary_marker(it_time->first), it_time->second);
-
-  std::map<std::string, scalar>::iterator it_scalar;
-  for(it_scalar = bc_values->value_constants_string_temp.begin(); it_scalar != bc_values->value_constants_string_temp.end(); it_scalar++)
-    bc_values->add_const(markers_conversion->get_internal_boundary_marker(it_scalar->first), it_scalar->second);
-
-  std::map<std::string, bool>::iterator it_zero;
-  for(it_zero = bc_values->value_zeroes_string_temp.begin(); it_zero != bc_values->value_zeroes_string_temp.end(); it_zero++)
-    bc_values->add_zero(markers_conversion->get_internal_boundary_marker(it_zero->first));
 }
 
 // updating time-dependent essential BC

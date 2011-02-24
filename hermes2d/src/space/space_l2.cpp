@@ -144,7 +144,7 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(surf_pos->marker)));
+  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
   if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
     proj[0] = proj[1] = bc->value;
@@ -184,7 +184,7 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->markers_conversion->get_user_boundary_marker(surf_pos->marker)));
+        DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
         if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
         {

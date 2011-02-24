@@ -270,8 +270,8 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
     // This functions check if the user-supplied marker on this element has been
     // already used, and if not, inserts it in the appropriate structure.
-    mesh->markers_conversion->insert_element_marker(mesh->markers_conversion->min_element_marker_unused, el_marker);
-    marker = mesh->markers_conversion->get_internal_element_marker(el_marker);
+    mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
+    marker = mesh->element_markers_conversion.get_internal_marker(el_marker);
 
     if(nv == 4) {
         check_triangle(i, v0, v1, v2);
@@ -320,8 +320,8 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
       // This functions check if the user-supplied marker on this element has been
       // already used, and if not, inserts it in the appropriate structure.
-      mesh->markers_conversion->insert_boundary_marker(mesh->markers_conversion->min_boundary_marker_unused, bnd_marker);
-      marker = mesh->markers_conversion->get_internal_boundary_marker(bnd_marker);
+      mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
+      marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker);
       
       en->marker = marker;
 

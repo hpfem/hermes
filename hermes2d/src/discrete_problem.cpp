@@ -71,8 +71,9 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces,
 
   // Update the weak formulation with the user-supplied string markers
   // according to the conversion table contained in the mesh.
-  markers_conversion = *spaces[0]->get_mesh()->markers_conversion;
-  wf->set_markers_conversion(spaces[0]->get_mesh()->markers_conversion);
+  element_markers_conversion = spaces[0]->get_mesh()->element_markers_conversion;
+  boundary_markers_conversion = spaces[0]->get_mesh()->boundary_markers_conversion;
+  wf->set_markers_conversion(spaces[0]->get_mesh()->element_markers_conversion, spaces[0]->get_mesh()->boundary_markers_conversion);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.
@@ -657,7 +658,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
         continue;
       if (fabs(mfv->scaling_factor) < 1e-12)
         continue;
-      if (mfv->area != HERMES_ANY && !(marker == markers_conversion.get_internal_boundary_marker(mfv->area)))
+      if (mfv->area != HERMES_ANY && !(marker == boundary_markers_conversion.get_internal_marker(mfv->area)))
         continue;
 
       // If a block scaling table is provided, and if the scaling coefficient
@@ -799,7 +800,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       continue;
     if (fabs(vfv->scaling_factor) < 1e-12) 
       continue;
-    if (vfv->area != HERMES_ANY && !(marker == markers_conversion.get_internal_boundary_marker(vfv->area))) 
+    if (vfv->area != HERMES_ANY && !(marker == boundary_markers_conversion.get_internal_marker(vfv->area))) 
       continue;
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
@@ -834,7 +835,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     // for them it is not important what value (true/false) is set, as it
     // is not read anywhere.
     if(marker > 0)
-      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(markers_conversion.get_user_boundary_marker(marker))->get_type() != BoundaryCondition::BC_DIRICHLET);
+      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(boundary_markers_conversion.get_user_marker(marker))->get_type() != BoundaryCondition::BC_DIRICHLET);
     spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
   }
 
@@ -1371,7 +1372,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
     if (mfs->area == H2D_DG_INNER_EDGE) continue;
     if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE 
-      && !(marker == markers_conversion.get_internal_boundary_marker(mfs->area))) continue;
+      && !(marker == boundary_markers_conversion.get_internal_marker(mfs->area))) continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1437,7 +1438,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
     if (vfs->area == H2D_DG_INNER_EDGE) continue;
     if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE 
-        && !(marker == markers_conversion.get_internal_boundary_marker(vfs->area))) continue;
+        && !(marker == boundary_markers_conversion.get_internal_marker(vfs->area))) continue;
 
     if (vfs->area == HERMES_ANY && !nat[m]) continue;
 

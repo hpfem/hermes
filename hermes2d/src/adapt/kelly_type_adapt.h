@@ -71,7 +71,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_vol;
     Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_surf;
 
-    Mesh::MarkersConversion markers_conversion;
+    Mesh::ElementMarkersConversion element_markers_conversion;
+    Mesh::BoundaryMarkersConversion boundary_markers_conversion;
 
     /// Scaling of the interface error estimates. May be specified by the user during construction.
     ///

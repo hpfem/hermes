@@ -158,7 +158,6 @@ public:
   ~Mesh() {
     free();
     dump_hash_stat();
-    delete markers_conversion;
   }
   /// Creates a copy of another mesh.
   void copy(const Mesh* mesh);
@@ -333,48 +332,60 @@ protected:
   {
   public:
     MarkersConversion();
-    MarkersConversion(const MarkersConversion& src);  // Copy constructor.
     ~MarkersConversion();
 
-    // Info about the maximum markers used so far, used in determining
+    // Info about the maximum marker used so far, used in determining
     // of the internal marker for a user-supplied std::string identification for
     // the purpose of disambiguity.
-    //
-    int min_boundary_marker_unused;
-    int min_element_marker_unused;
+    int min_marker_unused;
 
     // Function inserting a marker into conversion_table_for_element_markers.
     // This function controls if this user_marker x internal_marker is already
     // present, and if not, it inserts the std::pair.
-    void insert_element_marker(int internal_marker, std::string user_marker);
-    // An analogy for boundary markers.
-    void insert_boundary_marker(int internal_marker, std::string user_marker);
+    void insert_marker(int internal_marker, std::string user_marker);
 
     // Lookup functions.
     // Find a user marker for this internal marker.
-    std::string get_user_element_marker(int internal_marker);
-    // An analogy for boundary markers.
-    std::string get_user_boundary_marker(int internal_marker);
+    std::string get_user_marker(int internal_marker);
 
     // Find an internal marker for this user_marker.
-    int get_internal_element_marker(std::string user_marker);
-    // An analogy for boundary markers.
-    int get_internal_boundary_marker(std::string user_marker);
+    int get_internal_marker(std::string user_marker);
 
-  private:
+    enum MarkersConversionType {
+      HERMES_ELEMENT_MARKERS_CONVERSION = 0,
+      HERMES_BOUNDARY_MARKERS_CONVERSION = 1
+    };
+
+    virtual MarkersConversionType get_type() = 0;
+
+  protected:
     // Conversion tables between the std::string markers the user sets and
     // the markers used internally as members of Elements, Nodes.
-    std::map<int, std::string>* conversion_table_for_element_markers;
-    std::map<int, std::string>* conversion_table_for_boundary_markers;
+    std::map<int, std::string>* conversion_table;
 
     // Inverse tables, so that it is possible to search using either
     // the internal representation, or the user std::string value.
-    std::map<std::string, int>* conversion_table_for_element_markers_inverse;
-    std::map<std::string, int>* conversion_table_for_boundary_markers_inverse;
-
+    std::map<std::string, int>* conversion_table_inverse;
   };
 
-  MarkersConversion* markers_conversion;
+  class ElementMarkersConversion : public MarkersConversion
+  {
+  public:
+    ElementMarkersConversion(){};
+    ElementMarkersConversion(const ElementMarkersConversion& src);  // Copy constructor.
+    virtual MarkersConversionType get_type() { return HERMES_ELEMENT_MARKERS_CONVERSION; };
+  };
+
+  class BoundaryMarkersConversion : public MarkersConversion
+  {
+  public:
+    BoundaryMarkersConversion(){};
+    BoundaryMarkersConversion(const BoundaryMarkersConversion& src);  // Copy constructor.
+    virtual MarkersConversionType get_type() { return HERMES_BOUNDARY_MARKERS_CONVERSION; };
+  };
+
+  ElementMarkersConversion element_markers_conversion;
+  BoundaryMarkersConversion boundary_markers_conversion;
 
   friend class H2DReader;
   friend class BCTypes;

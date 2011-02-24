@@ -20,7 +20,8 @@ KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
   interface_scaling_const = boundary_scaling_const = volumetric_scaling_const = 1.0;
   ignore_visited_segments = ignore_visited_segments_;
 
-  markers_conversion = *spaces_[0]->get_mesh()->markers_conversion;
+  element_markers_conversion = spaces_[0]->get_mesh()->element_markers_conversion;
+  boundary_markers_conversion = spaces_[0]->get_mesh()->boundary_markers_conversion;
 }
 
 bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_processed)
@@ -183,8 +184,10 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           */
           if (bnd[isurf])   // Boundary
           {
-            if (markers_conversion.get_internal_boundary_marker(error_estimators_surf[iest].area) < 0 &&
+            /*
+            if (boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest].area) < 0 &&
                 error_estimators_surf[iest].area != HERMES_ANY) continue;
+                */
 
             err += eval_boundary_estimator(&error_estimators_surf[iest], rm, surf_pos);
           }
