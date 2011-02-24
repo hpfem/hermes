@@ -271,20 +271,14 @@ public:
     this->boundary_markers_conversion = boundary_markers_conversion;
   }
 
-protected:
-  // Function which according to the conversion table provided, updates the above members.
-  Mesh::MarkersConversion markers_conversion;
-
 private:
 
   Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
 
-  // Function which according to the conversion table provided, updates the above members.
   Mesh::ElementMarkersConversion element_markers_conversion;
   Mesh::BoundaryMarkersConversion boundary_markers_conversion;
-
 };
 
 #endif
