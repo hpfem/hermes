@@ -1,0 +1,4 @@
+rm *~ 
+./adapt-quad-2
+python plot_graph.py &
+

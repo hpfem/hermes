@@ -1,4 +1,4 @@
-project(adapt-quad)
+project(adapt-quad-1)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
