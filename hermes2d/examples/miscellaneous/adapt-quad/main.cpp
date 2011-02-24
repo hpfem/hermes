@@ -26,6 +26,9 @@ const double CONST_F = 2.0;
 
 int main(int argc, char* argv[])
 {
+  if (ADAPTIVE_QUADRATURE) info("Adaptive quadrature ON.");
+  else info("Adaptive quadrature OFF.");
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;

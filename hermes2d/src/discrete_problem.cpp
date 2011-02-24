@@ -1882,6 +1882,8 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
                                            PrecalcShapeset *fu, PrecalcShapeset *fv, 
                                            RefMap *ru, RefMap *rv)
 {
+  //printf("Entered eval_form_adaptive.\n");
+
   scalar result = 0;
   
   unsigned int num_sons = (ru->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4);
@@ -1910,9 +1912,12 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init, d
     ru->push_transform(sons_i);
     rv->push_transform(sons_i);
     
-    // The actual calculation.
+    // The actual calculation. \prd
+    //printf("Evaluating subelement with order = %d\n", order_init + order_increase);
     subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
                                               u_ext, fu, fv, ru, rv);
+
+    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
 
     result_current_subelements += subs_value[sons_i];
 
@@ -2009,15 +2014,16 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
   }
   else {
     // Perform adaptive numerical quadrature starting with order = 2.
-    // TODO: The choice of initial order matters a lot of efficiency,
-    //       we should figure out a smart way to choose the initial order.
-    int order_init = 2;
+    // TODO: The choice of initial order matters a lot for efficiency,
+    //       this needs more research.
+    int order_init = 4;
+
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
-    // Calculate the value of the form using adaptive quadrature.
-    // TODO; So far this function is recursive and thus slow. 
-    //       It should be rewritten in a non-recursive way.
-    
+
+    //printf("Eval_form: initial result = %g\n", result_init);
+
+    // Calculate the value of the form using adaptive quadrature.    
     result = eval_form_adaptive(order_init, result_init, mfv->adapt_rel_error_tol, 
                                 mfv, u_ext, fu, fv, ru, rv);
   }
