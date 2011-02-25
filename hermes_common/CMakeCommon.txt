@@ -1,61 +1,19 @@
-# This file contains common cmake rules, that are shared in all h1d, h2d and
-# h3d. Only put dimension independent rules here.
-
-# Enable debugging symbols for all files all the time:
-set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
-IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Stop on first error (sometimes gcc doesn't print all the possible
-    # candidates when a function signature is wrong if this is enabled, so we
-    # leave it disabled by default):
-    # set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
-
-    # All warnings are errors
-    #set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
-
-    # Disable the "unused variable/parameters/functions" warnings (as those are
-    # not really problematic, it doesn't cause any harm):
-    set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
-
-    # Disable all switch warnings for now (until all code is fixed)
-    set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
-
-    # Enable all warnings:
-    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
-
-
-ENDIF()
-
-
-# Enable Stacktraces
+# Check which kind of stacktrace is available
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE("link.h" HAVE_TEUCHOS_LINK)
 CHECK_INCLUDE_FILE("bfd.h" HAVE_TEUCHOS_BFD)
 CHECK_INCLUDE_FILE("execinfo.h" HAVE_EXECINFO)
-IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(HAVE_CXXABI yes)
-ENDIF()
+endif()
 include(CheckFunctionExists)
 CHECK_FUNCTION_EXISTS(vasprintf HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS(strcasecmp HAVE_STRCASECMP)
 
-IF (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (HAVE_EXECINFO AND HAVE_CXXABI AND HAVE_VASPRINTF AND HAVE_TEUCHOS_LINK AND HAVE_TEUCHOS_BFD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(HAVE_TEUCHOS_STACKTRACE yes)
-ENDIF()
+endif()
 
-
-# FIXME: Tests are disabled for now, as they would clash with different
-# hermeses:
-add_custom_target(test COMMAND ctest)
-add_custom_target(test-quick COMMAND ctest -LE slow -j9)
-
-# Teuchos RCP
-if (NOT WITH_TRILINOS)
- SET(TEUCHOS_SOURCES
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_dyn_cast.cpp
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_Ptr.cpp
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_RCPNode.cpp
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_TestForException.cpp
-  ${HERMES_COMMON_DIR}/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
-  )
-endif (NOT WITH_TRILINOS)
+set(CMAKE_REQUIRED_LIBRARIES m)
+CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
+CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)

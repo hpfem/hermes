@@ -1,8 +1,21 @@
 include_directories(${hermes1d_SOURCE_DIR}/src)
 
-include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-include(PickRealOrCplxLibs)
-PICK_REAL_OR_CPLX_LIBS(${HERMES1D} ${PROJECT_NAME})
+#include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
 
-target_link_libraries(${PROJECT_NAME} ${HERMES1D} ${TRILINOS_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${HERMES1D})
+set(FLAGS -DHERMES_COMMON_REAL)
+
+if(DEBUG)    
+    set(HERMES_COMMON ${HERMES_COMMON_LIB_REAL_DEBUG})
+    set(FLAGS "${FLAGS} -g")
+    set(HERMES ${HERMES1D_DEBUG})
+else(DEBUG)
+    set(HERMES_COMMON ${HERMES_COMMON_LIB_REAL_RELEASE})
+    set(HERMES ${HERMES1D_RELEASE})
+endif(DEBUG)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS ${FLAGS})
+
+include(PickRealOrCplxLibs)
+PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON} ${PROJECT_NAME})
+
+target_link_libraries(${PROJECT_NAME} ${HERMES})

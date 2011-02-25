@@ -5,7 +5,7 @@ include_directories(${PROJECT_BINARY_DIR}/../hermes_common/)
 
 add_python_library(hermes2d ../src/hermes2d.cpp)
 include(PickRealOrCplxLibs)
-PICK_REAL_OR_CPLX_LIBS(${HERMES2D_REAL} hermes2d)
+PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB_REAL} hermes2d)
 target_link_libraries(hermes2d ${HERMES2D_REAL})
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d)
 install(TARGETS hermes2d

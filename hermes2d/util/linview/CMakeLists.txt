@@ -16,7 +16,8 @@ macro(LINVIEW_SETTINGS VIEW)
 		  include_directories(${DEP_ROOT}/include)
 	  endif(MSVC)
 	  
-	PICK_REAL_OR_CPLX_LIBS(${HERMES2D_REAL} ${PROJECT_NAME})
+    # Set correct include directories for PETSc.
+    PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB_REAL} ${PROJECT_NAME})
     get_property(FLAGS TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS)
 
     # Should debugging information be included?
@@ -27,8 +28,8 @@ macro(LINVIEW_SETTINGS VIEW)
     set(FLAGS "${FLAGS} -DWHATVIEW=${VIEW}")
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${FLAGS})
         
-    target_link_libraries(${PROJECT_NAME} ${HERMES2D_REAL} ${TRILINOS_LIBRARIES})
-    add_dependencies(${PROJECT_NAME} ${HERMES2D_REAL})
+    target_link_libraries(${PROJECT_NAME} ${HERMES2D_REAL})
+    #add_dependencies(${PROJECT_NAME} ${HERMES2D_REAL})
 endmacro(LINVIEW_SETTINGS)
 
 add_definitions(-DH2D_REAL)

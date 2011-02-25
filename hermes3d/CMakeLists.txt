@@ -1,14 +1,24 @@
+cmake_minimum_required(VERSION 2.6)
+
 project(hermes3d)
 
-cmake_minimum_required(VERSION 2.6)
-# H3D only supports Debug version.
-option(DEBUG         "Build debug version" YES)
+IF(H3D_DEBUG)
+	set(DEBUG YES)
+ELSE(H3D_DEBUG)
+	set(DEBUG NO)
+ENDIF(H3D_DEBUG)
 
-# Directory where the output will be written.
-set(OUTPUT_DIR "" CACHE STRING "Directory were the output will be written")
+IF(H3D_RELEASE)
+  set(RELEASE YES)
+  message(WARNING "As of now, Hermes3D is just an experimental package. Internal
+                   compiler errors have been observed on GCC-4.4.1 -- if this is
+                   your case, please set H3D_RELEASE to NO.") 
+ELSE(H3D_RELEASE)
+  set(RELEASE NO)
+ENDIF(H3D_RELEASE)
 
 IF(H3D_WITH_EXAMPLES)
-	set(WITH_EXAMPLES YES)
+  set(WITH_EXAMPLES YES)
 ELSE(H3D_WITH_EXAMPLES)
 	set(WITH_EXAMPLES NO)
 ENDIF(H3D_WITH_EXAMPLES)
@@ -37,24 +47,70 @@ ELSE(H3D_WITH_DEV_TESTS)
 	set(WITH_DEV_TESTS NO)
 ENDIF(H3D_WITH_DEV_TESTS)
 
-# Doxygen related
-#set(DOXYGEN_BINARY doxygen)
-#set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
+#
+# Version configuration.
+#
 
-#set(SPHINX_BUILD_BIN sphinx-build)
+if (NOT DEBUG AND NOT RELEASE)
+  message(FATAL_ERROR "WITH_H3D is set to YES, but no versions are specified. 
+                       Re-run with DEBUG and/or RELEASE set to YES.")
+endif (NOT DEBUG AND NOT RELEASE)
 
-# need at least real or complex version
 if(H3D_REAL)
-	list(APPEND VERS "real")
+    list(APPEND VERS "real")
 endif(H3D_REAL)
 if(H3D_COMPLEX)
-	list(APPEND VERS "complex")
+    list(APPEND VERS "complex")
 endif(H3D_COMPLEX)
 
 list(LENGTH VERS VERS_LEN)
 if(NOT(VERS_LEN GREATER 0))
-	message(FATAL_ERROR "H3D: No versions specified. Re-run with REAL and/or COMPLEX set to YES")
+  message(FATAL_ERROR "WITH_H3D is set to YES, but no versions are specified. 
+                       Re-run with REAL and/or COMPLEX set to YES.")
 endif(NOT(VERS_LEN GREATER 0))
+
+if(MSVC)
+    if(H3D_REAL)
+        set(HERMES3D_REAL hermes3d-real)                # Base name of the library.
+        set(HERMES3D_REAL_RELEASE ${HERMES3D_REAL})     # Name of the release version.
+        set(HERMES3D_REAL_DEBUG ${HERMES3D_REAL}-debug) # Name of the debug version.
+    endif(H3D_REAL)
+    if(H3D_COMPLEX)
+        set(HERMES3D_CPLX hermes3d-cplx)
+        set(HERMES3D_CPLX_RELEASE ${HERMES3D_CPLX})
+        set(HERMES3D_CPLX_DEBUG ${HERMES3D_CPLX}-debug)
+    endif(H3D_COMPLEX)
+else(MSVC)
+  if(DEBUG)
+    if(H3D_REAL)
+      set(HERMES3D_REAL_DEBUG hermes3d-real-debug)
+      set(HERMES3D_REAL ${HERMES3D_REAL_DEBUG})
+    endif(H3D_REAL)
+    if(H3D_COMPLEX)
+      set(HERMES3D_CPLX_DEBUG hermes3d-cplx-debug)
+      set(HERMES3D_CPLX ${HERMES3D_CPLX_DEBUG})
+    endif(H3D_COMPLEX)
+    
+    set(CMAKE_BUILD_TYPE Debug)
+  endif(DEBUG)
+
+  if(RELEASE)
+    if(H3D_REAL)
+      set(HERMES3D_REAL_RELEASE hermes3d-real)
+      set(HERMES3D_REAL ${HERMES3D_REAL_RELEASE})
+    endif(H3D_REAL)
+    if(H3D_COMPLEX)
+      set(HERMES3D_CPLX_RELEASE hermes3d-cplx)
+      set(HERMES3D_CPLX ${HERMES3D_CPLX_RELEASE})
+    endif(H3D_COMPLEX)
+
+    set(CMAKE_BUILD_TYPE Release)
+  endif(RELEASE)
+endif(MSVC)
+
+#
+# Optional libraries and settings for H3D.
+#
 
 if(WITH_TETRA)
 	list(APPEND ELEMTYPES "tetra")
@@ -71,62 +127,62 @@ if(NOT(ELEMTYPES_LEN GREATER 0))
 	message(FATAL_ERROR "H3D: No element types selected. Re-run with WITH_TETRA, WITH_HEX or WITH_PRISM set to YES")
 endif(NOT(ELEMTYPES_LEN GREATER 0))
 
-# internals regarding build type
-if(DEBUG)
-	if(H3D_REAL)
-		set(HERMES3D_REAL hermes3d-debug)
-	endif(H3D_REAL)
-	if(H3D_COMPLEX) 
-		set(HERMES3D_CPLX hermes3d-cplx-debug)
-	endif(H3D_COMPLEX)
-	set(CMAKE_BUILD_TYPE Debug)
-else(DEBUG)
-	if(H3D_REAL)
-		set(HERMES3D_REAL hermes3d)
-	endif(H3D_REAL)
-	if(H3D_COMPLEX)
-		set(HERMES3D_CPLX hermes3d-cplx)
-	endif(H3D_COMPLEX)
-	set(CMAKE_BUILD_TYPE Release)
-endif(DEBUG)
-
-# H3D needs BLAS. However, if it was needed before, there is no need to look for it again.
+# H3D needs BLAS and LAPACK/CLAPACK. 
 add_definitions(-DWITH_BLAS)
+
 if(MSVC)
-	if(NOT(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+	if(NOT CLAPACK_FOUND)
 		find_package(CLAPACK REQUIRED)
 		include_directories(${CLAPACK_INCLUDE_DIRS})
-	endif(NOT(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+	endif(NOT CLAPACK_FOUND)
+	
+	# If the library was found, prevent searching for it again in subsequent 
+	# invocations of cmake .
+	set(CLAPACK_FOUND   YES CACHE STRING "Lapack/BLAS library.")
 else(MSVC)
-  if(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+  if(NOT LAPACK_FOUND)
     enable_language(Fortran)
     find_package(LAPACK REQUIRED)
-  endif(NOT(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU))
+    
+  	# If the library was found, prevent searching for it again in subsequent 
+	# invocations of cmake .
+	set(LAPACK_FOUND    YES CACHE STRING "Lapack/BLAS library.")
+  endif(NOT LAPACK_FOUND)
 endif(MSVC)  
 
-# We require Python for the mesh parser (it also needs NumPy)
-find_package(Python REQUIRED)
-find_package(NumPy REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-set(PYTHON_INSTALL_PATH lib/python/site-packages)
+# Directory where the output will be written.
+set(OUTPUT_DIR "" CACHE STRING "Directory were the output will be written")
 
-# Python inclusion is different in H1D, H2D, H3D.
+#
+# Python.
+#
+
+# We require Python for the mesh parser (it also needs NumPy)
+if(NOT Python_FOUND OR NOT NumPy_FOUND)
+  find_package(Python REQUIRED)
+  find_package(NumPy REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  
+  # This path will be used relatively to CMAKE_INSTALL_PREFIX.
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)  
+endif(NOT Python_FOUND OR NOT NumPy_FOUND)    
+
 if(WITH_PYTHON)
-	find_package(PythonLibs REQUIRED)
-	find_package(Cython REQUIRED)
-	add_subdirectory(python)
-	include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  #find_package(PythonLibs REQUIRED)
+  add_subdirectory(python)
 endif(WITH_PYTHON)
 
+#
 # Subdirectories.
+#
+
 add_subdirectory(src)
 
 if(WITH_TESTS)
-	enable_testing()
-	add_subdirectory(tests)
+  add_subdirectory(tests)
 endif(WITH_TESTS)
 if(WITH_TOOLS)
-	add_subdirectory(tools)
+  add_subdirectory(tools)
 endif(WITH_TOOLS)
 
 # examples
@@ -145,7 +201,18 @@ add_custom_command(
 	COMMAND   make -C ${PROJECT_BINARY_DIR}/benchmarks
 )
 
-# doc
+#
+# Documentation.
+#
+
+# TODO: Find out why this section has been commented out.
+
+# Doxygen related
+#set(DOXYGEN_BINARY doxygen)
+#set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
+
+#set(SPHINX_BUILD_BIN sphinx-build)
+
 #add_subdirectory(doc)
 
 #add_custom_target(doc DEPENDS ${PROJECT_BINARY_DIR}/doc/xml/index.xml)
@@ -166,7 +233,11 @@ add_custom_command(
 #)
 
 
-# -- package --------
+#
+# Packaging.
+#
+
+# TODO: Test the packaging system and update it if neccessary.
 
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "1")

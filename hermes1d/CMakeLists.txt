@@ -1,71 +1,86 @@
-project(hermes1d)
-
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
+project(hermes1d)
 
 IF(H1D_DEBUG)
-	set(DEBUG YES)
+  set(DEBUG YES)
 ELSE(H1D_DEBUG)
-	set(DEBUG NO)
+  set(DEBUG NO)
 ENDIF(H1D_DEBUG)
 
 IF(H1D_RELEASE)
-	set(RELEASE NO)
+  set(RELEASE YES)
 ELSE(H1D_RELEASE)
-	set(RELEASE NO)
+  set(RELEASE NO)
 ENDIF(H1D_RELEASE)
 
-
 IF(H1D_WITH_EXAMPLES)
-	set(WITH_EXAMPLES YES)
+  set(WITH_EXAMPLES YES)
 ELSE(H1D_WITH_EXAMPLES)
-	set(WITH_EXAMPLES NO)
+  set(WITH_EXAMPLES NO)
 ENDIF(H1D_WITH_EXAMPLES)
 
 IF(H1D_WITH_BENCHMARKS)
-	set(WITH_BENCHMARKS YES)
+  set(WITH_BENCHMARKS YES)
 ELSE(H1D_WITH_BENCHMARKS)
-	set(WITH_BENCHMARKS NO)
+  set(WITH_BENCHMARKS NO)
 ENDIF(H1D_WITH_BENCHMARKS)
 
 IF(H1D_WITH_TESTS)
-	set(WITH_TESTS YES)
+  set(WITH_TESTS YES)
 ELSE(H1D_WITH_TESTS)
-	set(WITH_TESTS NO)
+  set(WITH_TESTS NO)
 ENDIF(H1D_WITH_TESTS)
 
-# Doxygen related
-set(DOXYGEN_BINARY doxygen)
-set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
 
-set(SPHINX_BUILD_BIN sphinx-build)
+#
+# Version configuration.
+#
 
 # For use in the common code.
 set(H1D_REAL YES)
-add_definitions(-DH1D_REAL)
 
-if(DEBUG)
-        set(HERMES1D hermes1d-debug)
-endif(DEBUG)
+# Depending on the setting of H1D_DEBUG and H1D_REAL, the user will have 
+# two variables at his disposal: HERMES1D_RELEASE and/or HERMES1D_DEBUG
+# (corresponding to the two libraries built on his system). He can use these
+# to selectively link his project to either the optimized version or
+# one with debugging symbols by adding the appropriate second argument to 
+# set_common_target_properties in his project's CMakeLists.txt. If he calles
+# that function with just the name of the project, the Debug version will be 
+# automatically selected if present (i.e. H1D_DEBUG was set to YES). Otherwise,
+# the Release version will be selected. The appropriate version of hermes_common
+# will be linked as well.
+if(MSVC)
+  set(HERMES1D hermes1d)                # Base name of the library.
+  set(HERMES1D_RELEASE ${HERMES1D})     # Name of the release version.
+  set(HERMES1D_DEBUG ${HERMES1D}-debug) # Name of the debug version.
+else(MSVC)
+  if(RELEASE)
+    set(HERMES1D_RELEASE hermes1D)
+    set(HERMES1D ${HERMES1D_RELEASE})
+    set(CMAKE_BUILD_TYPE Release)
+  endif(RELEASE)
+  if(DEBUG)
+    set(HERMES1D_DEBUG hermes1D-debug)
+    set(HERMES1D ${HERMES1D_DEBUG})
+    set(CMAKE_BUILD_TYPE Debug)
+  endif(DEBUG)
+endif(MSVC)
 
-if(RELEASE)
-        set(HERMES1D hermes1d)
-endif(RELEASE)
+#
+# Python
+#
 
-# Python inclusion is different in H1D, H2D, H3D.
 if(WITH_PYTHON)
-  find_package(Python REQUIRED)
-  find_package(NumPy REQUIRED)
-  find_package(Cython REQUIRED)
-  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-  set(PYTHON_INSTALL_PATH lib/python/site-packages)
   # This is needed to make hermes_common working properly:
-  SET(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/hermes_common)
+  set(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/hermes_common)
   add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 
+#
 # Subdirectories.
+#
+
 add_subdirectory(src)
 
 if(WITH_EXAMPLES)
@@ -77,9 +92,18 @@ if(WITH_BENCHMARKS)
 endif(WITH_BENCHMARKS)
 
 if(WITH_TESTS)
-    enable_testing()
-	add_subdirectory(tests)
+    add_subdirectory(tests)
 endif(WITH_TESTS)
+
+#
+# Documentation.
+#
+
+# Doxygen related
+set(DOXYGEN_BINARY doxygen)
+set(DOXYGEN_CONFIG_FILE ${PROJECT_SOURCE_DIR}/doc/Doxyfile)
+
+set(SPHINX_BUILD_BIN sphinx-build)
 
 add_subdirectory(doc.old)
 

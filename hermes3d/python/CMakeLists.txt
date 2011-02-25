@@ -22,4 +22,4 @@ add_custom_command(
 add_library(${PYTHON_LIB_NAME} SHARED hermes3d.cpp)
 add_dependencies(${PYTHON_LIB_NAME} hermes3d.cpp)
 
-target_link_libraries(${PYTHON_LIB_NAME} hermes3d-debug)
+target_link_libraries(${PYTHON_LIB_NAME} ${HERMES3D_REAL})

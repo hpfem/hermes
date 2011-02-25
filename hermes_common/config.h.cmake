@@ -1,3 +1,7 @@
+#cmakedefine HAVE_FMEMOPEN
+#cmakedefine HAVE_LOG2
+#cmakedefine EXTREME_QUAD
+
 #cmakedefine WITH_UMFPACK
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_SUPERLU
@@ -34,9 +38,3 @@
 #cmakedefine WITH_PRISM
 
 #cmakedefine PRELOADING
-
-/* --- */
-#define PACKAGE_NAME "Hermes1D"
-#define PACKAGE_TARNAME "hermes1d"
-#define PACKAGE_VERSION "0.0.1"
-#define PACKAGE_STRING "Hermes1D v" PACKAGE_VERSION

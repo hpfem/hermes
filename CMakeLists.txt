@@ -1,21 +1,23 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/hermes_common/cmake/cxx_flag_overrides.cmake)
-project(hermes)
-
 cmake_minimum_required(VERSION 2.6)
 
-#---------------------------------------------------------
-# begin of configuration section
-#
-# The values below are sane defaults to produce a build on all platforms,
-# if you want to override them, set them in CMake.vars
+project(hermes)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
+set(HERMES_COMMON_LIB_REAL  hermes_common-real)
+set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
 
-# Testing.
-set(WITH_TESTS                YES)
+#------------------------------------------------------------------------------
+# Main configuration options.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Optional parts of the library:
+### BEGIN DEFAULT CONFIGURATION ###
+
+# The values below are sane defaults to produce a build on all platforms,
+# if you want to override them, set them in CMake.vars
+
+# H1D:
 set(WITH_H1D                  YES)
 	# Release and debug versions.
 	set(H1D_DEBUG             YES)
@@ -25,6 +27,7 @@ set(WITH_H1D                  YES)
 	set(H1D_WITH_BENCHMARKS   YES)
 	set(H1D_WITH_TESTS        YES)
 
+# H2D:
 set(WITH_H2D                  YES)
 	# Real/complex version of the library (you can build either one or both):
 	set(H2D_REAL              YES)
@@ -41,11 +44,15 @@ set(WITH_H2D                  YES)
 	set(H2D_WITH_GLUT         YES)
 	set(H2D_WITH_VIEWER_GUI   NO)
 	set(H2D_WITH_UTIL         YES)
-		
+
+# H3D:		
 set(WITH_H3D                  YES)
 	# Real/complex version of the library.
 	set(H3D_REAL              YES)
 	set(H3D_COMPLEX           YES)
+	# Release and debug versions.
+	set(H3D_DEBUG             YES)
+	set(H3D_RELEASE           NO)
 	# Debugging options.
 	set(H3D_DEBUG_ORDER       NO)
 	set(H3D_PROFILING         NO)
@@ -61,6 +68,8 @@ set(WITH_H3D                  YES)
 	set(H3D_WITH_TOOLS        NO)
 	set(H3D_WITH_DEV_TESTS    NO)
 	
+# Hermes_common (linked to all H1D, H2D and H3D):
+set(HERMES_COMMON_WITH_TESTS  YES)
 
 # Logo will be shown:
 set(REPORT_WITH_LOGO        YES)
@@ -105,11 +114,12 @@ set(WITH_TRILINOS           NO)
 
 
 ### Mesh format ###
-option(WITH_EXODUSII "Enable support for EXODUSII mesh format" NO)
-option(WITH_HDF5     "Enable support for HDF5" NO)
+set(WITH_EXODUSII           NO)
+set(WITH_HDF5               NO)
 
 ### Others ###
-# Parallel execution (tells the linker to use parallel versions of the selected solvers, if available):
+# Parallel execution (tells the linker to use parallel versions of the selected 
+# solvers, if available):
 #
 # Enable OpenMP for shared memory processing.
 #  
@@ -124,37 +134,121 @@ set(WITH_MPI                NO)
 # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
 # Enable or disable Python.
-set(WITH_PYTHON             NO)
+set(WITH_PYTHON             YES)
+
+### end DEFAULT CONFIGURATION ###
 
 # Allow to override the default values in CMake.vars:
-if(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
-  include(CMake.vars)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/CMake.vars)
+include(CMake.vars OPTIONAL)
 
-# Find necessary packages.
+# Ensure that the correct version of hermes_common required by the selected
+# Hermes libraries will be built. Note that the debug/release decision has to
+# be made also here and not in ./hermes_common, so as to expose 
+# HERMES_COMMON_LIB_{REAL/CPLX}_{DEBUG/RELEASE} to all Hermeses. The logic is
+# as follows:
+# If any HXD (X={1/2/3}) is configured for a Debug version, Debug version of 
+# hermes_common will be built (the same for Release).  
+# If any HXD is configured for a Complex version, Complex version of 
+# hermes_common will be built (the same for Real).  
+macro (DETERMINE_HERMES_COMMON_VERSION HXD)
+    if (WITH_${HXD})
+        if(MSVC)
+            # In MSVC, Release/Debug is distinguished in a special way
+            # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
+            if (${HXD}_REAL)
+                set(HERMES_COMMON_REAL  YES)
+                set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
+                set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
+            endif (${HXD}_REAL)
+            if (${HXD}_COMPLEX)
+                set(HERMES_COMMON_COMPLEX YES)
+                set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
+                set(HERMES_COMMON_LIB_CPLX_DEBUG ${HERMES_COMMON_LIB_CPLX}-debug)
+            endif (${HXD}_COMPLEX)
+        else(MSVC)        
+          if(${HXD}_DEBUG)
+            set(HERMES_COMMON_DEBUG YES)
+            
+            if(${HXD}_REAL)
+              set(HERMES_COMMON_REAL  YES)
+              set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
+            endif(${HXD}_REAL)
+            if(${HXD}_COMPLEX)
+              set(HERMES_COMMON_COMPLEX  YES)
+              set(HERMES_COMMON_LIB_CPLX_DEBUG  ${HERMES_COMMON_LIB_CPLX}-debug)
+            endif(${HXD}_COMPLEX)
+          endif(${HXD}_DEBUG)
+
+          if(${HXD}_RELEASE)
+            set(HERMES_COMMON_RELEASE YES)
+            
+            if(${HXD}_REAL)
+              set(HERMES_COMMON_REAL  YES)
+              set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
+            endif(${HXD}_REAL)
+            if(${HXD}_COMPLEX)
+              set(HERMES_COMMON_COMPLEX  YES)
+              set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
+            endif(${HXD}_COMPLEX)
+          endif(${HXD}_RELEASE)
+        endif(MSVC)
+    endif (WITH_${HXD})   
+endmacro(DETERMINE_HERMES_COMMON_VERSION)
+
+DETERMINE_HERMES_COMMON_VERSION(H1D)
+DETERMINE_HERMES_COMMON_VERSION(H2D)
+DETERMINE_HERMES_COMMON_VERSION(H3D)
+
+#------------------------------------------------------------------------------
+# Find necessary packages according to the settings above.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 find_package(PTHREAD REQUIRED)
 
-# Solvers.
+# Python
+if(WITH_PYTHON)
+  find_package(Python REQUIRED)
+  find_package(NumPy REQUIRED)
+  find_package(Cython REQUIRED)
+  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+  set(PYTHON_INSTALL_PATH lib/python/site-packages)
+endif(WITH_PYTHON)
+
+# Solvers (TODO: This could maybe go into hermes_common/solver/CMakeLists.txt).
 if(MSVC)
 	if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-		find_package(CLAPACK REQUIRED)
-		include_directories(${CLAPACK_INCLUDE_DIRS})
+	    if (NOT CLAPACK_FOUND)
+    		find_package(CLAPACK REQUIRED)
+	    	include_directories(${CLAPACK_INCLUDE_DIRS})
+	    endif (NOT CLAPACK_FOUND)
+	 
+	    # If the library was found, prevent searching for it again in subsequent 
+	    # invocations of cmake .
+	    set(CLAPACK_FOUND    YES CACHE STRING "Lapack/BLAS library.")   
 	endif(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 else(MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
   # FindLAPACK is Fortran-only so Fortran must be enabled as well.
   if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-    enable_language(Fortran)
-    find_package(LAPACK REQUIRED)
+    if (NOT LAPACK_FOUND)
+        enable_language(Fortran)
+        find_package(LAPACK REQUIRED)
+    endif (NOT LAPACK_FOUND)
+    
     add_definitions(-DWITH_BLAS)
+    
+    # If the library was found, prevent searching for it again in subsequent 
+	# invocations of cmake .
+	set(LAPACK_FOUND    YES CACHE STRING "Lapack/BLAS library.")
   endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 endif(MSVC)  
 
 if(WITH_PETSC)
 	find_package(PETSC REQUIRED)
-	# For some header files, PETSc uses the same name for both real and complex versions (they only reside in 
-	# different directories), so we can't globally set the architecture-specific include directory here, but 
-	# rather on a per-target basis.
+	# For some header files, PETSc uses the same name for both real and complex 
+	# versions (they only reside in different directories), so we can't globally
+	# set the architecture-specific include directory here, but rather on a 
+	# per-target basis.
 	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
 endif(WITH_PETSC)
 
@@ -214,9 +308,45 @@ if(WITH_MPI)
   include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
 
-add_subdirectory(${HERMES_COMMON_DIR})
 
-include(hermes_common/CMakeCommon.txt)
+#------------------------------------------------------------------------------
+# Project-wide compiler settings.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Enable debugging symbols for all files all the time:
+# set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Stop on first error (sometimes gcc doesn't print all the possible
+    # candidates when a function signature is wrong if this is enabled, so we
+    # leave it disabled by default):
+    # set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+
+    # All warnings are errors
+    #set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
+
+    # Disable the "unused variable/parameters/functions" warnings (as those are
+    # not really problematic, it doesn't cause any harm):
+    set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
+
+    # Disable all switch warnings for now (until all code is fixed)
+    set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
+
+    # Enable all warnings:
+    set(CMAKE_CXX_FLAGS "-W -Wuninitialized -Wall ${CMAKE_CXX_FLAGS}")
+endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
+# Enabling multiprocessor build on MSVC
+if(MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # Do we have to add this in 
+                                                # set_target_properties?
+endif(MSVC)
+
+#------------------------------------------------------------------------------
+# Add project subdirectories and custom targets.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+add_subdirectory(${HERMES_COMMON_DIR})
 include_directories(${HERMES_COMMON_DIR})
 
 if(WITH_H1D)
@@ -231,9 +361,16 @@ if(WITH_H3D)
     add_subdirectory(hermes3d)
 endif(WITH_H3D)
 
-if(WITH_TESTS)
+if(H1D_WITH_TESTS OR H2D_WITH_TESTS OR H3D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
   enable_testing()
-endif(WITH_TESTS)
+  add_custom_target(test COMMAND ctest)
+  add_custom_target(test-quick COMMAND ctest -LE slow -j9)
+endif(H1D_WITH_TESTS OR H2D_WITH_TESTS OR H3D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
+
+
+#------------------------------------------------------------------------------
+# Report.
+#~~~~~~~~
 
 message("\nConfiguration results")
 message("---------------------")
@@ -261,11 +398,17 @@ else(REPORT_RUNTIME_CONTROL)
 endif(REPORT_RUNTIME_CONTROL)
 message("Report with logo: ${REPORT_WITH_LOGO}")
 message("---------------------")
+message("Hermes common library:")
+message("\tBuild Real version: ${HERMES_COMMON_REAL}")
+message("\tBuild Complex version: ${HERMES_COMMON_COMPLEX}")
+message("\tBuild Debug version: ${HERMES_COMMON_DEBUG}")
+message("\tBuild Release version: ${HERMES_COMMON_RELEASE}")
+message("\tBuild with tests: ${HERMES_COMMON_WITH_TESTS}")
+
 message("Build Hermes1D: ${WITH_H1D}")
 if(WITH_H1D)
 	message("\tBuild Hermes1D Debug version: ${H1D_DEBUG}")
 	message("\tBuild Hermes1D Release version: ${H1D_RELEASE}")
-		# Optional parts of the library.
 	message("\tBuild Hermes1D examples: ${H1D_WITH_EXAMPLES}")
 	message("\tBuild Hermes1D benchmarks: ${H1D_WITH_BENCHMARKS}")
 	message("\tBuild Hermes1D tests: ${H1D_WITH_TESTS}")
@@ -291,6 +434,8 @@ message("Build Hermes3D: ${WITH_H3D}")
 if(WITH_H3D)
 	message("\tBuild Hermes3D real version: ${H3D_REAL}")
 	message("\tBuild Hermes3D complex version: ${H3D_COMPLEX}")
+    message("\tBuild Hermes3D Debug version: ${H3D_DEBUG}")
+   	message("\tBuild Hermes3D Release version: ${H3D_RELEASE}")
 	message("\tBuild Hermes3D with Debug order: ${H3D_DEBUG_ORDER}")
 	message("\tBuild Hermes3D with profiling: ${H3D_PROFILING}")
 	message("\tBuild Hermes3D with Tetra: ${WITH_TETRA}")

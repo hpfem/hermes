@@ -1,8 +1,8 @@
 include(PickRealOrCplxLibs)
 
 macro(SET_COMMON_TARGET_PROPERTIES TRGT)
-  # Each test can define the particular hermes library to link with, or not
-  # define anything, in which case the "real" version will be used if hermes was
+  # Each project can define the particular Hermes library to link with, or not
+  # define anything, in which case the "real" version will be used if Hermes was
   # built with "real" support, otherwise the "complex" version will be used:
   if(${ARGC} EQUAL 1)
     if(H3D_REAL)
@@ -14,35 +14,40 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
     set(HERMES ${ARGV1})
   endif(${ARGC} EQUAL 1) 
 
-  set(FLAGS)
-  
-  # Should debugging information be included for the test?
-  if(DEBUG)
-    set(FLAGS "${FLAGS} -g")
-  endif(DEBUG)
-
-  # If the complex version is being used, define 'H3D_COMPLEX'.
+  # If the complex version is being used:
   if(H3D_COMPLEX)
-    if(${HERMES} STREQUAL ${HERMES3D_CPLX})
-        set(FLAGS "${FLAGS} -DH3D_COMPLEX")
-    endif(${HERMES} STREQUAL ${HERMES3D_CPLX})
+    if("${HERMES}" STREQUAL "${HERMES3D_CPLX_DEBUG}")
+        set(FLAGS "-DH3D_COMPLEX -DHERMES_COMMON_COMPLEX")
+        set(HERMES_COMMON ${HERMES_COMMON_LIB_CPLX_DEBUG})
+        set(FLAGS "${FLAGS} -g")
+    elseif("${HERMES}" STREQUAL "${HERMES3D_CPLX_RELEASE}")
+        set(FLAGS "-DH3D_COMPLEX -DHERMES_COMMON_COMPLEX")
+        set(HERMES_COMMON ${HERMES_COMMON_LIB_CPLX_RELEASE})
+    endif("${HERMES}" STREQUAL "${HERMES3D_CPLX_DEBUG}")
   endif(H3D_COMPLEX)
-  # If the real version is being used, define 'H3D_REAL'.
+  # If the real version is being used:
   if(H3D_REAL)
-    if(${HERMES} STREQUAL ${HERMES3D_REAL})
-        set(FLAGS "${FLAGS} -DH3D_REAL")
-    endif(${HERMES} STREQUAL ${HERMES3D_REAL})
+    if("${HERMES}" STREQUAL "${HERMES3D_REAL_DEBUG}")
+        set(FLAGS "-DH3D_REAL -DHERMES_COMMON_REAL")
+        set(HERMES_COMMON ${HERMES_COMMON_LIB_REAL_DEBUG})
+        set(FLAGS "${FLAGS} -g")
+    elseif("${HERMES}" STREQUAL "${HERMES3D_REAL_RELEASE}")
+        set(FLAGS "-DH3D_REAL -DHERMES_COMMON_REAL")
+        set(HERMES_COMMON ${HERMES_COMMON_LIB_REAL_RELEASE})
+    endif("${HERMES}" STREQUAL "${HERMES3D_REAL_DEBUG}")
   endif(H3D_REAL)
   
   set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
   include_directories(${hermes3d_SOURCE_DIR}/src)
+ 
+  PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON} ${TRGT})
 
-  PICK_REAL_OR_CPLX_LIBS(${HERMES} ${TRGT})
+  #target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
+  #add_dependencies(${TRGT} ${HERMES})
 
-  target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
-  add_dependencies(${TRGT} ${HERMES})
+  target_link_libraries(${TRGT} ${HERMES})
   
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)
     configure_file(
