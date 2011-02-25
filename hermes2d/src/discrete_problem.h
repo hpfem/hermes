@@ -21,6 +21,8 @@
 
 #include "../../hermes_common/matrix.h"
 #include "../../hermes_common/solver/solver.h"
+#include "../../hermes_common/solver/dpinterface.h"
+#include "../../hermes_common/tables.h"
 #include "adapt/adapt.h"
 #include "graph.h"
 #include "weakform/forms.h"
@@ -31,7 +33,6 @@
 #include "views/order_view.h"
 #include "function/function.h"
 #include "neighbor.h"
-#include "tables.h"
 #include "ref_selectors/selector.h"
 #include <map>
 
@@ -47,7 +48,7 @@ class Solver;
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class HERMES_API DiscreteProblem
+class HERMES_API DiscreteProblem : public DiscreteProblemInterface
 {
 public:
   /// Constructor.

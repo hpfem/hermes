@@ -22,9 +22,11 @@
 
 #include "h3d_common.h"
 #include "weakform/weakform.h"
-#include "vector.h"
-#include "matrix.h"
-#include "solver/solver.h"
+#include "../../hermes_common/tables.h"
+#include "../../hermes_common/vector.h"
+#include "../../hermes_common/matrix.h"
+#include "../../hermes_common/solver/solver.h"
+#include "../../hermes_common/solver/dpinterface.h"
 #include "norm.h"
 
 class Space;
@@ -37,9 +39,9 @@ struct SurfPos;
 ///
 /// This class does assembling into external matrix / vactor structures.
 ///
-class HERMES_API DiscreteProblem {
+class HERMES_API DiscreteProblem : public DiscreteProblemInterface {
 public:
-        DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> sp, bool is_linear = false);
+  DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> sp, bool is_linear = false);
 	virtual ~DiscreteProblem();
 	void free();
 
@@ -47,16 +49,19 @@ public:
   Space* get_space(int n) {  return this->spaces[n];  }
 
   // Precalculate matrix sparse structure.
-  void create_sparse_structure(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  void create_sparse_structure(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
+                               bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
   // General assembling procedure for nonlinear problems. coeff_vec is the 
   // previous Newton vector.
-	void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
+                bool rhsonly = false, bool force_diagonal_blocks = false, 
+                bool add_dir_lift = true, Table* block_weights = NULL);
 
   // Assembling for linear problems. Same as the previous functions, but 
   // does not need the coeff_vector.
-	void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
-                      bool rhsonly = false);
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+	
   // Get the number of spaces.
   int get_num_spaces() {return this->spaces.size();}
 

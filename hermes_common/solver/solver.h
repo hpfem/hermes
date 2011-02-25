@@ -21,6 +21,7 @@
 #define __HERMES_COMMON_SOLVER_H_
 
 #include "precond.h"
+#include "dpinterface.h"
                         
 #ifdef HAVE_TEUCHOS
   #include <Teuchos_RefCountPtr.hpp>
@@ -80,8 +81,6 @@ enum FactorizationScheme
                                               ///< factorization.
 };
 
-class DiscreteProblem;
-
 /// Abstract class for defining solver interface.
 ///
 /// TODO: Adjust interface to support faster update of matrix and rhs
@@ -130,11 +129,11 @@ class LinearSolver : public Solver
 class NonlinearSolver : public Solver {
   public:
     NonlinearSolver() : Solver() { dp = NULL; }
-    NonlinearSolver(DiscreteProblem* dp) : Solver() { this->dp = dp; }
+    NonlinearSolver(DiscreteProblemInterface* dp) : Solver() { this->dp = dp; }
     
   protected:
-    DiscreteProblem* dp;        // FE problem being solved (not NULL in case of using
-    // NonlinearProblem(DiscreteProblem *) ctor
+    DiscreteProblemInterface* dp; // FE problem being solved (not NULL in case of using
+                                  // NonlinearProblem(DiscreteProblemInterface *) ctor
 };
 
 /// Abstract class for defining interface for iterative solvers.

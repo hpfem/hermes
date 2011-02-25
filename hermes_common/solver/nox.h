@@ -40,7 +40,7 @@ class NoxProblemInterface;
 class HERMES_API NoxSolver : public IterSolver
 {
 public:
-  NoxSolver(DiscreteProblem *problem);
+  NoxSolver(DiscreteProblemInterface *problem);
   virtual ~NoxSolver();
 
   bool set_init_sln(double *ic);

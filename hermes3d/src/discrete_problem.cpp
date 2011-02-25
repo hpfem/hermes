@@ -154,8 +154,10 @@ bool DiscreteProblem::is_up_to_date()
 
 //// matrix creation ///////////////////////////////////////////////////////////////////////////////
 
-// This functions is identical in H2D and H3D.
-void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, bool rhsonly)
+// Signature of this function is identical in H1D, H2D, H3D, but only first three parameters are 
+// used in H3D.
+void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, bool rhsonly, 
+                                              bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
 
@@ -253,7 +255,8 @@ void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly)
   assemble(NULL, mat, rhs, rhsonly);
 }
 
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly)
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
+                               bool force_diagonal_blocks, bool add_dir_lift, Table* block_weights)
 {
   /* BEGIN IDENTICAL CODE WITH H2D */
 

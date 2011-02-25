@@ -16,9 +16,11 @@
 #include "../../hermes_common/matrix.h"
 #include "../../hermes_common/common.h"
 #include "../../hermes_common/solver/solver.h"
+#include "../../hermes_common/solver/dpinterface.h"
+#include "../../hermes_common/tables.h"
 #include "iterator.h"
 
-class HERMES_API DiscreteProblem {
+class HERMES_API DiscreteProblem : public DiscreteProblemInterface {
 public:
   DiscreteProblem(WeakForm* wf, Space* space, bool is_linear = true);
 
@@ -27,14 +29,17 @@ public:
   void process_vol_forms(SparseMatrix *mat, Vector *res, bool rhsonly);
 
   void assemble(scalar* coeff_vec, SparseMatrix *mat, Vector *rhs = NULL, 
-                bool rhsonly = false);
+                bool rhsonly = false, bool force_diagonal_blocks = false,
+                bool add_dir_lift = true, Table* block_weights = NULL);
 
   int get_num_dofs();
   
   bool is_matrix_free();
-
-  void create_sparse_structure(SparseMatrix* matrix);
-
+  
+  void create_sparse_structure(SparseMatrix* matrix, Vector* rhs = NULL, bool rhsonly = false,
+                               bool force_diagonal_blocks = false, Table* block_weights = NULL);
+                               
+  void invalidate_matrix() { return; }
 private:
   WeakForm* wf;
   Space* space;
