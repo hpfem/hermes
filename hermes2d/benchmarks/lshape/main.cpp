@@ -18,7 +18,6 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -70,10 +69,11 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("lshape.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinement.
   mesh.refine_all_elements();
+  //mesh.refine_towards_vertex(3, 5);
 
   // Enter boundary markers.
   BCTypes bc_types;
