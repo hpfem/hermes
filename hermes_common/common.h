@@ -19,7 +19,15 @@
 // Include
 //
 // common headers
+
+#ifdef _POSIX_C_SOURCE
+# undef _POSIX_C_SOURCE	// typeinfo defines it
+#endif
+#ifdef _XOPEN_SOURCE
+# undef _XOPEN_SOURCE	// typeinfo defines it
+#endif
 #include <typeinfo>
+
 #include <stdexcept>
 #include <cstdarg>
 #include <stdio.h>

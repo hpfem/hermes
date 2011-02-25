@@ -21,6 +21,12 @@
 
 #ifdef HAVE_NOX
   #include <NOX.H>
+    #ifdef _POSIX_C_SOURCE
+        # undef _POSIX_C_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+    #endif
+    #ifdef _XOPEN_SOURCE
+        # undef _XOPEN_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+    #endif
   #include <NOX_Epetra.H>
 #endif
 
