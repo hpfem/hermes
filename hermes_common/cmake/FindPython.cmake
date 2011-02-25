@@ -15,14 +15,23 @@ execute_process(
 	)
 string(STRIP ${PYTHON_LIB_PATH} PYTHON_LIB_PATH)
 IF(APPLE)
-FIND_LIBRARY(PYTHON_LIBRARY NAMES python)
+    FIND_LIBRARY(PYTHON_LIBRARY NAMES python)
 ELSE(APPLE)
-FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
-    PATHS ${PYTHON_LIB_PATH}
-    NO_DEFAULT_PATH
-    NO_SYSTEM_ENVIRONMENT_PATH
+    FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
+        PATHS ${PYTHON_LIB_PATH}
+        NO_DEFAULT_PATH
+        NO_SYSTEM_ENVIRONMENT_PATH
     )
 ENDIF(APPLE)
+
+# Python packages directory. Instead of this, we rather use the local subdirectory of
+# CMAKE_INSTALL_PREFIX.
+#
+#execute_process(
+#    COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" 
+#    OUTPUT_VARIABLE PYTHON_INSTALL_PATH 
+#    OUTPUT_STRIP_TRAILING_WHITESPACE
+#)
 
 # For MSVC (on Win, the function get_config_var does not accept the parameter 'LIBDIR').
 IF(MSVC)	

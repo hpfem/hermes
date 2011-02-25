@@ -34,5 +34,11 @@ SET(UMFPACK_INCLUDE_DIRS  ${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
 SET(UMFPACK_LIBRARIES     ${UMFPACK_LIBRARY} ${AMD_LIBRARY})
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(UMFPACK DEFAULT_MSG UMFPACK_LIBRARIES UMFPACK_INCLUDE_DIRS)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(  UMFPACK
+   "UMFPACK could not be found. Please install it according to instructions at\n
+   < http://hpfem.org/hermes/doc/src/installation/matrix_solvers/umfpack.html >\n
+   and/or provide path to its root directory by setting variable UMFPACK_ROOT 
+   in the CMake.vars file." 
+   UMFPACK_LIBRARIES UMFPACK_INCLUDE_DIRS
+)
 

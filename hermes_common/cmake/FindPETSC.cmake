@@ -57,87 +57,114 @@ ENDIF(NOT WITH_MPI AND EXISTS ${MY_PETSC_INC_DIRS}/mpiuni)
 
 SET(BASIC_PETSC_ARCH ${PETSC_ARCH})
 
-IF(H1D_REAL OR H2D_REAL OR H3D_REAL) # Search for the real version of the library.
+IF(HERMES_COMMON_REAL) # Search for the real version of the library.
 
-  SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-real)
+  # Look for the libraries only if they are not already in cache.
+  IF(NOT PETSC_REAL_LIBRARIES)  
+    SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-real)
 
-  # PETSc 3.1    
-  SET(PETSC_DIR ${MY_PETSC_LIB_DIRS}/${PETSC_ARCH})
-  IF(EXISTS ${PETSC_DIR})
+    # PETSc 3.1    
+    SET(PETSC_DIR ${MY_PETSC_LIB_DIRS}/${PETSC_ARCH})
+    IF(EXISTS ${PETSC_DIR})        
+      FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
+      FIND_LIBRARY(PETSC_LIB petsc)
+            
+      IF(COMMON_PETSC_INCLUDE_DIRS)
+        # Add arch-specific include directory.
+        SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_DIR}/include)
+      ELSE(COMMON_PETSC_INCLUDE_DIRS)
+        # petsc.h has not been found in the root include directory, search in the arch-specific one.
+        FIND_PATH(PETSC_REAL_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
+      ENDIF(COMMON_PETSC_INCLUDE_DIRS)
+     	  
+      IF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
+        SET(PETSC_FOUND TRUE)        
+        # Set the real version of the library (PETSc 3.1 is contained in a single libfile).
+        SET(PETSC_REAL_LIBRARIES ${PETSC_LIB})
+      ENDIF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
     
-    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
-    FIND_LIBRARY(PETSC_LIB petsc)
-          
-    IF(COMMON_PETSC_INCLUDE_DIRS)
-      # Add arch-specific include directory.
-      SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_DIR}/include)
-    ELSE(COMMON_PETSC_INCLUDE_DIRS)
-      # petsc.h has not been found in the root include directory, search in the arch-specific one.
-      FIND_PATH(PETSC_REAL_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
-    ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-   	  
-    IF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
-      SET(PETSC_FOUND TRUE)        
-      # Set the real version of the library (PETSc 3.1 is contained in a single libfile).
-      SET(PETSC_REAL_LIBRARIES ${PETSC_LIB})
-    ENDIF (PETSC_REAL_INCLUDE_DIRS AND PETSC_LIB)
+    ENDIF(EXISTS ${PETSC_DIR})  
+        
+    IF (PETSC_FOUND)    
+      IF (NOT PETSC_FIND_QUIETLY)
+	      MESSAGE(STATUS "Found real version of PETSc: ${PETSC_DIR}")
+      ENDIF (NOT PETSC_FIND_QUIETLY)
+    ELSE (PETSC_FOUND)
+      IF (PETSC_FIND_REQUIRED)
+        MESSAGE( FATAL_ERROR
+          "Real version of PETSC could not be found. Either disable it by setting 
+           WITH_PETSC to NO in your CMake.vars file, or install it according to 
+           instructions at\n
+          <http://hpfem.org/hermes/doc/src/installation/matrix_solvers/petsc.html>."
+        )
+      ENDIF (PETSC_FIND_REQUIRED)
+    ENDIF (PETSC_FOUND) 
+    
+    # linux specific (?)
+    SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} dl 
+      CACHE FILEPATH "PETSc libraries - real version")     
+  ENDIF(NOT PETSC_REAL_LIBRARIES)
   
-  ENDIF(EXISTS ${PETSC_DIR})  
+  # Export to cache.
+  SET(PETSC_REAL_INCLUDE_DIRS ${PETSC_REAL_INCLUDE_DIRS} 
+    CACHE PATH "PETSc include directories for the real version")
+    
+  UNSET(PETSC_LIB CACHE)  # PETSC_LIB don't needed any more - wipe out from cache.
+ENDIF(HERMES_COMMON_REAL)
+  
+IF(HERMES_COMMON_COMPLEX)  # Search for the complex version of the library.  
+  
+  # Look for the libraries only if they are not already in cache.
+  IF(NOT PETSC_CPLX_LIBRARIES)      
+    # Reset the search flags.
+    SET(PETSC_FOUND FALSE)
+    
+    SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-complex)
+    
+    # PETSc 3.1    
+    SET(PETSC_DIR ${MY_PETSC_LIB_DIRS}/${PETSC_ARCH})
+    IF(EXISTS ${PETSC_DIR})
+      FIND_LIBRARY(PETSC_LIB_C petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
+      FIND_LIBRARY(PETSC_LIB_C petsc)
+                
+      IF(COMMON_PETSC_INCLUDE_DIRS)
+        # Add arch-specific include directory.
+        SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_DIR}/include)
+      ELSE(COMMON_PETSC_INCLUDE_DIRS)
+        # petsc.h has not been found in the root include directory, search in the arch-specific one.
+        FIND_PATH(PETSC_CPLX_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
+      ENDIF(COMMON_PETSC_INCLUDE_DIRS)
+     	
+      IF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB_C)
+        SET(PETSC_FOUND TRUE)        
+        # Set the complex version of the library (PETSc 3.1 is contained in a single libfile).
+        SET(PETSC_CPLX_LIBRARIES ${PETSC_LIB_C})
+      ENDIF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB_C)
       
-  IF (PETSC_FOUND)    
-    IF (NOT PETSC_FIND_QUIETLY)
-		  MESSAGE(STATUS "Found real version of PETSc: ${PETSC_DIR}")
-    ENDIF (NOT PETSC_FIND_QUIETLY)
-  ELSE (PETSC_FOUND)
-    IF (PETSC_FIND_REQUIRED)
-	    MESSAGE(FATAL_ERROR "Could not find real version of PETSc")
-    ENDIF (PETSC_FIND_REQUIRED)
-  ENDIF (PETSC_FOUND) 
-  
-  # linux specific (?)
-  SET(PETSC_REAL_LIBRARIES ${PETSC_REAL_LIBRARIES} dl)     
-ENDIF(H1D_REAL OR H2D_REAL OR H3D_REAL)
-  
-IF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)  # Search for the complex version of the library.  
-  # Reset the search flags.
-  SET(PETSC_FOUND FALSE)
-  SET(PETSC_LIB PETSC_LIB-NOTFOUND)
+    ENDIF(EXISTS ${PETSC_DIR})
+    
+    IF (PETSC_FOUND)    
+      IF (NOT PETSC_FIND_QUIETLY)
+		    MESSAGE(STATUS "Found complex version of PETSc: ${PETSC_DIR}")
+      ENDIF (NOT PETSC_FIND_QUIETLY)
+    ELSE (PETSC_FOUND)
+      IF (PETSC_FIND_REQUIRED)
+	      MESSAGE( FATAL_ERROR
+          "Complex version of PETSC could not be found. Either disable it by setting 
+           WITH_PETSC to NO in your CMake.vars file, or install it according to 
+           instructions at\n
+           <http://hpfem.org/hermes/doc/src/installation/matrix_solvers/petsc.html>."
+        )
+      ENDIF (PETSC_FIND_REQUIRED)
+    ENDIF (PETSC_FOUND) 
+    
+    # linux specific (?)
+    SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} dl CACHE FILEPATH "PETSc libraries - complex version")  
+  ENDIF(NOT PETSC_CPLX_LIBRARIES)  
 
-  SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-complex)
-  
-  # PETSc 3.1    
-  SET(PETSC_DIR ${MY_PETSC_LIB_DIRS}/${PETSC_ARCH})
-  IF(EXISTS ${PETSC_DIR})
+    # Export to cache.
+  SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_CPLX_INCLUDE_DIRS} 
+    CACHE PATH "PETSc include directories for the complex version")
     
-    FIND_LIBRARY(PETSC_LIB petsc ${PETSC_DIR}/lib NO_DEFAULT_PATH)
-    FIND_LIBRARY(PETSC_LIB petsc)
-          
-    IF(COMMON_PETSC_INCLUDE_DIRS)
-      # Add arch-specific include directory.
-      SET(PETSC_CPLX_INCLUDE_DIRS ${PETSC_DIR}/include)
-    ELSE(COMMON_PETSC_INCLUDE_DIRS)
-      # petsc.h has not been found in the root include directory, search in the arch-specific one.
-      FIND_PATH(PETSC_CPLX_INCLUDE_DIRS petsc.h PATHS ${PETSC_DIR}/include)
-    ENDIF(COMMON_PETSC_INCLUDE_DIRS)
-   	       		  
-    IF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
-      SET(PETSC_FOUND TRUE)        
-      # Set the complex version of the library (PETSc 3.1 is contained in a single libfile).
-      SET(PETSC_CPLX_LIBRARIES ${PETSC_LIB})
-    ENDIF (PETSC_CPLX_INCLUDE_DIRS AND PETSC_LIB)
-    
-  ENDIF(EXISTS ${PETSC_DIR})
-  
-  IF (PETSC_FOUND)    
-    IF (NOT PETSC_FIND_QUIETLY)
-		  MESSAGE(STATUS "Found complex version of PETSc: ${PETSC_DIR}")
-    ENDIF (NOT PETSC_FIND_QUIETLY)
-  ELSE (PETSC_FOUND)
-    IF (PETSC_FIND_REQUIRED)
-	    MESSAGE(FATAL_ERROR "Could not find complex version of PETSc")
-    ENDIF (PETSC_FIND_REQUIRED)
-  ENDIF (PETSC_FOUND) 
-  
-  # linux specific (?)
-  SET(PETSC_CPLX_LIBRARIES ${PETSC_CPLX_LIBRARIES} dl)          
-ENDIF(H1D_COMPLEX OR H2D_COMPLEX OR H3D_COMPLEX)
+  UNSET(PETSC_LIB_C CACHE)  # PETSC_LIB don't needed any more - wipe out from cache.
+ENDIF(HERMES_COMMON_COMPLEX)

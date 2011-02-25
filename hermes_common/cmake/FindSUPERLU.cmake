@@ -42,4 +42,10 @@ FIND_LIBRARY( SUPERLU_LIBRARY ${PRE}superlu${POST} ${MY_SUPERLU_LIB_DIRS} NO_DEF
 FIND_LIBRARY( SUPERLU_LIBRARY ${PRE}superlu${POST} /usr/lib /usr/lib/superlu /usr/local/lib/superlu)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SUPERLU DEFAULT_MSG SUPERLU_LIBRARY SUPERLU_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(  SUPERLU 
+   "SUPERLU could not be found. Please install it according to instructions at\n
+   < http://hpfem.org/hermes/doc/src/installation/matrix_solvers/superlu.html >\n
+   and/or provide path to its root directory by setting variable SUPERLU_ROOT 
+   in the CMake.vars file."
+  SUPERLU_LIBRARY SUPERLU_INCLUDE_DIR
+)
