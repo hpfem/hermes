@@ -20,7 +20,7 @@
 #include "../hermes2d.h"
 
 // General BC.
-BoundaryCondition::BoundaryCondition() {
+BoundaryCondition::BoundaryCondition(Hermes::vector<std::string> markers) : markers(markers) {
   current_time = 0.0;
 };
 
@@ -31,7 +31,7 @@ void BoundaryCondition::set_current_time(double time) {
 };
 
 // Dirichlet BC.
-DirichletBoundaryCondition::DirichletBoundaryCondition() : BoundaryCondition() {
+DirichletBoundaryCondition::DirichletBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
   value = 0.0;
 };
 
@@ -49,7 +49,7 @@ DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<
 }
 
 // Neumann BC.
-NeumannBoundaryCondition::NeumannBoundaryCondition() : BoundaryCondition() {
+NeumannBoundaryCondition::NeumannBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
   value = 0.0;
 };
 
@@ -68,7 +68,7 @@ NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std:
 
 
 // Newton BC.
-NewtonBoundaryCondition::NewtonBoundaryCondition() : BoundaryCondition() {
+NewtonBoundaryCondition::NewtonBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
   value_u = 0.0;
   value_g = 0.0;
 };

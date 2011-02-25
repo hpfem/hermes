@@ -41,7 +41,7 @@ public:
   };
 
   /// Default constructor.
-  BoundaryCondition();
+  BoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Default destructor
   ~BoundaryCondition();
@@ -70,7 +70,7 @@ protected:
 class HERMES_API DirichletBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
-  DirichletBoundaryCondition();
+  DirichletBoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Virtual destructor.
   virtual ~DirichletBoundaryCondition();
@@ -104,7 +104,7 @@ public:
 class HERMES_API NeumannBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
-  NeumannBoundaryCondition();
+  NeumannBoundaryConditionHermes::vector<std::string> markers);
 
   /// Virtual destructor.
   virtual ~NeumannBoundaryCondition();
@@ -137,7 +137,7 @@ public:
 class HERMES_API NewtonBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
-  NewtonBoundaryCondition();
+  NewtonBoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Virtual destructor.
   virtual ~NewtonBoundaryCondition();
