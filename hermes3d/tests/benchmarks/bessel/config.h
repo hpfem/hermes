@@ -1,5 +1,5 @@
 #define WITH_UMFPACK
-/* #undef WITH_PETSC */
+#define WITH_PETSC
 /* #undef WITH_MPI */
 
 /* #undef TRACING */
