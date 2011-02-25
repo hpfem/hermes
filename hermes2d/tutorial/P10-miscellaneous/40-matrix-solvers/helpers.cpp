@@ -17,7 +17,7 @@ struct MatrixEntry {
     this->m = m;
     this->n = n;
     this->value = value;
-    info("Setting matrix element (%d, %d, %g).", m, n, value);
+    //info("Setting matrix element (%d, %d, %g).", m, n, value);
   }
 
   int m, n, id, used;
@@ -34,7 +34,7 @@ struct VectorEntry {
   void set(int m, scalar value) {
     this->m = m;
     this->value = value;
-    info("Setting vector entry (%d, %g).", m, value);
+    //info("Setting vector entry (%d, %g).", m, value);
   }
 
   int m, id, used;
