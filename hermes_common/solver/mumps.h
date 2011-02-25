@@ -26,7 +26,7 @@
 #ifdef WITH_MUMPS
   extern "C" {
     #include <mumps_c_types.h>
-  #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  #ifndef HERMES_COMMON_COMPLEX
     #include <dmumps_c.h>
     typedef scalar mumps_scalar;
     #define MUMPS_SCALAR(a) SCALAR(a)
@@ -44,7 +44,7 @@
   #endif
   
 #else
-  #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  #ifndef HERMES_COMMON_COMPLEX
     typedef scalar mumps_scalar;
     #define MUMPS_SCALAR(a) SCALAR(a)
   #else
@@ -92,7 +92,7 @@ public:
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   virtual scalar get(unsigned int idx) { return v[idx]; }
 #else
   virtual scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }

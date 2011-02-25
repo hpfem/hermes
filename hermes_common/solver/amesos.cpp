@@ -93,7 +93,7 @@ bool AmesosSolver::solve()
   
   TimePeriod tmr;  
 
-#if defined(H1D_COMPLEX) || defined(H2D_COMPLEX) || defined (H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   error("AmesosSolver::solve() not yet implemented for complex problems");
 #else
   problem.SetOperator(m->mat);
@@ -123,7 +123,7 @@ bool AmesosSolver::solve()
   // copy the solution into sln vector
   memset(sln, 0, m->size * sizeof(scalar));
   
-#if defined(H1D_COMPLEX) || defined(H2D_COMPLEX) || defined (H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
 #else 
   for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
 #endif

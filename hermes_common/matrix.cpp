@@ -120,10 +120,8 @@ double vec_dot(double *r, double *s, int n_dof)
 double vec_dot(Vector *r, Vector *s, int n_dof)
 {
   double result = 0;
-#ifndef H2D_COMPLEX
-#ifndef H3D_COMPLEX
+#ifndef HERMES_COMMON_COMPLEX
   for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
-#endif
 #endif
   return result;
 }

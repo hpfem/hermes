@@ -109,7 +109,7 @@ bool AztecOOSolver::solve()
   // no output
   aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
 
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   // setup the problem
   aztec.SetUserMatrix(m->mat);
   aztec.SetRHS(rhs->vec);

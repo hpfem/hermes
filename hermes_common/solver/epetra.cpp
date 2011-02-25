@@ -33,7 +33,7 @@ EpetraMatrix::EpetraMatrix()
   _F_
 #ifdef HAVE_EPETRA
   this->mat = NULL;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   this->mat_im = NULL;
 #endif
   this->grph = NULL;
@@ -95,7 +95,7 @@ void EpetraMatrix::finish()
   _F_
 #ifdef HAVE_EPETRA
   mat->FillComplete();
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   mat_im->FillComplete();
 #endif
 #endif
@@ -108,7 +108,7 @@ void EpetraMatrix::alloc()
   grph->FillComplete();
   // create the matrix
   mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
 #endif
 #endif
@@ -120,7 +120,7 @@ void EpetraMatrix::free()
 #ifdef HAVE_EPETRA
   if (owner) {
     delete mat; mat = NULL;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
     delete mat_im; mat_im = NULL;
 #endif
     delete grph; grph = NULL;
@@ -170,7 +170,7 @@ void EpetraMatrix::zero()
   _F_
 #ifdef HAVE_EPETRA
   mat->PutScalar(0.0);
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   mat_im->PutScalar(0.0);
 #endif
 #endif
@@ -181,7 +181,7 @@ void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
   _F_
 #ifdef HAVE_EPETRA
   if (v != 0.0) {		// ignore zero values
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     int n_to_pass = n;
     int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
     if (ierr != 0) error("Failed to insert into Epetra matrix");
@@ -263,7 +263,7 @@ EpetraVector::EpetraVector()
 #ifdef HAVE_EPETRA
   this->std_map = NULL;
   this->vec = NULL;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   this->vec_im = NULL;
 #endif
   this->size = 0;
@@ -298,7 +298,7 @@ void EpetraVector::alloc(unsigned int n)
   size = n;
   std_map = new Epetra_Map(size, 0, seq_comm); MEM_CHECK(std_map);
   vec = new Epetra_Vector(*std_map); MEM_CHECK(vec);
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   vec_im = new Epetra_Vector(*std_map); MEM_CHECK(vec_im);
 #endif
   zero();
@@ -310,7 +310,7 @@ void EpetraVector::zero()
   _F_
 #ifdef HAVE_EPETRA
   for (unsigned int i = 0; i < size; i++) (*vec)[i] = 0.0;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   for (unsigned int i = 0; i < size; i++) (*vec_im)[i] = 0.0;
 #endif
 #endif
@@ -321,7 +321,7 @@ void EpetraVector::change_sign()
   _F_
 #ifdef HAVE_EPETRA
   for (unsigned int i = 0; i < size; i++) (*vec)[i] *= -1.;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   for (unsigned int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
 #endif
 #endif
@@ -333,7 +333,7 @@ void EpetraVector::free()
 #ifdef HAVE_EPETRA
   delete std_map; std_map = NULL;
   delete vec; vec = NULL;
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
   delete vec_im; vec_im = NULL;
 #endif
   size = 0;
@@ -344,7 +344,7 @@ void EpetraVector::set(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   (*vec)[idx] = y;
 #else
   (*vec)[idx] = std::real(y);
@@ -357,7 +357,7 @@ void EpetraVector::add(unsigned int idx, scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   (*vec)[idx] += y;
 #else
   (*vec)[idx] += std::real(y);

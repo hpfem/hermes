@@ -86,7 +86,7 @@ public:
       error("Attempt to define more than one description of the Dirichlet BC \
                on the same part of the boundary.");
 
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(have_function && (value_constants[marker] != 0 || value_zeroes[marker]))
 #else
     if(have_function && (value_constants[marker] != std::complex<double>(0, 0) || value_zeroes[marker]))
@@ -98,7 +98,7 @@ public:
       value_callbacks.erase(marker);
     if(value_callbacks_time[marker] == NULL)
       value_callbacks_time.erase(marker);
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
     if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])
@@ -160,7 +160,7 @@ public:
   /// The same as add_function(), only supplies a 1D constant.
   void add_const(Hermes::vector<int> markers, scalar value) 
   {
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(value == 0) {
 #else
     if(value == std::complex<double>(0, 0)) {
@@ -183,7 +183,7 @@ public:
   // A wrapper utilizing the Mesh::MarkersConversion class.
   void add_const(Hermes::vector<std::string> markers, scalar value)
   {
-    #if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+    #ifndef HERMES_COMMON_COMPLEX
     if(value == 0) {
     #else
         if(value == std::complex<double>(0, 0)) {
@@ -205,7 +205,7 @@ public:
     for(unsigned int i = 0; i < markers.size(); i++) {
       /// If we find out that there is already a value present describing the Dirichlet
       /// BC on this part of the boundary, return an error, otherwise store the value.
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(!(value_constants.insert(std::pair<int, scalar>(markers[i], 0))).second)
 #else
       if(!(value_constants.insert(std::pair<int, scalar>(markers[i], std::complex<double>(0, 0)))).second)
@@ -248,7 +248,7 @@ public:
     std::vector<int>::iterator it;
     for(it = bc_types->markers_dirichlet.begin(); it != bc_types->markers_dirichlet.end(); it++) {
       bool have_function = is_time_dep[*it] ? value_callbacks_time[*it] != NULL : value_callbacks[*it] != NULL;
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
       if(!have_function && (value_constants[*it] == 0 && !value_zeroes[*it]))
 #else
       if(!have_function && (value_constants[*it] == std::complex<double>(0, 0) && !value_zeroes[*it]))
@@ -271,7 +271,7 @@ public:
   /// problem description the user solves.
   bool is_const(int marker)
   {
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(value_constants[marker] == 0 && !value_zeroes[marker]) {
 #else
     if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker]) {
@@ -305,7 +305,7 @@ public:
   /// An overloaded member for constant Dirichlet BCs.
   scalar calculate(int marker)
   {
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     if(value_constants[marker] == 0 && !value_zeroes[marker])
 #else
     if(value_constants[marker] == std::complex<double>(0, 0) && !value_zeroes[marker])

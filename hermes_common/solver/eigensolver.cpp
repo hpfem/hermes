@@ -25,7 +25,7 @@ void wrap_CSC(const Ptr<Python> p, const std::string name,
 {
     p->push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
     p->push_numpy_int_inplace("_JA", A->get_Ap(), A->get_size()+1);
-#if defined H2D_COMPLEX || H3D_COMPLEX
+#ifdef HERMES_COMMON_COMPLEX
     throw std::runtime_error("Eigenproblem with complex numbers is not supported.");
 #else
     p->push_numpy_double_inplace("_A", A->get_Ax(), A->get_nnz());

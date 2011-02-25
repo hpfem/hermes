@@ -17,7 +17,7 @@
 #define __H2D_QUAD_H
 
 #include "../h2d_common.h"
-#include "../config.h"
+#include "config.h"
 
 /// Indices of values in the value returned by Quad2D::get_points().
 enum GIP2DIndices {

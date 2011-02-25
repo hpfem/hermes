@@ -447,7 +447,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 // UMFPack solver //////
 
-#if !defined (H2D_COMPLEX) && !defined (H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   // real case
   #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
   #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)

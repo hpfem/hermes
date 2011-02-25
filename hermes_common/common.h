@@ -57,21 +57,9 @@
 
 // Decide which version of Hermes is being compiled and import
 // the build options from the corresponding config.h file.
-#if defined(H1D_REAL) || defined(H1D_COMPLEX)
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes1d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
-#elif defined(H2D_REAL) || defined(H2D_COMPLEX)
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes2d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
-#elif defined(H3D_REAL) || defined(H3D_COMPLEX)
-  #ifndef CONFIG_H_INCLUDED
-    #include "../hermes3d/src/config.h"
-    #define CONFIG_H_INCLUDED
-  #endif
+#ifndef CONFIG_H_INCLUDED
+  #include "config.h"
+  #define CONFIG_H_INCLUDED
 #endif
 
 // Error codes
@@ -141,7 +129,7 @@ enum ProjNormType
   HERMES_HDIV_NORM
 };
 
-#if defined(H2D_COMPLEX) || defined(H3D_COMPLEX)
+#ifdef HERMES_COMMON_COMPLEX
 
   #include <complex>
 

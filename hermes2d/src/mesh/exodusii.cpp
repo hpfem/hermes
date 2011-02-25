@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
 
-#include "../config.h"
+#include "config.h"
 
 #include <string.h>
 #include "exodusii.h"

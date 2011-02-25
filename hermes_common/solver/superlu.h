@@ -24,7 +24,7 @@
 #include "../matrix.h"
 
 #ifdef WITH_SUPERLU  
-  #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  #ifndef HERMES_COMMON_COMPLEX
     #ifdef SLU_MT
       #include <pdsp_defs.h>  
             
@@ -125,7 +125,7 @@
     #define SLU_PRINT_STAT(stat_ptr)  StatPrint(stat_ptr)
   #endif
 #else
-  #if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+  #ifndef HERMES_COMMON_COMPLEX
     typedef scalar slu_scalar;
     #define SUPERLU_SCALAR(a) SCALAR(a)
   #else
@@ -169,7 +169,7 @@ public:
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-#if !defined(H1D_COMPLEX) && !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   virtual scalar get(unsigned int idx) { return v[idx]; }
 #else
   virtual scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }

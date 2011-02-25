@@ -1,11 +1,11 @@
-#ifndef __H2D_EIGENSOLVER_H
-#define __H2D_EIGENSOLVER_H
+#ifndef __HERMES_EIGENSOLVER_H
+#define __HERMES_EIGENSOLVER_H
 
 #include "../matrix.h"
 
 #include "../python/python_api.h"
 
-#include "config.h"
+#include "../config.h"
 // RCP
 #ifndef WITH_TRILINOS
 #include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"

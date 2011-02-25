@@ -23,7 +23,7 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   #define MUMPS         dmumps_c
 #else
   #define MUMPS         zmumps_c
@@ -142,7 +142,7 @@ scalar MumpsMatrix::get(unsigned int m, unsigned int n)
   if (mid < 0) return 0.0;
   // Otherwise, add offset to the n-th column and return the value.
   if (mid >= 0) mid += Ap[n];
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   return Ax[mid];
 #else
   return cplx(Ax[mid].r, Ax[mid].i);
@@ -168,7 +168,7 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
     error("Sparse matrix entry not found");
   // Add offset to the n-th column.
   pos += Ap[n];
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   Ax[pos] += v;
 #else
   Ax[pos].r += v.real();
@@ -215,7 +215,7 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (unsigned int j = 0; j < size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)          
+#ifndef HERMES_COMMON_COMPLEX          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
 #else          
           fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
@@ -298,7 +298,7 @@ void MumpsVector::alloc(unsigned int n)
 void MumpsVector::change_sign()
 {
   _F_
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 #else
   for (unsigned int i = 0; i < size; i++) {
@@ -325,7 +325,7 @@ void MumpsVector::free()
 void MumpsVector::set(unsigned int idx, scalar y)
 {
   _F_
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   v[idx] = y;
 #else
   v[idx].r = y.real();
@@ -336,7 +336,7 @@ void MumpsVector::set(unsigned int idx, scalar y)
 void MumpsVector::add(unsigned int idx, scalar y)
 {
   _F_
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
   v[idx] += y;
 #else
   v[idx].r += y.real();
@@ -348,7 +348,7 @@ void MumpsVector::add(unsigned int n, unsigned int *idx, scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++) {
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     v[idx[i]] += y[i];
 #else
     v[idx[i]].r += y[i].real();
@@ -526,7 +526,7 @@ bool MumpsSolver::solve()
   {
     delete [] sln;
     sln = new scalar[m->size];
-#if !defined(H2D_COMPLEX) && !defined(H3D_COMPLEX)
+#ifndef HERMES_COMMON_COMPLEX
     for (unsigned int i = 0; i < rhs->size; i++)
       sln[i] = param.rhs[i];
 #else
