@@ -43,7 +43,7 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
 };
 
 // Dirichlet BC Value
-DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition() {
+DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
   this->value = value;
   this->markers = markers;
 }
@@ -61,7 +61,7 @@ scalar NeumannBoundaryCondition::function(double x, double y) const {
 };
 
 // Neumann BC Value
-NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition() {
+NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition(markers) {
   this->value = value;
   this->markers = markers;
 }
@@ -87,7 +87,11 @@ scalar NewtonBoundaryCondition::function_g(double x, double y) const {
 
 // BoundaryConditions.
 
-BoundaryConditions::BoundaryConditions() {};
+BoundaryConditions::BoundaryConditions() {
+  std::ostringstream oss;
+  oss << "Everywhere where no other is.";
+  this->empty_condition = new EmptyBoundaryCondition(oss.str());
+};
 
 BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
   add_boundary_conditions(boundary_conditions);
@@ -109,6 +113,11 @@ void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryConditio
     }
 
   create_marker_cache();
+
+  std::ostringstream oss;
+  oss << "Everywhere where no other is.";
+  this->empty_condition = new EmptyBoundaryCondition(oss.str());
+
 };
 
 Hermes::vector<BoundaryCondition *>::const_iterator BoundaryConditions::all_begin() const {
@@ -145,7 +154,9 @@ std::map<std::string, BoundaryCondition *>::const_iterator BoundaryConditions::m
 std::map<std::string, BoundaryCondition *>::const_iterator BoundaryConditions::markers_end() const {
   return markers.end();
 }
-BoundaryConditions::~BoundaryConditions() {};
+BoundaryConditions::~BoundaryConditions() {
+  delete this->empty_condition;
+};
 
 void BoundaryConditions::create_marker_cache() {
   for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
@@ -165,5 +176,13 @@ void BoundaryConditions::create_marker_cache() {
 
 
 BoundaryCondition* BoundaryConditions::get_boundary_condition(std::string marker) {
-  return markers[marker];
+  if(markers.find(marker) == markers.end())
+    return this->empty_condition;
+  else
+    return markers[marker];
 }
+
+void BoundaryConditions::set_current_time(double time) {
+  for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
+    (*all_iterator)->set_current_time(time);
+};

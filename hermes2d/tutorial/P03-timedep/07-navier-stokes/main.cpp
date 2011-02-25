@@ -31,7 +31,7 @@ using namespace RefinementSelectors;
 //           parameters can be changed in the mesh file "domain.mesh".
 //
 // The following parameters can be changed:
-
+const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
                                                   // divergence-free, more accurate than using a continuous
@@ -68,14 +68,6 @@ const std::string BDY_OBSTACLE = "5";
 // Current time (used in weak forms).
 double current_time = 0;
 
-// Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(double x, double y, double time) {
-  // Time-dependent parabolic profile at inlet.
-  double val_y = VEL_INLET * y*(H-y) / (H/2.)/(H/2.); // Peak value VEL_INLET at y = H/2.
-  if (time <= STARTUP_TIME) return val_y * time/STARTUP_TIME;
-  else return val_y;
-}
-
 // Weak forms.
 #include "forms.cpp"
 
@@ -93,20 +85,23 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
 
   // Initialize boundary conditions
-  DirichletFunctionBoundaryCondition bc_left_vel_x(Hermes::vector<std::string>(BDY_LEFT), VEL_INLET, H);
+  DirichletFunctionBoundaryCondition bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   DirichletValueBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
 
   DirichletValueBoundaryCondition bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
-  BoundaryConditions bcs_vel_y(Hermes::vector<BoundaryCondition *>(&bc_vel_y));
+  BoundaryConditions bcs_vel_y(&bc_vel_y);
+
+  BoundaryConditions bcs_pressure;
+
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
   H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space p_space(&mesh, NULL, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
@@ -129,17 +124,17 @@ int main(int argc, char* argv[])
   p_prev_time.set_zero(&mesh);
 
   // Initialize weak formulation.
-  WeakForm wf;
+  WeakForm* wf;
   if (NEWTON)
-    wf = *(new WeakFormNewton);
+    wf = new WeakFormNewton(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
   else
-    wf = *(new WeakFormSimpleLinearization);
+    wf = new WeakFormSimpleLinearization(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   bool is_linear;
   if (NEWTON) is_linear = false;
   else is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -174,10 +169,10 @@ int main(int argc, char* argv[])
     current_time += time_step;
     info("---- Time step %d, time = %g:", ts, current_time);
 
-    // Update time-dependent essential BC are used.
+    // Update time-dependent essential BCs.
     if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
     if (NEWTON) 

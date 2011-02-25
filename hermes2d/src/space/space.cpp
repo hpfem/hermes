@@ -631,14 +631,15 @@ int Space::assign_dofs(Hermes::vector<Space*> spaces)
 }
 
 // updating time-dependent essential BC
-HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces) {
+HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double time) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
+    spaces[i]->get_boundary_conditions()->set_current_time(time);
     spaces[i]->update_essential_bc_values();
   }
 }
 
-HERMES_API void update_essential_bc_values(Space *s) {
-  return update_essential_bc_values(Hermes::vector<Space*>(s));
+HERMES_API void update_essential_bc_values(Space *s, double time) {
+  update_essential_bc_values(Hermes::vector<Space*>(s), time);
 }
 

@@ -184,9 +184,6 @@ public:
   /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
   static int assign_dofs(Hermes::vector<Space*> spaces);
 
-  BCTypes* bc_types;
-  BCValues* bc_values;
-
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
   static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
@@ -306,8 +303,8 @@ public:
 };
 
 // updating time-dependent essential (Dirichlet) boundary conditions
-extern HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces);  // multiple spaces
-extern HERMES_API void update_essential_bc_values(Space *s);    // one space
+extern HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double time);  // multiple spaces
+extern HERMES_API void update_essential_bc_values(Space *s, double time);    // one space
 
 class Ord2
 {

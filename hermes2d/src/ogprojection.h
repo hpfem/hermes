@@ -72,6 +72,7 @@ protected:
   public:
     ProjectionMatrixVolForm(int i, int j, ProjNormType projNormType) : WeakForm::MatrixFormVol(i, j)
     {
+      this->adapt_eval = false;
       this->projNormType = projNormType;
     }
 
@@ -185,6 +186,7 @@ protected:
   public:
     ProjectionVectorVolForm(int i, MeshFunction* ext, ProjNormType projNormType) : WeakForm::VectorFormVol(i)
     {
+      this->adapt_eval = false;
       this->projNormType = projNormType;
       this->ext = Hermes::vector<MeshFunction *>(ext);
     }

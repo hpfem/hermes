@@ -37,7 +37,7 @@ void OGProjection::project_internal(Hermes::vector<Space *> spaces, WeakForm* wf
   delete matrix;
   delete rhs;
   delete dp;
-  delete wf;
+  //delete wf;
 }
 
 void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction*> source_meshfns,

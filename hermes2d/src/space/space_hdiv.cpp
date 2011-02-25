@@ -101,7 +101,7 @@ void HdivSpace::assign_edge_dofs()
       int ndofs = get_edge_order_internal(en) + 1;
       ndata[en->id].n = ndofs;
 
-      if (en->bnd && this->bc_types->get_type(en->marker) == BC_ESSENTIAL)
+      if (en->bnd && this->boundary_conditions->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker((en->marker)))->get_type() == BC_ESSENTIAL)
       {
         ndata[en->id].dof = -1;
       }

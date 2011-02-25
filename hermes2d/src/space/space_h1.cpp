@@ -81,7 +81,6 @@ void H1Space::set_shapeset(Shapeset *shapeset)
 Space* H1Space::dup(Mesh* mesh, int order_increase) const
 {
   _F_
-  // FIXME - not tested
   H1Space* space = new H1Space(mesh, boundary_conditions, 1, shapeset);
   space->copy_orders(this, order_increase);
   return space;
@@ -165,20 +164,6 @@ void H1Space::assign_vertex_dofs()
     next_dof += ed->n * stride;
   }
 }
-
-
-void H1Space::assign_edge_dofs()
-{
-  _F_
-  // TODO: remove this fn, we now assign all dofs at once
-}
-
-void H1Space::assign_bubble_dofs()
-{
-  _F_
-  // TODO: remove this fn, we now assign all dofs at once
-}
-
 
 //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 

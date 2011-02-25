@@ -73,7 +73,7 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces,
   // according to the conversion table contained in the mesh.
   element_markers_conversion = &spaces[0]->get_mesh()->element_markers_conversion;
   boundary_markers_conversion = &spaces[0]->get_mesh()->boundary_markers_conversion;
-  wf->set_markers_conversion(&spaces[0]->get_mesh()->element_markers_conversion, &spaces[0]->get_mesh()->boundary_markers_conversion);
+  wf->set_markers_conversion(spaces[0]->get_mesh()->element_markers_conversion, spaces[0]->get_mesh()->boundary_markers_conversion);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.

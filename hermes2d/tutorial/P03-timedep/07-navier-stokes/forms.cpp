@@ -57,6 +57,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -91,6 +92,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
   };
 
@@ -134,13 +136,11 @@ public:
   class VectorFormVolVel : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolVel(int i, bool Stokes, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), time_step(time_step)
-    {
+    VectorFormVolVel(int i, bool Stokes, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), time_step(time_step) {
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -149,8 +149,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -159,12 +158,13 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
     double time_step;
   };
 
-  // Members.
 protected:
+  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -182,12 +182,14 @@ public:
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_1);
 
-    BilinearFormUnSymVel* unsym_vel_form_0 = new BilinearFormUnSymVel(0, 0, Stokes);
-    unsym_vel_form_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
-    add_matrix_form(unsym_vel_form_0);
-    BilinearFormUnSymVel* unsym_vel_form_1 = new BilinearFormUnSymVel(1, 1, Stokes);
-    unsym_vel_form_1->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
-    add_matrix_form(unsym_vel_form_1);
+    BilinearFormUnSymVel_0_0* unsym_vel_form_0_0 = new BilinearFormUnSymVel_0_0(0, 0, Stokes);
+    add_matrix_form(unsym_vel_form_0_0);
+    BilinearFormUnSymVel_0_1* unsym_vel_form_0_1 = new BilinearFormUnSymVel_0_1(0, 1, Stokes);
+    add_matrix_form(unsym_vel_form_0_1);
+    BilinearFormUnSymVel_1_0* unsym_vel_form_1_0 = new BilinearFormUnSymVel_1_0(1, 0, Stokes);
+    add_matrix_form(unsym_vel_form_1_0);
+    BilinearFormUnSymVel_1_1* unsym_vel_form_1_1 = new BilinearFormUnSymVel_1_1(1, 1, Stokes);
+    add_matrix_form(unsym_vel_form_1_1);
 
     BilinearFormUnSymXVelPressure* unsym_velx_pressure_form = new BilinearFormUnSymXVelPressure(0, 2);
     add_matrix_form(unsym_velx_pressure_form);
@@ -195,11 +197,14 @@ public:
     BilinearFormUnSymYVelPressure* unsym_vely_pressure_form = new BilinearFormUnSymYVelPressure(1, 2);
     add_matrix_form(unsym_vely_pressure_form);
     
-    VectorFormVolVel* vector_vel_form_x = new VectorFormVolVel(0, Stokes, time_step);
-    vector_vel_form_x->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time);
-
-    VectorFormVolVel* vector_vel_form_y = new VectorFormVolVel(1, Stokes, time_step);
-    vector_vel_form_y->ext = Hermes::vector<MeshFunction*>(y_vel_previous_time);
+    VectorForm_0* F_0 = new VectorForm_0(0, Stokes, Reynolds, time_step);
+    F_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    add_vector_form(F_0);
+    VectorForm_1* F_1 = new VectorForm_1(1, Stokes, Reynolds, time_step);
+    F_1->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    add_vector_form(F_1);
+    VectorForm_2* F_2 = new VectorForm_2(2);
+    add_vector_form(F_2);
   };
 
   class BilinearFormSymVel : public WeakForm::MatrixFormVol
@@ -226,6 +231,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -264,6 +270,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
   };
 
@@ -296,6 +303,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
   };
 
@@ -328,6 +336,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
   };
 
@@ -364,6 +373,7 @@ public:
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
   };
 
@@ -407,13 +417,11 @@ public:
   class VectorForm_0 : public WeakForm::VectorFormVol
   {
   public:
-    VectorForm_0(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step)
-    {
+    VectorForm_0(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -424,13 +432,12 @@ public:
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * ((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step 
-                            + (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]);
+          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -441,11 +448,12 @@ public:
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * ((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step 
-                            + (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]);
+          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step)
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -454,13 +462,11 @@ public:
   class VectorForm_1 : public WeakForm::VectorFormVol
   {
   public:
-    VectorForm_1(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step)
-    {
+    VectorForm_1(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -471,13 +477,12 @@ public:
         result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dy[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * ((yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step 
-                            + (xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i]);
+          result += wt[i] * (((yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step )
+                            + ((xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -488,11 +493,12 @@ public:
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * ((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step 
-                            + (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]);
+          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
   protected:
+    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -501,13 +507,11 @@ public:
   class VectorForm_2 : public WeakForm::VectorFormVol
   {
   public:
-    VectorForm_2(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step)
-    {
+    VectorForm_2(int i) : WeakForm::VectorFormVol(i) {
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       scalar result = 0;
       Func<scalar>* xvel_prev_newton = u_ext[0];  
       Func<scalar>* yvel_prev_newton = u_ext[1];  
@@ -517,24 +521,19 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       Ord result = 0;
-      Func<Ord* xvel_prev_newton = u_ext[0];  
+      Func<Ord>* xvel_prev_newton = u_ext[0];  
       Func<Ord>* yvel_prev_newton = u_ext[1];  
 
       for (int i = 0; i < n; i++)
         result += wt[i] * (xvel_prev_newton->dx[i] * v->val[i] + yvel_prev_newton->dy[i] * v->val[i]);
       return result;
     }
-  protected:
-    bool Stokes;
-    double Reynolds;
-    double time_step;
   };
 
-  // Members.
 protected:
+  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -545,11 +544,12 @@ protected:
 class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double vel_inlet, double H) : DirichletBoundaryCondition(markers), vel_inlet(vel_inlet), H(H) {};
+  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+        DirichletBoundaryCondition(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
   ~DirichletFunctionBoundaryCondition() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 
-    return BC_VALUE; 
+    return BC_FUNCTION; 
   };
 
   virtual scalar function(double x, double y) const {
@@ -560,6 +560,7 @@ public:
       return val_y;
   };
 
+protected:
   // Members.
   double startup_time;
   double vel_inlet;

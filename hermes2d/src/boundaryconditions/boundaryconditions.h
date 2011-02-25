@@ -31,7 +31,8 @@ public:
   enum BoundaryConditionType {
     BC_DIRICHLET, ///< Dirichlet BC.
     BC_NEUMANN,   ///< Neumann BC.
-    BC_NEWTON     ///< Newton BC.
+    BC_NEWTON,    ///< Newton BC.
+    BC_NONE       ///< Empty (none) BC.
   };
 
   /// Types of description of boundary values, either a function (callback), or a constant.
@@ -104,7 +105,7 @@ public:
 class HERMES_API NeumannBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
-  NeumannBoundaryConditionHermes::vector<std::string> markers);
+  NeumannBoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Virtual destructor.
   virtual ~NeumannBoundaryCondition();
@@ -165,7 +166,15 @@ protected:
   scalar value_g;
 };
 
+/// Class representing empty boundary condition.
+class HERMES_API EmptyBoundaryCondition : public BoundaryCondition {
+public:
+  /// Constructor.
+  EmptyBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {};
 
+  /// Function giving info that u_Neumann is a constant.
+  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NONE; };
+};
 
 
 /// Class encapsulating all boundary conditions of one problem.
@@ -207,6 +216,9 @@ public:
 
   BoundaryCondition* get_boundary_condition(std::string marker);
 
+  /// Sets the current time for time-dependent boundary conditions.
+  void set_current_time(double time);
+
 private:
   /// All boundary conditions together.
   Hermes::vector<BoundaryCondition *> all;
@@ -225,6 +237,9 @@ private:
 
   /// Create boundary markers cache for assembling
   void create_marker_cache();
+
+  /// For purpose of filling non-user-provided BCs.
+  EmptyBoundaryCondition* empty_condition;
 };
 
 #endif
