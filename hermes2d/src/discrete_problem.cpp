@@ -1776,7 +1776,19 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
-    int order_init = 4;
+    Shapeset* fu_shapeset = fu->get_shapeset();
+    Shapeset* fv_shapeset = fv->get_shapeset();
+    int fu_index = fu->get_active_shape();
+    int fv_index = fv->get_active_shape();
+    int fu_order = fu_shapeset->get_order(fu_index);
+    int fv_order = fv_shapeset->get_order(fv_index);
+    int fu_order_h = H2D_GET_H_ORDER(fu_order);
+    int fu_order_v = H2D_GET_V_ORDER(fu_order);
+    int fv_order_h = H2D_GET_H_ORDER(fv_order);
+    int fv_order_v = H2D_GET_V_ORDER(fv_order);
+
+    // FIXME - this needs more research.
+    int order_init = (fu_order_h + fu_order_v) / 2 + (fv_order_h + fv_order_v) / 2;
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
@@ -2027,7 +2039,14 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
-    int order_init = 4;
+    Shapeset* fv_shapeset = fv->get_shapeset();
+    int fv_index = fv->get_active_shape();
+    int fv_order = fv_shapeset->get_order(fv_index);
+    int fv_order_h = H2D_GET_H_ORDER(fv_order);
+    int fv_order_v = H2D_GET_V_ORDER(fv_order);
+
+    // FIXME - this needs more research.
+    int order_init = (fv_order_h + fv_order_v) / 2;
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, vfv, u_ext, fv, rv);
@@ -2269,12 +2288,14 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs,
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
-    int order_init = 4;
+    int fu_order = fu->get_edge_fn_order(surf_pos->surf_num);
+    int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
+
+    // FIXME - this needs more research.
+    int order_init = fu_order + fv_order;
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, mfs, u_ext, fu, fv, ru, rv, surf_pos);
-
-    //printf("Eval_form: initial result = %g\n", result_init);
 
     // Calculate the value of the form using adaptive quadrature.    
     result = eval_form_adaptive(order_init, result_init,
@@ -2510,7 +2531,10 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs,
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
-    int order_init = 4;
+    int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
+
+    // FIXME - this needs more research.
+    int order_init = fv_order;
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, vfs, u_ext, fv, rv, surf_pos);
