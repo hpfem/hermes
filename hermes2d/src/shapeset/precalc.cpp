@@ -77,12 +77,12 @@ void PrecalcShapeset::set_active_shape(int index)
 
   if(master_pss == NULL) {
     if(!tables.present(key))
-      tables.add(new LightArray<LightArray<Node*>*>, key);
+      tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
     sub_tables = tables.get(key);
   }
   else {
     if(!master_pss->tables.present(key))
-      master_pss->tables.add(new LightArray<LightArray<Node*>*>, key);
+      master_pss->tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
     sub_tables = master_pss->tables.get(key);
   }
 
@@ -157,13 +157,12 @@ void PrecalcShapeset::free()
 
   for(unsigned int i = 0; i < tables.get_size(); i++)
     if(tables.present(i)) {
-      for(unsigned int j = 0; j < tables.get(i)->get_size(); j++) 
-        if(tables.get(i)->present(j)) {
-          for(unsigned int k = 0; k < tables.get(i)->get(j)->get_size(); k++)
-            if(tables.get(i)->get(j)->present(k))
-              ::free(tables.get(i)->get(j)->get(k));
-          delete tables.get(i)->get(j);
-        }
+      for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++) {
+        for(unsigned int k = 0; k < it->second->get_size(); k++)
+          if(it->second->present(k))
+            ::free(it->second->get(k));
+        delete it->second;
+      }
       delete tables.get(i);
     }
 

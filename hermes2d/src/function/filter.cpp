@@ -76,7 +76,7 @@ void Filter::init()
   order = 0;
 
   for(int i = 0; i < 10; i++)
-      tables[i] = new LightArray<LightArray<Node*>*>;
+      tables[i] = new std::map<uint64_t, LightArray<Node*>*>;
 
   memset(sln_sub, 0, sizeof(sln_sub));
   set_quad_2d(&g_quad_2d_std);
@@ -123,17 +123,16 @@ void Filter::set_active_element(Element* e)
   }
 
   if (tables[cur_quad] != NULL) {
-    for(unsigned int k = 0; k < tables[cur_quad]->get_size(); k++)
-      if(tables[cur_quad]->present(k)) {
-        for(unsigned int l = 0; l < tables[cur_quad]->get(k)->get_size(); l++)
-          if(tables[cur_quad]->get(k)->present(l))
-            ::free(tables[cur_quad]->get(k)->get(l));
-        delete tables[cur_quad]->get(k);
+    for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[cur_quad]->begin(); it != tables[cur_quad]->end(); it++) {
+      for(unsigned int l = 0; l < it->second->get_size(); l++)
+        if(it->second->present(l))
+          ::free(it->second->get(l));
+      delete it->second;
       }
     delete tables[cur_quad];
   }
 
-  tables[cur_quad] = new LightArray<LightArray<Node*>*>;
+  tables[cur_quad] = new std::map<uint64_t, LightArray<Node*>*>;
 
   sub_tables = tables[cur_quad];
   update_nodes_ptr();
@@ -146,16 +145,14 @@ void Filter::free()
 {
   for (int i = 0; i < num; i++)
     if (tables[i] != NULL) {
-      for(unsigned int k = 0; k < tables[i]->get_size(); k++) 
-        if(tables[i]->present(k)) {
-          for(unsigned int l = 0; l < tables[i]->get(k)->get_size(); l++)
-            if(tables[i]->get(k)->present(l))
-              ::free(tables[i]->get(k)->get(l));
-          delete tables[i]->get(k);
-        }
-      delete tables[i];
-      tables[i] = NULL;
+    for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[i]->begin(); it != tables[i]->end(); it++) {
+      for(unsigned int l = 0; l < it->second->get_size(); l++)
+        if(it->second->present(l))
+          ::free(it->second->get(l));
+      delete it->second;
     }
+    delete tables[i];
+  }
 }
 
 

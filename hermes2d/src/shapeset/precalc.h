@@ -107,7 +107,7 @@ protected:
   /// The highest and most complicated one maps a key formed by
   /// quadrature table selector (0-7), mode of the shape function (triangle/quad),
   /// and shape function index to a table from the middle layer.
-  LightArray<LightArray<LightArray<Node*>*>*> tables;
+  LightArray<std::map<uint64_t, LightArray<Node*>*>*> tables;
 
   int mode;
   int index;

@@ -243,7 +243,7 @@ protected:
   };
 
   /// Table of Node tables, for each possible transformation there can be a different Node table.
-  LightArray<LightArray<Node*>*>* sub_tables;
+  std::map<uint64_t, LightArray<Node*>*>* sub_tables;
 
   /// Table of nodes.
   LightArray<Node*>* nodes;
@@ -261,9 +261,9 @@ protected:
     if (sub_idx > H2D_MAX_IDX)
       handle_overflow_idx();
     else {
-      if(!sub_tables->present((unsigned int)sub_idx))
-        sub_tables->add(new LightArray<Node*>, (unsigned int)sub_idx);
-      nodes = sub_tables->get((unsigned int) sub_idx);
+      if(sub_tables->find(sub_idx) == sub_tables->end())
+        sub_tables->insert(std::pair<uint64_t, LightArray<Node*>*>(sub_idx, new LightArray<Node*>));
+      nodes = sub_tables->find(sub_idx)->second;
     }
   };
 
