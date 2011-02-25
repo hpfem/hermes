@@ -59,11 +59,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
-const int BDY_OBSTACLE = 5;
+const std::string BDY_BOTTOM = "1";
+const std::string BDY_RIGHT = "2";
+const std::string BDY_TOP = "3";
+const std::string BDY_LEFT = "4";
+const std::string BDY_OBSTACLE = "5";
 
 // Current time (used in weak forms).
 double current_time = 0;
@@ -92,28 +92,21 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
   mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
 
-  // Boundary condition types for x-velocity and y-velocity.
-  BCTypes xvel_bc_type, yvel_bc_type;
-  xvel_bc_type.add_bc_none(BDY_RIGHT);
-  xvel_bc_type.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
-  yvel_bc_type.add_bc_none(BDY_RIGHT);
-  yvel_bc_type.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryCondition bc_left_vel_x(Hermes::vector<std::string>(BDY_LEFT), VEL_INLET, H);
+  DirichletValueBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  BoundaryConditions bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
 
-  // Enter Dirichlet boundary values.
-  BCValues bc_values_x(&current_time);
-  bc_values_x.add_timedep_function(BDY_LEFT, essential_bc_values_xvel);
-  bc_values_x.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE));
-  
-  BCValues bc_values_y;
-  bc_values_y.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP, BDY_LEFT, BDY_OBSTACLE));
+  DirichletValueBoundaryCondition bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  BoundaryConditions bcs_vel_y(Hermes::vector<BoundaryCondition *>(&bc_vel_y));
 
   // Spaces for velocity components and pressure.
-  H1Space xvel_space(&mesh, &xvel_bc_type, &bc_values_x, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &yvel_bc_type, &bc_values_y, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space p_space(&mesh, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, NULL, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, NULL, NULL, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, NULL, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
@@ -136,34 +129,11 @@ int main(int argc, char* argv[])
   p_prev_time.set_zero(&mesh);
 
   // Initialize weak formulation.
-  WeakForm wf(3);
-  if (NEWTON) {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
-  }
-  else {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
-    wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
-  }
+  WeakForm wf;
+  if (NEWTON)
+    wf = *(new WeakFormNewton);
+  else
+    wf = *(new WeakFormSimpleLinearization);
 
   // Initialize the FE problem.
   bool is_linear;
