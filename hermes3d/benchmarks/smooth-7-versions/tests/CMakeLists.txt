@@ -1,3 +1,7 @@
+if(NOT H3D_REAL)
+    return()
+endif(NOT H3D_REAL)
+
 project(adapt-smooth)
 add_executable(${PROJECT_NAME}	main.cpp)
 

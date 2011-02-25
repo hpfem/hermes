@@ -1,3 +1,5 @@
+IF(H2D_COMPLEX)
+
 project(benchmark-bessel)
 
 add_executable(${PROJECT_NAME}
@@ -10,3 +12,5 @@ set_common_target_properties(${PROJECT_NAME} ${HERMES3D_CPLX})
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(${PROJECT_NAME} ${BIN})
+
+ENDIF(H2D_COMPLEX)

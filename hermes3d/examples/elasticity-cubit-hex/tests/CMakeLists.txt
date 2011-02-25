@@ -1,3 +1,7 @@
+if(NOT H3D_REAL)
+    return()
+endif(NOT H3D_REAL)
+
 project(example-elasticity-cubit-hex)
 add_executable(${PROJECT_NAME}	main.cpp)
 
