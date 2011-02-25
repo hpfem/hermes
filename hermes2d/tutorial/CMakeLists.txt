@@ -5,7 +5,7 @@ add_subdirectory(P01-linear)
 # add_subdirectory(P02-nonlinear)
 
 # Time-dependent problems
-# add_subdirectory(P03-timedep)
+add_subdirectory(P03-timedep)
 
 # Adaptivity for linear problems
 add_subdirectory(P04-linear-adapt)
