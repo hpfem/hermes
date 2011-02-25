@@ -117,25 +117,19 @@ private:
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
   };
+};
 
-  class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
-  public:
-    DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string> markers) : DirichletBoundaryCondition()
-    {
-      this->markers = markers;
-    }
+class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
+public:
+  DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string> markers) : DirichletBoundaryCondition(markers)
+  {}
 
-    scalar function(double x, double y) const
-    {
-      return -cos(M_PI*x);
-    }
+  ~DirichletFunctionBoundaryConditionTutorial() {};
 
-    inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
-  };
+  scalar function(double x, double y) const
+  {
+    return -cos(M_PI*x);
+  }
 
-  std::string BDY_HORIZONTAL;
-  std::string BDY_VERTICAL;
-
-  DirichletFunctionBoundaryConditionTutorial *bc1;
-  NeumannValueBoundaryCondition *bc2;
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 };

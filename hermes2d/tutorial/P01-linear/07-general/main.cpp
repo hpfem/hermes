@@ -49,6 +49,11 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakFormTutorial wf;
+  
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionTutorial bc1(BDY_HORIZONTAL);
+  NeumannValueBoundaryCondition bc2(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
