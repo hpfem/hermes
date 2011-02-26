@@ -38,6 +38,7 @@ set(SRC
   utils.cpp
   matrix.cpp
   tables.cpp
+  qsort.cpp 
   third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
   solver/nox.cpp 
   solver/epetra.cpp 

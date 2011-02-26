@@ -19,7 +19,6 @@ set(SRC
   output/gmsh.cpp
   output/vtk.cpp
   output/graph.cpp
-  qsort.cpp
   quadcheb.cpp
   quadstd.cpp
   refdomain.cpp

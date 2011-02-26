@@ -1,5 +1,5 @@
 set(SRC
-    iterator.cpp qsort.cpp
+    iterator.cpp 
     lobatto.cpp legendre.cpp
     discrete_problem.cpp solution.cpp space.cpp
     ogprojection.cpp

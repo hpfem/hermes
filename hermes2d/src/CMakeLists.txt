@@ -71,7 +71,6 @@ set(SRC
        neighbor.cpp
        numerical_flux.cpp
        graph.cpp
-       qsort.cpp 
        ogprojection.cpp
        h2d_common.cpp  
        discrete_problem.cpp
