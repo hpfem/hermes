@@ -179,6 +179,7 @@ endif(WITH_PYTHON)
 add_subdirectory(src)
 
 if(WITH_TESTS)
+  enable_testing()  
   add_subdirectory(tests)
 endif(WITH_TESTS)
 if(WITH_TOOLS)

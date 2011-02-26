@@ -92,6 +92,7 @@ if(WITH_BENCHMARKS)
 endif(WITH_BENCHMARKS)
 
 if(WITH_TESTS)
+    enable_testing()
     add_subdirectory(tests)
 endif(WITH_TESTS)
 
