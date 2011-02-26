@@ -11,13 +11,16 @@ using namespace RefinementSelectors;
 //
 //  Known exact solution, see functions fn() and fndd().
 //
-//  Domain: L-shape domain, see the file lshape.mesh.
+//  Domain: L-shape domain. Classical version is in the file "lshape-standard.mesh", version 
+//          with a circular edge in "lshape-round.mesh". Choose the one you like to use 
+//          and copy it into "domain.mesh". This is the mesh file that is loaded into Hermes.
 //
 //  BC:  Dirichlet, given by exact solution.
 //
 //  The following parameters can be changed:
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -42,9 +45,9 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                   // error behavior err \approx const1*exp(-const2*pow(NDOF, CONV_EXP)).
-const double ERR_STOP = 1e-2;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1e-4;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 100000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -72,7 +75,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinement.
-  mesh.refine_all_elements();
+  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   //mesh.refine_towards_vertex(3, 5);
 
   // Enter boundary markers.
