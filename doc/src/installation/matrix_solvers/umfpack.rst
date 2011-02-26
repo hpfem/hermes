@@ -33,7 +33,7 @@ Using the special Hermes/Femhub package
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/hpfem/solvers/raw/master/packages/umfpack-5.5.1.spkg --no-check-certificate
+  wget https://github.com/downloads/hpfem/solvers/umfpack-5.5.1.spkg --no-check-certificate
   tar -jxvf umfpack-5.5.1.spkg
   rm umfpack-5.5.1.spkg
   cd umfpack-5.5.1

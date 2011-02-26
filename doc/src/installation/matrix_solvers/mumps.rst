@@ -11,7 +11,7 @@ Linux
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/hpfem/solvers/raw/master/packages/mumps-4.9.2.spkg --no-check-certificate
+  wget https://github.com/downloads/hpfem/solvers/mumps-4.9.2.spkg --no-check-certificate
   tar -jxvf mumps-4.9.2.spkg
   rm mumps-4.9.2.spkg
   cd mumps-4.9.2

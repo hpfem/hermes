@@ -10,7 +10,7 @@ Linux
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/hpfem/solvers/raw/master/packages/petsc-3.1-p7.spkg --no-check-certificate
+  wget https://github.com/downloads/hpfem/solvers/petsc-3.1-p7.spkg --no-check-certificate
   tar -jxvf petsc-3.1-p7.spkg
   rm petsc-3.1-p7.spkg
   cd petsc-3.1-p7

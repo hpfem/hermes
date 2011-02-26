@@ -44,7 +44,7 @@ Sequential
 Download the software package from the `solvers repository`_ and unpack 
 it in some temporary directory::
   
-  wget https://github.com/hpfem/solvers/raw/master/packages/superlu-4.0.spkg --no-check-certificate
+  wget https://github.com/downloads/hpfem/solvers/superlu-4.0.spkg --no-check-certificate
   tar -jxvf superlu-4.0.spkg
   rm superlu-4.0.spkg
   cd superlu-4.0
@@ -120,7 +120,7 @@ specifically tuned for Hermes is available in the
 `solvers repository`_ and you may download and unpack it using the
 following commands::
 
-  wget https://github.com/hpfem/solvers/raw/master/packages/superlu_mt-2.0.spkg --no-check-certificate
+  wget https://github.com/downloads/hpfem/solvers/superlu_mt-2.0.spkg --no-check-certificate
   tar -jxvf superlu_mt-2.0.spkg
   rm superlu_mt-2.0.spkg
   cd superlu_mt-2.0
