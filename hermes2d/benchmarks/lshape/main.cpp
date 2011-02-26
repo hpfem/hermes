@@ -45,9 +45,9 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                   // error behavior err \approx const1*exp(-const2*pow(NDOF, CONV_EXP)).
-const double ERR_STOP = 1e-4;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1e-3;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;                      // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 410, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
