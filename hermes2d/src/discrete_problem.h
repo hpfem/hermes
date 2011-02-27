@@ -16,8 +16,8 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_WARN
 
-#ifndef __H2D_FEPROBLEM_H
-#define __H2D_FEPROBLEM_H
+#ifndef __H2D_DISCRETE_PROBLEM_H
+#define __H2D_DISCRETE_PROBLEM_H
 
 #include "../../hermes_common/matrix.h"
 #include "../../hermes_common/solver/solver.h"

@@ -456,11 +456,11 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat,
   for (unsigned ss = 0; ss < stages.size(); ss++) 
     // Assemble one stage. One stage is a collection of functions, 
     // and meshes that can not be further minimized.
-    // E.g. if a linear form uses two external solution, each of 
+    // E.g. if a linear form uses two external solutions, each of 
     // which is defined on a different mesh, and different to the
     // mesh of the current test function, then the stage would have 
     // three meshes. By stage functions, all functions are meant: shape 
-    // function (their precalculated values), and mesh functions.
+    // functions (their precalculated values), and mesh functions.
     assemble_one_stage(stages[ss], mat, rhs, rhsonly, force_diagonal_blocks, 
                        block_weights, spss, refmap, u_ext);
   
@@ -489,8 +489,8 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
        Hermes::vector<Solution *>& u_ext)
 {
   _F_
-  // Boundary flags. bnd[i] == true := i-th edge of the current 
-  // Element is a boundary edge.
+  // Boundary flags. bnd[i] == true if i-th edge of the current 
+  // element is a boundary edge.
   bool bnd[4];
 
   // Info about the boundary edge.
@@ -504,15 +504,21 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
     stage.ext[i]->set_quad_2d(&g_quad_2d_std);
   trav.begin(stage.meshes.size(), &(stage.meshes.front()), &(stage.fns.front()));
 
-  // Check that there is a DG form, so that the whole process is needed to do.
+  // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
   DG_matrix_forms_present = false;
   DG_vector_forms_present = false;
-  for(unsigned int i = 0; i < stage.mfsurf.size(); i++)
-    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE)
+  for(unsigned int i = 0; i < stage.mfsurf.size(); i++) {
+    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE) {
       DG_matrix_forms_present = true;
-  for(unsigned int i = 0; i < stage.vfsurf.size(); i++)
-    if (stage.vfsurf[i]->area == H2D_DG_INNER_EDGE) 
+      break;
+    }
+  }
+  for(unsigned int i = 0; i < stage.vfsurf.size(); i++) {
+    if (stage.vfsurf[i]->area == H2D_DG_INNER_EDGE) {
       DG_vector_forms_present = true;
+      break;
+    }
+  }
 
   // Loop through all assembling states.
   // Assemble each one.
@@ -589,19 +595,18 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   Hermes::vector<AsmList *> al;
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
     al.push_back(new AsmList);
-
+  
   // Natural boundary condition flag.
   Hermes::vector<bool> nat;
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
     nat.push_back(false);
-
-  // Element usage flag: iempty[i] == true := The current state does 
-  // not posses an active element in the i-th space.
+  
+  // Element usage flag: iempty[i] == true if the current state does not posses an active element in the i-th space.
   Hermes::vector<bool> isempty;
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
     isempty.push_back(false);
     
-  // Initialize the state, return a non-NULL element, if no such Element found, return.
+  // Initialize the state, return a non-NULL element; if no such element found, return.
   Element* rep_element = init_state(stage, spss, refmap, e, isempty, al);
   if(rep_element == NULL)
     return;
@@ -655,11 +660,11 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
 
       // If a block scaling table is provided, and if the scaling coefficient
       // A_mn for this block is zero, then the form does not need to be assembled.
-      scalar block_scaling_coeff = 1.;
+      double block_scaling_coeff = 1.;
       if (block_weights != NULL) {
-        if (fabs(block_weights->get_A(m, n)) < 1e-12)
-          continue;
         block_scaling_coeff = block_weights->get_A(m, n);
+        if (fabs(block_scaling_coeff) < 1e-12)
+          continue;
       }
       bool tra = (m != n) && (mfv->sym != 0);
       bool sym = (m == n) && (mfv->sym == 1);
@@ -698,8 +703,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
               scalar val = 0;
               // Numerical integration performed only if all 
               // coefficients multiplying the form are nonzero.
-              if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
-                  && std::abs(al[n]->coef[j]) > 1e-12) {
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
                 val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
                                                       refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
               }
@@ -738,8 +742,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
               scalar val = 0;
               // Numerical integration performed only if all coefficients 
               // multiplying the form are nonzero.
-              if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
-                  && std::abs(al[n]->coef[j]) > 1e-12) {
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
 
                 // Debug.
                 //printf("Eval form II: al[%d]->dof[%d] = %d, al[%d]->dof[%d] = %d\n", 
@@ -847,9 +850,9 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else
     if(DG_vector_forms_present || DG_matrix_forms_present)
-    assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
-                      spss, refmap, u_ext, isempty, 
-                      marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+      assemble_DG_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                        spss, refmap, u_ext, isempty, 
+                        marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
   }
 
 void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage, 
@@ -916,8 +919,10 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
     bool processed = true;
     for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
       if(neighbor_searches.present(i))
-        if(!neighbor_searches.get(i)->neighbors.at(neighbor_i)->visited)
+        if(!neighbor_searches.get(i)->neighbors.at(neighbor_i)->visited) {
             processed = false;
+            break;
+        }
 
     if(!DG_vector_forms_present && processed)
       continue;
@@ -940,12 +945,12 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
 
   // Deinitialize neighbor pss's, refmaps.
   if(DG_matrix_forms_present) {
-  for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
-    delete *it;
-  for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
-    delete *it;
-  for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
-    delete *it;
+    for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
+      delete *it;
+    for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
+      delete *it;
+    for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
+      delete *it;
   }
 
   // Delete the neighbor_searches array.
@@ -1369,10 +1374,11 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
-    scalar block_scaling_coeff = 1.;
+    double block_scaling_coeff = 1.;
     if (block_weights != NULL) {
-      if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
       block_scaling_coeff = block_weights->get_A(m, n);
+      if (fabs(block_scaling_coeff) < 1e-12) 
+        continue;
     }
 
     surf_pos.base = trav_base;
@@ -1401,8 +1407,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
         else if (rhsonly == false) {
           scalar val = 0;
           // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-          if (std::abs(block_scaling_coeff) > 1e-12 && std::abs(al[m]->coef[i]) > 1e-12 
-              && std::abs(al[n]->coef[j]) > 1e-12) {
+          if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
             val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
                                                   refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
           }
@@ -1481,10 +1486,11 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
-    scalar block_scaling_coeff = 1.;
+    double block_scaling_coeff = 1.;
     if (block_weights != NULL) {
-      if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
       block_scaling_coeff = block_weights->get_A(m, n);
+      if (fabs(block_scaling_coeff) < 1e-12) 
+        continue;
     }
 
     // Precalc shapeset and refmaps used for the evaluation.
@@ -2757,7 +2763,7 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
                                   bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u)
 {
-  NeighborSearch* nbs_u = (neighbor_searches.get(neighbor_index_u));
+  NeighborSearch* nbs_u = neighbor_searches.get(neighbor_index_u);
   // Order that will be returned.
   int order;
   
@@ -2826,8 +2832,8 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
 {
   _F_
 
-  NeighborSearch* nbs_u = (neighbor_searches.get(neighbor_index_u));
-  NeighborSearch* nbs_v = (neighbor_searches.get(neighbor_index_v));
+  NeighborSearch* nbs_u = neighbor_searches.get(neighbor_index_u);
+  NeighborSearch* nbs_v = neighbor_searches.get(neighbor_index_v);
 
   // Determine the integration order.
   int order = calc_order_dg_matrix_form(mfs, u_ext, fu, fv, ru_actual, surf_pos, neighbor_supp_u, neighbor_supp_v, neighbor_searches, neighbor_index_u);
@@ -2911,7 +2917,7 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos,
                                   LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v)
 {
-  NeighborSearch* nbs_v = (neighbor_searches.get(neighbor_index_v));
+  NeighborSearch* nbs_v = neighbor_searches.get(neighbor_index_v);
   // Order that will be returned.
   int order;
   int u_ext_length = u_ext.size();      // Number of external solutions.
