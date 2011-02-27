@@ -133,6 +133,9 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
         e->visited = false;
     }
   }
+  
+  //WARNING: AD HOC debugging parameter.
+  bool multimesh = true;
 
   // Begin the multimesh traversal.
   trav.begin(num, &(stage.meshes.front()), &(stage.fns.front()));
@@ -190,36 +193,51 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
 
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
             
-            // Determine the minimum mesh seq in this stage.
+            // 5 is for bits per page in the array.
+            LightArray<NeighborSearch*> neighbor_searches(5);
+            unsigned int num_neighbors = 0;
+            DiscreteProblem::NeighborNode* root;
+            int ns_index;
+            
             dp.min_dg_mesh_seq = 0;
             for(int j = 0; j < num; j++)
               if(stage.meshes[i]->get_seq() < dp.min_dg_mesh_seq || j == 0)
                 dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
               
-            // Initialize the NeighborSearches.
-            // 5 is for bits per page in the array.
-            LightArray<NeighborSearch*> neighbor_searches(5);
-            dp.init_neighbors(neighbor_searches, stage, isurf);
+            ns_index = stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq;
             
-            // Create a multimesh tree;
-            DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
-            dp.build_multimesh_tree(root, neighbor_searches);
-            
-            // Update all NeighborSearches according to the multimesh tree.
-            // After this, all NeighborSearches in neighbor_searches should have the same count 
-            // of neighbors and proper set of transformations
-            // for the central and the neighbor element(s) alike.
-            // Also check that every NeighborSearch has the same number of neighbor elements.
-            unsigned int num_neighbors = 0;
-            for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
-              if(neighbor_searches.present(j)) {
-                NeighborSearch* ns = neighbor_searches.get(j);
-                dp.update_neighbor_search(ns, root);
-                if(num_neighbors == 0)
-                  num_neighbors = ns->n_neighbors;
-                if(ns->n_neighbors != num_neighbors)
-                  error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt::calc_err_internal.");
-              }
+            // Determine the minimum mesh seq in this stage.
+            if (multimesh) 
+            {              
+              // Initialize the NeighborSearches.
+              dp.init_neighbors(neighbor_searches, stage, isurf);
+              
+              // Create a multimesh tree;
+              root = new DiscreteProblem::NeighborNode(NULL, 0);
+              dp.build_multimesh_tree(root, neighbor_searches);
+              
+              // Update all NeighborSearches according to the multimesh tree.
+              // After this, all NeighborSearches in neighbor_searches should have the same count 
+              // of neighbors and proper set of transformations
+              // for the central and the neighbor element(s) alike.
+              // Also check that every NeighborSearch has the same number of neighbor elements.
+              for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
+                if(neighbor_searches.present(j)) {
+                  NeighborSearch* ns = neighbor_searches.get(j);
+                  dp.update_neighbor_search(ns, root);
+                  if(num_neighbors == 0)
+                    num_neighbors = ns->n_neighbors;
+                  if(ns->n_neighbors != num_neighbors)
+                    error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt::calc_err_internal.");
+                }
+            }
+            else
+            {
+              neighbor_searches.add(new NeighborSearch(ee[i], stage.meshes[i]), 0);
+              neighbor_searches.get(0)->set_active_edge(isurf);
+              num_neighbors = neighbor_searches.get(0)->n_neighbors;
+              ns_index = 0;
+            }
 
             // Go through all segments of the currently processed interface (segmentation is caused
             // by hanging nodes on the other side of the interface).
@@ -247,18 +265,27 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               // Push all the necessary transformations to all functions of this stage.
               // The important thing is that the transformations to the current subelement are already there.
               // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
-              for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
-                  stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
-              
-              /* END COPY FROM DISCRETE_PROBLEM.CPP */
               rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
+              if (multimesh) 
+              {
+                for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                  for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
+                    stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
+              }
+              else
+              {            
+                // Push the transformations only to the solution on the current mesh
+                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(0)->central_n_trans[neighbor]; trf_i++)
+                  stage.fns[i]->push_transform(neighbor_searches.get(0)->central_transformations[neighbor][trf_i]);
+              }
+              /* END COPY FROM DISCRETE_PROBLEM.CPP */
+              
               
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
               double central_err = 0.5 * eval_interface_estimator(&error_estimators_surf[iest],
                                                                   rm, surf_pos, neighbor_searches, 
-                                                                  stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq);
+                                                                  ns_index);
               double neighb_err = central_err;
 
               // Scale the error estimate by the scaling function dependent on the element diameter
@@ -288,16 +315,23 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
               
               // Clear the transformations from the RefMaps and all functions.
-              for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
-              rm->set_transform(neighbor_searches.get(stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+              if (multimesh)
+                for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                  stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+              else
+                stage.fns[i]->set_transform(neighbor_searches.get(0)->original_central_el_transform);
+
+              rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
+
+              
               /* END COPY FROM DISCRETE_PROBLEM.CPP */
             }
             
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
             
-            // Delete the multimesh tree;
-            delete root;
+            if (multimesh)
+              // Delete the multimesh tree;
+              delete root;
             
             // Delete the neighbor_searches array.
             for(unsigned int j = 0; j < neighbor_searches.get_size(); j++) 
