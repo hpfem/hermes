@@ -415,6 +415,7 @@ public:
   bool ignore_errors;
 
   friend class DiscreteProblem;
+  friend class KellyTypeAdapt;
 };
 
 #endif /* NEIGHBOR_H_ */

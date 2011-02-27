@@ -76,33 +76,28 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   }
 
   have_coarse_solutions = true;
-
-  // Prepare mesh traversal and error arrays.
-  Mesh **meshes = new Mesh* [num];
-  std::set<Transformable*> trset;
+  
+  WeakForm::Stage stage;
 
   num_act_elems = 0;
   for (int i = 0; i < num; i++)
   {
-    meshes[i] = sln[i]->get_mesh();
-    trset.insert(sln[i]);
+    stage.meshes.push_back(sln[i]->get_mesh());
+    stage.fns.push_back(sln[i]);
 
-    num_act_elems += meshes[i]->get_num_active_elements();
-    int max = meshes[i]->get_max_element_id();
+    num_act_elems += stage.meshes[i]->get_num_active_elements();
+    int max = stage.meshes[i]->get_max_element_id();
 
     if (errors[i] != NULL) delete [] errors[i];
     errors[i] = new double[max];
     memset(errors[i], 0.0, sizeof(double) * max);
   }
-
+/*
   for (unsigned int i = 0; i < error_estimators_vol.size(); i++)
     trset.insert(error_estimators_vol[i].ext.begin(), error_estimators_vol[i].ext.end());
   for (unsigned int i = 0; i < error_estimators_surf.size(); i++)
     trset.insert(error_estimators_surf[i].ext.begin(), error_estimators_surf[i].ext.end());
-
-  Transformable **tr = new Transformable* [trset.size()];
-  std::copy(trset.begin(), trset.end(), tr);
-  trset.clear();
+*/
 
   double total_norm = 0.0;
 
@@ -134,31 +129,25 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
     for (int i = 0; i < num; i++)
     {
       Element* e;
-      for_all_active_elements(e, meshes[i])
+      for_all_active_elements(e, stage.meshes[i])
         e->visited = false;
     }
   }
 
   // Begin the multimesh traversal.
-  trav.begin(num, meshes, tr);
+  trav.begin(num, &(stage.meshes.front()), &(stage.fns.front()));
   while ((ee = trav.get_next_state(bnd, surf_pos)) != NULL)
-  {
+  {   
     // Go through all solution components.
-    // WARNING: This may not work yet because of the untested multimesh behavior of NeighborSearch.
     for (int i = 0; i < num; i++)
     {
+      if (ee[i] == NULL)
+        continue;
+      
       // Set maximum integration order for use in integrals, see limit_order()
       update_limit_table(ee[i]->get_mode());
 
-      NeighborSearch *nbs = new NeighborSearch(ee[i], meshes[i]);
-
       RefMap *rm = sln[i]->get_refmap();
-      
-      // MULTIMESH DG CHANGE
-      /*
-      nbs->attach_rm(rm); // This is needed for querying the geometric and quadrature data.
-      */
-      // MULTIMESH DG CHANGE
 
       double err = 0.0;
 
@@ -199,27 +188,77 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
           {
             if (error_estimators_surf[iest].area != H2D_DG_INNER_EDGE) continue;
 
-            // MULTIMESH DG CHANGE
-            /*
-            nbs->set_active_edge(isurf, ignore_visited_segments);
-            */
-            // MULTIMESH DG CHANGE
+            /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+            
+            // Determine the minimum mesh seq in this stage.
+            dp.min_dg_mesh_seq = 0;
+            for(int j = 0; j < num; j++)
+              if(stage.meshes[i]->get_seq() < dp.min_dg_mesh_seq || j == 0)
+                dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
+              
+            // Initialize the NeighborSearches.
+            // 5 is for bits per page in the array.
+            LightArray<NeighborSearch*> neighbor_searches(5);
+            dp.init_neighbors(neighbor_searches, stage, isurf);
+            
+            // Create a multimesh tree;
+            DiscreteProblem::NeighborNode* root = new DiscreteProblem::NeighborNode(NULL, 0);
+            dp.build_multimesh_tree(root, neighbor_searches);
+            
+            // Update all NeighborSearches according to the multimesh tree.
+            // After this, all NeighborSearches in neighbor_searches should have the same count 
+            // of neighbors and proper set of transformations
+            // for the central and the neighbor element(s) alike.
+            // Also check that every NeighborSearch has the same number of neighbor elements.
+            unsigned int num_neighbors = 0;
+            for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
+              if(neighbor_searches.present(j)) {
+                NeighborSearch* ns = neighbor_searches.get(j);
+                dp.update_neighbor_search(ns, root);
+                if(num_neighbors == 0)
+                  num_neighbors = ns->n_neighbors;
+                if(ns->n_neighbors != num_neighbors)
+                  error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt::calc_err_internal.");
+              }
+
             // Go through all segments of the currently processed interface (segmentation is caused
             // by hanging nodes on the other side of the interface).
-            for (int neighbor = 0; neighbor < nbs->get_num_neighbors(); neighbor++)
-            {
-              bool use_extended_shapeset = false;
-              // MULTIMESH DG CHANGE
-              /*
-              bool needs_processing = nbs->set_active_segment(neighbor, use_extended_shapeset);
-              if (!needs_processing) continue;
-              */
-              // MULTIMESH DG CHANGE
-
+            for (unsigned int neighbor = 0; neighbor < num_neighbors; neighbor++)
+            {              
+              if (ignore_visited_segments) {
+                bool processed = true;
+                for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
+                  if(neighbor_searches.present(j))
+                    if(!neighbor_searches.get(j)->neighbors.at(neighbor)->visited) {
+                      processed = false;
+                      break;
+                    }
+                if (processed) continue;
+              }
+              
+              // Set the active segment in all NeighborSearches
+              for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
+                if(neighbor_searches.present(j)) {
+                  neighbor_searches.get(j)->active_segment = neighbor;
+                  neighbor_searches.get(j)->neighb_el = neighbor_searches.get(j)->neighbors[neighbor];
+                  neighbor_searches.get(j)->neighbor_edge = neighbor_searches.get(j)->neighbor_edges[neighbor];
+                }
+                
+              // Push all the necessary transformations to all functions of this stage.
+              // The important thing is that the transformations to the current subelement are already there.
+              // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
+              for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
+                  stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
+              
+              /* END COPY FROM DISCRETE_PROBLEM.CPP */
+              rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
+              
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
               double central_err = 0.5 * eval_interface_estimator(&error_estimators_surf[iest],
-                                                                  rm, surf_pos, nbs);
+                                                                  rm, surf_pos, neighbor_searches, 
+                                                                  stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq);
               double neighb_err = central_err;
 
               // Scale the error estimate by the scaling function dependent on the element diameter
@@ -231,7 +270,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               // the other side, add the now computed error to that element as well.
               if (ignore_visited_segments)
               {
-                Element *neighb = nbs->get_current_neighbor_element();
+                Element *neighb = neighbor_searches.get(i)->neighb_el;
 
                 // Scale the error estimate by the scaling function dependent on the element diameter
                 // (use the diameter of the element on the other side).
@@ -245,7 +284,28 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               }
               else
                 err += central_err;
+              
+              /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+              
+              // Clear the transformations from the RefMaps and all functions.
+              for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+              rm->set_transform(neighbor_searches.get(stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+              /* END COPY FROM DISCRETE_PROBLEM.CPP */
             }
+            
+            /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+            
+            // Delete the multimesh tree;
+            delete root;
+            
+            // Delete the neighbor_searches array.
+            for(unsigned int j = 0; j < neighbor_searches.get_size(); j++) 
+              if(neighbor_searches.present(j))
+                delete neighbor_searches.get(j);
+              
+            /* END COPY FROM DISCRETE_PROBLEM.CPP */
+            
           }
         }
       }
@@ -262,9 +322,6 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       errors[i][ee[i]->id] += err;
 
       ee[i]->visited = true;
-
-      delete nbs;
-
     }
   }
   trav.finish();
@@ -296,7 +353,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
     for (int i = 0; i < num; i++)
     {
       Element* e;
-      for_all_active_elements(e, meshes[i])
+      for_all_active_elements(e, stage.meshes[i])
         errors[i][e->id] /= norms[i];
     }
   }
@@ -310,11 +367,9 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
     errors_squared_sum /= total_norm;
 
   // Prepare an ordered list of elements according to an error.
-  fill_regular_queue(meshes);
+  fill_regular_queue(&(stage.meshes.front()));
   have_errors = true;
 
-  delete [] meshes;
-  delete [] tr;
   if (calc_norm)
     delete [] norms;
   delete [] errors_components;
@@ -379,6 +434,9 @@ double KellyTypeAdapt::eval_solution_norm(error_matrix_form_val_t val, error_mat
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // COPIED FROM discrete_problem.cpp
+//
+// NOTE: This is not neccessary if we have the DiscreteProblem instance available
+//       (as currently required for the NeighborSearch functionality).
 
 // Initialize integration order for external functions
 ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext)
@@ -400,14 +458,12 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, c
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
-  // MULTIMESH DG CHANGE
-  /*
+  
   for (unsigned i = 0; i < ext.size(); i++) {
-    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], rm, order);
+    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
     else ext_fn[i] = NULL;
   }
-  */
-  // MULTIMESH DG CHANGE
+  
   ext_data->nf = ext.size();
   ext_data->fn = ext_fn;
 
@@ -428,38 +484,6 @@ ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge)
   return fake_ext;
 }
 
-// Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the
-// supplied NeighborSearch's active edge).
-ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
-{
-  Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
-  for(unsigned int j = 0; j < ext.size(); j++)
-    ext_fns[j] = nbs->init_ext_fn(ext[j]);
-
-  ExtData<scalar>* ext_data = new ExtData<scalar>;
-  ext_data->fn = ext_fns;
-  ext_data->nf = ext.size();
-
-  return ext_data;
-}
-
-// Initialize integration order for discontinuous external functions.
-ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, NeighborSearch* nbs)
-{
-  Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
-  // MULTIMESH DG CHANGE
-  /*
-  for (unsigned int j = 0; j < ext.size(); j++)
-    fake_ext_fns[j] = nbs->init_ext_fn_ord(ext[j]);
-  */
-  // MULTIMESH DG CHANGE
-
-  ExtData<Ord>* fake_ext = new ExtData<Ord>;
-  fake_ext->fn = fake_ext_fns;
-  fake_ext->nf = ext.size();
-
-  return fake_ext;
-}
 
 // END COPIED FROM discrete_problem.cpp
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,12 +529,10 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
 
   // function values
   Func<scalar>** ui = new Func<scalar>* [num];
-  // MULTIMESH DG CHANGE
-  /*
+  
   for (int i = 0; i < num; i++)
-    ui[i] = init_fn(this->sln[i], rm, order);
-  */
-  // MULTIMESH DG CHANGE
+    ui[i] = init_fn(this->sln[i], order);
+  
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
@@ -587,24 +609,24 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
 }
 
 double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
-                                                RefMap *rm, SurfPos* surf_pos, NeighborSearch* nbs)
+                                                RefMap *rm, SurfPos* surf_pos,
+                                                LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index)
 {
-  // MULTIMESH DG CHANGE
-  /*
-  // Determine integration order.
-  Func<Ord>** oi = new Func<Ord>* [num];
-  
+  NeighborSearch* nbs = (neighbor_searches.get(neighbor_index));
+  Hermes::vector<MeshFunction*> slns;
   for (int i = 0; i < num; i++)
-    oi[i] = nbs->init_ext_fn_ord(this->sln[i]);
+    slns.push_back(this->sln[i]);
+  
+  // Determine integration order.
+  ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, neighbor_searches);
   
   // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, nbs);
+  // ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, nbs);
 
   // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-  Element *neighb_el = nbs->get_current_neighbor_element();
-  Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), neighb_el->marker, neighb_el->id, neighb_el->get_diameter());
+  Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, nbs->neighb_el->get_diameter());
   double fake_wt = 1.0;
-  Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext);
+  Ord o = err_est_form->ord(1, &fake_wt, fake_ui->fn, fake_ui->fn[err_est_form->i], fake_e, NULL);
 
   int order = rm->get_inv_ref_order();
   order += o.get_order();
@@ -612,40 +634,49 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   limit_order(order);
 
   // Clean up.
-  for (int i = 0; i < this->num; i++)
-    if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-  delete [] oi;
+  if (fake_ui != NULL)
+  {
+    for (int i = 0; i < num; i++)
+      delete fake_ui->fn[i];
+    fake_ui->free_ord();
+    delete fake_ui;
+  }
+  
   delete fake_e;
-  delete fake_ext;
-
+  
+  //delete fake_ext;
+  
+  Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
+  int np = quad->get_num_points(eo);
+  double3* pt = quad->get_points(eo);
+  
+  // Init geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).
+  double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
+  double* jwt = new double[np];
+  for(int i = 0; i < np; i++)
+    jwt[i] = pt[i][2] * tan[i][2];
+  
+  Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos, eo), 
+                                              nbs->neighb_el->marker, 
+                                              nbs->neighb_el->id, 
+                                              nbs->neighb_el->get_diameter());
   // eval the form
   nbs->set_quad_order(order);
-
-  // Init geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).
-  Geom<double>* e = nbs->init_geometry(NULL, surf_pos);
-  double* jwt = nbs->init_jwt(NULL);
   
-
   // function values
-  Func<scalar>** ui = new Func<scalar>* [num];
-  for (int i = 0; i < num; i++)
-    ui[i] = nbs->init_ext_fn(this->sln[i]);
-  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
+  ExtData<scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
+  //ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
 
   scalar res = interface_scaling_const *
-                err_est_form->fn(nbs->get_quad_np(), jwt, ui, ui[err_est_form->i], e, ext);
+                err_est_form->fn(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
-  for (int i = 0; i < this->num; i++)
-    if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
-  delete [] ui;
-  if (ext != NULL) { ext->free(); delete ext; }
+  if (ui != NULL) { ui->free(); delete ui; }
+  //if (ext != NULL) { ext->free(); delete ext; }
   e->free(); delete e;
   delete [] jwt;
 
   return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
-  */
-  // MULTIMESH DG CHANGE
-  return 0.0; // added for MULTIMESH DG CHANGE
 }
