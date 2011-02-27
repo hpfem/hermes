@@ -135,7 +135,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   }
   
   //WARNING: AD HOC debugging parameter.
-  bool multimesh = true;
+  bool multimesh = false;
 
   // Begin the multimesh traversal.
   trav.begin(num, &(stage.meshes.front()), &(stage.fns.front()));
@@ -201,10 +201,10 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
             
             dp.min_dg_mesh_seq = 0;
             for(int j = 0; j < num; j++)
-              if(stage.meshes[i]->get_seq() < dp.min_dg_mesh_seq || j == 0)
+              if(stage.meshes[j]->get_seq() < dp.min_dg_mesh_seq || j == 0)
                 dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
-              
-            ns_index = stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq;
+            
+            ns_index = stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq; // = 0 for single mesh
             
             // Determine the minimum mesh seq in this stage.
             if (multimesh) 
@@ -233,10 +233,12 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
             }
             else
             {
-              neighbor_searches.add(new NeighborSearch(ee[i], stage.meshes[i]), 0);
-              neighbor_searches.get(0)->set_active_edge(isurf);
-              num_neighbors = neighbor_searches.get(0)->n_neighbors;
-              ns_index = 0;
+              NeighborSearch *ns = new NeighborSearch(ee[i], stage.meshes[i]);
+              ns->original_central_el_transform = stage.fns[i]->get_transform();
+              ns->set_active_edge(isurf);
+              ns->clear_initial_sub_idx();
+              num_neighbors = ns->n_neighbors;
+              neighbor_searches.add(ns, ns_index);
             }
 
             // Go through all segments of the currently processed interface (segmentation is caused
@@ -265,7 +267,6 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               // Push all the necessary transformations to all functions of this stage.
               // The important thing is that the transformations to the current subelement are already there.
               // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
-              rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
               if (multimesh) 
               {
                 for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
@@ -275,11 +276,11 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               else
               {            
                 // Push the transformations only to the solution on the current mesh
-                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(0)->central_n_trans[neighbor]; trf_i++)
-                  stage.fns[i]->push_transform(neighbor_searches.get(0)->central_transformations[neighbor][trf_i]);
+                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(ns_index)->central_n_trans[neighbor]; trf_i++)
+                  stage.fns[i]->push_transform(neighbor_searches.get(ns_index)->central_transformations[neighbor][trf_i]);
               }
               /* END COPY FROM DISCRETE_PROBLEM.CPP */
-              
+              rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
               
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
@@ -319,7 +320,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
                 for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
                   stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
               else
-                stage.fns[i]->set_transform(neighbor_searches.get(0)->original_central_el_transform);
+                stage.fns[i]->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
 
               rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
 
