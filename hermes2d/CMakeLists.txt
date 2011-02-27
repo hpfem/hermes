@@ -45,6 +45,11 @@ ENDIF(H2D_WITH_TUTORIAL)
 # Version configuration.
 #
 
+if (NOT DEBUG AND NOT RELEASE)
+  message(FATAL_ERROR "WITH_H2D is set to YES, but no versions are specified. 
+                       Re-run with DEBUG and/or RELEASE set to YES.")
+endif (NOT DEBUG AND NOT RELEASE)
+
 if(H2D_REAL)
     list(APPEND VERS "real")
 endif(H2D_REAL)
@@ -80,7 +85,9 @@ else(MSVC)
       set(HERMES2D_CPLX ${HERMES2D_CPLX_DEBUG})
     endif(H2D_COMPLEX)
     
-    set(CMAKE_BUILD_TYPE Debug)
+    # set(CMAKE_BUILD_TYPE Debug) # This does not work with multi-version configurations,
+                                  # because it is linked to the project (i.e. we would have
+                                  # to have separate projects for Debug and Release)
   endif(DEBUG)
 
   if(RELEASE)
@@ -93,7 +100,7 @@ else(MSVC)
       set(HERMES2D_CPLX ${HERMES2D_CPLX_RELEASE})
     endif(H2D_COMPLEX)
 
-    set(CMAKE_BUILD_TYPE Release)
+    # set(CMAKE_BUILD_TYPE Release)
   endif(RELEASE)
 endif(MSVC)
 
