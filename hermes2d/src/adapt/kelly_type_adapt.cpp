@@ -612,7 +612,7 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                                                 RefMap *rm, SurfPos* surf_pos,
                                                 LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index)
 {
-  NeighborSearch* nbs = (neighbor_searches.get(neighbor_index));
+  NeighborSearch* nbs = neighbor_searches.get(neighbor_index);
   Hermes::vector<MeshFunction*> slns;
   for (int i = 0; i < num; i++)
     slns.push_back(this->sln[i]);
@@ -661,9 +661,7 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                                               nbs->neighb_el->marker, 
                                               nbs->neighb_el->id, 
                                               nbs->neighb_el->get_diameter());
-  // eval the form
-  nbs->set_quad_order(order);
-  
+    
   // function values
   ExtData<scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
   //ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
