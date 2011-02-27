@@ -3,7 +3,6 @@
 #include "boundaryconditions/boundaryconditions.h"
 
 // Basic electrostatic class - need improvement
-// TODO: cannot handle BCs
 class WeakFormElectrostatic : public WeakForm
 {
 public:
@@ -77,31 +76,18 @@ class WeakFormTutorial : public WeakFormElectrostatic
 public:
   WeakFormTutorial(Mesh *mesh) : WeakFormElectrostatic()
   {
-    set_markers_conversion(mesh->get_markers_conversion());
-
-    // Set material properties
-    set_materials();
-
-    // Set boundary conditions
-    set_boundary_conditions();
-  }
-
-private:
-  void set_materials()
-  {
+    // Set material properties    
     // Element markers.
-    int EL1 = markers_conversion.get_internal_element_marker("1");
-    int EL2 = markers_conversion.get_internal_element_marker("2");
+    int EL1 = mesh->get_element_markers_conversion().get_internal_marker("1");
+    int EL2 = mesh->get_element_markers_conversion().get_internal_marker("2");
 
     eps_r[EL1] = 1.0;
     eps_r[EL2] = 10.0;
 
     rho[EL1] = 0.0;
     rho[EL2] = 0.0;
-  }
 
-  void set_boundary_conditions()
-  {
+    // Set boundary conditions
     // Boundary markers.
     std::string OUTER_BDY = "1";
     std::string STATOR_BDY = "2";
@@ -115,6 +101,13 @@ private:
     boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc_out, bc_stator));
   }
 
+  ~WeakFormTutorial()
+  {
+    delete bc_out;
+    delete bc_stator;
+  }
+
+private:
   DirichletValueBoundaryCondition *bc_out;
   DirichletValueBoundaryCondition *bc_stator;
 };

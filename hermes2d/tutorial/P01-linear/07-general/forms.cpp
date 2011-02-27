@@ -2,20 +2,39 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
 
+class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+public:
+  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers) : DirichletBoundaryCondition(markers)
+  {}
+
+  ~DirichletFunctionBoundaryCondition() {};
+
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+
+  scalar function(double x, double y) const
+  {
+    return -cos(M_PI*x);
+  }
+};
+
 class WeakFormTutorial : public WeakForm
 {
 public:
   WeakFormTutorial() : WeakForm(1)
   {
     // Boundary markers.
-    BDY_HORIZONTAL = "Boundary horizontal";
-    BDY_VERTICAL = "Boundary vertical";
+    std::string BDY_HORIZONTAL = "Boundary horizontal";
+    std::string BDY_VERTICAL = "Boundary vertical";
+
+    // Initialize boundary conditions
+    bc1 = new DirichletFunctionBoundaryCondition(Hermes::vector<std::string>(BDY_HORIZONTAL));
+    bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
+
+    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
 
     add_matrix_form(new MatrixFormVolTutorial(0, 0));
     add_vector_form(new VectorFormVolTutorial(0));
     add_vector_form_surf(new VectorFormSurfTutorial(0, BDY_VERTICAL));
-
-    set_boundary_conditions();
   }
 
   ~WeakFormTutorial()
@@ -25,14 +44,6 @@ public:
   }
 
 private:
-  void set_boundary_conditions()
-  {
-    // Initialize boundary conditions
-    bc1 = new WeakFormTutorial::DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string>(BDY_HORIZONTAL));
-    bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
-
-    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
-  }
 
   // Problem parameters.
   double a_11(double x, double y) { if (y > 0) return 1 + x*x + y*y; else return 1;}

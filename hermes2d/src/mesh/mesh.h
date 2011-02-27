@@ -306,12 +306,6 @@ public:
   int nactive;
   unsigned seq;
 
-  class ElementMarkersConversion;
-  class BoundaryMarkersConversion;
-
-  ElementMarkersConversion* get_element_markers_conversion() { return &element_markers_conversion; };
-  BoundaryMarkersConversion* get_boundary_markers_conversion() { return &boundary_markers_conversion; };
-
 protected:
 
   int nbase, ntopvert;
@@ -404,6 +398,10 @@ protected:
   friend class HdivSpace;
   friend class DiscreteProblem;
   friend class KellyTypeAdapt;
+
+public:
+  ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };
+  BoundaryMarkersConversion &get_boundary_markers_conversion() { return boundary_markers_conversion; };
 };
 
 // Elementary functions to create a quad / triangle element. If mesh != NULL,
