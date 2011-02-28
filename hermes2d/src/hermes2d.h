@@ -45,9 +45,6 @@
 #include "../hermes_common/solver/precond_ml.h"
 
 // boundary conditions
-  // this
-#include "../hermes_common/bctypes.h"
-  // is going to be replaced with this
 #include "boundaryconditions/boundaryconditions.h"
 
 // Eigensolver

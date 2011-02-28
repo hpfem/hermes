@@ -114,7 +114,7 @@ void H1Space::assign_vertex_dofs()
         NodeData* nd = ndata + vn->id;
         if (!vn->is_constrained_vertex() && nd->dof == H2D_UNASSIGNED_DOF)
         {
-          if (nd->n == BC_ESSENTIAL || is_fixed_vertex(vn->id))
+          if (nd->n == BoundaryCondition::BC_DIRICHLET || is_fixed_vertex(vn->id))
           {
             nd->dof = H2D_CONSTRAINED_DOF;
           }

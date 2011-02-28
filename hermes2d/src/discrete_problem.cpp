@@ -831,9 +831,6 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     int j = stage.idx[i];
     if (isempty[j])
       continue;
-    // For inner edges (with marker == 0), bc_types should not be called,
-    // for them it is not important what value (true/false) is set, as it
-    // is not read anywhere.
     if(marker > 0)
       nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker))->get_type() != BoundaryCondition::BC_DIRICHLET);
     spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);

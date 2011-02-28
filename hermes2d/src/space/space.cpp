@@ -391,7 +391,7 @@ void Space::reset_dof_assignment()
   int i, j;
   for (i = 0; i < mesh->get_max_node_id(); i++)
   {
-    ndata[i].n = BC_NATURAL;
+    ndata[i].n = BoundaryCondition::BC_NEUMANN;
     ndata[i].dof = H2D_UNASSIGNED_DOF;
   }
 
@@ -406,8 +406,8 @@ void Space::reset_dof_assignment()
         && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
       {
         j = e->next_vert(i);
-        ndata[e->vn[i]->id].n = BC_ESSENTIAL;
-        ndata[e->vn[j]->id].n = BC_ESSENTIAL;
+        ndata[e->vn[i]->id].n = BoundaryCondition::BC_DIRICHLET;
+        ndata[e->vn[j]->id].n = BoundaryCondition::BC_DIRICHLET;
       }
     }
   }

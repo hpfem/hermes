@@ -16,8 +16,6 @@
 #ifndef __H2D_SPACE_H
 #define __H2D_SPACE_H
 
-#include "../../../hermes_common/bctypes.h"
-#include "../../../hermes_common/bcvalues.h"
 #include "../mesh/mesh.h"
 #include "../mesh/traverse.h"
 #include "../shapeset/shapeset.h"
@@ -34,21 +32,10 @@
 /// There are four main functions the Space class provides:
 /// <ol>
 ///    <li> It handles the Dirichlet (essential) boundary conditions. The user provides a pointer
-///         to an instance of the BCTypes class that determines
-///         which markers represent the Dirichlet part of the boundary (by returning BC_ESSENTIAL)
-///         and which markers represent the Neumann and Newton parts (BC_NATURAL). It is also
-///         possible to return the value BC_NONE, which supresses all BC processing on such part
-///         of the boundary. The pointer to BCTypes is set by the function set_bc_types().
-///
-///         On Dirichlet edges the Space class calls a callback set_essential_bc_values(). The
-///         obtained scalar values are projected onto the available
-///         edge shape functions on each edge. This way the Dirichlet lift is obtained, which
-///         matches as closely as possible the user-defined boundary data. Two types of value
-///         callback functions are defined: the first provides the absolute coordinates on the edge
-///         in question, while the second is supposed to return the Dirichlet value based on two
-///         vertex indices and a parameter in the range [0, 1], representing the position on the
-///         edge. The user can set any one of the two callbacks, whichever suits him/her better. If
-///         both are set, the "SurfPos" one takes precedence.
+///         to an instance of the BoundaryConditions class that determines
+///         which markers represent the Dirichlet part of the boundary, and which markers represent
+///         the Neumann and Newton parts. It is also possible to use the value BC_NONE
+///         which supresses all BC processing on such part of the boundary.
 ///
 ///         The default BC type is BC_NATURAL for the whole boundary. The default BC value is zero for all
 ///         markers.
