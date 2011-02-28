@@ -128,19 +128,7 @@ private:
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
   };
-};
 
-class DirichletFunctionBoundaryConditionTutorial : public DirichletBoundaryCondition {
-public:
-  DirichletFunctionBoundaryConditionTutorial(Hermes::vector<std::string> markers) : DirichletBoundaryCondition(markers)
-  {}
-
-  ~DirichletFunctionBoundaryConditionTutorial() {};
-
-  scalar function(double x, double y) const
-  {
-    return -cos(M_PI*x);
-  }
-
-  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+  DirichletFunctionBoundaryCondition *bc1;
+  NeumannValueBoundaryCondition *bc2;
 };
