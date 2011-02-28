@@ -446,8 +446,8 @@ static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2
   int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
   int nb = ref_map_shapeset.get_num_bubbles(qo);
 
-  AUTOLA_OR(double2, fn, np);
-  memset(fn, 0, sizeof(double2) * np);
+  double2* fn = new double2[np];
+  memset(fn, 0, np * sizeof(double2));
 
   double* rhside[2];
   double* old[2];

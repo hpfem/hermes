@@ -328,7 +328,7 @@ protected:
   void refine_quad_to_triangles(Element* e);
   void refine_element_to_triangles_id(int id);
 
-  class MarkersConversion
+  class HERMES_API MarkersConversion
   {
   public:
     MarkersConversion();

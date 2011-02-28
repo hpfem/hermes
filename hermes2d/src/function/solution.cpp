@@ -18,7 +18,6 @@
 #include "../../../hermes_common/matrix.h"
 #include "../shapeset/precalc.h"
 #include "../mesh/refmap.h"
-#include "../auto_local_array.h"
 
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 
@@ -1049,7 +1048,9 @@ void Solution::precalculate(int order, int mask)
     node = new_node(newmask, np);
 
     // transform integration points by the current matrix
-    AUTOLA_OR(scalar, x, np); AUTOLA_OR(scalar, y, np); AUTOLA_OR(scalar, tx, np);
+    scalar* x = new scalar[np];
+    scalar* y = new scalar[np];
+    scalar* tx = new scalar[np];
     double3* pt = quad->get_points(order);
     for (i = 0; i < np; i++)
     {

@@ -70,7 +70,7 @@ public:
 };
 
 
-// An example of ose of Electrostatic class
+// An example of use of Electrostatic class
 class WeakFormTutorial : public WeakFormElectrostatic
 {
 public:

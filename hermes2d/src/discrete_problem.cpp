@@ -191,8 +191,8 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
     mat->free();
     mat->prealloc(ndof);
 
-    AUTOLA_CL(AsmList, al, wf->get_neq());
-    AUTOLA_OR(Mesh*, meshes, wf->get_neq());
+    AsmList* al = new AsmList[wf->get_neq()];
+    Mesh** meshes = new Mesh*[wf->get_neq()];
     bool **blocks = wf->get_blocks(force_diagonal_blocks);
 
     // Init multi-mesh traversal.

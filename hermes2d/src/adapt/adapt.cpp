@@ -132,7 +132,10 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
   }
 
   //reset element refinement info
-  AUTOLA2_OR(int, idx, max_id + 1, this->num + 1);
+  int** idx = new int*[max_id];
+  for(unsigned int i = 0; i < max_id; i++)
+    idx[i] = new int[num];
+  
   for(int j = 0; j < max_id; j++)
     for(int l = 0; l < this->num; l++)
       idx[j][l] = -1; // element not refined
@@ -287,7 +290,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
 }
 
 void Adapt::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
-                                        AutoLocalArray2<int>& idx, Hermes::vector<RefinementSelectors::Selector *> refinement_selectors) {
+                                        int** idx, Hermes::vector<RefinementSelectors::Selector *> refinement_selectors) {
   int num_elem_to_proc = elems_to_refine.size();
   for(int inx = 0; inx < num_elem_to_proc; inx++) {
     ElementToRefine& elem_ref = elems_to_refine[inx];

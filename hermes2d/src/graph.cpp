@@ -244,7 +244,7 @@ void GnuplotGraph::save(const char* filename)
   fprintf(f, "%s", terminal_str.c_str());
 
   int len = strlen(filename);
-  AUTOLA_OR(char, outname, len + 10);
+  char* outname = new char[len + 10];
   strcpy(outname, filename);
   char* slash = strrchr(outname, '/');
   if (slash != NULL) strcpy(outname, ++slash);

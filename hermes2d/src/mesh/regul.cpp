@@ -245,7 +245,7 @@ void Mesh::flatten()
     if (node->elem[1] != NULL) node->elem[1] = (Element*) (node->elem[1]->id + 1);
   }
 
-  AUTOLA_OR(int, idx, elements.get_size()+1);
+  int* idx = new int[elements.get_size()+1];
   Array<Element> new_elements;
   Element* e;
   for_all_active_elements(e, this)

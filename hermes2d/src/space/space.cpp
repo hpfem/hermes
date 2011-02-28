@@ -16,7 +16,6 @@
 #include "../h2d_common.h"
 #include "space.h"
 #include "../../../hermes_common/matrix.h"
-#include "../auto_local_array.h"
 #include "../boundaryconditions/boundaryconditions.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init)
@@ -320,7 +319,7 @@ void Space::distribute_orders(Mesh* mesh, int* parents)
 {
   _F_
   int num = mesh->get_max_element_id();
-  AUTOLA_OR(int, orders, num+1);
+  int* orders = new int[num+1];
   Element* e;
   for_all_active_elements(e, mesh)
   {
@@ -331,7 +330,7 @@ void Space::distribute_orders(Mesh* mesh, int* parents)
   }
   for_all_active_elements(e, mesh)
     set_element_order_internal(e->id, orders[e->id]);
-
+  delete [] orders;
 }
 
 

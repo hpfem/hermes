@@ -372,8 +372,7 @@ void L2OrthoHP::get_optimal_refinement(Element* e, int order, Solution* rsln, in
   else
     max_order = std::min( max_order, (20 - e->iro_cache)/2 - 2); // user specified
 
-
-  AUTOLA_CL(Cand, cand, maxcand);
+  Cand* cand = new Cand[maxcand];
 
   #define make_p_cand(q) { \
     assert(n < maxcand);   \
@@ -758,8 +757,8 @@ double L2OrthoHP::calc_error_n(int n, ...)
   va_end(ap);
 
   // prepare multi-mesh traversal and error arrays
-  AUTOLA_OR(Mesh*, meshes, 2*num);
-  AUTOLA_OR(Transformable*, tr, 2*num);
+  Mesh** meshes = new Mesh*[2*num];
+  Transformable** tr = new Transformable*[2*num];
   Traverse trav;
   nact = 0;
   for (i = 0; i < num; i++)
@@ -778,7 +777,7 @@ double L2OrthoHP::calc_error_n(int n, ...)
   }
 
   double total_norm = 0.0;
-  AUTOLA_OR(double, norms, num);
+  double* norms = new double[num];
   memset(norms, 0, num*sizeof(double));
   double total_error = 0.0;
   if (esort != NULL) delete [] esort;
