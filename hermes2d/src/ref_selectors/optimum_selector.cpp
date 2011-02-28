@@ -388,7 +388,7 @@ namespace RefinementSelectors {
                 c.dofs -= calc_num_shapes(HERMES_MODE_TRIANGLE, std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])), H2DRS_ORDER_ANY, H2DST_TRI_EDGE) / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
             }
             if (has_vertex_shape[HERMES_MODE_TRIANGLE])
-              c.dofs -= 3*3; //every vertex functions of vertices which create the middle triangle is added 3-times
+              c.dofs -= 2*3; // Every vertex function belonging to vertices of the middle triangle is added 3-times, so it has to be deducted 2 times.
           }
           break;
 
