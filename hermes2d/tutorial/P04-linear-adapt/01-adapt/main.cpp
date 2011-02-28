@@ -61,6 +61,11 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+// Boundary markers.
+const std::string OUTER_BDY = "1", STATOR_BDY = "2";
+// Voltage on the stator
+const double VOLTAGE = 50.0;
+
 // Weak forms.
 #include "forms.cpp"
 
@@ -73,6 +78,11 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakFormTutorial wf(&mesh);
+  
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc_out(OUTER_BDY, 0.0);
+  DirichletValueBoundaryCondition bc_stator(STATOR_BDY, VOLTAGE);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);

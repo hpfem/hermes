@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
   WeakFormTutorial wf;
   
   // Initialize boundary conditions
-  DirichletFunctionBoundaryConditionTutorial bc1(BDY_HORIZONTAL);
-  NeumannValueBoundaryCondition bc2(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
+  DirichletFunctionBoundaryCondition bc1(BDY_HORIZONTAL);
+  NeumannValueBoundaryCondition bc2(BDY_VERTICAL, 0.0);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.

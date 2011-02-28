@@ -26,12 +26,6 @@ public:
     std::string BDY_HORIZONTAL = "Boundary horizontal";
     std::string BDY_VERTICAL = "Boundary vertical";
 
-    // Initialize boundary conditions
-    bc1 = new DirichletFunctionBoundaryCondition(Hermes::vector<std::string>(BDY_HORIZONTAL));
-    bc2 = new NeumannValueBoundaryCondition(Hermes::vector<std::string>(BDY_VERTICAL), 0.0);
-
-    boundary_conditions->add_boundary_conditions(Hermes::vector<BoundaryCondition *>(bc1, bc2));
-
     add_matrix_form(new MatrixFormVolTutorial(0, 0));
     add_vector_form(new VectorFormVolTutorial(0));
     add_vector_form_surf(new VectorFormSurfTutorial(0, BDY_VERTICAL));
@@ -39,8 +33,6 @@ public:
 
   ~WeakFormTutorial()
   {
-    delete bc1;
-    delete bc2;
   }
 
 private:
@@ -128,7 +120,4 @@ private:
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
   };
-
-  DirichletFunctionBoundaryCondition *bc1;
-  NeumannValueBoundaryCondition *bc2;
 };

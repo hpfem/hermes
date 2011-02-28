@@ -85,6 +85,10 @@ public:
                                           Func<Ord> *u, Geom<Ord> *e,
                                           ExtData<Ord> *); ///< Error linear form to estimate order of a function.
 
+
+  Mesh::ElementMarkersConversion* get_element_markers_conversion() { return &this->element_markers_conversion; };
+  Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return &this->boundary_markers_conversion; };
+
   // General case.
 
   class HERMES_API Form
@@ -271,7 +275,7 @@ public:
     this->boundary_markers_conversion = boundary_markers_conversion;
   }
 
-private:
+protected:
 
   Stage* find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2,

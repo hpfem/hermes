@@ -190,7 +190,7 @@ public:
   /// Default destructor.
   ~BoundaryConditions();
 
-  /// Add all boundary conditions of a problem.
+  /// Initializes the class, fills the structures.
   void add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions);
 
   /// Public iterators for the private data structures.

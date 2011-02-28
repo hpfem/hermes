@@ -93,9 +93,9 @@ BoundaryConditions::BoundaryConditions() {
   this->empty_condition = new EmptyBoundaryCondition(oss.str());
 };
 
-BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
+BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) : all(boundary_conditions) {
   add_boundary_conditions(boundary_conditions);
-}
+};
 
 void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
   all = boundary_conditions;
