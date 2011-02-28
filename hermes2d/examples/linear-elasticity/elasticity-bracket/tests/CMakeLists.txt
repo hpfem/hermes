@@ -1,13 +1,13 @@
 if(NOT H2D_REAL)
     return()
 endif(NOT H2D_REAL)
-project(example-bracket)
+project(test-example-bracket)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
 set_common_target_properties(${PROJECT_NAME})
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(example-bracket ${BIN})
-set_tests_properties(example-bracket PROPERTIES LABELS slow)
+add_test(test-example-bracket ${BIN})
+set_tests_properties(test-example-bracket PROPERTIES LABELS slow)
 
 
