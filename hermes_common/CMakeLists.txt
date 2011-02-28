@@ -85,6 +85,16 @@ macro(BUILD_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   add_library(${HERMES_COMMON_LIB} SHARED ${SRC})
   set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
+  #This is needed e.g. for eigenvalue problems.
+  if(NOT Python_FOUND OR NOT NumPy_FOUND)
+    find_package(Python REQUIRED)
+    find_package(NumPy REQUIRED)
+    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+    
+    # This path will be used relatively to CMAKE_INSTALL_PREFIX.
+    set(PYTHON_INSTALL_PATH lib/python/site-packages)   
+  endif(NOT Python_FOUND OR NOT NumPy_FOUND)    
+
   PICK_REAL_OR_CPLX_LIBS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
   PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
   
