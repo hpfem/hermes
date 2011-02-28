@@ -1,4 +1,4 @@
-project(hex-h1-1face)
+project(test-hex-h1-1face)
 
 if(DEV_TESTS)
 

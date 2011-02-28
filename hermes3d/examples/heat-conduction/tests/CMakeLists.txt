@@ -1,4 +1,4 @@
-project(example-heat-conduction)
+project(test-example-heat-conduction)
 add_executable(${PROJECT_NAME} main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)

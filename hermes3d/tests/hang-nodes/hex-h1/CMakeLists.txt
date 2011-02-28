@@ -1,4 +1,4 @@
-project(hnnd-hex-h1)
+project(test-hnnd-hex-h1)
 set(BIN_DIRICHLET ${PROJECT_NAME}-dirichlet)
 set(BIN_NEWTON ${PROJECT_NAME}-newton)
 

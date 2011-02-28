@@ -1,4 +1,4 @@
-project(calc-hex-h1-nonlin)
+project(test-calc-hex-h1-nonlin)
 
 set(BINARIES) 
 

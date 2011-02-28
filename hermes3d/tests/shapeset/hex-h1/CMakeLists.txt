@@ -1,4 +1,4 @@
-project(shapeset-hex-h1)
+project(test-shapeset-hex-h1)
 
 if(WITH_HEX)
 

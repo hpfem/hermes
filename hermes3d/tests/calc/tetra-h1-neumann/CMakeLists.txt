@@ -1,4 +1,4 @@
-project(calc-tetra-h1-neumann)
+project(test-calc-tetra-h1-neumann)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)

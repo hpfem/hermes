@@ -1,4 +1,4 @@
-project(ref-map)
+project(test-ref-map)
 
 add_executable(${PROJECT_NAME}	main.cpp)
 

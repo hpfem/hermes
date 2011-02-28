@@ -1,4 +1,4 @@
-project(calc-hex-h1-mf)
+project(test-calc-hex-h1-mf)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)
 set(BINARIES) 

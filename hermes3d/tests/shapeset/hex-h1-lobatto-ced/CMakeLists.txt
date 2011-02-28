@@ -1,4 +1,4 @@
-project(hex-h1-lobatto-shapeset-ced)
+project(test-hex-h1-lobatto-shapeset-ced)
 
 if(WITH_HEX)
 #
@@ -10,8 +10,8 @@ set_common_target_properties(${PROJECT_NAME})
 # Tests
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(hex-h1-lobbatto-shapeset-ced-1 ${BIN})
-set_tests_properties(hex-h1-lobbatto-shapeset-ced-1 PROPERTIES LABELS slow)
+add_test(${PROJECT_NAME}-1 ${BIN})
+set_tests_properties(${PROJECT_NAME}-1 PROPERTIES LABELS slow)
 
 endif(WITH_HEX)
 

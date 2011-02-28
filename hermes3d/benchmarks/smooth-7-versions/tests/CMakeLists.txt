@@ -2,7 +2,7 @@ if(NOT H3D_REAL)
     return()
 endif(NOT H3D_REAL)
 
-project(adapt-smooth)
+project(test-benchmark-adapt-smooth)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include(${hermes3d_SOURCE_DIR}/CMake.common)

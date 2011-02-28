@@ -2,7 +2,7 @@ if(NOT H3D_REAL)
     return()
 endif(NOT H3D_REAL)
 
-project(example-elasticity-cubit-hex)
+project(test-example-elasticity-cubit-hex)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)
