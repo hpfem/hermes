@@ -8,7 +8,7 @@
  */
 
 // Not-a-number constant.
-extern HERMES_API const double NAN;
+#define NAN 0x7fffffffffffffffL;
 
 // functions
 extern HERMES_API double exp2(double x); ///< exp 2

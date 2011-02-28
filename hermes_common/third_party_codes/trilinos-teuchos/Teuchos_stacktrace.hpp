@@ -39,13 +39,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Instead include the needed header files directly
 #include <string>
 
+#include "compat.h"
+
 namespace Teuchos {
 
 /** \brief . */
 void show_stacktrace();
 
 /** \brief . */
-void print_stack_on_segfault();
+void HERMES_API print_stack_on_segfault();
 
 /** \brief . */
 std::string get_stacktrace();

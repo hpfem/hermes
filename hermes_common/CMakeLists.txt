@@ -30,7 +30,6 @@ endif (NOT WITH_TRILINOS)
 # Source files for the Hermes_common library.
 #
 set(SRC 
-  common.cpp    
   hermes_logging.cpp
   common_time_period.cpp
   callstack.cpp

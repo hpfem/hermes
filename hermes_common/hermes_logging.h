@@ -140,8 +140,8 @@ extern HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo
 #endif
 
 /* file operations */
-void __hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
-void __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
+void HERMES_API __hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
+void HERMES_API __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
 /* log file */
 #undef HERMES_LOG_FILE
 #ifdef HERMES_REPORT_NO_FILE

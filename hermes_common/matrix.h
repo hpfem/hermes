@@ -158,7 +158,7 @@ void chsgn(T **matrix, unsigned int m, unsigned int n)
 /// pivoting; d is output as +-1 depending on whether the number of row interchanges was even
 /// or odd, respectively. This routine is used in combination with lubksb to solve linear equations
 /// or invert a matrix.
-void ludcmp(double **a, int n, int *indx, double *d);
+void HERMES_API ludcmp(double **a, int n, int *indx, double *d);
 
 /// Solves the set of n linear equations AX = B. Here a[n][n] is input, not as the matrix
 /// A but rather as its LU decomposition, determined by the routine ludcmp. indx[n] is input
@@ -198,7 +198,7 @@ double HERMES_API vec_dot(Vector *r, Vector *s, int ndof);
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not
 /// modified. The Cholesky factor L is returned in the lower triangle of a, except for its diagonal
 /// elements which are returned in p[n].
-void choldc(double **a, int n, double p[]);
+void HERMES_API choldc(double **a, int n, double p[]);
 
 /// Solves the set of n linear equations A*x = b, where a is a positive-definite symmetric matrix.
 /// a[n][n] and p[n] are input as the output of the routine choldc. Only the lower
