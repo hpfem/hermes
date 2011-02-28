@@ -39,12 +39,6 @@ public:
                              Hermes::vector<MeshFunction*> source_meshfns,
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
-  static void project_global(Space *space,
-                             Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
-                             std::pair<WeakForm::vector_form_val_t, WeakForm::vector_form_ord_t> proj_liform,
-                             ExactFunction source_fn, scalar* target_vec,
-                             MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
   /// Global orthogonal projection of one vector-valued ExactFunction.
   static void project_global(Space *space, ExactFunction2 source_fn, scalar* target_vec,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK);

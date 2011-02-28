@@ -63,29 +63,6 @@ public:
   WeakForm(unsigned int neq = 1, bool mat_free = false);
   ~WeakForm();
 
-  // General case.
-  typedef scalar (*vector_form_val_t)(int n, double *wt, Func<scalar> *u[], Func<double> *vi,
-                                      Geom<double> *e, ExtData<scalar> *);
-  typedef Ord (*vector_form_ord_t)(int n, double *wt, Func<Ord> *u[], Func<Ord> *vi,
-                                   Geom<Ord> *e, ExtData<Ord> *);
-
-  // Matrix forms for error calculation.
-  typedef scalar (*error_matrix_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
-                                             Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
-                                             ExtData<scalar> *); ///< Error bilinear form callback function.
-  typedef Ord (*error_matrix_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
-                                          Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
-                                          ExtData<Ord> *); ///< Error bilinear form to estimate order of a function.
-
-  // Vector forms for error calculation.
-  typedef scalar (*error_vector_form_val_t) (int n, double *wt, Func<scalar> *u_ext[],
-                                             Func<scalar> *u, Geom<double> *e,
-                                             ExtData<scalar> *); ///< Error linear form callback function.
-  typedef Ord (*error_vector_form_ord_t) (int n, double *wt, Func<Ord> *u_ext[],
-                                          Func<Ord> *u, Geom<Ord> *e,
-                                          ExtData<Ord> *); ///< Error linear form to estimate order of a function.
-
-
   Mesh::ElementMarkersConversion* get_element_markers_conversion() { return &this->element_markers_conversion; };
   Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return &this->boundary_markers_conversion; };
 

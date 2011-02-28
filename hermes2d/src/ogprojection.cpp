@@ -188,5 +188,4 @@ void OGProjection::project_local(Space *space, int proj_norm, ExactFunction sour
 {
   _F_
   error("OGProjection::project_local(): not implemented.");
-  /// TODO
 }
