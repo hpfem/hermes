@@ -373,6 +373,7 @@ protected:
   public:
     ElementMarkersConversion(){};
     ElementMarkersConversion(const ElementMarkersConversion& src);  // Copy constructor.
+    void operator=(const ElementMarkersConversion& src);  // Assignment operator.
     virtual MarkersConversionType get_type() { return HERMES_ELEMENT_MARKERS_CONVERSION; };
   };
 
@@ -381,6 +382,7 @@ protected:
   public:
     BoundaryMarkersConversion(){};
     BoundaryMarkersConversion(const BoundaryMarkersConversion& src);  // Copy constructor.
+    void operator=(const BoundaryMarkersConversion& src);  // Assignment operator.
     virtual MarkersConversionType get_type() { return HERMES_BOUNDARY_MARKERS_CONVERSION; };
   };
 

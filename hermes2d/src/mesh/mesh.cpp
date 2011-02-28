@@ -1122,6 +1122,8 @@ void Mesh::copy(const Mesh* mesh)
   ntopvert = mesh->ntopvert;
   ninitial = mesh->ninitial;
   seq = mesh->seq;
+  boundary_markers_conversion = mesh->boundary_markers_conversion;
+  element_markers_conversion = mesh->element_markers_conversion;
 }
 
 
@@ -2102,7 +2104,30 @@ Mesh::ElementMarkersConversion::ElementMarkersConversion(const Mesh::ElementMark
   min_marker_unused = src.min_marker_unused;
 }
 
+void Mesh::ElementMarkersConversion::operator=(const ElementMarkersConversion& src)
+{
+  conversion_table = new std::map<int, std::string>;
+  conversion_table_inverse = new std::map<std::string, int>;
+  
+  *conversion_table = *src.conversion_table;
+  *conversion_table_inverse = *src.conversion_table_inverse;
+  
+  min_marker_unused = src.min_marker_unused;
+}
+
+
 Mesh::BoundaryMarkersConversion::BoundaryMarkersConversion(const Mesh::BoundaryMarkersConversion& src)
+{
+  conversion_table = new std::map<int, std::string>;
+  conversion_table_inverse = new std::map<std::string, int>;
+  
+  *conversion_table = *src.conversion_table;
+  *conversion_table_inverse = *src.conversion_table_inverse;
+  
+  min_marker_unused = src.min_marker_unused;
+}
+
+void Mesh::BoundaryMarkersConversion::operator=(const BoundaryMarkersConversion& src)
 {
   conversion_table = new std::map<int, std::string>;
   conversion_table_inverse = new std::map<std::string, int>;
