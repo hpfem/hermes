@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/hermes_common/cmake/cxx_flag_overrides.cmake)
 project(hermes)
+
+cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 set(HERMES_COMMON_LIB_REAL  hermes_common-real)
 set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_MODULE_PATH}/cxx_flag_overrides.cmake)
-
 #------------------------------------------------------------------------------
 # Main configuration options.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
