@@ -96,8 +96,7 @@ public:
                       unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
-    return calc_err_est(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln),
-                        (Hermes::vector<double>*) NULL, solutions_for_adapt, error_flags);
+    return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
   }
 
   /// Calculates the error of the solution. 'n' must be the same
@@ -117,15 +116,10 @@ public:
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
-    return calc_err_exact(Hermes::vector<Solution *> (sln),
-                          Hermes::vector<Solution *> (rsln),
-                          (Hermes::vector<double>*) NULL,
-                          solutions_for_adapt, error_flags);
+    return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
   }
 
-  /// Calculates the error of the solution. 'n' must be the same
-  /// as 'num' in the constructor. After that, n coarse solution
-  /// pointers are passed, followed by n exact solution pointers.
+  /// Calculates the error of the solution.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
   double calc_err_exact(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
                         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
@@ -254,6 +248,11 @@ protected: //forms and error evaluation
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
   virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                                   Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+                                   unsigned int error_flags);
+
+  /// One Space version.
+  virtual double calc_err_internal(Solution* sln, Solution* rsln,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
 

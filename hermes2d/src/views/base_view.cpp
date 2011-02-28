@@ -53,7 +53,7 @@ void BaseView::show(const Space* space, double eps, int item)
   this->space = space->dup(space->get_mesh(), order_increase);
   pss = new PrecalcShapeset(this->space->get_shapeset());
   sln = new Solution();
-  ndof = Space::get_num_dofs(this->space);
+  ndof = this->space->get_num_dofs();
   base_index = 0;
   this->eps = eps;
   this->item = item;

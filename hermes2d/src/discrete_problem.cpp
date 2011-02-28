@@ -34,6 +34,21 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces,
          bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
   _F_
+  init(wf, spaces, is_linear);
+}
+
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear)
+{
+  _F_
+  Hermes::vector<Space *> spaces_to_pass;
+  spaces_to_pass.push_back(space);
+  init(wf, spaces_to_pass, is_linear);
+}
+
+void DiscreteProblem::init(WeakForm* wf, Hermes::vector<Space *> spaces, 
+         bool is_linear)
+{
+  _F_
   // Sanity checks.
   if(wf == NULL)
     error("WeakForm* wf can not be NULL in DiscreteProblem::DiscreteProblem.");
@@ -112,7 +127,7 @@ int DiscreteProblem::get_num_dofs()
   _F_
   ndof = 0;
   for (unsigned int i = 0; i < wf->get_neq(); i++)
-    ndof += Space::get_num_dofs(spaces[i]);
+    ndof += spaces[i]->get_num_dofs();
   return ndof;
 }
 
@@ -3275,7 +3290,7 @@ bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
                        / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
     if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%",
-                 iter_count+1, Space::get_num_dofs(space), rel_error);
+      iter_count+1, space->get_num_dofs(), rel_error);
 
     // Stopping criterion.
     if (rel_error < picard_tol) {

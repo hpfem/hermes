@@ -639,6 +639,7 @@ HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double
 }
 
 HERMES_API void update_essential_bc_values(Space *s, double time) {
-  update_essential_bc_values(Hermes::vector<Space*>(s), time);
+  s->get_boundary_conditions()->set_current_time(time);
+  s->update_essential_bc_values();
 }
 

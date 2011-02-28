@@ -83,6 +83,20 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
+void OGProjection::project_global(Space* space, MeshFunction* source_meshfn,
+                             scalar* target_vec, MatrixSolverType matrix_solver,
+                             ProjNormType proj_norm)
+{
+  Hermes::vector<Space *> spaces;
+  spaces.push_back(space);
+  Hermes::vector<MeshFunction *> source_meshfns;
+  source_meshfns.push_back(source_meshfn);
+  Hermes::vector<ProjNormType> proj_norms;
+  proj_norms.push_back(proj_norm);
+  project_global(spaces, source_meshfns, target_vec, matrix_solver, proj_norms);
+}
+
+
 void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution *> sols_src,
                                   Hermes::vector<Solution *> sols_dest, MatrixSolverType matrix_solver,
                                   Hermes::vector<ProjNormType> proj_norms)
@@ -154,7 +168,7 @@ void OGProjection::project_global(Space *space, ExactFunction2 source_fn, scalar
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
   source_sln.set_exact(mesh, source_fn);
-  project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, norm);
+  project_global(space, &source_sln, target_vec, matrix_solver, norm);
 };
 
 void OGProjection::project_global(Space *space, ExactFunction source_fn, scalar* target_vec,
@@ -180,7 +194,7 @@ void OGProjection::project_global(Space *space, ExactFunction source_fn, scalar*
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
   source_sln.set_exact(mesh, source_fn);
-  project_global(space, (MeshFunction*)&source_sln, target_vec, matrix_solver, norm);
+  project_global(space, &source_sln, target_vec, matrix_solver, norm);
 };
 
 void OGProjection::project_local(Space *space, int proj_norm, ExactFunction source_fn, Mesh* mesh,

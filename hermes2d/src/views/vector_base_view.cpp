@@ -31,7 +31,7 @@ void VectorBaseView::show(Space* space)
   pss = new PrecalcShapeset(space->get_shapeset());
   sln = new Solution();
   this->space = space;
-  ndof = Space::get_num_dofs(space);
+  ndof = space->get_num_dofs();
   base_index = 0;
   update_solution();
 }

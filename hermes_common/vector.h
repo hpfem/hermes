@@ -24,8 +24,6 @@ class vector : public std::vector<T>
 public:
   /// A default constructor. Creates an empty vector.
   vector() { };
-  /// 1 parameter constructor.
-  vector(const T& a) { this->push_back(a); };
   /// 2 parameters constructor.
   vector(const T& a, const T& b) { this->reserve(2); this->push_back(a); this->push_back(b); };
   /// 3 parameters constructor.

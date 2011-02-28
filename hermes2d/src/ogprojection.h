@@ -28,6 +28,10 @@ public:
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+  static void project_global(Space* space, MeshFunction* source_meshfn,
+                             scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+                             ProjNormType proj_norm = HERMES_H1_NORM);
+
   static void project_global(Hermes::vector<Space *> spaces,
                              Hermes::vector<Solution*> sols_src, Hermes::vector<Solution*> sols_dest,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK,
@@ -182,7 +186,8 @@ protected:
     {
       this->adapt_eval = false;
       this->projNormType = projNormType;
-      this->ext = Hermes::vector<MeshFunction *>(ext);
+      this->ext = Hermes::vector<MeshFunction *>();
+      this->ext.push_back(ext);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,

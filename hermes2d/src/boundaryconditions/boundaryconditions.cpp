@@ -90,7 +90,9 @@ scalar NewtonBoundaryCondition::function_g(double x, double y) const {
 BoundaryConditions::BoundaryConditions() {
   std::ostringstream oss;
   oss << "Everywhere where no other is.";
-  this->empty_condition = new EmptyBoundaryCondition(oss.str());
+  Hermes::vector<std::string> markers_to_pass;
+  markers_to_pass.push_back(oss.str());
+  this->empty_condition = new EmptyBoundaryCondition(markers_to_pass);
 };
 
 BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) : all(boundary_conditions) {
@@ -116,8 +118,9 @@ void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryConditio
 
   std::ostringstream oss;
   oss << "Everywhere where no other is.";
-  this->empty_condition = new EmptyBoundaryCondition(oss.str());
-
+  Hermes::vector<std::string> markers_to_pass;
+  markers_to_pass.push_back(oss.str());
+  this->empty_condition = new EmptyBoundaryCondition(markers_to_pass);
 };
 
 Hermes::vector<BoundaryCondition *>::const_iterator BoundaryConditions::all_begin() const {
