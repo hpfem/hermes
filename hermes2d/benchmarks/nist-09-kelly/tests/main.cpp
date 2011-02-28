@@ -165,6 +165,9 @@ int main(int argc, char* argv[])
     KellyTypeAdapt* adaptivity2 = new KellyTypeAdapt(&space, Hermes::vector<ProjNormType>(), false);
     adaptivity2->disable_aposteriori_interface_scaling();
     adaptivity2->add_error_estimator_surf(callback(interface_estimator));
+
+    if (USE_RESIDUAL_ESTIMATOR)
+      adaptivity2->add_error_estimator_vol(callback(residual_estimator));
     
     double err_est_rel2 = adaptivity2->calc_err_est(&sln) * 100;  
     double err_exact_rel2 = adaptivity2->calc_err_exact(&sln, &exact) * 100;

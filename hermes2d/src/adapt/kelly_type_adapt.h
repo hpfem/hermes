@@ -3,6 +3,7 @@
 
 #include "adapt.h"
 #include "../neighbor.h"
+#include "../discrete_problem.h"
 
 /// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
 inline double scale_by_element_diameter(double e_diam)
@@ -43,6 +44,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
       WeakForm::error_vector_form_ord_t ord;
       Hermes::vector<MeshFunction *> ext;
     };
+    
+    DiscreteProblem dp; // Only needed for gaining access to NeighborSearch methods.
 
     ///
     /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
@@ -52,10 +55,11 @@ class HERMES_API KellyTypeAdapt : public Adapt
     double eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                    RefMap* rm,
                                    SurfPos* surf_pos);
-    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
-                                    RefMap* rm,
+    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
+                                    RefMap *rm, 
                                     SurfPos* surf_pos,
-                                    NeighborSearch* nbs);
+                                    LightArray<NeighborSearch*>& neighbor_searches, 
+                                    int neighbor_index);
     double eval_solution_norm(error_matrix_form_val_t val, error_matrix_form_ord_t ord,
                               RefMap* rm,
                               MeshFunction* sln);

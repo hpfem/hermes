@@ -91,16 +91,19 @@ DiscreteProblem::~DiscreteProblem()
   _F_
   free();
   if (sp_seq != NULL) delete [] sp_seq;
-  for(int i = 0; i < num_user_pss; i++)
-    delete pss[i];
-  delete [] pss;
+  if (pss != NULL) {
+    for(int i = 0; i < num_user_pss; i++)
+      delete pss[i];
+    delete [] pss;
+  }
 }
 
 void DiscreteProblem::free()
 {
   _F_
   struct_changed = values_changed = true;
-  memset(sp_seq, -1, sizeof(int) * wf->get_neq());
+  if (wf != NULL)
+    memset(sp_seq, -1, sizeof(int) * wf->get_neq());
   wf_seq = -1;
 }
 
