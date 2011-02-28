@@ -203,7 +203,7 @@ void solve(Solver &solver, int n) {
     info("Matrix solve successful.");
     printf("Solution vector: ");
     for (int i = 0; i < n; i++) {
-      printf("%g ", sln[i]);
+      printf(SCALAR_FMT"\n", SCALAR(sln[i]));
     }
     printf("\n");
   }
