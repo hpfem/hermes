@@ -91,7 +91,9 @@ else(MSVC)
       set(HERMES3D_CPLX ${HERMES3D_CPLX_DEBUG})
     endif(H3D_COMPLEX)
     
-    set(CMAKE_BUILD_TYPE Debug)
+    # set(CMAKE_BUILD_TYPE Debug) # This does not work with multi-version configurations,
+                                  # because it is linked to the project (i.e. we would have
+                                  # to have separate projects for Debug and Release)
   endif(DEBUG)
 
   if(RELEASE)
@@ -104,7 +106,7 @@ else(MSVC)
       set(HERMES3D_CPLX ${HERMES3D_CPLX_RELEASE})
     endif(H3D_COMPLEX)
 
-    set(CMAKE_BUILD_TYPE Release)
+    #set(CMAKE_BUILD_TYPE Release)
   endif(RELEASE)
 endif(MSVC)
 

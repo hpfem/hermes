@@ -150,54 +150,64 @@ include(CMake.vars OPTIONAL)
 # hermes_common will be built (the same for Release).  
 # If any HXD is configured for a Complex version, Complex version of 
 # hermes_common will be built (the same for Real).  
-macro (DETERMINE_HERMES_COMMON_VERSION HXD)
+
+macro (DETERMINE_HERMES_COMMON_REAL_COMPLEX HXD)
+    if (WITH_${HXD})
+        if (${HXD}_REAL)
+            set(HERMES_COMMON_REAL  YES)
+        endif (${HXD}_REAL)
+        if (${HXD}_COMPLEX)
+            set(HERMES_COMMON_COMPLEX YES)
+        endif (${HXD}_COMPLEX)
+    endif (WITH_${HXD})   
+endmacro(DETERMINE_HERMES_COMMON_REAL_COMPLEX)
+
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H1D)
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H2D)
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H3D)
+
+macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
         if(MSVC)
             # In MSVC, Release/Debug is distinguished in a special way
             # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
-            if (${HXD}_REAL)
-                set(HERMES_COMMON_REAL  YES)
+            if (HERMES_COMMON_REAL)
                 set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
                 set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif (${HXD}_REAL)
-            if (${HXD}_COMPLEX)
-                set(HERMES_COMMON_COMPLEX YES)
+            endif (HERMES_COMMON_REAL)
+            if (HERMES_COMMON_COMPLEX)
                 set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
                 set(HERMES_COMMON_LIB_CPLX_DEBUG ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif (${HXD}_COMPLEX)
+            endif (HERMES_COMMON_COMPLEX)
         else(MSVC)        
           if(${HXD}_DEBUG)
             set(HERMES_COMMON_DEBUG YES)
             
-            if(${HXD}_REAL)
-              set(HERMES_COMMON_REAL  YES)
+            if(HERMES_COMMON_REAL)
               set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
-            endif(${HXD}_REAL)
-            if(${HXD}_COMPLEX)
-              set(HERMES_COMMON_COMPLEX  YES)
+            endif(HERMES_COMMON_REAL)
+            if(HERMES_COMMON_COMPLEX)
               set(HERMES_COMMON_LIB_CPLX_DEBUG  ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif(${HXD}_COMPLEX)
+            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_DEBUG)
 
           if(${HXD}_RELEASE)
             set(HERMES_COMMON_RELEASE YES)
             
-            if(${HXD}_REAL)
-              set(HERMES_COMMON_REAL  YES)
+            if(HERMES_COMMON_REAL)
               set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif(${HXD}_REAL)
-            if(${HXD}_COMPLEX)
-              set(HERMES_COMMON_COMPLEX  YES)
+            endif(HERMES_COMMON_REAL)
+            if(HERMES_COMMON_COMPLEX)
               set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
-            endif(${HXD}_COMPLEX)
+            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_RELEASE)
         endif(MSVC)
     endif (WITH_${HXD})   
-endmacro(DETERMINE_HERMES_COMMON_VERSION)
+endmacro(DETERMINE_HERMES_COMMON_RELEASE_DEBUG)
 
-DETERMINE_HERMES_COMMON_VERSION(H1D)
-DETERMINE_HERMES_COMMON_VERSION(H2D)
-DETERMINE_HERMES_COMMON_VERSION(H3D)
+DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H1D)
+DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
+DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H3D)
 
 #------------------------------------------------------------------------------
 # Find necessary packages according to the settings above.
@@ -334,6 +344,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
     # Enable all warnings:
     set(CMAKE_CXX_FLAGS "-W -Wuninitialized -Wall ${CMAKE_CXX_FLAGS}")
+
+    set(RELEASE_FLAGS "-DNDEBUG -O3")
+    set(DEBUG_FLAGS   "-g")
 endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 # Enabling multiprocessor build on MSVC

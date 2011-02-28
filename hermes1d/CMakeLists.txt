@@ -37,6 +37,11 @@ ENDIF(H1D_WITH_TESTS)
 # Version configuration.
 #
 
+if (NOT DEBUG AND NOT RELEASE)
+  message(FATAL_ERROR "WITH_H1D is set to YES, but no versions are specified. 
+                       Re-run with DEBUG and/or RELEASE set to YES.")
+endif (NOT DEBUG AND NOT RELEASE)
+
 # For use in the common code.
 set(H1D_REAL YES)
 
@@ -58,12 +63,15 @@ else(MSVC)
   if(RELEASE)
     set(HERMES1D_RELEASE hermes1D)
     set(HERMES1D ${HERMES1D_RELEASE})
-    set(CMAKE_BUILD_TYPE Release)
+  
+    # set(CMAKE_BUILD_TYPE Release) # This does not work with multi-version configurations,
+                                    # because it is linked to the project (i.e. we would have
+                                    # to have separate projects for Debug and Release)
   endif(RELEASE)
   if(DEBUG)
     set(HERMES1D_DEBUG hermes1D-debug)
     set(HERMES1D ${HERMES1D_DEBUG})
-    set(CMAKE_BUILD_TYPE Debug)
+    #set(CMAKE_BUILD_TYPE Debug)
   endif(DEBUG)
 endif(MSVC)
 
