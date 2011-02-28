@@ -27,11 +27,11 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
-double time_step = 0.05;                           // Time step.
+double time_step = 0.5;                           // Time step.
 const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
-const double TIME_TOL_UPPER = 1.0;                 // If rel. temporal error is greater than this threshold, decrease time 
+const double TIME_TOL_UPPER = 100.0;                 // If rel. temporal error is greater than this threshold, decrease time 
                                                    // step size and repeat time step.
 const double TIME_TOL_LOWER = 0.5;                 // If rel. temporal error is less than this threshold, increase time step
                                                    // but do not repeat time step (this might need further research).
@@ -110,10 +110,9 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, space, is_linear);
 
   // Initialize views.
-  OrderView oview("Mesh", new WinGeom(0, 0, 480, 400));
-  oview.show(space);
-  ScalarView eview("Temporal error", new WinGeom(490, 0, 500, 400));
-  ScalarView sview("Solution", new WinGeom(1000, 0, 500, 400));
+  ScalarView sview_high("Solution (higher-order)", new WinGeom(0, 0, 500, 400));
+  ScalarView sview_low("Solution (lower-order)", new WinGeom(490, 0, 500, 400));
+  ScalarView eview("Temporal error", new WinGeom(1000, 0, 500, 400));
 
   // Graph for time step history.
   SimpleGraph time_step_graph;
@@ -135,7 +134,7 @@ int main(int argc, char* argv[])
 
     // Plot error function.
     char title[100];
-    sprintf(title, "Temporal error, t = %g", current_time);
+    sprintf(title, "Temporal error, t = %g", current_time + time_step);
     eview.set_title(title);
     AbsFilter abs_tef(time_error_fn);
     eview.show(&abs_tef, HERMES_EPS_VERYHIGH);
@@ -167,16 +166,23 @@ int main(int argc, char* argv[])
     current_time += time_step;
 
     // Show the new time level solution.
-    sprintf(title, "Solution, t = %g", current_time);
-    sview.set_title(title);
-    sview.show(sln_time_new, HERMES_EPS_VERYHIGH);
-    oview.show(space);
+    sprintf(title, "Solution (higher-order), t = %g", current_time);
+    sview_high.set_title(title);
+    sview_high.show(sln_time_new, HERMES_EPS_VERYHIGH);
+    sprintf(title, "Solution (lower-order), t = %g", current_time);
+    sview_low.set_title(title);
+    SumFilter sln_time_new_low(Hermes::vector<MeshFunction*>(sln_time_new, time_error_fn), 
+                               Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
+    sview_low.show(&sln_time_new_low, HERMES_EPS_VERYHIGH);
 
     // Copy solution for next time step.
     sln_time_prev->copy(sln_time_new);
 
     // Increase counter of time steps.
     ts++;
+
+    View::wait(HERMES_WAIT_KEYPRESS);
+
   } 
   while (current_time < T_FINAL);
 
