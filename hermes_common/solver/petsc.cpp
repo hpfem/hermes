@@ -26,6 +26,8 @@
 
 static int num_petsc_objects = 0;
 
+CommandLineArgs cmd_line_args;
+
 int remove_petsc_object()
 {
   _F_  
@@ -62,15 +64,15 @@ int add_petsc_object()
   
   if (petsc_initialized != PETSC_TRUE)
   {
-    bool have_args = CommandLineArgs::check();
+    bool have_args = cmd_line_args.check();
     
     if (have_args)
-      ierr = PetscInitialize(&CommandLineArgs::get_argc(), 
-                             &CommandLineArgs::get_argv(), 
+      ierr = PetscInitialize(&cmd_line_args.get_argc(), 
+                             &cmd_line_args.get_argv(), 
                              PETSC_NULL, PETSC_NULL);
     else
     #ifdef WITH_MPI
-      CommandLineArgs::missing_error();
+      cmd_line_args.missing_error();
     #else
       ierr = PetscInitializeNoArguments();  
     #endif
