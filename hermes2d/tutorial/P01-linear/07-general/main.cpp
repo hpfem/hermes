@@ -60,6 +60,8 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
+  WeakFormSecondOrderLinear wf;
+
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);

@@ -75,10 +75,10 @@ public:
 
 
 // An example of use of Electrostatic class
-class WeakFormTutorial : public WeakFormElectrostatic
+class WeakFormElectrostaticTutorial : public WeakFormElectrostatic
 {
 public:
-  WeakFormTutorial(Mesh *mesh) : WeakFormElectrostatic()
+  WeakFormElectrostaticTutorial() : WeakFormElectrostatic()
   {
     // Set material properties    
     // Element markers.
@@ -97,7 +97,5 @@ public:
     double VOLTAGE = 50;
   }
 
-  ~WeakFormTutorial()
-  {}
-
+  ~WeakFormElectrostaticTutorial() {};
 };

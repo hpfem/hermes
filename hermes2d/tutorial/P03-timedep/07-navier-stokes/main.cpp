@@ -126,9 +126,9 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm* wf;
   if (NEWTON)
-    wf = new WeakFormNewton(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSNewton(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
   else
-    wf = new WeakFormSimpleLinearization(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSSimpleLinearization(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   bool is_linear;

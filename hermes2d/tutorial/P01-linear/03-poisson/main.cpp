@@ -18,7 +18,7 @@
 // You can change the constant right-hand side CONST_F, the
 // initial polynomial degree P_INIT, and play with various initial
 // mesh refinements at the beginning of the main() function.
-
+const double CONST_F = 2.0;
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
@@ -45,6 +45,9 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
+
+  // Initialize the weak formulation.
+  WeakFormPoisson wf(CONST_F);
 
   // Initialize the FE problem.
   bool is_linear = true;

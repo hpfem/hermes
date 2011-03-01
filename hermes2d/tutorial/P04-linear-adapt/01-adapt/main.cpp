@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   mloader.load("motor.mesh", &mesh);
 
   // Initialize the weak formulation.
-  WeakFormTutorial wf(&mesh);
+  WeakFormElectrostaticTutorial wf;
   
   // Initialize boundary conditions
   DirichletValueBoundaryCondition bc_out(OUTER_BDY, 0.0);
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
