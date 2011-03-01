@@ -19,7 +19,7 @@
 
 #include "../hermes_common/common.h"
 #include "function/solution.h"
-#include "weakform/forms.h"
+#include "function/forms.h"
 
 class HERMES_API OGProjection
 {

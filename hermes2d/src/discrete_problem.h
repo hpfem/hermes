@@ -25,7 +25,7 @@
 #include "../../hermes_common/tables.h"
 #include "adapt/adapt.h"
 #include "graph.h"
-#include "weakform/forms.h"
+#include "function/forms.h"
 #include "weakform/weakform.h"
 #include "views/view.h"
 #include "views/scalar_view.h"

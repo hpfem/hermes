@@ -17,10 +17,10 @@
 // The following parameters can be changed:
 // Calculation of approximation of time derivative (and its output).
 // Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = true;
+const bool CALC_TIME_DER = false;
 
-const Ord2 P_INIT = Ord2(0,0);                    // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
+const Ord2 P_INIT = Ord2(2,2);                    // Initial polynomial degree.                      
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
 double TAU = 1E-4;                                // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -91,14 +91,16 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1, 1);
-  mesh.refine_element_id(1053);
-  mesh.refine_element_id(1054);
-  mesh.refine_element_id(1087);
-  mesh.refine_element_id(1088);
-  mesh.refine_element_id(1117);
-  mesh.refine_element_id(1118);
-  mesh.refine_element_id(1151);
-  mesh.refine_element_id(1152);
+  if(INIT_REF_NUM == 4) {
+    mesh.refine_element_id(1053);
+    mesh.refine_element_id(1054);
+    mesh.refine_element_id(1087);
+    mesh.refine_element_id(1088);
+    mesh.refine_element_id(1117);
+    mesh.refine_element_id(1118);
+    mesh.refine_element_id(1151);
+    mesh.refine_element_id(1152);
+  }
 
   // Boundary condition types;
   BCTypes bc_types;
@@ -248,6 +250,12 @@ int main(int argc, char* argv[])
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
   VectorView vview("Velocity", new WinGeom(700, 400, 600, 300));
 
+  ScalarView s1("1", new WinGeom(0, 0, 600, 300));
+  ScalarView s2("2", new WinGeom(700, 0, 600, 300));
+  ScalarView s3("3", new WinGeom(0, 400, 600, 300));
+  ScalarView s4("4", new WinGeom(700, 400, 600, 300));
+
+
   // Iteration number.
   int iteration = 0;
   
@@ -270,11 +278,29 @@ int main(int argc, char* argv[])
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+    scalar* solution_vector;
+    if(solver->solve()) {
+      solution_vector = solver->get_solution();
+      Solution::vector_to_solutions(solution_vector, Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+    }
     else
     error ("Matrix solver failed.\n");
+
+    // Assumption: single mesh.
+    // Assumption: uniform refinement.
+    // Assumption: iso p orders.
+    DiscontinuityDetector discontinuity_detector(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+
+    std::set<int> discontinuous_elements = discontinuity_detector.get_discontinuous_element_ids(0.05);
+
+    FluxLimiter flux_limiter(solution_vector, Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+
+    flux_limiter.limit_according_to_detector(discontinuous_elements);
+
+
 
     // Approximate the time derivative of the solution.
     if(CALC_TIME_DER) {
@@ -297,7 +323,7 @@ int main(int argc, char* argv[])
 
     // Determine the time step according to the CFL condition.
     // Only mean values on an element of each solution component are taken into account.
-    double *solution_vector = solver->get_solution();
+    double *solution_vectora = solver->get_solution();
     double min_condition = 0;
     Element *e;
     for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
@@ -305,13 +331,13 @@ int main(int argc, char* argv[])
             if ((e)->active) {
               AsmList al;
               space_rho.get_element_assembly_list(e, &al);
-              double rho = solution_vector[al.dof[0]];
+              double rho = solution_vectora[al.dof[0]];
               space_rho_v_x.get_element_assembly_list(e, &al);
-              double v1 = solution_vector[al.dof[0]] / rho;
+              double v1 = solution_vectora[al.dof[0]] / rho;
               space_rho_v_y.get_element_assembly_list(e, &al);
-              double v2 = solution_vector[al.dof[0]] / rho;
+              double v2 = solution_vectora[al.dof[0]] / rho;
               space_e.get_element_assembly_list(e, &al);
-              double energy = solution_vector[al.dof[0]];
+              double energy = solution_vectora[al.dof[0]];
       
               double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy));
       
@@ -330,15 +356,10 @@ int main(int argc, char* argv[])
     prev_e.copy(&sln_e);
 
     // Visualization.
-    pressure.reinit();
-    u.reinit();
-    w.reinit();
-    Mach_number.reinit();
-    entropy_estimate.reinit();
-    pressure_view.show(&pressure);
-    entropy_production_view.show(&entropy_estimate);
-    Mach_number_view.show(&Mach_number);
-    vview.show(&u, &w);
+    s1.show(&prev_rho);
+    s2.show(&prev_rho_v_x);
+    s3.show(&prev_rho_v_y);
+    s4.show(&prev_e);
   }
   
   pressure_view.close();

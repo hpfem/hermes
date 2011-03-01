@@ -8,7 +8,8 @@ set(SRC
        function/solution.cpp 
        function/filter.cpp
        function/norm.cpp
-
+       function/forms.cpp
+	   
        linearizer/linear1.cpp 
        linearizer/linear2.cpp 
        linearizer/linear3.cpp 
@@ -66,7 +67,6 @@ set(SRC
        views/view_support.cpp
 
        weakform/weakform.cpp 
-       weakform/forms.cpp
 
        neighbor.cpp
        numerical_flux.cpp

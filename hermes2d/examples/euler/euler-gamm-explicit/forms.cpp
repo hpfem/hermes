@@ -512,7 +512,7 @@ Scalar linear_form_3_3_second_flux(int n, double *wt, Func<Real> *ue[], Func<Rea
 // This is a hack, because of the difficult forms that are used, we supply this artificial integration order. 
 Ord linear_form_order(int n, double *wt, Func<Ord> *ue[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(1);
+  return Ord(2);
 }
 
 

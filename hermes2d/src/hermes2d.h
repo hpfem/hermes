@@ -80,7 +80,7 @@
 
 #include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "weakform/forms.h"
+#include "function/forms.h"
 
 #include "integrals/integrals_h1.h"
 #include "integrals/integrals_hcurl.h"

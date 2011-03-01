@@ -5,7 +5,7 @@
 #include "mesh/mesh.h"
 #include "quadrature/quad.h"
 #include "function/solution.h"
-#include "weakform/forms.h"
+#include "function/forms.h"
 #include "mesh/refmap.h"
 
 /*** Class NeighborSearch. ***/

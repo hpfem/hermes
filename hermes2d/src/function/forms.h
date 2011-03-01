@@ -51,6 +51,7 @@ public:
   Ord operator/(double d) { return *this; }
 
   Ord operator+=(const Ord &o) { this->order = std::max(this->order, o.order); return *this; }
+  Ord operator-=(const Ord &o) { this->order = std::max(this->order, o.order); return *this; }
 
   Ord operator+=(const double &d) { return *this; }
   Ord operator-=(const double &d) { return *this; }
@@ -130,7 +131,7 @@ public:
   for(int i = 0; i < num_gip; i++) __ATTRIB[i] -= __OTHER_FUNC.__ATTRIB[i]; } }
 
   /// Calculate this -= func for each function expations and each integration point.
-  /** \param[in] func A function which is subtracted from *this. A number of integratio points and a number of component has to match. */
+  /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
   //FIXME : It should be 'virtual', but then it doesn't compile.
   void subtract(const Func<T>& func) {
     assert_msg(num_gip == func.num_gip, "Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
@@ -213,7 +214,7 @@ public:
  *  \c get_val_central, \c get_val_neighbor, etc.
  **/
 template<typename T>
-class DiscontinuousFunc : public Func<T>
+class HERMES_API DiscontinuousFunc : public Func<T>
 {
 private:
   bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
@@ -311,7 +312,7 @@ public:
 
 /// Geometry (coordinates, normals, tangents) of either an element or an edge.
 template<typename T>
-class Geom
+class HERMES_API Geom
 {
 public:
   int elem_marker;       ///< Element marker (for both volumetric and surface forms).
@@ -364,7 +365,7 @@ public:
 /// instance is also automatically destroyed.
 ///
 template<typename T>
-class InterfaceGeom : public Geom<T>
+class HERMES_API InterfaceGeom : public Geom<T>
 {
 private:
   int neighb_marker;
@@ -396,26 +397,26 @@ public:
 };
 
 /// Init element geometry for calculating the integration order.
-Geom<Ord>* init_geom_ord();
+HERMES_API Geom<Ord>* init_geom_ord();
 /// Init element geometry for volumetric integrals.
-Geom<double>* init_geom_vol(RefMap *rm, const int order);
+HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
 /// Init element geometry for surface integrals.
-Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
+HERMES_API Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
 
 /// Init the function for calculation the integration order.
-Func<Ord>* init_fn_ord(const int order);
+HERMES_API Func<Ord>* init_fn_ord(const int order);
 /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
-Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
+HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 /// Init the mesh-function for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(MeshFunction *fu, const int order);
+HERMES_API Func<scalar>* init_fn(MeshFunction *fu, const int order);
 /// Init the solution for the evaluation of the volumetric/surface integral.
-Func<scalar>* init_fn(Solution *fu, const int order);
+HERMES_API Func<scalar>* init_fn(Solution *fu, const int order);
 
 /// User defined data that can go to the bilinear and linear forms.
 /// It also holds arbitraty number of functions, that user can use.
 /// Typically, these functions are solutions from the previous time/iteration levels.
 template<typename T>
-class ExtData
+class HERMES_API ExtData
 {
 public:
   int nf;         ///< Number of functions in 'fn' array.

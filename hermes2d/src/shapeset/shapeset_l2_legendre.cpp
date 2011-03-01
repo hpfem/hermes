@@ -4004,7 +4004,7 @@ int* leg_quad_edge_indices[4] =
 #define XX(a,b) oo(a,b), oo(a,b)
 
 int leg_quad_index_to_order[] = {
-  oo(1,1),   oo(1,1),   oo(1,2),   oo(1,3),   oo(1,4),   oo(1,5),   oo(1,6),   oo(1,7),   oo(1,8),   oo(1,9),   oo(1,10),
+  oo(0,0),   oo(1,1),   oo(1,2),   oo(1,3),   oo(1,4),   oo(1,5),   oo(1,6),   oo(1,7),   oo(1,8),   oo(1,9),   oo(1,10),
   oo(1,1),   oo(1,1),   oo(1,2),   oo(1,3),   oo(1,4),   oo(1,5),   oo(1,6),   oo(1,7),   oo(1,8),   oo(1,9),   oo(1,10),
   oo(2,1),   oo(2,1),   oo(2,2),   oo(2,3),   oo(2,4),   oo(2,5),   oo(2,6),   oo(2,7),   oo(2,8),   oo(2,9),   oo(2,10),
   oo(3,1),   oo(3,1),   oo(3,2),   oo(3,3),   oo(3,4),   oo(3,5),   oo(3,6),   oo(3,7),   oo(3,8),   oo(3,9),   oo(3,10),
