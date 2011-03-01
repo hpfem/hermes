@@ -1,4 +1,4 @@
-project(adapt-h1-simple)
+project(test-adapt-h1-simple)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include(${hermes3d_SOURCE_DIR}/CMake.common)

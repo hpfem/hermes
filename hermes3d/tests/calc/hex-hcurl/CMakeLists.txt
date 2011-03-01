@@ -1,4 +1,4 @@
-project(calc-hex-hcurl)
+project(test-calc-hex-hcurl)
 add_executable(${PROJECT_NAME}	main.cpp)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)

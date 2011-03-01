@@ -1,4 +1,4 @@
-project(regularize)
+project(test-regularize)
 
 add_executable(${PROJECT_NAME}	main.cpp)
 

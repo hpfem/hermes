@@ -1,6 +1,6 @@
 IF(H2D_COMPLEX)
 
-project(benchmark-bessel)
+project(test-benchmark-bessel)
 
 add_executable(${PROJECT_NAME}
 	main.cpp

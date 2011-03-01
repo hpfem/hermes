@@ -1,7 +1,7 @@
-project(lobatto-1)
+project(test-lobatto-1)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (../../../CMake.common)
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(lobatto-1 ${BIN})
+add_test(test-lobatto-1 ${BIN})

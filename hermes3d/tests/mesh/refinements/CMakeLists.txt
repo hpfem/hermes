@@ -1,4 +1,4 @@
-project(mesh-refinements)
+project(test-mesh-refinements)
 
 add_executable(${PROJECT_NAME}	main.cpp)
 

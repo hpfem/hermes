@@ -1,4 +1,4 @@
-project(mesh-copy)
+project(test-mesh-copy)
 
 include(${hermes3d_SOURCE_DIR}/CMake.common)
 

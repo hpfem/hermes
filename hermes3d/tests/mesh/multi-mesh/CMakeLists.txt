@@ -1,4 +1,4 @@
-project(multi-mesh)
+project(test-multi-mesh)
 
 include (${hermes3d_SOURCE_DIR}/CMake.common)
 

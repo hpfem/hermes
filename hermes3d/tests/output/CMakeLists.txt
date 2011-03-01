@@ -1,4 +1,4 @@
-project(output)
+project(test-output)
 
 if(H3D_REAL)
 

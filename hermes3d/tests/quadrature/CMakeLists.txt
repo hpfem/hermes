@@ -1,4 +1,4 @@
-project(h3d-quadrature)
+project(test-h3d-quadrature)
 
 if(H3D_REAL)
 
@@ -10,6 +10,6 @@ set_common_target_properties(${PROJECT_NAME} ${HERMES3D_REAL})
 # Tests
 
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
-add_test(quadrature-1 ${BIN})
+add_test(${PROJECT_NAME}-1 ${BIN})
 
 endif(H3D_REAL)

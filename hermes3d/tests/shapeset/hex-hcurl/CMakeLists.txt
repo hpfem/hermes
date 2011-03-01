@@ -1,4 +1,4 @@
-project(shapeset-hex-hcurl)
+project(test-shapeset-hex-hcurl)
 
 if(WITH_HEX)
 #

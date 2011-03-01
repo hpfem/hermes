@@ -91,6 +91,11 @@ endif(WITH_PYTHON)
 
 add_subdirectory(src)
 
+if(WITH_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif(WITH_TESTS)
+
 if(WITH_EXAMPLES)
     add_subdirectory(examples)
 endif(WITH_EXAMPLES)
@@ -98,11 +103,6 @@ endif(WITH_EXAMPLES)
 if(WITH_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif(WITH_BENCHMARKS)
-
-if(WITH_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif(WITH_TESTS)
 
 #
 # Documentation.
