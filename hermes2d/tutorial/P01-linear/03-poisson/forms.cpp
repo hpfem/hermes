@@ -12,7 +12,7 @@ public:
   {
     add_matrix_form(new MatrixFormVolPoisson(0, 0));
     add_vector_form(new VectorFormVolPoisson(0));
-  }
+  };
 
 private:
   class MatrixFormVolPoisson : public WeakForm::MatrixFormVol
@@ -58,6 +58,4 @@ private:
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
   };
-
-  DirichletValueBoundaryCondition* bc;
 };

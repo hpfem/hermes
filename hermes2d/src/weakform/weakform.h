@@ -34,8 +34,6 @@ template<typename T> class Func;
 template<typename T> class Geom;
 template<typename T> class ExtData;
 
-class BoundaryConditions;
-
 // Bilinear form symmetry flag, see WeakForm::add_matrix_form
 enum SymFlag
 {
@@ -63,8 +61,8 @@ public:
   WeakForm(unsigned int neq = 1, bool mat_free = false);
   ~WeakForm();
 
-  Mesh::ElementMarkersConversion* get_element_markers_conversion() { return &this->element_markers_conversion; };
-  Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return &this->boundary_markers_conversion; };
+  Mesh::ElementMarkersConversion* get_element_markers_conversion() { return element_markers_conversion; };
+  Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return boundary_markers_conversion; };
 
   // General case.
 
@@ -193,7 +191,6 @@ protected:
   unsigned int neq;
   int seq;
   bool is_matfree;
-  BoundaryConditions* boundary_conditions;
 
   struct Area  { Hermes::vector<std::string> markers;  };
 
@@ -239,8 +236,6 @@ public:
   { return area == marker; }
 
   bool is_sym() const { return false; /* not impl. yet */ }
-
-  BoundaryConditions* get_boundary_conditions() { return boundary_conditions; }
 
   friend class DiscreteProblem;
   friend class Precond;

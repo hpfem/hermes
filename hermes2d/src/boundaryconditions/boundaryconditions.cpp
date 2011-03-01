@@ -45,7 +45,11 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
 // Dirichlet BC Value
 DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
   this->value = value;
-  this->markers = markers;
+}
+
+DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(std::string marker, scalar value) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
+  this->value = value;
+  markers.push_back(marker);
 }
 
 // Neumann BC.
@@ -63,9 +67,12 @@ scalar NeumannBoundaryCondition::function(double x, double y) const {
 // Neumann BC Value
 NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition(markers) {
   this->value = value;
-  this->markers = markers;
 }
 
+NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(std::string marker, scalar value) : NeumannBoundaryCondition(Hermes::vector<std::string>()) {
+  this->value = value;
+  markers.push_back(marker);
+}
 
 // Newton BC.
 NewtonBoundaryCondition::NewtonBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
@@ -96,6 +103,12 @@ BoundaryConditions::BoundaryConditions() {
 };
 
 BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) : all(boundary_conditions) {
+  add_boundary_conditions(boundary_conditions);
+};
+
+BoundaryConditions::BoundaryConditions(BoundaryCondition * boundary_condition) {
+  Hermes::vector<BoundaryCondition *> boundary_conditions;
+  boundary_conditions.push_back(boundary_condition);
   add_boundary_conditions(boundary_conditions);
 };
 

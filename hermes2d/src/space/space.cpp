@@ -580,31 +580,6 @@ void Space::free_extra_data()
   extra_data.clear();
 }
 
-/*void Space::dump_node_info()
-{
-  Node* n;
-  for_all_nodes(n, mesh)
-  {
-    NodeData* nd = &ndata[n->id];
-    if (n->type == HERMES_TYPE_VERTEX)
-    {
-      printf("vert node id=%d ref=%d bnd=%d x=%g y=%g dof=%d n=%d ",
-             n->id, n->ref, n->bnd, n->x, n->y, nd->dof, nd->n);
-      if (nd->dof < 0)
-        printf("coef=%g", nd->vertex_bc_coef[0]);
-    }
-    else
-    {
-      printf("edge node id=%d ref=%d bnd=%d marker=%d p1=%d p2=%d dof=%d n=%d ",
-             n->id, n->ref, n->bnd, n->marker, n->p1, n->p2, nd->dof, nd->n);
-      if (nd->dof < 0)
-        for (int i = 0; i < nd->n; i++)
-          printf("proj[%d]=%g ", i, nd->edge_bc_proj[i+2]);
-    }
-    printf("\n");
-  }
-}*/
-
 int Space::get_num_dofs(Hermes::vector<Space *> spaces)
 {
   _F_
@@ -613,6 +588,12 @@ int Space::get_num_dofs(Hermes::vector<Space *> spaces)
     ndof += spaces[i]->get_num_dofs();
   }
   return ndof;
+}
+
+int Space::get_num_dofs(Space* space)
+{
+  _F_
+  return space->get_num_dofs();
 }
 
 // This is identical to H3D.

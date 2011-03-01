@@ -115,6 +115,24 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   delete [] target_vec;
 }
 
+void OGProjection::project_global(Space * space,
+                             Solution* sol_src, Solution* sol_dest,
+                             MatrixSolverType matrix_solver,
+                             ProjNormType proj_norm)
+{
+  Hermes::vector<Space *> spaces;
+  spaces.push_back(space);
+  Hermes::vector<Solution *> sols_src;
+  sols_src.push_back(sol_src);
+  Hermes::vector<Solution *> sols_dest;
+  sols_dest.push_back(sol_dest);
+  Hermes::vector<ProjNormType> proj_norms;
+  if(proj_norm != HERMES_UNSET_NORM)
+    proj_norms.push_back(proj_norm);
+  
+  project_global(spaces, sols_src, sols_dest, matrix_solver, proj_norms);
+}
+
 void OGProjection::project_global(Hermes::vector<Space *> spaces,
                                   Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
                                   Hermes::vector<WeakForm::VectorFormVol *> vfvol,

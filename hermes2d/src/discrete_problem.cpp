@@ -34,19 +34,18 @@ DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces,
          bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
 {
   _F_
-  init(wf, spaces, is_linear);
+  init();
 }
 
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear)
+   : wf(wf), is_linear(is_linear), wf_seq(-1)
 {
   _F_
-  Hermes::vector<Space *> spaces_to_pass;
-  spaces_to_pass.push_back(space);
-  init(wf, spaces_to_pass, is_linear);
+  spaces.push_back(space);
+  init();
 }
 
-void DiscreteProblem::init(WeakForm* wf, Hermes::vector<Space *> spaces, 
-         bool is_linear)
+void DiscreteProblem::init()
 {
   _F_
   // Sanity checks.
@@ -88,7 +87,7 @@ void DiscreteProblem::init(WeakForm* wf, Hermes::vector<Space *> spaces,
   // according to the conversion table contained in the mesh.
   element_markers_conversion = &spaces[0]->get_mesh()->element_markers_conversion;
   boundary_markers_conversion = &spaces[0]->get_mesh()->boundary_markers_conversion;
-  wf->set_markers_conversion(spaces[0]->get_mesh()->element_markers_conversion, spaces[0]->get_mesh()->boundary_markers_conversion);
+  wf->set_markers_conversion(&spaces[0]->get_mesh()->element_markers_conversion, &spaces[0]->get_mesh()->boundary_markers_conversion);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.

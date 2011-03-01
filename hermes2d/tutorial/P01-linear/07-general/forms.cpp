@@ -4,8 +4,10 @@
 
 class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers) : DirichletBoundaryCondition(markers)
-  {}
+  DirichletFunctionBoundaryCondition(std::string marker) : DirichletBoundaryCondition(Hermes::vector<std::string>())
+  {
+    markers.push_back(marker);
+  }
 
   ~DirichletFunctionBoundaryCondition() {};
 
@@ -24,7 +26,7 @@ public:
   {
     add_matrix_form(new MatrixFormVolSecondOrderLinear(0, 0));
     add_vector_form(new VectorFormVolSecondOrderLinear(0));
-    add_vector_form_surf(new VectorFormSurfSecondOrderLinear(0, BDY_VERTICAL));
+    add_vector_form_surf(new VectorFormSurfSecondOrderLinear(0, "Boundary vertical"));
   }
 
   ~WeakFormSecondOrderLinear() {}

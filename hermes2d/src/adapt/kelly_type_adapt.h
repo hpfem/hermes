@@ -5,6 +5,8 @@
 #include "../neighbor.h"
 #include "../discrete_problem.h"
 
+#ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
+
 /// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
 inline double scale_by_element_diameter(double e_diam)
 {
@@ -264,4 +266,6 @@ class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
       }
     }
 };
+
+#endif
 #endif // KELLY_TYPE_ADAPT_H

@@ -92,8 +92,9 @@ public:
 /// Class representing Dirichlet boundary condition of the form u|_{\Gamma_Dirichlet} = u_Dirichlet given by value.
 class HERMES_API DirichletValueBoundaryCondition : public DirichletBoundaryCondition {
 public:
-  /// Constructor.
+  /// Constructors.
   DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
+  DirichletValueBoundaryCondition(std::string marker, scalar value);
 
   /// Function giving info that u_Dirichlet is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
@@ -126,8 +127,9 @@ public:
 /// Class representing Neumann boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} = u_Neumann given by value.
 class HERMES_API NeumannValueBoundaryCondition : public NeumannBoundaryCondition {
 public:
-  /// Constructor.
+  /// Constructors.
   NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
+  NeumannValueBoundaryCondition(std::string marker, scalar value);
 
   /// Function giving info that u_Neumann is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
@@ -137,7 +139,7 @@ public:
 /// Abstract class representing Newton (mixed) boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} + g * u = u_Newton.
 class HERMES_API NewtonBoundaryCondition : public BoundaryCondition {
 public:
-  /// Default constructor.
+  /// Default constructors.
   NewtonBoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Virtual destructor.
@@ -186,6 +188,7 @@ public:
 
   /// Constructor with all boundary conditions of a problem.
   BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions);
+  BoundaryConditions(BoundaryCondition * boundary_condition);
 
   /// Default destructor.
   ~BoundaryConditions();

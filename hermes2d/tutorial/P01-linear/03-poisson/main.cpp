@@ -39,15 +39,15 @@ int main(int argc, char* argv[])
   //mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  WeakFormTutorial wf(&mesh);
+  WeakFormPoisson wf(CONST_F);
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
-
-  // Initialize the weak formulation.
-  WeakFormPoisson wf(CONST_F);
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -134,7 +134,9 @@ enum ProjNormType
   HERMES_H1_NORM, 
   HERMES_H1_SEMINORM, 
   HERMES_HCURL_NORM, 
-  HERMES_HDIV_NORM
+  HERMES_HDIV_NORM,
+  // Used for passing to projecting functions.
+  HERMES_UNSET_NORM
 };
 
 #ifdef HERMES_COMMON_COMPLEX

@@ -37,6 +37,11 @@ public:
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+  static void project_global(Space * space,
+                             Solution* sol_src, Solution* sol_dest,
+                             MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+                             ProjNormType proj_norm = HERMES_UNSET_NORM);
+
   static void project_global(Hermes::vector<Space *> spaces,
                              Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
                              Hermes::vector<WeakForm::VectorFormVol *> vfvol,

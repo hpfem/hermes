@@ -15,7 +15,6 @@
 
 #include "../h2d_common.h"
 #include "weakform.h"
-#include "../boundaryconditions/boundaryconditions.h"
 #include "../../../hermes_common/matrix.h"
 #include "forms.h"
 
@@ -107,12 +106,10 @@ WeakForm::WeakForm(unsigned int neq, bool mat_free)
   this->neq = neq;
   this->seq = 0;
   this->is_matfree = mat_free;
-  this->boundary_conditions = new BoundaryConditions();
 }
 
 WeakForm::~WeakForm()
 {
-  delete this->boundary_conditions;
 }
 
 void WeakForm::add_matrix_form(MatrixFormVol* form)

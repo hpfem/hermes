@@ -69,7 +69,8 @@ class HERMES_API Adapt
 public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
   /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-  Adapt(Hermes::vector<Space *> spaces_, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+  Adapt(Hermes::vector<Space *> spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+  Adapt(Space* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
   virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
   // Matrix forms for error calculation.
@@ -78,7 +79,7 @@ public:
   public:
     MatrixFormVolError(ProjNormType type)
     {
-      this->projNormType = projNormType;
+      this->projNormType = type;
     }
 
     /// Error bilinear form callback function.
@@ -246,6 +247,9 @@ public:
    *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
   bool adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat = 0,
              int regularize = -1, double to_be_processed = 0.0);
+  
+  bool adapt(RefinementSelectors::Selector* refinement_selector, double thr, int strat = 0,
+            int regularize = -1, double to_be_processed = 0.0);
 
   /// Unrefines the elements with the smallest error.
   /** \note This method is provided just for backward compatibility reasons. Currently, it is not used by the library.
@@ -317,7 +321,7 @@ protected: //adaptivity
    *  \param[in] elems_to_refine A vector of refinements.
    *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
    *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
-  void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, int** idx,
+  void fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine, int** idx,
                                    Hermes::vector<RefinementSelectors::Selector *> refinement_selectors);
 
   /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.

@@ -1,5 +1,7 @@
 #include "kelly_type_adapt.h"
 
+#ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
+
 KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
                                Hermes::vector< ProjNormType > norms_,
                                bool ignore_visited_segments_,
@@ -717,3 +719,5 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                               // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                               // the weights.
 }
+
+#endif

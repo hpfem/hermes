@@ -32,27 +32,24 @@
 
 using namespace std;
 
-Adapt::Adapt(Hermes::vector< Space* > spaces_,
+Adapt::Adapt(Hermes::vector<Space *> spaces,
              Hermes::vector<ProjNormType> proj_norms) :
+    spaces(spaces),
     num_act_elems(-1),
     have_errors(false),
     have_coarse_solutions(false),
     have_reference_solutions(false)
 {
   // sanity check
-  if (proj_norms.size() > 0 && spaces_.size() != proj_norms.size())
+  if (proj_norms.size() > 0 && spaces.size() != proj_norms.size())
     error("Mismatched numbers of spaces and projection types in Adapt::Adapt().");
 
-  this->num = spaces_.size();
+  this->num = spaces.size();
 
   // sanity checks
   error_if(this->num <= 0, "Too few components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
   error_if(this->num > H2D_MAX_COMPONENTS, "Too many components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
-  for (int i = 0; i < this->num; i++) {
-    if (spaces_[i] == NULL) error("spaces[%d] is NULL in Adapt::Adapt().", i);
-    this->spaces.push_back(spaces_[i]);
-  }
-
+  
   // reset values
   memset(errors, 0, sizeof(errors));
   memset(sln, 0, sizeof(sln));
@@ -75,6 +72,38 @@ Adapt::Adapt(Hermes::vector< Space* > spaces_,
   // assign norm weak forms  according to norms selection
   for (int i = 0; i < this->num; i++)
     error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
+}
+
+Adapt::Adapt(Space* space, ProjNormType proj_norm) :
+    spaces(Hermes::vector<Space *>()),
+    num_act_elems(-1),
+    have_errors(false),
+    have_coarse_solutions(false),
+    have_reference_solutions(false)
+{
+  spaces.push_back(space);
+
+  this->num = 1;
+
+  // reset values
+  memset(errors, 0, sizeof(errors));
+  memset(sln, 0, sizeof(sln));
+  memset(rsln, 0, sizeof(rsln));
+
+  // if norms were not set by the user, set them to defaults
+  // according to spaces
+  if (proj_norm == HERMES_UNSET_NORM) {
+      switch (space->get_type()) {
+        case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
+        case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
+        case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
+        case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
+        default: error("Unknown space type in Adapt::Adapt().");
+      }
+    }
+
+  // assign norm weak forms  according to norms selection
+  error_form[0][0] = new MatrixFormVolError(proj_norm);
 }
 
 Adapt::~Adapt()
@@ -123,7 +152,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
   double err0_squared = 1000.0;
   double processed_error_squared = 0.0;
 
-  vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
+  Hermes::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
   elem_inx_to_proc.reserve(num_act_elems);
 
   //adaptivity loop
@@ -269,7 +298,15 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
   return done;
 }
 
-void Adapt::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
+bool Adapt::adapt(RefinementSelectors::Selector* refinement_selector, double thr, int strat,
+            int regularize, double to_be_processed)
+{
+  Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
+  refinement_selectors.push_back(refinement_selector);
+  return adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
+}
+
+void Adapt::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine,
                                         int** idx, Hermes::vector<RefinementSelectors::Selector *> refinement_selectors) {
   int num_elem_to_proc = elems_to_refine.size();
   for(int inx = 0; inx < num_elem_to_proc; inx++) {
@@ -783,6 +820,18 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
     return -1.0;
   }
 }
+
+double Adapt::calc_err_internal(Solution* sln, Solution* rsln,
+                                   Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+                                   unsigned int error_flags)
+{
+  Hermes::vector<Solution *> slns;
+  slns.push_back(sln);
+  Hermes::vector<Solution *> rslns;
+  rslns.push_back(rsln);
+  return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+}
+
 
 void Adapt::fill_regular_queue(Mesh** meshes) {
   assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);

@@ -57,7 +57,7 @@ public:
   DiscreteProblem(WeakForm* wf, Space* space, bool is_linear = false);
 
   /// Init function. Common code for the constructors.
-  void init(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear = false);
+  void init();
 
   /// Destuctor.
   virtual ~DiscreteProblem();

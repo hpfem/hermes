@@ -27,10 +27,18 @@ public:
     add_matrix_form(unsym_vely_pressure_form);
     
     VectorFormVolVel* vector_vel_form_x = new VectorFormVolVel(0, Stokes, time_step);
-    vector_vel_form_x->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time);
+    
+    Hermes::vector<MeshFunction *> ext_vel_x;
+    ext_vel_x.push_back(x_vel_previous_time);
+
+    vector_vel_form_x->ext = ext_vel_x;
 
     VectorFormVolVel* vector_vel_form_y = new VectorFormVolVel(1, Stokes, time_step);
-    vector_vel_form_y->ext = Hermes::vector<MeshFunction*>(y_vel_previous_time);
+
+    Hermes::vector<MeshFunction *> ext_vel_y;
+    ext_vel_y.push_back(y_vel_previous_time);
+    
+    vector_vel_form_y->ext = ext_vel_y;
   };
 
   class BilinearFormSymVel : public WeakForm::MatrixFormVol
@@ -546,6 +554,11 @@ class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition
 public:
   DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
         DirichletBoundaryCondition(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
+  DirichletFunctionBoundaryCondition(std::string marker, double vel_inlet, double H, double startup_time) : 
+        DirichletBoundaryCondition(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
+    markers.push_back(marker);
+  };
+  
   ~DirichletFunctionBoundaryCondition() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 

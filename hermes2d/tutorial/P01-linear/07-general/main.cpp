@@ -30,6 +30,9 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
+// Boundary markers.
+const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Boundary vertical";
+
 // Weak forms.
 #include "forms.cpp"
 
@@ -48,7 +51,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  WeakFormTutorial wf;
+  WeakFormSecondOrderLinear wf;
   
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc1(BDY_HORIZONTAL);
@@ -56,11 +59,9 @@ int main(int argc, char* argv[])
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, wf.get_boundary_conditions(), P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
-
-  WeakFormSecondOrderLinear wf;
 
   // Initialize the FE problem.
   bool is_linear = true;
