@@ -64,7 +64,57 @@ int read_matrix_and_rhs(char *file_name, int &n,
     STATE_RHS,
   } state = STATE_N;
 
-  double buffer[4]; //increased in size by one
+#ifndef H3D_COMPLEX
+
+  double buffer[4]; 
+  char row[MAX_ROW_LEN];
+  while (fgets(row, MAX_ROW_LEN, file) != NULL) {
+    switch (state) {
+      case STATE_N:
+        if (read_n_nums(row, 1, buffer)) {
+          if (argv[4]="complex_matrix_to_real"){
+             n = (int) 2*buffer[0];
+          }
+          else
+             n = (int) buffer[0];
+          state = STATE_MATRIX;
+        } 
+      break;
+
+      case STATE_MATRIX:
+        if (argv[4]="complex_matrix_to_real"){
+           if (read_n_nums(row, 4, buffer)) {
+              mat[2*mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+              mat[2*mat.size()] = (MatrixEntry((int) buffer[0]+n, (int) buffer[1]+n, buffer[2]));
+              mat[2*mat.size()] = (MatrixEntry((int) buffer[0]+n, (int) buffer[1], (-1)*buffer[3]));
+              mat[2*mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1]+n, buffer[3]));
+           }
+        }
+        else
+           if (read_n_nums(row, 3, buffer)) {
+             mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+           }
+	   else
+           state = STATE_RHS;
+      break;
+
+        case STATE_RHS:
+        if (argv[4]="complex_matrix_to_real"){
+          if (read_n_nums(row, 2, buffer)) {
+            rhs[(int) buffer[0]] = buffer[1];
+            rhs[(int) buffer[0]+n] = buffer[2];
+        }
+        else
+          if (read_n_nums(row, 2, buffer)) {
+            rhs[(int) buffer[0]] = buffer[1];
+          }       
+        break;
+    }
+  }
+
+#else
+
+  double buffer[4]; 
   char row[MAX_ROW_LEN];
   while (fgets(row, MAX_ROW_LEN, file) != NULL) {
     switch (state) {
@@ -75,39 +125,6 @@ int read_matrix_and_rhs(char *file_name, int &n,
         } 
       break;
 
-#ifndef H3D_COMPLEX
-
-      case STATE_MATRIX:
-        if (read_n_nums(row, 3, buffer)) {
-          mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
-        }
-	else
-        state = STATE_RHS;
-      break;
-
-        case STATE_RHS:
-          if (read_n_nums(row, 2, buffer)) {
-            rhs[(int) buffer[0]] = buffer[1];
-          }
-        break;
-    }
-  }
-
-#else
-/*
-// set matrix and rhs without reading the file
-
-  n = 3;
-  mat[mat.size()] = MatrixEntry(0, 0, scalar(1, 2));
-  mat[mat.size()] = MatrixEntry(1, 1, scalar(1, 4));
-  mat[mat.size()] = MatrixEntry(2, 2, scalar(1, 6));
-
-  rhs[0] = scalar(2, 1);
-  rhs[1] = scalar(4, 1);
-  rhs[2] = scalar(6, 2);
-*/
-
-//read file with complex MatrixEntry and complex rhs VectorEntry
       case STATE_MATRIX:
         if (read_n_nums(row, 4, buffer)) {
           complex<double> cmplx_buffer(buffer[2], buffer[3]);
