@@ -36,7 +36,7 @@ public:
   Filter(Hermes::vector<MeshFunction*> solutions);
   virtual ~Filter();
 
-        void init(Hermes::vector<MeshFunction*> solutions);
+  void init(Hermes::vector<MeshFunction*> solutions);
 
 	virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);

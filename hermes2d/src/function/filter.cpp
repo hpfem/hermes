@@ -613,8 +613,7 @@ void LinearFilter::precalculate(int order, int mask)
 }
 
 
-LinearFilter::LinearFilter(MeshFunction* old)
-          : Filter(Hermes::vector<MeshFunction*>(old))
+LinearFilter::LinearFilter(MeshFunction* old) // : Filter(old)
  {
    init_components();
  }

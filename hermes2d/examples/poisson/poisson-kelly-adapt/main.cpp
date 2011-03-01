@@ -73,12 +73,12 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions
   DirichletValueBoundaryCondition bc_left(BDY_LEFT, T1);
   NeumannValueBoundaryCondition bc_outer_inner(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER), 0.0);
-  NeumannValueBoundaryCondition bc_bottom(Hermes::vector<std::string>(BDY_BOTTOM), 0.0);
+  NeumannValueBoundaryCondition bc_bottom(BDY_BOTTOM, 0.0);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_left, &bc_outer_inner, &bc_bottom));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
@@ -150,13 +150,13 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
                                                   
     // Report results.
-    info("ndof: %d, err_est_rel: %g%%", Space::get_num_dofs(&space), err_est_rel);
+    info("ndof: %d, err_est_rel: %g%%", space.get_num_dofs(), err_est_rel);
     
     // Time measurement.
     cpu_time.tick();
     
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof.add_values(space.get_num_dofs(), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu.save("conv_cpu_est.dat");
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (space.get_num_dofs() >= NDOF_STOP) done = true;
     
     // Increase the counter of performed adaptivity steps.
     if (done == false)  as++;
