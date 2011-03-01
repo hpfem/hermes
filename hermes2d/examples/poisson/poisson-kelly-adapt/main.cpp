@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
+  int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
@@ -138,25 +138,27 @@ int main(int argc, char* argv[])
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space);
-    adaptivity->add_error_estimator_surf(callback(kelly_interface_estimator));
-    /*
-    adaptivity->add_error_estimator_surf(callback(kelly_interface_estimator));
-    adaptivity->add_error_estimator_surf(callback(kelly_newton_boundary_estimator), BDY_BOTTOM);
-    adaptivity->add_error_estimator_surf(callback(kelly_neumann_boundary_estimator), BDY_OUTER);
-    adaptivity->add_error_estimator_surf(callback(kelly_zero_neumann_boundary_estimator), BDY_INNER);
-    */
+
+    // FIXME
+    Hermes::vector<Space*> spaces;
+    spaces.push_back(&space);
+
+    KellyTypeAdapt* adaptivity = new KellyTypeAdapt(spaces);
+    adaptivity->add_error_estimator_surf(new ErrorEstimatorFormInterface(0));
+    adaptivity->add_error_estimator_surf(new ErrorEstimatorFormNewton(0, BDY_BOTTOM));
+    adaptivity->add_error_estimator_surf(new ErrorEstimatorFormNeumann(0, BDY_OUTER));
+    adaptivity->add_error_estimator_surf(new ErrorEstimatorFormZeroNeumann(0, BDY_INNER));
 
     double err_est_rel = adaptivity->calc_err_est(&sln, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
                                                   
     // Report results.
-    info("ndof: %d, err_est_rel: %g%%", space.get_num_dofs(), err_est_rel);
+    info("ndof: %d, err_est_rel: %g%%", Space::get_num_dofs(&space), err_est_rel);
     
     // Time measurement.
     cpu_time.tick();
     
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(space.get_num_dofs(), err_est_rel);
+    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
     graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu.save("conv_cpu_est.dat");
@@ -168,7 +170,7 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (space.get_num_dofs() >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
     
     // Increase the counter of performed adaptivity steps.
     if (done == false)  as++;

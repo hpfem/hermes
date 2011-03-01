@@ -87,15 +87,5 @@ public:
 
     rho["1"] = 0.0;
     rho["2"] = 0.0;
-
-    // Set boundary conditions
-    // Boundary markers.
-    std::string OUTER_BDY = "1";
-    std::string STATOR_BDY = "2";
-
-    // Voltage on the stator
-    double VOLTAGE = 50;
   }
-
-  ~WeakFormElectrostaticTutorial() {};
 };

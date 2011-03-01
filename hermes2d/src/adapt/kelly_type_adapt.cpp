@@ -1,6 +1,6 @@
 #include "kelly_type_adapt.h"
 
-#ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
+// #ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
 
 KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
                                Hermes::vector< ProjNormType > norms_,
@@ -36,32 +36,26 @@ bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_p
   return Adapt::adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
 }
 
-void KellyTypeAdapt::add_error_estimator_vol( int i,
-                                              WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                              std::string area,
-                                              Hermes::vector<MeshFunction*> ext )
+void KellyTypeAdapt::add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm* form)
 {
-  error_if(i < 0 || i >= this->num,
-           "Invalid component number (%d), max. supported components: %d", i, H2D_MAX_COMPONENTS);
+  error_if(form->i < 0 || form->i >= this->num,
+           "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
 
-  KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
+  form->adapt = this;
   this->error_estimators_vol.push_back(form);
 }
 
-void KellyTypeAdapt::add_error_estimator_surf(int i,
-                                              WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                              std::string area,
-                                              Hermes::vector<MeshFunction*> ext)
+void KellyTypeAdapt::add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form)
 {
-  error_if (i < 0 || i >= this->num,
+  error_if (form->i < 0 || form->i >= this->num,
             "Invalid equation number.");
 
-  KellyTypeAdapt::ErrorEstimatorForm form = { i, area, vfv, vfo, ext };
+  form->adapt = this;
   this->error_estimators_surf.push_back(form);
 }
 
-double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
-                                         Hermes::vector< double >* component_errors,
+double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                                         Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                          unsigned int error_flags)
 {
   int n = slns.size();
@@ -160,22 +154,22 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
       {
         // Skip current error estimator if it is assigned to a different component or geometric area
         // different from that of the current active element.
-        if (error_estimators_vol[iest].i != i)
+        if (error_estimators_vol[iest]->i != i)
           continue;
         /*
         if (error_estimators_vol[iest].area != ee[i]->marker)
           continue;
           */
-        else if (error_estimators_vol[iest].area != HERMES_ANY)
+        else if (error_estimators_vol[iest]->area != HERMES_ANY)
           continue;
 
-        err += eval_volumetric_estimator(&error_estimators_vol[iest], rm);
+        err += eval_volumetric_estimator(error_estimators_vol[iest], rm);
       }
 
       // Go through all surface error estimators (includes both interface and boundary est's).
       for (unsigned int iest = 0; iest < error_estimators_surf.size(); iest++)
       {
-        if (error_estimators_surf[iest].i != i)
+        if (error_estimators_surf[iest]->i != i)
           continue;
 
         for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
@@ -191,11 +185,11 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
                 error_estimators_surf[iest].area != HERMES_ANY) continue;
                 */
 
-            err += eval_boundary_estimator(&error_estimators_surf[iest], rm, surf_pos);
+            err += eval_boundary_estimator(error_estimators_surf[iest], rm, surf_pos);
           }
           else              // Interface
           {
-            if (error_estimators_surf[iest].area != H2D_DG_INNER_EDGE) continue;
+            if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE) continue;
 
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
             
@@ -290,7 +284,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
               
               // The estimate is multiplied by 0.5 in order to distribute the error equally onto
               // the two neighboring elements.
-              double central_err = 0.5 * eval_interface_estimator(&error_estimators_surf[iest],
+              double central_err = 0.5 * eval_interface_estimator(error_estimators_surf[iest],
                                                                   rm, surf_pos, neighbor_searches, 
                                                                   ns_index);
               double neighb_err = central_err;
@@ -577,7 +571,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
-                err_est_form->fn(np, jwt, ui, ui[err_est_form->i], e, ext);
+                err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
     if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
@@ -635,7 +629,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
   ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, eo);
 
   scalar res = boundary_scaling_const *
-                err_est_form->fn(np, jwt, ui, ui[err_est_form->i], e, ext);
+                err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
     if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
@@ -649,7 +643,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
                               // the weights.
 }
 
-double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
+double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                                 RefMap *rm, SurfPos* surf_pos,
                                                 LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index)
 {
@@ -708,7 +702,7 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   //ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
 
   scalar res = interface_scaling_const *
-                err_est_form->fn(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
+                err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
   if (ui != NULL) { ui->free(); delete ui; }
   //if (ext != NULL) { ext->free(); delete ext; }
@@ -720,4 +714,4 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                               // the weights.
 }
 
-#endif
+// #endif

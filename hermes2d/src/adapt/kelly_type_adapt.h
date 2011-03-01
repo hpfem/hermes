@@ -5,7 +5,7 @@
 #include "../neighbor.h"
 #include "../discrete_problem.h"
 
-#ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
+// #ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
 
 /// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
 inline double scale_by_element_diameter(double e_diam)
@@ -38,16 +38,37 @@ typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
 ///
 class HERMES_API KellyTypeAdapt : public Adapt
 {
-  protected:
-    struct ErrorEstimatorForm
+public:
+  class HERMES_API ErrorEstimatorForm
+  {
+  public:
+    int i;
+    std::string area;
+    Hermes::vector<MeshFunction *> ext;
+
+    ErrorEstimatorForm(int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction *>()) :
+      i(i), area(area), ext(ext) {}
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+               Func<scalar> *u, Geom<double> *e,
+               ExtData<scalar> *ext)
     {
-      int i;
-      std::string area;
-      WeakForm::error_vector_form_val_t fn;
-      WeakForm::error_vector_form_ord_t ord;
-      Hermes::vector<MeshFunction *> ext;
-    };
-    
+      error("Adapt::::ErrorEstimatorForm::ord must be overrided.");
+      return 0.0;
+    }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                     Func<Ord> *u, Geom<Ord> *e,
+                     ExtData<Ord> *ext)
+    {
+      error("Adapt::::ErrorEstimatorForm::ord must be overrided.");
+      return Ord();
+    }
+
+    // FIXME - temporary
+    KellyTypeAdapt *adapt;
+  };
+
+  protected:  
     DiscreteProblem dp; // Only needed for gaining access to NeighborSearch methods.
 
     ///
@@ -58,10 +79,11 @@ class HERMES_API KellyTypeAdapt : public Adapt
     double eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                    RefMap* rm,
                                    SurfPos* surf_pos);
-    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
-                                    RefMap *rm, 
+    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+                                    RefMap *rm,
                                     SurfPos* surf_pos,
-                                    NeighborSearch* nbs);
+                                    LightArray<NeighborSearch*>& neighbor_searches,
+                                    int neighbor_index);
     double eval_solution_norm(Adapt::MatrixFormVolError* form,
                               RefMap* rm,
                               MeshFunction* sln);
@@ -69,8 +91,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     ///
     /// Linear forms used to calculate the error estimator value for each component.
     ///
-    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_vol;
-    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm> error_estimators_surf;
+    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_vol;
+    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_surf;
 
     Mesh::ElementMarkersConversion element_markers_conversion;
     Mesh::BoundaryMarkersConversion boundary_markers_conversion;
@@ -96,8 +118,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
 
     /// Calculates error estimates for each solution component, the total error estimate, and possibly also
     /// their normalizations.
-    virtual double calc_err_internal(Hermes::vector< Solution* > slns,
-                                     Hermes::vector< double >* component_errors,
+    virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+                                     Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                      unsigned int error_flags);
 
   public:
@@ -146,6 +168,9 @@ class HERMES_API KellyTypeAdapt : public Adapt
       error_estimators_vol.clear();
     }
 
+    Mesh::ElementMarkersConversion* get_element_markers_conversion() { return &this->element_markers_conversion; };
+    Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return &this->boundary_markers_conversion; };
+
     /// Append volumetric error estimator form.
     ///
     /// For example, element residual norms may be represented by such a form.
@@ -153,23 +178,9 @@ class HERMES_API KellyTypeAdapt : public Adapt
     /// \c vector_form_val_t is defined in \c weakform/weakform.h and its arguments will be interpreted during
     /// evaluation of the estimator as follows:
     ///
-    ///   - int n,                 ... number of integration points
-    ///   - double *wt,            ... integration weights
-    ///   - Func\<scalar\> *u[],   ... all solution components
-    ///   - Func\<double\> *vi,    ... currently processed solution component
-    ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
-    ///   - ExtData\<scalar\> *ext ... external functions (e.g. previous time-level solutions appearing in the residual)
+    ///   - ErrorEstimatorForm* form ... error estimator class
     ///
-    void add_error_estimator_vol( int i,
-                                  WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  std::string area = HERMES_ANY,
-                                  Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  );
-    void add_error_estimator_vol( WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  std::string area = HERMES_ANY,
-                                  Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>()  )
-    {
-      add_error_estimator_vol(0, vfv, vfo, area, ext);
-    }
+    void add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm* form);
 
     /// Append boundary or interface error estimator form.
     ///
@@ -178,16 +189,7 @@ class HERMES_API KellyTypeAdapt : public Adapt
     /// by <c> area == H2D_DG_INNER_EDGE </c> and then the effective types for \c u, \c vi and \c e are,
     /// respectively \c DiscontinuousFunc, \c DiscontinuousFunc and \c InterfaceGeom.
     ///
-    void add_error_estimator_surf(int i,
-                                  WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  std::string area = H2D_DG_INNER_EDGE,
-                                  Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
-    void add_error_estimator_surf(WeakForm::error_vector_form_val_t vfv, WeakForm::error_vector_form_ord_t vfo,
-                                  std::string area = H2D_DG_INNER_EDGE,
-                                  Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>())
-    {
-      add_error_estimator_surf(0, vfv, vfo, area, ext);
-    }
+    void add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form); // std::string area = H2D_DG_INNER_EDGE,
 
     ///
     /// The following two methods calculate the error of the given \c sln, using \code calc_err_internal \endcode.
@@ -197,15 +199,17 @@ class HERMES_API KellyTypeAdapt : public Adapt
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
       if (num != 1) EXIT("Wrong number of solutions.");
-      return calc_err_est(Hermes::vector<Solution *> (sln),
-                          (Hermes::vector<double>*) NULL, error_flags);
+      Hermes::vector<Solution *> slns;
+      slns.push_back(sln);
+      return calc_err_est(slns, NULL, error_flags);
     }
+
 
     double calc_err_est(Hermes::vector<Solution *> slns,
                         Hermes::vector<double>* component_errors = NULL,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
-      return calc_err_internal(slns, component_errors, error_flags);
+      return calc_err_internal(slns, Hermes::vector<Solution *>(), component_errors, false, error_flags);
     }
 
     /// Refines the elements selected by the \code RefinementSelectors::HOnlySelector \endcode according
@@ -230,20 +234,40 @@ class HERMES_API KellyTypeAdapt : public Adapt
 ///       Currently, the forms for the Neumann and Newton boundary conditions must be specified by
 ///       the user, see the example \c poisson-kelly-adapt.
 ///
-template<typename Real, typename Scalar>
-Scalar original_kelly_interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                                          Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0.;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                           e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
-  return result;
-}
 
 class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
 {
   public:
+  class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt::ErrorEstimatorForm
+  {
+  public:
+    ErrorEstimatorFormKelly(int i) : ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+               Func<scalar> *u, Geom<double> *e,
+               ExtData<scalar> *ext)
+    {
+      return original_kelly_interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
+    }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                     Func<Ord> *u, Geom<Ord> *e,
+                     ExtData<Ord> *ext)
+    {
+      return original_kelly_interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
+    }
+
+  private:
+    template<typename Real, typename Scalar>
+    static Scalar original_kelly_interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                                                     Geom<Real> *e, ExtData<Scalar> *ext)
+    {
+      Scalar result = 0.;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
+                               e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+      return result;
+    }
+  };
     /// Constructor.
     ///
     /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
@@ -257,15 +281,9 @@ class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
       boundary_scaling_const = interface_scaling_const;
 
       for (int i = 0; i < num; i++)
-      {
-        KellyTypeAdapt::ErrorEstimatorForm form = {
-          i, H2D_DG_INNER_EDGE, callback(original_kelly_interface_estimator), Hermes::vector<MeshFunction*>()
-        };
-
-        this->error_estimators_surf.push_back(form);
-      }
+        this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
     }
 };
 
-#endif
+// #endif
 #endif // KELLY_TYPE_ADAPT_H
