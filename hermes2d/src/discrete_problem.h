@@ -58,8 +58,8 @@ public:
   /// Constructor.
   DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear = false);
 
-  /// Non-parametrized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
-  DiscreteProblem() : wf(NULL), pss(NULL), num_user_pss(0), sp_seq(NULL) {};
+  /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
+ DiscreteProblem() : wf(NULL), pss(NULL) {num_user_pss = 0; sp_seq = NULL;}
   
   /// Destuctor.
   virtual ~DiscreteProblem();

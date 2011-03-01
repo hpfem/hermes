@@ -158,9 +158,12 @@ int main(int argc, char* argv[])
   // Visualize initial condition.
   char title[100];
   ScalarView sln_view("Initial condition", new WinGeom(0, 0, 440, 350));
+  sln_view.show_mesh(false);
   OrderView ordview("Initial mesh", new WinGeom(445, 0, 440, 350));
-  ScalarView time_error_view("Temporal error", new WinGeom(0, 405, 440, 350));
-  ScalarView space_error_view("Spatial error", new WinGeom(445, 405, 440, 350));
+  ScalarView time_error_view("Temporal error", new WinGeom(0, 400, 440, 350));
+  time_error_view.fix_scale_width(60);
+  ScalarView space_error_view("Spatial error", new WinGeom(445, 400, 440, 350));
+  space_error_view.fix_scale_width(60);
   sln_view.show(sln_prev_time);
   ordview.show(&space);
 
@@ -169,7 +172,7 @@ int main(int argc, char* argv[])
   if (ADAPTIVE_TIME_STEP_ON) info("Time step history will be saved to file time_step_history.dat.");
   
   // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1;
   do 
   {
     info("Begin time step %d.", ts);
@@ -211,7 +214,7 @@ int main(int argc, char* argv[])
       /* If ADAPTIVE_TIME_STEP_ON == true, estimate temporal error. 
          If too large or too small, then adjust it and restart the time step. */
 
-      double rel_err_time;
+      double rel_err_time = 0;
       if (bt->is_embedded() == true) {
         info("Calculating temporal error estimate.");
 
