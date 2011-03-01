@@ -17,7 +17,7 @@
 #define __H2D_ADAPT_H
 
 #include "../function/norm.h"
-#include "../weakform/forms.h"
+#include "../function/forms.h"
 #include "../space/space.h"
 #include "../../../hermes_common/vector.h"
 #include "../weakform/weakform.h"
