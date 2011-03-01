@@ -351,7 +351,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
 
       if (calc_norm)
       {
-        double nrm = eval_solution_norm(error_form[i][i], error_ord[i][i], rm, sln[i]);
+        double nrm = eval_solution_norm(error_form[i][i], rm, sln[i]);
         norms[i] += nrm;
         total_norm += nrm;
       }
@@ -425,7 +425,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   }
 }
 
-double KellyTypeAdapt::eval_solution_norm(error_matrix_form_val_t val, error_matrix_form_ord_t ord, RefMap *rm, MeshFunction* sln)
+double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction* sln)
 {
   // determine the integration order
   int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -433,7 +433,7 @@ double KellyTypeAdapt::eval_solution_norm(error_matrix_form_val_t val, error_mat
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = ord(1, &fake_wt, NULL, ou, ou, fake_e, NULL);
+  Ord o = form->ord(1, &fake_wt, NULL, ou, ou, fake_e, NULL);
   int order = rm->get_inv_ref_order();
   order += o.get_order();
 
@@ -462,7 +462,7 @@ double KellyTypeAdapt::eval_solution_norm(error_matrix_form_val_t val, error_mat
 
   // function values
   Func<scalar>* u = init_fn(sln, order);
-  scalar res = val(np, jwt, NULL, u, u, e, NULL);
+  scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;

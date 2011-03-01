@@ -1,35 +1,97 @@
-template<typename Real, typename Scalar>
-Scalar bilinear_form_1(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-               Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return EPS_1 * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
+#include "weakform/weakform.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/boundaryconditions.h"
+#include "weakform/forms.h"
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form_2(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-               Geom<Real> *e, ExtData<Scalar> *ext)
+class WeakFormPoisson : public WeakForm
 {
-  return EPS_2 * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
+public:
+  WeakFormPoisson(double EPS_1, double EPS_2, double H, double T0) : WeakForm(1) {
+    add_matrix_form(new BilinearForm(0, 0, EPS_1, MATERIAL_1));
+    add_matrix_form(new BilinearForm(0, 0, EPS_2, MATERIAL_2));
 
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_outer(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_GAMMA_OUTER * int_v<Real, Scalar>(n, wt, v);
-}
+    add_vector_form_surf(new LinearFormSurfOuter(0, CONST_GAMMA_OUTER, BDY_OUTER));
+    add_matrix_form_surf(new BilinearFormSurfBottom(0, 0, H, BDY_BOTTOM));
+    add_vector_form_surf(new LinearFormSurfBottom(0, H, T0, BDY_BOTTOM));
+  };
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return H * int_u_v<Real, Scalar>(n, wt, u, v);
-}
+  class BilinearForm : public WeakForm::MatrixFormVol
+  {
+  public:
+    BilinearForm(int i, int j, double EPS, std::string area) : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), EPS(EPS) {}
 
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return T0 * H * int_v<Real, Scalar>(n, wt, v);
-}
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return EPS * int_grad_u_grad_v<double, scalar>(n, wt, u, v);
+    }
 
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      return EPS * int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
+    }
+  protected:
+    // Members.
+    double EPS;
+  };
+
+  class LinearFormSurfOuter : public WeakForm::VectorFormSurf
+  {
+  public:
+    LinearFormSurfOuter(int i, double CONST_GAMMA_OUTER, std::string area) : WeakForm::VectorFormSurf(i, area), CONST_GAMMA_OUTER(CONST_GAMMA_OUTER) {}
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return CONST_GAMMA_OUTER * int_v<double, scalar>(n, wt, v);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      return CONST_GAMMA_OUTER * int_v<Ord, Ord>(n, wt, v);
+    }
+  protected:
+    // Members.
+    double CONST_GAMMA_OUTER;
+  };
+
+  class BilinearFormSurfBottom : public WeakForm::MatrixFormSurf
+  {
+  public:
+    BilinearFormSurfBottom(int i, int j, double H, std::string area) : WeakForm::MatrixFormSurf(i, j, area), H(H) {}
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return H * int_u_v<double, scalar>(n, wt, u, v);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      return H * int_u_v<Ord, Ord>(n, wt, u, v);
+    }
+  protected:
+    // Members.
+    double H;
+  };
+
+  class LinearFormSurfBottom : public WeakForm::VectorFormSurf
+  {
+  public:
+    LinearFormSurfBottom(int i, double H, double T0, std::string area) : WeakForm::VectorFormSurf(i, area), H(H), T0(T0) {}
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return T0 * H * int_v<double, scalar>(n, wt, v);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    {
+      return T0 * H * int_v<Ord, Ord>(n, wt, v);
+    }
+  protected:
+    // Members.
+    double H;
+    double T0;
+  };
+};
+
+
+
+/*
 template<typename Real, typename Scalar>
 Scalar kelly_interface_estimator(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, 
                                  Geom<Real> *e, ExtData<Scalar> *ext)
@@ -89,3 +151,4 @@ Scalar kelly_zero_neumann_boundary_estimator(int n, double *wt, Func<Real> *u_ex
   
   return e->diam * result;
 }
+*/

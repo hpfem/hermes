@@ -46,21 +46,4 @@ inline T int_g_h(Function<T>* fg, Function<T>* fh, RefMap* rg, RefMap* rh)
   return result;
 }
 
-//// error calculation for adaptivity  //////////////////////////////////////////////////////////////////////////////
-
-template<typename Real, typename Scalar>
-Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-
-  error("hdiv error form not implemented yet in integrals_hdiv.h.");
-
-  // this is Hcurl code:
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-                       u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-  return result;
-}
-
-
 #endif

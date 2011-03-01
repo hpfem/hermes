@@ -18,6 +18,7 @@
 
 #include "../quadrature/limit_order.h"
 #include "../weakform/weakform.h"
+#include "../adapt/adapt.h"
 
 //// the following integrals can be used in both volume and surface forms ////
 
@@ -136,29 +137,6 @@ Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2,
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (w1->val[i] * u->dx[i] + w2->val[i] * u->dy[i]) * v->val[i];
-  return result;
-}
-
-//// error calculation for adaptivity  ////
-
-template<typename Real, typename Scalar>
-Scalar h1_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-               Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
-                       + u->dy[i] * conj(v->dy[i]));
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar h1_error_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                    Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
   return result;
 }
 

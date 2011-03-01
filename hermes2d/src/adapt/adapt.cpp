@@ -55,8 +55,6 @@ Adapt::Adapt(Hermes::vector< Space* > spaces_,
 
   // reset values
   memset(errors, 0, sizeof(errors));
-  memset(error_form, 0, sizeof(error_form));
-  memset(error_ord, 0, sizeof(error_ord));
   memset(sln, 0, sizeof(sln));
   memset(rsln, 0, sizeof(rsln));
 
@@ -75,37 +73,19 @@ Adapt::Adapt(Hermes::vector< Space* > spaces_,
   }
 
   // assign norm weak forms  according to norms selection
-  for (int i = 0; i < this->num; i++) {
-    switch (proj_norms[i]) {
-      case HERMES_H1_NORM:
-           error_form[i][i] = h1_error_form<double, scalar>; error_ord[i][i] = h1_error_form<Ord, Ord>;
-           //printf("H1 norm.\n");
-           break;
-      case HERMES_H1_SEMINORM:
-           error_form[i][i] = h1_error_semi_form<double, scalar>; error_ord[i][i] = h1_error_semi_form<Ord, Ord>;
-           //printf("H1 semi norm.\n");
-           break;
-      case HERMES_HCURL_NORM:
-           error_form[i][i] = hcurl_error_form<double, scalar>; error_ord[i][i] = hcurl_error_form<Ord, Ord>;
-           //printf("Hcurl norm.\n");
-           break;
-      case HERMES_HDIV_NORM:
-           error_form[i][i] = hdiv_error_form<double, scalar>; error_ord[i][i] = hdiv_error_form<Ord, Ord>;
-           //printf("Hdiv norm.\n");
-           break;
-      case HERMES_L2_NORM:
-           error_form[i][i] = l2_error_form<double, scalar>; error_ord[i][i] = l2_error_form<Ord, Ord>;
-	   //printf("L2 norm.\n");
-           break;
-      default: error("Unknown projection type in Adapt::Adapt().");
-    }
-  }
+  for (int i = 0; i < this->num; i++)
+    error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
 }
 
 Adapt::~Adapt()
 {
   for (int i = 0; i < this->num; i++)
     delete [] errors[i];
+
+  // free error_form
+  for (int i = 0; i < this->num; i++)
+    for (int j = 0; j < this->num; j++)
+      delete error_form[i][j];
 }
 
 //// adapt /////////////////////////////////////////////////////////////////////////////////////////
@@ -521,26 +501,21 @@ void Adapt::unrefine(double thr)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Adapt::set_error_form(int i, int j, error_matrix_form_val_t error_bi_form, error_matrix_form_ord_t error_bi_ord)
+void Adapt::set_error_form(int i, int j, Adapt::MatrixFormVolError* form)
 {
   error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
            "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
 
-  error_form[i][j] = error_bi_form;
-  error_ord[i][j] = error_bi_ord;
+  error_form[i][j] = form;
 }
 
 // case i = j = 0
-void Adapt::set_error_form(error_matrix_form_val_t error_bi_form, error_matrix_form_ord_t error_bi_ord)
+void Adapt::set_error_form(Adapt::MatrixFormVolError* form)
 {
-  int i = 0;
-  int j = 0;
-
-  error_form[i][j] = error_bi_form;
-  error_ord[i][j] = error_bi_ord;
+  set_error_form(0, 0, form);
 }
 
-double Adapt::eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_ord_t error_bi_ord,
+double Adapt::eval_error(Adapt::MatrixFormVolError* form,
                          MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1,
                          MeshFunction *rsln2)
 {
@@ -556,7 +531,7 @@ double Adapt::eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = error_bi_ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
+  Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
   if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
@@ -594,7 +569,7 @@ double Adapt::eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_
   err1->subtract(*v1);
   err2->subtract(*v2);
 
-  scalar res = error_bi_fn(np, jwt, NULL, err1, err2, e, NULL);
+  scalar res = form->value(np, jwt, NULL, err1, err2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -606,7 +581,7 @@ double Adapt::eval_error(error_matrix_form_val_t error_bi_fn, error_matrix_form_
   return std::abs(res);
 }
 
-double Adapt::eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_form_ord_t error_bi_ord,
+double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
                               MeshFunction *rsln1, MeshFunction *rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
@@ -619,7 +594,7 @@ double Adapt::eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
-  Ord o = error_bi_ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
+  Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
   if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
@@ -652,7 +627,7 @@ double Adapt::eval_error_norm(error_matrix_form_val_t error_bi_fn, error_matrix_
   Func<scalar>* v1 = init_fn(rsln1, order);
   Func<scalar>* v2 = init_fn(rsln2, order);
 
-  scalar res = error_bi_fn(np, jwt, NULL, v1, v2, e, NULL);
+  scalar res = form->value(np, jwt, NULL, v1, v2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -728,8 +703,8 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
       for (j = 0; j < num; j++) {
         if (error_form[i][j] != NULL) {
           double err, nrm;
-          err = eval_error(error_form[i][j], error_ord[i][j], sln[i], sln[j], rsln[i], rsln[j]);
-          nrm = eval_error_norm(error_form[i][j], error_ord[i][j], rsln[i], rsln[j]);
+          err = eval_error(error_form[i][j], sln[i], sln[j], rsln[i], rsln[j]);
+          nrm = eval_error_norm(error_form[i][j], rsln[i], rsln[j]);
 
           norms[i] += nrm;
           total_norm  += nrm;

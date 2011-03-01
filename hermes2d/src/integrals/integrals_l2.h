@@ -59,18 +59,6 @@ Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
   return result;
 }
 
-//// error calculation for adaptivity  ////
-
-template<typename Real, typename Scalar>
-Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-               Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * conj(v->val[i]));
-  return result;
-}
-
 
 
 

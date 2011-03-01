@@ -43,11 +43,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Element material markers and associated diffusion coefficients.
-const int MATERIAL_1 = 1; const double EPS_1 = 1.0;
-const int MATERIAL_2 = 2; const double EPS_2 = 10.0;
+const std::string MATERIAL_1 = "1"; const double EPS_1 = 1.0;
+const std::string MATERIAL_2 = "2"; const double EPS_2 = 10.0;
 
 // Boundary markers and boundary condition data.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
+const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 const double T1 = 30.0;                   // Prescribed temperature on Gamma_left.
 const double T0 = 20.0;                   // Outer temperature on Gamma_bottom.
 const double H  = 0.05;                   // Heat flux on Gamma_bottom.
@@ -70,28 +70,19 @@ int main(int argc, char* argv[])
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_OUTER, BDY_INNER));
-  bc_types.add_bc_newton(BDY_BOTTOM);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_LEFT, T1);
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc_left(BDY_LEFT, T1);
+  NeumannValueBoundaryCondition bc_outer_inner(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER), 0.0);
+  NeumannValueBoundaryCondition bc_bottom(Hermes::vector<std::string>(BDY_BOTTOM), 0.0);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_left, &bc_outer_inner, &bc_bottom));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_1), HERMES_SYM, MATERIAL_1);
-  wf.add_matrix_form(callback(bilinear_form_2), HERMES_SYM, MATERIAL_2);
-  wf.add_matrix_form_surf(callback(bilinear_form_surf_bottom), BDY_BOTTOM);
-  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
-  wf.add_vector_form_surf(callback(linear_form_surf_outer), BDY_OUTER);
+  WeakFormPoisson wf(EPS_1, EPS_2, H, T0);
 
   // Initialize coarse and reference mesh solution.
   Solution sln;
@@ -149,10 +140,13 @@ int main(int argc, char* argv[])
     info("Calculating error estimate."); 
     KellyTypeAdapt* adaptivity = new KellyTypeAdapt(&space);
     adaptivity->add_error_estimator_surf(callback(kelly_interface_estimator));
+    /*
+    adaptivity->add_error_estimator_surf(callback(kelly_interface_estimator));
     adaptivity->add_error_estimator_surf(callback(kelly_newton_boundary_estimator), BDY_BOTTOM);
     adaptivity->add_error_estimator_surf(callback(kelly_neumann_boundary_estimator), BDY_OUTER);
     adaptivity->add_error_estimator_surf(callback(kelly_zero_neumann_boundary_estimator), BDY_INNER);
-    
+    */
+
     double err_est_rel = adaptivity->calc_err_est(&sln, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
                                                   
     // Report results.

@@ -64,17 +64,5 @@ Scalar int_e_tau_f_tau(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Rea
   return result;
 }
 
-//// error calculation for adaptivity  //////////////////////////////////////////////////////////////////////////////
-
-template<typename Real, typename Scalar>
-Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-                       u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-  return result;
-}
-
 #endif
 

@@ -59,9 +59,8 @@ class HERMES_API KellyTypeAdapt : public Adapt
     double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, 
                                     RefMap *rm, 
                                     SurfPos* surf_pos,
-                                    LightArray<NeighborSearch*>& neighbor_searches, 
-                                    int neighbor_index);
-    double eval_solution_norm(error_matrix_form_val_t val, error_matrix_form_ord_t ord,
+                                    NeighborSearch* nbs);
+    double eval_solution_norm(Adapt::MatrixFormVolError* form,
                               RefMap* rm,
                               MeshFunction* sln);
 
