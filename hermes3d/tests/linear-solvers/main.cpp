@@ -53,7 +53,7 @@ bool read_n_nums(char *row, int n, double values[]) {
 }
 
 int read_matrix_and_rhs(char *file_name, int &n, 
-                        std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, scalar> &rhs) {
+                        std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, scalar> &rhs, char *argv[]) {
 
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return ERR_FAILURE;
@@ -72,7 +72,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
     switch (state) {
       case STATE_N:
         if (read_n_nums(row, 1, buffer)) {
-          if (argv[4]="complex_matrix_to_real"){
+          if (strcasecmp(argv[4],"complex_matrix_to_real") == 0){
              n = (int) 2*buffer[0];
           }
           else
@@ -82,12 +82,12 @@ int read_matrix_and_rhs(char *file_name, int &n,
       break;
 
       case STATE_MATRIX:
-        if (argv[4]="complex_matrix_to_real"){
+        if (strcasecmp(argv[4],"complex_matrix_to_real") == 0){
            if (read_n_nums(row, 4, buffer)) {
-              mat[2*mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
-              mat[2*mat.size()] = (MatrixEntry((int) buffer[0]+n, (int) buffer[1]+n, buffer[2]));
-              mat[2*mat.size()] = (MatrixEntry((int) buffer[0]+n, (int) buffer[1], (-1)*buffer[3]));
-              mat[2*mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1]+n, buffer[3]));
+              mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+              mat[mat.size()] = (MatrixEntry((int) buffer[0] + n, (int) buffer[1] + n, buffer[2]));
+              mat[mat.size()] = (MatrixEntry((int) buffer[0] + n, (int) buffer[1], (-1)*buffer[3]));
+              mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1] + n, buffer[3]));
            }
         }
         else
@@ -99,7 +99,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
       break;
 
         case STATE_RHS:
-        if (argv[4]="complex_matrix_to_real"){
+        if (strcasecmp(argv[4],"complex_matrix_to_real") == 0){
           if (read_n_nums(row, 2, buffer)) {
             rhs[(int) buffer[0]] = buffer[1];
             rhs[(int) buffer[0]+n] = buffer[2];
