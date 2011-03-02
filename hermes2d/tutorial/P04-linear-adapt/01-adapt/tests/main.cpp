@@ -37,14 +37,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int OUTER_BDY = 1, STATOR_BDY = 2;
-
-// Problem parameters.
-const int MATERIAL_1 = 1;
-const int MATERIAL_2 = 2;
-const double EPS_1 = 1.0;                // Relative electric permittivity in Omega_1.
-const double EPS_2 = 10.0;               // Relative electric permittivity in Omega_2.
-const double VOLTAGE = 50.0;             // Voltage on the stator.
+const std::string OUTER_BDY = "1", STATOR_BDY = "2";
+// Voltage on the stator
+const double VOLTAGE = 50.0;
 
 // Weak forms.
 #include "forms.cpp"
@@ -56,22 +51,16 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("motor.mesh", &mesh);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(OUTER_BDY, STATOR_BDY));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(STATOR_BDY, VOLTAGE);
-  bc_values.add_const(OUTER_BDY, 0.0);
+  // Initialize the weak formulation.
+  WeakFormElectrostaticTutorial wf;
+  
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc_out(OUTER_BDY, 0.0);
+  DirichletValueBoundaryCondition bc_stator(STATOR_BDY, VOLTAGE);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(biform1), HERMES_SYM, MATERIAL_1);
-  wf.add_matrix_form(callback(biform2), HERMES_SYM, MATERIAL_2);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;

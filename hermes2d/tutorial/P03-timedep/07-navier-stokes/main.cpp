@@ -49,7 +49,7 @@ const double RE = 200.0;                          // Reynolds number.
 const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
 const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
                                                   // from 0 to VEL_INLET, then it stays constant.
-const double time_step = 0.1;                     // Time step.
+const double TAU = 0.1;                           // Time step.
 const double T_FINAL = 30000.0;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
@@ -126,9 +126,9 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm* wf;
   if (NEWTON)
-    wf = new WeakFormNSNewton(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
   else
-    wf = new WeakFormNSSimpleLinearization(STOKES, RE, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   bool is_linear;
@@ -163,10 +163,10 @@ int main(int argc, char* argv[])
 
   // Time-stepping loop:
   char title[100];
-  int num_time_steps = T_FINAL / time_step;
+  int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    current_time += time_step;
+    current_time += TAU;
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.

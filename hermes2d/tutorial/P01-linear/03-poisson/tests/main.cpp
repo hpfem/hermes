@@ -9,30 +9,8 @@ double CONST_F = 2.0;                             // Constant right-hand side.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
-
-// function values for Dirichlet boundary conditions.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return 0;
-}
-
-// return the value \int \nabla u . \nabla v dx .
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
-
-// return the value \int v dx .
-template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return CONST_F * int_v<Real, Scalar>(n, wt, v);
-}
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -44,24 +22,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_element_id(0);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+  // Initialize the weak formulation.
+  WeakFormPoisson wf(CONST_F);
+  // Initialize boundary conditions
+  DirichletValueBoundaryCondition bc(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
   
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
-
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
   int success = 1;
