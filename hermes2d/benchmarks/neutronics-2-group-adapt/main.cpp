@@ -31,7 +31,7 @@ const int P_INIT[2] =
   {1, 1};                                         // Initial polynomial orders for the individual solution components.
 const int INIT_REF_NUM[2] =
   {1, 1};                                         // Initial uniform mesh refinement for the individual solution components.
-const int STRATEGY = 1;                           // Adaptive strategy:
+const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -45,7 +45,7 @@ const bool MULTIMESH = true;                      // true = use multi-mesh, fals
                                                   // the same but the polynomial degrees can still vary.
 const double THRESHOLD_MULTI = 0.3;               // error threshold for element refinement (multi-mesh)
 const double THRESHOLD_SINGLE = 0.7;              // error threshold for element refinement (single-mesh)                                         
-const CandList CAND_LIST = H2D_HP_ISO;            // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO_H;        // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -203,7 +203,8 @@ scalar essential_bc_values_2(double x, double y)
 // Functions for calculating errors:
 
 double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
-                   double (*nfn)(MeshFunction*, RefMap*), Hermes::vector<Solution*>& slns1, Hermes::vector<Solution*>& slns2  )
+                   double (*nfn)(MeshFunction*, RefMap*), Hermes::vector<Solution*>& slns1, 
+                   Hermes::vector<Solution*>& slns2  )
 {
   double error = 0.0, norm = 0.0;
 
@@ -314,12 +315,12 @@ int main(int argc, char* argv[])
   //selector.set_error_weights(2.1, 0.9, sqrt(2.0));
 
   // Initialize views.
-  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 500, 460));
-  ScalarView view2("Neutron flux 2", new WinGeom(510, 0, 500, 460));
-  ScalarView view3("Error in neutron flux 1", new WinGeom(280, 0, 500, 460));
-  ScalarView view4("Error in neutron flux 2", new WinGeom(780, 0, 500, 460));
-  OrderView oview1("Mesh and orders for group 1", new WinGeom(275, 0, 500, 460));
-  OrderView oview2("Mesh and orders for group 2", new WinGeom(780, 0, 500, 460));
+  ScalarView view1("Neutron flux 1", new WinGeom(0, 0, 400, 350));
+  ScalarView view2("Neutron flux 2", new WinGeom(410, 0, 400, 350));
+  OrderView oview1("Mesh and orders for group 1", new WinGeom(820, 0, 350, 300));
+  OrderView oview2("Mesh and orders for group 2", new WinGeom(1180, 0, 350, 300));
+  ScalarView view3("Error in neutron flux 1", new WinGeom(0, 405, 400, 350));
+  ScalarView view4("Error in neutron flux 2", new WinGeom(410, 405, 400, 350));
 
   // Show meshes.
   view1.show_mesh(false); view1.set_3d_mode(true);
@@ -445,7 +446,8 @@ int main(int argc, char* argv[])
     DiffFilter err_distrib_1(Hermes::vector<MeshFunction*>(&ex1, &sln1));
     DiffFilter err_distrib_2(Hermes::vector<MeshFunction*>(&ex2, &sln2));
 
-    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1[0] * 100, err_exact_h1[1] * 100);
+    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", 
+         err_exact_h1[0] * 100, err_exact_h1[1] * 100);
     info("Total error wrt. exact solution (H1 norm): %g%%", error_h1);
     info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1_total);
     info("Total error wrt. ref. solution  (E norm):  %g%%", err_est_energ_total);
