@@ -26,7 +26,7 @@
 
 double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type)
 {
-  double error;
+  double error = -1.0;
   switch (norm_type) {
   case HERMES_L2_NORM:
     error = calc_abs_error(error_fn_l2, sln1, sln2);
@@ -48,7 +48,7 @@ double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type)
 
 double calc_norm(MeshFunction* ref_sln, int norm_type)
 {
-  double norm;
+  double norm = -1.0;
   switch (norm_type) {
   case HERMES_L2_NORM:
     norm = calc_norm(norm_fn_l2, ref_sln);

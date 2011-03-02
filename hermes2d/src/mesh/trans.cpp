@@ -95,8 +95,8 @@ HERMES_API double2 *transform(Element *e)
 
 HERMES_API void element_polygonal_boundary(Element *e, double2 **tp, int *npoints)
 {
-	double2 *pt;
-    int n;
+    double2 *pt = NULL;
+    int n = 0;
     int d = 2; // number of points on one side (e.g. d >= 2)
 
     //*tp = transform_element(e, countof(e2_pt), e2_pt);

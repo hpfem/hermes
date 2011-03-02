@@ -155,7 +155,7 @@ State* Traverse::push_state()
 
 void Traverse::set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos)
 {
-  Element* e;
+  Element* e = NULL;
   for (int i = 0; i < num; i++)
     if ((e = s->e[i]) != NULL) break;
 
@@ -583,7 +583,7 @@ uint64_t Traverse::init_idx(Rect* cr, Rect* er)
   {
     uint64_t hmid = (r.l + r.r) >> 1;
     uint64_t vmid = (r.t + r.b) >> 1;
-    int son;
+    int son = -1;
 
     if (cr->r <= hmid && cr->t <= vmid) { son = 0; r.r = hmid; r.t = vmid; }
     else if (cr->l >= hmid && cr->t <= vmid) { son = 1; r.l = hmid; r.t = vmid; }

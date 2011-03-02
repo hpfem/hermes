@@ -273,7 +273,7 @@ void VectorView::on_display()
     for (i = 0; i < vec.get_num_triangles(); i++)
     {
       double miny = 1e100;
-      int idx, k, l1, l2, r2, r1, s;
+      int idx = -1, k, l1, l2, r2, r1, s;
       double lry, x;
       double mr, ml, lx, rx, xval, yval;
 

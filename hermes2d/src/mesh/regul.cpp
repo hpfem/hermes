@@ -118,7 +118,7 @@ void Mesh::regularize_triangle(Element* e)
 
 void Mesh::regularize_quad(Element* e)
 {
-  int i, k, k1, k2, k3, n, m;
+  int i, k = 0, k1, k2, k3, n = 0, m = 0;
  Node *v4, *v5;
   Element* t[4];
 

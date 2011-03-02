@@ -26,8 +26,10 @@ void Node::ref_element(Element* e)
   {
     // store the element pointer in a free slot of 'elem'
     if (elem[0] == NULL) elem[0] = e;
-    else if (elem[1] == NULL) elem[1] = e;
-    else assert_msg(false, "No free slot 'elem'");
+    else {
+      if (elem[1] == NULL) elem[1] = e;
+      else {assert_msg(false, "No free slot 'elem'");}
+    }
   }
   ref++;
 }
@@ -74,6 +76,7 @@ Element* Element::get_neighbor(int ie) const
   if (elem[0] == this) return elem[1];
   if (elem[1] == this) return elem[0];
   assert(0);
+  return NULL;
 }
 
 
@@ -463,7 +466,7 @@ Node* get_edge_node()
 void refine_quad(Mesh* mesh, Element* e, int refinement, Element** sons_out)
 {
   int i, j;
-  Element* sons[4];
+  Element* sons[4] = {NULL, NULL, NULL, NULL};
 
   // remember the markers of the edge nodes
   int bnd[4] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
@@ -1406,7 +1409,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
       for (int k = 0; k < 2; k++)
       {
         int p1, p2;
-        int idx2;
+        int idx2 = 0;
 
         if (k == 0)
         {
@@ -1484,7 +1487,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
       for (int k = 0; k < 2; k++)
       {
         int p1, p2;
-        int idx2;
+        int idx2 = 0;
         if (k == 0)
         {
           p1 = e->vn[(idx)%3]->id;

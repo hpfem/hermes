@@ -548,7 +548,7 @@ Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<Prec
 {
   _F_
   // Find a non-NULL e[i].
-  Element* e0;
+  Element* e0 = NULL;
   for (unsigned int i = 0; i < stage.idx.size(); i++)
     if ((e0 = e[i]) != NULL) 
       break;
@@ -673,7 +673,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       bool sym = (m == n) && (mfv->sym == 1);
 
       // Assemble the local stiffness matrix for the form mfv.
-      scalar **local_stiffness_matrix;
+      scalar **local_stiffness_matrix = NULL;
       if(rhsonly == false)
         local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
 
@@ -1681,7 +1681,8 @@ Func<double>* DiscreteProblem::get_fn(PrecalcShapeset *fu, RefMap *rm, const int
     }
   }
   else {
-    AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id());
+    AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, 
+                                      fu->get_transform(), fu->get_shapeset()->get_id());
     if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
       if(assembling_caches.cache_fn_triangles.find(key) == assembling_caches.cache_fn_triangles.end())
         assembling_caches.cache_fn_triangles[key] = init_fn(fu, rm, order);
@@ -1884,7 +1885,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(ru, order);
-    double* jac;
+    double* jac = NULL;
     if(!ru->is_jacobian_const()) 
       jac = ru->get_jacobian(order);
     cache_jwt[order] = new double[np];
@@ -2143,7 +2144,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormVol 
   if (cache_e[order] == NULL)
   {
     cache_e[order] = init_geom_vol(rv, order);
-    double* jac;
+    double* jac = NULL;
     if(!rv->is_jacobian_const()) 
       jac = rv->get_jacobian(order);
     cache_jwt[order] = new double[np];

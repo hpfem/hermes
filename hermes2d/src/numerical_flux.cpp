@@ -186,7 +186,7 @@ double NumericalFlux::matrix_R_inv(int i, int j, double w0, double w1, double w3
     double v2 = u*u+w*w;
     double p = (kappa-1)*(E - rho*v2/2);
     double c = sqrt(kappa*p/rho);
-    double result;
+    double result = 0;
     if (i == 0 && j == 0)
         result = ((kappa-1)*v2/2 + u*c)/2;
     else if (i == 0 && j == 1)
