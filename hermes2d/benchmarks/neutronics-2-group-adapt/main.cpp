@@ -18,8 +18,8 @@ using namespace RefinementSelectors;
 //
 // BC:
 //
-// homogeneous neumann on symmetry axes
-// homogeneous dirichlet on zero flux boundary
+// Homogeneous neumann on symmetry axes.
+// Homogeneous dirichlet on zero flux boundary.
 // -d D_g\phi_g / d n = 8 \phi_g   on albedo boundary (homogeneous Robin).
 //
 
@@ -28,10 +28,10 @@ using namespace RefinementSelectors;
 // Adaptivity control:
 
 const int P_INIT[2] =
-  {1, 1};                                         // Initial polynomial orders for the individual solution components.
+  {6, 6};                                         // Initial polynomial orders for the individual solution components.
 const int INIT_REF_NUM[2] =
-  {1, 1};                                         // Initial uniform mesh refinement for the individual solution components.
-const int STRATEGY = 0;                           // Adaptive strategy:
+  {3, 3};                                         // Initial uniform mesh refinement for the individual solution components.
+const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -57,13 +57,13 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.01;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+const int NDOF_STOP = 200000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int MAX_ADAPT_NUM = 60;                     // Adaptivity process stops when the number of adaptation steps grows over
                                                   // this limit.
-const int ADAPTIVITY_NORM = 2;                    // Specifies the norm used by H1Adapt to calculate the error and norm.
+const int ADAPTIVITY_NORM = 0;                    // Specifies the norm used by H1Adapt to calculate the error and norm.
                                                   // ADAPTIVITY_NORM = 0 ... H1 norm.
                                                   // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
                                                   // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
@@ -71,7 +71,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
-const int ERR_PLOT = 0;                           // Row in the convergence graphs for exact errors .
+const int ERR_PLOT = 0;                           // Row in the convergence graphs for exact errors.
 const int ERR_EST_PLOT = 1;                       // Row in the convergence graphs for error estimates.
 const int GROUP_1 = 0;                            // Row in the DOF evolution graph for group 1.
 const int GROUP_2 = 1;                            // Row in the DOF evolution graph for group 2.
@@ -89,15 +89,20 @@ const double Sr[4][2] = { {0.011, 0.13},
                           {0.09, 0.15},
                           {0.035, 0.25},
                           {0.04, 0.35}	};
-const double nSf[4][2]= { {0.0025, 0.15},
+/*const double nSf[4][2]= { {0.0025, 0.15},
                           {0.0, 0.0},
                           {0.0011, 0.1},
                           {0.004, 0.25}	};
+*/
+const double nSf[4][2]= { {0.0, 0.0},
+                          {0.0, 0.0},
+                          {0.0, 0.0},
+                          {0.0, 0.0}	};
 const double chi[4][2]= { {1, 0},
                           {1, 0},
                           {1, 0},
                           {1, 0} };
-const double Ss[4][2][2] = { 
+/*const double Ss[4][2][2] = { 
                              { { 0.0, 0.0 },
                                { 0.05, 0.0 }  },
                              { { 0.0, 0.0 },
@@ -106,6 +111,17 @@ const double Ss[4][2][2] = {
                                { 0.025, 0.0 } },
                              { { 0.0, 0.0 },
                                { 0.014, 0.0 } } 
+                           };
+*/
+const double Ss[4][2][2] = { 
+                             { { 0.0, 0.0 },
+                               { 0.0, 0.0 }  },
+                             { { 0.0, 0.0 },
+                               { 0.0, 0.0 }  },
+                             { { 0.0, 0.0 },
+                               { 0.0, 0.0 } },
+                             { { 0.0, 0.0 },
+                               { 0.0, 0.0 } } 
                            };
 
 double a = 0., b = 1., c = (a+b)/2.;
@@ -424,9 +440,11 @@ int main(int argc, char* argv[])
       adaptivity.set_error_form(0, 1, callback(biform_0_1));
       adaptivity.set_error_form(1, 0, callback(biform_1_0));
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
-    } else if (ADAPTIVITY_NORM == 1) {
-      adaptivity.set_error_form(0, 0, callback(biform_0_0));
-      adaptivity.set_error_form(1, 1, callback(biform_1_1));
+    } else {
+      if (ADAPTIVITY_NORM == 1) {
+        adaptivity.set_error_form(0, 0, callback(biform_0_0));
+        adaptivity.set_error_form(1, 1, callback(biform_1_1));
+      }
     }
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns) * 100;
     
@@ -454,6 +472,8 @@ int main(int argc, char* argv[])
 
     view1.show(&sln1);
     view2.show(&sln2);
+    //view3.show(&ex1);
+    //view4.show(&ex2);
     view3.show(&err_distrib_1);
     view4.show(&err_distrib_2);
 

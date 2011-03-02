@@ -98,5 +98,5 @@ Scalar liform_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Re
 // highly oscillating source function for 2nd group.
 Ord liform_1_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  return Ord(30 + v->val[0].get_order()); 
+  return Ord(30 + v->val[0].get_order());
 }
