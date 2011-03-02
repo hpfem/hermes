@@ -981,7 +981,6 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
 
   // Push all the necessary transformations to all functions of this stage.
   // The important thing is that the transformations to the current subelement are already there.
-  // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
   for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
     for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_n_trans[neighbor_i]; trf_i++)
       stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_transformations[neighbor_i][trf_i]);

@@ -416,6 +416,7 @@ public:
 
   friend class DiscreteProblem;
   friend class KellyTypeAdapt;
+  friend class DiscontinuityDetector;
 };
 
 #endif /* NEIGHBOR_H_ */

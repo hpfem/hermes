@@ -70,7 +70,12 @@ std::set<int>& DiscontinuityDetector::get_discontinuous_element_ids(double thres
     for(int edge_i = 0; edge_i < e->get_num_surf(); edge_i++)
       if(calculate_relative_flow_direction(e, edge_i) < -1e-3 && !e->en[edge_i]->bnd) {
         double jump = calculate_jumps(e, edge_i);
-        double diameter_indicator = std::pow(e->get_diameter(), (H2D_GET_H_ORDER(spaces[0]->get_element_order(e->id)) + 1) / 2);
+        double diameter_indicator = std::pow(e->get_diameter(), 
+                                             (0.5 * (H2D_GET_H_ORDER(spaces[0]->get_element_order(e->id)) 
+                                                     + 
+                                                     H2D_GET_V_ORDER(spaces[0]->get_element_order(e->id)))
+                                              + 1)
+                                              / 2);
         double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % 4]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % 4]->y - e->vn[edge_i]->y, 2));
         double norm = calculate_norm(e, edge_i);
         double discontinuity_detector = jump / (diameter_indicator * edge_length * norm);
@@ -115,11 +120,7 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
 
 double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
 {
-  // Set active element to the solutions.
-  solutions[0]->set_active_element(e);
-  solutions[1]->set_active_element(e);
-  solutions[2]->set_active_element(e);
-  solutions[3]->set_active_element(e);
+  
 
   // Set Geometry.
   SurfPos surf_pos;
@@ -130,42 +131,77 @@ double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
   double3* pt = solutions[0]->get_quad_2d()->get_points(eo);
   int np = solutions[0]->get_quad_2d()->get_num_points(eo);
 
-  Geom<double>* geom = init_geom_surf(solutions[0]->get_refmap(), &surf_pos, eo);
-  double3* tan = solutions[0]->get_refmap()->get_tangent(surf_pos.surf_num, eo);
-  double* jwt = new double[np];
-  for(int i = 0; i < np; i++)
-      jwt[i] = pt[i][2] * tan[i][2];
- 
-  // Prepare functions on the central element.
-  Func<scalar>* density = init_fn(solutions[0], eo);
-  Func<scalar>* density_vel_x = init_fn(solutions[1], eo);
-  Func<scalar>* density_vel_y = init_fn(solutions[2], eo);
-  Func<scalar>* density_energy = init_fn(solutions[3], eo);
+  // Initialize the NeighborSearch.
+  NeighborSearch ns(e, mesh);
+  ns.set_active_edge(edge_i);
 
-  // Set neighbor element to the solutions.
-  solutions[0]->set_active_element(e->get_neighbor(edge_i));
-  solutions[1]->set_active_element(e->get_neighbor(edge_i));
-  solutions[2]->set_active_element(e->get_neighbor(edge_i));
-  solutions[3]->set_active_element(e->get_neighbor(edge_i));
-
-  // Prepare functions on the neighbor element.
-  Func<scalar>* density_neighbor = init_fn(solutions[0], eo);
-  Func<scalar>* density_vel_x_neighbor = init_fn(solutions[1], eo);
-  Func<scalar>* density_vel_y_neighbor = init_fn(solutions[2], eo);
-  Func<scalar>* density_energy_neighbor = init_fn(solutions[3], eo);
-
-  DiscontinuousFunc<scalar> density_discontinuous(density, density_neighbor, true);
-  DiscontinuousFunc<scalar> density_vel_x_discontinuous(density_vel_x, density_vel_x_neighbor, true);
-  DiscontinuousFunc<scalar> density_vel_y_discontinuous(density_vel_y, density_vel_y_neighbor, true);
-  DiscontinuousFunc<scalar> density_energy_discontinuous(density_energy, density_energy_neighbor, true);
-
+  // The value to be returned.
   double result = 0.0;
-  for(int point_i = 0; point_i < np; point_i++)
-    result += jwt[point_i] * (
-    std::pow(density_discontinuous.get_val_central(point_i) - density_discontinuous.get_val_neighbor(point_i), 2) + 
-    std::pow(density_vel_x_discontinuous.get_val_central(point_i) - density_vel_x_discontinuous.get_val_neighbor(point_i), 2) + 
-    std::pow(density_vel_y_discontinuous.get_val_central(point_i) - density_vel_y_discontinuous.get_val_neighbor(point_i), 2) + 
-    std::pow(density_energy_discontinuous.get_val_central(point_i) - density_energy_discontinuous.get_val_neighbor(point_i), 2));
+
+  // Go through all neighbors.
+  for(unsigned int neighbor_i = 0; neighbor_i < ns.get_num_neighbors(); neighbor_i++) {
+    ns.active_segment = neighbor_i;
+    ns.neighb_el = ns.neighbors[neighbor_i];
+    ns.neighbor_edge = ns.neighbor_edges[neighbor_i];
+
+    // Set active element to the solutions.
+    solutions[0]->set_active_element(e);
+    solutions[1]->set_active_element(e);
+    solutions[2]->set_active_element(e);
+    solutions[3]->set_active_element(e);
+  
+    // Push all the necessary transformations.
+    for(unsigned int trf_i = 0; trf_i < ns.central_n_trans[neighbor_i]; trf_i++) {
+      solutions[0]->push_transform(ns.central_transformations[neighbor_i][trf_i]);
+      solutions[1]->push_transform(ns.central_transformations[neighbor_i][trf_i]);
+      solutions[2]->push_transform(ns.central_transformations[neighbor_i][trf_i]);
+      solutions[3]->push_transform(ns.central_transformations[neighbor_i][trf_i]);
+    }
+
+    Geom<double>* geom = init_geom_surf(solutions[0]->get_refmap(), &surf_pos, eo);
+    double3* tan = solutions[0]->get_refmap()->get_tangent(surf_pos.surf_num, eo);
+    double* jwt = new double[np];
+    for(int i = 0; i < np; i++)
+        jwt[i] = pt[i][2] * tan[i][2];
+ 
+    // Prepare functions on the central element.
+    Func<scalar>* density = init_fn(solutions[0], eo);
+    Func<scalar>* density_vel_x = init_fn(solutions[1], eo);
+    Func<scalar>* density_vel_y = init_fn(solutions[2], eo);
+    Func<scalar>* density_energy = init_fn(solutions[3], eo);
+
+    // Set neighbor element to the solutions.
+    solutions[0]->set_active_element(ns.neighb_el);
+    solutions[1]->set_active_element(ns.neighb_el);
+    solutions[2]->set_active_element(ns.neighb_el);
+    solutions[3]->set_active_element(ns.neighb_el);
+
+    // Push all the necessary transformations.
+    for(unsigned int trf_i = 0; trf_i < ns.neighbor_n_trans[neighbor_i]; trf_i++) {
+      solutions[0]->push_transform(ns.neighbor_transformations[neighbor_i][trf_i]);
+      solutions[1]->push_transform(ns.neighbor_transformations[neighbor_i][trf_i]);
+      solutions[2]->push_transform(ns.neighbor_transformations[neighbor_i][trf_i]);
+      solutions[3]->push_transform(ns.neighbor_transformations[neighbor_i][trf_i]);
+    }
+
+    // Prepare functions on the neighbor element.
+    Func<scalar>* density_neighbor = init_fn(solutions[0], eo);
+    Func<scalar>* density_vel_x_neighbor = init_fn(solutions[1], eo);
+    Func<scalar>* density_vel_y_neighbor = init_fn(solutions[2], eo);
+    Func<scalar>* density_energy_neighbor = init_fn(solutions[3], eo);
+
+    DiscontinuousFunc<scalar> density_discontinuous(density, density_neighbor, true);
+    DiscontinuousFunc<scalar> density_vel_x_discontinuous(density_vel_x, density_vel_x_neighbor, true);
+    DiscontinuousFunc<scalar> density_vel_y_discontinuous(density_vel_y, density_vel_y_neighbor, true);
+    DiscontinuousFunc<scalar> density_energy_discontinuous(density_energy, density_energy_neighbor, true);
+
+    for(int point_i = 0; point_i < np; point_i++)
+      result += jwt[point_i] * (
+      std::pow(density_discontinuous.get_val_central(point_i) - density_discontinuous.get_val_neighbor(point_i), 2) + 
+      std::pow(density_vel_x_discontinuous.get_val_central(point_i) - density_vel_x_discontinuous.get_val_neighbor(point_i), 2) + 
+      std::pow(density_vel_y_discontinuous.get_val_central(point_i) - density_vel_y_discontinuous.get_val_neighbor(point_i), 2) + 
+      std::pow(density_energy_discontinuous.get_val_central(point_i) - density_energy_discontinuous.get_val_neighbor(point_i), 2));
+  }
 
   return std::sqrt(result);
 };
@@ -242,7 +278,7 @@ void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_eleme
       AsmList al;
       spaces[space_i]->get_element_assembly_list(spaces[space_i]->get_mesh()->get_element(*it), &al);
       for(unsigned int shape_i = 0; shape_i < al.cnt; shape_i++)
-        if(H2D_GET_H_ORDER(spaces[space_i]->get_shapeset()->get_order(al.idx[shape_i])) > 0)
+        if(H2D_GET_H_ORDER(spaces[space_i]->get_shapeset()->get_order(al.idx[shape_i])) > 0 || H2D_GET_V_ORDER(spaces[space_i]->get_shapeset()->get_order(al.idx[shape_i])) > 0)
           solution_vector[al.dof[shape_i]] = 0.0;
     }
 

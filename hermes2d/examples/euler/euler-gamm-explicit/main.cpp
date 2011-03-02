@@ -287,9 +287,6 @@ int main(int argc, char* argv[])
     else
     error ("Matrix solver failed.\n");
 
-    // Assumption: single mesh.
-    // Assumption: uniform refinement.
-    // Assumption: iso p orders.
     DiscontinuityDetector discontinuity_detector(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
 
