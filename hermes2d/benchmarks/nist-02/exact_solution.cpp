@@ -1,3 +1,6 @@
+double OMEGA;
+double ALPHA;
+
 double get_angle(double y, double x)
 {
   double theta = atan2(y, x);
