@@ -23,7 +23,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double alpha = 1.0;
 
 // Exact solution.
-scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz) {
+scalar3 exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz) {
 	dx[0] = (1 - y*y)*(1 - z*z)*(z - 6*x*x);
 	dx[1] = 2*(1 - x*x)*(1 - z*z) - 2*x*(1 - z*z)*(y*y*y + 2*x);
 	dx[2] = -2*x*(1 - y*y)*(z*z - 3*x*y*z) - 3*y*z*(1 - x*x)*(1 - y*y);
@@ -36,7 +36,7 @@ scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, 
 	dz[1] = -2*z*(1 - x*x)*(y*y*y + 2*x);
 	dz[2] = (1 - x*x)*(1 - y*y)*(2*z - 3*x*y);
 
-	static scalar3 val;
+	static scalar3 val(0.0, 0.0, 0.0);
 	val[0] = (1-y*y) * (1-z*z) * (x*z - 2*x*x*x + 1);
 	val[1] = (1-x*x) * (1-z*z) * (y*y*y + 2*x);
 	val[2] = (1-x*x) * (1-y*y) * (z*z - 3*x*y*z);
@@ -148,7 +148,7 @@ int main(int argc, char **args)
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-	ExactSolution ex_sln(&mesh, exact_solution);
+  ExactSolution ex_sln(&mesh, exact_solution);
 
   // Calculate exact error.
   info("Calculating exact error.");

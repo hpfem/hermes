@@ -24,7 +24,7 @@ cplx img(0, -1);
 cplx alpha(-1, 1);
 
 // Exact solution.
-scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
+scalar3 exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
 {
 	dx[0] = img * 3./8. * (1. - y*y) * (1. - z*z);
 	dx[1] = 0.0;
@@ -38,7 +38,7 @@ scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, 
 	dz[1] = 0.0;
 	dz[2] = 0.0;
 
-	static scalar3 val;
+	static scalar3 val(0.0, 0.0, 0.0);
 	val[0] = img * 3./8. * x * (1. - y*y) * (1. - z*z);
 	val[1] = 0.0;
 	val[2] = 0.0;
@@ -134,7 +134,7 @@ int main(int argc, char **args)
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-		ExactSolution ex_sln(&mesh, exact_solution);
+  ExactSolution ex_sln(&mesh, exact_solution);
 
   // Calculate exact error.
   info("Calculating exact error.");

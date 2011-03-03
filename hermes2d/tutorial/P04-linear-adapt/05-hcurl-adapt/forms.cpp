@@ -62,9 +62,9 @@ static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, 
 }
 
 // exact solution
-scalar2& exact(double x, double y, scalar2& dx, scalar2& dy)
+scalar2 exact(double x, double y, scalar2& dx, scalar2& dy)
 {
-  static scalar2 ex;
+  static scalar2 ex(0.0, 0.0);
   exact_sol(x,y, ex[0], ex[1], dx[1], dy[0]);
   return ex;
 }

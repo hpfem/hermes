@@ -71,9 +71,9 @@ double exact_solution2(double x, double y, double z, double &dx, double &dy, dou
 }
 
 //
-scalar3 &exact_vec_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
+scalar3 exact_vec_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
 {
-	static scalar3 val;
+  static scalar3 val(0.0, 0.0, 0.0);
 
 	dx[0] = dx[1] = dx[2] = 0;
 	dy[0] = dy[1] = dy[2] = 0;

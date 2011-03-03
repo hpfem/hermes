@@ -32,7 +32,7 @@
 
 typedef scalar (*exact_fn_t)(double x, double y, double z, scalar &dx, scalar &dy, scalar &dz);
 
-typedef scalar3 &(*exact_vec_fn_t)(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz);
+typedef scalar3 (*exact_vec_fn_t)(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz);
 
 /// Represents a function defined on a mesh.
 ///

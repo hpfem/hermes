@@ -28,7 +28,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 cplx img(0, 1);
 
 // Exact solution.
-scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz) {
+scalar3 exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz) {
 	dx[0] = 3.*x*x*y*y - 3.*y*y*y*z;
 	dy[0] = 2.*x*x*x*y - 9.*x*y*y*z;
 	dz[0] = -3.*x*y*y*y;
@@ -41,7 +41,7 @@ scalar3 &exact_solution(double x, double y, double z, scalar3 &dx, scalar3 &dy, 
 	dy[2] = z*z*z;
 	dz[2] = 3.*y*z*z;
 
-	static scalar3 val;
+	static scalar3 val(0.0, 0.0, 0.0);
 	val[0] = x*x*x*y*y - 3.*x*y*y*y*z;
 	val[1] = x*x*x*y*y*y*z*z*z + 2.*x*x*y*z;
 	val[2] = y*z*z*z - 4.*x*x*x;

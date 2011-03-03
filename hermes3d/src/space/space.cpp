@@ -2408,10 +2408,10 @@ static scalar default_bc_value_by_coord(int ess_bdy_marker, double x, double y, 
 	return 0.0;
 }
 
-static scalar3 &default_bc_vec_value_by_coord(int ess_bdy_marker, double x, double y, double z) 
+static scalar3 default_bc_vec_value_by_coord(int ess_bdy_marker, double x, double y, double z) 
 {
   _F_
-  static scalar3 val = { 0.0, 0.0, 0.0 };
+  static scalar3 val(0.0, 0.0, 0.0);
   return val;
 }
 

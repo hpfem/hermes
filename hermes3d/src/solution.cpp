@@ -825,10 +825,10 @@ void Solution::precalculate_exact(const int np, const QuadPt3D *pt, int mask)
      // TODO: untransform Hcurl and vector-valued functions
      assert(transform == true);
      for (int i = 0; i < np; i++) {
-       scalar3  dx = { 0.0, 0.0, 0.0 };
-       scalar3  dy = { 0.0, 0.0, 0.0 };
-       scalar3  dz = { 0.0, 0.0, 0.0 };
-       scalar3 &fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
+       scalar3 dx(0.0, 0.0, 0.0);
+       scalar3 dy(0.0, 0.0, 0.0);
+       scalar3 dz(0.0, 0.0, 0.0);
+       scalar3 fn = exact_vec_fn(x[i], y[i], z[i], dx, dy, dz);
        for (int j = 0; j < num_components; j++) {
 	 node->values[j][FN][i] = fn[j];
 	 node->values[j][DX][i] = dx[j];

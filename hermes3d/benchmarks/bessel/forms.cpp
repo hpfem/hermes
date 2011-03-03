@@ -62,11 +62,10 @@ static void exact_sol(double x, double y, double z, scalar &e0, scalar &e1, scal
 }
 
 // Exact solution.
-scalar3 &exact(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
+scalar3 exact(double x, double y, double z, scalar3 &dx, scalar3 &dy, scalar3 &dz)
 {
-  static scalar3 ex;
+  scalar3 ex(0.0, 0.0, 0.0);
 
-  ex[0] = ex[1] = ex[2] = 0;
   exact_sol(x, y, z, ex[0], ex[1], dx[1], dy[0]);
   return ex;
 }
@@ -110,15 +109,19 @@ scalar liform_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Ge
   cplx ii = cplx(0.0, 1.0);
   scalar result = 0;
   for (int i = 0; i < n; i++) {
-    scalar dx[3], dy[3], dz[3];
-    scalar3 ev;
-    ev[0] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
-    ev[1] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
-    ev[2] = exact(e->x[i], e->y[i], e->z[i], dx, dy, dz)[0];
+    scalar3 dx0(0, 0, 0), dy0(0, 0, 0), dz0(0, 0, 0);
+    scalar3 ev0(0.0, 0.0, 0.0);
+    ev0 = exact(e->x[i], e->y[i], e->z[i], dx0, dy0, dz0);
 
     scalar curl_e[3];
+    scalar dx[3], dy[3], dz[3];
+    dx[0] = dx0[0]; dx[1] = dx0[1]; dx[2] = dx0[2]; 
+    dy[0] = dy0[0]; dy[1] = dy0[1]; dy[2] = dy0[2]; 
+    dz[0] = dz0[0]; dz[1] = dz0[1]; dz[2] = dz0[2]; 
     calc_curl(dx, dy, dz, curl_e);
     scalar tpe[3];
+    scalar ev[3];
+    ev[0] = ev0[0]; ev[1] = ev0[1]; ev[2] = ev0[2];
     calc_tan_proj(e->nx[i], e->ny[i], e->nz[i], ev, tpe);
 
     scalar g[3] = {
