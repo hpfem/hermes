@@ -690,7 +690,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
   mask = size-1;
 
   // select the linearization quadrature
-  Quad2D *old_quad, *old_quad_x, *old_quad_y;
+  Quad2D *old_quad, *old_quad_x = NULL, *old_quad_y = NULL;
   old_quad = sln->get_quad_2d();
   sln->set_quad_2d(&quad_lin);
   if (disp) { old_quad_x = xdisp->get_quad_2d();
@@ -735,7 +735,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     scalar* val = sln->get_values(ia, ib);
     if (val == NULL) error("Item not defined in the solution.");
 
-    scalar *dx, *dy;
+    scalar *dx = NULL, *dy = NULL;
     if (disp)
     {
       xdisp->set_active_element(e);

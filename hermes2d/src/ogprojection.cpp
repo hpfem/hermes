@@ -178,8 +178,10 @@ void OGProjection::project_global(Space *space, ExactFunction2 source_fn, scalar
     default: error("Unknown space type in OGProjection::project_global().");
   }
   // Since the projected function is vector-valued, H1 and L2 spaces are not admissible.
-  if (space_type == HERMES_H1_SPACE) error("Mismatched space and projection norm in OGProjection::project_global().");
-  if (space_type == HERMES_L2_SPACE) error("Mismatched space and projection norm in OGProjection::project_global().");
+  if (space_type == HERMES_H1_SPACE) 
+    error("Mismatched space and projection norm in OGProjection::project_global().");
+  if (space_type == HERMES_L2_SPACE) 
+    error("Mismatched space and projection norm in OGProjection::project_global().");
   Mesh *mesh = space->get_mesh();
   if (mesh == NULL) error("Mesh is NULL in project_global().");
   Solution source_sln;
@@ -201,8 +203,10 @@ void OGProjection::project_global(Space *space, ExactFunction source_fn, scalar*
     default: error("Unknown space type in OGProjection::project_global().");
   }
   // Since the projected function is scalar, Hcurl and Hdiv spaces are not admissible.
-  if (space_type == HERMES_HCURL_SPACE) error("Mismatched space and projection norm in OGProjection::project_global().");
-  if (space_type == HERMES_HDIV_SPACE) error("Mismatched space and projection norm in OGProjection::project_global().");
+  if (space_type == HERMES_HCURL_SPACE) 
+    error("Mismatched space and projection norm in OGProjection::project_global().");
+  if (space_type == HERMES_HDIV_SPACE) 
+    error("Mismatched space and projection norm in OGProjection::project_global().");
 
   Mesh *mesh = space->get_mesh();
   if (mesh == NULL) error("Mesh is NULL in project_global().");

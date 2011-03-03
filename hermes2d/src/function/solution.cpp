@@ -231,6 +231,15 @@ Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
   this->set_exact(mesh, exactfn);
 }
 
+Solution::Solution(Mesh *mesh, ExactFunction2 exactfn2) : MeshFunction(mesh)
+{
+  space_type = HERMES_INVALID_SPACE;
+  this->init();
+  this->mesh = mesh;
+  this->own_mesh = false;
+  this->set_exact(mesh, exactfn2);
+}
+
 Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
@@ -1009,7 +1018,7 @@ int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
 void Solution::precalculate(int order, int mask)
 {
   int i, j, k, l;
-  Node* node;
+  Node* node = NULL;
   Quad2D* quad = quads[cur_quad];
   quad->set_mode(mode);
   H2D_CHECK_ORDER(quad, order);
@@ -1131,8 +1140,8 @@ void Solution::precalculate(int order, int mask)
     {
       for (i = 0; i < np; i++)
       {
-        scalar2 dx = { 0.0, 0.0 }, dy = { 0.0, 0.0 };
-        scalar2& val = exactfn2(x[i], y[i], dx, dy);
+        scalar2 dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
+        scalar2 val = exactfn2(x[i], y[i], dx, dy);
         for (j = 0; j < 2; j++) {
           node->values[j][0][i] = val[j] * exact_mult;
           node->values[j][1][i] = dx[j] * exact_mult;
@@ -1418,8 +1427,8 @@ scalar Solution::get_pt_value(double x, double y, int item)
     }
     else
     {
-      scalar2 dx = {0.0, 0.0}, dy = {0.0, 0.0};
-      scalar2& val = exactfn2(x, y, dx, dy);
+      scalar2 dx(0.0, 0.0), dy(0.0, 0.0);
+      scalar2 val = exactfn2(x, y, dx, dy);
       if (b == 0) return val[a];
       if (b == 1) return dx[a];
       if (b == 2) return dy[a];

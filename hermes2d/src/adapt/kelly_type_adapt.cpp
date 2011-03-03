@@ -105,7 +105,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector< Solution* > slns,
   if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
       (error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
 
-  double *norms;
+  double *norms = NULL;
   if (calc_norm)
   {
     norms = new double[num];

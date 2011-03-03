@@ -165,7 +165,8 @@ int ElementToRefineStream::read_bytes(int num_bytes) {
   return result;
 }
 
-HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs) {
+HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, 
+           const std::vector<ElementToRefine>& elem_refs) {
   //calculate range of values
   Range<int> range_id, range_comp, range_order;
   vector<ElementToRefine>::const_iterator elem_ref = elem_refs.begin();

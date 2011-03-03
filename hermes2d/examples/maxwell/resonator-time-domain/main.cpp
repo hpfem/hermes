@@ -28,11 +28,13 @@ const int P_INIT = 2;                             // Initial polynomial degree. 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Initial condition for E,
-double E_init_cond(double x, double y, double& dx, double& dy) {
-  dx = -2*x;
-  dy = -2*y;
-  return 1 - x*x;
+// Initial condition for E.
+scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
+  dx[0] = 0.0;
+  dx[1] = -2*x;
+  dy[0] = -2*y;
+  dy[1] = 0.0;
+  return scalar2(1 - y*y, 1 - x*x);
 }
 
 //  Boundary markers.
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
 
   // Create an Hcurl space for E and L2 space for B.
   HcurlSpace E_space(&mesh, &bc_types, &bc_values, P_INIT);
-  L2Space B_space(&mesh, NULL, NULL, P_INIT);
+  L2Space B_space(&mesh, P_INIT);
 
   // Initialize previous time level solutions;
   Solution E_prev(&mesh, E_init_cond);

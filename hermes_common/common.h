@@ -352,8 +352,39 @@ typedef double double2x2[2][2];
 typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 
-typedef scalar scalar2[2];
-typedef scalar scalar3[3];
+struct scalar2 
+{ 
+  scalar val[2]; 
+
+ public:
+  scalar2(scalar v1, scalar v2) 
+  { 
+    val[0] = v1; val[1] = v2; 
+  }
+
+  scalar& operator[] (int idx) 
+  { 
+    assert(idx >= 0 && idx < 2);
+    return val[idx];
+  }
+};
+
+struct scalar3
+{ 
+  scalar val[3]; 
+
+ public:
+  scalar3(scalar v1, scalar v2, scalar v3) 
+  { 
+    val[0] = v1; val[1] = v2, val[2] = v3; 
+  }
+
+  scalar& operator[] (int idx) 
+  { 
+    assert(idx >= 0 && idx < 3);
+    return val[idx];
+  }
+};
 
 typedef unsigned long long int uint64;
 

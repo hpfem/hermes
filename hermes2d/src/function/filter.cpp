@@ -380,7 +380,8 @@ MagFilter::MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int
 };
 
 MagFilter::MagFilter(MeshFunction* sln1, int item1)
-         : SimpleFilter(magnitude_fn, Hermes::vector<MeshFunction*>(sln1, sln1), Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
+         : SimpleFilter(magnitude_fn, Hermes::vector<MeshFunction*>(sln1, sln1), 
+                        Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
 {
   if (sln1->get_num_components() < 2)
     error("The single-argument constructor is intended for vector-valued solutions.");
@@ -389,8 +390,7 @@ MagFilter::MagFilter(MeshFunction* sln1, int item1)
 
 static void difference_fn_2(int n, Hermes::vector<scalar*> values, scalar* result)
 {
-  for (int i = 0; i < n; i++)
-		result[i] = values.at(0)[i] - values.at(1)[i];
+  for (int i = 0; i < n; i++) result[i] = values.at(0)[i] - values.at(1)[i];
 };
 
 DiffFilter::DiffFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)

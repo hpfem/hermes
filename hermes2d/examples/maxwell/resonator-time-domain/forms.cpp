@@ -1,6 +1,7 @@
 // Bilinear form, block 0, 0
 template<typename Real, typename Scalar>
-Scalar bilinear_form_0_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar bilinear_form_0_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
@@ -12,7 +13,8 @@ Scalar bilinear_form_0_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 
 // Bilinear form, block 0, 1
 template<typename Real, typename Scalar>
-Scalar bilinear_form_0_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar bilinear_form_0_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
@@ -24,11 +26,12 @@ Scalar bilinear_form_0_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 
 // Bilinear form, block 1, 0
 template<typename Real, typename Scalar>
-Scalar bilinear_form_1_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar bilinear_form_1_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
-    result += wt[i] * (-u->dy[i] + u->dx[i]) * v->val[i];
+    result += wt[i] * (u->dy0[i] - u->dx1[i]) * v->val[i];
   }
 
   return result;
@@ -36,7 +39,8 @@ Scalar bilinear_form_1_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 
 // Bilinear form, block 1, 1
 template<typename Real, typename Scalar>
-Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
@@ -48,7 +52,8 @@ Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 
 // Linear form, block 0
 template<typename Real, typename Scalar>
-Scalar linear_form_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar linear_form_0(int n, double *wt, Func<Scalar> *u_ext[], 
+                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Scalar>* u_prev = ext->fn[0];
 
@@ -62,7 +67,8 @@ Scalar linear_form_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Ge
 
 // Linear form, block 1
 template<typename Real, typename Scalar>
-Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[], 
+                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
   Func<Scalar>* u_prev = ext->fn[0];
 

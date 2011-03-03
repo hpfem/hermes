@@ -100,6 +100,7 @@ public:
   Solution();
   Solution(Mesh *mesh);
   Solution(Mesh *mesh, ExactFunction exactfn);
+  Solution(Mesh *mesh, ExactFunction2 exactfn2);
   Solution(Mesh *mesh, scalar init_const);
   Solution (Space* s, Vector* coeff_vec);
   Solution (Space* s, scalar* coeff_vec);
@@ -113,7 +114,7 @@ public:
   int* get_element_orders() { return this->elem_orders;}
 
   void set_exact(Mesh* mesh, ExactFunction exactfn);
-  void set_exact(Mesh* mesh, ExactFunction2 exactfn);
+  void set_exact(Mesh* mesh, ExactFunction2 exactfn2);
 
   void set_const(Mesh* mesh, scalar c);
   void set_const(Mesh* mesh, scalar c0, scalar c1); // two-component (Hcurl) const
