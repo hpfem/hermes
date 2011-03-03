@@ -8,7 +8,7 @@ Scalar bilinear_form_0_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
     result += wt[i] * (u->val0[i] * v->val0[i] + u->val1[i] * v->val1[i]);
   }
 
-  return result / TAU;
+  return result / time_step;
 }
 
 // Bilinear form, block 0, 1
@@ -31,7 +31,7 @@ Scalar bilinear_form_1_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
-    result += wt[i] * (u->dy0[i] - u->dx1[i]) * v->val[i];
+    result += wt[i] * u->curl[i] * v->val[i];
   }
 
   return result;
@@ -44,10 +44,10 @@ Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 {
   Scalar result = 0;
   for (int i=0; i < n; i++) {
-    result += wt[i] * (u->val[i] * v->val[i]);
+    result += wt[i] * u->val[i] * v->val[i];
   }
 
-  return result / TAU;
+  return result / time_step;
 }
 
 // Linear form, block 0
@@ -62,7 +62,7 @@ Scalar linear_form_0(int n, double *wt, Func<Scalar> *u_ext[],
     result += wt[i] * (u_prev->val0[i] * v->val0[i] + u_prev->val1[i] * v->val1[i]);
   }
 
-  return result / TAU;
+  return result / time_step;
 }
 
 // Linear form, block 1
@@ -77,7 +77,7 @@ Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[],
     result += wt[i] * (u_prev->val[i] * v->val[i]);
   }
 
-  return result / TAU;
+  return result / time_step;
 }
 
 
