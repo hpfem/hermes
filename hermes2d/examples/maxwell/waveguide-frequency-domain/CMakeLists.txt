@@ -1,6 +1,6 @@
 IF(H2D_COMPLEX)
 
-project(waveguide)
+project(waveguide-frequency-domain)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
