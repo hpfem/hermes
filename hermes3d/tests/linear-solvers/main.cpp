@@ -110,7 +110,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
 //read file with complex MatrixEntry and complex rhs VectorEntry
       case STATE_MATRIX:
         if (read_n_nums(row, 4, buffer)) {
-          complex<double> cmplx_buffer(buffer[2], buffer[3]);
+            std::complex<double> cmplx_buffer(buffer[2], buffer[3]);
           mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer));
         }
 	else
@@ -119,7 +119,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
 
         case STATE_RHS:
           if (read_n_nums(row, 3, buffer)) {
-          complex<double> cmplx_buffer(buffer[1], buffer[2]);
+              std::complex<double> cmplx_buffer(buffer[1], buffer[2]);
             rhs[(int) buffer[0]] = (scalar) cmplx_buffer;
           }
         break;
