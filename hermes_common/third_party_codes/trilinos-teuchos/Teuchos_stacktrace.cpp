@@ -152,7 +152,8 @@ std::string format(const char *fmt, ...)
     va_start(argptr, fmt);
 
     char *str;
-    vasprintf(&str, fmt, argptr);
+    // The integer assignment is merely a warning proof.
+    int abc = vasprintf(&str, fmt, argptr);
     std::string s=str;
     free(str);
 
