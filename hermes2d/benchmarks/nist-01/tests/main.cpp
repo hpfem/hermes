@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   WeakFormPoisson wf(EXACT_SOL_P);
+  
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
   BoundaryConditions bcs(&bc);

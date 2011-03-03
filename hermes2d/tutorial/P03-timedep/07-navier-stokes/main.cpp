@@ -88,12 +88,9 @@ int main(int argc, char* argv[])
   DirichletFunctionBoundaryCondition bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   DirichletConstantBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
-
   DirichletConstantBoundaryCondition bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_y(&bc_vel_y);
-
   BoundaryConditions bcs_pressure;
-
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
