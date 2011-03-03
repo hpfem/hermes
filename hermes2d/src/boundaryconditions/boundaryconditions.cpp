@@ -43,11 +43,11 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
 };
 
 // Dirichlet BC Value
-DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
+DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
   this->value = value;
 }
 
-DirichletValueBoundaryCondition::DirichletValueBoundaryCondition(std::string marker, scalar value) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
+DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(std::string marker, scalar value) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
   this->value = value;
   markers.push_back(marker);
 }
@@ -65,11 +65,11 @@ scalar NeumannBoundaryCondition::function(double x, double y) const {
 };
 
 // Neumann BC Value
-NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition(markers) {
+NeumannConstantBoundaryCondition::NeumannConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition(markers) {
   this->value = value;
 }
 
-NeumannValueBoundaryCondition::NeumannValueBoundaryCondition(std::string marker, scalar value) : NeumannBoundaryCondition(Hermes::vector<std::string>()) {
+NeumannConstantBoundaryCondition::NeumannConstantBoundaryCondition(std::string marker, scalar value) : NeumannBoundaryCondition(Hermes::vector<std::string>()) {
   this->value = value;
   markers.push_back(marker);
 }

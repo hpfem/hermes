@@ -90,11 +90,11 @@ public:
 };
 
 /// Class representing Dirichlet boundary condition of the form u|_{\Gamma_Dirichlet} = u_Dirichlet given by value.
-class HERMES_API DirichletValueBoundaryCondition : public DirichletBoundaryCondition {
+class HERMES_API DirichletConstantBoundaryCondition : public DirichletBoundaryCondition {
 public:
   /// Constructors.
-  DirichletValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
-  DirichletValueBoundaryCondition(std::string marker, scalar value);
+  DirichletConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
+  DirichletConstantBoundaryCondition(std::string marker, scalar value);
 
   /// Function giving info that u_Dirichlet is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
@@ -125,11 +125,11 @@ public:
 };
 
 /// Class representing Neumann boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} = u_Neumann given by value.
-class HERMES_API NeumannValueBoundaryCondition : public NeumannBoundaryCondition {
+class HERMES_API NeumannConstantBoundaryCondition : public NeumannBoundaryCondition {
 public:
   /// Constructors.
-  NeumannValueBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
-  NeumannValueBoundaryCondition(std::string marker, scalar value);
+  NeumannConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
+  NeumannConstantBoundaryCondition(std::string marker, scalar value);
 
   /// Function giving info that u_Neumann is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }

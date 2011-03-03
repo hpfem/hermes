@@ -86,10 +86,10 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
-  DirichletValueBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  DirichletConstantBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
 
-  DirichletValueBoundaryCondition bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  DirichletConstantBoundaryCondition bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_y(&bc_vel_y);
 
   BoundaryConditions bcs_pressure;

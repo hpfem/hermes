@@ -71,9 +71,9 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  DirichletValueBoundaryCondition bc_left(BDY_LEFT, T1);
-  NeumannValueBoundaryCondition bc_outer_inner(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER), 0.0);
-  NeumannValueBoundaryCondition bc_bottom(BDY_BOTTOM, 0.0);
+  DirichletConstantBoundaryCondition bc_left(BDY_LEFT, T1);
+  NeumannConstantBoundaryCondition bc_outer_inner(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER), 0.0);
+  NeumannConstantBoundaryCondition bc_bottom(BDY_BOTTOM, 0.0);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_left, &bc_outer_inner, &bc_bottom));
 
   // Create an H1 space with default shapeset.
