@@ -10,9 +10,12 @@ using namespace RefinementSelectors;
 // with vector-valued E (an Hcurl function) and scalar B (an L2 function). Time integration 
 // is done using implicit Euler. The speed of light is assumed to be 1.0 for simplicity.
 //
-// PDE: \partial E / \partial t - curl B = 0,
+// PDE: (1. / SPEED_OF_LIGHT**2) \partial E / \partial t - curl B = 0,
 //      \partial B / \partial t + curl E = 0.
 //
+// Note: curl E = \partial E_2 / \partial x - \partial E_1 / \partial y
+//       curl B = (\partial B / \partial y, - \partial B / \partial x)
+//       
 // Domain: square cavity with another small square cavity attached from outside
 //         on the right.
 //
@@ -22,24 +25,46 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 
-const int P_INIT_E = 4;                           // Initial polynomial degree for E.
-const int P_INIT_B = 4;                           // Initial polynomial degree for B.
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT_E = 1;                           // Initial polynomial degree for E.
+const int P_INIT_B = 1;                           // Initial polynomial degree for B.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
 const double time_step = 0.005;                   // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const double T_FINAL = 1;                         // Length of time interval.
+const double SPEED_OF_LIGHT = 1.0;                // Speed of light.
+const double T_FINAL = 10000;                     // Length of time interval.
 double current_time = 0;
 
-// Initial condition for E.
+// Initial conditions for E and B (Version A).
+scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
+  dx[0] = sin(x) * sin(y);
+  dx[1] = cos(x) * cos(y);
+  dy[0] = -cos(x) * cos(y);
+  dy[1] = -sin(x) * sin(y);
+  return scalar2(-cos(x) * sin(y), sin(x) * cos(y));
+}
+scalar B_init_cond(double x, double y, scalar& dx, scalar& dy) {
+  dx = 0.0;
+  dy = 0.0;
+  return 0.0;
+}
+
+/* 
+// Initial conditions for E and B (Version B).
 scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
   dx[0] = 0.0;
-  dx[1] = -sin(0.5 * M_PI * x) * 0.5 * M_PI;
-  dy[0] = -sin(0.5 * M_PI * y) * 0.5 * M_PI;
+  dx[1] = 0.0;
+  dy[0] = 0.0;
   dy[1] = 0.0;
-  return scalar2(cos(0.5 * M_PI * y), cos(0.5 * M_PI * x));
+  return scalar2(0.0, 0.0);
 }
+scalar B_init_cond(double x, double y, scalar& dx, scalar& dy) {
+  dx = - 0.5 * M_PI * sin(0.5 * M_PI * x) * cos(0.5 * M_PI * y);
+  dy = - 0.5 * M_PI * cos(0.5 * M_PI * x) * sin(0.5 * M_PI * y);
+  return cos(0.5 * M_PI * x) * cos(0.5 * M_PI * y);
+}
+*/
 
 //  Boundary markers.
 const int BDY_DIRICHLET = 1;
@@ -71,9 +96,9 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&E_space, &B_space));
   info("ndof = %d", ndof);
 
-  // Initialize previous time level solutions;
+  // Initialize solutions for E and B.
   Solution E_sln(&mesh, E_init_cond);
-  Solution B_sln(&mesh, 0.0);
+  Solution B_sln(&mesh, B_init_cond);
 
   // Initialize the weak formulation.
   WeakForm wf(2);
@@ -85,9 +110,11 @@ int main(int argc, char* argv[])
   wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &B_sln);
 
   // Initialize views.
-  VectorView E_view("Electric field", new WinGeom(0, 0, 520, 400));
-  E_view.fix_scale_width(50);
-  ScalarView B_view("Magnetic field", new WinGeom(530, 0, 520, 400));
+  ScalarView E1_view("E1", new WinGeom(0, 0, 520, 400));
+  E1_view.fix_scale_width(50);
+  ScalarView E2_view("E2", new WinGeom(525, 0, 520, 400));
+  E2_view.fix_scale_width(50);
+  ScalarView B_view("B", new WinGeom(1050, 0, 520, 400));
   B_view.fix_scale_width(50);
   
   // Initialize the FE problem.
@@ -121,13 +148,15 @@ int main(int argc, char* argv[])
 				  Hermes::vector<Solution*>(&E_sln, &B_sln));
     else error ("Matrix solver failed.\n");
 
-    // Show real part of the solution.
-    E_view.show(&E_sln);
+    // Show the solution.
+    E1_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
+    E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
     B_view.show(&B_sln);
 
     // Increase current time and time step counter.
     current_time += time_step;
     ts++;
+
   } while (current_time < T_FINAL);
 
   // Clean up.
