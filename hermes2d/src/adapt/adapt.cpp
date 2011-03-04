@@ -71,6 +71,10 @@ Adapt::Adapt(Hermes::vector<Space *> spaces,
 
   // assign norm weak forms  according to norms selection
   for (int i = 0; i < this->num; i++)
+    for (int j = 0; j < this->num; j++)
+      error_form[i][j] = NULL;
+
+  for (int i = 0; i < this->num; i++)
     error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
 }
 
