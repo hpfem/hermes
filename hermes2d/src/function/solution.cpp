@@ -328,17 +328,16 @@ void Solution::copy(const Solution* sln)
 
     init_dxdy_buffer();
   }
-  else // exact, const
+  else // Const, exact handled differently.
   {
-    exactfn1 = sln->exactfn1;
-    exactfn2 = sln->exactfn2;
     cnst[0] = sln->cnst[0];
     cnst[1] = sln->cnst[1];
+    if((dynamic_cast<ExactSolution1D*>(this)) != NULL || (dynamic_cast<ExactSolution2D*>(this)) != NULL)
+      error("ExactSolutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
   }
 
   element = NULL;
 }
-
 
 void Solution::free_tables()
 {
@@ -1140,7 +1139,7 @@ void Solution::precalculate(int order, int mask)
         {
           double jac = (*m)[0][0] *  (*m)[1][1] - (*m)[1][0] *  (*m)[0][1];
           scalar val, dx = 0.0, dy = 0.0;
-          val = exactfn1(x[i], y[i], dx, dy);
+          val = (static_cast<ExactSolution1D*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = (  (*m)[1][1]*dx - (*m)[0][1]*dy) / jac * exact_mult;
           node->values[0][2][i] = (- (*m)[1][0]*dx + (*m)[0][0]*dy) / jac * exact_mult;
@@ -1151,7 +1150,7 @@ void Solution::precalculate(int order, int mask)
         for (i = 0; i < np; i++)
         {
           scalar val, dx = 0.0, dy = 0.0;
-          val = exactfn1(x[i], y[i], dx, dy);
+          val = (static_cast<ExactSolution1D*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = dx * exact_mult;
           node->values[0][2][i] = dy * exact_mult;
@@ -1163,7 +1162,7 @@ void Solution::precalculate(int order, int mask)
       for (i = 0; i < np; i++)
       {
         scalar2 dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
-        scalar2 val = exactfn2(x[i], y[i], dx, dy);
+        scalar2 val = (static_cast<ExactSolution2D*>(this))->exact_function(x[i], y[i], dx, dy);
         for (j = 0; j < 2; j++) {
           node->values[j][0][i] = val[j] * exact_mult;
           node->values[j][1][i] = dx[j] * exact_mult;
@@ -1442,7 +1441,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
     if (num_components == 1)
     {
       scalar val, dx = 0.0, dy = 0.0;
-      val = exactfn1(x, y, dx, dy);
+      val = (static_cast<ExactSolution1D*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val;
       if (b == 1) return dx;
       if (b == 2) return dy;
@@ -1450,7 +1449,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
     else
     {
       scalar2 dx(0.0, 0.0), dy(0.0, 0.0);
-      scalar2 val = exactfn2(x, y, dx, dy);
+      scalar2 val = (static_cast<ExactSolution2D*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val[a];
       if (b == 1) return dx[a];
       if (b == 2) return dy[a];
@@ -1505,4 +1504,41 @@ scalar Solution::get_pt_value(double x, double y, int item)
 
   warn("Point (%g, %g) does not lie in any element.", x, y);
   return NAN;
+}
+
+
+// Exact solution.
+ExactSolution::ExactSolution(Mesh* mesh)
+{}
+
+ExactSolution1D::ExactSolution1D(Mesh* mesh)
+{}
+
+ExactSolution1D::~ExactSolution1D()
+{}
+
+int ExactSolution1D::update(Mesh* mesh)
+{
+  set_exact(mesh, exact_function);
+}
+
+unsigned int ExactSolution1D::get_dimension()
+{
+  return 1;
+}
+ 
+ExactSolution2D::ExactSolution2D(Mesh* mesh)
+{}
+
+ExactSolution2D::~ExactSolution2D()
+{}
+
+int ExactSolution2D::update(Mesh* mesh)
+{
+  set_exact(mesh, exact_function);
+}
+
+unsigned int ExactSolution2D::get_dimension()
+{
+  return 2;
 }

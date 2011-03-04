@@ -177,8 +177,6 @@ public:
   /// Returns space type.
   ESpaceType get_space_type() const { return space_type; };
 
-
-
 public:
   /// Internal.
   virtual void set_active_element(Element* e);
@@ -258,28 +256,51 @@ protected:
 /// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
 /// typically an exact solution to a PDE. This can be used to compare an approximate solution
 /// with an exact solution (see DiffFilter).
-///
-/// Please note that the same functionality can be obtained by using Solution::set_exact().
-/// This class is provided merely for convenience.
-///
 class HERMES_API ExactSolution : public Solution
 {
 public:
+  ExactSolution(Mesh* mesh);
 
-  ExactSolution(Mesh* mesh, ExactFunction exactfn)
-    { set_exact(mesh, exactfn); }
+  ~ExactSolution() = 0;
 
-  ExactSolution(Mesh* mesh, ExactFunction2 exactfn)
-    { set_exact(mesh, exactfn); }
+  virtual int update(Mesh* mesh);
 
-  int update(Mesh* mesh, ExactFunction exactfn)
-    { set_exact(mesh, exactfn);  return 1; }
+  // Number of value dimensions from {1, 2}.
+  virtual unsigned int get_dimension() = 0;
 
-  int update(Mesh* mesh, ExactFunction2 exactfn)
-    { set_exact(mesh, exactfn);  return 1; }
-
+  // The mesh.
+  Mesh* mesh;
 };
 
+class HERMES_API ExactSolution1D : public Solution
+{
+public:
+  ExactSolution1D(Mesh* mesh);
+
+  ~ExactSolution1D() = 0;
+
+  virtual int update(Mesh* mesh) = 0;
+
+  virtual unsigned int get_dimension();
+
+  // Function representing an exact one-dimension valued solution.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
+};
+
+class HERMES_API ExactSolution2D : public Solution
+{
+public:
+  ExactSolution2D(Mesh* mesh);
+
+  ~ExactSolution2D() = 0;
+
+  virtual int update(Mesh* mesh);
+
+  virtual unsigned int get_dimension();
+
+  // Function representing an exact two-dimension valued solution.
+  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) = 0;
+};
 
 
 #endif
