@@ -16,7 +16,7 @@
 #include "../h2d_common.h"
 #include "weakform.h"
 #include "../../../hermes_common/matrix.h"
-#include "forms.h"
+#include "../function/forms.h"
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
