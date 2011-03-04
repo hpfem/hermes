@@ -74,7 +74,7 @@ Scalar linear_form_1(int n, double *wt, Func<Scalar> *u_ext[],
 
   Scalar result = 0;
   for (int i=0; i < n; i++) {
-    result += wt[i] * (u_prev->val[i] * v->val[i]);
+    result += wt[i] * u_prev->val[i] * v->val[i];
   }
 
   return result / time_step;

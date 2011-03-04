@@ -25,7 +25,7 @@ using namespace RefinementSelectors;
 const int P_INIT_E = 4;                           // Initial polynomial degree for E.
 const int P_INIT_B = 4;                           // Initial polynomial degree for B.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const double time_step = 0.001;                   // Time step.
+const double time_step = 0.005;                   // Time step.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -35,10 +35,10 @@ double current_time = 0;
 // Initial condition for E.
 scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
   dx[0] = 0.0;
-  dx[1] = -2*x;
-  dy[0] = -2*y;
+  dx[1] = -sin(0.5 * M_PI * x) * 0.5 * M_PI;
+  dy[0] = -sin(0.5 * M_PI * y) * 0.5 * M_PI;
   dy[1] = 0.0;
-  return scalar2(1 - y*y, 1 - x*x);
+  return scalar2(cos(0.5 * M_PI * y), cos(0.5 * M_PI * x));
 }
 
 //  Boundary markers.
@@ -86,7 +86,9 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   VectorView E_view("Electric field", new WinGeom(0, 0, 520, 400));
+  E_view.fix_scale_width(50);
   ScalarView B_view("Magnetic field", new WinGeom(530, 0, 520, 400));
+  B_view.fix_scale_width(50);
   
   // Initialize the FE problem.
   bool is_linear = true;
