@@ -74,8 +74,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
-const double k = 3.0 - 4.0 * nu;
-const double G = E / (2.0 * (1.0 + nu));
 const double lambda = 0.5444837367825;            // Mode 1.
 const double Q = 0.5430755788367;
 
@@ -84,17 +82,11 @@ const double Q = 0.5430755788367;
 //const double mu = E / (2*(1 + nu));
 
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Exact solution.
-#include "exact_solution.cpp"
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values_u(double x, double y) { return u_fn(x, y);}
-scalar essential_bc_values_v(double x, double y) { return v_fn(x, y);}
 
 int main(int argc, char* argv[])
 {
@@ -114,32 +106,25 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) u_mesh.refine_all_elements();
   for (int i = 0; i < INIT_REF_NUM; i++) v_mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values_u, bc_values_v;
-  bc_values_u.add_function(BDY_DIRICHLET, essential_bc_values_u);
-  bc_values_v.add_function(BDY_DIRICHLET, essential_bc_values_v);
-
-  // Create H1 spaces with default shapeset for both displacement components.
-  H1Space u_space(&u_mesh, &bc_types, &bc_values_u, P_INIT_U);
-  H1Space v_space(&v_mesh, &bc_types, &bc_values_v, P_INIT_V);
+  // Set exact solutions.
+  ExactSolutionNIST03U exact_u(&u_mesh, E, nu, lambda, Q);
+  ExactSolutionNIST03V exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
-  //wf.add_vector_form(0, linear_form_u, linear_form_0_ord, HERMES_SYM);
-  //wf.add_vector_form(1, linear_form_v, linear_form_1_ord, HERMES_SYM);
+  WeakFormNIST03 wf(&exact_u, &exact_v);
+  
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionExactU bc_u(BDY_DIRICHLET, &exact_u);
+  BoundaryConditions bcs_u(&bc_u);
+  
+  DirichletFunctionBoundaryConditionExactV bc_v(BDY_DIRICHLET, &exact_v);
+  BoundaryConditions bcs_v(&bc_v);
+
+  // Create H1 spaces with default shapeset for both displacement components.
+  H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);
+  H1Space v_space(&v_mesh, &bcs_v, P_INIT_V);
 
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
-
-  // Initialize exact solutions.
-  ExactSolution u_exact(&u_mesh, u_fndd);
-  ExactSolution v_exact(&v_mesh, v_fndd);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -209,21 +194,6 @@ int main(int argc, char* argv[])
     s_view_v.show(&v_sln); 
     o_view_v.show(&v_space);
 
-    /*
-    // Exact solution for comparison with computational results.
-    u_exact.update(&u_mesh, u_fndd);
-    v_exact.update(&v_mesh, v_fndd);
-
-    // Show exact solution.
-    sview_u_exact.show(&u_exact);
-    sprintf(title, "Exact solution for u.");
-    sview_u_exact.set_title(title);
-    
-    sview_v_exact.show(&v_exact);
-    sprintf(title, "Exact solution for v.");
-    sview_v_exact.set_title(title);
-    */
-
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
     Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&u_space, &v_space));
@@ -237,7 +207,7 @@ int main(int argc, char* argv[])
     Hermes::vector<double> err_exact_rel;
     bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution *>(&u_sln, &v_sln), 
-                                 Hermes::vector<Solution *>(&u_exact, &v_exact), 
+                                 Hermes::vector<Solution *>(&exact_u, &exact_v), 
                                  &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.

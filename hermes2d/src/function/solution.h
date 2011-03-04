@@ -261,25 +261,20 @@ class HERMES_API ExactSolution : public Solution
 public:
   ExactSolution(Mesh* mesh);
 
-  ~ExactSolution() = 0;
-
-  virtual int update(Mesh* mesh);
+  ~ExactSolution();
 
   // Number of value dimensions from {1, 2}.
   virtual unsigned int get_dimension() = 0;
-
-  // The mesh.
-  Mesh* mesh;
 };
 
-class HERMES_API ExactSolution1D : public Solution
+/// These classes are abstract (pure virtual destructor).
+/// The user is supposed to subclass them (see e.g. NIST benchmarks).
+class HERMES_API ExactSolution1D : public ExactSolution
 {
 public:
   ExactSolution1D(Mesh* mesh);
 
   ~ExactSolution1D() = 0;
-
-  virtual int update(Mesh* mesh) = 0;
 
   virtual unsigned int get_dimension();
 
@@ -287,14 +282,12 @@ public:
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
 };
 
-class HERMES_API ExactSolution2D : public Solution
+class HERMES_API ExactSolution2D : public ExactSolution
 {
 public:
   ExactSolution2D(Mesh* mesh);
 
   ~ExactSolution2D() = 0;
-
-  virtual int update(Mesh* mesh);
 
   virtual unsigned int get_dimension();
 

@@ -1508,35 +1508,33 @@ scalar Solution::get_pt_value(double x, double y, int item)
 
 
 // Exact solution.
-ExactSolution::ExactSolution(Mesh* mesh)
+ExactSolution::ExactSolution(Mesh* mesh) : Solution(mesh)
+{
+  sln_type = HERMES_EXACT;
+  num_components = 1;
+  exact_mult = 1.0;
+  num_dofs = -1;
+}
+
+ExactSolution::~ExactSolution()
 {}
 
-ExactSolution1D::ExactSolution1D(Mesh* mesh)
+ExactSolution1D::ExactSolution1D(Mesh* mesh) : ExactSolution(mesh)
 {}
 
 ExactSolution1D::~ExactSolution1D()
 {}
-
-int ExactSolution1D::update(Mesh* mesh)
-{
-  set_exact(mesh, exact_function);
-}
 
 unsigned int ExactSolution1D::get_dimension()
 {
   return 1;
 }
  
-ExactSolution2D::ExactSolution2D(Mesh* mesh)
+ExactSolution2D::ExactSolution2D(Mesh* mesh) : ExactSolution(mesh)
 {}
 
 ExactSolution2D::~ExactSolution2D()
 {}
-
-int ExactSolution2D::update(Mesh* mesh)
-{
-  set_exact(mesh, exact_function);
-}
 
 unsigned int ExactSolution2D::get_dimension()
 {

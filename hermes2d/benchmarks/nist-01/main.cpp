@@ -72,12 +72,15 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  
+  // Set exact solution.
+  ExactSolutionNIST01 exact(&mesh, EXACT_SOL_P);
 
   // Initialize the weak formulation.
   WeakFormPoisson wf(EXACT_SOL_P);
   
   // Initialize boundary conditions
-  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
+  DirichletFunctionBoundaryConditionExact bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -85,9 +88,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
