@@ -24,16 +24,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
+const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 
 // Problem parameters.
 const double CONST_F = -4.0; 
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  return (-CONST_F/4.0)*(x*x + y*y);
-}
 
 // Weak forms.
 #include "forms.cpp"
@@ -48,23 +42,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+  // Initialize the weak formulation.
+  WeakFormPoisson wf(CONST_F);
 
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), essential_bc_values);
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryCondition bc(Hermes::vector<std::string>("1", "2", "3", "4"), CONST_F);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
-
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
 
   // Initialize the FE problem.
   bool is_linear = true;
