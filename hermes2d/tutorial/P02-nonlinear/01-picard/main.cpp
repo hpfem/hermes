@@ -27,23 +27,8 @@ const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Thermal conductivity (temperature-dependent)
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) 
-{ 
-  return 1 + pow(u, 4); 
-}
-
-// Right-hand side (can be a general function of 'x' and 'y').
-template<typename Real>
-Real rhs(Real x, Real y)
-{
-  return 1.0;
-}
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -60,24 +45,18 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
 
   // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
+  DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
   // Initialize previous iteration solution for the Picard method.
   Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_NONSYM, HERMES_ANY, &sln_prev_iter);
-  wf.add_vector_form(callback(linear_form), HERMES_ANY);
+  WeakFormHeatTransfer wf(&sln_prev_iter);
 
   // Perform the Picard's iteration.
   bool verbose = true;
