@@ -57,15 +57,8 @@ double ALPHA_P = 1000;      // This problem has and exponential peak in the inte
 double X_LOC = 0.5;         // (X_LOC, Y_LOC) is the location of the peak, and ALPHA determines the strenghth of the peak.
 double Y_LOC = 0.5;
 
- 
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y) { return fn(x, y);}
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -81,27 +74,21 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Set exact solution.
+  ExactSolutionNIST04 exact(&mesh, ALPHA_P, X_LOC, Y_LOC);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
+  WeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
+  
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionExact bc(BDY_DIRICHLET, &exact);
+  BoundaryConditions bcs(&bc);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 460, 350));

@@ -4,7 +4,7 @@
 
 using namespace RefinementSelectors;
 
-//  This is the fifth in the series of NIST benchmarks with unknown exact solutions.
+//  This is the fifth in the series of NIST benchmarks, with unknown exact solution.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
@@ -12,7 +12,7 @@ using namespace RefinementSelectors;
 //  PDE: -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
 //       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f.
 //
-//  Known exact solution: unknow.
+//  Known exact solution: unknown.
 //
 //  Domain: square (0, 8.4)x(0, 24), see the file "battery.mesh".
 //
@@ -52,46 +52,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const int OMEGA_1 = 1;
-const int OMEGA_2 = 2;
-const int OMEGA_3 = 3;
-const int OMEGA_4 = 4;
-const int OMEGA_5 = 5;
+// See the file forms.cpp.
 
-const double P_1 = 25.0;
-const double P_2 = 7.0;
-const double P_3 = 5.0;
-const double P_4 = 0.2;
-const double P_5 = 0.05;
-
-const double Q_1 = 25.0;
-const double Q_2 = 0.8;
-const double Q_3 = 0.0001;
-const double Q_4 = 0.2;
-const double Q_5 = 0.05;
-
-const double F_1 = 0.0;
-const double F_2 = 1.0;
-const double F_3 = 1.0;
-const double F_4 = 0.0;
-const double F_5 = 0.0;
-
-// Boundary markers.
-const int BDY_LEFT = 1;
-const int BDY_TOP = 2;
-const int BDY_RIGHT = 3;
-const int BDY_BOTTOM = 4;
-
-// Boundary condition coefficients for the four sides.
-const double C_LEFT = 0.0;
-const double C_TOP = 1.0;
-const double C_RIGHT = 2.0;
-const double C_BOTTOM = 3.0;
-
-const double G_N_LEFT = 0.0;
-const double G_N_TOP = 3.0;
-const double G_N_RIGHT = 2.0;
-const double G_N_BOTTOM = 1.0;
 
 // Weak forms.
 #include "forms.cpp"
