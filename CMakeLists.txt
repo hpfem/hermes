@@ -39,7 +39,6 @@ set(WITH_H2D                  YES)
 	set(H2D_WITH_EXAMPLES     YES)
 	set(H2D_WITH_BENCHMARKS   YES)
 	set(H2D_WITH_TESTS        YES)
-	set(H2D_WITH_MODULES      YES)
 	set(H2D_WITH_TUTORIAL     YES)
 	set(H2D_WITH_GLUT         YES)
 	set(H2D_WITH_VIEWER_GUI   NO)
@@ -221,7 +220,6 @@ if(WITH_PYTHON)
   find_package(NumPy REQUIRED)
   find_package(Cython REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-  set(PYTHON_INSTALL_PATH lib/python/site-packages)
 endif(WITH_PYTHON)
 
 # Solvers (TODO: This could maybe go into hermes_common/solver/CMakeLists.txt).
@@ -351,8 +349,7 @@ endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 # Enabling multiprocessor build on MSVC
 if(MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # Do we have to add this in 
-                                                # set_target_properties?
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
 endif(MSVC)
 
 #------------------------------------------------------------------------------

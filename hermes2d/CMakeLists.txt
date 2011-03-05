@@ -130,8 +130,6 @@ if(NOT Python_FOUND OR NOT NumPy_FOUND)
   find_package(NumPy REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
   
-  # This path will be used relatively to CMAKE_INSTALL_PREFIX.
-  set(PYTHON_INSTALL_PATH lib/python/site-packages)   
 endif(NOT Python_FOUND OR NOT NumPy_FOUND)    
 
 if(WITH_PYTHON)
