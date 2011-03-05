@@ -352,6 +352,13 @@ if(MSVC)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
 endif(MSVC)
 
+
+#------------------------------------------------------------------------------
+# Project-wide linker settings.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+include(ConfigureRPATH)
+ConfigureRPATH()
+
 #------------------------------------------------------------------------------
 # Add project subdirectories and custom targets.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
