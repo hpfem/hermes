@@ -87,12 +87,11 @@ include(PickRealOrCplxLibs)
 # FIXME: Find which projects need it and enclose their CMake scripts in 
 # if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed, 
 # as it has been already done in ../CMakeLists.txt
-if(NOT Python_FOUND OR NOT NumPy_FOUND)
+if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
     find_package(Python REQUIRED)
     find_package(NumPy REQUIRED)
     include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-
-endif(NOT Python_FOUND OR NOT NumPy_FOUND)   
+endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)   
 
 # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 # and set its build properties (compile and link flags, installation directories).

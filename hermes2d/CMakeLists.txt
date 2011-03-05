@@ -125,12 +125,11 @@ endif(H2D_WITH_VIEWER_GUI)
 #
 
 # We require Python for the mesh parser (it also needs NumPy)
-if(NOT Python_FOUND OR NOT NumPy_FOUND)
+if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
   find_package(Python REQUIRED)
   find_package(NumPy REQUIRED)
   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-  
-endif(NOT Python_FOUND OR NOT NumPy_FOUND)    
+endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)    
 
 if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) # Required by python wrappers.
