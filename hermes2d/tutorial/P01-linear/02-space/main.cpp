@@ -48,13 +48,10 @@ int main(int argc, char* argv[])
 
   // Enter boundary markers.
   // (If no markers are entered, default is a natural BC).
-  BCTypes bc_types;
-
-  // Enter Dirichlet boundary values (default is zero).
-  BCValues bc_values;
+  BoundaryConditions bcs;
 
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
