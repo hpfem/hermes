@@ -38,3 +38,4 @@
 #cmakedefine WITH_PRISM
 
 #cmakedefine PRELOADING
+#cmakedefine HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS

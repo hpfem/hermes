@@ -70,6 +70,7 @@ set(WITH_H3D                  YES)
 	
 # Hermes_common (linked to all H1D, H2D and H3D):
 set(HERMES_COMMON_WITH_TESTS  YES)
+set(HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS  YES)
 
 # Logo will be shown:
 set(REPORT_WITH_LOGO        YES)
@@ -417,6 +418,7 @@ message("\tBuild Complex version: ${HERMES_COMMON_COMPLEX}")
 message("\tBuild Debug version: ${HERMES_COMMON_DEBUG}")
 message("\tBuild Release version: ${HERMES_COMMON_RELEASE}")
 message("\tBuild with tests: ${HERMES_COMMON_WITH_TESTS}")
+message("\tBuild with check boundary conditions: ${HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS}")
 
 message("Build Hermes1D: ${WITH_H1D}")
 if(WITH_H1D)
