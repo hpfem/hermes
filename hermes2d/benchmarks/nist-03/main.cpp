@@ -64,7 +64,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -134,9 +134,9 @@ int main(int argc, char* argv[])
   s_view_u.show_mesh(false);
   OrderView  o_view_u("Mesh for u", new WinGeom(450, 0, 420, 350));
 
-  ScalarView s_view_v("Solution for v", new WinGeom(880, 0, 440, 350));
+  ScalarView s_view_v("Solution for v", new WinGeom(0, 405, 440, 350));
   s_view_v.show_mesh(false);
-  OrderView  o_view_v("Mesh for v", new WinGeom(1330, 0, 420, 350));
+  OrderView  o_view_v("Mesh for v", new WinGeom(450, 405, 420, 350));
 
   /*  
   ScalarView sview_u_exact("", new WinGeom(550, 0, 500, 400));

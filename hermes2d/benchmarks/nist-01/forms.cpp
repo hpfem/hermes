@@ -12,7 +12,7 @@ public:
   {
     add_matrix_form(new MatrixFormVolPoisson(0, 0));
     
-    VectorFormVolPoisson* wfp= new VectorFormVolPoisson(0);
+    VectorFormVolPoisson* wfp = new VectorFormVolPoisson(0);
     wfp->parameter = parameter;
     add_vector_form(wfp);
   };
