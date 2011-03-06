@@ -55,13 +55,13 @@ SET(NETCDF_ROOT /opt/packages/netcdf)
 #   /usr/local/lib/python (if WITH_PYTHON was set to YES; see also 
 #                          how to set PYTHON_INSTALL_PATH below). 
 # If set as follows, the library files will be installed into 
-#   /home/pavel/hermes/lib, 
-#   /home/pavel/hermes/include,
-#   /home/pavel/hermes/lib/python
+#   /home/pavel/build/hermes/lib, 
+#   /home/pavel/build/hermes/include,
+#   /home/pavel/build/hermes/lib/python
 # In this way, the library may be installed e.g. into user's home 
 # directory without needing the administrator rights:
 #
-   set(CMAKE_INSTALL_PREFIX    /home/pavel/hermes)
+   set(CMAKE_INSTALL_PREFIX    /home/pavel/build/hermes)
 
 # Installation directory for Python wrappers.
 # If WITH_PYTHON =  YES, 'make install' (or 'sudo make install') will
