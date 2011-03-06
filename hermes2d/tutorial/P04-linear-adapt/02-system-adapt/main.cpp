@@ -82,10 +82,7 @@ const double KAPPA = 1;
 const double K = 100;
 
 // Boundary markers.
-const int OUTER_BDY = 1;
-
-// Exact solution.
-#include "exact_solution.cpp"
+const std::string OUTER_BDY = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -100,41 +97,33 @@ int main(int argc, char* argv[])
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &u_mesh);
-  if (MULTI == false) u_mesh.refine_towards_boundary(1, INIT_REF_BDY);
+  if (MULTI == false) u_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
 
   // Create initial mesh (master mesh).
   v_mesh.copy(&u_mesh);
 
   // Initial mesh refinements in the v_mesh towards the boundary.
-  if (MULTI == true) v_mesh.refine_towards_boundary(1, INIT_REF_BDY);
+  if (MULTI == true) v_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(OUTER_BDY);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(OUTER_BDY);
-
-  // Create H1 spaces with default shapeset for both displacement components.
-  H1Space u_space(&u_mesh, &bc_types, &bc_values, P_INIT_U);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, &bc_values, P_INIT_V);
+  // Set exact solutions.
+  ExactSolutionFitzHughNagumo1 exact_u(&u_mesh, SIGMA, D_u);
+  ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K, D_v);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1));
-  wf.add_matrix_form(1, 0, callback(bilinear_form_1_0));
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
-  wf.add_vector_form(0, linear_form_0, linear_form_0_ord);
-  wf.add_vector_form(1, linear_form_1, linear_form_1_ord);
+  WeakFormFitzHughNagumo wf(&exact_u, &exact_v);
+  
+  // Initialize boundary conditions
+  DirichletConstantBoundaryCondition bc_u(OUTER_BDY, 0.0);
+  BoundaryConditions bcs_u(&bc_u);
+  DirichletConstantBoundaryCondition bc_v(OUTER_BDY, 0.0);
+  BoundaryConditions bcs_v(&bc_v);
+
+  // Create H1 spaces with default shapeset for both displacement components.
+  H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);
+  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bcs_v, P_INIT_V);
 
   // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
-
-  // Initialize exact solutions.
-  ExactSolution u_exact(&u_mesh, uexact);
-  ExactSolution v_exact(&v_mesh, vexact);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -209,7 +198,7 @@ int main(int argc, char* argv[])
     Hermes::vector<double> err_exact_rel;
     bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution *>(&u_sln, &v_sln), 
-                                                            Hermes::vector<Solution *>(&u_exact, &v_exact), 
+                                                            Hermes::vector<Solution *>(&exact_u, &exact_v), 
                                                             &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.
