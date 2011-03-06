@@ -46,7 +46,7 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
+        result -= wt[i] * (rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
