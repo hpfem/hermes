@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 
   // View FE basis functions.
   BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
+  bview.fix_scale_width(50);
   bview.show(&space);
 
   // Practice some keyboard and mouse controls.
