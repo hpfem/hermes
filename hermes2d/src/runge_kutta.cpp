@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <typeinfo>
 #include "hermes2d.h"
 
 
@@ -22,6 +23,8 @@ RungeKutta::RungeKutta(bool residual_as_vector)
   stage_time_sol = NULL;
 }
 
+RungeKutta::~RungeKutta()
+{}
 
 void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
                                        scalar* source_vec, scalar* target_vec)
@@ -244,11 +247,6 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
   // Delete all residuals.
   for (int i = 0; i < num_stages; i++) delete residuals[i];
 
-  // Delete artificial Solutions with stage times.
-  for (int i = 0; i < num_stages; i++)
-    delete stage_time_sol[i];
-  delete [] stage_time_sol;
-
   // Clean up.
   delete [] K_vector;
   delete [] u_ext_vec;
@@ -275,14 +273,14 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
                      WeakForm* stage_wf_right) 
 {
   // First let's do the mass matrix (only one block ndof times ndof).
-  MatrixFormVolL2 proj_form(0, 0, HERMES_SYM);
-  proj_form.area = HERMES_ANY;
-  proj_form.scaling_factor = 1.0;
-  proj_form.u_ext_offset = 0;
-  proj_form.adapt_eval = false;
-  proj_form.adapt_order_increase = -1;
-  proj_form.adapt_rel_error_tol = -1;
-  stage_wf_left->add_matrix_form(&proj_form);
+  MatrixFormVolL2* proj_form = new MatrixFormVolL2(0, 0, HERMES_SYM);
+  proj_form->area = HERMES_ANY;
+  proj_form->scaling_factor = 1.0;
+  proj_form->u_ext_offset = 0;
+  proj_form->adapt_eval = false;
+  proj_form->adapt_order_increase = -1;
+  proj_form->adapt_rel_error_tol = -1;
+  stage_wf_left->add_matrix_form(proj_form);
 
   // In the rest we will take the stationary jacobian and residual forms 
   // (right-hand side) and use them to create a block Jacobian matrix of
@@ -331,23 +329,27 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
   // new stage Jacobian.
 
   for (unsigned int m = 0; m < mfvol_base.size(); m++) {
-    WeakForm::MatrixFormVol mfv_base = *mfvol_base[m];
     for (unsigned int i = 0; i < num_stages; i++) {
       for (unsigned int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormVol mfv_ij(i, j, (SymFlag)mfv_base.sym, mfv_base.area, mfv_base.ext, 
-                                       -time_step * bt->get_A(i, j), i);
+        WeakForm::MatrixFormVol* mfv_ij = mfvol_base[m]->clone();
        
+        mfv_ij->i = i;
+        mfv_ij->j = j;
+        mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
+
+        mfv_ij->u_ext_offset = i;
+
         // Add stage_time_sol[i] as an external function to the form.
-        mfv_ij.ext.push_back(stage_time_sol[i]);
+        mfv_ij->ext.push_back(stage_time_sol[i]);
 
         // This form will not be integrated adaptively.
-        mfv_ij.adapt_eval = false;
-        mfv_ij.adapt_order_increase = -1;
-        mfv_ij.adapt_rel_error_tol = -1;
+        mfv_ij->adapt_eval = false;
+        mfv_ij->adapt_order_increase = -1;
+        mfv_ij->adapt_rel_error_tol = -1;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form(&mfv_ij);
+        stage_wf_right->add_matrix_form(mfv_ij);
       }
     }
   }
@@ -356,23 +358,27 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
   // additional external solutions, and anter them as
   // blocks of the stage Jacobian.
   for (unsigned int m = 0; m < mfsurf_base.size(); m++) {
-    WeakForm::MatrixFormSurf mfs_base = *mfsurf_base[m];
     for (int i = 0; i < num_stages; i++) {
       for (int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormSurf mfs_ij(i, j, mfs_base.area, mfs_base.ext, 
-                                -time_step * bt->get_A(i, j), i);
+        WeakForm::MatrixFormSurf* mfs_ij = mfsurf_base[m]->clone();
+       
+        mfs_ij->i = i;
+        mfs_ij->j = j;
+        mfs_ij->scaling_factor = -time_step * bt->get_A(i, j);
+
+        mfs_ij->u_ext_offset = i;
 
         // Add stage_time_sol[i] as an external function to the form.
-        mfs_ij.ext.push_back(stage_time_sol[i]);
+        mfs_ij->ext.push_back(stage_time_sol[i]);
 
         // This form will not be integrated adaptively.
-        mfs_ij.adapt_eval = false;
-        mfs_ij.adapt_order_increase = -1;
-        mfs_ij.adapt_rel_error_tol = -1;
+        mfs_ij->adapt_eval = false;
+        mfs_ij->adapt_order_increase = -1;
+        mfs_ij->adapt_rel_error_tol = -1;
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form_surf(&mfs_ij);
+        stage_wf_right->add_matrix_form_surf(mfs_ij);
       }
     }
   }
@@ -381,22 +387,24 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
   // additional external solutions, and anter them as
   // blocks of the stage residual.
   for (unsigned int m = 0; m < vfvol_base.size(); m++) {
-    WeakForm::VectorFormVol vfv_base = *vfvol_base[m];
     for (int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormVol vfv_i(i, vfv_base.area, vfv_base.ext, 
-                                -1.0, i);
+      WeakForm::VectorFormVol* vfv_i = vfvol_base[m]->clone();
+       
+      vfv_i->i = i;
+      vfv_i->scaling_factor = -1.0;
+      vfv_i->u_ext_offset = i;
 
       // Add stage_time_sol[i] as an external function to the form.
-      vfv_i.ext.push_back(stage_time_sol[i]);
+      vfv_i->ext.push_back(stage_time_sol[i]);
 
       // This form will not be integrated adaptively.
-      vfv_i.adapt_eval = false;
-      vfv_i.adapt_order_increase = -1;
-      vfv_i.adapt_rel_error_tol = -1;
+      vfv_i->adapt_eval = false;
+      vfv_i->adapt_order_increase = -1;
+      vfv_i->adapt_rel_error_tol = -1;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
-      stage_wf_right->add_vector_form(&vfv_i);
+      stage_wf_right->add_vector_form(vfv_i);
     }
   }
 
@@ -404,25 +412,27 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
   // additional external solutions, and anter them as
   // blocks of the stage residual.
   for (unsigned int m = 0; m < vfsurf_base.size(); m++) {
-    WeakForm::VectorFormSurf vfs_base = *vfsurf_base[m];
     for (int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormSurf vfs_i(i, vfs_base.area, vfs_base.ext, 
-                          -1.0, i);
-  
+      WeakForm::VectorFormSurf* vfs_i = vfsurf_base[m]->clone();
+       
+      vfs_i->i = i;
+      vfs_i->scaling_factor = -1.0;
+      vfs_i->u_ext_offset = i;
+
       // Add stage_time_sol[i] as an external function to the form.
-      vfs_i.ext.push_back(stage_time_sol[i]);
+      vfs_i->ext.push_back(stage_time_sol[i]);
 
       // Set offset for u_ext[] external solutions.
-      vfs_i.u_ext_offset = i;
+      vfs_i->u_ext_offset = i;
 
       // This form will not be integrated adaptively.
-      vfs_i.adapt_eval = false;
-      vfs_i.adapt_order_increase = -1;
-      vfs_i.adapt_rel_error_tol = -1;
+      vfs_i->adapt_eval = false;
+      vfs_i->adapt_order_increase = -1;
+      vfs_i->adapt_rel_error_tol = -1;
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
-      stage_wf_right->add_vector_form_surf(&vfs_i);
+      stage_wf_right->add_vector_form_surf(vfs_i);
     }
   }
 }

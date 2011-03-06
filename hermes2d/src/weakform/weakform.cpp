@@ -40,6 +40,12 @@ Ord WeakForm::MatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
   return Ord();
 }
 
+WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
+{
+  error("WeakForm::MatrixFormVol::clone() must be overriden.");
+  return NULL;
+}
+
 WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
                                        std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
 {
@@ -59,6 +65,12 @@ Ord WeakForm::MatrixFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
   return Ord();
 }
 
+WeakForm::MatrixFormSurf* WeakForm::MatrixFormSurf::clone()
+{
+  error("WeakForm::MatrixFormSurf::clone() must be overriden.");
+  return NULL;
+}
+
 WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
                                          Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
 {
@@ -74,6 +86,12 @@ Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
 {
   error("WeakForm::VectorFormVol::ord must be overrided.");
   return Ord();
+}
+
+WeakForm::VectorFormVol* WeakForm::VectorFormVol::clone()
+{
+  error("WeakForm::VectorFormVol::clone() must be overriden.");
+  return NULL;
 }
 
 WeakForm::VectorFormVol::VectorFormVol(unsigned int i, std::string area,
@@ -98,6 +116,11 @@ Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
   return Ord();
 }
 
+WeakForm::VectorFormSurf* WeakForm::VectorFormSurf::clone()
+{
+  error("WeakForm::VectorFormSurf::clone() must be overriden.");
+  return NULL;
+}
 
 WeakForm::WeakForm(unsigned int neq, bool mat_free)
 {

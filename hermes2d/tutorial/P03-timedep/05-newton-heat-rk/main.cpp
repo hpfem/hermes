@@ -53,11 +53,15 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_RK_1;
 
-// Model parameters.
-#include "model.cpp"
+const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
+
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
+
+// Initial condition.
+#include "initial_condition.cpp"
 
 // Main function.
 int main(int argc, char* argv[])
@@ -78,36 +82,34 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
+  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
-
-  int ndof = Space::get_num_dofs(space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof = %d.", ndof);
 
-  // Previous and next time level solutions.
-  Solution* sln_time_prev = new Solution(&mesh, init_cond);
-  Solution* sln_time_new = new Solution(&mesh);
+  // Previous time level solution (initialized by the initial condition).
+  InitialSolutionHeatTransfer sln_time_prev(&mesh);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_time_prev);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_time_prev);
+  // Initialize the weak formulation
+  WeakFormHeatTransferRungeKuttaTimedep wf(ALPHA, &sln_time_prev);
+
+  // Previous and next time level solutions.
+  Solution sln_time_new(&mesh);
 
   // Initialize the FE problem.
   bool is_linear = false;
-  DiscreteProblem dp(&wf, space, is_linear);
+  DiscreteProblem dp(&wf, &space, is_linear);
+
+  // Initialize Runge-Kutta time stepping.
+  RungeKutta runge_kutta;
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
   OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
-  oview.show(space);
+  oview.show(&space);
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
@@ -118,7 +120,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
+    if (!runge_kutta.rk_time_step(current_time, time_step, &bt, &sln_time_prev, &sln_time_new, &dp, matrix_solver,
 		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
@@ -130,21 +132,16 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, t = %g", current_time);
     sview.set_title(title);
-    sview.show(sln_time_new, HERMES_EPS_VERYHIGH);
-    oview.show(space);
+    sview.show(&sln_time_new, HERMES_EPS_VERYHIGH);
+    oview.show(&space);
 
     // Copy solution for the new time step.
-    sln_time_prev->copy(sln_time_new);
+    sln_time_prev.copy(&sln_time_new);
 
     // Increase counter of time steps.
     ts++;
   } 
   while (current_time < T_FINAL);
-
-  // Cleanup.
-  delete space;
-  delete sln_time_prev;
-  delete sln_time_new;
 
   // Wait for all views to be closed.
   View::wait();

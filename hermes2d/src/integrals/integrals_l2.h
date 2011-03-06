@@ -58,8 +58,4 @@ Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
     result += wt[i] * (u_prev->val[i] * conj(v->val[i]));
   return result;
 }
-
-
-
-
 #endif

@@ -103,6 +103,8 @@ public:
     MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym = HERMES_NONSYM, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+    virtual MatrixFormVol* clone();
+
     unsigned int i, j;
     int sym;
 
@@ -118,6 +120,8 @@ public:
     MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+    virtual MatrixFormSurf* clone();
+
     unsigned int i, j;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
@@ -132,6 +136,8 @@ public:
     VectorFormVol(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+    virtual VectorFormVol* clone();
+
     unsigned int i;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext);
@@ -143,6 +149,8 @@ public:
   public:
     VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
+    
+    virtual VectorFormSurf* clone();
 
     unsigned int i;
 
