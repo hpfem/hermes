@@ -29,30 +29,8 @@ const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Thermal conductivity (temperature-dependent)
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u) 
-{ 
-  return 1 + pow(u, 4); 
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) 
-{ 
-  return 4*pow(u, 3); 
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real rhs(Real x, Real y)
-{
-  return 1.0;
-}
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -68,22 +46,16 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(1,INIT_BDY_REF_NUM);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
+  // Initialize the weak formulation.
+  WeakFormHeatTransfer wf;
 
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
+  // Enter boundary markers.
+  DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
-
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(res), HERMES_ANY);
 
   // Initialize the FE problem.
   bool is_linear = false;
