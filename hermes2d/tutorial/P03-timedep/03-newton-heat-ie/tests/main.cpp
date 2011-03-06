@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   InitialSolutionHeatTransfer u_prev_time(&mesh);
 
   // Initialize the weak formulation
-  WeakFormHeatTransfer wf(ALPHA, time_step, &u_prev_time);
+  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &u_prev_time);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.

@@ -1,7 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
-#include "weakform/forms.h"
 
 class WeakFormNSSimpleLinearization : public WeakForm
 {

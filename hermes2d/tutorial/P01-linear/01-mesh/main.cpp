@@ -21,7 +21,7 @@ Click into the image window and:\n\
   Also see help - click into the image window and press F1.\n";
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
+const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 
 int main(int argc, char* argv[])
 {

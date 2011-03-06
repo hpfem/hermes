@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   int ndof = space.get_num_dofs();
 
   // Initialize the weak formulation
-  WeakFormHeatTransfer wf;
+  WeakFormHeatTransferNewton wf;
 
   // Initialize the FE problem.
   bool is_linear = false;

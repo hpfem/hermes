@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation
-  WeakFormHeatTransfer wf;
+  WeakFormHeatTransferNewton wf;
 
   // Initialize the FE problem.
   bool is_linear = false;

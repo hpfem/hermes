@@ -2,10 +2,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
 
-class WeakFormHeatTransfer : public WeakForm
+class WeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  WeakFormHeatTransfer() : WeakForm(1) {
+  WeakFormHeatTransferNewton() : WeakForm(1) {
     add_matrix_form(new MatrixFormVolHeatTransfer(0, 0));
 
     add_vector_form(new VectorFormVolHeatTransfer(0));

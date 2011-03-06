@@ -33,10 +33,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1,INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize the weak formulation.
-  WeakFormHeatTransfer wf;
+  WeakFormHeatTransferNewton wf;
 
   // Enter boundary markers.
   DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
