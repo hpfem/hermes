@@ -62,7 +62,7 @@ private:
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
-		           - rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
+		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
@@ -76,7 +76,7 @@ private:
 
     // Heat sources (can be a general function of 'x' and 'y').
     template<typename Real>
-    Real rhs(Real x, Real y) {
+    Real heat_src(Real x, Real y) {
       return 1.0;
     }
 

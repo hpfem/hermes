@@ -9,11 +9,11 @@ using namespace RefinementSelectors;
 
 //  This test makes sure that example 17-newton-elliptic-2 works correctly.
 
-const int P_INIT = 2;                             // Initial polynomial degree
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method
-const int NEWTON_MAX_ITER = 9;                  // Maximum allowed number of Newton iterations
-const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements
-const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary
+const int P_INIT = 2;                             // Initial polynomial degree.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 9;                    // Maximum allowed number of Newton iterations.
+const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 

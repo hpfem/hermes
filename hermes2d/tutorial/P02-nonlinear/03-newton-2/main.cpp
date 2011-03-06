@@ -17,27 +17,13 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 2;                             // Initial polynomial degree
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations
-const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements
-const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary
+const int P_INIT = 2;                             // Initial polynomial degree.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u)
-{
-  return 1 + pow(u, 4);
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) {
-  return 4*pow(u, 3);
-}
 
 // This function is used to define Dirichlet boundary conditions.
 double dir_lift(double x, double y, double& dx, double& dy) {
@@ -63,13 +49,6 @@ scalar essential_bc_values(double x, double y)
 {
   double dx, dy;
   return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y)
-{
-  return 1.0;
 }
 
 // Weak forms.
