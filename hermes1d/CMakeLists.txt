@@ -61,7 +61,7 @@ if(MSVC)
   set(HERMES1D_DEBUG ${HERMES1D}-debug) # Name of the debug version.
 else(MSVC)
   if(RELEASE)
-    set(HERMES1D_RELEASE hermes1D)
+    set(HERMES1D_RELEASE hermes1d)
     set(HERMES1D ${HERMES1D_RELEASE})
   
     # set(CMAKE_BUILD_TYPE Release) # This does not work with multi-version configurations,
@@ -69,7 +69,7 @@ else(MSVC)
                                     # to have separate projects for Debug and Release)
   endif(RELEASE)
   if(DEBUG)
-    set(HERMES1D_DEBUG hermes1D-debug)
+    set(HERMES1D_DEBUG hermes1d-debug)
     set(HERMES1D ${HERMES1D_DEBUG})
     #set(CMAKE_BUILD_TYPE Debug)
   endif(DEBUG)
@@ -80,8 +80,9 @@ endif(MSVC)
 #
 
 if(WITH_PYTHON)
-  # This is needed to make hermes_common working properly:
-  set(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/hermes_common)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/h1d_wrapper/)
+  set(CYTHON_INCLUDE_DIRECTORIES -I.)
+  set(CYTHON_INCLUDE_DIRECTORIES ${CYTHON_INCLUDE_DIRECTORIES} -I${CMAKE_SOURCE_DIR}/hermes_common)
   add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 

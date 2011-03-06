@@ -53,7 +53,7 @@ ENDIF (Cython_FOUND)
 #   CYTHON_ADD_MODULE(assembly something.cpp)
 
 if(NOT CYTHON_INCLUDE_DIRECTORIES)
-    set(CYTHON_INCLUDE_DIRECTORIES .)
+    set(CYTHON_INCLUDE_DIRECTORIES -I.)
 endif(NOT CYTHON_INCLUDE_DIRECTORIES)
 
 # Cythonizes the .pyx files into .cpp file (but doesn't compile it)
@@ -63,10 +63,11 @@ macro(CYTHON_ADD_MODULE_PYX name)
     else(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
         set(DEPENDS ${name}.pyx)
     endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
+
     add_custom_command(
         OUTPUT ${name}.cpp
         COMMAND ${CYTHON_BIN}
-        ARGS ${CYTHON_FLAGS} -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+        ARGS ${CYTHON_FLAGS} ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${DEPENDS}
         COMMENT "Cythonizing ${name}.pyx")
 endmacro(CYTHON_ADD_MODULE_PYX)
@@ -75,8 +76,8 @@ endmacro(CYTHON_ADD_MODULE_PYX)
 macro(CYTHON_ADD_MODULE name)
     CYTHON_ADD_MODULE_PYX(${name})
     # We need Python for this:
-    if (NOT Python_FOUND)
+    if (NOT PYTHON_FOUND)
         find_package(Python REQUIRED)
-    endif (NOT Python_FOUND)
+    endif (NOT PYTHON_FOUND)
     add_python_library(${name} ${name}.cpp ${ARGN})
 endmacro(CYTHON_ADD_MODULE)

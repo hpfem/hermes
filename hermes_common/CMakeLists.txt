@@ -65,6 +65,12 @@ set(SRC
 #
 add_subdirectory(solver)
 
+if(WITH_PYTHON)
+    set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
+    add_subdirectory(hermes_common)
+endif(WITH_PYTHON)
+
+
 # Create file with preprocessor definitions exposing the build settings to the source code.
 configure_file(
   config.h.cmake
@@ -78,21 +84,21 @@ configure_file(
 include(BuildAndInstallScripts)
 include(PickRealOrCplxLibs)
 
+# This is needed e.g. for eigenvalue problems.
+# FIXME: Find which projects need it and enclose their CMake scripts in 
+# if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed, 
+# as it has been already done in ../CMakeLists.txt
+if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+    find_package(Python REQUIRED)
+    find_package(NumPy REQUIRED)
+    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)   
+
 # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 # and set its build properties (compile and link flags, installation directories).
 macro(BUILD_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   add_library(${HERMES_COMMON_LIB} SHARED ${SRC})
   set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
-
-  #This is needed e.g. for eigenvalue problems.
-  if(NOT Python_FOUND OR NOT NumPy_FOUND)
-    find_package(Python REQUIRED)
-    find_package(NumPy REQUIRED)
-    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-    
-    # This path will be used relatively to CMAKE_INSTALL_PREFIX.
-    set(PYTHON_INSTALL_PATH lib/python/site-packages)   
-  endif(NOT Python_FOUND OR NOT NumPy_FOUND)    
 
   PICK_REAL_OR_CPLX_LIBS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
   PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
@@ -187,8 +193,12 @@ endif(HERMES_COMMON_COMPLEX)
 file(GLOB INC_COMMON    "*.h")
 file(GLOB INC_SOLVER    "solver/*.h")
 file(GLOB INC_COMPAT    "compat/*.h")
+file(GLOB INC_PYTHON    "python/*.h")
+file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/*.h")
 install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
 install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solver)
 install(FILES ${INC_COMPAT}    DESTINATION include/hermes/hermes_common/compat)
+install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python)
+install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos)
 
 

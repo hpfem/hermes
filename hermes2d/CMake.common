@@ -45,6 +45,14 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   #target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
   #add_dependencies(${TRGT} ${HERMES})
 
+  # Only linking to the hermes2d library and to those third party shared 
+  # libraries that do not stay in some standard system directory 
+  # should be needed to build any project outside of Hermes (hermes_common gets
+  # found automatically as long as it has been installed e.g. to /usr/local/lib).
+  # When the CMake command target_link_libraries is used to link to another 
+  # project in current build tree, linking information from that project is 
+  # transitively added to the current project (so now we have some unnecessary
+  # libraries added to ${TRGT}).
   target_link_libraries(${TRGT} ${HERMES})
   
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)

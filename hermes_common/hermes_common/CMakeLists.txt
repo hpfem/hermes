@@ -1,18 +1,34 @@
+# TODO: Complex version?
+if (NOT HERMES_COMMON_REAL)
+    return()
+endif (NOT HERMES_COMMON_REAL)
+
+include_directories(${PROJECT_BINARY_DIR})
+
 cython_add_module(cython_utils)
 cython_add_module(numpy_utils)
+cython_add_module(matrix)
 
-cython_add_module_pyx(matrix)
-add_python_library(matrix matrix.cpp)
-target_link_libraries(matrix ${HERMES})
+target_link_libraries(matrix ${HERMES_COMMON_LIB_REAL})
 
-# FIXME: this is dimension dependent:
-set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d/hermes_common/)
-install(TARGETS numpy_utils
+# FIXME: Seems that 'cython_utils' and 'matrix' aren't used outside H1D - verify
+# and possibly make a switch here.
+# TODO: Change 'hermes_common' to 'hermes/hermes_common'
+set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes_common/)
+
+install(TARGETS numpy_utils cython_utils matrix
             RUNTIME DESTINATION ${PY_PATH}
             ARCHIVE DESTINATION ${PY_PATH}
             LIBRARY DESTINATION ${PY_PATH}
         )
-# This is needed, so that cmake doesn't install the symbolic link instead:
-install(FILES ${PROJECT_SOURCE_DIR}/../hermes_common/hermes_common/__init__.py
+
+# This is needed, so that cmake doesn't install the symbolic link instead
+# FIXME: Is this still true?
+install(FILES __init__.py
     DESTINATION ${PY_PATH}
     )
+    
+file(GLOB PY_INC  "${CMAKE_CURRENT_SOURCE_DIR}/*.pxd")
+file(GLOB MAT_INC "${CMAKE_CURRENT_SOURCE_DIR}/cpp/*")
+install(FILES ${PY_INC}   DESTINATION ${PY_PATH})
+install(FILES ${MAT_INC}  DESTINATION ${PY_PATH})

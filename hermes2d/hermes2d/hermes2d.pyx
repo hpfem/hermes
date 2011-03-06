@@ -1,6 +1,6 @@
 from numpy cimport ndarray
 
-from hermes2d.hermes_common.numpy_utils cimport c2numpy_int, c2numpy_double
+from hermes_common.numpy_utils cimport c2numpy_int, c2numpy_double
 cimport hermes2d_defs
 
 cdef class MeshFunction:

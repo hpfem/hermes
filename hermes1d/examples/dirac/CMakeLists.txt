@@ -1,14 +1,10 @@
 project(cppdirac)
 
-find_package(PythonLibs REQUIRED)
-
-include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-include_directories(${hermes1d_SOURCE_DIR}/hermes1d/h1d_wrapper/)
-
+include_directories(${hermes1d_SOURCE_DIR}/src)
 add_executable(${PROJECT_NAME} main.cpp forms.cpp)
 
+SET(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_SOURCE_DIR}/hermes_common)
+SET(CYTHON_INCLUDE_DIRECTORIES ${CYTHON_INCLUDE_DIRECTORIES} -I${hermes1d_SOURCE_DIR})
 
-
-SET(CYTHON_INCLUDE_DIRECTORIES . -I../../hermes_common/ -I../../)
 cython_add_module(forms_wrapper forms.cpp)
 target_link_libraries(forms_wrapper ${HERMES1D})

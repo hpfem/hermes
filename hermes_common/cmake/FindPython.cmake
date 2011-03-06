@@ -24,14 +24,23 @@ ELSE(APPLE)
     )
 ENDIF(APPLE)
 
-# Python packages directory. Instead of this, we rather use the local subdirectory of
-# CMAKE_INSTALL_PREFIX.
+# Python packages directory. 
 #
-#execute_process(
-#    COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" 
-#    OUTPUT_VARIABLE PYTHON_INSTALL_PATH 
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
+IF("${PYTHON_INSTALL_PATH}" STREQUAL "USE_SYSTEM_PYTHON_DIRECTORY")  
+    # Use a system directory into which Python puts all the modules by default.
+    execute_process(
+        COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" 
+        OUTPUT_VARIABLE PYTHON_INSTALL_PATH 
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+ELSEIF(NOT PYTHON_INSTALL_PATH)
+    # Use a local subdirectory of CMAKE_INSTALL_PREFIX.
+    set(PYTHON_INSTALL_PATH lib/python)
+ENDIF("${PYTHON_INSTALL_PATH}" STREQUAL "USE_SYSTEM_PYTHON_DIRECTORY")   
+
+# To make hermes a Python module (individual parts of the library would then be
+# impported as 'from hermes.hermes2d import' instead of 'from hermes2d import')
+#   set(PYTHON_INSTALL_PATH "${PYTHON_INSTALL_PATH}/hermes")
 
 # For MSVC (on Win, the function get_config_var does not accept the parameter 'LIBDIR').
 IF(MSVC)	

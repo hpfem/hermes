@@ -3,7 +3,7 @@
 # file for the exact terms).
 # Email: hermes1d@googlegroups.com, home page: http://hpfem.org/
 
-from hermes1d.hermes_common.cpp.matrix cimport SparseMatrix, Vector
+from hermes_common.cpp.matrix cimport SparseMatrix, Vector
 
 cdef extern from "hermes1d.h":
 
