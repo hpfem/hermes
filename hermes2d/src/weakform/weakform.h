@@ -187,7 +187,12 @@ public:
 
   bool is_matrix_free() { return is_matfree; }
 
+  /// For time-dependent right-hand side functions.
+  void set_current_time(double time);
+  double get_current_time();
+
 protected:
+  double current_time;
   unsigned int neq;
   int seq;
   bool is_matfree;

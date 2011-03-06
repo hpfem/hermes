@@ -338,3 +338,13 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
   }
   return blocks;
 }
+
+void WeakForm::set_current_time(double time)
+{
+  current_time = time;
+}
+
+double WeakForm::get_current_time()
+{
+  return current_time;
+}
