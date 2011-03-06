@@ -80,7 +80,9 @@ endif(MSVC)
 #
 
 if(WITH_PYTHON)
-  set(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_SOURCE_DIR}/hermes_common)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hermes1d/h1d_wrapper/)
+  set(CYTHON_INCLUDE_DIRECTORIES -I.)
+  set(CYTHON_INCLUDE_DIRECTORIES ${CYTHON_INCLUDE_DIRECTORIES} -I${CMAKE_SOURCE_DIR}/hermes_common)
   add_subdirectory(hermes1d)
 endif(WITH_PYTHON)
 

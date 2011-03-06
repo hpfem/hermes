@@ -66,7 +66,7 @@ set(SRC
 add_subdirectory(solver)
 
 if(WITH_PYTHON)
-    set(CYTHON_INCLUDE_DIRECTORIES .)
+    set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
     add_subdirectory(hermes_common)
 endif(WITH_PYTHON)
 
