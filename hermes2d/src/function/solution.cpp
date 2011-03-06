@@ -221,24 +221,6 @@ Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
   this->own_mesh = false;
 }
 
-Solution::Solution(Mesh *mesh, ExactFunction exactfn) : MeshFunction(mesh)
-{
-  space_type = HERMES_INVALID_SPACE;
-  this->init();
-  this->mesh = mesh;
-  this->own_mesh = false;
-  this->set_exact(mesh, exactfn);
-}
-
-Solution::Solution(Mesh *mesh, ExactFunction2 exactfn2) : MeshFunction(mesh)
-{
-  space_type = HERMES_INVALID_SPACE;
-  this->init();
-  this->mesh = mesh;
-  this->own_mesh = false;
-  this->set_exact(mesh, exactfn2);
-}
-
 Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
@@ -583,35 +565,6 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   init_dxdy_buffer();
   element = NULL;
 }
-
-
-//// set_exact etc. ////////////////////////////////////////////////////////////////////////////////
-
-void Solution::set_exact(Mesh* mesh, ExactFunction exactfn)
-{
-  free();
-
-  this->mesh = mesh;
-  exactfn1 = exactfn;
-  num_components = 1;
-  sln_type = HERMES_EXACT;
-  exact_mult = 1.0;
-  num_dofs = -1;
-}
-
-
-void Solution::set_exact(Mesh* mesh, ExactFunction2 exactfn)
-{
-  free();
-
-  this->mesh = mesh;
-  exactfn2 = exactfn;
-  num_components = 2;
-  sln_type = HERMES_EXACT;
-  exact_mult = 1.0;
-  num_dofs = -1;
-}
-
 
 void Solution::set_const(Mesh* mesh, scalar c)
 {

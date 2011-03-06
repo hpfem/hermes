@@ -790,9 +790,9 @@ static int rtb_criterion(Element* e)
   return 0;
 }
 
-void Mesh::refine_towards_boundary(int marker, int depth, bool aniso, bool tria_to_quad)
+void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad)
 {
-  rtb_marker = marker;
+  rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
   rtb_aniso  = aniso;
   rtb_tria_to_quad = tria_to_quad;
 
@@ -805,7 +805,7 @@ void Mesh::refine_towards_boundary(int marker, int depth, bool aniso, bool tria_
     Element* e;
     for_all_active_elements(e, this)
       for (unsigned int j = 0; j < e->nvert; j++) {
-        if (e->en[j]->marker == marker) {
+        if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker)) {
           rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
         }
       }
@@ -814,13 +814,6 @@ void Mesh::refine_towards_boundary(int marker, int depth, bool aniso, bool tria_
     delete [] rtb_vert;
   }
 }
-
-
-void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso)
-{
-  this->refine_towards_boundary(this->boundary_markers_conversion.get_internal_marker(marker), depth, aniso);
-}
-
 
 void Mesh::unrefine_element_id(int id)
 {

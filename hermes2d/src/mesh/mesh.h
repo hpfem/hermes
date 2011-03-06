@@ -245,10 +245,7 @@ public:
   /// boundary marked by 'marker'. Elements touching both by an edge or
   /// by a vertex are refined. 'aniso' allows or disables anisotropic
   /// splits of quads.
-  void refine_towards_boundary(int marker, int depth, bool aniso = true, bool tria_to_quad = false);
-
-  // Wrapper function utilizing the class MarkersConversion.
-  void refine_towards_boundary(std::string marker, int depth, bool aniso = true);
+  void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool tria_to_quad = false);
 
   /// Regularizes the mesh by refining elements with hanging nodes of
   /// degree more than 'n'. As a result, n-irregular mesh is obtained.

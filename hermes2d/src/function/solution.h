@@ -99,8 +99,6 @@ public:
   void init();
   Solution();
   Solution(Mesh *mesh);
-  Solution(Mesh *mesh, ExactFunction exactfn);
-  Solution(Mesh *mesh, ExactFunction2 exactfn2);
   Solution(Mesh *mesh, scalar init_const);
   Solution (Space* s, Vector* coeff_vec);
   Solution (Space* s, scalar* coeff_vec);
@@ -112,9 +110,6 @@ public:
   void copy(const Solution* sln);
 
   int* get_element_orders() { return this->elem_orders;}
-
-  void set_exact(Mesh* mesh, ExactFunction exactfn);
-  void set_exact(Mesh* mesh, ExactFunction2 exactfn2);
 
   void set_const(Mesh* mesh, scalar c);
   void set_const(Mesh* mesh, scalar c0, scalar c1); // two-component (Hcurl) const
@@ -232,8 +227,6 @@ protected:
   ESpaceType space_type;
   void transform_values(int order, Node* node, int newmask, int oldmask, int np);
 
-  ExactFunction exactfn1;
-  ExactFunction2 exactfn2;
   scalar   cnst[2];
   scalar   exact_mult;
 
