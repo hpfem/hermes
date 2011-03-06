@@ -312,24 +312,6 @@ public:
     return D * (drdxdrdy(x, y) * v_r(x, y) + drdx(x, y) * dv_rdy(x, y) + drdy(x, y) * dv_rdx(x, y) + r(x, y) * dv_rdxdv_rdy(x, y) );
   }
 
-
-  // Exact solution u(x,y) and its derivatives.
-  double u_fn(double x, double y) {
-    return D * r(x, y) * u_r(x, y);
-  }
-
-  double u_fndd(double x, double y, double& dx, double& dy) {
-    dx = D * drdx(x, y) * (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x))) +
-         D * r(x, y) * (u_F * (-1) * lambda * sin(lambda * get_angle(y, x)) * d_theta_dx(x, y)) - 
-         D * r(x, y) * (lambda * (-1) * (lambda - 2) * sin((lambda - 2) * get_angle(y, x)) * d_theta_dx(x, y));
-
-    dy = D * drdy(x, y) * (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x))) +
-         D * r(x, y) * (u_F * (-1) * lambda * sin(lambda * get_angle(y, x)) * d_theta_dy(x, y)) - 
-         D * r(x, y) * (lambda * (-1) * (lambda - 2) * sin((lambda - 2) * get_angle(y, x)) * d_theta_dy(x, y));
-
-    return u_fn(x, y);
-  }
-
   // Exact solution v(x,y) and its derivatives.
   double v_fn(double x, double y) {
     return D * r(x, y) * v_r(x, y);

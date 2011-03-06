@@ -22,7 +22,9 @@ private:
   class MatrixFormVolNIST03_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolNIST03_0_0(double A, double B) : WeakForm::MatrixFormVol(0, 0), A(A), B(B) { }
+    MatrixFormVolNIST03_0_0(double A, double B) : WeakForm::MatrixFormVol(0, 0), A(A), B(B) {
+      sym = HERMES_SYM;
+    }
 
 template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -50,7 +52,9 @@ template<typename Real, typename Scalar>
   class MatrixFormVolNIST03_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolNIST03_0_1(double C) : WeakForm::MatrixFormVol(0, 1), C(C) { }
+    MatrixFormVolNIST03_0_1(double C) : WeakForm::MatrixFormVol(0, 1), C(C) { 
+      sym = HERMES_SYM;
+    }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
@@ -78,7 +82,9 @@ template<typename Real, typename Scalar>
   class MatrixFormVolNIST03_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolNIST03_1_1(double A, double B) : WeakForm::MatrixFormVol(1, 1), A(A), B(B) { }
+    MatrixFormVolNIST03_1_1(double A, double B) : WeakForm::MatrixFormVol(1, 1), A(A), B(B) { 
+      sym = HERMES_SYM;
+    }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)

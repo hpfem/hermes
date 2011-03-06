@@ -77,16 +77,11 @@ const double nu = 0.3;                            // Poisson ratio.
 const double lambda = 0.5444837367825;            // Mode 1.
 const double Q = 0.5430755788367;
 
-// TEMPORARY: if forms.cpp.bracket is used:
-//const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-//const double mu = E / (2*(1 + nu));
-
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
-
 
 int main(int argc, char* argv[])
 {
