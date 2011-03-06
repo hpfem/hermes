@@ -6,9 +6,9 @@ class WeakFormPoisson : public WeakForm
 {
 public:
   // Problem parameters.
-  double CONST_F;
+  double const_f;
 
-  WeakFormPoisson(double CONST_F) : WeakForm(1), CONST_F(CONST_F) {
+  WeakFormPoisson(double const_f) : WeakForm(1), const_f(const_f) {
     add_matrix_form(new MatrixFormVolPoisson(0, 0));
     add_vector_form(new VectorFormVolPoisson(0));
   };
@@ -40,7 +40,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return static_cast<WeakFormPoisson *>(wf)->CONST_F * int_v<Real, Scalar>(n, wt, v);
+      return static_cast<WeakFormPoisson *>(wf)->const_f * int_v<Real, Scalar>(n, wt, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -56,8 +56,8 @@ private:
 
 class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double CONST_F) : DirichletBoundaryCondition(markers),
-    CONST_F(CONST_F) {
+  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double const_f) : DirichletBoundaryCondition(markers),
+    const_f(const_f) {
   }
 
   ~DirichletFunctionBoundaryCondition() { }
@@ -65,9 +65,9 @@ public:
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 
   scalar function(double x, double y) const {
-    return (-CONST_F/4.0)*(x*x + y*y);
+    return (-const_f/4.0)*(x*x + y*y);
   }
 
   // Member.
-  double CONST_F;
+  double const_f;
 };

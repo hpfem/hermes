@@ -5,11 +5,11 @@
 class WeakFormHeatTransferNewtonTimedepSDIRKStage1 : public WeakForm
 {
 public:
-  WeakFormHeatTransferNewtonTimedepSDIRKStage1(double ALPHA, double time_step, 
-      Solution* sln_prev_time, double BUTCHER_A_11, double GAMMA, double BUTCHER_C_1) : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, ALPHA, time_step, BUTCHER_A_11));
+  WeakFormHeatTransferNewtonTimedepSDIRKStage1(double alpha, double tau, 
+      Solution* sln_prev_time, double butcher_a_11, double gamma, double butcher_c_1) : WeakForm(1) {
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau, butcher_a_11));
 
-    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, ALPHA, time_step, GAMMA, BUTCHER_C_1);
+    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha, tau, gamma, butcher_c_1);
     vector_form->ext.push_back(sln_prev_time);
     add_vector_form(vector_form);
   };
@@ -18,8 +18,8 @@ private:
   class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j, double ALPHA, double time_step, double BUTCHER_A_11) : 
-        WeakForm::MatrixFormVol(i, j), ALPHA(ALPHA), time_step(time_step), BUTCHER_A_11(BUTCHER_A_11) {
+    MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau, double butcher_a_11) : 
+        WeakForm::MatrixFormVol(i, j), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) {
       sym = HERMES_NONSYM; 
     }
 
@@ -28,8 +28,8 @@ private:
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * v->val[i] / time_step
-                           + BUTCHER_A_11 * (dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] 
+        result += wt[i] * (u->val[i] * v->val[i] / tau
+                           + butcher_a_11 * (dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] 
                                       * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
                                       + lam<Real>(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])));
       return result;
@@ -47,26 +47,26 @@ private:
     // Note: for any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u) { 
-      return 1 + pow(u, ALPHA); 
+      return 1 + pow(u, alpha); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
     Real dlam_du(Real u) { 
-      return ALPHA*pow(u, ALPHA - 1); 
+      return alpha*pow(u, alpha - 1); 
     }
     
     // Members.
-    double ALPHA;
-    double time_step;
-    double BUTCHER_A_11;
+    double alpha;
+    double tau;
+    double butcher_a_11;
   };
 
   class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
   {
   public:
-  VectorFormVolHeatTransfer(int i, double ALPHA, double time_step, double GAMMA, double BUTCHER_C_1) :
-      WeakForm::VectorFormVol(i), ALPHA(ALPHA), time_step(time_step), GAMMA(GAMMA), BUTCHER_C_1(BUTCHER_C_1) { }
+  VectorFormVolHeatTransfer(int i, double alpha, double tau, double gamma, double butcher_c_1) :
+      WeakForm::VectorFormVol(i), alpha(alpha), tau(tau), gamma(gamma), butcher_c_1(butcher_c_1) { }
 
   template<typename Real, typename Scalar>
   Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -74,9 +74,9 @@ private:
     Func<Scalar>* Y1_prev_newton = u_ext[0];
     Func<Scalar>* u_prev_time = ext->fn[0];
     for (int i = 0; i < n; i++) {
-      result += wt[i] * (Y1_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / time_step;
+      result += wt[i] * (Y1_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / tau;
     }
-    result += GAMMA * res_ss(n, wt, u_ext, v, e, ext, wf->get_current_time() + BUTCHER_C_1 * time_step);
+    result += gamma * res_ss(n, wt, u_ext, v, e, ext, wf->get_current_time() + butcher_c_1 * tau);
     return result;
   }
 
@@ -109,14 +109,14 @@ private:
   // Note: for any u, this function has to be positive.
   template<typename Real>
   Real lam(Real u)  { 
-    return 1 + pow(u, ALPHA); 
+    return 1 + pow(u, alpha); 
   }
 
   // Members.
-  double ALPHA;
-  double time_step;
-  double GAMMA;
-  double BUTCHER_C_1;
+  double alpha;
+  double tau;
+  double gamma;
+  double butcher_c_1;
   };
 };
 
@@ -125,13 +125,13 @@ private:
 class WeakFormHeatTransferNewtonTimedepSDIRKStage2 : public WeakForm
 {
 public:
-  WeakFormHeatTransferNewtonTimedepSDIRKStage2(double ALPHA, double time_step, Solution* sln_prev_time, Solution* sln_stage_1,
-    double BUTCHER_A_11, double GAMMA, double BUTCHER_B_1, double BUTCHER_B_2, double BUTCHER_C_1, double BUTCHER_C_2) : WeakForm(1) 
+  WeakFormHeatTransferNewtonTimedepSDIRKStage2(double alpha, double tau, Solution* sln_prev_time, Solution* sln_stage_1,
+    double butcher_a_11, double gamma, double butcher_b_1, double butcher_b_2, double butcher_c_1, double butcher_c_2) : WeakForm(1) 
   {
-    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, ALPHA, time_step, BUTCHER_A_11));
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau, butcher_a_11));
 
-    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, ALPHA, time_step, GAMMA, BUTCHER_B_1,
-                                             BUTCHER_B_2, BUTCHER_C_1, BUTCHER_C_2);
+    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha, tau, gamma, butcher_b_1,
+                                             butcher_b_2, butcher_c_1, butcher_c_2);
     vector_form->ext.push_back(sln_prev_time);
     vector_form->ext.push_back(sln_stage_1);
     add_vector_form(vector_form);
@@ -141,8 +141,8 @@ private:
   class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j, double ALPHA, double time_step, double BUTCHER_A_11) : 
-        WeakForm::MatrixFormVol(i, j), ALPHA(ALPHA), time_step(time_step), BUTCHER_A_11(BUTCHER_A_11) {
+    MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau, double butcher_a_11) : 
+        WeakForm::MatrixFormVol(i, j), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) {
       sym = HERMES_NONSYM; 
     }
 
@@ -151,8 +151,8 @@ private:
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * v->val[i] / time_step
-                           + BUTCHER_A_11 * (dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] 
+        result += wt[i] * (u->val[i] * v->val[i] / tau
+                           + butcher_a_11 * (dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] 
                                       * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
                                       + lam<Real>(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])));
       return result;
@@ -170,28 +170,28 @@ private:
     // Note: for any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u) { 
-      return 1 + pow(u, ALPHA); 
+      return 1 + pow(u, alpha); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
     Real dlam_du(Real u) { 
-      return ALPHA*pow(u, ALPHA - 1); 
+      return alpha*pow(u, alpha - 1); 
     }
     
     // Members.
-    double ALPHA;
-    double time_step;
-    double BUTCHER_A_11;
+    double alpha;
+    double tau;
+    double butcher_a_11;
   };
 
   class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolHeatTransfer(int i, double ALPHA, double time_step, double GAMMA, double BUTCHER_B_1, 
-        double BUTCHER_B_2, double BUTCHER_C_1, double BUTCHER_C_2) :
-        WeakForm::VectorFormVol(i), ALPHA(ALPHA), time_step(time_step), GAMMA(GAMMA), BUTCHER_B_1(BUTCHER_B_1),
-        BUTCHER_B_2(BUTCHER_B_2), BUTCHER_C_1(BUTCHER_C_1), BUTCHER_C_2(BUTCHER_C_2) { }
+    VectorFormVolHeatTransfer(int i, double alpha, double tau, double gamma, double butcher_b_1, 
+        double butcher_b_2, double butcher_c_1, double butcher_c_2) :
+        WeakForm::VectorFormVol(i), alpha(alpha), tau(tau), gamma(gamma), butcher_b_1(butcher_b_1),
+        butcher_b_2(butcher_b_2), butcher_c_1(butcher_c_1), butcher_c_2(butcher_c_2) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -200,10 +200,10 @@ private:
       Func<Scalar>* u_prev_time = ext->fn[0];
       Func<Scalar>* Y1[] = {ext->fn[1]};
       for (int i = 0; i < n; i++) {
-        result += wt[i] * (Y2_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / time_step;
+        result += wt[i] * (Y2_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / tau;
       }
-      result += BUTCHER_B_1 * res_ss(n, wt, Y1, v, e, ext, wf->get_current_time() + BUTCHER_C_1 * time_step);
-      result += BUTCHER_B_2 * res_ss(n, wt, u_ext, v, e, ext, wf->get_current_time() + BUTCHER_C_2 * time_step);
+      result += butcher_b_1 * res_ss(n, wt, Y1, v, e, ext, wf->get_current_time() + butcher_c_1 * tau);
+      result += butcher_b_2 * res_ss(n, wt, u_ext, v, e, ext, wf->get_current_time() + butcher_c_2 * tau);
       return result;
     }
 
@@ -236,17 +236,17 @@ private:
     // Note: for any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u)  { 
-      return 1 + pow(u, ALPHA); 
+      return 1 + pow(u, alpha); 
     }
 
     // Members.
-    double ALPHA;
-    double time_step;
-    double GAMMA;
-    double BUTCHER_B_1;
-    double BUTCHER_B_2;
-    double BUTCHER_C_1;
-    double BUTCHER_C_2;
+    double alpha;
+    double tau;
+    double gamma;
+    double butcher_b_1;
+    double butcher_b_2;
+    double butcher_c_1;
+    double butcher_c_2;
   };
 };
 
