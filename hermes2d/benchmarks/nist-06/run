@@ -1,4 +1,4 @@
 rm *~ 
-./nist-6
+./nist-06
 python plot_graph.py &
 
