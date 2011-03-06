@@ -46,3 +46,33 @@ SET(WITH_EXODUSII YES)
 SET(EXODUSII_ROOT /opt/packages/exodusii)
 SET(NETCDF_ROOT /opt/packages/netcdf)
 
+#------------------------   INSTALLATION   --------------------------
+
+# Installation directory. If not set, 'sudo make install' will 
+# install the Hermes library into a default directory - typically 
+#   /usr/local/lib,
+#   /usr/local/include/hermes,  
+#   /usr/local/lib/python (if WITH_PYTHON was set to YES; see also 
+#                          how to set PYTHON_INSTALL_PATH below). 
+# If set as follows, the library files will be installed into 
+#   /home/pavel/hermes/lib, 
+#   /home/pavel/hermes/include,
+#   /home/pavel/hermes/lib/python
+# In this way, the library may be installed e.g. into user's home 
+# directory without needing the administrator rights:
+#
+   set(CMAKE_INSTALL_PREFIX    /home/pavel/hermes)
+
+# Installation directory for Python wrappers.
+# If WITH_PYTHON =  YES, 'make install' (or 'sudo make install') will
+# also create Python wrappers and install them to directories shown
+# above. You may also install them into a different directory by 
+# setting PYTHON_INSTALL_PATH appropriately, or into a default place 
+# where Python stores its modules (execute the following command to 
+# see where it is on your computer:
+#   python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()"
+# ). This makes importing the wrappers in your Python scripts a bit 
+# easier, but might require administrator rights. It is done by:
+# 
+#  set(PYTHON_INSTALL_PATH   USE_SYSTEM_PYTHON_DIRECTORY)
+
