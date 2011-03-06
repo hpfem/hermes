@@ -87,7 +87,7 @@ protected:
       case HERMES_L2_NORM:
         return l2_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_semi_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return h1_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
             return h1_semi_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
@@ -108,7 +108,7 @@ protected:
       case HERMES_L2_NORM:
         return l2_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return h1_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
             return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
@@ -203,7 +203,7 @@ protected:
       case HERMES_L2_NORM:
         return l2_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_semi_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+        return h1_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_SEMINORM:
             return h1_semi_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
       case HERMES_HCURL_NORM:
@@ -224,7 +224,7 @@ protected:
       case HERMES_L2_NORM:
         return l2_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_semi_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
+        return h1_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_SEMINORM:
             return h1_semi_projection_liform<Ord, Ord>(n, wt, u_ext, v, e, ext);
       case HERMES_HCURL_NORM:
