@@ -66,6 +66,7 @@ set(SRC
 add_subdirectory(solver)
 
 if(WITH_PYTHON)
+    set(CYTHON_INCLUDE_DIRECTORIES .)
     add_subdirectory(hermes_common)
 endif(WITH_PYTHON)
 

@@ -1,4 +1,4 @@
-from cpp.matrix cimport (Matrix as cMatrix,
+from hermes_common.cpp.matrix cimport (Matrix as cMatrix,
         SparseMatrix as cSparseMatrix, CSCMatrix as cCSCMatrix,
         UMFPackVector as cUMFPackVector, Vector as cVector)
 

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys
+sys.path.insert(0, "../../../hermes_common")
 sys.path.insert(0, "../..")
 
 from numpy import arange, empty, zeros, array
@@ -13,7 +14,7 @@ from hermes1d.solvers.eigen import solve_eig_numpy, solve_eig_pysparse, \
 from hermes1d.h1d_wrapper.h1d_wrapper import FESolution, calc_err_est, \
         calc_solution_norm, adapt
 from hermes1d.fekete.fekete import Function, Mesh1D
-from hermes1d.hermes_common.matrix import CSCMatrix
+from hermes_common.matrix import CSCMatrix
 
 from _forms import assemble_schroedinger
 from plot import plot_eigs, plot_file

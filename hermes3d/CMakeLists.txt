@@ -168,6 +168,7 @@ endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
 
 if(WITH_PYTHON)
   #find_package(PythonLibs REQUIRED)
+  set(CYTHON_INCLUDE_DIRECTORIES . -I${CMAKE_SOURCE_DIR}/hermes_common)
   add_subdirectory(python)
 endif(WITH_PYTHON)
 

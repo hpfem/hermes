@@ -1,5 +1,5 @@
 from hermes1d.h1d_wrapper.h1d_wrapper cimport Mesh
-from hermes1d.hermes_common.matrix cimport SparseMatrix
+from hermes_common.matrix cimport SparseMatrix
 
 from numpy import array, empty, linspace
 from scipy.interpolate import InterpolatedUnivariateSpline

@@ -1,5 +1,5 @@
 from hermes1d.h1d_wrapper.hermes1d cimport Space
-from hermes1d.hermes_common.cpp.matrix cimport SparseMatrix
+from hermes_common.cpp.matrix cimport SparseMatrix
 
 cdef extern from "forms.h":
     int eqn_type_R

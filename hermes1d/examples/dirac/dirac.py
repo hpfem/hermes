@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys
+sys.path.insert(0, "../../../hermes_common")
 sys.path.insert(0, "../..")
 
 from numpy import arange, empty, zeros, array
