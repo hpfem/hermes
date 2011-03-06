@@ -15,275 +15,15 @@
 
 #include "hermes2d.h"
 
-// TODO LIST: 
-//
-// BUG: If time-dependent Ditichlet boundary conditions are used, the 
-//      Dirichlet lift is not updated for different stage times as it should 
-//      be. 
-//
-// (1) With explicit and diagonally implicit methods, the matrix is treated
-//     in the same way as with fully implicit ones. To make this more 
-//     efficient, with explicit and diagonally implicit methods one should 
-//     first only solve for the upper left block, then eliminate all blocks 
-//     under it, then solve for block at position 22, eliminate all blocks 
-//     under it, etc. Currently this is not done and everything is left to 
-//     the matrix solver.   
-//
-// (2) In example 03-timedep-adapt-space-and-time with implicit Euler 
-//     method, Newton's method takes much longer than in 01-timedep-adapt-space-only
-//     (that also uses implicit Euler method). This means that the initial guess for 
-//     the K_vector should be improved (currently it is zero).
-//
-// (3) At the end of rk_time_step(), the previous time level solution is 
-//     projected onto the space of the new time-level solution so that 
-//     it can be added to the stages. This projection is slow so we should 
-//     find a way to do this differently. In any case, the projection 
-//     is not necessary when no adaptivity in space takes place and the 
-//     two spaces are the same (but it is done anyway).
-//
-// (4) Enable more equations than one. Right now rk_time_step() does not 
-//     work for systems.
-//
-// (5) Enable all other matrix solvers, so far UMFPack is hardwired here.
-//
-// (6) We do not take advantage of the fact that all blocks in the 
-//     Jacobian matrix have the same structure. Thus it is enough to 
-//     assemble the matrix M (one block) and copy the sparsity structure
-//     into all remaining nonzero blocks (and diagonal blocks). Right 
-//     now, the sparsity structure is created expensively in each block 
-//     again.
-//
-// (7) If space does not change, the sparsity does not change. Right now 
-//     we discard everything at the end of every time step, we should not 
-//     do it.  
-//
-// (8) If the problem does not depend explicitly on time, then all the blocks 
-//     in the Jacobian matrix of the stationary residual are the same up 
-//     to a multiplicative constant. Thus they do not have to be aassembled 
-//     from scratch.
-// 
-// (9) If the problem is linear, then the Jacobian is constant. If Space 
-//     does not change between time steps, we should keep it. 
 
-void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, WeakForm* stage_wf_left, 
-                     WeakForm* stage_wf_right, Solution** stage_time_sol) 
+RungeKutta::RungeKutta(bool residual_as_vector)
 {
-  // First let's do the mass matrix (only one block ndof times ndof).
-
-  /*
-  FIXME
-  WeakForm::MatrixFormVol mfv_00;
-  mfv_00.i = 0;
-  mfv_00.j = 0;
-  mfv_00.sym = HERMES_SYM;
-  mfv_00.area = HERMES_ANY;
-  mfv_00.fn = l2_form<double, scalar>;
-  mfv_00.ord = l2_form<Ord, Ord>;
-  mfv_00.ext = Hermes::vector<MeshFunction*> ();
-  mfv_00.scaling_factor = 1.0;
-  mfv_00.u_ext_offset = 0;
-  mfv_00.adapt_eval = false;
-  mfv_00.adapt_order_increase = -1;
-  mfv_00.adapt_rel_error_tol = -1;
-  stage_wf_left->add_matrix_form_internal(&mfv_00);
-  */
-  stage_wf_left->add_matrix_form(new MatrixFormVolL2(0, 0, HERMES_SYM));
-
-  // In the rest we will take the stationary jacobian and residual forms 
-  // (right-hand side) and use them to create a block Jacobian matrix of
-  // size (num_stages*ndof times num_stages*ndof) and a block residual 
-  // vector of length num_stages*ndof.
-
-  // Number of stages.
-  int num_stages = bt->get_size();
-
-  // Original weak formulation.
-  WeakForm* wf = dp->get_weak_formulation();
-
-  // Extract mesh from (the first space of) the original discrete problem.
-  Mesh* mesh = dp->get_space(0)->get_mesh();
-
-  // Create constant Solutions to represent the stage times,
-  // stage_time = current_time + c_i*time_step.
-  // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
-  // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
-  // SOLUTIONS IN ExtData.
-  for (int i = 0; i < num_stages; i++) {
-    stage_time_sol[i] = new Solution(mesh);
-    stage_time_sol[i]->set_const(mesh, current_time + bt->get_C(i)*time_step);
-  }
-
-  // Extracting volume and surface matrix and vector forms from the
-  // original weak formulation.
-  if (wf->get_neq() != 1) error("wf->neq != 1 not implemented yet.");
-  Hermes::vector<WeakForm::MatrixFormVol *> mfvol_base = wf->get_mfvol();
-  Hermes::vector<WeakForm::MatrixFormSurf *> mfsurf_base = wf->get_mfsurf();
-  Hermes::vector<WeakForm::VectorFormVol *> vfvol_base = wf->get_vfvol();
-  Hermes::vector<WeakForm::VectorFormSurf *> vfsurf_base = wf->get_vfsurf();
-
-  // Duplicate matrix volume forms, scale them according
-  // to the Butcher's table, enhance them with additional
-  // external solutions, and anter them as blocks to the
-  // new stage Jacobian.
-
-  // FIXME
-  /*
-  for (unsigned int m = 0; m < mfvol_base.size(); m++) {
-    WeakForm::MatrixFormVol mfv_base = mfvol_base[m];
-    for (int i = 0; i < num_stages; i++) {
-      for (int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormVol mfv_ij;
-        mfv_ij.i = i;
-        mfv_ij.j = j;
-        mfv_ij.sym = mfv_base.sym;
-        mfv_ij.area = mfv_base.area;
-        mfv_ij.fn = mfv_base.fn;
-        mfv_ij.ord = mfv_base.ord;
-        mfv_ij.scaling_factor = -time_step * bt->get_A(i, j);
-
-        // Duplicate external solutions.
-        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
-        // std::copy(mfv_base.ext.begin(), mfv_base.ext.end(), mfv_ij.ext.begin()); 
-        for (unsigned int f_idx = 0; f_idx < mfv_base.ext.size(); f_idx++) 
-          mfv_ij.ext.push_back(mfv_base.ext[f_idx]);
-
-        // Add stage_time_sol[i] as an external function to the form.
-        mfv_ij.ext.push_back(stage_time_sol[i]);
-
-        // Set offset for u_ext[] external solutions.
-        mfv_ij.u_ext_offset = i;
-
-        // This form will not be integrated adaptively.
-        mfv_ij.adapt_eval = false;
-        mfv_ij.adapt_order_increase = -1;
-        mfv_ij.adapt_rel_error_tol = -1;
-
-        // Add the matrix form to the corresponding block of the
-        // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form_internal(&mfv_ij);
-      }
-    }
-  }
-
-
-  // Duplicate matrix surface forms, enhance them with
-  // additional external solutions, and anter them as
-  // blocks of the stage Jacobian.
-  for (unsigned int m = 0; m < mfsurf_base.size(); m++) {
-    WeakForm::MatrixFormSurf mfs_base = mfsurf_base[m];
-    for (int i = 0; i < num_stages; i++) {
-      for (int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormSurf mfs_ij;
-        mfs_ij.i = i;
-        mfs_ij.j = j;
-        mfs_ij.area = mfs_base.area;
-        mfs_ij.fn = mfs_base.fn;
-        mfs_ij.ord = mfs_base.ord;
-        mfs_ij.scaling_factor = -time_step * bt->get_A(i, j);
-
-        // Duplicate external solutions.
-        // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
-        // std::copy(mfs_base.ext.begin(), mfs_base.ext.end(), mfs_ij.ext.begin()); 
-        for (unsigned int f_idx = 0; f_idx < mfs_base.ext.size(); f_idx++) 
-          mfs_ij.ext.push_back(mfs_base.ext[f_idx]);
-
-        // Add stage_time_sol[i] as an external function to the form.
-        mfs_ij.ext.push_back(stage_time_sol[i]);
-
-        // Set offset for u_ext[] external solutions.
-        mfs_ij.u_ext_offset = i;
-
-        // This form will not be integrated adaptively.
-        mfs_ij.adapt_eval = false;
-        mfs_ij.adapt_order_increase = -1;
-        mfs_ij.adapt_rel_error_tol = -1;
-
-        // Add the matrix form to the corresponding block of the
-        // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form_surf_internal(&mfs_ij);
-      }
-    }
-  }
-
-  // Duplicate vector volume forms, enhance them with
-  // additional external solutions, and anter them as
-  // blocks of the stage residual.
-  for (unsigned int m = 0; m < vfvol_base.size(); m++) {
-    WeakForm::VectorFormVol vfv_base = vfvol_base[m];
-    for (int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormVol vfv_i;
-      vfv_i.i = i;
-      vfv_i.area = vfv_base.area;
-      vfv_i.fn = vfv_base.fn;
-      vfv_i.ord = vfv_base.ord;
-      vfv_i.scaling_factor = -1.0;
-
-      // Duplicate external solutions.
-      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
-      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
-      for (unsigned int f_idx = 0; f_idx < vfv_base.ext.size(); f_idx++) 
-        vfv_i.ext.push_back(vfv_base.ext[f_idx]);
-
-      // Add stage_time_sol[i] as an external function to the form.
-      vfv_i.ext.push_back(stage_time_sol[i]);
-
-      // Set offset for u_ext[] external solutions.
-      vfv_i.u_ext_offset = i;
-
-      // This form will not be integrated adaptively.
-      vfv_i.adapt_eval = false;
-      vfv_i.adapt_order_increase = -1;
-      vfv_i.adapt_rel_error_tol = -1;
-
-      // Add the matrix form to the corresponding block of the
-      // stage Jacobian matrix.
-      stage_wf_right->add_vector_form_internal(&vfv_i);
-    }
-  }
-
-  // Duplicate vector surface forms, enhance them with
-  // additional external solutions, and anter them as
-  // blocks of the stage residual.
-  for (unsigned int m = 0; m < vfsurf_base.size(); m++) {
-    WeakForm::VectorFormSurf vfs_base = vfsurf_base[m];
-    for (int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormSurf vfs_i;
-      vfs_i.i = i;
-      vfs_i.area = vfs_base.area;
-      vfs_i.fn = vfs_base.fn;
-      vfs_i.ord = vfs_base.ord;
-      vfs_i.scaling_factor = -1.0;
-
-      // Duplicate external solutions.
-      // THIS WAS WRONG, ONE CANNOT COPY INTO AN EMPTY STD::VECTOR:
-      // std::copy(vfv_base.ext.begin(), vfv_base.ext.end(), vfv_ij.ext.begin()); 
-      for (unsigned int f_idx = 0; f_idx < vfs_base.ext.size(); f_idx++) 
-        vfs_i.ext.push_back(vfs_base.ext[f_idx]);
-  
-      // Add stage_time_sol[i] as an external function to the form.
-      vfs_i.ext.push_back(stage_time_sol[i]);
-
-      // Set offset for u_ext[] external solutions.
-      vfs_i.u_ext_offset = i;
-
-      // This form will not be integrated adaptively.
-      vfs_i.adapt_eval = false;
-      vfs_i.adapt_order_increase = -1;
-      vfs_i.adapt_rel_error_tol = -1;
-
-      // Add the matrix form to the corresponding block of the
-      // stage Jacobian matrix.
-      stage_wf_right->add_vector_form_surf_internal(&vfs_i);
-    }
-  }
-  */
+  this->residual_as_vector = residual_as_vector;
+  stage_time_sol = NULL;
 }
 
-// This takes a matrix, and uses it to formally construct a block-diagonal
-// matrix. There are num_blocks blocks on the diagonal. The block diagonal
-// matrix is then multiplied with the vector source_vec.
-void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
+
+void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
                                        scalar* source_vec, scalar* target_vec)
 {
   int size = matrix->get_size();
@@ -292,8 +32,7 @@ void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
   }
 }
 
-bool HERMES_RESIDUAL_AS_VECTOR_RK = true;
-bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
                   DiscreteProblem* dp, MatrixSolverType matrix_solver,
                   bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
@@ -342,10 +81,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
                                             // size num_stages*ndof times num_stages*ndof.
 
-  Solution** stage_time_sol = new Solution*[num_stages];
-                                            // This array will be filled by artificially created
-                                            // solutions to represent stage times.
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right, stage_time_sol); 
+  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right); 
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
@@ -412,10 +148,9 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
     vector_right->change_sign();
 
     // Measure the residual norm.
-    if (HERMES_RESIDUAL_AS_VECTOR_RK) {
+    if (residual_as_vector)
       // Calculate the l2-norm of residual vector.
       residual_norm = get_l2_norm(vector_right);
-    }
     else {
       // Translate residual vector into residual functions.
       Solution::vector_to_solutions(vector_right, stage_dp_right.get_spaces(),
@@ -523,8 +258,7 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
   return true;
 }
 
-// This is the same as the rk_time_step() function above but it does not have the error_fn parameter.
-bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTable* const bt,
                   Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
                   MatrixSolverType matrix_solver, bool verbose, bool is_linear, 
                   double newton_tol, int newton_max_iter,
@@ -534,4 +268,161 @@ bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
 	              sln_time_prev, sln_time_new, NULL, dp, matrix_solver,
 	              verbose, is_linear, newton_tol, newton_max_iter,
                       newton_damping_coeff, newton_max_allowed_residual_norm);
+}
+
+void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
+                     DiscreteProblem* dp, WeakForm* stage_wf_left, 
+                     WeakForm* stage_wf_right) 
+{
+  // First let's do the mass matrix (only one block ndof times ndof).
+  MatrixFormVolL2 proj_form(0, 0, HERMES_SYM);
+  proj_form.area = HERMES_ANY;
+  proj_form.scaling_factor = 1.0;
+  proj_form.u_ext_offset = 0;
+  proj_form.adapt_eval = false;
+  proj_form.adapt_order_increase = -1;
+  proj_form.adapt_rel_error_tol = -1;
+  stage_wf_left->add_matrix_form(&proj_form);
+
+  // In the rest we will take the stationary jacobian and residual forms 
+  // (right-hand side) and use them to create a block Jacobian matrix of
+  // size (num_stages*ndof times num_stages*ndof) and a block residual 
+  // vector of length num_stages*ndof.
+
+  // Number of stages.
+  int num_stages = bt->get_size();
+
+  // Original weak formulation.
+  WeakForm* wf = dp->get_weak_formulation();
+
+  // Extract mesh from (the first space of) the original discrete problem.
+  Mesh* mesh = dp->get_space(0)->get_mesh();
+
+  // Create constant Solutions to represent the stage times,
+  // stage_time = current_time + c_i*time_step.
+  // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
+  // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
+  // SOLUTIONS IN ExtData.
+  if(stage_time_sol != NULL) {
+    for (int i = 0; i < num_stages; i++)
+      delete stage_time_sol[i];
+    delete [] stage_time_sol;
+    stage_time_sol = NULL;
+  }
+
+  stage_time_sol = new Solution*[num_stages];
+
+  for (int i = 0; i < num_stages; i++) {
+    stage_time_sol[i] = new Solution(mesh);
+    stage_time_sol[i]->set_const(mesh, current_time + bt->get_C(i)*time_step);
+  }
+
+  // Extracting volume and surface matrix and vector forms from the
+  // original weak formulation.
+  if (wf->get_neq() != 1) error("wf->neq != 1 not implemented yet.");
+  Hermes::vector<WeakForm::MatrixFormVol *> mfvol_base = wf->get_mfvol();
+  Hermes::vector<WeakForm::MatrixFormSurf *> mfsurf_base = wf->get_mfsurf();
+  Hermes::vector<WeakForm::VectorFormVol *> vfvol_base = wf->get_vfvol();
+  Hermes::vector<WeakForm::VectorFormSurf *> vfsurf_base = wf->get_vfsurf();
+
+  // Duplicate matrix volume forms, scale them according
+  // to the Butcher's table, enhance them with additional
+  // external solutions, and anter them as blocks to the
+  // new stage Jacobian.
+
+  for (unsigned int m = 0; m < mfvol_base.size(); m++) {
+    WeakForm::MatrixFormVol mfv_base = *mfvol_base[m];
+    for (unsigned int i = 0; i < num_stages; i++) {
+      for (unsigned int j = 0; j < num_stages; j++) {
+        WeakForm::MatrixFormVol mfv_ij(i, j, (SymFlag)mfv_base.sym, mfv_base.area, mfv_base.ext, 
+                                       -time_step * bt->get_A(i, j), i);
+       
+        // Add stage_time_sol[i] as an external function to the form.
+        mfv_ij.ext.push_back(stage_time_sol[i]);
+
+        // This form will not be integrated adaptively.
+        mfv_ij.adapt_eval = false;
+        mfv_ij.adapt_order_increase = -1;
+        mfv_ij.adapt_rel_error_tol = -1;
+
+        // Add the matrix form to the corresponding block of the
+        // stage Jacobian matrix.
+        stage_wf_right->add_matrix_form(&mfv_ij);
+      }
+    }
+  }
+
+  // Duplicate matrix surface forms, enhance them with
+  // additional external solutions, and anter them as
+  // blocks of the stage Jacobian.
+  for (unsigned int m = 0; m < mfsurf_base.size(); m++) {
+    WeakForm::MatrixFormSurf mfs_base = *mfsurf_base[m];
+    for (int i = 0; i < num_stages; i++) {
+      for (int j = 0; j < num_stages; j++) {
+        WeakForm::MatrixFormSurf mfs_ij(i, j, mfs_base.area, mfs_base.ext, 
+                                -time_step * bt->get_A(i, j), i);
+
+        // Add stage_time_sol[i] as an external function to the form.
+        mfs_ij.ext.push_back(stage_time_sol[i]);
+
+        // This form will not be integrated adaptively.
+        mfs_ij.adapt_eval = false;
+        mfs_ij.adapt_order_increase = -1;
+        mfs_ij.adapt_rel_error_tol = -1;
+
+        // Add the matrix form to the corresponding block of the
+        // stage Jacobian matrix.
+        stage_wf_right->add_matrix_form_surf(&mfs_ij);
+      }
+    }
+  }
+
+  // Duplicate vector volume forms, enhance them with
+  // additional external solutions, and anter them as
+  // blocks of the stage residual.
+  for (unsigned int m = 0; m < vfvol_base.size(); m++) {
+    WeakForm::VectorFormVol vfv_base = *vfvol_base[m];
+    for (int i = 0; i < num_stages; i++) {
+      WeakForm::VectorFormVol vfv_i(i, vfv_base.area, vfv_base.ext, 
+                                -1.0, i);
+
+      // Add stage_time_sol[i] as an external function to the form.
+      vfv_i.ext.push_back(stage_time_sol[i]);
+
+      // This form will not be integrated adaptively.
+      vfv_i.adapt_eval = false;
+      vfv_i.adapt_order_increase = -1;
+      vfv_i.adapt_rel_error_tol = -1;
+
+      // Add the matrix form to the corresponding block of the
+      // stage Jacobian matrix.
+      stage_wf_right->add_vector_form(&vfv_i);
+    }
+  }
+
+  // Duplicate vector surface forms, enhance them with
+  // additional external solutions, and anter them as
+  // blocks of the stage residual.
+  for (unsigned int m = 0; m < vfsurf_base.size(); m++) {
+    WeakForm::VectorFormSurf vfs_base = *vfsurf_base[m];
+    for (int i = 0; i < num_stages; i++) {
+      WeakForm::VectorFormSurf vfs_i(i, vfs_base.area, vfs_base.ext, 
+                          -1.0, i);
+  
+      // Add stage_time_sol[i] as an external function to the form.
+      vfs_i.ext.push_back(stage_time_sol[i]);
+
+      // Set offset for u_ext[] external solutions.
+      vfs_i.u_ext_offset = i;
+
+      // This form will not be integrated adaptively.
+      vfs_i.adapt_eval = false;
+      vfs_i.adapt_order_increase = -1;
+      vfs_i.adapt_rel_error_tol = -1;
+
+      // Add the matrix form to the corresponding block of the
+      // stage Jacobian matrix.
+      stage_wf_right->add_vector_form_surf(&vfs_i);
+    }
+  }
 }

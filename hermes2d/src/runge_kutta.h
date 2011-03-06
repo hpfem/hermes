@@ -16,45 +16,115 @@
 #ifndef __H2D_RUNGE_KUTTA_H
 #define __H2D_RUNGE_KUTTA_H
 
-/// Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
-/// The original discretized equation is M\dot{Y} = F(t, Y) where M is the mass
-/// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
-/// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
-/// and right-hand side of the equation, respectively.
-void HERMES_API create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                                DiscreteProblem* dp, WeakForm* stage_wf_left,
-                                WeakForm* stage_wf_right);
 
-/// Takes a matrix M of size ndof times ndof, extends it (formally) to
-/// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and
-/// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec
-/// which has length num_stages*ndof. The result is saved in vector_left which also
-/// has length num_stages*ndof.
-/// TODO: enable this for other types of matrices.
-void HERMES_API multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, int num_stages,
-                                                  scalar* stage_coeff_vec, scalar* vector_left);
+// TODO LIST: 
+//
+// BUG: If time-dependent Ditichlet boundary conditions are used, the 
+//      Dirichlet lift is not updated for different stage times as it should 
+//      be. 
+//
+// (1) With explicit and diagonally implicit methods, the matrix is treated
+//     in the same way as with fully implicit ones. To make this more 
+//     efficient, with explicit and diagonally implicit methods one should 
+//     first only solve for the upper left block, then eliminate all blocks 
+//     under it, then solve for block at position 22, eliminate all blocks 
+//     under it, etc. Currently this is not done and everything is left to 
+//     the matrix solver.   
+//
+// (2) In example 03-timedep-adapt-space-and-time with implicit Euler 
+//     method, Newton's method takes much longer than in 01-timedep-adapt-space-only
+//     (that also uses implicit Euler method). This means that the initial guess for 
+//     the K_vector should be improved (currently it is zero).
+//
+// (3) At the end of rk_time_step(), the previous time level solution is 
+//     projected onto the space of the new time-level solution so that 
+//     it can be added to the stages. This projection is slow so we should 
+//     find a way to do this differently. In any case, the projection 
+//     is not necessary when no adaptivity in space takes place and the 
+//     two spaces are the same (but it is done anyway).
+//
+// (4) Enable more equations than one. Right now rk_time_step() does not 
+//     work for systems.
+//
+// (5) Enable all other matrix solvers, so far UMFPack is hardwired here.
+//
+// (6) We do not take advantage of the fact that all blocks in the 
+//     Jacobian matrix have the same structure. Thus it is enough to 
+//     assemble the matrix M (one block) and copy the sparsity structure
+//     into all remaining nonzero blocks (and diagonal blocks). Right 
+//     now, the sparsity structure is created expensively in each block 
+//     again.
+//
+// (7) If space does not change, the sparsity does not change. Right now 
+//     we discard everything at the end of every time step, we should not 
+//     do it.  
+//
+// (8) If the problem does not depend explicitly on time, then all the blocks 
+//     in the Jacobian matrix of the stationary residual are the same up 
+//     to a multiplicative constant. Thus they do not have to be aassembled 
+//     from scratch.
+// 
+// (9) If the problem is linear, then the Jacobian is constant. If Space 
+//     does not change between time steps, we should keep it. 
 
-// Perform one explicit or implicit time step using the Runge-Kutta method
-// corresponding to a given Butcher's table. If err_vec != NULL then it will be 
-// filled with an error vector calculated using the second B-row of the Butcher's
-// table (the second B-row B2 must be nonzero in that case). The negative default 
-// values for newton_tol and newton_max_iter are for linear problems.
-// Many improvements are needed, a todo list is presented at the beginning of
-// the corresponding .cpp file.
-bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
-                             DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                             bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, 
-                             int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
-                             double newton_max_allowed_residual_norm = 1e6);
+class HERMES_API RungeKutta
+{
 
-// This is a wrapper for the previous function if error_fn is not provided
-// (adaptive time stepping is not wanted). 
-bool HERMES_API rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                             Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
-                             MatrixSolverType matrix_solver, bool verbose = false, bool is_linear = false, 
-                             double newton_tol = 1e-6, int newton_max_iter = 20,
-                             double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+public:
+  /// Constructor.
+  RungeKutta(bool residual_as_vector = true);
+
+  /// Destructor.
+  ~RungeKutta();
+
+  /// Takes a matrix M of size ndof times ndof, extends it (formally) to
+  /// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and
+  /// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec
+  /// which has length num_stages*ndof. The result is saved in vector_left which also
+  /// has length num_stages*ndof.
+  /// TODO: enable this for other types of matrices.
+  void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, int num_stages,
+                                                    scalar* stage_coeff_vec, scalar* vector_left);
+
+  // Perform one explicit or implicit time step using the Runge-Kutta method
+  // corresponding to a given Butcher's table. If err_vec != NULL then it will be 
+  // filled with an error vector calculated using the second B-row of the Butcher's
+  // table (the second B-row B2 must be nonzero in that case). The negative default 
+  // values for newton_tol and newton_max_iter are for linear problems.
+  // Many improvements are needed, a todo list is presented at the beginning of
+  // the corresponding .cpp file.
+  bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+                               Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                               DiscreteProblem* dp, MatrixSolverType matrix_solver,
+                               bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, 
+                               int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
+                               double newton_max_allowed_residual_norm = 1e6);
+
+  // This is a wrapper for the previous function if error_fn is not provided
+  // (adaptive time stepping is not wanted). 
+  bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
+                               Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
+                               MatrixSolverType matrix_solver, bool verbose = false, bool is_linear = false, 
+                               double newton_tol = 1e-6, int newton_max_iter = 20,
+                               double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+
+protected:
+  /// Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
+  /// The original discretized equation is M\dot{Y} = F(t, Y) where M is the mass
+  /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
+  /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
+  /// and right-hand side of the equation, respectively.
+  void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
+                                  DiscreteProblem* dp, WeakForm* stage_wf_left,
+                                  WeakForm* stage_wf_right);
+
+  /// Members.
+  bool residual_as_vector;
+
+  /// This array will be filled by artificially created solutions to represent stage times.
+  Solution** stage_time_sol;
+
+};
 
 
 #endif
