@@ -20,7 +20,7 @@ using namespace RefinementSelectors;
 // The following parameters can be changed:
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // The calculation will stop when this indicator of a steady state is reached.
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
         vview.show(&u, &w);
       }
       // Output solution in VTK format.
-      if(VTK_OUTPUT) {
+      if(VTK_VISUALIZATION) {
         pressure.reinit();
         Mach_number.reinit();
         Linearizer lin;

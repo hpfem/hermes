@@ -20,7 +20,7 @@
 // mesh refinements at the beginning of the main() function.
 const double CONST_F = 2.0;
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = true;                     // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   else error ("Matrix solver failed.\n");
 
   // VTK output.
-  if (VTK_OUTPUT) {
+  if (VTK_VISUALIZATION) {
     // Output solution in VTK format.
     Linearizer lin;
     bool mode_3D = true;

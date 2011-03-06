@@ -42,7 +42,7 @@ const bool PRECONDITIONING = true;
 
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;             // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 const Ord2 P_INIT_FLOW = Ord2(0,0);               // Polynomial degree for the Euler equations (for the flow).
@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
         s5.show(&prev_c);
       }
       // Output solution in VTK format.
-      if(VTK_OUTPUT) {
+      if(VTK_VISUALIZATION) {
         Linearizer lin;
         char filename[40];
         sprintf(filename, "w0-%i.vtk", iteration - 1);

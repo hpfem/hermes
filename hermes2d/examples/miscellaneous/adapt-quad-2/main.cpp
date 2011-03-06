@@ -11,7 +11,7 @@ using namespace RefinementSelectors;
 
 const bool ADAPTIVE_QUADRATURE = true;            // Evaluate weak forms using adaptive quadrature.
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
-const bool VTK_OUTPUT = false;                    // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;             // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
    
     // VTK output.
-    if (VTK_OUTPUT) {
+    if (VTK_VISUALIZATION) {
       // Output solution in VTK format.
       Linearizer lin;
       char* title = new char[100];
