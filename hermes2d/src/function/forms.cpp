@@ -14,10 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "forms.h"
-/*
-const char* ERR_UNDEFINED_NEIGHBORING_ELEMENTS = "Neighboring elements are not defined and so are not function traces on their interface. "
-                                                 "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
-*/
+
 // Explicit template specializations are needed here, general template<T> T DiscontinuousFunc<T>::zero = T(0) doesn't work.
 template<> Ord DiscontinuousFunc<Ord>::zero = Ord(0);
 template<> double DiscontinuousFunc<double>::zero = 0.0;
@@ -41,7 +38,6 @@ Geom<Ord>* init_geom_ord()
 
   static Ord diam = Ord(1);
 
-  // element = NULL;
   e->x = x; e->y = y;
   e->nx = nx; e->ny = ny;
   e->tx = tx; e->ty = ty;
@@ -55,7 +51,6 @@ Geom<Ord>* init_geom_ord()
 Geom<double>* init_geom_vol(RefMap *rm, const int order)
 {
   Geom<double>* e = new Geom<double>;
-  //e->element = rm->get_active_element();
   e->diam = rm->get_active_element()->get_diameter();
   e->id = rm->get_active_element()->id;
   e->elem_marker = rm->get_active_element()->marker;
@@ -83,12 +78,11 @@ Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
   e->ty = new double [np];
   e->nx = new double [np];
   e->ny = new double [np];
-  for (int i = 0; i < np; i++)
-  {
+  for (int i = 0; i < np; i++) {
     e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
     e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
   }
-    e->orientation = rm->get_active_element()->get_edge_orientation(surf_pos->surf_num);
+  e->orientation = rm->get_active_element()->get_edge_orientation(surf_pos->surf_num);
 	return e;
 }
 
@@ -101,7 +95,7 @@ Func<Ord>* init_fn_ord(const int order)
 	f->val = d;
 	f->dx = f->dy = d;
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-        f->laplace = d;
+  f->laplace = d;
 #endif
 	f->val0 = f->val1 = d;
 	f->dx0 = f->dx1 = d;
@@ -194,8 +188,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       delete [] m;
   }
   // Hcurl space.
-  else if (space_type == HERMES_HCURL_SPACE)
-  {
+  else if (space_type == HERMES_HCURL_SPACE) {
     u->val0 = new double [np];
     u->val1 = new double [np];
     u->curl = new double [np];
@@ -220,12 +213,10 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
         m[i][1][0] = const_inv_ref_map[1][0];
         m[i][1][1] = const_inv_ref_map[1][1];
       }
-
     }
     else
       m = rm->get_inv_ref_map(order);
-    for (int i = 0; i < np; i++, m++)
-    {
+    for (int i = 0; i < np; i++, m++) {
       u->val0[i] = (fn0[i] * (*m)[0][0] + fn1[i] * (*m)[0][1]);
       u->val1[i] = (fn0[i] * (*m)[1][0] + fn1[i] * (*m)[1][1]);
       u->curl[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx1[i] - dy0[i]);
@@ -236,9 +227,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       delete [] m;
   }
   // Hdiv space.
-  // WARNING: This needs checking as it was never used.
-  else if (space_type == HERMES_HDIV_SPACE)
-  {
+  else if (space_type == HERMES_HDIV_SPACE) {
     u->val0 = new double [np];
     u->val1 = new double [np];
 
@@ -262,12 +251,10 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
         m[i][1][0] = const_inv_ref_map[1][0];
         m[i][1][1] = const_inv_ref_map[1][1];
       }
-
     }
     else
       m = rm->get_inv_ref_map(order);
-    for (int i = 0; i < np; i++, m++)
-    {
+    for (int i = 0; i < np; i++, m++) {
       u->val0[i] = (  fn0[i] * (*m)[1][1] - fn1[i] * (*m)[1][0]);
       u->val1[i] = (- fn0[i] * (*m)[0][1] + fn1[i] * (*m)[0][0]);
       u->div[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx0[i] + dy1[i]);
@@ -277,8 +264,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
       delete [] m;
   }
   // L2 Space.
-  else if (space_type == HERMES_L2_SPACE)
-  {
+  else if (space_type == HERMES_L2_SPACE) {
     // Same as for H1, except that we currently do not have
     // second derivatives of L2 shape functions for triangles.
     u->val = new double [np];
@@ -305,13 +291,11 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
         m[i][1][0] = const_inv_ref_map[1][0];
         m[i][1][1] = const_inv_ref_map[1][1];
       }
-
     }
     else
       m = rm->get_inv_ref_map(order);
 
-    for (int i = 0; i < np; i++, m++)
-    {
+    for (int i = 0; i < np; i++, m++) {
       u->val[i] = fn[i];
       u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
       u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
@@ -330,7 +314,7 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 /// Preparation of mesh functions.
 Func<scalar>* init_fn(MeshFunction *fu, const int order)
 {
-  // sanity checks
+  // Sanity checks.
   if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
 
@@ -341,8 +325,7 @@ Func<scalar>* init_fn(MeshFunction *fu, const int order)
   int np = quad->get_num_points(order);
   Func<scalar>* u = new Func<scalar>(np, nc);
 
-  if (u->nc == 1)
-  {
+  if (u->nc == 1) {
     u->val = new scalar [np];
     u->dx  = new scalar [np];
     u->dy  = new scalar [np];
@@ -350,8 +333,7 @@ Func<scalar>* init_fn(MeshFunction *fu, const int order)
     memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
     memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
   }
-  else if (u->nc == 2)
-  {
+  else if (u->nc == 2) {
     u->val0 = new scalar [np];
     u->val1 = new scalar [np];
     u->curl = new scalar [np];
@@ -360,11 +342,10 @@ Func<scalar>* init_fn(MeshFunction *fu, const int order)
     memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
     memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
 
-    // This works.
     scalar *dx1 = fu->get_dx_values(1);
     scalar *dy0 = fu->get_dy_values(0);
     for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
-    // This was never tested but it should work.
+    
     scalar *dx0 = fu->get_dx_values(0);
     scalar *dy1 = fu->get_dy_values(1);
     for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
@@ -375,7 +356,7 @@ Func<scalar>* init_fn(MeshFunction *fu, const int order)
 /// Preparation of solutions.
 Func<scalar>* init_fn(Solution *fu, const int order)
 {
-  // sanity checks
+  // Sanity checks.
   if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
 
@@ -395,8 +376,7 @@ Func<scalar>* init_fn(Solution *fu, const int order)
   int np = quad->get_num_points(order);
   Func<scalar>* u = new Func<scalar>(np, nc);
 
-  if (u->nc == 1)
-  {
+  if (u->nc == 1) {
     u->val = new scalar [np];
     u->dx  = new scalar [np];
     u->dy  = new scalar [np];
@@ -408,24 +388,19 @@ Func<scalar>* init_fn(Solution *fu, const int order)
     memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
     memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-    if (space_type == HERMES_H1_SPACE)
-    {
-      if(sln_type == HERMES_SLN)
-      {
+    if (space_type == HERMES_H1_SPACE) {
+      if(sln_type == HERMES_SLN) {
         scalar *dxx = fu->get_dxx_values();
         scalar *dyy = fu->get_dyy_values();
         for (int i = 0; i < np; i++)
           u->laplace[i] = dxx[i] + dyy[i];
       }
       else if (sln_type == HERMES_CONST)
-      {
         memset(u->laplace, 0, np * sizeof(scalar));
-      }
     }
 #endif
   }
-  else if (u->nc == 2)
-  {
+  else if (u->nc == 2) {
     u->val0 = new scalar [np];
     u->val1 = new scalar [np];
     u->curl = new scalar [np];
@@ -434,11 +409,10 @@ Func<scalar>* init_fn(Solution *fu, const int order)
     memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
     memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
 
-    // This works.
     scalar *dx1 = fu->get_dx_values(1);
     scalar *dy0 = fu->get_dy_values(0);
     for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
-    // This was never tested but it should work.
+    
     scalar *dx0 = fu->get_dx_values(0);
     scalar *dy1 = fu->get_dy_values(1);
     for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
