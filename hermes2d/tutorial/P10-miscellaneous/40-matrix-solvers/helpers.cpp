@@ -60,7 +60,7 @@ bool read_n_numbers(char *row, int n, double values[]) {
 // Processes the input file. Matrix and vector will be stored in 
 // arrays of MatrixEntry and VectorEntry types, respectively.
 bool read_matrix_and_rhs(char *file_name, int &n, 
-                        Array<MatrixEntry> &mat, Array<VectorEntry> &rhs) 
+                        Array<MatrixEntry> &mat, Array<VectorEntry> &rhs, bool &b) 
 {
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return false;
@@ -71,13 +71,21 @@ bool read_matrix_and_rhs(char *file_name, int &n,
     STATE_RHS,
   } state = STATE_N;
 
+  int k = 0;
   double buffer[4];
   char row[MAX_ROW_LEN];
   while (fgets(row, MAX_ROW_LEN, file) != NULL) {
     switch (state) {
       case STATE_N:
         if (read_n_numbers(row, 1, buffer)) {
-          n = (int) buffer[0];
+          if (b){
+             n = 2*((int) buffer[0]); 
+             printf("%d\n",n);  
+          }   
+          else{ 
+             n = (int) buffer[0];
+             printf("%d\n",n);
+          } 
           state = STATE_MATRIX;
         } 
       break;
@@ -85,18 +93,41 @@ bool read_matrix_and_rhs(char *file_name, int &n,
 #ifndef H2D_COMPLEX
 
       case STATE_MATRIX:
-        if (read_n_numbers(row, 3, buffer)) {
-          MatrixEntry* me = mat.add();
-          me->set((int) buffer[0], (int) buffer[1], buffer[2]);
-        }
-	else
-        state = STATE_RHS;
+        if (b)
+            if (read_n_numbers(row, 4, buffer)) {
+           
+              printf("%d\n",k);
+              MatrixEntry* me = mat.add();
+              me->set((int) buffer[0], (int) buffer[1], buffer[2]);
+              me->set((int) buffer[0] + n, (int) buffer[1] + n, buffer[2]);
+              me->set((int) buffer[0] + n, (int) buffer[1], buffer[3]);
+              me->set((int) buffer[0], (int) buffer[1] + n, (-1)*buffer[3]);
+              k=k+4;
+            }
+ 	    else
+            state = STATE_RHS;
+
+        else
+         if (read_n_numbers(row, 3, buffer)) {
+           MatrixEntry* me = mat.add();
+           me->set((int) buffer[0], (int) buffer[1], buffer[2]);
+          }
+	  else
+          state = STATE_RHS;
       break;
 
       case STATE_RHS:
-        if (read_n_numbers(row, 2, buffer)) {
-          VectorEntry* ve = rhs.add();
-          ve->set((int) buffer[0], (scalar) buffer[1]);
+        if (b){
+          if (read_n_numbers(row, 3, buffer)) {
+             VectorEntry* ve = rhs.add();
+             ve->set((int) buffer[0], (scalar) buffer[1]);
+             ve->set((int) buffer[0] + n, (scalar) buffer[2]);
+          }
+        }   
+        else
+          if (read_n_numbers(row, 2, buffer)) {
+             VectorEntry* ve = rhs.add();
+             ve->set((int) buffer[0], (scalar) buffer[1]);
         }
       break;
     }
