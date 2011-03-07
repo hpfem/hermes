@@ -46,48 +46,14 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u)
-{
-  return 1 + pow(u, 4);
-}
-
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) {
-  return 4*pow(u, 3);
-}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/10.;
-  dy = (x+10)/10.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition. It will be projected on the FE mesh 
-// to obtain initial coefficient vector for the Newton's method.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{
-  // Using the Dirichlet lift elevated by two
-  double val = dir_lift(x, y, dx, dy) + 2;
-  return val;
-}
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
+
+// Initial condition.
+#include "initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -98,23 +64,17 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(1, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(jac), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(res), HERMES_ANY);
+  // Initialize the weak formulation
+  WeakFormHeatTransferNewton wf;
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -142,9 +102,8 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector on the coarse mesh.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)] ;
-  Solution* init_sln = new Solution(&mesh, init_cond);
-  OGProjection::project_global(&space, init_sln, coeff_vec_coarse, matrix_solver); 
-  delete init_sln;
+  InitialSolutionHeatTransfer init_sln(&mesh);
+  OGProjection::project_global(&space, &init_sln, coeff_vec_coarse, matrix_solver); 
 
   // Newton's loop on the coarse mesh. This is needed to obtain a good 
   // starting point for the Newton's method on the reference mesh.
@@ -242,11 +201,6 @@ int main(int argc, char* argv[])
         done = true;
         break;
       }
-      
-      // Project last fine mesh solution on the new coarse mesh
-      // to obtain new coars emesh solution.
-      info("Projecting reference solution on new coarse mesh for error calculation.");
-      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
     }
 
     // Clean up.
