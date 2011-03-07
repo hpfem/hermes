@@ -16,7 +16,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
+const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 
 // Problem parameters.
 const double CONST_F = 2.0;  
@@ -34,15 +34,15 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   //mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
-
-  // Enter zero Dirichlet boundary values.
-  BCValues bc_values;
+  // Initialize the weak formulation.
+  WeakFormPoisson wf(CONST_F);
+  
+  // Initialize boundary conditions
+  DirichletConstantBoundaryCondition bc(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
@@ -56,21 +56,18 @@ int main(int argc, char* argv[])
   // applied recursively to all four subelements. 
   int adapt_order_increase = 1;
   double adapt_rel_error_tol = 1e1;
-  WeakForm wf;
   if (ADAPTIVE_QUADRATURE) {
     info("Adaptive quadrature ON.");    
-    wf.add_matrix_form(bilinear_form, HERMES_SYM, HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(), 
-                       adapt_order_increase, adapt_rel_error_tol);
-    wf.add_vector_form(linear_form, HERMES_ANY, Hermes::vector<MeshFunction*>(), 
-                       adapt_order_increase, adapt_rel_error_tol);
+    wf.mfvol[0]->adapt_eval = true;
+    wf.mfvol[0]->adapt_order_increase = adapt_order_increase;
+    wf.mfvol[0]->adapt_rel_error_tol = adapt_rel_error_tol;
+    
+    wf.vfvol[0]->adapt_eval = true;
+    wf.vfvol[0]->adapt_order_increase = adapt_order_increase;
+    wf.vfvol[0]->adapt_rel_error_tol = adapt_rel_error_tol;
   }
-  else {
+  else
     info("Adaptive quadrature OFF.");    
-    wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>, 
-                       HERMES_SYM, HERMES_ANY);
-    wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>);
-  }
 
   // Initialize the FE problem.
   bool is_linear = true;
