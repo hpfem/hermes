@@ -37,10 +37,10 @@
 
 /// Report unrecoverable errors where you need to report the location of the error
 /// It also reports call stack
-#ifdef _MSC_VER		// __PRETTY_FUNCTION__ missing on MSVC; #ifdef _WIN32 was here in H3D
-#define EXIT(...) h_exit(__LINE__, __FUNCTION__, __FILE__, ## __VA_ARGS__)
+#ifndef __GNUC__    // __PRETTY_FUNCTION__ missing on MSVC;
+  #define EXIT(...) h_exit(__LINE__, __FUNCTION__, __FILE__, ## __VA_ARGS__)
 #else
-#define EXIT(...) h_exit(__LINE__, __PRETTY_FUNCTION__, __FILE__, ## __VA_ARGS__)
+  #define EXIT(...) h_exit(__LINE__, __PRETTY_FUNCTION__, __FILE__, ## __VA_ARGS__)
 #endif
 
 void HERMES_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
@@ -54,10 +54,10 @@ void HERMES_API warning(const char *warn, ...);
 
 /// Check that memory allocation was ok, it not, report an error (also dump call stack) and
 /// terminate
-#ifdef _MSC_VER		// __PRETTY_FUNCTION__ missing on MSVC; #ifdef _WIN32 was here in H3D
-#define MEM_CHECK(var) h_mem_check(__LINE__, __FUNCTION__, __FILE__, var)
+#ifndef __GNUC__  // __PRETTY_FUNCTION__ missing on MSVC;
+  #define MEM_CHECK(var) h_mem_check(__LINE__, __FUNCTION__, __FILE__, var)
 #else
-#define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
+  #define MEM_CHECK(var) h_mem_check(__LINE__, __PRETTY_FUNCTION__, __FILE__, var)
 #endif
 
 void HERMES_API h_mem_check(int line, const char *func, const char *file, void *var);

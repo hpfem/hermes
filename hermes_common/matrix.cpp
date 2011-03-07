@@ -211,7 +211,6 @@ int SparseMatrix::get_num_indices()
   return total;
 }
 
-// This function is identical in H2D and H3D.
 SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
   _F_
@@ -249,7 +248,6 @@ SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
   return NULL;
 }
 
-// This function is identical in H2D and H3D.
 Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   _F_
