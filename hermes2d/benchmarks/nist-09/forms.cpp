@@ -1,51 +1,84 @@
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+#include "weakform/weakform.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/boundaryconditions.h"
+
+// Exact solution.
+#include "exact_solution.cpp"
+
+class WeakFormPoisson : public WeakForm
 {
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
+public:
+  WeakFormPoisson(ExactSolutionNIST09* exact_solution) : WeakForm(1)
+  {
+    add_matrix_form(new MatrixFormVolPoisson(0, 0));
+    
+    add_vector_form(new VectorFormVolPoisson(0, exact_solution));
+  };
 
-template<typename Real>
-Real rhs(Real x, Real y)
-{  
-  if (PROB_PARAM == 0){
-   ALPHA = 20;
-   X_LOC = -0.05;
-   Y_LOC = -0.05;
-   R_ZERO = 0.7;
-   }
-else if (PROB_PARAM == 1){
-   ALPHA = 1000;
-   X_LOC = -0.05;
-   Y_LOC = -0.05;
-   R_ZERO = 0.7;
-   }
-else if (PROB_PARAM == 2){
-   ALPHA = 1000;
-   X_LOC = 1.5;
-   Y_LOC = 0.25;
-   R_ZERO = 0.92;
-   }
-else{
-   ALPHA = 50;
-   X_LOC = 0.5;
-   Y_LOC = 0.5;
-   R_ZERO = 0.25;
-   }
+private:
+  class MatrixFormVolPoisson : public WeakForm::MatrixFormVol
+  {
+  public:
+    MatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
 
-  Real a = pow(x - X_LOC, 2);
-  Real b = pow(y - Y_LOC, 2);
-  Real c = sqrt(a + b);
-  Real d = ((ALPHA*x - (ALPHA * X_LOC)) * (2*x - (2 * X_LOC)));
-  Real e = ((ALPHA*y - (ALPHA * Y_LOC)) * (2*y - (2 * Y_LOC)));
-  Real f = (pow(ALPHA*c - (ALPHA * R_ZERO), 2) + 1.0);
-  Real g = (ALPHA * c - (ALPHA * R_ZERO));
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+    }
 
-  return ((ALPHA/(c * f)) - (d/(2 * pow(a + b, 1.5) * f)) - ((ALPHA * d * g)/((a + b) * pow(f, 2))) + 
-         (ALPHA/(c * f)) - (e/(2 * pow(a + b, 1.5) * f)) - ((ALPHA * e * g)/((a + b) * pow(f, 2))));
-}
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
 
-template<typename Real, typename Scalar>
-Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    }
+  };
+
+  class VectorFormVolPoisson : public WeakForm::VectorFormVol
+  {
+  public:
+    VectorFormVolPoisson(int i, ExactSolutionNIST09* exact_solution) : WeakForm::VectorFormVol(i), exact_solution(exact_solution) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result -= wt[i] * (exact_solution->rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
+      return result;
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+    
+    // Members.
+    ExactSolutionNIST09* exact_solution;
+  };
+};
+
+class DirichletFunctionBoundaryConditionExact : public DirichletBoundaryCondition
 {
-  return -int_F_v<Real, Scalar>(n, wt, rhs, v, e);
-}
+public:
+  DirichletFunctionBoundaryConditionExact(std::string marker, ExactSolutionNIST09* exact_solution) : 
+        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    markers.push_back(marker);
+  };
+  
+  ~DirichletFunctionBoundaryConditionExact() {};
+
+  virtual BoundaryConditionValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar function(double x, double y) const {
+    return exact_solution->fn(x, y);
+  };
+
+  ExactSolutionNIST09* exact_solution;
+};
