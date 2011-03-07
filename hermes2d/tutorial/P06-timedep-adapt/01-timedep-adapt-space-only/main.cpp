@@ -67,52 +67,15 @@ const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newt
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
 
-// Thermal conductivity (temperature-dependent).
-// Note: for any u, this function has to be positive.
-template<typename Real>
-Real lam(Real u)
-{
-  return 1 + pow(u, 4);
-}
+const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
-// Derivative of the thermal conductivity with respect to 'u'.
-template<typename Real>
-Real dlam_du(Real u) {
-  return 4*pow(u, 3);
-}
-
-// This function is used to define Dirichlet boundary conditions.
-double dir_lift(double x, double y, double& dx, double& dy) {
-  dx = (y+10)/100.;
-  dy = (x+10)/100.;
-  return (x+10)*(y+10)/100.;
-}
-
-// Initial condition.
-scalar init_cond(double x, double y, double& dx, double& dy)
-{
-  return dir_lift(x, y, dx, dy);
-}
-
-// Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  double dx, dy;
-  return dir_lift(x, y, dx, dy);
-}
-
-// Heat sources (can be a general function of 'x' and 'y').
-template<typename Real>
-Real heat_src(Real x, Real y)
-{
-  return 1.0;
-}
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
+
+// Initial condition.
+#include "initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -124,30 +87,23 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
   mesh.copy(&basemesh);
-
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  
+  // Initialize boundary conditions.
+  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
   // Convert initial condition into a Solution.
-  Solution sln_prev_time;
-  sln_prev_time.set_exact(&mesh, init_cond);
+  InitialSolutionHeatTransfer sln_prev_time(&mesh);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
-  wf.add_vector_form(callback(F_euler), HERMES_ANY, &sln_prev_time);
+  // Initialize the weak formulation
+  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_prev_time);
 
   // Initialize the discrete problem.
   bool is_linear = false;
