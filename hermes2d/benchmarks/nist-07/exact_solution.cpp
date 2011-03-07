@@ -1,12 +1,19 @@
-static double fn(double x, double y)
+class ExactSolutionNIST07 : public ExactSolution1D
 {
-  return pow(x, ALPHA);
-}
+public:
+  ExactSolutionNIST07(Mesh* mesh, double alpha) : ExactSolution1D(mesh), alpha(alpha) {};
 
-static double fndd(double x, double y, double& dx, double& dy)
-{
-  dx = (ALPHA/(pow(x, 0.4)));
-  dy = 0;
+  double fn(double x, double y) {
+    return pow(x, alpha);
+  };
 
-  return fn(x, y);
-}
+  // Function representing an exact one-dimension valued solution.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    dx = (alpha/(pow(x, 0.4)));
+    dy = 0;
+    return fn(x, y);
+  };
+
+  // Members.
+  double alpha;
+};
