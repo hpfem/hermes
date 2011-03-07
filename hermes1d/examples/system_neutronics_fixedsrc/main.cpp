@@ -11,7 +11,7 @@
 //  (homogeneous b.c. of Neumann/Dirichlet type, respectively). There is
 //  a uniform source of 1.5 fast neutrons (group 1) per cm per sec. 
 //	Reference:
-// 		HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
+// 		HP-MESH ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
 // 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
 //		Example 4.A (pp. 168).
 //
@@ -36,7 +36,7 @@
 // General input (external source problem).
 
 bool flag = false;                      // Flag for debugging purposes.
-bool verbose = true;										
+bool verbose = true;
 
 int N_SLN = 1;                          // Number of solutions.
 
@@ -52,7 +52,16 @@ int main()
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData();
-  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  
+  // Boundary conditions.
+  Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>();
+  Hermes::vector<BCSpec *>DIR_BC_RIGHT;
+  
+  for (int g = 0; g < N_GRP; g++)  
+    DIR_BC_RIGHT.push_back(new BCSpec(g,flux_right_surf[g]));
+  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions,
+                           DIR_BC_LEFT, DIR_BC_RIGHT, N_GRP, N_SLN);  
   delete md;
   
   // Enumerate basis functions, info for user.
@@ -62,11 +71,6 @@ int main()
   // Plot the space.
   space->plot("space.gp");
 
-  for (int g = 0; g < N_GRP; g++)  
-  {
-    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-  }
-  
   // Initialize the weak formulation.
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jacobian_fuel_0_0, NULL, fuel);
@@ -102,7 +106,7 @@ int main()
 
     // Assemble the Jacobian matrix and residual vector.
     dp->assemble(coeff_vec, matrix, rhs);
-
+    
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
 

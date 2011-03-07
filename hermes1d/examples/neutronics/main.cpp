@@ -128,8 +128,13 @@ int main()
   int material_markers[N_MAT] = {Marker_inner, Marker_outer, Marker_reflector };
   int subdivisions[N_MAT] = {N_subdiv_inner, N_subdiv_outer, N_subdiv_reflector };
 
+  // Boundary conditions.
+  Hermes::vector<BCSpec *>DIR_BC_LEFT;
+  Hermes::vector<BCSpec *>DIR_BC_RIGHT;
+  
   // Create space.
-  Space* space = new Space(N_MAT, interfaces, poly_orders, material_markers, subdivisions, N_GRP, N_SLN);
+  Space* space = new Space(N_MAT, interfaces, poly_orders, material_markers, subdivisions,
+                           DIR_BC_LEFT, DIR_BC_RIGHT, N_GRP, N_SLN);
   // Enumerate basis functions, info for user.
   int ndof = Space::get_num_dofs(space);
   info("ndof: %d", ndof);
@@ -137,7 +142,7 @@ int main()
   // Initial approximation: u = 1.
   double K_EFF_old;
   double init_val = 1.0;
-  set_vertex_dofs_constant(space, init_val, 0);
+  set_vertex_dofs_constant(space, init_val);
   
   // Initialize the weak formulation.
   WeakForm wf;
@@ -161,7 +166,7 @@ int main()
     // Obtain fission source.
     int current_solution = 0, previous_solution = 1;
     copy_dofs(current_solution, previous_solution, space);
-		
+
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
 
@@ -224,10 +229,10 @@ int main()
     K_EFF_old = K_EFF;
     K_EFF = calc_fission_yield(space);		
     info("K_EFF_%d = %f", i, K_EFF);
-		
+
     if (fabs(K_EFF - K_EFF_old)/K_EFF < TOL_SI) break;
   }
-	
+
   // Plot the critical (i.e. steady-state) neutron flux.
   Linearizer l(space);
   l.plot_solution("solution.gp");

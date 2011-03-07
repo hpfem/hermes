@@ -43,7 +43,17 @@ int main()
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData();
-  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  
+  // Boundary conditions.
+  Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>();
+  Hermes::vector<BCSpec *>DIR_BC_RIGHT;
+  
+  for (int g = 0; g < N_GRP; g++)  
+    DIR_BC_RIGHT.push_back(new BCSpec(g,flux_right_surf[g]));
+  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions,
+                           DIR_BC_LEFT, DIR_BC_RIGHT, N_GRP, N_SLN);  
+                           
   delete md;
   
   // Enumerate basis functions, info for user.
@@ -53,11 +63,6 @@ int main()
   // Plot the space.
   space->plot("space.gp");
 
-  for (int g = 0; g < N_GRP; g++)  
-  {
-    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-  }
-  
   // Initialize the weak formulation.
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jacobian_fuel_0_0, NULL, fuel);
