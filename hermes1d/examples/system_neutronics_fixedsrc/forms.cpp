@@ -145,7 +145,7 @@ double residual_surf_left_0(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
 {
 	Material_type m = fuel;	// material of the leftmost cell
   int comp = 0;    				// solution component (energy group)
-  return 1./D[m][comp] * current_left_surf[comp] * v; 
+  return current_left_surf[comp] * v; 
 }
 double residual_surf_left_1(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
@@ -153,5 +153,5 @@ double residual_surf_left_1(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
 {
 	Material_type m = fuel; // material of the leftmost cell
   int comp = 1;    				// solution component (energy group)
-  return 1./D[m][comp] * current_left_surf[comp] * v; 
+  return current_left_surf[comp] * v; 
 }

@@ -230,17 +230,17 @@ double residual_surf_left_0(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
         double dvdx, void *user_data)
 {
-	Material_type m = fuel;	// material of the leftmost cell
-  int comp = 0;    				// solution component (energy group)
-  return 1./D[m][comp] * current_left_surf[comp] * v; 
+  Material_type m = fuel; // material of the leftmost cell
+  int comp = 0;           // solution component (energy group)
+  return current_left_surf[comp] * v; 
 }
 double residual_surf_left_1(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
         double dvdx, void *user_data)
 {
-	Material_type m = fuel; // material of the leftmost cell
-  int comp = 1;    				// solution component (energy group)
-  return 1./D[m][comp] * current_left_surf[comp] * v; 
+  Material_type m = fuel; // material of the leftmost cell
+  int comp = 1;           // solution component (energy group)
+  return current_left_surf[comp] * v; 
 }
 
 /* EXTRAPOLATED ZERO FLUX B.C. */
@@ -249,35 +249,35 @@ double jacobian_surf_right_0(double x, double u, double dudx,
         double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
 {
-	Material_type m = water;
-	int comp = 0;
-  return 0.5 / D[m][comp] * u * v;
+  Material_type m = water;
+  int comp = 0;
+  return 0.5 * u * v;
 }
 double jacobian_surf_right_1(double x, double u, double dudx,
         double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
 {
-	Material_type m = water;
-	int comp = 1;
-  return 0.5 / D[m][comp] * u * v;
+  Material_type m = water;
+  int comp = 1;
+  return 0.5 * u * v;
 }
 
 double residual_surf_right_0(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
         double dvdx, void *user_data)
 {
-	Material_type m = water;
+  Material_type m = water;
   int comp = 0;    // solution component
   int last_newton = 0, last_global = 1;   // solution indices
-  return 0.5 / D[m][comp] * u_prev[last_newton][comp] * v; 
+  return 0.5 * u_prev[last_newton][comp] * v; 
 }
 
 double residual_surf_right_1(double x, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM], 
         double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], double v,
         double dvdx, void *user_data)
 {
-	Material_type m = water;
+  Material_type m = water;
   int comp = 1;    // solution component
   int last_newton = 0, last_global = 1;   // solution indices
-  return 0.5 / D[m][comp] * u_prev[last_newton][comp] * v; 
+  return 0.5 * u_prev[last_newton][comp] * v; 
 }
