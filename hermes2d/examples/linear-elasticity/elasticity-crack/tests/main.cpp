@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   // This also initializes the multimesh hp-FEM.
   v_mesh.copy(&u_mesh);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types_xy;
   bc_types_xy.add_bc_dirichlet(BDY_LEFT);
   bc_types_xy.add_bc_neumann(Hermes::vector<int>(BDY_TOP, BDY_REST));

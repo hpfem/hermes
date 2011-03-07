@@ -74,7 +74,7 @@ const std::string BDY_DIRICHLET = "1";
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
   BoundaryConditions bcs(&bc);
 

@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
   mesh2.refine_all_elements();
   mesh2.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 

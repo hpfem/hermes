@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
 

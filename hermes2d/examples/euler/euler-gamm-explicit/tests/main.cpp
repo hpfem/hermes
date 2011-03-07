@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
   mesh.refine_element_id(1151);
   mesh.refine_element_id(1152);
 
-  // Enter boundary markers.  
+  // Initialize boundary conditions.  
   BCTypes bc_types;
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
 

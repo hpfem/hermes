@@ -319,7 +319,7 @@ int main(int argc, char* argv[])
   // Define a macro for easier manipulation with Solution*/MeshFunction* pairs.
   #define mkptr(a) slptr_##a, mfptr_##a
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_neumann(BDY_SYM);
   bc_types.add_bc_newton(BDY_VACUUM);

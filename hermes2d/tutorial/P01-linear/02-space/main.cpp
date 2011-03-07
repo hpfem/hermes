@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   // Refine all elements (optional).
   mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   // (If no markers are entered, default is a natural BC).
   BoundaryConditions bcs;
 

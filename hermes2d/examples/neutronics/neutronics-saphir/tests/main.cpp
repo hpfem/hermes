@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   // Perform initial uniform mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_NEUMANN));
 

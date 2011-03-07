@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_GROUND);
   bc_types.add_bc_newton(BDY_AIR);
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
   info("Visualizing Mesh and Orders extracted from the Solution.");
  
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types_null;
   BCValues bc_values_null;
 

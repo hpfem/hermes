@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers. 
+  // Initialize boundary conditions. 
   // Note: "essential" means that solution value is prescribed.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));

@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_INNER);
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));

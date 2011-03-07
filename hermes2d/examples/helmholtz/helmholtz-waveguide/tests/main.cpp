@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     // Perform uniform mesh refinement.
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
-    // Enter boundary markers.
+    // Initialize boundary conditions.
     BCTypes bc_types;    
     bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_LEFT, BDY_PERFECT));
     bc_types.add_bc_newton(Hermes::vector<int>(BDY_IMPEDANCE));

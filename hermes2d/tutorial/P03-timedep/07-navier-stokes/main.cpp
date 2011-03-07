@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
   mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
 
-  // Initialize boundary conditions
+  // Initialize boundary conditions.
   DirichletFunctionBoundaryCondition bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   DirichletConstantBoundaryCondition bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   BoundaryConditions bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));

@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
                                               // one solution lives on basemesh and the 
                                               // other on its descendant.
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_REST));
 

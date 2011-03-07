@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
 

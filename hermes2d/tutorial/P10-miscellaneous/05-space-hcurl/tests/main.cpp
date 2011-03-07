@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
   // Create an Hcurl space with default shapeset.
   // (BC types and essential BC values not relevant.)
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
 
   // Enter Dirichlet boundary values.

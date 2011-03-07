@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(vertex_id_nucleus,10);
   for (int i=0;i<FINAL_REF_NUM;i++) mesh.refine_all_elements();
 
-  // Enter boundary markers. 
+  // Initialize boundary conditions. 
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP));
 

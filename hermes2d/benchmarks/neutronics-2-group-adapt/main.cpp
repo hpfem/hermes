@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
   else // Use just one mesh for both groups.
     for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_FLUX);
   bc_types.add_bc_neumann(BDY_SYMMETRY);

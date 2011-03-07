@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
   mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND));
   bc_types.add_bc_newton(BDY_AIR);

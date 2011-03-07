@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakFormHeatTransferNewton wf;
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
   BoundaryConditions bcs(&bc);
 

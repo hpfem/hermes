@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
   // Refine towards boundary.
   mesh.refine_towards_boundary(1, 1);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY);
 

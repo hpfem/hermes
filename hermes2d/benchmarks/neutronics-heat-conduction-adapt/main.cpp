@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
   mesh_T.copy(&basemesh);
   mesh_phi.copy(&basemesh);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 

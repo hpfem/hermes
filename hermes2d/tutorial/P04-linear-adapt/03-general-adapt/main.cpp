@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
   bc_types.add_bc_neumann(BDY_VERTICAL);

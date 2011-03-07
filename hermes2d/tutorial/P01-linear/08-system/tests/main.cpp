@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("sample.mesh", &mesh);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_1);
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_3, BDY_4, BDY_5));

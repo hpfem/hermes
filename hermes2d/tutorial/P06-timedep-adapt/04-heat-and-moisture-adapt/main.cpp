@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
   T_mesh.copy(&basemesh);
   M_mesh.copy(&basemesh);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes temp_bc_type, moist_bc_type;
   temp_bc_type.add_bc_dirichlet(BDY_REACTOR_WALL);
   temp_bc_type.add_bc_neumann(BDY_SYMMETRY);

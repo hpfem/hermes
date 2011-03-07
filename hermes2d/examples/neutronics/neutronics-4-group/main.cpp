@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   iter3.set_const(&mesh, 1.00);
   iter4.set_const(&mesh, 1.00);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_neumann(BDY_SYM);
   bc_types.add_bc_newton(BDY_VACUUM);

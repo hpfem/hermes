@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
   // Perform initial uniform mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(WATER_2, IRON));
   bc_types.add_bc_neumann(WATER_1); 

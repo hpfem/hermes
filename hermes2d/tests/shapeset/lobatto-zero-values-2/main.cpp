@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
   // We load the mesh on a triangle [-1,-1][1,-1][-1,1] domain.
   mloader.load("ref_triangle.mesh", &mesh);            
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   // (If no markers are entered, default is a natural BC).
   BCTypes bc_types;
 

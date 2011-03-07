@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY_TOP);
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_TOP);
   bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));

@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     else mesh.refine_element_id(0, 0);
   }
 
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 

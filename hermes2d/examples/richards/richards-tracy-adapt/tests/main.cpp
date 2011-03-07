@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY);
   basemesh.copy(&mesh);
   
-  // Enter boundary markers.
+  // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_REST));
 
