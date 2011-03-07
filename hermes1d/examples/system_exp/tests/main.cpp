@@ -38,7 +38,6 @@ double f_1(double x) {
 // Weak forms for Jacobi matrix and residual.
 #include "forms.cpp"
 
-
 int main() 
 {
   // Time measurement.
@@ -76,7 +75,6 @@ int main()
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  bool success = false;
   while (1) {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
@@ -98,7 +96,7 @@ int main()
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+    for(int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Solve the linear system.
     if(!solver->solve())
@@ -120,6 +118,18 @@ int main()
 
   // Test variable.
   info("ndof = %d.", Space::get_num_dofs(space));
+
+  bool success = true;
+  info("number of iterations: %d", it);
+  if (it > 2) success = false;
+  //for (int i = 0; i < 6; i++) printf("[%d]... %g\n", i, coeff_vec[i]);
+  if (fabs(coeff_vec[0] - 1.64873) > 1e-4) success = false;
+  if (fabs(coeff_vec[1] - 0.0659358) > 1e-4) success = false;
+  if (fabs(coeff_vec[2] - 0.10871) > 1e-4) success = false;
+  if (fabs(coeff_vec[3] - 0.606548) > 1e-4) success = false;
+  if (fabs(coeff_vec[4] - 0.0399916) > 1e-4) success = false;
+  if (fabs(coeff_vec[5] - 0.0242557) > 1e-4) success = false;
+
   if (success)
   {
     info("Success!");
