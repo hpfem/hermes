@@ -52,7 +52,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -73,14 +73,8 @@ const double ALPHA_P = 1000.0;
 
 const double EPSILON = 1.0 / 100.0;
  
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y) { return fn(x, y);}
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -95,27 +89,21 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Set exact solution.
+  ExactSolutionNIST12 exact(&mesh, ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
+  WeakFormPoisson wf(&exact);
+
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionExact bc(BDY_DIRICHLET, &exact);
+  BoundaryConditions bcs(&bc);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
