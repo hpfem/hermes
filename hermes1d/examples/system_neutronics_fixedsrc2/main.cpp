@@ -10,7 +10,7 @@
 //  on both the right and left boundaries of the core (homogeneous Dirichlet).
 //  There is an assembly-wise constant source of fast (group 1) neutrons. 
 //  Reference:
-//  HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
+//  HP-MESH ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
 //  A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
 //  Example 3 (pp. 154).
 //

@@ -11,7 +11,7 @@
 //  (homogeneous b.c. of Neumann/Dirichlet type, respectively). There is
 //  a uniform source of 1.5 fast neutrons (group 1) per cm per sec. 
 //	Reference:
-// 		HP-Space ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
+// 		HP-MESH ADAPTATION FOR 1-D MULTIGROUP NEUTRON DIFFUSION PROBLEMS,
 // 		A MSc. Thesis by YAQI WANG, Texas A&M University, 2006,
 //		Example 4.A (pp. 168).
 //
