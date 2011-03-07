@@ -78,18 +78,37 @@ class HERMES_API Space {
               int n_sln = 1, bool print_banner = true);
         Space(double a, double b, int n_base_elem, 
               Hermes::vector<std::pair<int, double> *> left_boundary_conditions = 
-              ( Hermes::vector<std::pair<int, double> *>() ), 
-	      Hermes::vector<std::pair<int, double> *> right_boundary_conditions = 
-              (Hermes::vector<std::pair<int, double> *>() ), int p_init = 1, int n_eq = 1, 
-              int n_sln = 1, bool print_banner = true);
+                ( Hermes::vector<std::pair<int, double> *>() ), 
+              Hermes::vector<std::pair<int, double> *> right_boundary_conditions = 
+                ( Hermes::vector<std::pair<int, double> *>() ), 
+              int p_init = 1, 
+              int n_eq = 1, 
+              int n_sln = 1, 
+              bool print_banner = true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
         // pts_array[]...  array of macroelement grid points
         // p_array[]...    array of macroelement poly degrees
         // m_array[]...    array of macroelement material markers
         // div_array[]...  array of macroelement equidistant divisions
-        Space(int n_macro_elem, double *pts_array, int *p_array, int *m_array, 
-              int *div_array, int n_eq=1, int n_sln=1, bool print_banner=true);
+        Space(int n_macro_elem, 
+              double *pts_array, int *p_array, int *m_array, int *div_array, 
+              Hermes::vector<std::pair<int, double> *> left_boundary_conditions = 
+                ( Hermes::vector<std::pair<int, double> *>() ), 
+              Hermes::vector<std::pair<int, double> *> right_boundary_conditions = 
+                ( Hermes::vector<std::pair<int, double> *>() ), 
+              int n_eq=1, 
+              int n_sln=1, 
+              bool print_banner=true);
+        
+        //FIXME: We currently do not have a Python wrapper for Hermes::vector, so we
+        // cannot wrap the above constructor. This constructor is required to ensure
+        // compatibility with the wrappers, but should not be used.
+        Space(int n_macro_elem, 
+              double *pts_array, int *p_array, int *m_array, int *div_array, 
+              int n_eq=1, 
+              int n_sln=1, 
+              bool print_banner=true);
         
         void init(double a, double b, int n_base_elem, int p_init, int n_eq, 
                   int n_sln, bool print_banner);

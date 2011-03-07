@@ -33,7 +33,7 @@
 
 // General input (eigenvalue problem).
 
-bool flag = false;					// Flag for debugging purposes.
+bool flag = false;    // Flag for debugging purposes.
 bool verbose = true;
 
 // Power method initialization.
@@ -54,7 +54,17 @@ int main()
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
   SpaceData *md = new SpaceData(verbose);		
-  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  
+  // Boundary conditions.
+  Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>();
+  Hermes::vector<BCSpec *>DIR_BC_RIGHT;
+  
+  for (int g = 0; g < N_GRP; g++)  
+    DIR_BC_RIGHT.push_back(new BCSpec(g,flux_right_surf[g]));
+  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions,
+                           DIR_BC_LEFT, DIR_BC_RIGHT, N_GRP, N_SLN);  
+                           
   delete md;
   
   // Enumerate basis functions, info for user.
@@ -70,10 +80,7 @@ int main()
   double init_val = 1.0;
 
   for (int g = 0; g < N_GRP; g++)  
-  {
     set_vertex_dofs_constant(space, init_val, g);
-    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-  }
   
   // Initialize the weak formulation.
   WeakForm wf(2);

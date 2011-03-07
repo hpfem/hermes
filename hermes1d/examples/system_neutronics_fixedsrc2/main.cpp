@@ -34,7 +34,7 @@
 
 // General input (external source problem).
 bool flag = false;                      // Flag for debugging purposes.
-bool verbose = true;										
+bool verbose = true;
 
 int N_SLN = 1;                          // Number of solutions.
 
@@ -49,8 +49,20 @@ int main()
 {
   // Create space.
   // Transform input data to the format used by the "Space" constructor.
-  SpaceData *md = new SpaceData();		
-  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions, N_GRP, N_SLN);  
+  SpaceData *md = new SpaceData();
+  
+  // Boundary conditions.
+  Hermes::vector<BCSpec *>DIR_BC_LEFT;
+  Hermes::vector<BCSpec *>DIR_BC_RIGHT;
+  
+  for (int g = 0; g < N_GRP; g++) 
+  {
+    DIR_BC_LEFT.push_back(new BCSpec(g,flux_left_surf[g]));
+    DIR_BC_RIGHT.push_back(new BCSpec(g,flux_right_surf[g]));
+  }
+  
+  Space* space = new Space(md->N_macroel, md->interfaces, md->poly_orders, md->material_markers, md->subdivisions,
+                           DIR_BC_LEFT, DIR_BC_RIGHT, N_GRP, N_SLN);  
   delete md;
   
   // Enumerate basis functions, info for user.
@@ -58,14 +70,6 @@ int main()
   info("ndof: %d", ndof);
 
   // Plot the space.
-  space->plot("space.gp");
-
-  for (int g = 0; g < N_GRP; g++)  
-  {
-    space->set_bc_left_dirichlet(g, flux_left_surf[g]);
-    space->set_bc_right_dirichlet(g, flux_right_surf[g]);
-  }
-  
   // Initialize the weak formulation.
   WeakForm wf(2);
   wf.add_matrix_form(0, 0, jacobian_mat1_0_0, NULL, mat1);
@@ -100,7 +104,7 @@ int main()
   // Fill vector coeff_vec using dof and coeffs arrays in elements.
   double *coeff_vec = new double[Space::get_num_dofs(space)];
   get_coeff_vector(space, coeff_vec);
-
+  
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -114,6 +118,14 @@ int main()
 
     // Assemble the Jacobian matrix and residual vector.
     dp->assemble(coeff_vec, matrix, rhs);
+    
+    #include "../../../hermes_common/solver/umfpack_solver.h"
+    CSCMatrix *mm = static_cast<CSCMatrix*>(matrix);
+    UMFPackVector *mv = static_cast<UMFPackVector*>(rhs);
+    FILE *fp = fopen("data.m", "wt");
+    mm->dump(fp, "A");
+    mv->dump(fp, "b");
+    fclose(fp);
 
     // Calculate the l2-norm of residual vector.
     double res_l2_norm = get_l2_norm(rhs);
