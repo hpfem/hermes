@@ -281,8 +281,7 @@ bool read_matrix_and_rhs(char *file_name, int &n,
       case STATE_MATRIX:
         if (read_n_numbers(row, 4, buffer)) {
           complex<double> cmplx_buffer(buffer[2], buffer[3]);
-          MatrixEntry* me = mat.add();
-          me->set((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer);
+          mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer));
         }
 	else
         state = STATE_RHS;
@@ -291,8 +290,7 @@ bool read_matrix_and_rhs(char *file_name, int &n,
       case STATE_RHS:
         if (read_n_numbers(row, 3, buffer)) {
           complex<double> cmplx_buffer(buffer[1], buffer[2]);
-          VectorEntry* ve = rhs.add();
-          ve->set((int) buffer[0], (scalar) cmplx_buffer);
+          rhs[(int) buffer[0]] = (scalar) cmplx_buffer;
         }
       break;
     }
