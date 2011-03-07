@@ -9,7 +9,14 @@ cython_add_module(cython_utils)
 cython_add_module(numpy_utils)
 cython_add_module(matrix)
 
-target_link_libraries(matrix ${HERMES_COMMON_LIB_REAL})
+# TODO: We currently allow only one version of matrix.so - if only the release
+# version of hermes_common is being built, matrix.so will be linked with that
+# version, otherwise it will be always linked with the debug version.
+if (HERMES_COMMON_DEBUG)
+    target_link_libraries(matrix ${HERMES_COMMON_LIB_REAL_DEBUG})
+else (HERMES_COMMON_DEBUG)
+    target_link_libraries(matrix ${HERMES_COMMON_LIB_REAL_RELEASE})
+endif (HERMES_COMMON_DEBUG)
 
 # FIXME: Seems that 'cython_utils' and 'matrix' aren't used outside H1D - verify
 # and possibly make a switch here.
