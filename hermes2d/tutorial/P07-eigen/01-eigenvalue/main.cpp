@@ -28,7 +28,7 @@ const double TOL = 1e-10;                         // Pysparse parameter: Error t
 const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
 
 // Boundary markers.
-const int BDY_ALL = 1;
+const std::string BDY_ALL = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -46,28 +46,23 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_ALL);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_ALL);
+  DirichletConstantBoundaryCondition bc(BDY_ALL, 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
   info("ndof: %d.", ndof);
 
-  // Initialize the weak formulation for the left hand side, i.e., H.
-  WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(callback(bilinear_form_left));
-  wf_right.add_matrix_form(callback(bilinear_form_right));
+  // Initialize the weak formulation.
+  WeakFormEigenLeft wf_left;
+  WeakFormEigenRight wf_right;
 
   // Initialize matrices.
   RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
   RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
 
-  // Assemble matrices.
+  // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dp_left(&wf_left, &space, is_linear);
   dp_left.assemble(matrix_left.get());
@@ -88,7 +83,7 @@ int main(int argc, char* argv[])
   // Reading solution vectors and visualizing.
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
   int neig = es.get_n_eigs();
-  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvalues.");  
+  if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     eigenval[ieig] = es.get_eigenvalue(ieig);
     int n;

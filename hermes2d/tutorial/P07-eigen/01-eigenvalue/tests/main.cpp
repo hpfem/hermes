@@ -16,7 +16,7 @@ using Teuchos::rcp;
 using Hermes::EigenSolver;
 
 // Boundary markers.
-const int BDY_ALL = 1;
+const std::string BDY_ALL = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -34,22 +34,17 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_ALL);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_ALL);
+  DirichletConstantBoundaryCondition bc(BDY_ALL, 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d.", ndof);
 
   // Initialize the weak formulation for the left hand side, i.e., H.
-  WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(callback(bilinear_form_left));
-  wf_right.add_matrix_form(callback(bilinear_form_right));
+  WeakFormEigenLeft wf_left;
+  WeakFormEigenRight wf_right;
 
   // Initialize matrices.
   RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
