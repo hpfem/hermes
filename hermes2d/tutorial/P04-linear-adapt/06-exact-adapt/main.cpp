@@ -5,8 +5,7 @@
 using namespace RefinementSelectors;
 
 // This example shows how to adapt the mesh to match an arbitrary 
-// given function (no PDE solved). The definition of the function 
-// f() is below.
+// given function (no PDE solved). 
 //
 // The following parameters can be changed:
 
@@ -40,13 +39,8 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// This function can be modified.
-scalar f(double x, double y, double& dx, double& dy)
-{
-  dx = 0.25 * pow(x*x + y*y, -0.75) * 2 * x;
-  dy = 0.25 * pow(x*x + y*y, -0.75) * 2 * y;
-  return pow(x*x + y*y, 0.25);
-}
+// Exact solution can be modified.
+#include "exact_solution.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -58,22 +52,19 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
-
   
-  // Enter boundary markers.
-  BCTypes bc_types;
-  
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
+  // Empty boundary conditions.
+  BoundaryConditions bcs;
  
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf_dummy;
 
   // Initialize coarse and reference mesh solution.
-  Solution sln, ref_sln;
+  Solution sln;
+  ExactSolutionCustom* ref_sln = NULL;
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -100,14 +91,16 @@ int main(int argc, char* argv[])
     // Assign the function f() to the fine mesh.
     info("Assigning f() to the reference mesh.");
     bool is_linear = true;
-    ref_sln.set_exact(ref_space->get_mesh(), f);
+    if(ref_sln != NULL)
+      delete ref_sln;
+    ref_sln = new ExactSolutionCustom(ref_space->get_mesh());
 
     // Time measurement.
     cpu_time.tick();
     
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection::project_global(&space, ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);
@@ -117,7 +110,7 @@ int main(int argc, char* argv[])
     info("Calculating exact error."); 
     Adapt* adaptivity = new Adapt(&space);
     // Note: the error estimate is now equal to the exact error.
-    double err_exact_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    double err_exact_rel = adaptivity->calc_err_est(&sln, ref_sln) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_exact_rel: %g%%", 
@@ -156,7 +149,7 @@ int main(int argc, char* argv[])
 
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
-  sview.show(&ref_sln);
+  sview.show(ref_sln);
 
   // Wait for all views to be closed.
   View::wait();
