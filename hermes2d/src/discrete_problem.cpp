@@ -672,7 +672,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
         continue;
       if (fabs(mfv->scaling_factor) < 1e-12)
         continue;
-      if (mfv->area != HERMES_ANY && !(marker == boundary_markers_conversion->get_internal_marker(mfv->area)))
+      if (mfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->area)))
         continue;
 
       // If a block scaling table is provided, and if the scaling coefficient
@@ -814,7 +814,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       continue;
     if (fabs(vfv->scaling_factor) < 1e-12) 
       continue;
-    if (vfv->area != HERMES_ANY && !(marker == boundary_markers_conversion->get_internal_marker(vfv->area))) 
+    if (vfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->area))) 
       continue;
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
