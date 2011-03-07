@@ -19,7 +19,7 @@ void solve(Solver &solver, int n) {
   if (solver.solve()) {
     scalar *sln = solver.get_solution();
     info("Matrix solve successful.");
-    printf("Solution vector: ");
+    printf("Solution vector: \n");
     for (int i = 0; i < n; i++) {
       printf(SCALAR_FMT"\n", SCALAR(sln[i]));
     }
@@ -50,11 +50,17 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
 
   // Prepare to read from file.
   int n;                               // Matrix size.
+  bool b;                              // Decides do we turn complex matrix to real
   Array<MatrixEntry> ar_mat;           // Matrix in coordinate format.
   Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
 
+  if (argc == 4 && strcasecmp(argv[3],"complex_matrix_to_real") == 0)
+     b = true;
+  else
+     b = false;
+
   // Read matrix and rhs from file.
-  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs))
+  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, b))
     error("Failed to read the matrix and rhs.");
 
   if (strcasecmp(argv[1], "petsc") == 0) {
