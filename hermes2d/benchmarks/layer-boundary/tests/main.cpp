@@ -61,11 +61,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double K = 1e2;
 
-// Exact solution
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -81,27 +78,21 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_REF_NUM_BDY);
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Set exact solution.
+  ExactSolutionPerturbedPoisson exact(&mesh, K);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
+  WeakFormPerturbedPoisson wf(&exact);
+  
+  // Initialize boundary conditions.
+  DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
+  BoundaryConditions bcs(&bc);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, sol_exact);
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
