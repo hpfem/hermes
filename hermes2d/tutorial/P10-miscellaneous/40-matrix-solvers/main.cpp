@@ -50,7 +50,7 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
 
   // Prepare to read from file.
   int n;                               // Matrix size.
-  bool cplx_2_real;                              // Decides do we turn complex matrix to real
+  bool cplx_2_real;                    // Decides do we turn complex matrix to real
   Array<MatrixEntry> ar_mat;           // Matrix in coordinate format.
   Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
 
