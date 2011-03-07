@@ -60,7 +60,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
+const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
 
 // Weak forms.
 #include "forms.cpp"
@@ -79,21 +79,15 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  // Note: "essential" means that solution value is prescribed.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  DirichletConstantBoundaryCondition bc(Hermes::vector<std::string>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
-  // Initialize the weak formulation for the left hand side i.e. H 
-  WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(callback(bilinear_form_left));
-  wf_right.add_matrix_form(callback(bilinear_form_right));
+  // Initialize the weak formulation.
+  WeakFormEigenLeft wf_left;
+  WeakFormEigenRight wf_right;
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
