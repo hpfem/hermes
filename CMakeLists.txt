@@ -19,6 +19,8 @@ set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
 
 # H1D:
 set(WITH_H1D                  YES)
+	# For use in the common code.
+	set(H1D_REAL              YES)
 	# Release and debug versions.
 	set(H1D_DEBUG             YES)
 	set(H1D_RELEASE           NO)

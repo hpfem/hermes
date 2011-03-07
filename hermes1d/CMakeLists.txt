@@ -42,9 +42,6 @@ if (NOT DEBUG AND NOT RELEASE)
                        Re-run with DEBUG and/or RELEASE set to YES.")
 endif (NOT DEBUG AND NOT RELEASE)
 
-# For use in the common code.
-set(H1D_REAL YES)
-
 # Depending on the setting of H1D_DEBUG and H1D_REAL, the user will have 
 # two variables at his disposal: HERMES1D_RELEASE and/or HERMES1D_DEBUG
 # (corresponding to the two libraries built on his system). He can use these
