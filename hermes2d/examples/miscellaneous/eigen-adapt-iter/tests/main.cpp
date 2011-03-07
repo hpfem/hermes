@@ -52,15 +52,8 @@ const int NEWTON_MAX_ITER = 10;
 const double PICARD_TOL = 1e-3;
 const int PICARD_MAX_ITER = 50;
 
-// Problem parameters.
-double V(double x, double y) {
-  return 0;
-  //double r = sqrt(x*x + y*y);
-  //return -1./(0.001 + r*r);
-}
-
 // Boundary markers.
-const int BDY_MARKER = 1;
+const std::string BDY_MARKER = "1";
 
 // Weak forms.
 #include "forms.cpp"
@@ -81,22 +74,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_MARKER));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_MARKER));
+  // Initialize boundary conditions.
+  DirichletConstantBoundaryCondition bc(BDY_MARKER, 0.0);
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
 
-  // Initialize the weak formulation for the left hand side, i.e., H.
-  WeakForm wf_S, wf_M;
-  wf_S.add_matrix_form(bilinear_form_S, bilinear_form_S_ord);
-  wf_M.add_matrix_form(callback(bilinear_form_M));
+  // Initialize the weak formulation for the left hand side.
+  WeakFormS wf_S;
+  WeakFormM wf_M;
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
