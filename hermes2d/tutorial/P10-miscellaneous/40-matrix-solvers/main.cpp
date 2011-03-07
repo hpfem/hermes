@@ -50,17 +50,17 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
 
   // Prepare to read from file.
   int n;                               // Matrix size.
-  bool b;                              // Decides do we turn complex matrix to real
+  bool cplx_2_real;                              // Decides do we turn complex matrix to real
   Array<MatrixEntry> ar_mat;           // Matrix in coordinate format.
   Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
 
-  if (argc == 4 && strcasecmp(argv[3],"complex_matrix_to_real") == 0)
-     b = true;
+  if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
+     cplx_2_real = true;
   else
-     b = false;
+     cplx_2_real = false;
 
   // Read matrix and rhs from file.
-  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, b))
+  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real))
     error("Failed to read the matrix and rhs.");
 
   if (strcasecmp(argv[1], "petsc") == 0) {
