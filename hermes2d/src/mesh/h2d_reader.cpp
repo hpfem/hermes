@@ -355,11 +355,13 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     }
   }
 
+#ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
   // check that all boundary edges have a marker assigned
   for_all_edge_nodes(en, mesh)
     if (en->ref < 2 && en->marker == 0) {
       warn("Boundary edge node does not have a boundary marker");
     }
+#endif
 
   //// curves //////////////////////////////////////////////////////////////////
   p.exec("have_curves = 1 if curves else 0");

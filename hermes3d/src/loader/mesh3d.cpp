@@ -316,18 +316,18 @@ bool H3DReader::load(const char *file_name, Mesh *mesh) {
       }
     }
 
+#ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
     // check if all "outer" faces have defined boundary condition
     for (std::map<Facet::Key, Facet*>::const_iterator it = mesh->facets.begin(); it != mesh->facets.end(); it++) {
       Facet *facet = it->second;
 
-#ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
       if(((unsigned) facet->left == INVALID_IDX) || ((unsigned) facet->right == INVALID_IDX)) {
         fprintf(stderr, "Not all outer faces have defined boundary condition (line %d).", line_nr);
         throw E_READ_ERROR;
-      }	
-#endif		
-
+      }
     }
+#endif
+
     mesh->ugh();
   }
   catch (int e) {
