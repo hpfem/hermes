@@ -163,6 +163,8 @@ void RefMap::calc_inv_ref_map(int order)
 
     jac[i] *= trj;
   }
+
+  delete [] m;
 }
 
 
@@ -216,6 +218,8 @@ void RefMap::calc_second_ref_map(int order)
     mm[j][2][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
     mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
   }
+
+  delete [] k;
 }
 
 

@@ -1063,6 +1063,10 @@ void Solution::precalculate(int order, int mask)
       }
     }
 
+    delete [] x;
+    delete [] y;
+    delete [] tx;
+
     // transform gradient or vector solution, if required
     if (transform)
       transform_values(order, node, newmask, oldmask, np);
