@@ -35,8 +35,8 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
   // Prepare to read from file.
   int n;                               // Matrix size.
   bool cplx_2_real;                    // Decides do we turn complex matrix to real
-  Array<MatrixEntry> ar_mat;           // Matrix in coordinate format.
-  Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
+  std::map<unsigned int, MatrixEntry> ar_mat;
+  std::map<unsigned int, scalar> ar_rhs; format.
 
   if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
      cplx_2_real = true;
