@@ -16,7 +16,6 @@
 #include <typeinfo>
 #include "hermes2d.h"
 
-
 RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool residual_as_vector) 
         : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size()), 
         residual_as_vector(residual_as_vector) {
