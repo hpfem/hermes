@@ -17,14 +17,24 @@
 #include "hermes2d.h"
 
 
-RungeKutta::RungeKutta(bool residual_as_vector)
-{
-  this->residual_as_vector = residual_as_vector;
-  stage_time_sol = NULL;
+RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool residual_as_vector) 
+        : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size()), 
+        residual_as_vector(residual_as_vector), stage_time_sol(NULL) {
+
+  // Check for not implemented features.
+  if (matrix_solver != SOLVER_UMFPACK)
+    error("Sorry, rk_time_step() still only works with UMFpack.");
+  if (dp->get_weak_formulation()->get_neq() > 1)
+    error("Sorry, rk_time_step() does not work with systems yet.");
+  
+  // Create matrix solver.
+  solver = create_linear_solver(matrix_solver, &matrix_right, &vector_right);
 }
 
 RungeKutta::~RungeKutta()
-{}
+{
+  delete solver;
+}
 
 void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
                                        scalar* source_vec, scalar* target_vec)
@@ -35,35 +45,13 @@ void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int nu
   }
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
-                  DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                  bool verbose, bool is_linear, double newton_tol, int newton_max_iter,
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
+                  bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
-  // Check for not implemented features.
-  if (matrix_solver != SOLVER_UMFPACK)
-    error("Sorry, rk_time_step() still only works with UMFpack.");
-  if (dp->get_weak_formulation()->get_neq() > 1)
-    error("Sorry, rk_time_step() does not work with systems yet.");
-
-  // Get number of stages from the Butcher's table.
-  int num_stages = bt->get_size();
-
   // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-  if(error_fn != NULL) if (bt->is_embedded() == false) {
+  if(error_fn != NULL && bt->is_embedded() == false)
     error("rk_time_step(): R-K method must be embedded if temporal error estimate is requested.");
-  }
-
-  // Matrix for the time derivative part of the equation (left-hand side).
-  UMFPackMatrix* matrix_left = new UMFPackMatrix();
-
-  // Matrix and vector for the rest (right-hand side).
-  UMFPackMatrix* matrix_right = new UMFPackMatrix();
-  UMFPackVector* vector_right = new UMFPackVector();
-
-  // Create matrix solver.
-  Solver* solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
 
   // Get space, mesh, and ndof for the stage solutions in the R-K method (K_i vectors).
   Space* K_space = dp->get_space(0);
@@ -74,17 +62,12 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
   // to define a num_stages x num_stages block weak formulation.
   Hermes::vector<Space*> stage_spaces;
   stage_spaces.push_back(K_space);
-  for (int i = 1; i < num_stages; i++) {
+  for (int i = 1; i < num_stages; i++)
     stage_spaces.push_back(K_space->dup(K_mesh));
-  }
   Space::assign_dofs(stage_spaces);
 
-  // Create a multistage weak formulation.
-  WeakForm stage_wf_left;                   // For the matrix M (size ndof times ndof).
-  WeakForm stage_wf_right(num_stages);      // For the rest of equation (written on the right),
-                                            // size num_stages*ndof times num_stages*ndof.
-
-  create_stage_wf(current_time, time_step, bt, dp, &stage_wf_left, &stage_wf_right); 
+  // Creates the stage weak formulation.
+  create_stage_wf(current_time, time_step); 
 
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
@@ -113,7 +96,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
   // Assemble the block-diagonal mass matrix M of size ndof times ndof.
   // The corresponding part of the global residual vector is obtained 
   // just by multiplication.
-  stage_dp_left.assemble(matrix_left);
+  stage_dp_left.assemble(&matrix_left);
 
   // The Newton's loop.
   double residual_norm;
@@ -131,32 +114,32 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
       }
     }
 
-    multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
+    multiply_as_diagonal_block_matrix(&matrix_left, num_stages, K_vector, vector_left);
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left
     // can be added later.
     bool rhs_only = false;
     bool force_diagonal_blocks = true;
-    stage_dp_right.assemble(u_ext_vec, matrix_right, vector_right,
+    stage_dp_right.assemble(u_ext_vec, &matrix_right, &vector_right,
                             rhs_only, force_diagonal_blocks, false); // false = do not add Dirichlet lift while
                                                                      // converting u_ext_vec into Solutions.
 
-    matrix_right->add_to_diagonal_blocks(num_stages, matrix_left);
+    matrix_right.add_to_diagonal_blocks(num_stages, &matrix_left);
 
-    vector_right->add_vector(vector_left);
+    vector_right.add_vector(vector_left);
 
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    vector_right->change_sign();
+    vector_right.change_sign();
 
     // Measure the residual norm.
     if (residual_as_vector)
       // Calculate the l2-norm of residual vector.
-      residual_norm = get_l2_norm(vector_right);
+      residual_norm = get_l2_norm(&vector_right);
     else {
       // Translate residual vector into residual functions.
-      Solution::vector_to_solutions(vector_right, stage_dp_right.get_spaces(),
+      Solution::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(),
                                     residuals, add_dir_lift);
       residual_norm = calc_norms(residuals);
     }
@@ -189,9 +172,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
 
     // If the problem is linear, quit.
     if (is_linear) {
-      if (verbose) {
+      if (verbose)
         info("Terminating Newton's loop as problem is linear.");
-      }
       break;
     }
 
@@ -201,8 +183,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
 
   // If max number of iterations was exceeded, fail.
   if (it >= newton_max_iter) {
-    if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
-
+    if (verbose) 
+      info("Maximum allowed number of Newton iterations exceeded, returning false.");
     return false;
   }
 
@@ -212,7 +194,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
   // FIXME - this projection is slow and it is not needed when the 
   //         spaces are the same (if spatial adaptivity does not take place). 
   scalar* coeff_vec = new scalar[ndof];
-  OGProjection::project_global(K_space, sln_time_prev, coeff_vec, matrix_solver);
+  OGProjection::project_global(K_space, sln_time_prev, coeff_vec);
 
   // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
   for (int i = 0; i < ndof; i++) {
@@ -234,18 +216,13 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
     }
     Solution::vector_to_solution(coeff_vec, K_space, error_fn, false);
   }
-
-  // Clean up.
-  delete matrix_left;
-  delete matrix_right;
-  delete vector_right;
-  delete solver;
-
   // Delete stage spaces, but not the first (original) one.
-  for (int i = 1; i < num_stages; i++) delete stage_spaces[i];
+  for (int i = 1; i < num_stages; i++) 
+    delete stage_spaces[i];
 
   // Delete all residuals.
-  for (int i = 0; i < num_stages; i++) delete residuals[i];
+  for (int i = 0; i < num_stages; i++) 
+    delete residuals[i];
 
   // Clean up.
   delete [] K_vector;
@@ -256,22 +233,20 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTabl
   return true;
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                  Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
-                  MatrixSolverType matrix_solver, bool verbose, bool is_linear, 
-                  double newton_tol, int newton_max_iter,
-                  double newton_damping_coeff, double newton_max_allowed_residual_norm) 
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, bool verbose,
+                  double newton_tol, int newton_max_iter,double newton_damping_coeff, 
+                  double newton_max_allowed_residual_norm) 
 {
-  return rk_time_step(current_time, time_step, bt,
-	              sln_time_prev, sln_time_new, NULL, dp, matrix_solver,
-	              verbose, is_linear, newton_tol, newton_max_iter,
+  return rk_time_step(current_time, time_step, sln_time_prev, sln_time_new, NULL, verbose, newton_tol, newton_max_iter,
                       newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                     DiscreteProblem* dp, WeakForm* stage_wf_left, 
-                     WeakForm* stage_wf_right) 
+void RungeKutta::create_stage_wf(double current_time, double time_step) 
 {
+  // Clear the WeakForms.
+  stage_wf_left.delete_all();
+  stage_wf_right.delete_all();
+
   // First let's do the mass matrix (only one block ndof times ndof).
   MatrixFormVolL2* proj_form = new MatrixFormVolL2(0, 0, HERMES_SYM);
   proj_form->area = HERMES_ANY;
@@ -280,7 +255,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
   proj_form->adapt_eval = false;
   proj_form->adapt_order_increase = -1;
   proj_form->adapt_rel_error_tol = -1;
-  stage_wf_left->add_matrix_form(proj_form);
+  stage_wf_left.add_matrix_form(proj_form);
 
   // In the rest we will take the stationary jacobian and residual forms 
   // (right-hand side) and use them to create a block Jacobian matrix of
@@ -349,7 +324,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form(mfv_ij);
+        stage_wf_right.add_matrix_form(mfv_ij);
       }
     }
   }
@@ -378,7 +353,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
 
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
-        stage_wf_right->add_matrix_form_surf(mfs_ij);
+        stage_wf_right.add_matrix_form_surf(mfs_ij);
       }
     }
   }
@@ -404,7 +379,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
-      stage_wf_right->add_vector_form(vfv_i);
+      stage_wf_right.add_vector_form(vfv_i);
     }
   }
 
@@ -432,7 +407,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step, ButcherT
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
-      stage_wf_right->add_vector_form_surf(vfs_i);
+      stage_wf_right.add_vector_form_surf(vfs_i);
     }
   }
 }

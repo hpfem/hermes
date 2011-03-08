@@ -115,7 +115,8 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, &space, is_linear);
 
   // Initialize Runge-Kutta time stepping.
-  RungeKutta runge_kutta;
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
+
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
   do 
@@ -125,10 +126,8 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = false;
-    if (!runge_kutta.rk_time_step(current_time, time_step, &bt, &sln_time_prev, &sln_time_new, &dp, matrix_solver,
-		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
+    if (!runge_kutta.rk_time_step(current_time, time_step, &sln_time_prev, &sln_time_new, verbose, NEWTON_TOL, NEWTON_MAX_ITER))
       error("Runge-Kutta time step failed, try to decrease time step size.");
-    }
 
     // Update time.
     current_time += time_step;

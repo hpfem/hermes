@@ -72,7 +72,7 @@ class HERMES_API RungeKutta
 
 public:
   /// Constructor.
-  RungeKutta(bool residual_as_vector = true);
+  RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool residual_as_vector = true);
 
   /// Destructor.
   ~RungeKutta();
@@ -93,19 +93,15 @@ public:
   // values for newton_tol and newton_max_iter are for linear problems.
   // Many improvements are needed, a todo list is presented at the beginning of
   // the corresponding .cpp file.
-  bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                               Solution* sln_time_prev, Solution* sln_time_new, Solution* error_fn, 
-                               DiscreteProblem* dp, MatrixSolverType matrix_solver,
-                               bool verbose = false, bool is_linear = false, double newton_tol = 1e-6, 
+  bool rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, 
+                               Solution* error_fn, bool verbose = false, double newton_tol = 1e-6, 
                                int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                                double newton_max_allowed_residual_norm = 1e6);
 
   // This is a wrapper for the previous function if error_fn is not provided
   // (adaptive time stepping is not wanted). 
-  bool rk_time_step(double current_time, double time_step, ButcherTable* const bt,
-                               Solution* sln_time_prev, Solution* sln_time_new, DiscreteProblem* dp, 
-                               MatrixSolverType matrix_solver, bool verbose = false, bool is_linear = false, 
-                               double newton_tol = 1e-6, int newton_max_iter = 20,
+  bool rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new,
+                               bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                                double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 protected:
@@ -114,9 +110,8 @@ protected:
   /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
   /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
   /// and right-hand side of the equation, respectively.
-  void create_stage_wf(double current_time, double time_step, ButcherTable* bt, 
-                                  DiscreteProblem* dp, WeakForm* stage_wf_left,
-                                  WeakForm* stage_wf_right);
+  void create_stage_wf(double current_time, double time_step);
+
 
   /// Members.
   bool residual_as_vector;
@@ -124,6 +119,30 @@ protected:
   /// This array will be filled by artificially created solutions to represent stage times.
   Solution** stage_time_sol;
 
+  /// Multistage weak formulation.
+  WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
+  WeakForm stage_wf_right;    // For the rest of equation (written on the right),
+                              // size num_stages*ndof times num_stages*ndof.
+
+  /// Matrix for the time derivative part of the equation (left-hand side).
+  UMFPackMatrix matrix_left;
+
+  /// Matrix and vector for the rest (right-hand side).
+  UMFPackMatrix matrix_right;
+  UMFPackVector vector_right;
+
+  /// Matrix solver.
+  Solver* solver;
+
+  /// DiscreteProblem.
+  DiscreteProblem* dp;
+  bool is_linear;
+
+  /// ButcherTable.
+  ButcherTable* bt;
+
+  /// Number of stages.
+  unsigned int num_stages;
 };
 
 
