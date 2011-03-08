@@ -321,43 +321,43 @@ void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat,
                   std::map<unsigned int, scalar> &ar_rhs, SparseMatrix *mat,
                   Vector *rhs) {
   mat->prealloc(n);
-  for (int i = 0; i < ar_mat.get_size(); i++) {
-    MatrixEntry &me = ar_mat.get(i);
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat->pre_add_ij(me.m, me.n);
   }
 
   mat->alloc();
-  for (int i = 0; i < ar_mat.get_size(); i++ ) {
-    MatrixEntry &me = ar_mat.get(i);
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat->add(me.m, me.n, me.value);
   }
   mat->finish();
 
   rhs->alloc(n);
-  for (int i = 0; i < ar_rhs.get_size(); i++ ) {
-    rhs->add(ar_rhs[i].m, ar_rhs[i].value);
+  for (std::map<unsigned int, scalar>::iterator it = ar_rhs.begin(); it != ar_rhs.end(); it++) {
+    rhs->add(it->first, it->second);
   }
   rhs->finish();
 }
 
 // Block version of build_matrix().
-void build_matrix_block(unsigned int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, scalar> &ar_rhs,
+void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, scalar> &ar_rhs,
                         SparseMatrix *matrix, Vector *rhs) {
   matrix->prealloc(n);
-  for (unsigned int i = 0; i < n; i++)
-    for (unsigned int j = 0; j < n; j++)
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++)
       matrix->pre_add_ij(i, j);
 
   matrix->alloc();
   scalar **mat = new_matrix<scalar>(n, n);
   int *cols = new int[n];
   int *rows = new int[n];
-  for (unsigned int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     cols[i] = i;
     rows[i] = i;
   }
-  for (int i = 0; i < ar_mat.get_size(); i++) {
-    MatrixEntry &me = ar_mat.get(i);
+  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    MatrixEntry &me = it->second;
     mat[me.m][me.n] = me.value;
   }
   matrix->add(n, n, mat, rows, cols);
@@ -365,15 +365,12 @@ void build_matrix_block(unsigned int n, std::map<unsigned int, MatrixEntry> &ar_
 
   rhs->alloc(n);
   scalar *rs = new scalar[n];
-  for (int i = 0; i < ar_rhs.get_size(); i++) {
-    VectorEntry &ve = ar_rhs.get(i);
-    rs[ve.m] = ve.value;
+  for (std::map<unsigned int, scalar>::iterator it = ar_rhs.begin(); it != ar_rhs.end(); it++) {
+    rs[it->first] = it->second;
   }
   unsigned int *u_rows = new unsigned int[n];
-  for (unsigned int i = 0; i < n; i++) {
-    u_rows[i] = i;
-  }
-
+  for (int i = 0; i < n; i++)
+    u_rows[i] = rows[i] >= 0 ? rows[i] : 0;
   rhs->add(n, u_rows, rs);
   rhs->finish();
 }
