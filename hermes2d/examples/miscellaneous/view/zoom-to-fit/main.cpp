@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   if (argc < 3)
   {
     printf("Please input as this format: zoom-to-fit <function> <domain> \n");
-    return ERR_FAILURE;
+    return -1;
   }
 
   // Define dimensions of the various tested views.
@@ -69,13 +69,11 @@ int main(int argc, char* argv[])
   };
   std::string title;
 
-  bool auto_range = true;      // True to detrmine the vertical limits from function values.
+  bool auto_range = true;      // True to determine the vertical limits from function values.
   double range_min, range_max; // Custom vertical limits.
 
   // Function for inspection.
   Solution fn;
-
-
 
   // Load the mesh file.
   Mesh mesh;
@@ -112,7 +110,7 @@ int main(int argc, char* argv[])
       printf("Please set the first argument to a number from 0 to 4: \n");
       for (int i = 0; i < 4; i++)
         printf("%d: %s\n", i, title.c_str());
-      return ERR_FAILURE;
+      return -1;
   }
 
   if (fn_id == 4) { // Test manual setting bounds for the displayed range.
@@ -123,16 +121,16 @@ int main(int argc, char* argv[])
     // Test the behaviour when user enters bigger lower bound.
     view.set_min_max_range(1, 0.5);
     // Show the function.
-    //view.show(&fn);
+    view.show(&fn);
     // Wait for the view to be closed.
-    //View::wait();
+    View::wait();
 
     // Test the behaviour when user enters both bounds the same.
     view.set_min_max_range(0.5, 0.5);
     // Show the function.
-    //view.show(&fn);
+    view.show(&fn);
     // Wait for the view to be closed.
-    //View::wait();
+    View::wait();
 
   } else { // Test model positioning.
 
@@ -141,7 +139,7 @@ int main(int argc, char* argv[])
       view.set_3d_mode(true);
 
       // Show the function.
-      //view.show(&fn);
+      view.show(&fn);
       // Wait for the view to be closed.
       View::wait();
 
@@ -154,13 +152,12 @@ int main(int argc, char* argv[])
         view.show_bounding_box();
 
         // Show the function.
-        //view.show(&fn);
+        view.show(&fn);
         // Wait for the view to be closed.
         View::wait();
       }
     }
   }
 
-  printf("Success!\n");
-  return ERR_SUCCESS;
+  return 0;
 }

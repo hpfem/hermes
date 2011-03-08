@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+./zoom-to-fit 0 square.mesh
+./zoom-to-fit 0 distorted.mesh
+./zoom-to-fit 1 square.mesh
+./zoom-to-fit 1 distorted.mesh
+./zoom-to-fit 2 square.mesh
+./zoom-to-fit 2 curved.mesh
+./zoom-to-fit 3 square.mesh
+./zoom-to-fit 3 curved.mesh
+./zoom-to-fit 4 square.mesh
