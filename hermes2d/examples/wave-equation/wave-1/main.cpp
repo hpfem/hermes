@@ -26,20 +26,16 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
                                                    // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY = 1;
+const std::string BDY = "1";
 
 // Problem parameters.
 const double C_SQUARED = 100;                      // Square of wave speed.                     
 
-// Initial condition for u.
-double init_cond_u(double x, double y, double& dx, double& dy) {
-  dx = exp(-x*x - y*y) * (-2*x);
-  dy = exp(-x*x - y*y) * (-2*y);
-  return exp(-x*x - y*y);
-}
-
 // Weak forms.
 #include "forms.cpp"
+
+// Initial condition.
+#include "initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -55,33 +51,25 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(4, 1);
 
   // Refine towards boundary.
-  mesh.refine_towards_boundary(1, 1);
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY);
-
-  // Enter Dirichlet boundary values;
-  BCValues bc_values;
-  bc_values.add_zero(BDY);
-
-  // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, &bc_types, &bc_values, P_INIT);
-  H1Space v_space(&mesh, &bc_types, &bc_values, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
-
+  mesh.refine_towards_boundary(BDY, 1);
+  
   // Initialize solutions.
-  Solution u_sln(&mesh, init_cond_u);
+  InitialConditionWave u_sln(&mesh);
   Solution v_sln(&mesh, 0.0);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));  
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1));  
-  wf.add_matrix_form(1, 0, callback(bilinear_form_1_0));  
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));  
-  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &u_sln);  
-  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &v_sln);  
+  WeakFormWave wf(TAU, C_SQUARED, &u_sln, &v_sln);
+  
+  // Initialize boundary conditions
+  DirichletConstantBoundaryCondition bc(BDY, 0.0);
+  BoundaryConditions bcs(&bc);
+
+  // Create x- and y- displacement space using the default H1 shapeset.
+  H1Space u_space(&mesh, &bcs, P_INIT);
+  H1Space v_space(&mesh, &bcs, P_INIT);
+
+  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
+
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -104,7 +92,7 @@ int main(int argc, char* argv[])
   // Time stepping loop.
   double current_time = TAU; int ts = 1;
   bool rhs_only = false;
-  do 
+  do
   {
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
@@ -146,4 +134,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-
