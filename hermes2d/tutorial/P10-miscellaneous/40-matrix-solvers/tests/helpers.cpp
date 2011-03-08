@@ -380,7 +380,7 @@ void solve(Solver &solver, int n) {
   if (solver.solve()) {
     scalar *sln = solver.get_solution();
     info("Matrix solve successful.");
-    printf("Solution vector: ");
+    printf("Solution vector: \n");
     for (int i = 0; i < n; i++) {
       printf(SCALAR_FMT"\n", SCALAR(sln[i]));
     }
