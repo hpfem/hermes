@@ -36,7 +36,7 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
   int n;                               // Matrix size.
   bool cplx_2_real;                    // Decides do we turn complex matrix to real
   std::map<unsigned int, MatrixEntry> ar_mat;
-  std::map<unsigned int, scalar> ar_rhs; format.
+  std::map<unsigned int, scalar> ar_rhs; 
 
   if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
      cplx_2_real = true;
