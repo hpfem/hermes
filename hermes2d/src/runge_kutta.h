@@ -116,9 +116,6 @@ protected:
   /// Members.
   bool residual_as_vector;
 
-  /// This array will be filled by artificially created solutions to represent stage times.
-  Solution** stage_time_sol;
-
   /// Multistage weak formulation.
   WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
   WeakForm stage_wf_right;    // For the rest of equation (written on the right),

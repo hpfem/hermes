@@ -19,7 +19,7 @@
 
 RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool residual_as_vector) 
         : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size()), 
-        residual_as_vector(residual_as_vector), stage_time_sol(NULL) {
+        residual_as_vector(residual_as_vector) {
 
   // Check for not implemented features.
   if (matrix_solver != SOLVER_UMFPACK)
@@ -276,6 +276,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
   // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
   // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
   // SOLUTIONS IN ExtData.
+  /*
   if(stage_time_sol != NULL) {
     for (int i = 0; i < num_stages; i++)
       delete stage_time_sol[i];
@@ -289,6 +290,7 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
     stage_time_sol[i] = new Solution(mesh);
     stage_time_sol[i]->set_const(mesh, current_time + bt->get_C(i)*time_step);
   }
+  */
 
   // Extracting volume and surface matrix and vector forms from the
   // original weak formulation.
@@ -313,9 +315,6 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
         mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
         mfv_ij->u_ext_offset = i;
-
-        // Add stage_time_sol[i] as an external function to the form.
-        mfv_ij->ext.push_back(stage_time_sol[i]);
 
         // This form will not be integrated adaptively.
         mfv_ij->adapt_eval = false;
@@ -343,9 +342,6 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
 
         mfs_ij->u_ext_offset = i;
 
-        // Add stage_time_sol[i] as an external function to the form.
-        mfs_ij->ext.push_back(stage_time_sol[i]);
-
         // This form will not be integrated adaptively.
         mfs_ij->adapt_eval = false;
         mfs_ij->adapt_order_increase = -1;
@@ -369,9 +365,6 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
       vfv_i->scaling_factor = -1.0;
       vfv_i->u_ext_offset = i;
 
-      // Add stage_time_sol[i] as an external function to the form.
-      vfv_i->ext.push_back(stage_time_sol[i]);
-
       // This form will not be integrated adaptively.
       vfv_i->adapt_eval = false;
       vfv_i->adapt_order_increase = -1;
@@ -393,9 +386,6 @@ void RungeKutta::create_stage_wf(double current_time, double time_step)
       vfs_i->i = i;
       vfs_i->scaling_factor = -1.0;
       vfs_i->u_ext_offset = i;
-
-      // Add stage_time_sol[i] as an external function to the form.
-      vfs_i->ext.push_back(stage_time_sol[i]);
 
       // Set offset for u_ext[] external solutions.
       vfs_i->u_ext_offset = i;

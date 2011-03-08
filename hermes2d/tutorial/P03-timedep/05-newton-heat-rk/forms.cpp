@@ -28,12 +28,6 @@ private:
       Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      // This is a temporary workaround. The stage time t_n + h * c_i
-      // can be accessed via u_stage_time->val[0];
-      // In this particular case the stage time is not needed as 
-      // the form does not depend explicitly on time.
-      //Func<Scalar>* u_stage_time = ext->fn[1]; 
-
       // Stationary part of the Jacobian matrix (time derivative term left out).
       Scalar result1 = 0, result2 = 0;
       for (int i = 0; i < n; i++) {
@@ -85,12 +79,6 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
-
-      // This is a temporary workaround. The stage time t_n + h * c_i
-      // can be accessed via u_stage_time->val[0];
-      // In this particular case the stage time is not needed as 
-      // the form does not depend explicitly on time.
-      //Func<Scalar>* u_stage_time = ext->fn[1]; 
 
       // Stationary part of the residual (time derivative term left out).
       Scalar result1 = 0, result2 = 0;
