@@ -125,8 +125,12 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    bool is_linear = false;
-    if (!runge_kutta.rk_time_step(current_time, time_step, &sln_time_prev, &sln_time_new, verbose, NEWTON_TOL, NEWTON_MAX_ITER))
+    Hermes::vector<Solution*> slns_time_prev;
+    slns_time_prev.push_back(&sln_time_prev);
+    Hermes::vector<Solution*> slns_time_new;
+    slns_time_new.push_back(&sln_time_new);
+
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, true, verbose, NEWTON_TOL, NEWTON_MAX_ITER))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 
     // Update time.

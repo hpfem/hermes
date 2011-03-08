@@ -93,15 +93,15 @@ public:
   // values for newton_tol and newton_max_iter are for linear problems.
   // Many improvements are needed, a todo list is presented at the beginning of
   // the corresponding .cpp file.
-  bool rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, 
-                               Solution* error_fn, bool verbose = false, double newton_tol = 1e-6, 
+  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new,
+                               Hermes::vector<Solution*> error_fns, bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
                                int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                                double newton_max_allowed_residual_norm = 1e6);
 
   // This is a wrapper for the previous function if error_fn is not provided
   // (adaptive time stepping is not wanted). 
-  bool rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new,
-                               bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
+  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new,
+                               bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                                double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
 protected:
@@ -110,7 +110,10 @@ protected:
   /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
   /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
   /// and right-hand side of the equation, respectively.
-  void create_stage_wf(double current_time, double time_step);
+  void create_stage_wf(unsigned int size, double current_time, double time_step);
+  
+  // Prepare u_ext_vec.
+  void prepare_u_ext_vec(double time_step);
 
 
   /// Members.
@@ -140,6 +143,16 @@ protected:
 
   /// Number of stages.
   unsigned int num_stages;
+
+  // Vector K_vector of length num_stages * ndof. will represent
+  // the 'K_i' vectors in the usual R-K notation.
+  scalar* K_vector;
+
+  // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
+  scalar* u_ext_vec;
+
+  // Vector for the left part of the residual.
+  scalar* vector_left;
 };
 
 

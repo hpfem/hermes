@@ -28,6 +28,10 @@ public:
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+  static void project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution *> source_sols,
+                             scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+
   static void project_global(Space* space, MeshFunction* source_meshfn,
                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
                              ProjNormType proj_norm = HERMES_H1_NORM);
