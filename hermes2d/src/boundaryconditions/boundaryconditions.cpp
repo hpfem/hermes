@@ -52,45 +52,12 @@ DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(std::stri
   markers.push_back(marker);
 }
 
-// Neumann BC.
-NeumannBoundaryCondition::NeumannBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
-  value = 0.0;
+// Natural BC.
+NaturalBoundaryCondition::NaturalBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
 };
 
-NeumannBoundaryCondition::~NeumannBoundaryCondition() {};
+NaturalBoundaryCondition::~NaturalBoundaryCondition() {};
 
-scalar NeumannBoundaryCondition::function(double x, double y) const {
-  error("NeumannBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
-  return 0.0;
-};
-
-// Neumann BC Value
-NeumannConstantBoundaryCondition::NeumannConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : NeumannBoundaryCondition(markers) {
-  this->value = value;
-}
-
-NeumannConstantBoundaryCondition::NeumannConstantBoundaryCondition(std::string marker, scalar value) : NeumannBoundaryCondition(Hermes::vector<std::string>()) {
-  this->value = value;
-  markers.push_back(marker);
-}
-
-// Newton BC.
-NewtonBoundaryCondition::NewtonBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
-  value_u = 0.0;
-  value_g = 0.0;
-};
-
-NewtonBoundaryCondition::~NewtonBoundaryCondition() {};
-
-scalar NewtonBoundaryCondition::function_u(double x, double y) const {
-  error("NewtonBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
-  return 0.0;
-};
-
-scalar NewtonBoundaryCondition::function_g(double x, double y) const {
-  error("NeumannBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
-  return 0.0;
-};
 
 // BoundaryConditions.
 
@@ -119,11 +86,8 @@ void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryConditio
       case BoundaryCondition::BC_DIRICHLET:
         dirichlet.push_back(static_cast<DirichletBoundaryCondition *>(*all_iterator));
         break;
-      case BoundaryCondition::BC_NEUMANN:
-        neumann.push_back(static_cast<NeumannBoundaryCondition *>(*all_iterator));
-        break;
-      case BoundaryCondition::BC_NEWTON:
-        newton.push_back(static_cast<NewtonBoundaryCondition *>(*all_iterator));
+      case BoundaryCondition::BC_NATURAL:
+        natural.push_back(static_cast<NaturalBoundaryCondition *>(*all_iterator));
         break;
     }
 
@@ -151,19 +115,13 @@ Hermes::vector<DirichletBoundaryCondition *>::const_iterator BoundaryConditions:
   return dirichlet.end();
 }
 
-Hermes::vector<NeumannBoundaryCondition *>::const_iterator BoundaryConditions::neumann_begin() const {
-  return neumann.begin();
+Hermes::vector<NaturalBoundaryCondition *>::const_iterator BoundaryConditions::natural_begin() const {
+  return natural.begin();
 }
-Hermes::vector<NeumannBoundaryCondition *>::const_iterator BoundaryConditions::neumann_end() const {
-  return neumann.end();
+Hermes::vector<NaturalBoundaryCondition *>::const_iterator BoundaryConditions::natural_end() const {
+  return natural.end();
 }
 
-Hermes::vector<NewtonBoundaryCondition *>::const_iterator BoundaryConditions::newton_begin() const {
-  return newton.begin();
-}
-Hermes::vector<NewtonBoundaryCondition *>::const_iterator BoundaryConditions::newton_end() const {
-  return newton.end();
-}
 std::map<std::string, BoundaryCondition *>::const_iterator BoundaryConditions::markers_begin() const {
   return markers.begin();
 }

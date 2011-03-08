@@ -391,7 +391,7 @@ void Space::reset_dof_assignment()
   int i, j;
   for (i = 0; i < mesh->get_max_node_id(); i++)
   {
-    ndata[i].n = BoundaryCondition::BC_NEUMANN;
+    ndata[i].n = BoundaryCondition::BC_NATURAL;
     ndata[i].dof = H2D_UNASSIGNED_DOF;
   }
 

@@ -30,8 +30,7 @@ public:
   /// There is no need to a special marker BC_NONE, as the default condition is zero Dirichlet.
   enum BoundaryConditionType {
     BC_DIRICHLET, ///< Dirichlet BC.
-    BC_NEUMANN,   ///< Neumann BC.
-    BC_NEWTON,    ///< Newton BC.
+    BC_NATURAL,   ///< Natural BC.
     BC_NONE       ///< Empty (none) BC.
   };
 
@@ -102,71 +101,19 @@ public:
 
 
 
-/// Abstract class representing Neumann boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} = u_Neumann.
-class HERMES_API NeumannBoundaryCondition : public BoundaryCondition {
+/// Class representing natural boundary condition of any form (Neumann, Newton).
+class HERMES_API NaturalBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
-  NeumannBoundaryCondition(Hermes::vector<std::string> markers);
+  NaturalBoundaryCondition(Hermes::vector<std::string> markers);
 
   /// Virtual destructor.
-  virtual ~NeumannBoundaryCondition();
-
-  /// Pure virtual function giving info whether u_Neumann is a constant or a function.
-  virtual BoundaryConditionValueType get_value_type() const = 0;
+  virtual ~NaturalBoundaryCondition();
 
   /// Gets the type of this boundary condition.
-  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NEUMANN; }
-
-  /// Represents a function prescribed on the boundary.
-  virtual scalar function(double x, double y) const;
-
-  /// Special case of a constant function.
-  scalar value;
+  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NATURAL; }
 };
 
-/// Class representing Neumann boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} = u_Neumann given by value.
-class HERMES_API NeumannConstantBoundaryCondition : public NeumannBoundaryCondition {
-public:
-  /// Constructors.
-  NeumannConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
-  NeumannConstantBoundaryCondition(std::string marker, scalar value);
-
-  /// Function giving info that u_Neumann is a constant.
-  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }
-};
-
-
-/// Abstract class representing Newton (mixed) boundary condition of the form \nabla u \cdot n |_{\Gamma_Neumann} + g * u = u_Newton.
-class HERMES_API NewtonBoundaryCondition : public BoundaryCondition {
-public:
-  /// Default constructors.
-  NewtonBoundaryCondition(Hermes::vector<std::string> markers);
-
-  /// Virtual destructor.
-  virtual ~NewtonBoundaryCondition();
-
-  /// Pure virtual function giving info whether u_Newton is a constant or a function.
-  virtual BoundaryConditionValueType get_value_type_u() const = 0;
-
-  /// Pure virtual function giving info whether g is a constant or a function.
-  virtual BoundaryConditionValueType get_value_type_g() const = 0;
-
-  /// Gets the type of this boundary condition.
-  inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NEWTON; }
-
-protected:
-  /// Represents a function prescribed on the boundary.
-  virtual scalar function_u(double x, double y) const;
-
-  /// Special case of a constant function.
-  scalar value_u;
-
-  /// Represents a function prescribed on the boundary.
-  virtual scalar function_g(double x, double y) const;
-
-  /// Special case of a constant function.
-  scalar value_g;
-};
 
 /// Class representing empty boundary condition.
 class HERMES_API EmptyBoundaryCondition : public BoundaryCondition {
@@ -205,13 +152,9 @@ public:
   Hermes::vector<DirichletBoundaryCondition *>::const_iterator dirichlet_begin() const;
   Hermes::vector<DirichletBoundaryCondition *>::const_iterator dirichlet_end() const;
 
-  Hermes::vector<NeumannBoundaryCondition *>::const_iterator neumann_iterator;
-  Hermes::vector<NeumannBoundaryCondition *>::const_iterator neumann_begin() const;
-  Hermes::vector<NeumannBoundaryCondition *>::const_iterator neumann_end() const;
-
-  Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_iterator;
-  Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_begin() const;
-  Hermes::vector<NewtonBoundaryCondition *>::const_iterator newton_end() const;
+  Hermes::vector<NaturalBoundaryCondition *>::const_iterator natural_iterator;
+  Hermes::vector<NaturalBoundaryCondition *>::const_iterator natural_begin() const;
+  Hermes::vector<NaturalBoundaryCondition *>::const_iterator natural_end() const;
 
   std::map<std::string, BoundaryCondition *>::const_iterator markers_iterator;
   std::map<std::string, BoundaryCondition *>::const_iterator markers_begin() const;
@@ -230,10 +173,7 @@ private:
   Hermes::vector<DirichletBoundaryCondition *> dirichlet;
 
   /// Neumann boundary conditions.
-  Hermes::vector<NeumannBoundaryCondition *> neumann;
-
-  /// Newton boundary conditions.
-  Hermes::vector<NewtonBoundaryCondition *> newton;
+  Hermes::vector<NaturalBoundaryCondition *> natural;
 
   /// Boundary markers cache
   std::map<std::string, BoundaryCondition *> markers;
