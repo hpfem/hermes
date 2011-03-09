@@ -214,32 +214,33 @@ double residual_4(int num, double *x, double *weights,
 };
 
 
-double jacobian_surf_right_U_Re(double x, double u, double dudx,
+double jacobian_surf_right_U_Re_Re(double x, double u, double dudx,
                                 double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
                                 double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
-{     
-    return 1*u*v;
+{
+    return u*v;
 }
 
 
-double jacobian_surf_right_U_Im(double x, double u, double dudx,
+double jacobian_surf_right_U_Re_Im(double x, double u, double dudx,
                                 double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
                                 double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
 {
     return -Zl*u*v;
 }
 
-double jacobian_surf_right_I_Re(double x, double u, double dudx,
+double jacobian_surf_right_U_Im_Re(double x, double u, double dudx,
                                 double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
                                 double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
 {
-    return 1*u*v;
+    return u*v;
 }
 
 
-double jacobian_surf_right_I_Im(double x, double u, double dudx,
+double jacobian_surf_right_U_Im_Im(double x, double u, double dudx,
                                 double v, double dvdx, double u_prev[MAX_SLN_NUM][MAX_EQN_NUM],
                                 double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM], void *user_data)
 {
     return -Zl*u*v;
 }
+
