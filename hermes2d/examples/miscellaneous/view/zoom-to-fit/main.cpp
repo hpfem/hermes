@@ -2,14 +2,14 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-// This test makes sure that automatic zooming capability of ScalarView works correctly.
-// It also tests displaying constant functions and bounding boxes.
+// This example allows you to try out the automatic zooming capability of ScalarView,
+// as well as displaying constant functions and bounding boxes.
 // Called as
 //    zoom-to-fit <function> <domain>
 // it displays a plot of a function specified by the argument <function> over the mesh
 // loaded from file <domain>, using several screen sizes. Before going to another screen
-// size, the program waits until the tester finishes inspecting the current window and
-// closes it.
+// size, the program waits until you finish inspecting the current window and
+// close it.
 // The argument <function> may attain values from 0 to 3, corresponding to functions that
 // are currently implemented in 'test_functions.cpp':
 //   0: Constant function:  z = 3.
