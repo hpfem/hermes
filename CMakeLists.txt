@@ -73,8 +73,19 @@ set(WITH_H3D                  YES)
 set(HERMES_COMMON_WITH_TESTS  YES)
 set(HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS  YES)
 
-# Logo will be shown:
-set(REPORT_WITH_LOGO        YES)
+# Reporting and logging:
+set(REPORT_WITH_LOGO        YES)  #logo will be shown
+set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+                                  #The runtime control is intended just for Python wrappers.
+set(REPORT_ALL              NO)   #do not report all events, just selected ones
+set(REPORT_WARNING          YES)  #warnings will be reported
+set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+set(REPORT_INFO             YES)  #info will be reported
+set(REPORT_VERBOSE          NO)   #info details will not be reported
+set(REPORT_TRACE            NO)   #code execution tracing will not be reported
+set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
 #### Solvers ###
 # Standard UMFPACK.
@@ -137,6 +148,11 @@ set(WITH_MPI                NO)
 
 # Enable or disable Python.
 set(WITH_PYTHON             YES)
+
+# Set overrides:
+if(WITH_PYTHON)
+  set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
+endif(WITH_PYTHON)
 
 ### end DEFAULT CONFIGURATION ###
 
@@ -425,6 +441,16 @@ else(REPORT_RUNTIME_CONTROL)
   message("Report controlled by: PREPROCESSOR DIRECTIVES")
 endif(REPORT_RUNTIME_CONTROL)
 message("Report with logo: ${REPORT_WITH_LOGO}")
+if(REPORT_ALL)
+  message("Report all events: YES")
+else(REPORT_ALL)
+  message("Report warnings: ${REPORT_WARNING}")
+  message("Report integration warnings: ${REPORT_INTR_WARNING}")
+  message("Report results/info: ${REPORT_INFO}")
+  message("Report results/info details: ${REPORT_VERBOSE}")
+  message("Report program execution: ${REPORT_TRACE}")
+  message("Report internal time measurements: ${REPORT_TIME}")
+endif(REPORT_ALL)
 message("---------------------")
 message("Hermes common library:")
 message("\tBuild Real version: ${HERMES_COMMON_REAL}")
@@ -449,11 +475,11 @@ if(WITH_H2D)
 	message("\tBuild Hermes2D complex version: ${H2D_COMPLEX}")
 	message("\tBuild Hermes2D Debug version: ${H2D_DEBUG}")
 	message("\tBuild Hermes2D Release version: ${H2D_RELEASE}")
-	message("\tBuild Hermes2D examples: ${H2D_WITH_EXAMPLES}")
-	message("\tBuild Hermes2D benchmarks: ${H2D_WITH_BENCHMARKS}")
-	message("\tBuild Hermes2D tests: ${H2D_WITH_TESTS}")
-	message("\tBuild Hermes2D modules: ${H2D_WITH_MODULES}")
-	message("\tBuild Hermes2D tutorial: ${H2D_WITH_TUTORIAL}")
+	message("\tBuild Hermes2D with examples: ${H2D_WITH_EXAMPLES}")
+	message("\tBuild Hermes2D with benchmarks: ${H2D_WITH_BENCHMARKS}")
+	message("\tBuild Hermes2D with tests: ${H2D_WITH_TESTS}")
+	message("\tBuild Hermes2D with modules: ${H2D_WITH_MODULES}")
+	message("\tBuild Hermes2D with tutorial: ${H2D_WITH_TUTORIAL}")
 	message("\tBuild Hermes2D with GLUT: ${H2D_WITH_GLUT}")
 	message("\tBuild Hermes2D with VIEWER_GUI: ${H2D_WITH_VIEWER_GUI}")
 	message("\tBuild Hermes2D with util: ${H2D_WITH_UTIL}")
@@ -463,14 +489,14 @@ message("Build Hermes3D: ${WITH_H3D}")
 if(WITH_H3D)
 	message("\tBuild Hermes3D real version: ${H3D_REAL}")
 	message("\tBuild Hermes3D complex version: ${H3D_COMPLEX}")
-    message("\tBuild Hermes3D Debug version: ${H3D_DEBUG}")
+        message("\tBuild Hermes3D Debug version: ${H3D_DEBUG}")
    	message("\tBuild Hermes3D Release version: ${H3D_RELEASE}")
 	message("\tBuild Hermes3D with Debug order: ${H3D_DEBUG_ORDER}")
 	message("\tBuild Hermes3D with profiling: ${H3D_PROFILING}")
 	message("\tBuild Hermes3D with Tetra: ${WITH_TETRA}")
 	message("\tBuild Hermes3D with Hex: ${WITH_HEX}")
 	message("\tBuild Hermes3D with Prism: ${WITH_PRISM}")
-	message("\tBuild Hermes3D examples: ${H3D_WITH_EXAMPLES}")
+	message("\tBuild Hermes3D with examples: ${H3D_WITH_EXAMPLES}")
 	message("\tBuild Hermes3D with benchmarks: ${H3D_WITH_BENCHMARKS}")
 	message("\tBuild Hermes3D with tests: ${H3D_WITH_TESTS}")
 	message("\tBuild Hermes3D with tools: ${H3D_WITH_TOOLS}")
