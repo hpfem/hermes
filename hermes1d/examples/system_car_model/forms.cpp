@@ -310,9 +310,9 @@ double residual_3(int num, double *x, double *weights,
 };
 
 double residual_4(int num, double *x, double *weights,
-                double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],
-                double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],
-                double *v, double *dvdx, void *user_data)
+                  double u_prev[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],
+                  double du_prevdx[MAX_SLN_NUM][MAX_EQN_NUM][MAX_QUAD_PTS_NUM],
+                  double *v, double *dvdx, void *user_data)
 {
   int si = 0;      // solution index (only 0 is relevant for this example)
   // renaming for better readability
