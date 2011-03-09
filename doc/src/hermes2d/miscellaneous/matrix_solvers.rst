@@ -87,7 +87,7 @@ An example call looks like this:
 
     P10-40-matrix-solvers-real aztecoo linsys-cplx-4.txt complex-matrix-to-real
 
-Which generates following output:
+Which generates following output::
 
     I Matrix solve successful.
     Solution vector: 
@@ -102,7 +102,7 @@ A complex solver call with the same input file:
 
     P10-40-matrix-solvers-cplx aztecoo linsys-cplx-4.txt
 
-Generates following output:
+Generates following output::
 
     I Matrix solve successful.
     Solution vector: 
