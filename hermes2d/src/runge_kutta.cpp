@@ -1,5 +1,3 @@
-#define HERMES_REPORT_INFO
-
 // This file is part of Hermes2D.
 //
 // Hermes2D is free software: you can redistribute it and/or modify

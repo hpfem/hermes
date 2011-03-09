@@ -13,9 +13,6 @@
 /// You should have received a copy of the GNU General Public License
 /// along with Hermes2D. If not, see <http:///www.gnu.org/licenses/>.
 
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_WARN
-
 #ifndef __H2D_DISCRETE_PROBLEM_H
 #define __H2D_DISCRETE_PROBLEM_H
 

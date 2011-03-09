@@ -13,9 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_WARN
-
 #include "h2d_common.h"
 #include "integrals/integrals_h1.h"
 #include "quadrature/limit_order.h"
