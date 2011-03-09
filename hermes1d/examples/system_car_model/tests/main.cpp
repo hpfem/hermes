@@ -9,8 +9,6 @@
 #define ERROR_SUCCESS                               0
 #define ERROR_FAILURE                               -1
 
-const int PRINT = 0;
-
 //  The following parameters can be changed:
 const int NEQ = 5;                      // Number of equations.
 const int NELEM = 5;                    // Number of elements.
@@ -88,8 +86,7 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
     for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Solve the linear system.
-    if(!(success = solver->solve()))
-      error ("Matrix solver failed.\n");
+    if(!(success = solver->solve())) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];

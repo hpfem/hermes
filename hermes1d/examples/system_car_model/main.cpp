@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes1d.h"
 
@@ -10,6 +8,7 @@
 //  |zeta| <= zeta_max
 //  |v| <= v_max
 //  |phi| <= phi_max
+//
 //  Goal: Calculate all possible trajectories of the car given the 
 //  initial condition and intervals for alpha and zeta. The current 
 //  algorithm considers 9 control parameters and moves only on the 
@@ -29,10 +28,7 @@
 //  BC: Homogenous Dirichlet.
 //
 //  The following parameters can be changed:
-// Print data.
-const int PRINT = 0;
 
-//  The following parameters can be changed:
 const int NEQ = 5;                      // Number of equations.
 const int NELEM = 5;                    // Number of elements.
 const double A = 0, B = 10;             // Domain end points.
@@ -47,20 +43,20 @@ const double Alpha_max = 1.;
 const double Zeta_max = M_PI/6;
 const int Num_rays = 120;
 
+// Matrix solver.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0));
+Hermes::vector<BCSpec *>DIR_BC_LEFT = Hermes::vector<BCSpec *>(new BCSpec(0, 0), new BCSpec(0, 0), 
+                                      new BCSpec(0, 0), new BCSpec(0, 0), new BCSpec(0, 0));
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Controls.
 const int N_ctrl = 4;
-double time_ctrl[N_ctrl] = 
-  {A, A + (A+B)/(N_ctrl-1.), A + 2.*(A+B)/(N_ctrl-1.), B};
+double time_ctrl[N_ctrl] = {A, A + (A+B)/(N_ctrl-1.), A + 2.*(A+B)/(N_ctrl-1.), B};
 double alpha_ctrl[N_ctrl] = {0, 0, 0, 0};
 double zeta_ctrl[N_ctrl] = {0, 0, 0, 0};
-
 
 // Include weak forms.
 #include "forms.cpp"
@@ -68,9 +64,9 @@ double zeta_ctrl[N_ctrl] = {0, 0, 0, 0};
 void compute_trajectory(Space *space, DiscreteProblem *dp) 
 {
   info("alpha = (%g, %g, %g, %g), zeta = (%g, %g, %g, %g)", 
-         alpha_ctrl[0], alpha_ctrl[1], 
-         alpha_ctrl[2], alpha_ctrl[3], zeta_ctrl[0], 
-         zeta_ctrl[1], zeta_ctrl[2], zeta_ctrl[3]); 
+       alpha_ctrl[0], alpha_ctrl[1], 
+       alpha_ctrl[2], alpha_ctrl[3], zeta_ctrl[0], 
+       zeta_ctrl[1], zeta_ctrl[2], zeta_ctrl[3]); 
 
   // Newton's loop.
   // Fill vector coeff_vec using dof and coeffs arrays in elements.
@@ -83,7 +79,7 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   int it = 1;
-  while (1) 
+  while (true) 
   {
     // Obtain the number of degrees of freedom.
     int ndof = Space::get_num_dofs(space);
@@ -105,11 +101,10 @@ void compute_trajectory(Space *space, DiscreteProblem *dp)
 
     // Multiply the residual vector with -1 since the matrix 
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    for(int i=0; i<ndof; i++) rhs->set(i, -rhs->get(i));
+    for(int i = 0; i < ndof; i++) rhs->set(i, -rhs->get(i));
 
     // Solve the linear system.
-    if(!solver->solve())
-      error ("Matrix solver failed.\n");
+    if(!solver->solve()) error ("Matrix solver failed.\n");
 
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
