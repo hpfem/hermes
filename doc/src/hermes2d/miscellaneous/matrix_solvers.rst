@@ -17,12 +17,18 @@ default value for the Mumps solver.
 **Usage:**
 ::
 
+There are two available solver options: real and complex one.
+The distinction between these two is in system matrix and right hand side vector entries they handle.
+
+Typical usage of matrix solvers would look like this:
+
     matrix-solvers <matrix_solver> <input_text_file_with_matrix_and_vector> 
 
 **Available solvers:** petsc, petsc-block, umfpack, umfpack-block,  aztecoo, 
 aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.
 
 **Available input files:** linsys-1.txt, linsys-2.txt, linsys-3.txt,
+linsys-cplx-4.txt, linsys-cplx-hermitian-5.txt, linsys-cplx-nonhermitian-6.txt
 
 but the user can of course provide his/her own. In the input file, the first number is the 
 matrix/vector size, followed by the matrix in the coordinate format and the right-hand side 
@@ -69,3 +75,40 @@ Output::
     I Setting vector entry (4, 19).
     I Matrix solve successful.
     Solution vector: 1 2 3 4 5 
+
+**Solving complex valued linear systems with real solver:**
+
+Matrix solvers in Hermes have the capability of solving complex valued linear systems with real solvers. It is achieved by 
+transforming the original complex matrix to equivalent real fomulation. In Hermes this is simply done by adding additional command line argument:
+
+    matrix-solvers <matrix_solver> <input_text_file_with_matrix_and_vector> complex-matrix-to-real
+
+An example call looks like this:
+
+    P10-40-matrix-solvers-real aztecoo linsys-cplx-4.txt complex-matrix-to-real
+
+Which generates following output::
+
+    I Matrix solve successful.
+    Solution vector: 
+    0.800000
+    0.470588
+    0.486486
+    -0.600000
+    -0.882353
+    -0.918919
+
+A complex solver call with the same input file:
+
+    P10-40-matrix-solvers-cplx aztecoo linsys-cplx-4.txt
+
+Generates following output::
+
+    I Matrix solve successful.
+    Solution vector: 
+    (0.800000, -0.600000)
+    (0.470588, -0.882353)
+    (0.486486, -0.918919)
+
+  
+

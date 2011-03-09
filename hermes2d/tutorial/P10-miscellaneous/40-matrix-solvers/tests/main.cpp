@@ -34,12 +34,18 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
 
   // Prepare to read from file.
   int n;                               // Matrix size.
-  Array<MatrixEntry> ar_mat;           // Matrix in coordinate format.
-  Array<VectorEntry> ar_rhs;           // Right-hand side in coordinate format.
+  bool cplx_2_real;                    // Decides do we turn complex matrix to real
+  std::map<unsigned int, MatrixEntry> ar_mat;
+  std::map<unsigned int, scalar> ar_rhs; 
+
+  if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
+     cplx_2_real = true;
+  else
+     cplx_2_real = false;
 
   // Read matrix and rhs from file.
   info("Reading matrix from file %s.", argv[2]);
-  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs))
+  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real))
     error("Failed to read the matrix and rhs.");
 
   if (strcasecmp(argv[1], "petsc") == 0) {
