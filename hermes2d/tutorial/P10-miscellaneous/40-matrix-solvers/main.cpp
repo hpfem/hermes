@@ -17,7 +17,7 @@
 // Solve the matrix problem.
 void solve(Solver &solver, int n) {
   if (solver.solve()) {
-    scalar *sln = solver.get_solution();
+    scalar* sln = solver.get_solution();
     info("Matrix solve successful.");
     printf("Solution vector: \n");
     for (int i = 0; i < n; i++) {
@@ -62,6 +62,7 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
   // Read matrix and rhs from file.
   if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real))
     error("Failed to read the matrix and rhs.");
+  else info("Matrix and rhs loaded from file %s.", argv[2]);
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC

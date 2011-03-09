@@ -60,7 +60,8 @@ bool read_n_numbers(char *row, int n, double values[]) {
 // Processes the input file. Matrix and vector will be stored in 
 // arrays of MatrixEntry and VectorEntry types, respectively.
 bool read_matrix_and_rhs(char *file_name, int &n, 
-                        std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, scalar> &rhs, bool &cplx_2_real) 
+                        std::map<unsigned int, MatrixEntry> &mat, 
+                        std::map<unsigned int, scalar> &rhs, bool &cplx_2_real) 
 {
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return false;
