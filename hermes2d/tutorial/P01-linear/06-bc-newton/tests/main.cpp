@@ -4,9 +4,6 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-double T1 = 30.0;                                 // prescribed temperature on Gamma_3.
-double T0 = 20.0;                                 // outer temperature on Gamma_1.
-double H  = 0.05;                                 // heat flux on Gamma_1.
 int UNIFORM_REF_LEVEL = 1;                        // number of initial uniform mesh refinements.
 int CORNER_REF_LEVEL = 3;                         // number of mesh refinements towards the re-entrant corner.
 int P_INIT = 6;                                   // Uniform polynomial degree of all mesh elements.
@@ -14,29 +11,15 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_OUTER = 2, BDY_LEFT = 3, BDY_INNER = 4;
+const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
+// Problem parameters.
+const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
+const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
+const double h  = 0.05;       // Heat flux on Gamma_bottom.
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return H * int_u_v<Real, Scalar>(n, wt, u, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return T0 * H * int_v<Real, Scalar>(n, wt, v);
-}
-
+// Weak forms.
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -49,26 +32,18 @@ int main(int argc, char* argv[])
   for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_OUTER, BDY_INNER));
-  bc_types.add_bc_newton(BDY_BOTTOM);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_LEFT, T1);
+  // Initialize boundary conditions
+  DirichletConstantBoundaryCondition bc1(BDY_LEFT, T1);
+  NaturalBoundaryCondition bc2(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER, BDY_BOTTOM));
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_BOTTOM);
-  wf.add_vector_form_surf(callback(linear_form_surf), BDY_BOTTOM);
+  WeakFormNewton wf(h, T0);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
