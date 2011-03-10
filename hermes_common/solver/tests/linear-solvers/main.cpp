@@ -438,9 +438,9 @@ int main(int argc, char *argv[]) {
   if (read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real) != ERR_SUCCESS)
     error("Failed to read the matrix and rhs.");
 
-  show_mat("Here is the original ar_mat: ", ar_mat);
+  //show_mat("Here is the original ar_mat: ", ar_mat);
 
-  show_rhs("Here is the original ar_rhs: ", ar_rhs);
+  //show_rhs("Here is the original ar_rhs: ", ar_rhs);
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC
