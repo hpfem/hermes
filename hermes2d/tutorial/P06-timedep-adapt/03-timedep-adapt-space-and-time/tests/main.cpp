@@ -276,9 +276,9 @@ int main(int argc, char* argv[])
 
   ndof = Space::get_num_dofs(&space);
 
-  printf("ndof allowed = %d\n", 130);
+  printf("ndof allowed = %d\n", 180);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 130) {      // ndofs was 121 at the time this test was created.
+  if (ndof < 180) {      // ndofs was 169 at the time this test was created.
     printf("Success!\n");
     return ERR_SUCCESS;
   }
