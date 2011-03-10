@@ -1,9 +1,10 @@
 #define HERMES_REPORT_WARN
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
-#include "config.h"
+
 //#include <getopt.h>
-#include <common.h>
+#include "common.h"
+#include "config.h"
 
 #include "solver/solver.h"
 #include "solver/umfpack_solver.h"
@@ -13,6 +14,8 @@
 #include "solver/amesos.h"
 #include "solver/aztecoo.h"
 #include "solver/mumps.h"
+
+#include <iostream>
 
 // Test of linear solvers.
 // Read matrix and RHS from a file.
@@ -32,7 +35,7 @@ struct MatrixEntry {
   scalar value;
 };
 
-void show_mat(const char *msg, map<unsigned int, MatrixEntry> mp) {
+void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp) {
   std::map<unsigned int, MatrixEntry>::iterator itr;
 
   std::cout << msg << std::endl;
@@ -47,7 +50,7 @@ void show_mat(const char *msg, map<unsigned int, MatrixEntry> mp) {
   std::cout << std::endl;
 }
 
-void show_rhs(const char *msg, map<unsigned int,scalar> mp) {
+void show_rhs(const char *msg, std::map<unsigned int,scalar> mp) {
   std::map<unsigned int, scalar>::iterator itr;
 
   std::cout << msg << std::endl;
@@ -144,7 +147,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
         } 
       break;
 
-#ifndef H3D_COMPLEX
+#ifndef HERMES_COMMON_COMPLEX
 
       case STATE_MATRIX:
         if (cplx_2_real){
@@ -316,7 +319,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
 
       case STATE_RHS:
         if (read_n_nums(row, 3, buffer)) {
-        complex<double> cmplx_buffer(buffer[1], buffer[2]);
+        std::complex<double> cmplx_buffer(buffer[1], buffer[2]);
           rhs[(int) buffer[0]] = (scalar) cmplx_buffer;
         }
       break;
@@ -415,7 +418,7 @@ void solve(Solver &solver, int n) {
 int main(int argc, char *argv[]) {
   int ret = ERR_SUCCESS;
 
-#ifndef H3D_COMPLEX
+#ifndef HERMES_COMMON_COMPLEX
   if (argc < 3) error("Not enough parameters.");
 #else
   if (argc < 3) error("Not enough parameters.");
