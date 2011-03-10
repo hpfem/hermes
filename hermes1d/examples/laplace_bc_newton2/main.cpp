@@ -114,6 +114,14 @@ int main()
   // Plot the resulting space.
   space->plot("space.gp");
 
+  // Cleaning
+  delete dp;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
+  delete matrix;
+
   info("Done.");
   return 0;
 }

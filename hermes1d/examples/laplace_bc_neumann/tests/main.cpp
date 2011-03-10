@@ -23,7 +23,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Boundary conditions.
 double Val_neum_right = 0;
-Hermes::vector<BCSpec *> DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0));
+BCSpec * bc = new BCSpec(0,0);
+Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(bc);
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Function f(x).
@@ -107,6 +108,15 @@ int main()
     it++;
   }
   info("Total running time: %g s", cpu_time.accumulated());
+
+  // Cleaning
+  delete dp;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
+  delete bc;
+  delete matrix;
 
   // Test variable.
   info("ndof = %d.", Space::get_num_dofs(space));

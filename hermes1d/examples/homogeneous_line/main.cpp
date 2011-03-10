@@ -40,7 +40,10 @@ double NEWTON_TOL = 1e-5;               // Tolerance.
 int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 // Boundary conditions.
-Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,1), new BCSpec(1,0));
+
+BCSpec * bc_u_re_left = new BCSpec(0,1);
+BCSpec * bc_u_im_left = new BCSpec(1,0);
+Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(bc_u_re_left, bc_u_im_left);
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 //At the end of the line is an indirect boundary condition U(l) = I(l)*Zl see below
@@ -106,7 +109,7 @@ int main() {
     //       residual on fine mesh is too small.
     if(res_l2_norm < NEWTON_TOL && it > 1) break;
 
-    // Multiply the residual vector with -1 since the matrix 
+    // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     for(int i = 0; i < Space::get_num_dofs(space); i++) rhs->set(i, -rhs->get(i));
 
@@ -119,13 +122,23 @@ int main() {
 
     // If the maximum number of iteration has been reached, then quit.
     if (it >= NEWTON_MAX_ITER) error ("Newton method did not converge.");
-    
+
     it++;
   }
 
   // Plot the solution.
   Linearizer l(space);
   l.plot_solution("solution.gp");
+
+  // cleaning
+  delete dp;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
+  delete bc_u_re_left;
+  delete bc_u_im_left;
+  delete matrix;
 
   info("Done.");
   return 0;

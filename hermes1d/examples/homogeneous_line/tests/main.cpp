@@ -44,7 +44,9 @@ int NEWTON_MAX_ITER = 150;              // Max. number of Newton iterations.
 
 
 // Boundary conditions.
-Hermes::vector<BCSpec *> DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,1), new BCSpec(0,0));
+BCSpec * bc_u_re_left = new BCSpec(0,1);
+BCSpec * bc_u_im_left = new BCSpec(1,0);
+Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(bc_u_re_left, bc_u_im_left);
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 //At the end of the line is an indirect boundary condition U(l) = I(l)*Zl see below
@@ -137,6 +139,16 @@ int main()
 
   // Test variable.
   info("ndof = %d.", Space::get_num_dofs(space));
+
+  // cleaning
+  delete dp;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
+  delete bc_u_re_left;
+  delete bc_u_im_left;
+  delete matrix;
 
   if (success)
   {

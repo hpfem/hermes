@@ -113,6 +113,14 @@ int main()
 
   info("Total running time: %g s", cpu_time.accumulated());
 
+  // Cleaning
+  delete dp;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
+  delete matrix;
+
   // Test variable.
   info("ndof = %d.", Space::get_num_dofs(space));
   if (success)
