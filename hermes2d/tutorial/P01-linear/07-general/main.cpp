@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc1(BDY_HORIZONTAL);
-  NeumannConstantBoundaryCondition bc2(BDY_VERTICAL, 0.0);
+  NaturalBoundaryCondition bc2(BDY_VERTICAL, 0.0);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.
