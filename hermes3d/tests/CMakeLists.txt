@@ -4,7 +4,6 @@
 add_subdirectory(adapt)
 add_subdirectory(calc)
 add_subdirectory(hang-nodes)
-add_subdirectory(linear-solvers)
 add_subdirectory(mesh)
 add_subdirectory(mesh-loaders)
 add_subdirectory(orders)

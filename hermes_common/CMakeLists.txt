@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.6)
 
 project(hermes_common)
 
+IF(HERMES_COMMON_WITH_TESTS)
+	set(WITH_TESTS YES)
+ELSE(HERMES_COMMON_WITH_TESTS)
+	set(WITH_TESTS NO)
+ENDIF(HERMES_COMMON_WITH_TESTS)
+
 # Check for stacktrace and math library.
 include(CMakeCommon.txt)
 
@@ -63,7 +69,10 @@ set(SRC
 #
 # Subdirectories with CMakeLists.txt
 #
-add_subdirectory(solver)
+if(WITH_TESTS)
+    enable_testing()  
+    add_subdirectory(solver)
+endif(WITH_TESTS)
 
 if(WITH_PYTHON)
     set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})

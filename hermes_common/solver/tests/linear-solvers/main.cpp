@@ -3,7 +3,16 @@
 #define HERMES_REPORT_VERBOSE
 #include "config.h"
 //#include <getopt.h>
-#include <hermes3d.h>
+#include <common.h>
+
+#include "solver/solver.h"
+#include "solver/umfpack_solver.h"
+#include "solver/superlu.h"
+#include "solver/petsc.h"
+#include "solver/epetra.h"
+#include "solver/amesos.h"
+#include "solver/aztecoo.h"
+#include "solver/mumps.h"
 
 // Test of linear solvers.
 // Read matrix and RHS from a file.
