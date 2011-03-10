@@ -15,19 +15,19 @@ using namespace RefinementSelectors;
  *  \section s_params Parameters
  *  - P_INIT=1 for both solution components
  *  - INIT_REF_NUM=1 for both solution components
- *  - THERSHOLD=0.3
+ *  - THRESHOLD=0.3
  *  - STRATEGY=1
  *  - CAND_LIST=HP_ISO
  *  - MESH_REGULARITY=-1
- *  - ERR_STOP=0.01
+ *  - ERR_STOP=1.0
  *  - CONV_EXP=1.0
  *  - NDOF_STOP=40000
  *  - ERROR_WEIGHTS=default values
  *
  *  \section s_res Expected results
- *  - DOFs: 446, 2682   (for the two solution components)
- *  - Iterations: 16    (the last iteration at which ERR_STOP is fulfilled)
- *  - Error:  3.46614%  (H1 norm of error with respect to the exact solution)
+ *  - DOFs: 127, 945    (for the two solution components)
+ *  - Iterations: 8     (the last iteration at which ERR_STOP is fulfilled)
+ *  - Error:  0.964023% (H1 norm of error with respect to the exact solution)
  *  - Negatives: 0      (number of negative values) 
  */
  
@@ -63,9 +63,9 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1;                        // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
+const int NDOF_STOP = 40000;                      // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int MAX_ADAPT_NUM = 60;                     // Adaptivity process stops when the number of adaptation steps grows over
                                                   // this limit.
@@ -87,22 +87,32 @@ const int GROUP_2 = 1;          // Row in the DOF evolution graph for group 2.
 // Problem data:
 
 // Two-group material properties for the 4 macro regions.
+/*
 const double D[4][2]  = { {1.12, 0.6},
                           {1.2, 0.5},
                           {1.35, 0.8},
-                          {1.3, 0.9}	};
+                          {1.3, 0.9}  };
+*/
+// FIXME: The benchmark and its exact solution must be fixed for discontinuous D
+const double D[4][2]  = { {1, 0.5},
+                          {1, 0.5},
+                          {1, 0.5},
+                          {1, 0.5}  };
+                          
 const double Sr[4][2] = { {0.011, 0.13},
                           {0.09, 0.15},
                           {0.035, 0.25},
-                          {0.04, 0.35}	};
+                          {0.04, 0.35}  };
+
 const double nSf[4][2]= { {0.0025, 0.15},
                           {0.0, 0.0},
                           {0.0011, 0.1},
-                          {0.004, 0.25}	};
+                          {0.004, 0.25} };
 const double chi[4][2]= { {1, 0},
                           {1, 0},
                           {1, 0},
-                          {1, 0} };
+                          {1, 0} };   
+                          
 const double Ss[4][2][2] = { 
                              { { 0.0, 0.0 },
                                { 0.05, 0.0 }  },
@@ -118,10 +128,10 @@ double a = 0., b = 1., c = (a+b)/2.;
 
 inline int get_material(double x, double y)
 {
-  if (x >= a && x <= c && y >= a && y <= c) return 0;
-  if (x >= c && x <= b && y >= a && y <= c) return 1;
-  if (x >= c && x <= b && y >= c && y <= b) return 2;
-  if (x >= a && x <= c && y >= c && y <= b) return 3;
+  if (x >= a && x < c && y >= a && y < c) return 0;
+  if (x > c && x <= b && y >= a && y < c) return 1;
+  if (x > c && x <= b && y > c && y < b)  return 2;
+  if (x >= a && x < c && y > c && y <= b) return 3;
   return -1;
 }
 
@@ -129,11 +139,14 @@ double Q1(double x, double y)
 {
   int q = get_material(x,y);
 
-  double exfl1 = exp(-4*sqr(x))*(y/2.-sqr(y/2.));
-  double exfl2 = exfl1 * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
-
-  double L = 0.5*exp(-4*sqr(x))*(1+4*(8*sqr(x)-1)*y*(y-2))*D[q][0];
-  return L + Sr[q][0]*exfl1 - chi[q][0]*nSf[q][0]*exfl1 - chi[q][1]*nSf[q][1]*exfl2;
+  double L =  1./40.*exp(-4*sqr(x)) * ( 
+                20*( 1+4*(8*sqr(x)-1)*y*(y-2) ) * D[q][0] + 1./8.*y*(y-2) * (
+                  80*nSf[q][0] + (
+                    10-2*cos(8*M_PI*x) + cos(8*M_PI*(x-y)) - 2*cos(8*M_PI*y) + cos(8*M_PI*(x+y))
+                  )*nSf[q][1] - 80*Sr[q][0] 
+                )
+              );
+  return L;
 }
 
 double Q2(double x, double y)
@@ -141,21 +154,29 @@ double Q2(double x, double y)
   int q = get_material(x,y);
 
   double yym2 = (y-2)*y;
-  double pi2 = sqr(M_PI), x2 = sqr(x), pix = M_PI*x, piy = M_PI*y;
-  double cy2 = sqr(cos(4*piy)),
-	 sy2 = sqr(sin(4*piy)),
-	 sx2 = sqr(sin(4*pix)),
-	 em4x2 = exp(-4*x2);
+  double p2 = sqr(M_PI), x2 = sqr(x), px = M_PI*x, py = M_PI*y;
+  double s8px = sin(8*px);
+  double s8py = sin(8*py);
+  double c8px = cos(8*px);
+  double c8py = cos(8*py);
+  double s4px2 = sqr(sin(4*px));
+  double s4py2 = sqr(sin(4*py));
 
-  double exfl1 = em4x2*(y/2.-sqr(y/2.));
-  double exfl2 = exfl1 * (1 + sx2 * sy2) / 10.0;
-
-  double L = 1./20.*em4x2*D[q][1]*(
-	     1+4*(8*x2-1)*yym2+16*pi2*yym2*cy2*sx2 + 0.5*sy2*(1-4*(1+4*pi2-8*x2)*yym2 +
-             (4*(1+12*pi2-8*x2)*yym2-1)*cos(8*pix) - 64*pix*yym2*sin(8*pix)) + 8*M_PI*(y-1)*sx2*sin(8*piy) );
-  return L + Sr[q][1]*exfl2 - Ss[q][1][0]*exfl1;
+  double L =  1./40.*exp(-4*x2) * (
+                10*yym2*Ss[q][1][0] - yym2*Sr[q][1]*( 1+s4px2*s4py2 ) + 0.5*D[q][1]*(
+                  5 + 20*(8*x2-1)*yym2 + (
+                    -1 + 4*(1+8*p2-8*x2)*yym2
+                  )*c8py + c8px*( 
+                    -1 + 4*(1+8*p2-8*x2)*yym2 + ( 1 - 4*(1+16*p2-8*x2)*yym2 )*c8py
+                  ) + 32*M_PI*(
+                    -4*x*yym2*s8px*s4py2 + (y-1)*s4px2*s8py
+                  )
+                )
+              );  
+  return L; 
 }
 
+// Essential boundary conditions.
 double g1_D(double x, double y) {
   return 0.0;
 }
@@ -170,17 +191,27 @@ double g2_D(double x, double y) {
 static double exact_flux1(double x, double y, double& dx, double& dy)
 {
   double em4x2 = exp(-4*sqr(x));
+  
   dx =  2.0*em4x2*x*y*(y-2);
   dy = -0.5*em4x2*(y-1);
+  
   return em4x2*(y/2.-sqr(y/2.));
 }
 
 static double exact_flux2(double x, double y, double& dx, double& dy)
 {
-  double em4x2 = exp(-4*sqr(x));
-  dx = 0.1*em4x2*y*(y-2)*(2*x+(2*x*sqr(sin(4*M_PI*x))-M_PI*sin(8*M_PI*x))*sqr(sin(4*M_PI*y)));
-  dy = 0.05*em4x2*(1-y+sqr(sin(4*M_PI*x))*(-(y-1)*sqr(sin(4*M_PI*y))-2*M_PI*y*(y-2)*sin(8*M_PI*y)));
-  return em4x2*(y/2.-sqr(y/2.)) * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
+  double yym2 = (y-2)*y;
+  double x2 = sqr(x), px = M_PI*x, py = M_PI*y;
+  double em4x2 = exp(-4*x2);
+  double s8px = sin(8*px);
+  double s8py = sin(8*py);
+  double s4px2 = sqr(sin(4*px));
+  double s4py2 = sqr(sin(4*py));
+  
+  dx =  1./10.*em4x2*yym2 * ( 2*x + (2*x*s4px2 - M_PI*s8px) * s4py2 );
+  dy =  1./20.*em4x2 * ( 1-y-s4px2*( (y-1)*s4py2 + 2*M_PI*yym2*s8py )  );
+  
+  return em4x2*(y/2.-sqr(y/2.)) * (1 + s4px2 * s4py2) / 10.0;
 }
 
 // APPROXIMATE SOLUTION
@@ -200,6 +231,8 @@ scalar essential_bc_values_2(double x, double y)
   return g2_D(x, y);
 }
 
+const double GAMMA = 8;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Weak forms:
 
@@ -209,7 +242,8 @@ scalar essential_bc_values_2(double x, double y)
 // Functions for calculating errors:
 
 double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
-                   double (*nfn)(MeshFunction*, RefMap*), Hermes::vector<Solution*>& slns1, Hermes::vector<Solution*>& slns2  )
+                   double (*nfn)(MeshFunction*, RefMap*), Hermes::vector<Solution*>& slns1, 
+                   Hermes::vector<Solution*>& slns2  )
 {
   double error = 0.0, norm = 0.0;
 
@@ -223,44 +257,6 @@ double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Other utility functions:
-
-// Construct a string representing the globally set adaptivity options.
-void make_str_from_adapt_opts(std::stringstream& str)
-{    
-  switch (CAND_LIST) {
-    case H2D_H_ANISO:
-    case H2D_H_ISO:
-      str << "h" << P_INIT[0] << "_" << P_INIT[1];
-      break;
-    case H2D_P_ANISO:
-    case H2D_P_ISO:
-      str << "p" << INIT_REF_NUM[0] << "_" << INIT_REF_NUM[1];
-      break;
-    default:
-      str << "hp";
-      break;
-  }
-  switch (CAND_LIST) {
-    case H2D_H_ANISO:
-    case H2D_P_ANISO:
-    case H2D_HP_ANISO:
-      str << "_aniso";
-      break;
-    case H2D_H_ISO:
-    case H2D_P_ISO:
-    case H2D_HP_ISO:
-      str << "_iso";
-      break;
-    case H2D_HP_ANISO_H:
-      str << "_anisoh";
-      break;
-    case H2D_HP_ANISO_P:
-      str << "_anisop";
-      break;
-  }
-  
-  str << (MULTIMESH ? "_multi" : "_single");
-}
 
 // Calculate number of negative solution values.
 int get_num_of_neg(MeshFunction *sln)
@@ -438,12 +434,8 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     Adapt adaptivity(Hermes::vector<Space*>(&space1, &space2));
-    if (ADAPTIVITY_NORM == 2) {
-      adaptivity.set_error_form(0, 0, callback(biform_0_0));
-      adaptivity.set_error_form(0, 1, callback(biform_0_1));
-      adaptivity.set_error_form(1, 0, callback(biform_1_0));
-      adaptivity.set_error_form(1, 1, callback(biform_1_1));
-    } else if (ADAPTIVITY_NORM == 1) {
+    if (ADAPTIVITY_NORM == 1) 
+    {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
     }
@@ -452,12 +444,12 @@ int main(int argc, char* argv[])
     
     Adapt adaptivity_proj(Hermes::vector<Space*>(&space1, &space2));
 
-    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
+    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns, NULL, false) * 100;
 
     Hermes::vector<double> err_exact_h1;
     ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
     Hermes::vector<Solution*> exslns(&ex1, &ex2);
-    error_h1 = adaptivity_proj.calc_err_est(slns, exslns, &err_exact_h1) * 100;
+    error_h1 = adaptivity_proj.calc_err_exact(slns, exslns, &err_exact_h1, false) * 100;
     
     // Report results.
     cpu_time.tick(); 
@@ -512,17 +504,17 @@ int main(int argc, char* argv[])
 
   int n_dof_1 = Space::get_num_dofs(&space1), 
       n_dof_2 = Space::get_num_dofs(&space2);
-  int n_dof_1_allowed = 300, 
-      n_dof_2_allowed = 2000;
+  int n_dof_1_allowed = 150, 
+      n_dof_2_allowed = 1000;
       
   int n_neg = get_num_of_neg(&sln1) + get_num_of_neg(&sln2);
   int n_neg_allowed = 0;
   
   int n_iter = as;
-  int n_iter_allowed = 15;
+  int n_iter_allowed = 10;
 
   double error = error_h1;
-  double error_allowed = 3.55;
+  double error_allowed = 1.1;
   
   printf("n_dof_actual  = %d,%d\n", n_dof_1, n_dof_2);
   printf("n_dof_allowed = %d,%d\n", n_dof_1_allowed, n_dof_2_allowed);
