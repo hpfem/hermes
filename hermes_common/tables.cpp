@@ -515,19 +515,19 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
     case Implicit_SDIRK_CASH_3_23_embedded:
       this->alloc(3);
       this->set_A(0, 0, 0.435866521508);
-      this->set_A(1, 0, -0.7 - 0.435866521508);
-      this->set_A(2, 0, 0.896869652944);
+      this->set_A(1, 0, 0.2820667320);
+      this->set_A(2, 0, 1.208496649);
       this->set_A(1, 1, 0.435866521508);
-      this->set_A(2, 1, 0.0182725272734);
+      this->set_A(2, 1, -0.6443632015);
       this->set_A(2, 2, 0.435866521508);
-      this->set_B(0, 0.896869652944);
-      this->set_B(1, 0.0182725272734);
+      this->set_B(0, 1.208496649);
+      this->set_B(1, -0.6443632015);
       this->set_B(2, 0.435866521508);
-      this->set_B2(0, 0.776691932910);
-      this->set_B2(1, 0.0297472791484);
+      this->set_B2(0, 0.77263013745746);
+      this->set_B2(1, 0.22736986254254);
       this->set_C(0, 0.435866521508);
-      this->set_C(1, -0.7);
-      this->set_C(2, 1.);
+      this->set_C(1, 0.717933260755);
+      this->set_C(2, 1.0);
     break;
 
     case Implicit_SDIRK_BILLINGTON_3_23_embedded:
