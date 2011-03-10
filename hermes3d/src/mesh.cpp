@@ -1053,75 +1053,76 @@ Hex *Mesh::create_hex(unsigned int vtcs[]) {
 	return hex;
 }
 
-Hex *Mesh::add_hex(unsigned int vtcs[]) {
-	_F_
-	Hex *hex = create_hex(vtcs);
+Hex *Mesh::add_hex(unsigned int vtcs[]) 
+{
+  _F_
+  Hex *hex = create_hex(vtcs);
 
-	// edges
-	ref_edges(hex);
+  // edges
+  ref_edges(hex);
 
-	// facets
-	for (int i = 0; i < Hex::NUM_FACES; i++) {
-		unsigned int facet_idxs[Quad::NUM_VERTICES];
-		int nvtcs = hex->get_face_vertices(i, facet_idxs);
+  // facets
+  for (int i = 0; i < Hex::NUM_FACES; i++) {
+    unsigned int facet_idxs[Quad::NUM_VERTICES];
+    int nvtcs = hex->get_face_vertices(i, facet_idxs);
     Facet::Key key(facet_idxs + 0, nvtcs);
     if (facets.find(key) != facets.end()) {
-			facets[key]->type = Facet::INNER;
-			facets[key]->set_right_info(hex->id, i);
-		}
-		else {
-			Facet *fct = new Facet(HERMES_MODE_QUAD);
-			MEM_CHECK(fct);
-			fct->set_left_info(hex->id, i);
-			facets[key] = fct;
-		}
-	}
+      facets[key]->type = Facet::INNER;
+      facets[key]->set_right_info(hex->id, i);
+    }
+    else {
+      Facet *fct = new Facet(HERMES_MODE_QUAD);
+      MEM_CHECK(fct);
+      fct->set_left_info(hex->id, i);
+      facets[key] = fct;
+    }
+  }
 
-	return hex;
+  return hex;
 }
 
-Prism *Mesh::create_prism(unsigned int vtcs[]) {
-	_F_
-	Prism *prism = new Prism(vtcs);
-	MEM_CHECK(prism);
+Prism *Mesh::create_prism(unsigned int vtcs[])
+{
+  _F_
+  Prism *prism = new Prism(vtcs);
+  MEM_CHECK(prism);
 
   unsigned int i;
-  for(i = 1; ; i++)
-    if(elements[i] == NULL)
-      break;
+  for(i = 1; ; i++) if(elements[i] == NULL) break;
   elements[i] = prism;
 
-	prism->id = i;
+  prism->id = i;
 
-	prism->ref_all_nodes();
+  prism->ref_all_nodes();
 
-	return prism;
+  return prism;
 }
 
-Prism *Mesh::add_prism(unsigned int vtcs[]) {
-	_F_
-	Prism *prism = create_prism(vtcs);
+Prism *Mesh::add_prism(unsigned int vtcs[]) 
+{
+  _F_
+  Prism *prism = create_prism(vtcs);
 
-	// edges
-	ref_edges(prism);
+  // edges
+  ref_edges(prism);
 
-	// facets
-	for (int i = 0; i < Prism::NUM_FACES; i++) {
-		unsigned int facet_idxs[Quad::NUM_VERTICES];
-		int nvtcs = prism->get_face_vertices(i, facet_idxs);
-		Facet::Key key(facet_idxs + 0, nvtcs);
+  // facets
+  for (int i = 0; i < Prism::NUM_FACES; i++) {
+    unsigned int facet_idxs[Quad::NUM_VERTICES];
+    int nvtcs = prism->get_face_vertices(i, facet_idxs);
+    Facet::Key key(facet_idxs + 0, nvtcs);
     if (facets.find(key) != facets.end()) {
-			facets[key]->type = Facet::INNER;
-			facets[key]->set_right_info(prism->id, i);
-		}
-		else {
-			Facet *fct = new Facet(HERMES_MODE_QUAD);
-			MEM_CHECK(fct);
-			fct->set_left_info(prism->id, i);
-			facets[key] = fct;
-		}
-	}
-	return prism;
+      facets[key]->type = Facet::INNER;
+      facets[key]->set_right_info(prism->id, i);
+    }
+    else {
+      Facet *fct = new Facet(HERMES_MODE_QUAD);
+      MEM_CHECK(fct);
+      fct->set_left_info(prism->id, i);
+      facets[key] = fct;
+    }
+  }
+  return prism;
 }
 
 Boundary *Mesh::add_tri_boundary(unsigned int vtcs[], int marker) {
@@ -1174,32 +1175,42 @@ Boundary *Mesh::add_quad_boundary(unsigned int vtcs[], int marker) {
 
 void Mesh::ugh()
 {
-	_F_
-	// set the number of active/base elements
-	nactive = nbase = elements.size();
+  _F_
+  // set the number of active/base elements
+  nactive = nbase = elements.size();
 
-	// set bnd flag for boundary edges
+  // set bnd flag for boundary edges
   for(std::map<Facet::Key, Facet*>::iterator it = facets.begin(); it != facets.end(); it++) {
     Facet *facet = it->second;
-		if (facet->type == Facet::OUTER) {
-			Element *elem = elements[facet->left];
-			const int *face_edge = elem->get_face_edges(facet->left_face_num);
-			for (int iedge = 0; iedge < elem->get_num_face_edges(facet->left_face_num); iedge++) {
-				unsigned int vtx[Edge::NUM_VERTICES];
-				elem->get_edge_vertices(face_edge[iedge], vtx);
+    if (facet->type == Facet::OUTER) {
+      Element *elem = elements[facet->left];
+      const int *face_edge = elem->get_face_edges(facet->left_face_num);
+      for (int iedge = 0; iedge < elem->get_num_face_edges(facet->left_face_num); iedge++) {
+	unsigned int vtx[Edge::NUM_VERTICES];
+	elem->get_edge_vertices(face_edge[iedge], vtx);
 
         Edge::Key key(vtx + 0, Edge::NUM_VERTICES);
-        if(edges.find(key) == edges.end())
-          edges[key] = new Edge;
-			  edges[key]->bnd = 1;
-			}
-		}
-	}
+        if(edges.find(key) == edges.end()) edges[key] = new Edge;
+	edges[key]->bnd = 1;
+      }
+    }
+  }
 
-	check_elem_oris();
+  check_elem_oris();
 }
 
-bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
+void Mesh::create_faces()
+{
+  // Go through all elements as if they were read from the file,
+  // move the search for faces from the H3DReader's load() function to here.
+
+
+
+
+}
+
+bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const 
+{
 	_F_
 	if (facet->type == Facet::INNER) {
 		// BOTH or NONE on the facet => refinement makes no problem
@@ -1251,21 +1262,21 @@ bool Mesh::is_compatible_quad_refinement(Facet *facet, int reft) const {
 	}
 }
 
-bool Mesh::can_refine_element(unsigned int eid, int reft) const {
-	_F_
-	bool can_refine = false;
+bool Mesh::can_refine_element(unsigned int eid, int reft) const 
+{
+  _F_
+  bool can_refine = false;
 
-	Element *elem = elements.at(eid);
-	assert(elem != NULL);
-	switch (elem->get_mode()) {
-		case HERMES_MODE_HEX: can_refine = can_refine_hex((Hex *) elem, reft); break;
-		case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-		case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
-		default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
-	}
+  Element *elem = elements.at(eid);
+  assert(elem != NULL);
+  switch (elem->get_mode()) {
+    case HERMES_MODE_HEX: can_refine = can_refine_hex((Hex *) elem, reft); break;
+    case HERMES_MODE_TET: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+    case HERMES_MODE_PRISM: EXIT(HERMES_ERR_NOT_IMPLEMENTED); break;
+    default: EXIT(HERMES_ERR_UNKNOWN_MODE); break;
+  }
 
-	return can_refine;
-
+  return can_refine;
 }
 
 bool Mesh::can_refine_hex(Hex *elem, int refinement) const {
@@ -2204,40 +2215,42 @@ Edge::Key Mesh::get_edge_id(unsigned int a, unsigned int b) const {
 }
 
 /// referencing edges
-void Mesh::ref_edges(Element *e) {
-	_F_
-	assert(e != NULL);
+void Mesh::ref_edges(Element *e) 
+{
+  _F_
+  assert(e != NULL);
 
-	for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-		unsigned int vtx[Edge::NUM_VERTICES];
-		e->get_edge_vertices(iedge, vtx);
+  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+       unsigned int vtx[Edge::NUM_VERTICES];
+       e->get_edge_vertices(iedge, vtx);
 
     Edge::Key key(vtx + 0, Edge::NUM_VERTICES);
     if (edges.find(key) != edges.end()) {
       edges.find(key)->second->ref++;
-		}
-		else {
-			Edge* edge = new Edge;
+    }
+    else {
+      Edge* edge = new Edge;
       edge->ref = 1;
       edges[key] = edge;
-		}
-	}
+    }
+  }
 }
 
-void Mesh::unref_edges(Element *e) {
-	_F_
-	assert(e != NULL);
+void Mesh::unref_edges(Element *e) 
+{
+  _F_
+  assert(e != NULL);
 
-	for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
-		unsigned int vtx[Edge::NUM_VERTICES];
-		e->get_edge_vertices(iedge, vtx);
+  for (int iedge = 0; iedge < e->get_num_edges(); iedge++) {
+    unsigned int vtx[Edge::NUM_VERTICES];
+    e->get_edge_vertices(iedge, vtx);
 
     Edge::Key key(vtx + 0, Edge::NUM_VERTICES);
     if (edges.find(key) != edges.end()) {
       edges.find(key)->second->ref--;
-		}
-		else assert(false); // Unreferencing non-existent edge
-	}
+    }
+    else assert(false); // Unreferencing non-existent edge
+  }
 }
 
 Facet::Key Mesh::get_facing_facet(Facet::Key fid, unsigned int elem_id) {

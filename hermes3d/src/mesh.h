@@ -31,10 +31,10 @@ class MeshLoader;
 #define H3D_REFT_HEX_X								0x0001
 #define H3D_REFT_HEX_Y								0x0002
 #define H3D_REFT_HEX_Z								0x0003
-#define H3D_H3D_REFT_HEX_XY								0x0004
-#define H3D_H3D_REFT_HEX_XZ								0x0005
-#define H3D_H3D_REFT_HEX_YZ								0x0006
-#define H3D_H3D_H3D_REFT_HEX_XYZ							0x0007
+#define H3D_H3D_REFT_HEX_XY							0x0004
+#define H3D_H3D_REFT_HEX_XZ							0x0005
+#define H3D_H3D_REFT_HEX_YZ							0x0006
+#define H3D_H3D_H3D_REFT_HEX_XYZ						0x0007
 
 // refinements on facets
 #define H3D_REFT_FACE_NONE							0x0000
@@ -50,7 +50,7 @@ class MeshLoader;
 #define H3D_H3D_SPLIT_HEX_XY							H3D_SPLIT_HEX_X | H3D_SPLIT_HEX_Y
 #define H3D_H3D_SPLIT_HEX_XZ							H3D_SPLIT_HEX_X | H3D_SPLIT_HEX_Z
 #define H3D_H3D_SPLIT_HEX_YZ							H3D_SPLIT_HEX_Y | H3D_SPLIT_HEX_Z
-#define H3D_H3D_H3D_SPLIT_HEX_XYZ							H3D_SPLIT_HEX_X | H3D_SPLIT_HEX_Y | H3D_SPLIT_HEX_Z
+#define H3D_H3D_H3D_SPLIT_HEX_XYZ						H3D_SPLIT_HEX_X | H3D_SPLIT_HEX_Y | H3D_SPLIT_HEX_Z
 
 /// Represents a vertex in 3D
 ///
@@ -650,24 +650,23 @@ public:
 class HERMES_API Mesh {
 //	Mesh(const Mesh &o);
 public:
-	Mesh();
-	virtual ~Mesh();
-	/// Frees all data associated with the mesh.
-	void free();
+  Mesh();
+  virtual ~Mesh();
+  /// Frees all data associated with the mesh.
+  void free();
 
-	/// Creates a copy of another mesh.
-	void copy(const Mesh &mesh);
-	/// Copies the coarsest elements of another mesh.
-	void copy_base(const Mesh &mesh);
+  /// Creates a copy of another mesh.
+  void copy(const Mesh &mesh);
+  /// Copies the coarsest elements of another mesh.
+  void copy_base(const Mesh &mesh);
 
-
-	/// Returns the total number of elements stored.
-	unsigned int get_num_elements() const { return elements.size(); }
-	/// Returns the number of coarse mesh elements.
-	unsigned int get_num_base_elements() const { return nbase; }
-	/// Returns the current number of active elements in the mesh.
-	unsigned int get_num_active_elements() const { return nactive; }
-	/// Returns the maximum node id number plus one.
+  /// Returns the total number of elements stored.
+  unsigned int get_num_elements() const { return elements.size(); }
+  /// Returns the number of coarse mesh elements.
+  unsigned int get_num_base_elements() const { return nbase; }
+  /// Returns the current number of active elements in the mesh.
+  unsigned int get_num_active_elements() const { return nactive; }
+  /// Returns the maximum node id number plus one.
   unsigned int get_max_element_id() const 
   { 
     unsigned int temp_max = 0;
@@ -760,7 +759,10 @@ public:
 
 	void ugh();
 
-	// data
+  /// Create faces (to be used after the mesh is read from file).
+  void create_faces();
+
+  // data
   std::map<unsigned int, Vertex *>   vertices;
 	std::map<Edge::Key, Edge *>      edges;
 	std::map<unsigned int, Element *>  elements;
