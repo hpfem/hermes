@@ -56,11 +56,21 @@ DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(std::stri
 NaturalBoundaryCondition::NaturalBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
 };
 
+NaturalBoundaryCondition::NaturalBoundaryCondition(std::string marker) : BoundaryCondition(Hermes::vector<std::string>()) {
+  markers.push_back(marker);
+}
+
 NaturalBoundaryCondition::~NaturalBoundaryCondition() {};
 
+// Empty BC
+EmptyBoundaryCondition::EmptyBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {
+};
+
+EmptyBoundaryCondition::EmptyBoundaryCondition(std::string marker) : BoundaryCondition(Hermes::vector<std::string>()) {
+  markers.push_back(marker);
+}
 
 // BoundaryConditions.
-
 BoundaryConditions::BoundaryConditions() {
   std::ostringstream oss;
   oss << "Everywhere where no other is.";

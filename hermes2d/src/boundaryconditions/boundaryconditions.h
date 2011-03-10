@@ -106,6 +106,7 @@ class HERMES_API NaturalBoundaryCondition : public BoundaryCondition {
 public:
   /// Default constructor.
   NaturalBoundaryCondition(Hermes::vector<std::string> markers);
+  NaturalBoundaryCondition(std::string marker);
 
   /// Virtual destructor.
   virtual ~NaturalBoundaryCondition();
@@ -119,7 +120,8 @@ public:
 class HERMES_API EmptyBoundaryCondition : public BoundaryCondition {
 public:
   /// Constructor.
-  EmptyBoundaryCondition(Hermes::vector<std::string> markers) : BoundaryCondition(markers) {};
+  EmptyBoundaryCondition(Hermes::vector<std::string> markers);
+  EmptyBoundaryCondition(std::string markers);
 
   /// Function giving info that u_Neumann is a constant.
   inline BoundaryConditionType get_type() const { return BoundaryCondition::BC_NONE; };

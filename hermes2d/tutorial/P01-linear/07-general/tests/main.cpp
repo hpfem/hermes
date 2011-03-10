@@ -25,7 +25,6 @@ const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Bounda
 
 int main(int argc, char* argv[])
 {
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -34,18 +33,18 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize the weak formulation.
-  WeakFormSecondOrderLinearCustom wf;
-
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc1(BDY_HORIZONTAL);
-  NeumannConstantBoundaryCondition bc2(BDY_VERTICAL, 0.0);
+  NaturalBoundaryCondition bc2(BDY_VERTICAL);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
+
+  // Initialize the weak formulation.
+  WeakFormGeneral wf;
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
