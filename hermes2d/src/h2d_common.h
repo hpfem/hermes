@@ -21,6 +21,17 @@
 #include "auto_local_array.h"
 //#include "vector.h"
 
+/// This defines the edge types used by discontinuous Galerkin weak forms.
+enum DG_EdgeType
+{
+  H2D_DG_BOUNDARY_EDGE = -12345,  ///< This is to be used by weak forms on the boundary. 
+  ///< It complements H2D_ANY in that it ensures the forms are evaluated also on non-natural
+  ///< boundaries (essential conditions may be enforced weakly in some DG methods).
+  H2D_DG_INNER_EDGE = -1234567    ///< This is to be used by weak forms specifying numerical flux through interior edges.
+  ///< Forms with this identifier will receive DiscontinuousFunc representations of shape
+  ///< and ext. functions, which they may query for values on either side of given interface.
+};
+
 
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."

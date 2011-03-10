@@ -291,7 +291,7 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
 
     case DF_HERMES_BIN: 
     {
-      hermes_fwrite("H3DX\001\000\000\000", 1, 8, file);
+      hermes_fwrite("HERMESX\001", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
@@ -428,7 +428,7 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
     case DF_HERMES_BIN: 
     {
-      hermes_fwrite("H3DR\001\000\000\000", 1, 8, file);
+      hermes_fwrite("HERMESR\001", 1, 8, file);
       int ssize = sizeof(scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);

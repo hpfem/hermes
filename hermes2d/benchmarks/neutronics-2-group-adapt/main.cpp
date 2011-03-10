@@ -13,14 +13,28 @@ using namespace RefinementSelectors;
 //
 // EQUATION:
 //
-//  - \nabla \cdot D_g \nabla \phi_g + \Sigma_{Rg}\phi_g
-//		- \sum_{g' \neq g} \Sigma_s^{g'\to g} \phi_{g'}	- \sum_{g'} \nu\Sigma_f^{g'} \phi_{g'} = Q_g
+//    L_1 = Q_1
+//    L_2 = Q_2
+//
+// where
+//
+//    L_1 = - \nabla \cdot D_1 \nabla \phi_1  
+//          + \SigmaR_1 \phi_1  
+//          - \SigmaS_21 \phi_2 
+//          - \chi_1 ( \nu\SigmaF_1 \phi_1 + \nu\SigmaF_2 \phi_2 ) 
+//    L_2 = - \nabla \cdot D_2 \nabla \phi_2  
+//          + \SigmaR_2 \phi_2  
+//          - \SigmaS_12 \phi_1 
+//          - \chi_2 ( \nu\SigmaF_1 \phi_1 + \nu\SigmaF_2 \phi_2 ) 
 //
 // BC:
 //
-// Homogeneous neumann on symmetry axes.
-// Homogeneous dirichlet on zero flux boundary.
-// -d D_g\phi_g / d n = 8 \phi_g   on albedo boundary (homogeneous Robin).
+//  Homogeneous Neumann on symmetry axes (BDY_SYMMETRY),
+//  homogeneous Dirichlet on zero flux boundary (BDY_FLUX),
+//  homogeneous Newton on albedo boundary (BDY_GAMMA):
+//    -d D_1\phi_1 / d n = GAMMA_1 \phi_1,
+//    -d D_2\phi_2 / d n = GAMMA_2 \phi_2,
+//    GAMMA_1 = 8*D_1, GAMMA_2 = 8*D_2.
 //
 
 // INITIALIZATION
@@ -28,9 +42,9 @@ using namespace RefinementSelectors;
 // Adaptivity control:
 
 const int P_INIT[2] =
-  {6, 6};                                         // Initial polynomial orders for the individual solution components.
+  {1, 1};                                         // Initial polynomial orders for the individual solution components.
 const int INIT_REF_NUM[2] =
-  {3, 3};                                         // Initial uniform mesh refinement for the individual solution components.
+  {1, 1};                                         // Initial uniform mesh refinement for the individual solution components.
 const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
@@ -65,8 +79,8 @@ const int MAX_ADAPT_NUM = 60;                     // Adaptivity process stops wh
                                                   // this limit.
 const int ADAPTIVITY_NORM = 0;                    // Specifies the norm used by H1Adapt to calculate the error and norm.
                                                   // ADAPTIVITY_NORM = 0 ... H1 norm.
-                                                  // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
-                                                  // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
+                                                  // ADAPTIVITY_NORM = 1 ... norm defined by the symmetric diagonal parts of the 
+                                                  //                         non-symmetric bilinear form.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -81,28 +95,33 @@ const int GROUP_2 = 1;                            // Row in the DOF evolution gr
 // Problem data:
 
 // Two-group material properties for the 4 macro regions.
+/*
 const double D[4][2]  = { {1.12, 0.6},
                           {1.2, 0.5},
                           {1.35, 0.8},
-                          {1.3, 0.9}	};
+                          {1.3, 0.9}  };
+*/
+// FIXME: The benchmark and its exact solution must be fixed for discontinuous D
+const double D[4][2]  = { {1, 0.5},
+                          {1, 0.5},
+                          {1, 0.5},
+                          {1, 0.5}  };
+                          
 const double Sr[4][2] = { {0.011, 0.13},
                           {0.09, 0.15},
                           {0.035, 0.25},
-                          {0.04, 0.35}	};
-/*const double nSf[4][2]= { {0.0025, 0.15},
+                          {0.04, 0.35}  };
+
+const double nSf[4][2]= { {0.0025, 0.15},
                           {0.0, 0.0},
                           {0.0011, 0.1},
-                          {0.004, 0.25}	};
-*/
-const double nSf[4][2]= { {0.0, 0.0},
-                          {0.0, 0.0},
-                          {0.0, 0.0},
-                          {0.0, 0.0}	};
+                          {0.004, 0.25} };
 const double chi[4][2]= { {1, 0},
                           {1, 0},
                           {1, 0},
-                          {1, 0} };
-/*const double Ss[4][2][2] = { 
+                          {1, 0} };   
+                          
+const double Ss[4][2][2] = { 
                              { { 0.0, 0.0 },
                                { 0.05, 0.0 }  },
                              { { 0.0, 0.0 },
@@ -112,26 +131,15 @@ const double chi[4][2]= { {1, 0},
                              { { 0.0, 0.0 },
                                { 0.014, 0.0 } } 
                            };
-*/
-const double Ss[4][2][2] = { 
-                             { { 0.0, 0.0 },
-                               { 0.0, 0.0 }  },
-                             { { 0.0, 0.0 },
-                               { 0.0, 0.0 }  },
-                             { { 0.0, 0.0 },
-                               { 0.0, 0.0 } },
-                             { { 0.0, 0.0 },
-                               { 0.0, 0.0 } } 
-                           };
 
 double a = 0., b = 1., c = (a+b)/2.;
 
 inline int get_material(double x, double y)
 {
-  if (x >= a && x <= c && y >= a && y <= c) return 0;
-  if (x >= c && x <= b && y >= a && y <= c) return 1;
-  if (x >= c && x <= b && y >= c && y <= b) return 2;
-  if (x >= a && x <= c && y >= c && y <= b) return 3;
+  if (x >= a && x < c && y >= a && y < c) return 0;
+  if (x > c && x <= b && y >= a && y < c) return 1;
+  if (x > c && x <= b && y > c && y < b)  return 2;
+  if (x >= a && x < c && y > c && y <= b) return 3;
   return -1;
 }
 
@@ -139,11 +147,14 @@ double Q1(double x, double y)
 {
   int q = get_material(x,y);
 
-  double exfl1 = exp(-4*sqr(x))*(y/2.-sqr(y/2.));
-  double exfl2 = exfl1 * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
-
-  double L = 0.5*exp(-4*sqr(x))*(1+4*(8*sqr(x)-1)*y*(y-2))*D[q][0];
-  return L + Sr[q][0]*exfl1 - chi[q][0]*nSf[q][0]*exfl1 - chi[q][1]*nSf[q][1]*exfl2;
+  double L =  1./40.*exp(-4*sqr(x)) * ( 
+                20*( 1+4*(8*sqr(x)-1)*y*(y-2) ) * D[q][0] + 1./8.*y*(y-2) * (
+                  80*nSf[q][0] + (
+                    10-2*cos(8*M_PI*x) + cos(8*M_PI*(x-y)) - 2*cos(8*M_PI*y) + cos(8*M_PI*(x+y))
+                  )*nSf[q][1] - 80*Sr[q][0] 
+                )
+              );
+  return L;
 }
 
 double Q2(double x, double y)
@@ -151,21 +162,29 @@ double Q2(double x, double y)
   int q = get_material(x,y);
 
   double yym2 = (y-2)*y;
-  double pi2 = sqr(M_PI), x2 = sqr(x), pix = M_PI*x, piy = M_PI*y;
-  double cy2 = sqr(cos(4*piy)),
-	 sy2 = sqr(sin(4*piy)),
-	 sx2 = sqr(sin(4*pix)),
-	 em4x2 = exp(-4*x2);
+  double p2 = sqr(M_PI), x2 = sqr(x), px = M_PI*x, py = M_PI*y;
+  double s8px = sin(8*px);
+  double s8py = sin(8*py);
+  double c8px = cos(8*px);
+  double c8py = cos(8*py);
+  double s4px2 = sqr(sin(4*px));
+  double s4py2 = sqr(sin(4*py));
 
-  double exfl1 = em4x2*(y/2.-sqr(y/2.));
-  double exfl2 = exfl1 * (1 + sx2 * sy2) / 10.0;
-
-  double L = 1./20.*em4x2*D[q][1]*(
-	     1+4*(8*x2-1)*yym2+16*pi2*yym2*cy2*sx2 + 0.5*sy2*(1-4*(1+4*pi2-8*x2)*yym2 +
-             (4*(1+12*pi2-8*x2)*yym2-1)*cos(8*pix) - 64*pix*yym2*sin(8*pix)) + 8*M_PI*(y-1)*sx2*sin(8*piy) );
-  return L + Sr[q][1]*exfl2 - Ss[q][1][0]*exfl1;
+  double L =  1./40.*exp(-4*x2) * (
+                10*yym2*Ss[q][1][0] - yym2*Sr[q][1]*( 1+s4px2*s4py2 ) + 0.5*D[q][1]*(
+                  5 + 20*(8*x2-1)*yym2 + (
+                    -1 + 4*(1+8*p2-8*x2)*yym2
+                  )*c8py + c8px*( 
+                    -1 + 4*(1+8*p2-8*x2)*yym2 + ( 1 - 4*(1+16*p2-8*x2)*yym2 )*c8py
+                  ) + 32*M_PI*(
+                    -4*x*yym2*s8px*s4py2 + (y-1)*s4px2*s8py
+                  )
+                )
+              );  
+  return L; 
 }
 
+// Essential boundary conditions.
 double g1_D(double x, double y) {
   return 0.0;
 }
@@ -180,17 +199,27 @@ double g2_D(double x, double y) {
 static double exact_flux1(double x, double y, double& dx, double& dy)
 {
   double em4x2 = exp(-4*sqr(x));
+  
   dx =  2.0*em4x2*x*y*(y-2);
   dy = -0.5*em4x2*(y-1);
+  
   return em4x2*(y/2.-sqr(y/2.));
 }
 
 static double exact_flux2(double x, double y, double& dx, double& dy)
 {
-  double em4x2 = exp(-4*sqr(x));
-  dx = 0.1*em4x2*y*(y-2)*(2*x+(2*x*sqr(sin(4*M_PI*x))-M_PI*sin(8*M_PI*x))*sqr(sin(4*M_PI*y)));
-  dy = 0.05*em4x2*(1-y+sqr(sin(4*M_PI*x))*(-(y-1)*sqr(sin(4*M_PI*y))-2*M_PI*y*(y-2)*sin(8*M_PI*y)));
-  return em4x2*(y/2.-sqr(y/2.)) * (1 + sqr(sin(4*M_PI*x)) * sqr(sin(4*M_PI*y))) / 10.0;
+  double yym2 = (y-2)*y;
+  double x2 = sqr(x), px = M_PI*x, py = M_PI*y;
+  double em4x2 = exp(-4*x2);
+  double s8px = sin(8*px);
+  double s8py = sin(8*py);
+  double s4px2 = sqr(sin(4*px));
+  double s4py2 = sqr(sin(4*py));
+  
+  dx =  1./10.*em4x2*yym2 * ( 2*x + (2*x*s4px2 - M_PI*s8px) * s4py2 );
+  dy =  1./20.*em4x2 * ( 1-y-s4px2*( (y-1)*s4py2 + 2*M_PI*yym2*s8py )  );
+  
+  return em4x2*(y/2.-sqr(y/2.)) * (1 + s4px2 * s4py2) / 10.0;
 }
 
 // APPROXIMATE SOLUTION
@@ -209,6 +238,8 @@ scalar essential_bc_values_2(double x, double y)
 {
   return g2_D(x, y);
 }
+
+const double GAMMA = 8;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Weak forms:
@@ -272,6 +303,18 @@ void make_str_from_adapt_opts(std::stringstream& str)
   
   str << (MULTIMESH ? "_multi" : "_single");
 }
+
+// Functions for plotting the right-hand side.
+static double exfn_Q1(double x, double y, double& dx, double& dy)
+{
+  return Q1(x,y);
+}
+static double exfn_Q2(double x, double y, double& dx, double& dy)
+{
+  return Q2(x,y);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
 {
@@ -435,27 +478,22 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     Adapt adaptivity(Hermes::vector<Space*>(&space1, &space2));
-    if (ADAPTIVITY_NORM == 2) {
+    if (ADAPTIVITY_NORM == 1) 
+    {
       adaptivity.set_error_form(0, 0, callback(biform_0_0));
-      adaptivity.set_error_form(0, 1, callback(biform_0_1));
-      adaptivity.set_error_form(1, 0, callback(biform_1_0));
       adaptivity.set_error_form(1, 1, callback(biform_1_1));
-    } else {
-      if (ADAPTIVITY_NORM == 1) {
-        adaptivity.set_error_form(0, 0, callback(biform_0_0));
-        adaptivity.set_error_form(1, 1, callback(biform_1_1));
-      }
     }
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns) * 100;
     
     Adapt adaptivity_proj(Hermes::vector<Space*>(&space1, &space2));
 
-    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns) * 100;
+    double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns, NULL, false) * 100;
 
     Hermes::vector<double> err_exact_h1;
     ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
-    Hermes::vector<Solution*> exslns(&ex1, &ex2);
-    double error_h1 = adaptivity_proj.calc_err_est(slns, exslns, &err_exact_h1) * 100;
+    //ExactSolution ex1(&mesh1, exfn_Q1), ex2(MULTIMESH ? &mesh2 : &mesh1, exfn_Q2);
+    Hermes::vector<Solution*> exslns(&ex1, &ex2); 
+    double error_h1 = adaptivity_proj.calc_err_exact(slns, exslns, &err_exact_h1, false) * 100;
     
     // Report results.
     cpu_time.tick(); 
