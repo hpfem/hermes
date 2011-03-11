@@ -503,3 +503,70 @@ if(WITH_H3D)
 	message("\tBuild Hermes3D with development tests: ${H3D_WITH_DEV_TESTS}")
 endif(WITH_H3D)
 message("\n")
+
+#------------------------------------------------------------------------------
+# Save the configuration.
+#
+# The following lines save the value of the configuration variables to a file
+# that may be included by an external project dependent on Hermes. At this 
+# moment, only variables needed for configuring our first modules are saved.
+#
+# NOTE: This command must be issued after all subdirectories with H1D,2D,3D
+# have been processed, in order to include their definitions (alternatively, one
+# could append these defs. to the config file from within the respective 
+# CMakeLists.
+# 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+FILE(WRITE config_real.cmake 
+"# HERMES-REAL CMAKE CONFIGURATION FILE\n
+SET(WITH_UMFPACK        ${WITH_UMFPACK})
+SET(WITH_SUPERLU        ${WITH_SUPERLU})
+SET(SUPERLU_MT          ${SUPERLU_MT})
+SET(WITH_PETSC          ${WITH_PETSC})
+SET(WITH_MUMPS          ${WITH_MUMPS})
+SET(WITH_TRILINOS       ${WITH_TRILINOS})
+SET(WITH_EXODUSII       ${WITH_EXODUSII})
+SET(WITH_HDF5           ${WITH_HDF5})
+SET(WITH_OPENMP         ${WITH_OPENMP})
+
+SET(HDF5_LIBRARY        ${HDF5_LIBRARY})
+SET(UMFPACK_LIBRARIES   ${UMFPACK_LIBRARIES})
+SET(TRILINOS_LIBRARIES  ${TRILINOS_LIBRARIES})
+SET(PETSC_LIBRARIES     ${PETSC_REAL_LIBRARIES})
+SET(MUMPS_LIBRARIES     ${MUMPS_REAL_LIBRARIES})
+SET(SUPERLU_LIBRARY     ${SUPERLU_LIBRARY})
+SET(LAPACK_LIBRARIES    ${LAPACK_LIBRARIES})
+SET(PTHREAD_LIBRARY     ${PTHREAD_LIBRARY})
+SET(CLAPACK_LIBRARY     ${CLAPACK_LIBRARY})
+SET(BLAS_LIBRARY        ${BLAS_LIBRARY})
+SET(F2C_LIBRARY         ${F2C_LIBRARY})
+SET(ADDITIONAL_LIBS     ${ADDITIONAL_LIBS})
+SET(PYTHON_LIBRARY      ${PYTHON_LIBRARY})
+SET(EXODUSII_LIBRARIES  ${EXODUSII_LIBRARIES})
+SET(WITH_GLUT           ${H2D_WITH_GLUT})
+SET(GLUT_LIBRARY        ${GLUT_LIBRARY})
+SET(GLEW_LIBRARY        ${GLEW_LIBRARY})
+
+SET(UMFPACK_INCLUDE_DIR  ${UMFPACK_INCLUDE_DIR})
+LIST(APPEND PETSC_INCLUDE_DIR ${COMMON_PETSC_INCLUDE_DIRS} ${PETSC_REAL_INCLUDE_DIRS})
+SET(MUMPS_INCLUDE_DIR    ${MUMPS_INCLUDE_DIR})
+SET(TRILINOS_INCLUDE_DIR ${TRILINOS_INCLUDE_DIR})
+SET(SUPERLU_INCLUDE_DIR  ${SUPERLU_INCLUDE_DIR})
+SET(HDF5_INCLUDE_DIR     ${HDF5_INCLUDE_DIR})
+SET(EXODUSII_INCLUDE_DIR ${EXODUSII_INCLUDE_DIR})
+SET(CLAPACK_INCLUDE_DIRS ${CLAPACK_INCLUDE_DIRS})
+SET(NUMPY_INCLUDE_PATH   ${NUMPY_INCLUDE_PATH})
+SET(PYTHON_INCLUDE_PATH  ${PYTHON_INCLUDE_PATH})
+SET(DEFAULT_PYTHON_INSTALL_PATH  ${DEFAULT_PYTHON_INSTALL_PATH})
+
+SET(HAVE_VASPRINTF      ${HAVE_VASPRINTF})
+SET(HAVE_STRCASECMP     ${HAVE_STRCASECMP})
+SET(HAVE_TEUCHOS_LINK   ${HAVE_TEUCHOS_LINK})
+SET(HAVE_TEUCHOS_BFD    ${HAVE_TEUCHOS_BFD})
+SET(HAVE_EXECINFO       ${HAVE_EXECINFO})
+SET(HAVE_FMEMOPEN       ${HAVE_FMEMOPEN})
+SET(HAVE_LOG2           ${HAVE_LOG2})
+")
+
+install( FILES config_real.cmake DESTINATION include/hermes )   
