@@ -25,7 +25,7 @@ set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 #   Implicit_Radau_IIA_3_5       // Implicit Radau IIA-5 method.
 #   Implicit_SIRK_2_2,           // Implicit SIRK-2-2 method.
 #   Implicit_ESIRK_2_2,          // Implicit ESIRK-2-2 method.
-#   Implicit_SDIRK_4_5           // Implicit SDIRK-4-5 method.
+#   Implicit_SDIRK_5_4           // Implicit SDIRK-4-5 method.
 
 
 add_test(test-tutorial-P03-05-newton-heat-rk-Explicit_RK_1 ${BIN} 1)
@@ -49,5 +49,5 @@ add_test(test-tutorial-P03-05-newton-heat-rk-Implicit_Radau_IIA_3_5 ${BIN} 14)
 
 add_test(test-tutorial-P03-05-newton-heat-rk-Implicit_SIRK_2_2 ${BIN} 15)
 add_test(test-tutorial-P03-05-newton-heat-rk-Implicit_ESIRK_2_2 ${BIN} 16)
-add_test(test-tutorial-P03-05-newton-heat-rk-Implicit_SDIRK_4_5 ${BIN} 17)
+add_test(test-tutorial-P03-05-newton-heat-rk-Implicit_SDIRK_5_4 ${BIN} 17)
 

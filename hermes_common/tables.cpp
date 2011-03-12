@@ -292,8 +292,8 @@ ButcherTable::ButcherTable(ButcherTableType butcher_table)
       this->set_C(2, 1.);
     break;
 
-    // Implicit SDIRK-4-5 (fifth-order).
-    case Implicit_SDIRK_4_5: 
+    // Implicit SDIRK-5-4 (fourth-order).
+    case Implicit_SDIRK_5_4: 
       this->alloc(5);
       this->set_A(0, 0, 1./4.);
       this->set_A(1, 0, 1./2.);

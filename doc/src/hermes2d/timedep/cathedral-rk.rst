@@ -45,7 +45,7 @@ Implicit methods::
 * Implicit_Lobatto_IIIB_3_4, 
 * Implicit_Lobatto_IIIC_3_4, 
 * Implicit_Radau_IIA_3_5, 
-* Implicit_SDIRK_4_5.
+* Implicit_SDIRK_5_4.
 
 Embedded explicit methods::
 

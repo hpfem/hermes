@@ -24,7 +24,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 // Implicit methods: 
 //   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
 //   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
-//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_4_5.
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
 // Embedded explicit methods:
 //   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
 //   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     case 14: butcher_table_type = Implicit_Radau_IIA_3_5; break;
     case 15: butcher_table_type = Implicit_SIRK_2_2; break;
     case 16: butcher_table_type = Implicit_ESIRK_2_2; break;
-    case 17: butcher_table_type = Implicit_SDIRK_4_5; break;
+    case 17: butcher_table_type = Implicit_SDIRK_5_4; break;
 
     default: error("Admissible command-line options are from 1 to 17.");
   }

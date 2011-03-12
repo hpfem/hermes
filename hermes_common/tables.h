@@ -43,7 +43,7 @@ enum ButcherTableType
    Implicit_Lobatto_IIIB_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Lobatto_IIIC_3_4,   // Implicit Lobatto IIIB-4 method.
    Implicit_Radau_IIA_3_5,      // Implicit Radau IIA-5 method.
-   Implicit_SDIRK_4_5,          // Implicit SDIRK-4-5 method.
+   Implicit_SDIRK_5_4,          // Implicit SDIRK-5-4 method.
 
    /* EMBEDDED EXPLICIT METHODS */
 
