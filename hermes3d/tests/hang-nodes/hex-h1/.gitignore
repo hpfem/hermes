@@ -1,0 +1,7 @@
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+config.h
+test-hnnd-hex-h1-dirichlet
+test-hnnd-hex-h1-newton

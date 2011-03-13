@@ -1,0 +1,9 @@
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+config.h
+libhermes_common-cplx-debug.so
+libhermes_common-cplx.so
+libhermes_common-real-debug.so
+libhermes_common-real.so
