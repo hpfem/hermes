@@ -109,6 +109,8 @@ public:
   /// Sets the order automatically assigned to all newly created elements.
   /// (The order of these is normally undefined and has to be set explicitly.)
   void set_default_order(int tri_order, int quad_order = -1);
+  /// Set the element order relative to the current order.
+  void adjust_element_order(int order_change);
   /// Sets the shapeset.
   virtual void set_shapeset(Shapeset* shapeset) = 0;
   /// Copies element orders from another space. 'inc' is an optional order

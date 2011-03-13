@@ -208,6 +208,13 @@ void Space::set_default_order(int tri_order, int quad_order)
   default_quad_order = quad_order;
 }
 
+void Space::adjust_element_order(int order_change)
+{
+  Element* e;
+  for_all_active_elements(e, this->get_mesh())
+    set_element_order(e->id, get_element_order(e->id) + order_change);
+}
+
 
 void Space::copy_orders_recurrent(Element* e, int order)
 {
