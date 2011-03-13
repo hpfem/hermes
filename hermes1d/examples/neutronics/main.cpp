@@ -248,6 +248,10 @@ int main()
 
   info("K_EFF = %f", K_EFF);
 
+  // Cleanup.
+  delete dp;
+  delete space;
+
   info("Done.");
   return 0;
 }

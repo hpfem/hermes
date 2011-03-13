@@ -18,10 +18,10 @@
 //  Exact solution: u(x) = exp(x), v(x) = exp(-x).
 //
 //  The following parameters can be changed:
-const int NEQ = 4;                      // Number of equations.
+const int NEQ = 4;                       // Number of equations.
 const int NELEM = 500;                   // Number of elements.
-const double A = 0, B = 10;             // Domain end points.
-const int P_INIT = 2;                   // Polynomial degree.
+const double A = 0, B = 10;              // Domain end points.
+const int P_INIT = 2;                    // Polynomial degree.
 
 // Damping parameter.
 int DAMPING_STEPS = 20;     // Number of damping steps. The entire problem
@@ -134,6 +134,17 @@ int main()
 
   // Plot the resulting space.
   space->plot("space.gp");
+
+  // Cleanup.
+  for(unsigned j = 0; j < DIR_BC_LEFT.size(); j ++)
+      delete DIR_BC_LEFT[j];
+  DIR_BC_LEFT.clear();
+
+  delete matrix;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete space;
 
   info("Done.");
   return 0;
