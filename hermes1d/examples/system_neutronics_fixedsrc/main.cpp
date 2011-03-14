@@ -147,7 +147,23 @@ int main()
   double I = calc_integrated_flux(space, 1, 60., 80.);
   double Iref = 134.9238787715397;
   info("I = %.13f, err = %.13f%%", I, 100.*(I - Iref)/Iref );
-	
+
+  // Cleanup.
+  for(unsigned i = 0; i < DIR_BC_LEFT.size(); i++)
+      delete DIR_BC_LEFT[i];
+  DIR_BC_LEFT.clear();
+
+  for(unsigned i = 0; i < DIR_BC_RIGHT.size(); i++)
+      delete DIR_BC_RIGHT[i];
+  DIR_BC_RIGHT.clear();
+
+  delete matrix;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete dp;
+  delete space;
+
   info("Done.");
   return 0;
 }

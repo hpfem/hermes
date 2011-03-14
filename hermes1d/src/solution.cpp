@@ -48,4 +48,5 @@ void copy_dofs(int sln_src, int sln_trg, Space* space, int comp)
   while ((e = I->next_active_element()) != NULL) {
     e->copy_dofs(sln_src, sln_trg);
   }
+  delete I;
 }

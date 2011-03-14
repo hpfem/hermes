@@ -130,6 +130,23 @@ int main()
   if (fabs(coeff_vec[4] - 0.0399916) > 1e-4) success = false;
   if (fabs(coeff_vec[5] - 0.0242557) > 1e-4) success = false;
 
+  // Cleanup.
+  for(unsigned i = 0; i < DIR_BC_LEFT.size(); i++)
+      delete DIR_BC_LEFT[i];
+  DIR_BC_LEFT.clear();
+
+  for(unsigned i = 0; i < DIR_BC_RIGHT.size(); i++)
+      delete DIR_BC_RIGHT[i];
+  DIR_BC_RIGHT.clear();
+
+  delete matrix;
+  delete rhs;
+  delete solver;
+  delete[] coeff_vec;
+  delete dp;
+  delete space;
+
+  // Test result.
   if (success)
   {
     info("Success!");

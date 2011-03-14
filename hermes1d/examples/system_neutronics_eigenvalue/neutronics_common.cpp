@@ -232,4 +232,5 @@ void get_solution_at_point(Space *space, double x, double flux[N_GRP], double J[
  
  	for (int g = 0; g < N_GRP; g++)
  		J[g] *= -D[m][g];
+        delete I;
 }

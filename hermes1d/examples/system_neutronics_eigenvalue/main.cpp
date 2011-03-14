@@ -216,6 +216,18 @@ int main()
   R = flux[0]/flux[1];
   info("phi_fast/phi_therm at x=40 : %.4f, err = %.2f%%", R, 100*(R-1.5162)/1.5162);
 	
+  // Cleanup.
+  for(unsigned i = 0; i < DIR_BC_LEFT.size(); i++)
+      delete DIR_BC_LEFT[i];
+  DIR_BC_LEFT.clear();
+
+  for(unsigned i = 0; i < DIR_BC_RIGHT.size(); i++)
+      delete DIR_BC_RIGHT[i];
+  DIR_BC_RIGHT.clear();
+
+  delete dp;
+  delete space;
+
   info("Done.");
   return 0;
 }

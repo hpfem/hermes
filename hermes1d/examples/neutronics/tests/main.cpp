@@ -236,6 +236,11 @@ int main()
 
   // Test variable.
   info("ndof = %d.", Space::get_num_dofs(space));
+
+  // Cleanup.
+  delete dp;
+  delete space;
+
   if (success)
   {
     info("Success!");
