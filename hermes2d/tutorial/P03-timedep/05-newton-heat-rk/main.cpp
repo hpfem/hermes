@@ -14,7 +14,7 @@ using namespace RefinementSelectors;
 //  For a list of available R-K methods see the file hermes_common/tables.h.
 //
 //  The function rk_time_step() needs more optimisation, see a todo list at 
-//  the beginning of file src/runge-kutta.cpp.
+//  the beginning of file src/runge-kutta.H.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.

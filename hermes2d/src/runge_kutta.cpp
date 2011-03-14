@@ -17,14 +17,12 @@
 #include "hermes2d.h"
 
 RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool residual_as_vector) 
-        : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size()), 
-        residual_as_vector(residual_as_vector) {
-
+    : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
+    stage_wf_left(dp->get_spaces().size()), residual_as_vector(residual_as_vector) 
+{
   // Check for not implemented features.
   if (matrix_solver != SOLVER_UMFPACK)
     error("Sorry, rk_time_step() still only works with UMFpack.");
-  if (dp->get_weak_formulation()->get_neq() > 1)
-    error("Sorry, rk_time_step() does not work with systems yet.");
   
   // Create matrix solver.
   solver = create_linear_solver(matrix_solver, &matrix_right, &vector_right);
@@ -116,7 +114,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left
     // can be added later.
-    stage_dp_right.assemble(u_ext_vec, &matrix_right, &vector_right, !jacobian_changed, true, false);
+    stage_dp_right.assemble(u_ext_vec, &matrix_right, &vector_right, !jacobian_changed && it > 1, true, false);
     
     matrix_right.add_to_diagonal_blocks(num_stages, &matrix_left);
 
@@ -292,12 +290,12 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
       for (unsigned int j = 0; j < num_stages; j++) {
         WeakForm::MatrixFormVol* mfv_ij = mfvol_base[m]->clone();
        
-        mfv_ij->i = mfv_ij->i + i * dp->get_num_dofs();
-        mfv_ij->j = mfv_ij->j + j * dp->get_num_dofs();
+        mfv_ij->i = mfv_ij->i + i * dp->get_spaces().size();
+        mfv_ij->j = mfv_ij->j + j * dp->get_spaces().size();
 
         mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
-        mfv_ij->u_ext_offset = i;
+        mfv_ij->u_ext_offset = i * dp->get_spaces().size();
 
         // This form will not be integrated adaptively.
         mfv_ij->adapt_eval = false;
@@ -319,12 +317,12 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
       for (int j = 0; j < num_stages; j++) {
         WeakForm::MatrixFormSurf* mfs_ij = mfsurf_base[m]->clone();
        
-        mfs_ij->i = mfs_ij->i + i * dp->get_num_dofs();
-        mfs_ij->j = mfs_ij->j + j * dp->get_num_dofs();
+        mfs_ij->i = mfs_ij->i + i * dp->get_spaces().size();
+        mfs_ij->j = mfs_ij->j + j * dp->get_spaces().size();
 
         mfs_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
-        mfs_ij->u_ext_offset = i;
+        mfs_ij->u_ext_offset = i * dp->get_spaces().size();
 
         // This form will not be integrated adaptively.
         mfs_ij->adapt_eval = false;
@@ -345,10 +343,10 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
     for (int i = 0; i < num_stages; i++) {
       WeakForm::VectorFormVol* vfv_i = vfvol_base[m]->clone();
        
-      vfv_i->i = vfv_i->i + i * dp->get_num_dofs();
+      vfv_i->i = vfv_i->i + i * dp->get_spaces().size();
       
       vfv_i->scaling_factor = -1.0;
-      vfv_i->u_ext_offset = i;
+      vfv_i->u_ext_offset = i * dp->get_spaces().size();
 
       // This form will not be integrated adaptively.
       vfv_i->adapt_eval = false;
@@ -368,13 +366,10 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
     for (int i = 0; i < num_stages; i++) {
       WeakForm::VectorFormSurf* vfs_i = vfsurf_base[m]->clone();
        
-      vfs_i->i = vfs_i->i + i * dp->get_num_dofs();
+      vfs_i->i = vfs_i->i + i * dp->get_spaces().size();
 
       vfs_i->scaling_factor = -1.0;
-      vfs_i->u_ext_offset = i;
-
-      // Set offset for u_ext[] external solutions.
-      vfs_i->u_ext_offset = i;
+      vfs_i->u_ext_offset = i * dp->get_spaces().size();
 
       // This form will not be integrated adaptively.
       vfs_i->adapt_eval = false;
