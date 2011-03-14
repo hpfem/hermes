@@ -2077,6 +2077,14 @@ void Mesh::MarkersConversion::insert_marker(int internal_marker, std::string use
 
 std::string Mesh::MarkersConversion::get_user_marker(int internal_marker)
 {
+  if(internal_marker == H2D_DG_INNER_EDGE_INT)
+    return
+      H2D_DG_INNER_EDGE;
+
+  if(internal_marker == H2D_DG_BOUNDARY_EDGE_INT)
+    return
+      H2D_DG_BOUNDARY_EDGE;
+
   if(conversion_table->find(internal_marker) == conversion_table->end())
     error("MarkersConversions class asked for a non existing marker %d", internal_marker);
   return conversion_table->find(internal_marker)->second;
@@ -2084,6 +2092,14 @@ std::string Mesh::MarkersConversion::get_user_marker(int internal_marker)
 
 int Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
 {
+  if(user_marker == H2D_DG_INNER_EDGE)
+    return
+      H2D_DG_INNER_EDGE_INT;
+
+  if(user_marker == H2D_DG_BOUNDARY_EDGE)
+    return
+      H2D_DG_BOUNDARY_EDGE_INT;
+
   if(conversion_table_inverse->find(user_marker) == conversion_table_inverse->end())
     error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
   return conversion_table_inverse->find(user_marker)->second;

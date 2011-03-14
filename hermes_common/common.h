@@ -411,6 +411,10 @@ const std::string H2D_DG_INNER_EDGE = "-1234567";    ///< This is to be used by 
                                     ///< Forms with this identifier will receive DiscontinuousFunc representations of shape
                                     ///< and ext. functions, which they may query for values on either side of given interface.
 
+// For internal use.
+const int H2D_DG_INNER_EDGE_INT = -1234567;
+const int H2D_DG_BOUNDARY_EDGE_INT = -12345;
+
 const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with number -1.
 
 /// This class makes command line arguments available to any other method in Hermes.

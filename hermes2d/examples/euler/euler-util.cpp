@@ -1,21 +1,21 @@
 extern NumericalFlux num_flux;
 
 // Calculates energy from other quantities.
-double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure)
+double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
 {
-  return pressure/(num_flux.kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
+  return pressure/(kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
 };
 
 // Calculates pressure from other quantities.
-double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy)
+double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
 {
-  return (num_flux.kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
+  return (kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
 };
 
 // Calculates speed of sound.
-double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy)
+double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
 {
-  return std::sqrt(num_flux.kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy) / rho);
+  return std::sqrt(kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy, kappa) / rho);
 };
 
 class DiscontinuityDetector
