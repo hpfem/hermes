@@ -717,13 +717,15 @@ void Mesh::refine_element_id(int id, int refinement)
   refine_element(this, e, refinement);
 }
 
-void Mesh::refine_all_elements(int refinement)
+void Mesh::refine_all_elements(int refinement, bool mark_as_initial)
 {
   Element* e;
   elements.set_append_only(true);
   for_all_active_elements(e, this)
     refine_element_id(e->id, refinement);
   elements.set_append_only(false);
+  if(mark_as_initial)
+    ninitial = this->get_max_element_id();
 }
 
 void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
@@ -839,8 +841,9 @@ void Mesh::unrefine_all_elements(bool keep_initial_refinements)
   {
     bool found = true;
     for (unsigned int i = 0; i < 4; i++)
-      if (e->sons[i] != NULL && (!e->sons[i]->active ||
-          (keep_initial_refinements && e->sons[i]->id < ninitial))  )
+      if (e->sons[i] != NULL && 
+          (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < ninitial))  
+         )
         { found = false; break; }
 
     if (found) list.push_back(e->id);

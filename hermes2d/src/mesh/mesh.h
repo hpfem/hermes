@@ -226,7 +226,7 @@ public:
 
   /// Refines all elements.
   /// \param refinement [in] Same meaning as in refine_element_id().
-  void refine_all_elements(int refinement = 0);
+  void refine_all_elements(int refinement = 0, bool mark_as_initial = false);
 
   /// Selects elements to refine according to a given criterion and
   /// performs 'depth' levels of refinements. The criterion function
