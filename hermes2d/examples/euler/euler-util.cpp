@@ -53,11 +53,11 @@ DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces,
                         Hermes::vector<Solution *> solutions) : spaces(spaces), solutions(solutions)
 {
   // A check that all meshes are the same in the spaces.
-  Mesh* mesh0 = spaces[0]->get_mesh();
+  int mesh0_seq = spaces[0]->get_mesh()->get_seq();
   for(unsigned int i = 0; i < spaces.size(); i++)
-    if(spaces[i]->get_mesh() != mesh0)
+    if(spaces[i]->get_mesh()->get_seq() != mesh0_seq)
       error("So far DiscontinuityDetector works only for single mesh.");
-  mesh = mesh0;
+  mesh = spaces[0]->get_mesh();
 };
 
 DiscontinuityDetector::~DiscontinuityDetector()
@@ -120,8 +120,6 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
 
 double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
 {
-  
-
   // Set Geometry.
   SurfPos surf_pos;
   surf_pos.marker = e->marker;
@@ -139,7 +137,7 @@ double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
   double result = 0.0;
 
   // Go through all neighbors.
-  for(unsigned int neighbor_i = 0; neighbor_i < ns.get_num_neighbors(); neighbor_i++) {
+  for(int neighbor_i = 0; neighbor_i < ns.get_num_neighbors(); neighbor_i++) {
     ns.active_segment = neighbor_i;
     ns.neighb_el = ns.neighbors[neighbor_i];
     ns.neighbor_edge = ns.neighbor_edges[neighbor_i];
@@ -258,9 +256,9 @@ public:
 
 protected:
   /// Members.
+  scalar* solution_vector;
   Hermes::vector<Space *> spaces;
   Hermes::vector<Solution *> solutions;
-  scalar* solution_vector;
 };
 
 FluxLimiter::FluxLimiter(scalar* solution_vector, Hermes::vector<Space *> spaces, Hermes::vector<Solution *> solutions) : solution_vector(solution_vector), spaces(spaces), 

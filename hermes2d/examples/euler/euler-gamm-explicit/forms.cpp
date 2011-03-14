@@ -1,5 +1,6 @@
 #include "hermes2d.h"
 #include "numerical_flux.h"
+
 // Utility functions for the Euler equations.
 #include "../euler-util.cpp"
 

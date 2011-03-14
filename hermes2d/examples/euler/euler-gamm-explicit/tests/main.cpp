@@ -41,7 +41,7 @@ const std::string BDY_INLET_OUTLET = "2";
 #include "forms.cpp"
 
 // Initial condition.
-#include "initial_condition.cpp"
+#include "../constant_initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {

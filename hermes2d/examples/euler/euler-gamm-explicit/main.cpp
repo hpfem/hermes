@@ -46,7 +46,7 @@ const std::string BDY_INLET_OUTLET = "2";
 #include "forms.cpp"
 
 // Initial condition.
-#include "initial_condition.cpp"
+#include "../constant_initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -99,10 +99,6 @@ int main(int argc, char* argv[])
   
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
-  // If the FE problem is in fact a FV problem.
-  if(P_INIT == 0)
-    dp.set_fvm();
-
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
