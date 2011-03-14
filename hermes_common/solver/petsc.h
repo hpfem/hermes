@@ -23,12 +23,16 @@
 #include "../matrix.h"
 #include "solver.h"
 
+#undef error //error is is used in petrsc.h
+
 #ifdef WITH_PETSC
   #include <petsc.h>
   #include <petscmat.h>
   #include <petscvec.h>
   #include <petscksp.h>
 #endif
+
+#define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__)) //redefine error back
 
 /// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
 ///
