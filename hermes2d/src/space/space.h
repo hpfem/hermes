@@ -110,7 +110,11 @@ public:
   /// (The order of these is normally undefined and has to be set explicitly.)
   void set_default_order(int tri_order, int quad_order = -1);
   /// Set the element order relative to the current order.
-  void adjust_element_order(int order_change);
+  /// The parameter min_order prevents decreasing polynomial order below this threshold.
+  void adjust_element_order(int order_change, unsigned int min_order);
+  /// Version for quads.
+  void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
+  
   /// Sets the shapeset.
   virtual void set_shapeset(Shapeset* shapeset) = 0;
   /// Copies element orders from another space. 'inc' is an optional order

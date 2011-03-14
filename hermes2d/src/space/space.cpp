@@ -208,13 +208,36 @@ void Space::set_default_order(int tri_order, int quad_order)
   default_quad_order = quad_order;
 }
 
-void Space::adjust_element_order(int order_change)
+void Space::adjust_element_order(int order_change, unsigned int min_order)
 {
+  _F_
   Element* e;
-  for_all_active_elements(e, this->get_mesh())
-    set_element_order(e->id, get_element_order(e->id) + order_change);
+  for_all_active_elements(e, this->get_mesh()) {
+    if(e->is_triangle())
+      set_element_order_internal(e->id, std::max<int>(min_order, get_element_order(e->id) + order_change));
+    else
+      set_element_order_internal(e->id, std::max<int>(H2D_MAKE_QUAD_ORDER(min_order, min_order), 
+      H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + order_change)));
+  }
+  assign_dofs();
 }
 
+void Space::adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order)
+{
+  _F_
+  Element* e;
+  for_all_active_elements(e, this->get_mesh()) {
+    if(e->is_triangle()) {
+      warn("Using quad version of Space::adjust_element_order(), only horizontal orders will be used.");
+      set_element_order_internal(e->id, std::max<int>(horizontal_min_order, get_element_order(e->id) + horizontal_order_change));
+    }
+    else
+      set_element_order_internal(e->id, std::max<int>
+          (H2D_MAKE_QUAD_ORDER(horizontal_min_order, vertical_min_order), 
+           H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change)));
+  }
+  assign_dofs();
+}
 
 void Space::copy_orders_recurrent(Element* e, int order)
 {

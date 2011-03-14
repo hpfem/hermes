@@ -33,10 +33,8 @@ void H1Space::init(Shapeset* shapeset, Ord2 p_init)
   }
 
   if (!h1_proj_ref++)
-  {
     // FIXME: separate projection matrices for different shapesets
     precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
-  }
   proj_mat = h1_proj_mat;
   chol_p   = h1_chol_p;
 
