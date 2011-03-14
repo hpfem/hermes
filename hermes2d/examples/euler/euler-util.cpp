@@ -285,3 +285,49 @@ void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_eleme
   // Now adjust the solutions.
   Solution::vector_to_solutions(solution_vector, spaces, solutions);
 };
+
+// Filters.
+class MachNumberFilter : public SimpleFilter
+{
+public: 
+  MachNumberFilter(Hermes::vector<MeshFunction*> solutions, double kappa) : SimpleFilter(solutions), kappa(kappa) {};
+  ~MachNumberFilter() {};
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
+    for (int i = 0; i < n; i++)
+      result[i] = std::sqrt((values.at(1)[i] / values.at(0)[i])*(values.at(1)[i] / values.at(0)[i]) + (values.at(2)[i] / values.at(0)[i])*(values.at(2)[i] / values.at(0)[i]))
+      / std::sqrt(kappa * calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / values.at(0)[i]);
+  }
+
+  double kappa;
+};
+
+class PressureFilter : public SimpleFilter
+{
+public: 
+  PressureFilter(Hermes::vector<MeshFunction*> solutions, double kappa) : SimpleFilter(solutions), kappa(kappa) {};
+  ~PressureFilter() {};
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
+    for (int i = 0; i < n; i++)
+      result[i] = (kappa - 1.) * (values.at(3)[i] - (values.at(1)[i]*values.at(1)[i] + values.at(2)[i]*values.at(2)[i])/(2*values.at(0)[i]));
+  }
+
+  double kappa;
+};
+
+class EntropyFilter : public SimpleFilter
+{
+public: 
+  EntropyFilter(Hermes::vector<MeshFunction*> solutions, double kappa, double rho_ext, double p_ext) : SimpleFilter(solutions), kappa(kappa), rho_ext(rho_ext), p_ext(p_ext) {};
+  ~EntropyFilter() {};
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
+    for (int i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
+        result[i] = std::log((calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / p_ext)
+        / pow((values.at(0)[i] / rho_ext), kappa));
+  }
+
+  double kappa, rho_ext, p_ext;
+};

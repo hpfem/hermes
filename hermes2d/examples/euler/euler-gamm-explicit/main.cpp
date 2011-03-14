@@ -48,42 +48,6 @@ const std::string BDY_INLET_OUTLET = "2";
 // Initial condition.
 #include "initial_condition.cpp"
 
-// Filter for entropy which uses the constants defined above.
-static void calc_entropy_estimate_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
-{
-  for (int i = 0; i < n; i++)
-    result[i] = std::log((calc_pressure(scalars.at(0)[i], scalars.at(1)[i], scalars.at(2)[i], scalars.at(3)[i], KAPPA) / P_EXT)
-    / pow((scalars.at(0)[i] / RHO_EXT), KAPPA));
-};
-
-static void calc_pressure_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
-{
-  for (int i = 0; i < n; i++)
-    result[i] = (KAPPA - 1.) * (scalars.at(3)[i] - (scalars.at(1)[i]*scalars.at(1)[i] + scalars.at(2)[i]*scalars.at(2)[i])/(2*scalars.at(0)[i]));
-};
-
-static void calc_Mach_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
-{
-  for (int i = 0; i < n; i++)
-    result[i] = std::sqrt((scalars.at(1)[i] / scalars.at(0)[i])*(scalars.at(1)[i] / scalars.at(0)[i]) + (scalars.at(2)[i] / scalars.at(0)[i])*(scalars.at(2)[i] / scalars.at(0)[i]))
-    / std::sqrt(KAPPA * calc_pressure(scalars.at(0)[i], scalars.at(1)[i], scalars.at(2)[i], scalars.at(3)[i], KAPPA) / scalars.at(0)[i]);
-};
-
-static void calc_u_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
-{
-  for (int i = 0; i < n; i++)
-    result[i] = scalars.at(1)[i]/scalars.at(0)[i];
-};
-
-static void calc_w_func(int n, Hermes::vector<scalar*> scalars, scalar* result)
-{
-  for (int i = 0; i < n; i++)
-    result[i] = scalars.at(2)[i]/scalars.at(0)[i];
-};
-
-// Time is zero at the beginning.
-double t = 0;
-
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -139,27 +103,22 @@ int main(int argc, char* argv[])
   if(P_INIT == 0)
     dp.set_fvm();
 
-  // Filters for visualization of pressure and the two components of velocity.
-  SimpleFilter pressure(calc_pressure_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter u(calc_u_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter w(calc_w_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter Mach_number(calc_Mach_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
-  SimpleFilter entropy_estimate(calc_entropy_estimate_func, Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+  // Filters for visualization of Mach number, pressure and entropy.
+  MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
+  PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
+  EntropyFilter entropy(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA, RHO_EXT, P_EXT);
 
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-  VectorView vview("Velocity", new WinGeom(700, 400, 600, 300));
 
+  /*
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
+  */
 
-
-  // Iteration number.
-  int iteration = 0;
-  
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -167,7 +126,8 @@ int main(int argc, char* argv[])
 
   // Output of the approximate time derivative.
   std::ofstream time_der_out("time_der");
-
+  
+  int iteration = 0; double t = 0;
   for(t = 0.0; t < 3.0; t += TAU) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
@@ -254,16 +214,31 @@ int main(int argc, char* argv[])
     prev_e.copy(&sln_e);
 
     // Visualization.
+    Mach_number.reinit();
+    pressure.reinit();
+    entropy.reinit();
+    pressure_view.show(&pressure);
+    entropy_production_view.show(&entropy);
+    Mach_number_view.show(&Mach_number);
+   
+    /*
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
     s3.show(&prev_rho_v_y);
     s4.show(&prev_e);
+    */
   }
   
   pressure_view.close();
   entropy_production_view.close();
   Mach_number_view.close();
-  vview.close();
+
+  /*
+  s1.close();
+  s2.close();
+  s3.close();
+  s4.close();
+  */
 
   time_der_out.close();
   return 0;
