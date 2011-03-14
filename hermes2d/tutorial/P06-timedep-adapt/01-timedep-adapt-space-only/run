@@ -1,3 +1,2 @@
 rm *~ 
-./newton-timedep-heat-adapt
-
+./P06-01-timedep-adapt-space-only

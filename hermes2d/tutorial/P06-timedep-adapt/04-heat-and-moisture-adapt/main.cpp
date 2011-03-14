@@ -20,9 +20,9 @@ const bool MULTI = true;                          // MULTI = true  ... use multi
                                                   // forced to be geometrically the same but the
                                                   // polynomial degrees can still vary.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
-const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees 
-                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
-                                                  // TODO: Add a third option where one layer will be taken off 
+const int UNREF_METHOD = 3;                       // 1... mesh reset to basemesh and poly degrees to P_INIT.   
+                                                  // 2... one ref. layer shaved off, poly degrees reset to P_INIT.
+                                                  // 3... one ref. layer shaved off, poly degrees decreased by one. 
                                                   // and just one polynomial degree subtracted.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -182,16 +182,25 @@ int main(int argc, char* argv[])
     // Uniform mesh derefinement.
     if (ts > 1 && ts % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
-      if (UNREF_LEVEL == 1) {
-        T_mesh.unrefine_all_elements();
-        M_mesh.unrefine_all_elements();
+      switch (UNREF_METHOD) {
+        case 1: T_mesh.copy(&basemesh);
+                M_mesh.copy(&basemesh);
+                T_space.set_uniform_order(P_INIT);
+                M_space.set_uniform_order(P_INIT);
+                break;
+        case 2: T_mesh.unrefine_all_elements();
+                M_mesh.unrefine_all_elements();
+                T_space.set_uniform_order(P_INIT);
+                M_space.set_uniform_order(P_INIT);
+                break;
+        case 3: T_mesh.unrefine_all_elements();
+                M_mesh.unrefine_all_elements();
+                //space.adjust_element_order(-1, P_INIT);
+                T_space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+                M_space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+                break;
+        default: error("Wrong global derefinement method.");
       }
-      else {
-        T_mesh.copy(&basemesh);
-        M_mesh.copy(&basemesh);
-      }
-      T_space.set_uniform_order(P_INIT);
-      M_space.set_uniform_order(P_INIT);
     }
 
     // Spatial adaptivity loop. Note: T_prev_time and M_prev_time must not be changed during 

@@ -32,10 +32,9 @@ const double T_FINAL = 2.0;                       // Time interval length.
 
 // Spatial adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
-const int UNREF_LEVEL = 1;                        // 1 = one layer of refinements is shaved off and poly degrees
-                                                  // of all elements reset to P_INIT; 2 = mesh reset to basemesh.  
-                                                  // TODO: Add a third option where one layer will be taken off 
-                                                  // and just one polynomial degree subtracted.
+const int UNREF_METHOD = 3;                       // 1... mesh reset to basemesh and poly degrees to P_INIT.   
+                                                  // 2... one ref. layer shaved off, poly degrees reset to P_INIT.
+                                                  // 3... one ref. layer shaved off, poly degrees decreased by one. 
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -180,9 +179,20 @@ int main(int argc, char* argv[])
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
       info("Global mesh derefinement.");
-      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
-      else mesh.copy(&basemesh);
-      space.set_uniform_order(P_INIT);
+      switch (UNREF_METHOD) {
+        case 1: mesh.copy(&basemesh);
+                space.set_uniform_order(P_INIT);
+                break;
+        case 2: mesh.unrefine_all_elements();
+                space.set_uniform_order(P_INIT);
+                break;
+        case 3: mesh.unrefine_all_elements();
+                //space.adjust_element_order(-1, P_INIT);
+                space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+                break;
+        default: error("Wrong global derefinement method.");
+      }
+
       ndof = Space::get_num_dofs(&space);
     }
 
