@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
     }
     else
-    error ("Matrix solver failed.\n");
+      error ("Matrix solver failed.\n");
 
     if(SHOCK_CAPTURING) {
       DiscontinuityDetector discontinuity_detector(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
