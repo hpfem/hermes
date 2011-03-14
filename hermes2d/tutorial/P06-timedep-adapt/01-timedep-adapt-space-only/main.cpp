@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", &basemesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
+  for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements(0, true);
   mesh.copy(&basemesh);
   
   // Initialize boundary conditions.
@@ -127,9 +127,16 @@ int main(int argc, char* argv[])
     if (ts > 1 && ts % UNREF_FREQ == 0) 
     {
       info("Global mesh derefinement.");
-      if (UNREF_LEVEL == 1) mesh.unrefine_all_elements();
-      else mesh.copy(&basemesh);
-      space.set_uniform_order(P_INIT);
+      if (UNREF_LEVEL == 1) {
+        mesh.unrefine_all_elements();
+        //space.adjust_element_order(-1, P_INIT);
+        space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+      }
+      else {
+        mesh.copy(&basemesh);
+        space.set_uniform_order(P_INIT);
+      }
+
       ndof = Space::get_num_dofs(&space);
     }
 
@@ -227,6 +234,16 @@ int main(int argc, char* argv[])
           as++;
       }
       
+      // Visualize the solution and mesh.
+      char title[100];
+      sprintf(title, "Solution, time %g", current_time);
+      view.set_title(title);
+      view.show_mesh(false);
+      view.show(&ref_sln);
+      sprintf(title, "Mesh, time %g", current_time);
+      ordview.set_title(title);
+      ordview.show(&space);
+
       // Clean up.
       delete solver;
       delete matrix;
@@ -237,16 +254,6 @@ int main(int argc, char* argv[])
       delete [] coeff_vec;
     }
     while (done == false);
-
-    // Visualize the solution and mesh.
-    char title[100];
-    sprintf(title, "Solution, time %g", current_time);
-    view.set_title(title);
-    view.show_mesh(false);
-    view.show(&ref_sln);
-    sprintf(title, "Mesh, time %g", current_time);
-    ordview.set_title(title);
-    ordview.show(&space);
 
     // Copy last reference solution into sln_prev_time.
     sln_prev_time.copy(&ref_sln);
