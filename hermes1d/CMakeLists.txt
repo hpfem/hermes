@@ -58,7 +58,7 @@ if(MSVC)
   set(HERMES1D_DEBUG ${HERMES1D}-debug) # Name of the debug version.
 else(MSVC)
   if(RELEASE)
-    set(HERMES1D_RELEASE hermes1d)
+    set(HERMES1D_RELEASE "hermes1d")
     set(HERMES1D ${HERMES1D_RELEASE})
   
     # set(CMAKE_BUILD_TYPE Release) # This does not work with multi-version configurations,
@@ -66,7 +66,7 @@ else(MSVC)
                                     # to have separate projects for Debug and Release)
   endif(RELEASE)
   if(DEBUG)
-    set(HERMES1D_DEBUG hermes1d-debug)
+    set(HERMES1D_DEBUG "hermes1d-debug")
     set(HERMES1D ${HERMES1D_DEBUG})
     #set(CMAKE_BUILD_TYPE Debug)
   endif(DEBUG)

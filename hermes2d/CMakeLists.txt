@@ -65,23 +65,23 @@ endif(NOT(VERS_LEN GREATER 0))
 
 if(MSVC)
     if(H2D_REAL)
-        set(HERMES2D_REAL hermes2d-real)                # Base name of the library.
+        set(HERMES2D_REAL "hermes2d-real")              # Base name of the library.
         set(HERMES2D_REAL_RELEASE ${HERMES2D_REAL})     # Name of the release version.
         set(HERMES2D_REAL_DEBUG ${HERMES2D_REAL}-debug) # Name of the debug version.
     endif(H2D_REAL)
     if(H2D_COMPLEX)
-        set(HERMES2D_CPLX hermes2d-cplx)
+        set(HERMES2D_CPLX "hermes2d-cplx")
         set(HERMES2D_CPLX_RELEASE ${HERMES2D_CPLX})
         set(HERMES2D_CPLX_DEBUG ${HERMES2D_CPLX}-debug)
     endif(H2D_COMPLEX)
 else(MSVC)
   if(DEBUG)
     if(H2D_REAL)
-      set(HERMES2D_REAL_DEBUG hermes2d-real-debug)
+      set(HERMES2D_REAL_DEBUG "hermes2d-real-debug")
       set(HERMES2D_REAL ${HERMES2D_REAL_DEBUG})
     endif(H2D_REAL)
     if(H2D_COMPLEX)
-      set(HERMES2D_CPLX_DEBUG hermes2d-cplx-debug)
+      set(HERMES2D_CPLX_DEBUG "hermes2d-cplx-debug")
       set(HERMES2D_CPLX ${HERMES2D_CPLX_DEBUG})
     endif(H2D_COMPLEX)
     
@@ -92,11 +92,11 @@ else(MSVC)
 
   if(RELEASE)
     if(H2D_REAL)
-      set(HERMES2D_REAL_RELEASE hermes2d-real)
+      set(HERMES2D_REAL_RELEASE "hermes2d-real")
       set(HERMES2D_REAL ${HERMES2D_REAL_RELEASE})
     endif(H2D_REAL)
     if(H2D_COMPLEX)
-      set(HERMES2D_CPLX_RELEASE hermes2d-cplx)
+      set(HERMES2D_CPLX_RELEASE "hermes2d-cplx")
       set(HERMES2D_CPLX ${HERMES2D_CPLX_RELEASE})
     endif(H2D_COMPLEX)
 
