@@ -29,7 +29,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Hermes::vector<BCSpec *> DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0), new BCSpec(0,0));
+Hermes::vector<BCSpec *> DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0), new BCSpec(1,0), new BCSpec(2,0), new BCSpec(3,0), new BCSpec(4,0));
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Controls.
