@@ -66,7 +66,6 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> spaces, b
 
   this->wf = wf;
   this->spaces = spaces;
-  this->BoundaryConditions = boundary_conditions;
   this->is_linear = is_linear;
 
   sp_seq = new int[wf->neq];
@@ -375,7 +374,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           WeakForm::MatrixFormVol *mfv = s->mfvol[ww];
           if (isempty[mfv->i] || isempty[mfv->j]) continue;
-          if (mfv->area != HERMES_ANY && !wf->is_in_area(marker, mfv->area)) continue;
+          if (mfv->area != HERMES_ANY_INT && !wf->is_in_area(marker, mfv->area)) continue;
           int m = mfv->i; fv = test_fn + m; am = al + m;
           int n = mfv->j; fu = base_fn + n; an = al + n;
           bool tra = (m != n) && (mfv->sym != HERMES_NONSYM);
@@ -482,7 +481,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           WeakForm::VectorFormVol* vfv = s->vfvol[ww];
           if (isempty[vfv->i]) continue;
-          if (vfv->area != HERMES_ANY && !wf->is_in_area(marker, vfv->area)) continue;
+          if (vfv->area != HERMES_ANY_INT && !wf->is_in_area(marker, vfv->area)) continue;
           int m = vfv->i;  
           fv = test_fn + m;      // H2D uses fv = spss[m]
           am = al + m;
@@ -522,7 +521,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           {
             WeakForm::MatrixFormSurf* mfs = s->mfsurf[ww];
             if (isempty[mfs->i] || isempty[mfs->j]) continue;
-            if (mfs->area != HERMES_ANY && !wf->is_in_area(marker, mfs->area)) continue;
+            if (mfs->area != HERMES_ANY_INT && !wf->is_in_area(marker, mfs->area)) continue;
             int m = mfs->i; 
             int n = mfs->j; 
             fu = base_fn + n;    // This is different in H2D.
@@ -573,7 +572,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           {
             WeakForm::VectorFormSurf* vfs = s->vfsurf[ww];
             if (isempty[vfs->i]) continue;
-            if (vfs->area != HERMES_ANY && !wf->is_in_area(marker, vfs->area)) continue;
+            if (vfs->area != HERMES_ANY_INT && !wf->is_in_area(marker, vfs->area)) continue;
             int m = vfs->i; 
             fv = test_fn + m;      // This is different from H2D.  
             am = al + m;
@@ -1147,7 +1146,7 @@ bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, Sparse
 {
   info("Solve newton");
   // Prepare solutions for measuring residual norm.
-  int num_spaces = dp->spaces.size();
+  int num_spaces = dp->get_spaces().size();
 
   Hermes::vector<Solution*> solutions;
   Hermes::vector<double> dir_lift_false;

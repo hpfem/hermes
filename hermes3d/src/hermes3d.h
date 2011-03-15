@@ -34,7 +34,6 @@
 // hermes_common
 #include "../../hermes_common/trace.h"
 #include "../../hermes_common/utils.h"
-#include "../../hermes_common/bctypes.h"
 
 // solvers
 #include "../../hermes_common/solver/solver.h"
@@ -69,6 +68,8 @@
 #include "space/space.h"
 #include "space/h1.h"
 #include "space/hcurl.h"
+
+#include "bctypes.h"
 
 #include "order.h"
 // quadrature

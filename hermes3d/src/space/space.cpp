@@ -207,7 +207,7 @@ void Space::set_uniform_order_internal(Ord3 order, int marker) {
 		if (it->second->used && it->second->active) {
       assert(elm_data[it->first] != NULL);
       assert(mesh->elements[it->first]->get_mode() == order.type);
-      if (marker == HERMES_ANY) elm_data[it->first]->order = order;
+      if (marker == HERMES_ANY_INT) elm_data[it->first]->order = order;
       else {
         if (elm_data[it->first]->marker == marker) elm_data[it->first]->order = order;
       }

@@ -20,14 +20,14 @@
 #ifndef __SPACE_H
 #define __SPACE_H
 
-#include "../mesh.h"
+#include "mesh.h"
 #include "../../../hermes_common/vector.h"
-#include "../shapeset/shapeset.h"
-#include "../asmlist.h"
-#include "../quad.h"
-#include "../order.h"
+#include "shapeset/shapeset.h"
+#include "asmlist.h"
+#include "quad.h"
+#include "order.h"
 
-#include "../../../hermes_common/bctypes.h"
+#include "bctypes.h"
 
 /// @defgroup spaces Spaces
 ///
@@ -65,10 +65,10 @@ public:
   Ord3 get_element_order(unsigned int eid) const;
   /// Sets the same polynomial order for all elements in the mesh. Intended for 
   /// the user and thus assign_dofs() is called at the end of this function.
-  void set_uniform_order(Ord3 order, int marker = HERMES_ANY);
+  void set_uniform_order(Ord3 order, int marker = HERMES_ANY_INT);
   /// Sets the same polynomial order for all elements in the mesh. Does not 
   /// call assign_dofs(). For internal use.
-  void set_uniform_order_internal(Ord3 order, int marker = HERMES_ANY);
+  void set_uniform_order_internal(Ord3 order, int marker = HERMES_ANY_INT);
 
   void copy_orders(const Space &space, int inc = 0);
 

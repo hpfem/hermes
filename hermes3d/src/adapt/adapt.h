@@ -60,7 +60,13 @@ public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl, 
   /// Hdiv). If proj_norms are not specified, they are expected to be set later by set_error_form.
   Adapt(Hermes::vector<Space *> sp, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>()) {this->init(sp, proj_norms);};
-  Adapt(Space* sp, ProjNormType proj_norm = HERMES_H1_NORM) {this->init(Hermes::vector<Space *> (sp), Hermes::vector<ProjNormType> (proj_norm));};
+  Adapt(Space* sp, ProjNormType proj_norm = HERMES_H1_NORM) {
+    Hermes::vector<Space *> spaces;
+    spaces.push_back(sp);
+    Hermes::vector<ProjNormType> proj_norms;
+    proj_norms.push_back(proj_norm);
+    this->init(spaces, proj_norms);
+  };
 	void init(Hermes::vector<Space *> sp, Hermes::vector<ProjNormType> proj_norms);
 	~Adapt();
 
@@ -124,7 +130,11 @@ public:
 	double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_est(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln), solutions_for_adapt, error_flags);
+    Hermes::vector<Solution *> slns;
+    slns.push_back(sln);
+    Hermes::vector<Solution *> rslns;
+    rslns.push_back(rsln);
+		return calc_err_est(slns, rslns, solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same
@@ -141,7 +151,11 @@ public:
 	double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true, unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_ABS)
 	{
 		if (num != 1) EXIT("Wrong number of solutions.");
-		return calc_err_exact(Hermes::vector<Solution *> (sln), Hermes::vector<Solution *> (rsln), solutions_for_adapt, error_flags);
+    Hermes::vector<Solution *> slns;
+    slns.push_back(sln);
+    Hermes::vector<Solution *> rslns;
+    rslns.push_back(rsln);
+		return calc_err_exact(slns, rslns, solutions_for_adapt, error_flags);
 	}
 
 	/// Calculates the error of the solution. 'n' must be the same

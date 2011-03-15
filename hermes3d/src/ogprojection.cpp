@@ -60,29 +60,37 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
     {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, L2projection_biform<double, scalar>, L2projection_biform<Ord, Ord>);
+      Hermes::vector<MeshFunction*> mesh_fns;
+      mesh_fns.push_back(source_meshfns[i]);
       proj_wf->add_vector_form(i, L2projection_liform<double, scalar>, L2projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY_INT, mesh_fns);
     }
     if (norm == HERMES_H1_NORM) 
     {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, H1projection_biform<double, scalar>, H1projection_biform<Ord, Ord>);
+      Hermes::vector<MeshFunction*> mesh_fns;
+      mesh_fns.push_back(source_meshfns[i]);
       proj_wf->add_vector_form(i, H1projection_liform<double, scalar>, H1projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY_INT, mesh_fns);
     }
     if (norm == HERMES_H1_SEMINORM) 
     {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, H1_semi_projection_biform<double, scalar>, H1_semi_projection_biform<Ord, Ord>);
+      Hermes::vector<MeshFunction*> mesh_fns;
+      mesh_fns.push_back(source_meshfns[i]);
       proj_wf->add_vector_form(i, H1_semi_projection_liform<double, scalar>, H1_semi_projection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY_INT, mesh_fns);
     }
     if (norm == HERMES_HCURL_NORM) 
     {
       found[i] = 1;
       proj_wf->add_matrix_form(i, i, Hcurlprojection_biform<double, scalar>, Hcurlprojection_biform<Ord, Ord>);
+      Hermes::vector<MeshFunction*> mesh_fns;
+      mesh_fns.push_back(source_meshfns[i]);
       proj_wf->add_vector_form(i, Hcurlprojection_liform<double, scalar>, Hcurlprojection_liform<Ord, Ord>,
-                               HERMES_ANY, source_meshfns[i]);
+                               HERMES_ANY_INT, mesh_fns);
     }
   }
   for (int i=0; i < n; i++) 
@@ -118,5 +126,13 @@ void OGProjection::project_global(Space* space,
                               Solution* sol_src, Solution* sol_dest, 
                               MatrixSolverType matrix_solver, ProjNormType proj_norm)
 {
-  project_global(Hermes::vector<Space *>(space), Hermes::vector<Solution *>(sol_src), Hermes::vector<Solution *>(sol_dest), matrix_solver, Hermes::vector<ProjNormType>(proj_norm));
+  Hermes::vector<Space *> spaces;
+  spaces.push_back(space);
+  Hermes::vector<Solution *> sols_src;
+  sols_src.push_back(sol_src);
+  Hermes::vector<Solution *> sols_dest;
+  sols_dest.push_back(sol_dest);
+  Hermes::vector<ProjNormType> proj_norms;
+  proj_norms.push_back(proj_norm);
+  project_global(spaces, sols_src, sols_dest, matrix_solver, proj_norms);
 }
