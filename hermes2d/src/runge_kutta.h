@@ -117,13 +117,7 @@ protected:
 
 
   /// Members.
-  bool residual_as_vector;
-
-  /// Multistage weak formulation.
-  WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
-  WeakForm stage_wf_right;    // For the rest of equation (written on the right),
-                              // size num_stages*ndof times num_stages*ndof.
-
+  
   /// Matrix for the time derivative part of the equation (left-hand side).
   UMFPackMatrix matrix_left;
 
@@ -143,6 +137,13 @@ protected:
 
   /// Number of stages.
   unsigned int num_stages;
+  
+  /// Multistage weak formulation.
+  WeakForm stage_wf_right;    // For the main part equation (written on the right),
+                              // size num_stages*ndof times num_stages*ndof.
+  WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
+  
+  bool residual_as_vector;
 
   // Vector K_vector of length num_stages * ndof. will represent
   // the 'K_i' vectors in the usual R-K notation.

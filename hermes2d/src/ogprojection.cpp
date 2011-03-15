@@ -52,7 +52,7 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   for (int i = 0; i < 100; i++) found[i] = 0;
   for (int i = 0; i < n; i++)
   {
-    ProjNormType norm;
+    ProjNormType norm = HERMES_UNSET_NORM;
     if (proj_norms == Hermes::vector<ProjNormType>()) {
       ESpaceType space_type = spaces[i]->get_type();
       switch (space_type) {

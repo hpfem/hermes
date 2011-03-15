@@ -146,7 +146,7 @@ void BoundaryConditions::create_marker_cache() {
   for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
     for(Hermes::vector<std::string>::const_iterator it = (*all_iterator)->markers.begin(); it != (*all_iterator)->markers.end(); it++)
     {
-      if (markers[*it])
+      if (markers[*it] != NULL)
         error("Attempt to define more than one description of the BC on the same part of the boundary with marker '%d'.", *it);
       //std::cout << "marker = " << *it << ", type = " << (*all_iterator)->get_type() << std::endl;
       markers[*it] = *all_iterator;

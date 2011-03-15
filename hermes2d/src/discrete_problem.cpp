@@ -3156,7 +3156,7 @@ Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coars
   _F_
   Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
   bool same_meshes = true;
-  int same_seq = coarse[0]->get_mesh()->get_seq();
+  unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
   for (unsigned int i = 0; i < coarse.size(); i++) {
     if(coarse[i]->get_mesh()->get_seq() != same_seq)
       same_meshes = false;
