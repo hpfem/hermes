@@ -163,7 +163,7 @@ public:
     }
 
     template<typename Real, typename Scalar>
-    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
 
       error("hdiv error form not implemented yet in integrals_hdiv.h.");
