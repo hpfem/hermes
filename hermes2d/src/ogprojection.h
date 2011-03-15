@@ -76,15 +76,15 @@ protected:
       switch (projNormType)
       {
       case HERMES_L2_NORM:
-        return l2_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return l2_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return h1_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_semi_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return h1_semi_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return hcurl_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_projection_biform<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return hdiv_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
         return 0.0;
@@ -192,15 +192,15 @@ protected:
       switch (projNormType)
       {
       case HERMES_L2_NORM:
-        return l2_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+        return l2_projection_liform<double, scalar>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+        return h1_projection_liform<double, scalar>(n, wt, u_ext, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_semi_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+            return h1_semi_projection_liform<double, scalar>(n, wt, u_ext, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+            return hcurl_projection_liform<double, scalar>(n, wt, u_ext, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_projection_liform<scalar, double>(n, wt, u_ext, v, e, ext);
+            return hdiv_projection_liform<double, scalar>(n, wt, u_ext, v, e, ext);
       default:
         error("Unknown projection type");
         return 0.0;

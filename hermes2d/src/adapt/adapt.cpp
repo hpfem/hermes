@@ -146,7 +146,7 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
 
   //reset element refinement info
   int** idx = new int*[max_id];
-  for(unsigned int i = 0; i < max_id; i++)
+  for(int i = 0; i < max_id; i++)
     idx[i] = new int[num];
   
   for(int j = 0; j < max_id; j++)

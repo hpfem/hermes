@@ -38,7 +38,7 @@ public:
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                  Geom<double> *e, ExtData<scalar> *ext)
     {
-        return matrix_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,

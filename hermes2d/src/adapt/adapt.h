@@ -90,15 +90,15 @@ public:
       switch (projNormType)
       {
       case HERMES_L2_NORM:
-        return l2_error_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return l2_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_error_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+        return h1_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_error_semi_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return h1_error_semi_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_error_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return hcurl_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_error_form<scalar, double>(n, wt, u_ext, u, v, e, ext);
+            return hdiv_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
         return 0.0;
@@ -163,7 +163,7 @@ public:
     }
 
     template<typename Real, typename Scalar>
-    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
 
       error("hdiv error form not implemented yet in integrals_hdiv.h.");
@@ -291,7 +291,6 @@ public:
   const std::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
 
 protected: //adaptivity
-  int num_act_elems; ///< A total number of active elements across all provided meshes.
   std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
   std::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
   std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
@@ -328,23 +327,21 @@ protected: //adaptivity
   /** \param[in] meshes An arrat of meshes of components. */
   void homogenize_shared_mesh_orders(Mesh** meshes);
 
-protected: //object state
-  bool have_errors; ///< True if errors of elements were calculated.
-  bool have_coarse_solutions; ///< True if the coarse solutions were set.
-  bool have_reference_solutions; ///< True if the reference solutions were set.
-
 protected: // spaces & solutions
   int num;                              ///< Number of solution components (as in wf->neq).
   Hermes::vector<Space*> spaces;        ///< Spaces.
+  int num_act_elems;                    ///< A total number of active elements across all provided meshes.
   Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
   Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
+  bool have_errors;                     ///< True if errors of elements were calculated.
+  bool have_coarse_solutions;           ///< True if the coarse solutions were set.
+  bool have_reference_solutions;        ///< True if the reference solutions were set.
+  
+  double* errors[H2D_MAX_COMPONENTS];   ///< Errors of elements. Meaning of the error depeds on flags used when the
+                                        ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
+  double  errors_squared_sum;           ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
 
-protected: // element error arrays
-  double* errors[H2D_MAX_COMPONENTS]; ///< Errors of elements. Meaning of the error depeds on flags used when the
-                                      ///< method calc_errors_internal() was calls. Initialized in the method calc_errors_internal().
-  double  errors_squared_sum;         ///< Sum of errors in the array Adapt::errors_squared. Used by a method adapt() in some strategies.
-
-  double error_time;                  ///< Time needed to calculate the error.
+  double error_time;                    ///< Time needed to calculate the error.
 
 protected: //forms and error evaluation
   static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal

@@ -457,7 +457,7 @@ double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMa
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* u = init_fn(sln, order);
+  Func<double>* u = init_fn(sln, order);
   scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
 
   e->free(); delete e;
