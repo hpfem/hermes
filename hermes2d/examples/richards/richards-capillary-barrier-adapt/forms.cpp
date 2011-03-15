@@ -58,8 +58,8 @@ private:
     }
 
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 
   class ResidualFormNewtonEuler : public WeakForm::VectorFormVol
@@ -92,8 +92,8 @@ private:
     }
     
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 };
 
@@ -151,8 +151,8 @@ private:
     }
 
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 
   class ResidualFormNewtonCrankNicolson : public WeakForm::VectorFormVol
@@ -190,8 +190,8 @@ private:
     }
     
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 };
 
@@ -241,8 +241,8 @@ private:
     }
 
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 
   class ResidualFormPicardEuler : public WeakForm::VectorFormVol
@@ -270,8 +270,8 @@ private:
     }
     
     // Members.
-    ConstitutiveRelations* relations;
     double tau;
+    ConstitutiveRelations* relations;
   };
 };
 
