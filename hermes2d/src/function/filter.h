@@ -92,17 +92,14 @@ public:
 
   SimpleFilter() {};
 
-  SimpleFilter(void (*filter_fn)(int n, Hermes::vector<scalar*> values, scalar* result),
-               Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
-
+  SimpleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
   virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
 protected:
-
   int item[10];
 
-  void (*filter_fn)(int n, Hermes::vector<scalar*>, scalar*);
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) = 0;
 
   void init_components();
   virtual void precalculate(int order, int mask);
@@ -118,25 +115,23 @@ protected:
 class HERMES_API DXDYFilter : public Filter
 {
 public:
-
   // one result (rslt), all inputs and result including derivatives
-  typedef void (*filter_fn_)(int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, scalar* rslt, scalar* rslt_dx, scalar* rslt_dy);
-
 	DXDYFilter() {};
-  DXDYFilter(filter_fn_ filter_fn, Hermes::vector<MeshFunction*> solutions);
+  DXDYFilter(Hermes::vector<MeshFunction*> solutions);
 
-        void init(filter_fn_ filter_fn, Hermes::vector<MeshFunction*> solutions);
+  void init(Hermes::vector<MeshFunction*> solutions);
 
-		virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
-  { error("Not implemented yet"); return 0; }
+	virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) { 
+    error("Not implemented yet"); 
+    return 0; 
+  }
 
 protected:
 
-  filter_fn_ filter_fn;
+  virtual void filter_fn (int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, scalar* rslt, scalar* rslt_dx, scalar* rslt_dy) = 0;
 
   void init_components();
   virtual void precalculate(int order, int mask);
-
 };
 
 
@@ -145,38 +140,52 @@ protected:
 /// \brief Calculates the magnitude of a vector function.
 class HERMES_API MagFilter : public SimpleFilter
 {
-  public:
-		MagFilter() {};
-                MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
-		MagFilter(MeshFunction* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1
+public:
+	MagFilter() {};
+  MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+	MagFilter(MeshFunction* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
 /// Calculates the difference of two functions.
 class HERMES_API DiffFilter : public SimpleFilter
 {
-  public: DiffFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public: 
+  DiffFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
 /// Calculates the sum of two functions.
 class HERMES_API SumFilter : public SimpleFilter
 {
-  public: SumFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public: 
+  SumFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
 /// Calculates the square of a function.
 class HERMES_API SquareFilter : public SimpleFilter
 {
-  public: SquareFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public: 
+  SquareFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
 /// Removes the imaginary part from a function.
 class HERMES_API RealFilter : public SimpleFilter
 {
-  public: RealFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public:
+  RealFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
@@ -184,20 +193,29 @@ class HERMES_API RealFilter : public SimpleFilter
 /// output, allowing it to be visualized.
 class HERMES_API ImagFilter : public SimpleFilter
 {
-  public: ImagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public:
+  ImagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
 /// Computes the absolute value of a complex solution.
 class HERMES_API AbsFilter : public SimpleFilter
 {
-  public: AbsFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public: 
+  AbsFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 /// Computes the angle of a complex solution.
 class HERMES_API AngleFilter : public SimpleFilter
 {
-  public: AngleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+public:
+  AngleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+protected:
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 };
 
 
@@ -211,17 +229,13 @@ public: // TODO: cylindrical coordinates
 
   VonMisesFilter(Hermes::vector<MeshFunction*> solutions, double lambda, double mu,
                  int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
-
   virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
   { error("Not implemented yet"); return 0; }
 
 protected:
-
   double lambda, mu;
   int cyl, item1, item2;
-
   virtual void precalculate(int order, int mask);
-
 };
 
 
@@ -230,28 +244,18 @@ protected:
 /// With adaptive time step: tau_frac = tau_new / tau_old
 class HERMES_API LinearFilter : public Filter
 {
-  public: LinearFilter(MeshFunction* old);
-          LinearFilter(MeshFunction* older, MeshFunction* old, double tau_frac = 1);
-
+public: 
+  LinearFilter(MeshFunction* old);
+  LinearFilter(MeshFunction* older, MeshFunction* old, double tau_frac = 1);
   virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
   { error("Not implemented yet"); return 0; }
 
-  protected:
-
-    double tau_frac;
-
-    virtual void precalculate(int order, int mask);
-    void init_components();
-    virtual void set_active_element(Element* e);
-
-
+protected:
+  double tau_frac;
+  virtual void precalculate(int order, int mask);
+  void init_components();
+  virtual void set_active_element(Element* e);
 };
-
-
-
-
-/// todo: divergence and curl (vorticity) filtr
-
 
 #endif
 
