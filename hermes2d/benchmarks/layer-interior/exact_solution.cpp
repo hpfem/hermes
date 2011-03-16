@@ -1,7 +1,7 @@
-class ExactSolutionPoisson : public ExactSolution1D
+class ExactSolutionPoisson : public ExactSolutionScalar
 {
 public:
-  ExactSolutionPoisson(Mesh* mesh, double slope) : ExactSolution1D(mesh), slope(slope) {};
+  ExactSolutionPoisson(Mesh* mesh, double slope) : ExactSolutionScalar(mesh), slope(slope) {};
 
   // Right-hand side.
   double fn(double x, double y) {

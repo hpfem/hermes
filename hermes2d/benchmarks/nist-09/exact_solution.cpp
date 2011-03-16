@@ -1,7 +1,7 @@
-class ExactSolutionNIST09 : public ExactSolution1D
+class ExactSolutionNIST09 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST09(Mesh* mesh, int user_parameter) : ExactSolution1D(mesh) {
+  ExactSolutionNIST09(Mesh* mesh, int user_parameter) : ExactSolutionScalar(mesh) {
     switch(user_parameter) {
     case 0:
       alpha = 20;

@@ -1,7 +1,7 @@
-class ExactSolutionNIST01 : public ExactSolution1D
+class ExactSolutionNIST01 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST01(Mesh* mesh, double EXACT_SOL_P) : ExactSolution1D(mesh), EXACT_SOL_P(EXACT_SOL_P) {};
+  ExactSolutionNIST01(Mesh* mesh, double EXACT_SOL_P) : ExactSolutionScalar(mesh), EXACT_SOL_P(EXACT_SOL_P) {};
 
   double fn(double x, double y) {
     return pow(2, 4 * EXACT_SOL_P) * pow(x, EXACT_SOL_P) * pow(1 - x, EXACT_SOL_P) * pow(y, EXACT_SOL_P) * pow(1 - y, EXACT_SOL_P);

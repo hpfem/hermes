@@ -1,8 +1,8 @@
-class ExactSolutionNIST12 : public ExactSolution1D
+class ExactSolutionNIST12 : public ExactSolutionScalar
 {
 public:
   ExactSolutionNIST12(Mesh* mesh, double alpha_p, double x_p, double y_p, double alpha_w, double x_w, double y_w, double omega_c, double r_0, double epsilon)
-    : ExactSolution1D(mesh), alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w), omega_c(omega_c), r_0(r_0), epsilon(epsilon) { };
+    : ExactSolutionScalar(mesh), alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w), omega_c(omega_c), r_0(r_0), epsilon(epsilon) { };
 
   double get_angle(double y, double x) {
     double theta = atan2(y, x);

@@ -263,12 +263,12 @@ public:
 
 /// These classes are abstract (pure virtual destructor).
 /// The user is supposed to subclass them (see e.g. NIST benchmarks).
-class HERMES_API ExactSolution1D : public ExactSolution
+class HERMES_API ExactSolutionScalar : public ExactSolution
 {
 public:
-  ExactSolution1D(Mesh* mesh);
+  ExactSolutionScalar(Mesh* mesh);
 
-  ~ExactSolution1D() = 0;
+  ~ExactSolutionScalar() = 0;
 
   virtual unsigned int get_dimension();
 
@@ -276,12 +276,12 @@ public:
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
 };
 
-class HERMES_API ExactSolution2D : public ExactSolution
+class HERMES_API ExactSolutionVector : public ExactSolution
 {
 public:
-  ExactSolution2D(Mesh* mesh);
+  ExactSolutionVector(Mesh* mesh);
 
-  ~ExactSolution2D() = 0;
+  ~ExactSolutionVector() = 0;
 
   virtual unsigned int get_dimension();
 

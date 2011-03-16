@@ -1,7 +1,7 @@
-class ExactSolutionNIST07 : public ExactSolution1D
+class ExactSolutionNIST07 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST07(Mesh* mesh, double alpha) : ExactSolution1D(mesh), alpha(alpha) {};
+  ExactSolutionNIST07(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
 
   double fn(double x, double y) {
     return pow(x, alpha);

@@ -1,7 +1,7 @@
-class ExactSolutionNIST11 : public ExactSolution1D
+class ExactSolutionNIST11 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST11(Mesh* mesh, double sigma, double tau, double rho) : ExactSolution1D(mesh), rho(rho), sigma(sigma), tau(tau) {
+  ExactSolutionNIST11(Mesh* mesh, double sigma, double tau, double rho) : ExactSolutionScalar(mesh), rho(rho), sigma(sigma), tau(tau) {
   };
 
   double fn(double x, double y) {

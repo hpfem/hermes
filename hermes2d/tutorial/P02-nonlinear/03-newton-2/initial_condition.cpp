@@ -1,7 +1,7 @@
-class InitialSolutionHeatTransfer : public ExactSolution1D
+class InitialSolutionHeatTransfer : public ExactSolutionScalar
 {
 public:
-  InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolution1D(mesh) {};
+  InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {

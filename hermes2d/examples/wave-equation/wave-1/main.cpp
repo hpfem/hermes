@@ -11,11 +11,11 @@
 // The function rk_time_step() needs more optimisation, see a todo list at 
 // the beginning of file src/runge-kutta.h.
 //
-// PDE: \frac{\partial^2 u}{\partial t^2} - \Delta u = 0,
+// PDE: \frac{1}{C_SQUARED}\frac{\partial^2 u}{\partial t^2} - \Delta u = 0,
 // converted into
 //
-//      \frac{\partial u}{\partial t} - v = 0,
-//      \frac{\partial v}{\partial t} - \Delta u = 0.
+//      \frac{\partial u}{\partial t} = v,
+//      \frac{\partial v}{\partial t} = C_SQUARED * \Delta u.
 //
 // BC:  u = 0 on the boundary,
 //      v = 0 on the boundary (u = 0 => \partial u / \partial t = 0).

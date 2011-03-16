@@ -1,7 +1,7 @@
-class ExactSolutionNIST04 : public ExactSolution1D
+class ExactSolutionNIST04 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST04(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) : ExactSolution1D(mesh), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) {};
+  ExactSolutionNIST04(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) : ExactSolutionScalar(mesh), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) {};
 
   double fn(double x, double y) {
     return exp(-ALPHA_P * (pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));

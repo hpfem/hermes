@@ -1,7 +1,7 @@
-class ExactSolutionNIST08 : public ExactSolution1D
+class ExactSolutionNIST08 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST08(Mesh* mesh, double alpha) : ExactSolution1D(mesh), alpha(alpha) {};
+  ExactSolutionNIST08(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
 
   double fn(double x, double y) {
     double r = sqrt(x*x + y*y);

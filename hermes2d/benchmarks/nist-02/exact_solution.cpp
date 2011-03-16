@@ -1,7 +1,7 @@
-class ExactSolutionNIST02 : public ExactSolution1D
+class ExactSolutionNIST02 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST02(Mesh* mesh, int problem_parameter) : ExactSolution1D(mesh), problem_parameter(problem_parameter) {
+  ExactSolutionNIST02(Mesh* mesh, int problem_parameter) : ExactSolutionScalar(mesh), problem_parameter(problem_parameter) {
     if (problem_parameter == 0) {
       OMEGA = ((5.0 * M_PI)/ 4.0);
       ALPHA = (M_PI/ OMEGA);

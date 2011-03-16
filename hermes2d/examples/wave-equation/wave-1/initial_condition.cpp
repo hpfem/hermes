@@ -1,7 +1,7 @@
-class InitialConditionWave : public ExactSolution1D
+class InitialConditionWave : public ExactSolutionScalar
 {
 public:
-  InitialConditionWave(Mesh* mesh) : ExactSolution1D(mesh) {};
+  InitialConditionWave(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {

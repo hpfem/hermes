@@ -1,7 +1,7 @@
-class ExactSolutionPerturbedPoisson : public ExactSolution1D
+class ExactSolutionPerturbedPoisson : public ExactSolutionScalar
 {
 public:
-  ExactSolutionPerturbedPoisson(Mesh* mesh, double K) : ExactSolution1D(mesh), K(K) {};
+  ExactSolutionPerturbedPoisson(Mesh* mesh, double K) : ExactSolutionScalar(mesh), K(K) {};
 
   // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
   double uhat(double x) {

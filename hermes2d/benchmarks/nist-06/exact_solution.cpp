@@ -1,7 +1,7 @@
-class ExactSolutionNIST06 : public ExactSolution1D
+class ExactSolutionNIST06 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST06(Mesh* mesh, double epsilon) : ExactSolution1D(mesh), epsilon(epsilon) {};
+  ExactSolutionNIST06(Mesh* mesh, double epsilon) : ExactSolutionScalar(mesh), epsilon(epsilon) {};
 
   double fn(double x, double y) {
     return (1 - exp(-(1-x)/epsilon)) * (1 - exp(-(1-y)/epsilon))

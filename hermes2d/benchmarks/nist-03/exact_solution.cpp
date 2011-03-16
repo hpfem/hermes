@@ -1,7 +1,7 @@
-class ExactSolutionNIST03U : public ExactSolution1D
+class ExactSolutionNIST03U : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST03U(Mesh* mesh, double E, double nu, double lambda, double Q) : ExactSolution1D(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
+  ExactSolutionNIST03U(Mesh* mesh, double E, double nu, double lambda, double Q) : ExactSolutionScalar(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
     k = 3.0 - 4.0 * nu;
     G = E / (2.0 * (1.0 + nu));
     A = -E * (1 - nu * nu)/(1 - 2 * nu);
@@ -166,10 +166,10 @@ public:
   double A, B, C, D, u_F, v_F;
 };
 
-class ExactSolutionNIST03V : public ExactSolution1D
+class ExactSolutionNIST03V : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST03V(Mesh* mesh, double E, double nu, double lambda, double Q) : ExactSolution1D(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
+  ExactSolutionNIST03V(Mesh* mesh, double E, double nu, double lambda, double Q) : ExactSolutionScalar(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
     k = 3.0 - 4.0 * nu;
     G = E / (2.0 * (1.0 + nu));
     A = -E * (1 - nu * nu)/(1 - 2 * nu);

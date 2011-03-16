@@ -1,7 +1,7 @@
-class ExactSolutionFitzHughNagumo1 : public ExactSolution1D
+class ExactSolutionFitzHughNagumo1 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionFitzHughNagumo1(Mesh* mesh, double sigma, double d_u) : ExactSolution1D(mesh), sigma(sigma),
+  ExactSolutionFitzHughNagumo1(Mesh* mesh, double sigma, double d_u) : ExactSolutionScalar(mesh), sigma(sigma),
                                                                     d_u(d_u) {
   }
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
@@ -26,10 +26,10 @@ public:
 };
 
 
-class ExactSolutionFitzHughNagumo2 : public ExactSolution1D
+class ExactSolutionFitzHughNagumo2 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionFitzHughNagumo2(Mesh* mesh, double K, double d_v) : ExactSolution1D(mesh), K(K), d_v(d_v) {
+  ExactSolutionFitzHughNagumo2(Mesh* mesh, double K, double d_v) : ExactSolutionScalar(mesh), K(K), d_v(d_v) {
   }
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     dx = dVdt(x)*V(y);

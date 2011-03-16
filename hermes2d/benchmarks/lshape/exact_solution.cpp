@@ -1,7 +1,7 @@
-class ExactSolutionLShape : public ExactSolution1D
+class ExactSolutionLShape : public ExactSolutionScalar
 {
 public:
-  ExactSolutionLShape(Mesh* mesh) : ExactSolution1D(mesh) {};
+  ExactSolutionLShape(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   static double fn(double x, double y) {
     double r = sqrt(x*x + y*y);
