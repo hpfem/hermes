@@ -90,17 +90,19 @@ BoundaryConditions::BoundaryConditions(BoundaryCondition * boundary_condition) {
 };
 
 void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
-  all = boundary_conditions;
-  for(all_iterator = all_begin(); all_iterator != all_end(); all_iterator++)
-    switch((*all_iterator)->get_type()) {
+  for(Hermes::vector<BoundaryCondition *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
+    switch((*it)->get_type()) {
       case BoundaryCondition::BC_DIRICHLET:
-        dirichlet.push_back(static_cast<DirichletBoundaryCondition *>(*all_iterator));
+        dirichlet.push_back(static_cast<DirichletBoundaryCondition *>(*it));
+        all.push_back(*it);
         break;
       case BoundaryCondition::BC_NATURAL:
-        natural.push_back(static_cast<NaturalBoundaryCondition *>(*all_iterator));
+        natural.push_back(static_cast<NaturalBoundaryCondition *>(*it));
+        all.push_back(*it);
         break;
     }
 
+  markers.clear();
   create_marker_cache();
 
   std::ostringstream oss;
@@ -108,6 +110,12 @@ void BoundaryConditions::add_boundary_conditions(Hermes::vector<BoundaryConditio
   Hermes::vector<std::string> markers_to_pass;
   markers_to_pass.push_back(oss.str());
   this->empty_condition = new EmptyBoundaryCondition(markers_to_pass);
+};
+
+void BoundaryConditions::add_boundary_condition(BoundaryCondition * boundary_condition) {
+  Hermes::vector<BoundaryCondition *> boundary_conditions;
+  boundary_conditions.push_back(boundary_condition);
+  add_boundary_conditions(boundary_conditions);
 };
 
 Hermes::vector<BoundaryCondition *>::const_iterator BoundaryConditions::all_begin() const {

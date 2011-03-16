@@ -10,8 +10,8 @@ public:
   // Constructor.
   EulerEquationsWeakFormImplicit(double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
   std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
-  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool preconditioning) :
-  WeakForm(4, true), num_flux(kappa), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), energy_ext(calc_energy(rho_ext, rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)) {
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool preconditioning, int num_of_equations = 4) :
+  WeakForm(num_of_equations, true), num_flux(kappa), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), energy_ext(calc_energy(rho_ext, rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)) {
     
     if(preconditioning) {
       add_matrix_form(new EulerEquationsPreconditioning(0));
@@ -77,7 +77,7 @@ public:
 
   // Destructor.
   ~EulerEquationsWeakFormImplicit() {};
-private:
+protected:
   class EulerEquationsPreconditioning : public WeakForm::MatrixFormVol
   {
   public:
@@ -785,4 +785,168 @@ private:
   double v2_ext;
   double energy_ext;
   double tau;
+};
+
+// The parameter variant in the constructor has the following meaning:
+// 1 - Dirichlet condition (concentration production) on the inlet.
+// 2 - Dirichlet condition (concentration production) on the bottom.
+// 3 - Dirichlet condition (concentration production) on the top.
+class EulerEquationsWeakFormImplicitCoupled : public EulerEquationsWeakFormImplicit
+{
+public:
+  // Constructor.
+  EulerEquationsWeakFormImplicitCoupled(int variant, double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
+  std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool preconditioning, Solution* prev_concentration, double epsilon) :
+  EulerEquationsWeakFormImplicit(kappa, rho_ext, v1_ext, v2_ext, pressure_ext, solid_wall_bottom_marker, solid_wall_top_marker, inlet_marker, outlet_marker, prev_density,
+  prev_density_vel_x, prev_density_vel_y, prev_energy, 5) {
+    
+    if(preconditioning)
+      add_matrix_form(new EulerEquationsPreconditioning(4));
+    
+    EulerEquationsLinearFormTime* linear_form_time = new EulerEquationsLinearFormTime(4);
+    linear_form_time->ext.push_back(prev_density);
+    linear_form_time->ext.push_back(prev_density_vel_x);
+    linear_form_time->ext.push_back(prev_density_vel_y);
+    linear_form_time->ext.push_back(prev_energy);
+    linear_form_time->ext.push_back(prev_concentration);
+    add_vector_form(linear_form_time);
+  
+    add_vector_form(new VectorFormConcentrationDiffusion(4, epsilon));
+    add_vector_form(new VectorFormConcentrationAdvection(4, epsilon));
+
+    if(variant != 1)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, inlet_marker));
+    if(variant != 2)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, solid_wall_bottom_marker));
+    if(variant != 3)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, solid_wall_top_marker));
+
+    add_vector_form_surf(new VectorFormConcentrationNatural(4, outlet_marker));
+
+    add_vector_form_surf(new VectorFormConcentrationInterface (4));
+  };
+
+  // Destructor.
+  ~EulerEquationsWeakFormImplicitCoupled() {};
+protected:
+  class VectorFormConcentrationDiffusion : public WeakForm::VectorFormVol
+  {
+  public:
+    VectorFormConcentrationDiffusion(int i, double epsilon) : WeakForm::VectorFormVol(i), epsilon(epsilon) {}
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Func<Real>* concentration_prev = u_ext[4];
+      return - epsilon * int_grad_u_grad_v<Real, Scalar>(n, wt, concentration_prev, v) * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+
+    // Member.
+    double epsilon;
+  };
+
+  class VectorFormConcentrationAdvection : public WeakForm::VectorFormVol
+  {
+  public:
+    VectorFormConcentrationAdvection(int i) : WeakForm::VectorFormVol(i), {}
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Func<Real>* density_prev = u_ext[0];
+      Func<Real>* density_vel_x_prev = u_ext[1];
+      Func<Real>* density_vel_y_prev = u_ext[2];
+      Func<Real>* concentration_prev = u_ext[4];
+
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * concentration_prev->val[i] * ((density_vel_x_prev->val[i] * v->dx[i]) + (density_vel_y_prev->val[i] * v->dy[i]))
+                  / density_prev->val[i];
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+  };
+
+  class VectorFormConcentrationNatural : public WeakForm::VectorFormSurf
+  {
+  public:
+    VectorFormConcentrationNatural(int i, std::string marker) : WeakForm::VectorFormSurf(i, marker) {}
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Func<Real>* density_prev = u_ext[0];
+      Func<Real>* density_vel_x_prev = u_ext[1];
+      Func<Real>* density_vel_y_prev = u_ext[2];
+      Func<Real>* concentration_prev = u_ext[4];
+
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * v->val[i] * concentration_prev->val[i] * (density_vel_x_prev->val[i] * e->nx[i] + density_vel_y_prev->val[i] * e->ny[i])
+                  / density_prev->val[i];
+        // (OR: for inlet/outlet) result += wt[i] * v->val[i] * concentration_prev->val[i] * (V1_EXT * e->nx[i] + V2_EXT * e->ny[i]);
+      return - result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+  };
+
+  class VectorFormConcentrationInterface : public WeakForm::VectorFormSurf
+  {
+  public:
+    VectorFormConcentrationInterface(int i) : WeakForm::VectorFormSurf(i, H2D_DG_INNER_EDGE) {}
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Func<Real>* density_prev = u_ext[0];
+      Func<Real>* density_vel_x_prev = u_ext[1];
+      Func<Real>* density_vel_y_prev = u_ext[2];
+      Func<Real>* concentration_prev = u_ext[4];
+
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * v->val[i] *
+                  (
+                    (
+                      density_vel_x_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
+                      -
+                      density_vel_x_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                    ) * e->nx[i]
+                    + 
+                    (
+                      density_vel_y_prev->get_val_central(i) * concentration_prev->get_val_central(i) / density_prev->get_val_central(i)
+                      -
+                      density_vel_y_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) / density_prev->get_val_neighbor(i)
+                    ) * e->ny[i]
+                  );
+      return - result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+  };
 };

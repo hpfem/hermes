@@ -144,6 +144,7 @@ public:
 
   /// Initializes the class, fills the structures.
   void add_boundary_conditions(Hermes::vector<BoundaryCondition *> boundary_conditions);
+  void add_boundary_condition(BoundaryCondition * boundary_condition);
 
   /// Public iterators for the private data structures.
   Hermes::vector<BoundaryCondition *>::const_iterator all_iterator;
