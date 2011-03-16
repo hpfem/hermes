@@ -75,7 +75,7 @@ public:
     this->tau = tau;
   }
 
-  double get_tau() {
+  double get_tau() const {
     return tau;
   }
 

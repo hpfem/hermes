@@ -69,11 +69,11 @@ public:
 
   void set_time_step(double tau) {
     this->tau = tau;
-  };
+  }
 
   double get_tau() const {
     return tau;
-  };
+  }
 
   // Destructor.
   ~EulerEquationsWeakFormImplicit() {};
@@ -797,9 +797,9 @@ public:
   // Constructor.
   EulerEquationsWeakFormImplicitCoupled(int variant, double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
   std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
-  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool preconditioning, Solution* prev_concentration, double epsilon) :
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, Solution* prev_concentration, bool preconditioning, double epsilon) :
   EulerEquationsWeakFormImplicit(kappa, rho_ext, v1_ext, v2_ext, pressure_ext, solid_wall_bottom_marker, solid_wall_top_marker, inlet_marker, outlet_marker, prev_density,
-  prev_density_vel_x, prev_density_vel_y, prev_energy, 5) {
+  prev_density_vel_x, prev_density_vel_y, prev_energy, preconditioning, 5) {
     
     if(preconditioning)
       add_matrix_form(new EulerEquationsPreconditioning(4));
@@ -813,7 +813,7 @@ public:
     add_vector_form(linear_form_time);
   
     add_vector_form(new VectorFormConcentrationDiffusion(4, epsilon));
-    add_vector_form(new VectorFormConcentrationAdvection(4, epsilon));
+    add_vector_form(new VectorFormConcentrationAdvection(4));
 
     if(variant != 1)
       add_vector_form_surf(new VectorFormConcentrationNatural(4, inlet_marker));
@@ -856,7 +856,7 @@ protected:
   class VectorFormConcentrationAdvection : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormConcentrationAdvection(int i) : WeakForm::VectorFormVol(i), {}
+    VectorFormConcentrationAdvection(int i) : WeakForm::VectorFormVol(i) {}
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -898,7 +898,7 @@ protected:
         result += wt[i] * v->val[i] * concentration_prev->val[i] * (density_vel_x_prev->val[i] * e->nx[i] + density_vel_y_prev->val[i] * e->ny[i])
                   / density_prev->val[i];
         // (OR: for inlet/outlet) result += wt[i] * v->val[i] * concentration_prev->val[i] * (V1_EXT * e->nx[i] + V2_EXT * e->ny[i]);
-      return - result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
+      return - result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -946,7 +946,7 @@ protected:
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      return Ord(20);
     }
   };
 };

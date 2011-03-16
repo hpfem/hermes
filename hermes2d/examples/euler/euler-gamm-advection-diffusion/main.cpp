@@ -201,14 +201,6 @@ int main(int argc, char* argv[])
     prev_c.copy(&sln_c);
 
     // Visualization.
-    Mach_number.reinit();
-    pressure.reinit();
-    entropy.reinit();
-    pressure_view.show(&pressure);
-    entropy_production_view.show(&entropy);
-    Mach_number_view.show(&Mach_number);
-
-    // Visualization.
     if((iteration - 1) % EVERY_NTH_STEP == 0) {
       // Hermes visualization.
       if(HERMES_VISUALIZATION) {
@@ -243,8 +235,6 @@ int main(int argc, char* argv[])
         lin.save_solution_vtk(&prev_c, filename, "concentration", false);
       }
     }
-
-
   }
   pressure_view.close();
   entropy_production_view.close();
