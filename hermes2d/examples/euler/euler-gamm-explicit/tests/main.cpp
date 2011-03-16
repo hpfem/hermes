@@ -15,17 +15,12 @@
 //  IC: Constant subsonic state identical to inlet. 
 //
 //  The following parameters can be changed:
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = false;
-
 const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 double CFL = 0.8;                                 // CFL value.
-double TAU = 1E-4;                                // Time step.
+double time_step = 1E-4;                                // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
 // Equation parameters.
 const double P_EXT = 2.5;         // Exterior pressure (dimensionless).
 const double RHO_EXT = 1.0;       // Inlet density (dimensionless).   
@@ -38,7 +33,7 @@ const std::string BDY_SOLID_WALL = "1";
 const std::string BDY_INLET_OUTLET = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
 #include "../constant_initial_condition.cpp"
@@ -91,28 +86,11 @@ int main(int argc, char* argv[])
 
   // Initialize the FE problem.
   bool is_linear = true;
-  
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.
   if(P_INIT == 0)
     dp.set_fvm();
-
-  // Filters for visualization of Mach number, pressure and entropy.
-  MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
-  PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
-  EntropyFilter entropy(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA, RHO_EXT, P_EXT);
-
-  ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
-  ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
-  ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-
-  /*
-  ScalarView s1("1", new WinGeom(0, 0, 600, 300));
-  ScalarView s2("2", new WinGeom(700, 0, 600, 300));
-  ScalarView s3("3", new WinGeom(0, 400, 600, 300));
-  ScalarView s4("4", new WinGeom(700, 400, 600, 300));
-  */
   
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -132,12 +110,14 @@ int main(int argc, char* argv[])
   double x = 0.75;
   double y = sqrt((double)(1.-x*x)) + 0.001;
 
-  for(unsigned int time_step = 0; time_step < 5; time_step++)
+  for(unsigned int time_iteration = 0; time_iteration < 5; time_iteration++)
   {
-    bool rhs_only = (time_step == 0 ? false : true);
+    bool rhs_only = (time_iteration == 0 ? false : true);
     // Assemble stiffness matrix and rhs or just rhs.
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
+    // Set current time step.
+    wf.set_time_step(time_step);
     dp.assemble(matrix, rhs, rhs_only);
 
     // Solve the matrix problem.
@@ -147,19 +127,6 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
     else
     error ("Matrix solver failed.\n");
-
-    // Approximate the time derivative of the solution.
-    if(CALC_TIME_DER) {
-      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e));
-      bool solutions_for_adapt = false;
-      double difference = time_step == 1 ? 0 : 
-        adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-					      Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
-                                              (Hermes::vector<double>*) NULL, solutions_for_adapt, 
-                                              HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
-      delete adapt_for_time_der_calc;
-    }
 
     // Determine the time step according to the CFL condition.
     // Only mean values on an element of each solution component are taken into account.
@@ -182,19 +149,19 @@ int main(int argc, char* argv[])
               if(condition < min_condition || min_condition == 0.)
                 min_condition = condition;
             }
-    if(TAU > min_condition)
-      TAU = min_condition;
-    if(TAU < min_condition * 0.9)
-      TAU = min_condition;
+    if(time_step > min_condition)
+      time_step = min_condition;
+    if(time_step < min_condition * 0.9)
+      time_step = min_condition;
 
     // Storing the testing values.
     for(unsigned int j = 0; j < 4; j++)
       for(unsigned int k = j*space_rho.get_num_dofs(); k < (j+1)*space_rho.get_num_dofs(); k++)
-        l2_norms[time_step][j] += solver->get_solution()[k];    
+        l2_norms[time_iteration][j] += solver->get_solution()[k];    
 
-    point_values[time_step][0] = sln_rho_v_x.get_pt_value(0.5, 0.001);
-    point_values[time_step][1] = sln_rho_v_x.get_pt_value(x, y);
-    point_values[time_step][2] = sln_rho_v_x.get_pt_value(1.5, 0.001);
+    point_values[time_iteration][0] = sln_rho_v_x.get_pt_value(0.5, 0.001);
+    point_values[time_iteration][1] = sln_rho_v_x.get_pt_value(x, y);
+    point_values[time_iteration][2] = sln_rho_v_x.get_pt_value(1.5, 0.001);
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
