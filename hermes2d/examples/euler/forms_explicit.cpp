@@ -71,7 +71,7 @@ public:
     }
   };
 
-  void set_tau(double tau) {
+  void set_time_step(double tau) {
     this->tau = tau;
   }
 

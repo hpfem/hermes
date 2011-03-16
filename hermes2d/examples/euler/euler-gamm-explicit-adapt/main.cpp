@@ -16,10 +16,6 @@ using namespace RefinementSelectors;
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = false;
-
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
 // Quantitative parameter of the discontinuity detector.
@@ -138,7 +134,7 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   EulerEquationsWeakFormExplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
     BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
-  wf.set_tau(time_step);
+  wf.set_time_step(time_step);
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   EulerEquationsWeakFormImplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
     BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  wf.set_tau(time_step);
+  wf.set_time_step(time_step);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -115,9 +115,6 @@ int main(int argc, char* argv[])
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
   */
   
-  // Output of the approximate time derivative.
-  std::ofstream time_der_out("time_der");
-
   // Initialize NOX solver.
   NoxSolver solver(&dp);
   solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
@@ -192,7 +189,6 @@ int main(int argc, char* argv[])
   s3.close();
   s4.close();
   */
-
-  time_der_out.close();
+  
   return 0;
 }

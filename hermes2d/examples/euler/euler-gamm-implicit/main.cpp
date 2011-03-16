@@ -75,13 +75,10 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh, RHO_EXT * V2_EXT);
   InitialSolutionEulerDensityEnergy prev_e(&mesh, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
 
-  // Solutions for the time derivative estimate.
-  Solution sln_temp_rho, sln_temp_rho_v_x, sln_temp_rho_v_y, sln_temp_e;
-
   // Initialize weak formulation.
   EulerEquationsWeakFormImplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
     BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  wf.set_tau(time_step);
+  wf.set_time_step(time_step);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -113,9 +110,6 @@ int main(int argc, char* argv[])
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
   */
-
-  // Output of the approximate time derivative.
-  std::ofstream time_der_out("time_der");
 
   // Initialize NOX solver.
   NoxSolver solver(&dp);
@@ -151,12 +145,12 @@ int main(int argc, char* argv[])
         pressure_view.show(&pressure);
         entropy_production_view.show(&entropy);
         Mach_number_view.show(&Mach_number);
-    /*
-    s1.show(&prev_rho);
-    s2.show(&prev_rho_v_x);
-    s3.show(&prev_rho_v_y);
-    s4.show(&prev_e);
-    */
+        /*
+        s1.show(&prev_rho);
+        s2.show(&prev_rho_v_x);
+        s3.show(&prev_rho_v_y);
+        s4.show(&prev_e);
+        */
       }
       // Output solution in VTK format.
       if(VTK_VISUALIZATION) {
@@ -191,7 +185,5 @@ int main(int argc, char* argv[])
   s3.close();
   s4.close();
   */
-
-  time_der_out.close();
   return 0;
 }
