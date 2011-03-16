@@ -1,4 +1,4 @@
 rm *~ 
-./markers
+./P10-25-markers-typical
 python plot_graph.py &
 

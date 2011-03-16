@@ -1,3 +1,3 @@
 rm *~ 
-./newton-timedep-heat-adapt-rk
+./P06-03-timedep-adapt-space-and-time
 

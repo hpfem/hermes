@@ -1,3 +1,3 @@
 rm *~ 
-./newton-elliptic-adapt
+./P05-01-newton-adapt
 python plot_graph.py &

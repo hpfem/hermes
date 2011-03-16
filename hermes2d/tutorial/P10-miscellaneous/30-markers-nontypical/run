@@ -1,4 +1,4 @@
 rm *~ 
-./markers
+./P10-30-markers-nontypical
 python plot_graph.py &
 

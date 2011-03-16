@@ -1,4 +1,4 @@
 rm *~  
-./hcurl-adapt
+./P04-05-hcurl-adapt
 python plot_graph.py &
 
