@@ -16,10 +16,6 @@ using namespace RefinementSelectors;
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = false;
-
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
 // Quantitative parameter of the discontinuity detector.
@@ -28,7 +24,7 @@ double DISCONTINUITY_DETECTOR_PARAM = 0.05;
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
 const int INIT_REF_NUM = 2;                             // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
-double TAU = 1E-4;                                // Time step.
+double time_step = 1E-4;                                // Time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 10;                        // Every UNREF_FREQth time step the mesh is unrefined.
@@ -77,7 +73,7 @@ const std::string BDY_SOLID_WALL = "1";
 const std::string BDY_INLET_OUTLET = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
 #include "../constant_initial_condition.cpp"
@@ -138,6 +134,7 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   EulerEquationsWeakFormExplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
     BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+  wf.set_time_step(time_step);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -164,7 +161,7 @@ int main(int argc, char* argv[])
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += TAU) {
+  for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
     // Periodic global derefinements.

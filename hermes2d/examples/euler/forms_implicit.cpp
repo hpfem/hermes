@@ -4,28 +4,38 @@
 // Utility functions for the Euler equations.
 #include "../euler-util.cpp"
 
-class EulerEquationsWeakFormExplicit : public WeakForm
+class EulerEquationsWeakFormImplicit : public WeakForm
 {
 public:
   // Constructor.
-  EulerEquationsWeakFormExplicit(double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
+  EulerEquationsWeakFormImplicit(double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
   std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
-  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy) :
-  WeakForm(4), num_flux(kappa), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), energy_ext(calc_energy(rho_ext, rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)) {
-    add_matrix_form(new EulerEquationsBilinearFormTime(0));
-    add_matrix_form(new EulerEquationsBilinearFormTime(1));
-    add_matrix_form(new EulerEquationsBilinearFormTime(2));
-    add_matrix_form(new EulerEquationsBilinearFormTime(3));
-
-    add_vector_form(new EulerEquationsLinearFormDensity());
-    add_vector_form(new EulerEquationsLinearFormDensityVelX());
-    add_vector_form(new EulerEquationsLinearFormDensityVelY());
-    add_vector_form(new EulerEquationsLinearFormDensityEnergy());
-
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool preconditioning) :
+  WeakForm(4, true), num_flux(kappa), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), energy_ext(calc_energy(rho_ext, rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)) {
+    
+    if(preconditioning) {
+      add_matrix_form(new EulerEquationsPreconditioning(0));
+      add_matrix_form(new EulerEquationsPreconditioning(1));
+      add_matrix_form(new EulerEquationsPreconditioning(2));
+      add_matrix_form(new EulerEquationsPreconditioning(3));
+    }
+    
     add_vector_form(new EulerEquationsLinearFormTime(0));
     add_vector_form(new EulerEquationsLinearFormTime(1));
     add_vector_form(new EulerEquationsLinearFormTime(2));
     add_vector_form(new EulerEquationsLinearFormTime(3));
+    
+    for(unsigned int vector_form_i = 0; vector_form_i < this->vfvol.size(); vector_form_i++) {
+      vfvol.at(vector_form_i)->ext.push_back(prev_density);
+      vfvol.at(vector_form_i)->ext.push_back(prev_density_vel_x);
+      vfvol.at(vector_form_i)->ext.push_back(prev_density_vel_y);
+      vfvol.at(vector_form_i)->ext.push_back(prev_energy);
+    }
+    
+    add_vector_form(new EulerEquationsLinearFormDensity());
+    add_vector_form(new EulerEquationsLinearFormDensityVelX());
+    add_vector_form(new EulerEquationsLinearFormDensityVelY());
+    add_vector_form(new EulerEquationsLinearFormDensityEnergy());
 
     add_vector_form_surf(new EulerEquationsLinearFormInterface(0));
     add_vector_form_surf(new EulerEquationsLinearFormInterface(1));
@@ -55,29 +65,23 @@ public:
       add_vector_form_surf(new EulerEquationsLinearFormInletOutlet(2, outlet_marker));
       add_vector_form_surf(new EulerEquationsLinearFormInletOutlet(3, outlet_marker));
     }
+  };
 
-    for(unsigned int vector_form_i = 0; vector_form_i < this->vfvol.size(); vector_form_i++) {
-      vfvol.at(vector_form_i)->ext.push_back(prev_density);
-      vfvol.at(vector_form_i)->ext.push_back(prev_density_vel_x);
-      vfvol.at(vector_form_i)->ext.push_back(prev_density_vel_y);
-      vfvol.at(vector_form_i)->ext.push_back(prev_energy);
-    }
+  void set_time_step(double tau) {
+    this->tau = tau;
+  };
 
-    for(unsigned int vector_form_i = 0; vector_form_i < this->vfsurf.size(); vector_form_i++) {
-      vfsurf.at(vector_form_i)->ext.push_back(prev_density);
-      vfsurf.at(vector_form_i)->ext.push_back(prev_density_vel_x);
-      vfsurf.at(vector_form_i)->ext.push_back(prev_density_vel_y);
-      vfsurf.at(vector_form_i)->ext.push_back(prev_energy);
-    }
+  double get_tau() const {
+    return tau;
   };
 
   // Destructor.
-  ~EulerEquationsWeakFormExplicit() {};
+  ~EulerEquationsWeakFormImplicit() {};
 private:
-  class EulerEquationsBilinearFormTime : public WeakForm::MatrixFormVol
+  class EulerEquationsPreconditioning : public WeakForm::MatrixFormVol
   {
   public:
-    EulerEquationsBilinearFormTime(int i) : WeakForm::MatrixFormVol(i, i) {}
+    EulerEquationsPreconditioning(int i) : WeakForm::MatrixFormVol(i, i) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -102,10 +106,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ext->fn[1]->val[i] * v->dx[i];
-        result += wt[i] * ext->fn[2]->val[i] * v->dy[i];
+        result += wt[i] * u_ext[1]->val[i] * v->dx[i];
+        result += wt[i] * u_ext[2]->val[i] * v->dy[i];
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -126,16 +130,16 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_1_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_1_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_1_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_1_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_1_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_1_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_1_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_1_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_1_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_1_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_1_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_1_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_1_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_1_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_1_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -177,16 +181,16 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_2_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_2_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_2_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_2_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_2_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_2_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_2_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_2_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_2_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_2_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_2_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_2_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_2_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_2_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_2_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -227,16 +231,16 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_3_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dx[i];
-        result += wt[i] * ext->fn[0]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_3_0<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dy[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_3_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dx[i];
-        result += wt[i] * ext->fn[1]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_3_1<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_3_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[2]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_3_2<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], ext->fn[3]->val[i]) * v->dy[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_1_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dx[i];
-        result += wt[i] * ext->fn[3]->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->A_2_3_3<Scalar>(ext->fn[0]->val[i], ext->fn[1]->val[i], ext->fn[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_3_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dx[i];
+        result += wt[i] * u_ext[0]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_3_0<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dy[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_3_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dx[i];
+        result += wt[i] * u_ext[1]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_3_1<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_3_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[2]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_3_2<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dy[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_1_3_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result += wt[i] * u_ext[3]->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->A_2_3_3<Scalar>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -275,7 +279,9 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return int_u_v<Real, Scalar>(n, wt, ext->fn[component_i], v);
+      return int_u_v<Real, Scalar>(n, wt, ext->fn[component_i], v)
+        -
+      int_u_v<Real, Scalar>(n, wt, u_ext[component_i], v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -300,21 +306,21 @@ private:
       Scalar result = 0;
       Scalar w_l[4], w_r[4];
       for (int i = 0; i < n; i++) {
-        w_l[0] = ext->fn[0]->get_val_central(i);
-        w_r[0] = ext->fn[0]->get_val_neighbor(i);
+        w_l[0] = u_ext[0]->get_val_central(i);
+        w_r[0] = u_ext[0]->get_val_neighbor(i);
     
-        w_l[1] = ext->fn[1]->get_val_central(i);
-        w_r[1] = ext->fn[1]->get_val_neighbor(i);
+        w_l[1] = u_ext[1]->get_val_central(i);
+        w_r[1] = u_ext[1]->get_val_neighbor(i);
 
-        w_l[2] = ext->fn[2]->get_val_central(i);
-        w_r[2] = ext->fn[2]->get_val_neighbor(i);
+        w_l[2] = u_ext[2]->get_val_central(i);
+        w_r[2] = u_ext[2]->get_val_neighbor(i);
 
-        w_l[3] = ext->fn[3]->get_val_central(i);
-        w_r[3] = ext->fn[3]->get_val_neighbor(i);
+        w_l[3] = u_ext[3]->get_val_central(i);
+        w_r[3] = u_ext[3]->get_val_neighbor(i);
 
-        result -= wt[i] * v->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+        result -= wt[i] * v->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -340,15 +346,15 @@ private:
       Scalar w01, w11, w21, w31;
       for (int i = 0; i < n; i++) 
       {
-        w01 = ext->fn[0]->val[i];
+        w01 = u_ext[0]->val[i];
     
-        w11 = ext->fn[1]->val[i];
+        w11 = u_ext[1]->val[i];
 
-        w21 = ext->fn[2]->val[i];
+        w21 = u_ext[2]->val[i];
 
-        w31 = ext->fn[3]->val[i];
+        w31 = u_ext[3]->val[i];
 
-        double p_b = calc_pressure(w01, w11, w21, w31, static_cast<EulerEquationsWeakFormExplicit*>(wf)->num_flux.kappa);
+        double p_b = calc_pressure(w01, w11, w21, w31, static_cast<EulerEquationsWeakFormImplicit*>(wf)->num_flux.kappa);
     
         double flux[4];
         double alpha = atan2(e->ny[i], e->nx[i]);
@@ -358,12 +364,12 @@ private:
         flux_local[1] = p_b;
         flux_local[2] = 0;
         flux_local[3] = 0;
-        static_cast<EulerEquationsWeakFormExplicit*>(wf)->num_flux.T_rot(mat_rot_inv, -alpha);
-        static_cast<EulerEquationsWeakFormExplicit*>(wf)->num_flux.dot_vector(flux, mat_rot_inv, flux_local);
+        static_cast<EulerEquationsWeakFormImplicit*>(wf)->num_flux.T_rot(mat_rot_inv, -alpha);
+        static_cast<EulerEquationsWeakFormImplicit*>(wf)->num_flux.dot_vector(flux, mat_rot_inv, flux_local);
 
         result -= wt[i] * v->val[i] * flux[element];
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -391,15 +397,15 @@ private:
       for (int i = 0; i < n; i++) 
       {
         // Left (inner) state from the previous time level solution.
-        w_l[0] = ext->fn[0]->val[i];
-        w_l[1] = ext->fn[1]->val[i];
-        w_l[2] = ext->fn[2]->val[i];
-        w_l[3] = ext->fn[3]->val[i];
+        w_l[0] = u_ext[0]->val[i];
+        w_l[1] = u_ext[1]->val[i];
+        w_l[2] = u_ext[2]->val[i];
+        w_l[3] = u_ext[3]->val[i];
     
-        w_r[0] = static_cast<EulerEquationsWeakFormExplicit*>(wf)->rho_ext;
-        w_r[1] = static_cast<EulerEquationsWeakFormExplicit*>(wf)->rho_ext * static_cast<EulerEquationsWeakFormExplicit*>(wf)->v1_ext;
-        w_r[2] = static_cast<EulerEquationsWeakFormExplicit*>(wf)->rho_ext * static_cast<EulerEquationsWeakFormExplicit*>(wf)->v2_ext;
-        w_r[3] = static_cast<EulerEquationsWeakFormExplicit*>(wf)->energy_ext;
+        w_r[0] = static_cast<EulerEquationsWeakFormImplicit*>(wf)->rho_ext;
+        w_r[1] = static_cast<EulerEquationsWeakFormImplicit*>(wf)->rho_ext * static_cast<EulerEquationsWeakFormImplicit*>(wf)->v1_ext;
+        w_r[2] = static_cast<EulerEquationsWeakFormImplicit*>(wf)->rho_ext * static_cast<EulerEquationsWeakFormImplicit*>(wf)->v2_ext;
+        w_r[3] = static_cast<EulerEquationsWeakFormImplicit*>(wf)->energy_ext;
     
         /*
         // The inlet part (left part of the computational domain).
@@ -542,9 +548,9 @@ private:
         }
         */
     
-        result -= wt[i] * v->val[i] * static_cast<EulerEquationsWeakFormExplicit*>(wf)->num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
+        result -= wt[i] * v->val[i] * static_cast<EulerEquationsWeakFormImplicit*>(wf)->num_flux.numerical_flux_i(element,w_l,w_r,e->nx[i], e->ny[i]);
       }
-      return result * TAU;
+      return result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -772,11 +778,11 @@ private:
     return rho_v_y / rho + (num_flux.kappa - 1.) * (rho_v_y / rho);
   }
 
-
   // Members.
   NumericalFlux num_flux;
   double rho_ext;
   double v1_ext;
   double v2_ext;
   double energy_ext;
+  double tau;
 };

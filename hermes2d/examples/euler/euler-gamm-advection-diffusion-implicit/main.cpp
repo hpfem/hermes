@@ -47,7 +47,7 @@ const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every
 
 const Ord2 P_INIT_FLOW = Ord2(0,0);               // Polynomial degree for the Euler equations (for the flow).
 const Ord2 P_INIT_CONCENTRATION = Ord2(1,1);      // Polynomial degree for the concentration.
-double TAU = 5E-2;                                // Time step.
+double time_step = 5E-2;                                // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -351,9 +351,6 @@ int main(int argc, char* argv[])
   // Iteration number.
   int iteration = 0;
   
-  // Output of the approximate time derivative.
-  std::ofstream time_der_out("time_der");
-
   // Initialize NOX solver.
   NoxSolver solver(&dp);
   solver.set_ls_tolerance(1E-2);
@@ -366,7 +363,7 @@ int main(int argc, char* argv[])
     solver.set_precond(pc);
   }
 
-  for(t = 0.0; t < 3.0; t += TAU)
+  for(t = 0.0; t < 3.0; t += time_step)
   {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
@@ -432,6 +429,6 @@ int main(int argc, char* argv[])
   s3.close();
   s4.close();
   s5.close();
-  time_der_out.close();
+
   return 0;
 }

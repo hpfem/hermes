@@ -15,10 +15,6 @@
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
-// Calculation of approximation of time derivative (and its output).
-// Setting this option to false saves the computation time.
-const bool CALC_TIME_DER = false;
-
 // Shock capturing.
 bool SHOCK_CAPTURING = false;
 // Quantitative parameter of the discontinuity detector.
@@ -27,7 +23,7 @@ double DISCONTINUITY_DETECTOR_PARAM = 0.05;
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
 const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                       // CFL value.
-double TAU = 1E-4;                                      // Time step.
+double time_step = 1E-4;                                      // Time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                         // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -43,7 +39,7 @@ const std::string BDY_SOLID_WALL = "1";
 const std::string BDY_INLET_OUTLET = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
 #include "../constant_initial_condition.cpp"
@@ -98,7 +94,11 @@ int main(int argc, char* argv[])
   bool is_linear = true;
   
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
-  
+
+  // If the FE problem is in fact a FV problem.
+  if(P_INIT == 0)
+    dp.set_fvm();  
+
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
@@ -120,17 +120,16 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Output of the approximate time derivative.
-  std::ofstream time_der_out("time_der");
-  
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += TAU) {
+  for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
     bool rhs_only = (iteration == 1 ? false : true);
     // Assemble stiffness matrix and rhs or just rhs.
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
+    // Set the current time step.
+    wf.set_time_step(time_step);
     dp.assemble(matrix, rhs, rhs_only);
 
     // Solve the matrix problem.
@@ -156,25 +155,6 @@ int main(int argc, char* argv[])
       flux_limiter.limit_according_to_detector(discontinuous_elements);
     }
 
-    // Approximate the time derivative of the solution.
-    if(CALC_TIME_DER) {
-      Adapt *adapt_for_time_der_calc = new Adapt(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e));
-      bool solutions_for_adapt = false;
-      double difference = iteration == 1 ? 0 : 
-        adapt_for_time_der_calc->calc_err_est(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-					      Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), 
-                                              (Hermes::vector<double>*) NULL, solutions_for_adapt, 
-                                              HERMES_TOTAL_ERROR_ABS | HERMES_ELEMENT_ERROR_ABS) / TAU;
-      delete adapt_for_time_der_calc;
-
-      // Info about the approximate time derivative.
-      if(iteration > 1) {
-        info("Approximate the norm time derivative : %g.", difference);
-        time_der_out << iteration << '\t' << difference << std::endl;
-      }
-    }
-
     // Determine the time step according to the CFL condition.
     // Only mean values on an element of each solution component are taken into account.
     double *solution_vectora = solver->get_solution();
@@ -198,10 +178,10 @@ int main(int argc, char* argv[])
               if(condition < min_condition || min_condition == 0.)
                 min_condition = condition;
             }
-    if(TAU > min_condition)
-      TAU = min_condition;
-    if(TAU < min_condition * 0.9)
-      TAU = min_condition;
+    if(time_step > min_condition)
+      time_step = min_condition;
+    if(time_step < min_condition * 0.9)
+      time_step = min_condition;
 
     // Copy the solutions into the previous time level ones.
     prev_rho.copy(&sln_rho);
@@ -236,6 +216,5 @@ int main(int argc, char* argv[])
   s4.close();
   */
 
-  time_der_out.close();
   return 0;
 }
