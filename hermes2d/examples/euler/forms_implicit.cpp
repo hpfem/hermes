@@ -69,11 +69,11 @@ public:
 
   void set_tau(double tau) {
     this->tau = tau;
-  }
+  };
 
-  double get_tau() {
+  double get_tau() const {
     return tau;
-  }
+  };
 
   // Destructor.
   ~EulerEquationsWeakFormImplicit() {};

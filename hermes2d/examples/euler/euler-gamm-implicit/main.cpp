@@ -22,8 +22,8 @@ using namespace RefinementSelectors;
 const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
 
-const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.                       
+const int P_INIT = 0;                                   // Initial polynomial degree.                      
+const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
 double time_step = 1E-2;                                // Time step.
 
 // Equation parameters.
@@ -75,10 +75,10 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   EulerEquationsWeakFormImplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
     BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
- 
+  wf.set_tau(time_step);
+
   // Initialize the FE problem.
   bool is_linear = false;
-
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.
