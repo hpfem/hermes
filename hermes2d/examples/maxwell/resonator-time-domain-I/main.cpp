@@ -8,7 +8,7 @@ using namespace RefinementSelectors;
 
 // This example shows how to discretize the first-order time-domain Maxwell's equations 
 // with vector-valued E (an Hcurl function) and scalar B (an L2 function). Time integration 
-// is done using implicit Euler. The speed of light is assumed to be 1.0 for simplicity.
+// is done using implicit Euler.
 //
 // PDE: (1. / SPEED_OF_LIGHT**2) \partial E / \partial t - curl B = 0,
 //      \partial B / \partial t + curl E = 0.

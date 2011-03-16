@@ -1,5 +1,5 @@
 
-project(resonator-time-domain)
+project(resonator-time-domain-I)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
