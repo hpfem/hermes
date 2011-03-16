@@ -1,7 +1,7 @@
-class InitialSolutionEulerDensity : public ExactSolution1D
+class InitialSolutionEulerDensity : public ExactSolutionScalar
 {
 public:
-  InitialSolutionEulerDensity(Mesh* mesh, double value) : ExactSolution1D(mesh), value(value) {};
+  InitialSolutionEulerDensity(Mesh* mesh, double value) : ExactSolutionScalar(mesh), value(value) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
@@ -11,10 +11,10 @@ public:
   // Value.
   double value;
 };
-class InitialSolutionEulerDensityVelX : public ExactSolution1D
+class InitialSolutionEulerDensityVelX : public ExactSolutionScalar
 {
 public:
-  InitialSolutionEulerDensityVelX(Mesh* mesh, double value) : ExactSolution1D(mesh), value(value) {};
+  InitialSolutionEulerDensityVelX(Mesh* mesh, double value) : ExactSolutionScalar(mesh), value(value) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
@@ -24,10 +24,10 @@ public:
   // Value.
   double value;
 };
-class InitialSolutionEulerDensityVelY : public ExactSolution1D
+class InitialSolutionEulerDensityVelY : public ExactSolutionScalar
 {
 public:
-  InitialSolutionEulerDensityVelY(Mesh* mesh, double value) : ExactSolution1D(mesh), value(value) {};
+  InitialSolutionEulerDensityVelY(Mesh* mesh, double value) : ExactSolutionScalar(mesh), value(value) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
@@ -37,10 +37,10 @@ public:
   // Value.
   double value;
 };
-class InitialSolutionEulerDensityEnergy : public ExactSolution1D
+class InitialSolutionEulerDensityEnergy : public ExactSolutionScalar
 {
 public:
-  InitialSolutionEulerDensityEnergy(Mesh* mesh, double value) : ExactSolution1D(mesh), value(value) {};
+  InitialSolutionEulerDensityEnergy(Mesh* mesh, double value) : ExactSolutionScalar(mesh), value(value) {};
 
   // Function representing an exact one-dimension valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
