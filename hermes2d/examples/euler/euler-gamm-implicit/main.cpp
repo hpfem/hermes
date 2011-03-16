@@ -18,6 +18,11 @@ using namespace RefinementSelectors;
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
+// Visualization.
+const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
+
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
@@ -51,7 +56,8 @@ int main(int argc, char* argv[])
   mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) 
+    mesh.refine_all_elements();
 
   // Boundary condition types;
   NaturalBoundaryCondition bc(Hermes::vector<std::string>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
@@ -136,19 +142,38 @@ int main(int argc, char* argv[])
       error("NOX failed.");
    
     // Visualization.
-    Mach_number.reinit();
-    pressure.reinit();
-    entropy.reinit();
-    pressure_view.show(&pressure);
-    entropy_production_view.show(&entropy);
-    Mach_number_view.show(&Mach_number);
-   
+    if((iteration - 1) % EVERY_NTH_STEP == 0) {
+      // Hermes visualization.
+      if(HERMES_VISUALIZATION) {
+        Mach_number.reinit();
+        pressure.reinit();
+        entropy.reinit();
+        pressure_view.show(&pressure);
+        entropy_production_view.show(&entropy);
+        Mach_number_view.show(&Mach_number);
     /*
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
     s3.show(&prev_rho_v_y);
     s4.show(&prev_e);
     */
+      }
+      // Output solution in VTK format.
+      if(VTK_VISUALIZATION) {
+        pressure.reinit();
+        Mach_number.reinit();
+        Linearizer lin;
+        char filename[40];
+        sprintf(filename, "pressure-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", false);
+        sprintf(filename, "pressure-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", true);
+        sprintf(filename, "Mach number-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", false);
+        sprintf(filename, "Mach number-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", true);
+      }
+    }
 
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
       solver.get_num_iters(), solver.get_residual());
