@@ -230,6 +230,15 @@ Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
   this->set_const(mesh, init_const);
 }
 
+Solution::Solution(Mesh *mesh, scalar init_const_0, scalar init_const_1) : MeshFunction(mesh)
+{
+  space_type = HERMES_INVALID_SPACE;
+  this->init();
+  this->mesh = mesh;
+  this->own_mesh = false;
+  this->set_const(mesh, init_const_0, init_const_1);
+}
+
 Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
 {
   space_type = s->get_type();

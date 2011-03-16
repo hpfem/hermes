@@ -100,6 +100,7 @@ public:
   Solution();
   Solution(Mesh *mesh);
   Solution(Mesh *mesh, scalar init_const);
+  Solution(Mesh *mesh, scalar init_const_0, scalar init_const_1);
   Solution (Space* s, Vector* coeff_vec);
   Solution (Space* s, scalar* coeff_vec);
   virtual ~Solution();
