@@ -43,7 +43,7 @@ const std::string BDY_SOLID_WALL = "1";
 const std::string BDY_INLET_OUTLET = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
 #include "../constant_initial_condition.cpp"
