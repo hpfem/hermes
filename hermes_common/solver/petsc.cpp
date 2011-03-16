@@ -221,6 +221,33 @@ double PetscMatrix::get_fill_in() const {
   return (double) nnz / ((double)size*size);
 }
 
+
+void PetscMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+  int n=size;
+  for (int i=0;i<n;i++){
+    vector_out[i]=0;
+    for (int j=0;j<n;j++){
+        vector_out[i]+=vector_in[j]*get(i,j);
+    }
+  }
+}
+// Multiplies matrix with a scalar.
+void PetscMatrix::multiply_with_scalar(scalar value){
+  MatScale(matrix,value);
+}
+// Creates matrix in PETSC format using size, nnz, and the three arrays.
+void PetscMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  this->size=size;
+  this->nnz=nnz;
+  MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,ax,&matrix);
+}
+// Duplicates a matrix (including allocation).
+PetscMatrix* PetscMatrix::duplicate(){
+    PetscMatrix*ptscmatrix=new PetscMatrix();        
+    MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
+    return ptscmatrix;
+};
+
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PetscVector::PetscVector() {

@@ -50,6 +50,15 @@ public:
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
 
+  // Applies the matrix to vector_in and saves result to vector_out.
+  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  // Multiplies matrix with a scalar.
+  void multiply_with_scalar(scalar value);
+  // Creates matrix in PETSC format using size, nnz, and the three arrays.
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  // Duplicates a matrix (including allocation).
+  PetscMatrix* duplicate();
+
 protected:
 #ifdef WITH_PETSC
   Mat matrix;
