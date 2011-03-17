@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   ExactSolutionPoisson exact(&mesh, SLOPE);
   
   // Initialize the weak formulation.
-  WeakFormPoisson wf(&exact);
+  WeakFormPoisson wf(SLOPE);
   
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET, &exact);
