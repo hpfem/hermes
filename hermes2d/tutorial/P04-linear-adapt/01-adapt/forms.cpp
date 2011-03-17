@@ -27,6 +27,7 @@ public:
   public:
     MatrixFormVolElectrostatic(int i, int j) : WeakForm::MatrixFormVol(i, j) {
     adapt_eval = false;
+    sym = HERMES_SYM;
     }
 
     template<typename Real, typename Scalar>
