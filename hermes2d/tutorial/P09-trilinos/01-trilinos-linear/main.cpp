@@ -20,16 +20,16 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const bool JFNK = true;                           // true = Jacobian-free method (for NOX),
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
+const bool JFNK = false;                          // true = Jacobian-free method (for NOX),
                                                   // false = Newton (for NOX).
 const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
                                                   // default ML preconditioner in case of Newton.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+const char* iterative_method = "cgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
@@ -75,9 +75,6 @@ int main(int argc, char **argv)
 
   info("---- Assembling by DiscreteProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
 
-  // Time measurement.
-  cpu_time.tick(HERMES_SKIP);
-
   // Initialize the solution.
   Solution sln1;
   
@@ -97,24 +94,36 @@ int main(int argc, char **argv)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
   
+  // Begin time measurement of assembly.
+  cpu_time.tick(HERMES_SKIP);
+
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
   dp1.assemble(matrix, rhs);
   
+  // Record assembly time.
+  double time1 = cpu_time.tick().last();
+  cpu_time.reset();
+
   // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
+  info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
   if(solver->solve())
     Solution::vector_to_solution(solver->get_solution(), &space, &sln1);
   else
     error ("Matrix solver failed.\n");
 
+  // CPU time needed by UMFpack to solve the matrix problem.
+  double time2 = cpu_time.tick().last();
+
+  // Calculate errors.
+  double rel_err_1 = calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
+  info("Assembly time: %g s, matrix solver time: %g s.", time1, time2);
+  info("Xxact H1 error: %g%%.", rel_err_1);
+
   delete(matrix);
   delete(rhs);
   delete(solver);
     
-  // CPU time needed by UMFpack.
-  double time1 = cpu_time.tick().last();
-
   // View the solution and mesh.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show(&sln1);
@@ -174,7 +183,7 @@ int main(int argc, char **argv)
   else error("NOX failed");
 
   // CPU time needed by NOX.
-  double time2 = cpu_time.tick().last();
+  time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
   ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
@@ -182,11 +191,9 @@ int main(int argc, char **argv)
   //view2.show(&exact);
 
   // Calculate errors.
-  //Solution ex(&mesh, &exact);
-  double rel_err_1 = calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
   double rel_err_2 = calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
-  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
+  info("Projection time: %g s, NOX assembly/solution time: %g s.", proj_time, time2);
+  info("Exact H1 error: %g%%.)", rel_err_2);
  
   // Wait for all views to be closed.
   View::wait();
