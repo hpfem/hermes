@@ -17,7 +17,9 @@ private:
   class MatrixFormVolPerturbedPoisson : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolPerturbedPoisson(int i, int j, double K) : WeakForm::MatrixFormVol(i, j), K(K) { }
+    MatrixFormVolPerturbedPoisson(int i, int j, double K) : WeakForm::MatrixFormVol(i, j), K(K) {
+      sym = HERMES_SYM;
+    }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
