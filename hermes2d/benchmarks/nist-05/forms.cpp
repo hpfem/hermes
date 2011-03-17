@@ -60,7 +60,7 @@ private:
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       double p, q;
       // integration order calculation.
-      if(e->elem_marker = -8888)
+      if(e->elem_marker == -9999)
         p = q = 1;
       else {
         if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_1) {
@@ -107,7 +107,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       double f;
-      if(e->elem_marker = -8888)
+      if(e->elem_marker == -9999)
         f = 1;
       else {
         if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_1)
