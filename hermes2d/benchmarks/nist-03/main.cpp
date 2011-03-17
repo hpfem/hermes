@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
 
-    // Initialize matrix solver.
+    // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -200,6 +200,7 @@ int main(int argc, char* argv[])
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::vector<double> err_exact_rel;
+    //double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
     bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution *>(&u_sln, &v_sln), 
                                  Hermes::vector<Solution *>(&exact_u, &exact_v), 
