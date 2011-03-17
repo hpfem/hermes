@@ -3,12 +3,12 @@ class ExactSolutionPoisson : public ExactSolutionScalar
 public:
   ExactSolutionPoisson(Mesh* mesh, double slope) : ExactSolutionScalar(mesh), slope(slope) {};
 
-  // Right-hand side.
+  // Exact solution.
   double fn(double x, double y) {
     return atan(slope * (sqrt(sqr(x-1.25) + sqr(y+0.25)) - M_PI/3));
   }
 
-  // Function representing an exact one-dimension valued solution.
+  // Exact solution with derivatives.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
       double t = sqrt(sqr(x-1.25) + sqr(y+0.25));
       double u = t * (sqr(slope) * sqr(t - M_PI/3) + 1);

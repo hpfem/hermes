@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
   TimePeriod cpu_time;
   cpu_time.tick();
 
-  // Setup data structures for solving the discrete algebraic problem.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -263,9 +263,9 @@ int main(int argc, char* argv[])
     // STRATEGY == -1 and only the exact error is calculated by this object.
     Adapt* adaptivity = new Adapt(space, norm);
     
-    // Calculate and report exact error.
+    // Calculate exact error.
     bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&ref_sln, &exact, solutions_for_adapt, HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
     info("ndof_fine: %d, err_exact_rel: %g%%", Space::get_num_dofs(actual_sln_space), err_exact_rel);
 
     // Time measurement.

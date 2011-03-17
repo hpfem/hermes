@@ -367,7 +367,7 @@ int main(int argc, char* args[])
   cpu_time.tick();
   clk_time.tick();
   
-  // Setup data structures for solving the discrete algebraic problem.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);

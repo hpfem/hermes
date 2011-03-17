@@ -12,7 +12,7 @@ using namespace RefinementSelectors;
 //  PDE: -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
 //       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f.
 //
-//  Known exact solution: unknown.
+//  Exact solution: unknown.
 //
 //  Domain: square (0, 8.4)x(0, 24), see the file "battery.mesh".
 //
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    // Initialize matrix solver.
+    // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);

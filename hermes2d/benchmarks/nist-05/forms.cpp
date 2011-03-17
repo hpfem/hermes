@@ -2,9 +2,6 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
 
-// Exact solution.
-#include "exact_solution.cpp"
-
 class WeakFormPoissonNIST05 : public WeakForm
 {
 public:
@@ -180,8 +177,8 @@ private:
 class DirichletFunctionBoundaryConditionExact : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryConditionExact(std::string marker, ExactSolutionNIST01* exact_solution) : 
-        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  DirichletFunctionBoundaryConditionExact(std::string marker) : 
+        DirichletBoundaryCondition(Hermes::vector<std::string>()) 
   {
     markers.push_back(marker);
   };
@@ -193,10 +190,8 @@ public:
   };
 
   virtual scalar function(double x, double y) const {
-    return exact_solution->fn(x, y);
+    return 0; //exact_solution->fn(x, y);
   };
-
-  ExactSolutionNIST01* exact_solution;
 };
 
 
