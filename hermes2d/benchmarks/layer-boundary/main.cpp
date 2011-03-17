@@ -72,11 +72,14 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_REF_NUM_BDY);
 
-  // Set exact solution.
-  ExactSolutionPerturbedPoisson exact(&mesh, K);
+  // Define exact solution.
+  MyExactSolution exact_sln(&mesh, K);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(&mesh, K);
 
   // Initialize the weak formulation.
-  WeakFormPerturbedPoisson wf(&exact);
+  WeakFormPerturbedPoisson wf(&rhs);
   
   // Initialize boundary conditions.
   DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
@@ -147,7 +150,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error,
-    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

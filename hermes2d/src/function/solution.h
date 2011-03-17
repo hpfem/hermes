@@ -257,7 +257,7 @@ public:
 
   ~ExactSolution();
 
-  // Number of value dimensions from {1, 2}.
+  // Dimension of result - either 1 or 2.
   virtual unsigned int get_dimension() = 0;
 };
 
@@ -272,8 +272,8 @@ public:
 
   virtual unsigned int get_dimension();
 
-  // Function representing an exact one-dimension valued solution.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
+  // Function representing an exact scalar-valued solution.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) { return 0;};
 };
 
 class HERMES_API ExactSolutionVector : public ExactSolution
@@ -285,8 +285,8 @@ public:
 
   virtual unsigned int get_dimension();
 
-  // Function representing an exact two-dimension valued solution.
-  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) = 0;
+  // Function representing an exact vector-valued solution.
+  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) {return scalar2(0, 0);};
 };
 
 

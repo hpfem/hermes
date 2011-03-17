@@ -3,14 +3,14 @@
 #include "boundaryconditions/boundaryconditions.h"
 
 // Exact solution.
-#include "exact_solution.cpp"
+#include "exact_functions.cpp"
 
 class WeakFormPerturbedPoisson : public WeakForm
 {
 public:
-  WeakFormPerturbedPoisson(ExactSolutionPerturbedPoisson* exact_solution) : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolPerturbedPoisson(0, 0, exact_solution->K));
-    add_vector_form(new VectorFormVolPerturbedPoisson(0, exact_solution));
+  WeakFormPerturbedPoisson(MyRightHandSide* my_rhs) : WeakForm(1) {
+    add_matrix_form(new MatrixFormVolPerturbedPoisson(0, 0, my_rhs->K));
+    add_vector_form(new VectorFormVolPerturbedPoisson(0, my_rhs));
   };
 
 private:
@@ -41,13 +41,13 @@ private:
   class VectorFormVolPerturbedPoisson : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolPerturbedPoisson(int i, ExactSolutionPerturbedPoisson* exact_solution) : WeakForm::VectorFormVol(i), 
-          exact_solution(exact_solution) { }
+    VectorFormVolPerturbedPoisson(int i, MyRightHandSide* my_rhs) : WeakForm::VectorFormVol(i), 
+          my_rhs(my_rhs) { }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       scalar result = 0;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (exact_solution->rhs(e->x[i], e->y[i]) * v->val[i]);
+        result += wt[i] * (my_rhs->rhs(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
@@ -56,6 +56,6 @@ private:
     }
 
     // Member.
-    ExactSolutionPerturbedPoisson* exact_solution;
+    MyRightHandSide* my_rhs;
   };
 };

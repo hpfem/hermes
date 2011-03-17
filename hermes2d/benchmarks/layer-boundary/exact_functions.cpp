@@ -1,9 +1,9 @@
-class ExactSolutionPerturbedPoisson : public ExactSolutionScalar
+// Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
+class MyExactFunction : public ExactSolutionScalar
 {
 public:
-  ExactSolutionPerturbedPoisson(Mesh* mesh, double K) : ExactSolutionScalar(mesh), K(K) {};
+  MyExactFunction(Mesh* mesh, double K) : ExactSolutionScalar(mesh), K(K) {};
 
-  // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
   double uhat(double x) {
     return 1. - (exp(K*x) + exp(-K*x)) / (exp(K) + exp(-K));
   }
@@ -14,18 +14,35 @@ public:
     return -K*K * (exp(K*x) + exp(-K*x)) / (exp(K) + exp(-K));
   }
 
-  // Right-hand side.
+  // Member.
+  double K;
+};
+
+// Right-hand side.
+class MyRightHandSide : public MyExactFunction
+{
+public:
+  MyRightHandSide(Mesh* mesh, double K) : MyExactFunction(mesh, K) {};
+
   double rhs(double x, double y) {
     return -(dduhat_dxx(x)*uhat(y) + uhat(x)*dduhat_dxx(y)) + K*K*uhat(x)*uhat(y);
   }
+};
 
-  // Function representing an exact one-dimension valued solution.
+// Exact solution.
+class MyExactSolution : public MyExactFunction
+{
+public:
+  MyExactSolution(Mesh* mesh, double K) : MyExactFunction(mesh, K) {};
+
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     dx = duhat_dx(x) * uhat(y);
     dy = uhat(x) * duhat_dx(y);
     return uhat(x) * uhat(y);
   };
-
-  // Member.
-  double K;
 };
+
+
+
+
+
