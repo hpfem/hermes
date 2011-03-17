@@ -79,7 +79,7 @@ BoundaryConditions::BoundaryConditions() {
   this->empty_condition = new EmptyBoundaryCondition(markers_to_pass);
 };
 
-BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) : all(boundary_conditions) {
+BoundaryConditions::BoundaryConditions(Hermes::vector<BoundaryCondition *> boundary_conditions) {
   add_boundary_conditions(boundary_conditions);
 };
 
