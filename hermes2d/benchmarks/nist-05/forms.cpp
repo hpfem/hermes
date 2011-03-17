@@ -2,23 +2,59 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
 
-class WeakFormPoissonNIST05 : public WeakForm
+class WeakFormNIST05 : public WeakForm
 {
 public:
-  WeakFormPoissonNIST05(double parameter) : WeakForm(1)
+  WeakFormNIST05(std::string omega_1, std::string omega_2, std::string omega_3, std::string omega_4, std::string omega_5,
+  std::string bdy_left, std::string bdy_top, std::string bdy_right, std::string bdy_bottom) : WeakForm(1),
+  omega_1(omega_1), omega_2(omega_2), omega_3(omega_3), omega_4(omega_4), omega_5(omega_5), bdy_left(bdy_left), bdy_top(bdy_top), 
+  bdy_bottom(bdy_bottom), bdy_right(bdy_right),
+  p_1(25.0),
+  p_2(7.0),
+  p_3(5.0),
+  p_4(0.2),
+  p_5(0.05),
+
+  q_1(25.0),
+  q_2(0.8),
+  q_3(0.0001),
+  q_4(0.2),
+  q_5(0.05),
+
+  f_1(0.0),
+  f_2(1.0),
+  f_3(1.0),
+  f_4(0.0),
+  f_5(0.0),
+
+  c_left(0.0),
+  c_top(1.0),
+  c_right(2.0),
+  c_bottom(3.0),
+
+  g_n_left(0.0),
+  g_n_top(3.0),
+  g_n_right(2.0),
+  g_n_bottom(1.0)
   {
-    add_matrix_form(new MatrixFormVolPoisson(0, 0));
-    
-    VectorFormVolPoisson* wfp= new VectorFormVolPoisson(0);
-    wfp->parameter = parameter;
-    add_vector_form(wfp);
+    add_matrix_form(new MatrixFormVolNIST05(0, 0));
+    add_vector_form(new VectorFormVolNIST05(0));
+    add_matrix_form_surf(new MatrixFormSurfNIST05(0, 0, bdy_bottom));
+    add_matrix_form_surf(new MatrixFormSurfNIST05(0, 0, bdy_right));
+    add_matrix_form_surf(new MatrixFormSurfNIST05(0, 0, bdy_top));
+    add_vector_form_surf(new VectorFormSurfNIST05(0, bdy_bottom));
+    add_vector_form_surf(new VectorFormSurfNIST05(0, bdy_top));
+    add_vector_form_surf(new VectorFormSurfNIST05(0, bdy_left));
+    add_vector_form_surf(new VectorFormSurfNIST05(0, bdy_right));
   };
 
 private:
-  class MatrixFormVolPoisson : public WeakForm::MatrixFormVol
+  class MatrixFormVolNIST05 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
+    MatrixFormVolNIST05(int i, int j) : WeakForm::MatrixFormVol(i, j) {
+      sym = HERMES_SYM;
+    }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -26,29 +62,32 @@ private:
       // integration order calculation.
       if(e->elem_marker = -8888)
         p = q = 1;
-      else
-        switch(wf->element_markers_conversion->get_user_marker(e->elem_marker)) {
-          case OMEGA_1:
-            p = P_1;
-            q = Q_1;
-            break;
-          case OMEGA_2:
-            p = P_2;
-            q = Q_2;
-            break;
-          case OMEGA_3:
-            p = P_3;
-            q = Q_3;
-            break;
-          case OMEGA_4:
-            p = P_4;
-            q = Q_4;
-            break;
-          case OMEGA_5:
-            p = P_5;
-            q = Q_5;
-            break;
+      else {
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_1) {
+            p = static_cast<WeakFormNIST05*>(wf)->p_1;
+            q = static_cast<WeakFormNIST05*>(wf)->q_1;
         }
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_2) {
+            p = static_cast<WeakFormNIST05*>(wf)->p_2;
+            q = static_cast<WeakFormNIST05*>(wf)->q_2;
+        }
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_3) {
+            p = static_cast<WeakFormNIST05*>(wf)->p_3;
+            q = static_cast<WeakFormNIST05*>(wf)->q_3;
+        }
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_4) {
+            p = static_cast<WeakFormNIST05*>(wf)->p_4;
+            q = static_cast<WeakFormNIST05*>(wf)->q_4;
+        }
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_5) {
+            p = static_cast<WeakFormNIST05*>(wf)->p_5;
+            q = static_cast<WeakFormNIST05*>(wf)->q_5;
+        }
+      }
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (p * u->dx[i] * v->dx[i] + q * u->dy[i] * v->dy[i]);
+      return result;
     };
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -58,55 +97,32 @@ private:
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
-
-    const std::string OMEGA_1;
-    const std::string OMEGA_2;
-    const std::string OMEGA_3;
-    const std::string OMEGA_4;
-    const std::string OMEGA_5;
-
-    const double P_1;
-    const double P_2;
-    const double P_3;
-    const double P_4;
-    const double P_5;
-
-    const double Q_1;
-    const double Q_2;
-    const double Q_3;
-    const double Q_4;
-    const double Q_5;
   };
 
-  class VectorFormVolPoisson : public WeakForm::VectorFormVol
+  class VectorFormVolNIST05 : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolPoisson(int i) : WeakForm::VectorFormVol(i) { }
+    VectorFormVolNIST05(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      double p;
+      double f;
       if(e->elem_marker = -8888)
-        p = 1;
-      else
-        switch(wf->element_markers_conversion->get_user_marker(e->elem_marker)) {
-          case OMEGA_1:
-            p = F_1;
-            break;
-          case OMEGA_2:
-            p = F_2;
-            break;
-          case OMEGA_3:
-            p = F_3;
-            break;
-          case OMEGA_4:
-            p = F_4;
-            break;
-          case OMEGA_5:
-            p = F_5;
-            break;
-        }
-      return p * int_v<Real, Scalar>(n, wt, v);
+        f = 1;
+      else {
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_1)
+            f = static_cast<WeakFormNIST05*>(wf)->f_1;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_2)
+            f = static_cast<WeakFormNIST05*>(wf)->f_2;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_3)
+            f = static_cast<WeakFormNIST05*>(wf)->f_3;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_4)
+            f = static_cast<WeakFormNIST05*>(wf)->f_4;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<WeakFormNIST05*>(wf)->omega_5)
+            f = static_cast<WeakFormNIST05*>(wf)->f_5;
+      }
+
+      return f * int_v<Real, Scalar>(n, wt, v);
     };
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -116,227 +132,149 @@ private:
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
-     
-    // Members.
-    const std::string OMEGA_1;
-    const std::string OMEGA_2;
-    const std::string OMEGA_3;
-    const std::string OMEGA_4;
-    const std::string OMEGA_5;
+  };
 
-    const double F_1;
-    const double F_2;
-    const double F_3;
-    const double F_4;
-    const double F_5;
+  class MatrixFormSurfNIST05 : public WeakForm::MatrixFormSurf
+  {
+  public:
+    MatrixFormSurfNIST05(int i, int j, std::string marker) : WeakForm::MatrixFormSurf(i, j, marker) {}
+
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        Real x = e->x[i];
+        Real y = e->y[i];
+        Scalar p = 0.0;
+        Scalar q = 0.0;
+        Scalar c = 1.0;
+        if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_left) {
+          if (x == 0.0) {
+            if ((y >= 0.0 && y <= 0.8)||(y >= 23.2 && y <= 24.0)) {
+              p = static_cast<WeakFormNIST05*>(wf)->p_1; 
+              q = static_cast<WeakFormNIST05*>(wf)->q_1;
+            }
+            if ((y >= 1.6 && y <= 3.6)||(y >= 18.8 && y <= 21.2)) {
+              p = static_cast<WeakFormNIST05*>(wf)->p_2; 
+              q = static_cast<WeakFormNIST05*>(wf)->q_2;
+            }
+            if (y >= 3.6 && y <= 18.8) {
+              p = static_cast<WeakFormNIST05*>(wf)->p_3; 
+              q = static_cast<WeakFormNIST05*>(wf)->q_3;
+            }
+            if ((y >= 0.8 && y <= 1.6)||(y >= 21.2 && y <= 23.2)) {
+              p = static_cast<WeakFormNIST05*>(wf)->p_5; 
+              q = static_cast<WeakFormNIST05*>(wf)->q_5;
+            }
+          }
+          c = static_cast<WeakFormNIST05*>(wf)->c_left;
+        }
+        if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_right) {
+          p = static_cast<WeakFormNIST05*>(wf)->p_1; 
+          q = static_cast<WeakFormNIST05*>(wf)->q_1;
+          c = static_cast<WeakFormNIST05*>(wf)->c_right;
+        }
+
+        if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_bottom) {
+          p = static_cast<WeakFormNIST05*>(wf)->p_1; 
+          q = static_cast<WeakFormNIST05*>(wf)->q_1;
+          c = static_cast<WeakFormNIST05*>(wf)->c_bottom;
+        }
+
+        if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_top) {
+          p = static_cast<WeakFormNIST05*>(wf)->p_1; 
+          q = static_cast<WeakFormNIST05*>(wf)->q_1;
+          c = static_cast<WeakFormNIST05*>(wf)->c_top;
+        }
+        result += wt[i] * (p * u->dx[i] * v->val[i] - q * u->dy[i] * v->val[i] + c * u->val[i] * v->val[i]);
+      }
+      return result;
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return wt[0] * (u->dx[0] * v->val[0] - u->dy[0] * v->val[0] +  u->val[0] * v->val[0]);
+    }
+  };
+
+  class VectorFormSurfNIST05 : public WeakForm::VectorFormSurf
+  {
+  public:
+    VectorFormSurfNIST05(int i, std::string marker) : WeakForm::VectorFormSurf(i, marker) {}
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      Scalar g = 1.0;
+      if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_left) {
+        g = static_cast<WeakFormNIST05*>(wf)->g_n_left; 
+      }
+      if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_right) {
+        g = static_cast<WeakFormNIST05*>(wf)->g_n_right;
+      }
+
+      if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_bottom) {
+        g = static_cast<WeakFormNIST05*>(wf)->g_n_bottom;
+      }
+
+      if(this->area == static_cast<WeakFormNIST05*>(wf)->bdy_top) {
+        g = static_cast<WeakFormNIST05*>(wf)->g_n_top;
+      }
+      return g * int_v<Real, Scalar>(n, wt, v);
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
   };
 
   // Members.
-  const std::string OMEGA_1 = "1";
-  const std::string OMEGA_2 = "2";
-  const std::string OMEGA_3 = "3";
-  const std::string OMEGA_4 = "4";
-  const std::string OMEGA_5 = "5";
+  const std::string omega_1;
+  const std::string omega_2;
+  const std::string omega_3;
+  const std::string omega_4;
+  const std::string omega_5;
 
-  const double P_1 = 25.0;
-  const double P_2 = 7.0;
-  const double P_3 = 5.0;
-  const double P_4 = 0.2;
-  const double P_5 = 0.05;
+  const double p_1;
+  const double p_2;
+  const double p_3;
+  const double p_4;
+  const double p_5;
 
-  const double Q_1 = 25.0;
-  const double Q_2 = 0.8;
-  const double Q_3 = 0.0001;
-  const double Q_4 = 0.2;
-  const double Q_5 = 0.05;
+  const double q_1;
+  const double q_2;
+  const double q_3;
+  const double q_4;
+  const double q_5;
 
-  const double F_1 = 0.0;
-  const double F_2 = 1.0;
-  const double F_3 = 1.0;
-  const double F_4 = 0.0;
-  const double F_5 = 0.0;
+  const double f_1;
+  const double f_2;
+  const double f_3;
+  const double f_4;
+  const double f_5;
 
   // Boundary markers.
-  const std::string BDY_LEFT = "1";
-  const std::string BDY_TOP = "2";
-  const std::string BDY_RIGHT = "3";
-  const std::string BDY_BOTTOM = "4";
+  const std::string bdy_left;
+  const std::string bdy_top;
+  const std::string bdy_right;
+  const std::string bdy_bottom;
 
   // Boundary condition coefficients for the four sides.
-  const double C_LEFT = 0.0;
-  const double C_TOP = 1.0;
-  const double C_RIGHT = 2.0;
-  const double C_BOTTOM = 3.0;
+  const double c_left;
+  const double c_top;
+  const double c_right;
+  const double c_bottom;
 
-  const double G_N_LEFT = 0.0;
-  const double G_N_TOP = 3.0;
-  const double G_N_RIGHT = 2.0;
-  const double G_N_BOTTOM = 1.0;
+  const double g_n_left;
+  const double g_n_top;
+  const double g_n_right;
+  const double g_n_bottom;
 };
 
-class DirichletFunctionBoundaryConditionExact : public DirichletBoundaryCondition
-{
-public:
-  DirichletFunctionBoundaryConditionExact(std::string marker) : 
-        DirichletBoundaryCondition(Hermes::vector<std::string>()) 
-  {
-    markers.push_back(marker);
-  };
-  
-  ~DirichletFunctionBoundaryConditionExact() {};
-
-  virtual BoundaryConditionValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  };
-
-  virtual scalar function(double x, double y) const {
-    return 0; //exact_solution->fn(x, y);
-  };
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Weak forms
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf_left(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, 
-                               Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-  {
-    double x = e->x[i];
-    double y = e->y[i];
-    double P = 0.0;
-    double Q = 0.0;
-
-    if (x == 0.0)
-    {
-      if ((y >= 0.0 && y <= 0.8)||(y >= 23.2 && y <= 24.0))
-      {
-        P = P_1; 
-        Q = Q_1;
-      }
-      if ((y >= 1.6 && y <= 3.6)||(y >= 18.8 && y <= 21.2))
-      {
-        P = P_2; 
-        Q = Q_2;
-      }
-      if (y >= 3.6 && y <= 18.8)
-      {
-        P = P_3; 
-        Q = Q_3;
-      }
-      if ((y >= 0.8 && y <= 1.6)||(y >= 21.2 && y <= 23.2))
-      {
-        P = P_5; 
-        Q = Q_5;
-      }
-    }
-    result += wt[i] * (P * u->dx[i] * v->val[i] - Q * u->dy[i] * v->val[i] + C_LEFT * u->val[i] * v->val[i]);
-  }
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf_right(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
-                                Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-  {
-    double P = 25.0;
-    double Q = 25.0;
-    result += wt[i] * (P * u->dx[i] * v->val[i] - Q * u->dy[i] * v->val[i] + C_RIGHT * u->val[i] * v->val[i]);
-  }
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf_top(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
-                              Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-  {
-    double P = 25.0;
-    double Q = 25.0;
-    result += wt[i] * (P * u->dx[i] * v->val[i] - Q * u->dy[i] * v->val[i] + C_TOP * u->val[i] * v->val[i]);
-  }
-  return result;
-}
-
-template<typename Real, typename Scalar>
-Scalar bilinear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v,
-                                 Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  for (int i = 0; i < n; i++)
-  {
-    double P = 25.0;
-    double Q = 25.0;
-    result += wt[i] * (P * u->dx[i] * v->val[i] - Q * u->dy[i] * v->val[i] + C_BOTTOM * u->val[i] * v->val[i]);
-  }
-  return result;
-}
-
-Ord bilinear_form_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-                      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return Ord(30);
-//return u->val[0] * v->val[0] * e->x[0] * e->x[0]; // returning the sum of the degrees of the basis
-                                                    // and test function plus two
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_left(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return G_N_LEFT * int_v<Real, Scalar>(n, wt, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_right(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return G_N_RIGHT * int_v<Real, Scalar>(n, wt, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_top(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return G_N_TOP * int_v<Real, Scalar>(n, wt, v);
-}
-
-template<typename Real, typename Scalar>
-Scalar linear_form_surf_bottom(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return G_N_BOTTOM * int_v<Real, Scalar>(n, wt, v);
-}

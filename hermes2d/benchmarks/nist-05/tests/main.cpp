@@ -55,49 +55,21 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Problem parameters.
-const int OMEGA_1 = 1;
-const int OMEGA_2 = 2;
-const int OMEGA_3 = 3;
-const int OMEGA_4 = 4;
-const int OMEGA_5 = 5;
-
-const double P_1 = 25.0;
-const double P_2 = 7.0;
-const double P_3 = 5.0;
-const double P_4 = 0.2;
-const double P_5 = 0.05;
-
-const double Q_1 = 25.0;
-const double Q_2 = 0.8;
-const double Q_3 = 0.0001;
-const double Q_4 = 0.2;
-const double Q_5 = 0.05;
-
-const double F_1 = 0.0;
-const double F_2 = 1.0;
-const double F_3 = 1.0;
-const double F_4 = 0.0;
-const double F_5 = 0.0;
+// Element markers.
+const std::string OMEGA_1 = "1";
+const std::string OMEGA_2 = "2";
+const std::string OMEGA_3 = "3";
+const std::string OMEGA_4 = "4";
+const std::string OMEGA_5 = "5";
 
 // Boundary markers.
-const int BDY_LEFT = 1;
-const int BDY_TOP = 2;
-const int BDY_RIGHT = 3;
-const int BDY_BOTTOM = 4;
-
-// Boundary condition coefficients for the four sides.
-const double C_LEFT = 0.0;
-const double C_TOP = 1.0;
-const double C_RIGHT = 2.0;
-const double C_BOTTOM = 3.0;
-
-const double G_N_LEFT = 0.0;
-const double G_N_TOP = 3.0;
-const double G_N_RIGHT = 2.0;
-const double G_N_BOTTOM = 1.0;
+const std::string BDY_LEFT = "1";
+const std::string BDY_TOP = "2";
+const std::string BDY_RIGHT = "3";
+const std::string BDY_BOTTOM = "4";
 
 // Weak forms.
+// In this example, some parameters are part of the weak formulation, see the file forms.cpp, class WeakFormNIST05.
 #include "forms.cpp"
 
 int main(int argc, char* argv[])
@@ -111,38 +83,14 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(BDY_LEFT);
-  bc_types.add_bc_newton(Hermes::vector<int>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM));
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
+  NaturalBoundaryCondition bc(Hermes::vector<std::string>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));
+  BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(biform1), HERMES_SYM, OMEGA_1);
-  wf.add_matrix_form(callback(biform2), HERMES_SYM, OMEGA_2);
-  wf.add_matrix_form(callback(biform3), HERMES_SYM, OMEGA_3);
-  wf.add_matrix_form(callback(biform4), HERMES_SYM, OMEGA_4);
-  wf.add_matrix_form(callback(biform5), HERMES_SYM, OMEGA_5);
-
-  wf.add_matrix_form_surf(bilinear_form_surf_right, bilinear_form_ord, BDY_RIGHT);
-  wf.add_matrix_form_surf(bilinear_form_surf_top, bilinear_form_ord, BDY_TOP);
-  wf.add_matrix_form_surf(bilinear_form_surf_bottom, bilinear_form_ord, BDY_BOTTOM);
-
-  wf.add_vector_form_surf(callback(linear_form_surf_left), BDY_LEFT);
-  wf.add_vector_form_surf(callback(linear_form_surf_right), BDY_RIGHT);
-  wf.add_vector_form_surf(callback(linear_form_surf_top), BDY_TOP);
-  wf.add_vector_form_surf(callback(linear_form_surf_bottom), BDY_BOTTOM);
-
-  wf.add_vector_form(callback(linear_form_1), OMEGA_1);
-  wf.add_vector_form(callback(linear_form_2), OMEGA_2);
-  wf.add_vector_form(callback(linear_form_3), OMEGA_3);
-  wf.add_vector_form(callback(linear_form_4), OMEGA_4);
-  wf.add_vector_form(callback(linear_form_5), OMEGA_5);
+  WeakFormNIST05 wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -167,7 +115,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
-    // Initialize matrix solver.
+    // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
