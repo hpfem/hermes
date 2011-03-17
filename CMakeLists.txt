@@ -8,6 +8,46 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 set(HERMES_COMMON_LIB_REAL  hermes_common-real)
 set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
+
+
+#ADDED BY COLMAN
+IF (APPLE)
+    IF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+            ## It's Mac OS X.
+
+            SET (CMAKE_BUILD_TYPE "Release" CACHE STRING "Release is default." FORCE)
+
+            SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING
+                "compiling for OSX only in i386 format. Library with the
+                 necessary symbol '_glutSetOption' was only available
+                 in /usr/lib/libglut.dylib, which happened to be a pure
+                 i386 library. Maybe fixed later." FORCE)
+            IF (${CMAKE_VERBOSE_MAKEFILE} MATCHES "TRUE")
+                MESSAGE(STATUS)
+                MESSAGE(STATUS "*******************************************************************************")
+                MESSAGE(STATUS "*        SUMMARY OF USED VARIABLES -> Details in AllVariables.txt             *")
+                MESSAGE(STATUS "*******************************************************************************")
+                MESSAGE(STATUS "COMPILING FOR OSX, i386 platform")
+                MESSAGE(STATUS "CMAKE_ROOT ........................... = ${CMAKE_ROOT}")
+                MESSAGE(STATUS "CMAKE_HOME_DIRECTORY ................. = ${CMAKE_HOME_DIRECTORY}")
+                MESSAGE(STATUS "CMAKE_VERSION ........................ = ${CMAKE_VERSION}")
+                MESSAGE(STATUS "CMAKE_GENERATOR ...................... = ${CMAKE_GENERATOR}")
+                MESSAGE(STATUS "CMAKE_MODULE_PATH .................... = ${CMAKE_MODULE_PATH}")
+                MESSAGE(STATUS "CMAKE_HOST_SYSTEM .................... = ${CMAKE_HOST_SYSTEM}")
+                MESSAGE(STATUS "CMAKE_HOST_SYSTEM_VERSION ............ = ${CMAKE_HOST_SYSTEM_VERSION}")
+                MESSAGE(STATUS "CMAKE_HOST_SYSTEM_NAME ............... = ${CMAKE_HOST_SYSTEM_NAME}")
+                MESSAGE(STATUS "CMAKE_HOST_SYSTEM_PROCESSOR .......... = ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+                MESSAGE(STATUS "CMAKE_HOST_UNIX ...................... = ${CMAKE_HOST_UNIX}")
+                MESSAGE(STATUS "CMAKE_BUILD_TYPE ..................... = ${CMAKE_BUILD_TYPE}")
+                MESSAGE(STATUS "CMAKE_C_COMPILER ..................... = ${CMAKE_C_COMPILER}")
+                MESSAGE(STATUS "CMAKE_CXX_COMPILER ................... = ${CMAKE_CXX_COMPILER}")
+            ENDIF()
+        ENDIF ()
+    ENDIF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+ENDIF (APPLE)
+
+
 #------------------------------------------------------------------------------
 # Main configuration options.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
