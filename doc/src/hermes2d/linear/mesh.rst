@@ -33,8 +33,8 @@ the Hermes mesh file format::
 
     # comments start with a hash
     var = 5.0 + cos(pi)  # number
-    list = { 1, 2, 3, 4, var }  # list
-    pairs = { {1, 2}, {1, var}, {0, list} }  # list of lists
+    list = [ 1, 2, 3, 4, var ]  # list
+    pairs = [ [1, 2], [1, var], [0, list] ]  # list of lists
 
 Every mesh file must contain at least the variables ``vertices``, ``elements``
 and ``boundaries``. The variable ``vertices`` defines the coordinates
@@ -44,36 +44,36 @@ of all mesh vertices (in any order). For the above geometry it looks like this::
     b = sqrt(2)/2
 
     vertices =
-    {
-      { 0, -a },    # vertex 0
-      { a, -a },    # vertex 1
-      { -a, 0 },    # vertex 2
-      { 0, 0 },     # vertex 3
-      { a, 0 },     # vertex 4
-      { -a, a },    # vertex 5
-      { 0, a },     # vertex 6
-      { a*b, a*b }  # vertex 7
-    }
+    [
+      [ 0, -a ],    # vertex 0
+      [ a, -a ],    # vertex 1
+      [ -a, 0 ],    # vertex 2
+      [ 0, 0 ],     # vertex 3
+      [ a, 0 ],     # vertex 4
+      [ -a, a ],    # vertex 5
+      [ 0, a ],     # vertex 6
+      [ a*b, a*b ]  # vertex 7
+    ]
 
 The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra nonnegative integer or string denoting the element (material) marker. Element markers make it possible to use different equation parameters in subdomains. In Hermes one can assign different weak forms to those subdomains, or access the element and boundary markers from indise of weak forms. If the domain is composed of only one material, as the above geometry, all elements may be assigned a zero marker for simplicity::
 
     elements =
-    {
-      { 0, 1, 4, 3, 0 },  # quad 0
-      { 3, 4, 7, 0 },     # tri 1
-      { 3, 7, 6, 0 },     # tri 2
-      { 2, 3, 6, 5, 0 }   # quad 3
-    }
+    [
+      [ 0, 1, 4, 3, 0 ]  # quad 0
+      [ 3, 4, 7, 0 ],     # tri 1
+      [ 3, 7, 6, 0 ],     # tri 2
+      [ 2, 3, 6, 5, 0 ]   # quad 3
+    ]
 
 If we wanted to use a string material marker, we would do something like::
 
     elements =
-    {
-      { 0, 1, 4, 3; Material A },  # quad 0
-      { 3, 4, 7; Material A },     # tri 1
-      { 3, 7, 6; Material A },     # tri 2
-      { 2, 3, 6, 5; Material A }   # quad 3
-    }
+    [
+      [ 0, 1, 4, 3, "Material A" ],  # quad 0
+      [ 3, 4, 7, "Material A" ],     # tri 1
+      [ 3, 7, 6, "Material A" ],     # tri 2
+      [ 2, 3, 6, 5, "Material A" ]   # quad 3
+    ]
 
 
 The last mandatory variable, ``boundaries``, defines boundary markers for all
@@ -83,30 +83,30 @@ assigned a boundary condition, as we will see later. An edge is identified by
 three numbers: two vertex indices and its marker. For the above geometry, we have::
 
     boundaries =
-    {
-      { 0, 1, 1 },
-      { 1, 4, 2 },
-      { 3, 0, 4 },
-      { 4, 7, 2 },
-      { 7, 6, 2 },
-      { 2, 3, 4 },
-      { 6, 5, 2 },
-      { 5, 2, 3 }
-    }
+    [
+      [ 0, 1, 1 ],
+      [ 1, 4, 2 ],
+      [ 3, 0, 4 ],
+      [ 4, 7, 2 ],
+      [ 7, 6, 2 ],
+      [ 2, 3, 4 ],
+      [ 6, 5, 2 ],
+      [ 5, 2, 3 ]
+    ]
 
 If we wanted to use strings as markers, we could do::
 
     boundaries =
-    {
-      { 0, 1; Boundary bottom },
-      { 1, 4; Boundary outer },
-      { 3, 0; Boundary inner },
-      { 4, 7; Boundary outer },
-      { 7, 6; Boundary outer },
-      { 2, 3; Boundary inner },
-      { 6, 5; Boundary outer },
-      { 5, 2; Boundary left }
-    }
+    [
+      [ 0, 1, "Boundary bottom" ],
+      [ 1, 4, "Boundary outer" ],
+      [ 3, 0, "Boundary inner" ],
+      [ 4, 7, "Boundary outer" ],
+      [ 7, 6, "Boundary outer" ],
+      [ 2, 3, "Boundary inner" ],
+      [ 6, 5, "Boundary outer" ],
+      [ 5, 2, "Boundary left" ]
+    ]
 
 For historical reasons, most Hermes examples are based on integer markers. 
 String markers are used in tutorial examples 
@@ -131,10 +131,10 @@ Circular arcs
 Circular arcs are very easy to define. For the above example, we have::
 
     curves =
-    {
-      { 4, 7, 45 },  # circular arcs with central angle 45 degrees
-      { 7, 6, 45 }   # circular arcs with central angle 45 degrees
-    }
+    [
+      [ 4, 7, 45 ],  # circular arcs with central angle 45 degrees
+      [ 7, 6, 45 ]   # circular arcs with central angle 45 degrees
+    ]
     # EOF
 
 
