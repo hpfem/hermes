@@ -93,6 +93,11 @@ configure_file(
 include(BuildAndInstallScripts)
 include(PickRealOrCplxLibs)
 
+IF (APPLE)
+include(${CMAKE_HOME_DIRECTORY}/OSX.cmake)
+ENDIF (APPLE)
+
+
 # This is needed e.g. for eigenvalue problems.
 # FIXME: Find which projects need it and enclose their CMake scripts in 
 # if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed, 
