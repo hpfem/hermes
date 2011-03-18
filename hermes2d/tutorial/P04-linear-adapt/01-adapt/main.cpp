@@ -74,7 +74,7 @@ const double VOLTAGE = 50.0;
 
 int main(int argc, char* argv[])
 {
-  // Instantiate the class with global functions.
+  // Instantiate a class with global functions.
   Hermes2D hermes2d;
 
   // Load the mesh.

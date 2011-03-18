@@ -38,6 +38,8 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
+#define MODE_1                                    // If this is defined, mode-1 solution is calculated, otherwise 
+                                                  // mode-2 solution. See Mitchell's paper for details.
 const int P_INIT_U = 2;                           // Initial polynomial degree for u.
 const int P_INIT_V = 2;                           // Initial polynomial degree for v.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -74,8 +76,15 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
-const double lambda = 0.5444837367825;            // Mode 1.
-const double Q = 0.5430755788367;
+#ifdef MODE_1
+  const double lambda = 0.5444837367825;          // lambda for mode-1 solution.
+  const double mu = E / (2 * (1 + nu));           // mu for mode-1 solution (mu is the same as G)
+  const double Q = 0.5430755788367;               // Q for mode-1 solution.
+#else
+  const double lambda = 0.9085291898461;          // lambda for mode-2 solution.
+  const double mu = E / (2 * (1 + nu));           // mu for mode-2 solution (mu is the same as G).
+  const double Q = -0.2189232362488;              // Q for mode-2 solution.
+#endif
 
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
@@ -85,6 +94,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -128,10 +140,10 @@ int main(int argc, char* argv[])
   ScalarView s_view_u("Solution for u", new WinGeom(0, 0, 440, 350));
   s_view_u.show_mesh(false);
   OrderView  o_view_u("Mesh for u", new WinGeom(450, 0, 420, 350));
-
   ScalarView s_view_v("Solution for v", new WinGeom(0, 405, 440, 350));
   s_view_v.show_mesh(false);
   OrderView  o_view_v("Mesh for v", new WinGeom(450, 405, 420, 350));
+  ScalarView mises_view("Von Mises stress [Pa]", new WinGeom(880, 0, 440, 350));
 
   /*  
   ScalarView sview_u_exact("", new WinGeom(550, 0, 500, 400));
@@ -152,7 +164,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    Hermes::vector<Space *>* ref_spaces = hermes2d.construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -188,6 +200,8 @@ int main(int argc, char* argv[])
     o_view_u.show(&u_space);
     s_view_v.show(&v_sln); 
     o_view_v.show(&v_space);
+    VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
+    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1e5);
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 
@@ -212,17 +226,12 @@ int main(int argc, char* argv[])
     // Report results.
     info("ndof_coarse[u]: %d, ndof_fine[u]: %d",
          u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
-
     info("err_est_rel[u]: %g%%, err_exact_rel[u]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
-
     info("ndof_coarse[v]: %d, ndof_fine[v]: %d",
          v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
-
     info("err_est_rel[v]: %g%%, err_exact_rel[v]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
-
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
-
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
