@@ -10,15 +10,15 @@
 #define ERROR_FAILURE                               -1
 
 // Problem specification (core geometry, material properties, initial FE space).
-#include "neutronics_problem_def.cpp"
+#include "../neutronics_problem_def.cpp"
 
 // Common functions for neutronics problems (requires variable declarations from
 // "neutronics_problem_def.cpp").
-#include "neutronics_common.cpp"
+#include "../neutronics_common.cpp"
 
 // Weak forms for the problem (requires the rhs construction routine from 
 // "neutronics_common.cpp").
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // General input (external source problem).
 bool flag = false;											// Flag for debugging purposes.
