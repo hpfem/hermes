@@ -36,11 +36,11 @@ public:
   bool load_stream(std::istream &is, Mesh *mesh, const char *filename);
 
 protected:
-	Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);
+  Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);
   Nurbs* load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, int &p2);
 
-	void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);
-	void save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
+  void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);
+  void save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
 };
 
 #endif
