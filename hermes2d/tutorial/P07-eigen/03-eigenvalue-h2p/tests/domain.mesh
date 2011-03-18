@@ -2,22 +2,22 @@
 rhomax = 16.0 
 zmax =  16.0 # dont change zmax !!
 vertices =
-{
-  { 0 , 0},     # vertex 0
-  { rhomax, 0 },    # vertex 1
-  { rhomax, zmax },    # vertex 2
-  { 0, zmax }    # vertex3
-}
+[
+  [ 0 , 0],     # vertex 0
+  [ rhomax, 0 ],    # vertex 1
+  [ rhomax, zmax ],    # vertex 2
+  [ 0, zmax ]    # vertex3
+]
 elements =
-{
-{0,1,2,3,1}
-}
+[
+[0,1,2,3,1]
+]
 
 boundaries =
-{
-  { 0, 1, 1},
-  { 1, 2 ,2},
-  { 2, 3, 3},
-  { 3, 0, 4}
-}
+[
+  [ 0, 1, 1],
+  [ 1, 2 ,2],
+  [ 2, 3, 3],
+  [ 3, 0, 4]
+]
 
