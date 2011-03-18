@@ -97,9 +97,7 @@ public:
   ///< Returns the correct axial order for given edge.
   static int make_edge_order(int edge, int encoded_order, int mode);
   
-  /// Create globally refined space.
-  Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1) const;
-  Space* construct_refined_space(Space* coarse, int order_increase = 1) const;
+
 
   double get_l2_norm(Vector* vec) const;
 
