@@ -65,6 +65,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Boundary markers.
 const std::string OUTER_BDY = "1", STATOR_BDY = "2";
+
 // Voltage on the stator
 const double VOLTAGE = 50.0;
 

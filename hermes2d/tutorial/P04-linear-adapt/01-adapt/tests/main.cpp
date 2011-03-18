@@ -6,6 +6,7 @@ using namespace RefinementSelectors;
 
 // This test makes sure that example 10-adapt works correctly.
 
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.2;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -42,14 +43,18 @@ const std::string OUTER_BDY = "1", STATOR_BDY = "2";
 const double VOLTAGE = 50.0;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
+
+  // Instantiate the class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("motor.mesh", &mesh);
+  mloader.load("../motor.mesh", &mesh);
 
   // Initialize the weak formulation.
   WeakFormElectrostaticTutorial wf;
@@ -64,58 +69,101 @@ int main(int argc, char* argv[])
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
-  
+
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  
+
+  // Initialize views.
+  //ScalarView sview("Solution", new WinGeom(0, 0, 410, 600));
+  //sview.fix_scale_width(50);
+  //sview.show_mesh(false);
+  //OrderView  oview("Polynomial orders", new WinGeom(420, 0, 400, 600));
+
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
-  
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Adaptivity loop:
-  int as = 1; 
+  int as = 1;
   bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = construct_refined_space(&space);
+    Space* ref_space = hermes2d.construct_refined_space(&space);
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Assemble reference problem.
+    info("Solving on reference mesh.");
+    bool is_linear = true;
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. 
+
+    // Solve the linear system of the reference problem.
     // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    if(solver->solve())
+        Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    else
+        error ("Matrix solver failed.\n");
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
     // Time measurement.
     cpu_time.tick();
 
+    if (VTK_VISUALIZATION) {
+      // Output solution in VTK format.
+      Linearizer lin;
+      char* title = new char[100];
+      sprintf(title, "sln-%d.vtk", as);
+      lin.save_solution_vtk(&sln, title, "Potential", false);
+      info("Solution in VTK format saved to file %s.", title);
+
+      // Output mesh and element orders in VTK format.
+      Orderizer ord;
+      sprintf(title, "ord-%d.vtk", as);
+      ord.save_orders_vtk(&space, title);
+      info("Element orders in VTK format saved to file %s.", title);
+    }
+
+    // View the coarse mesh solution and polynomial orders.
+    //if (HERMES_VISUALIZATION) {
+    //  sview.show(&sln);
+    //  oview.show(&space);
+    //}
+
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
+    info("Calculating error estimate.");
     Adapt* adaptivity = new Adapt(&space);
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    bool solutions_for_adapt = true;
+    // In the following function, the Boolean parameter "solutions_for_adapt" determines whether
+    // the calculated errors are intended for use with adaptivity (this may not be the case, for example,
+    // when error wrt. an exact solution is calculated). The default value is solutions_for_adapt = true,
+    // The last parameter "error_flags" determine whether the total and element errors are treated as
+    // absolute or relative. Its default value is error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL.
+    // In subsequent examples and benchmarks, these two parameters will be often used with
+    // their default values, and thus they will not be present in the code explicitly.
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln, solutions_for_adapt,
+                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
       Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
@@ -129,11 +177,11 @@ int main(int argc, char* argv[])
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      
+
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
@@ -147,11 +195,9 @@ int main(int argc, char* argv[])
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
     delete dp;
-    
+
   }
   while (done == false);
-  
-  verbose("Total running time: %g s", cpu_time.accumulated());
 
   int ndof = Space::get_num_dofs(&space);
 

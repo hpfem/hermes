@@ -1,9 +1,0 @@
-rm *~ *.gp *.eps  
-tutorial-10-adapt
-gnuplot conv_dof.gp
-gnuplot conv_cpu.gp
-epstopdf conv_dof.eps
-epstopdf conv_cpu.eps
-okular conv_dof.pdf &
-okular conv_cpu.pdf &
-
