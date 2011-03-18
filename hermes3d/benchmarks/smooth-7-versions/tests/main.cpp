@@ -1,7 +1,7 @@
 #define HERMES_REPORT_WARN
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
-#include "config.h"
+#include "../config.h"
 #include <hermes3d.h>
 
 //  This test makes sure that the benchmark smooth-7-versions works correctly.
@@ -35,7 +35,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 #define ANISO_Y	   2
 #define ANISO_Z	   4
 int ANISO_TYPE;
-#include "exact_solution.cpp"
+#include "../exact_solution.cpp"
 
 // Boundary condition types. We also assign directional polynomial degrees here. 
 BCType bc_types(int marker)
@@ -125,7 +125,7 @@ int main(int argc, char **args)
   // Load the mesh.
   Mesh mesh;
   H3DReader mesh_loader;
-  mesh_loader.load("hex-0-1.mesh3d", &mesh);
+  mesh_loader.load("../hex-0-1.mesh3d", &mesh);
 
   // Assign the lowest possible directional polynomial degrees so that the problem's NDOF >= 1.
   assign_poly_degrees();

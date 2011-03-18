@@ -1,7 +1,7 @@
 #define HERMES_REPORT_WARN
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
-#include "config.h"
+#include "../config.h"
 #include <hermes3d.h>
 
 // This test makes sure that the example elasticity-cubit-hex works correctly.
@@ -59,7 +59,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
   return 0;
 }
 
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char **args) 
 {
@@ -69,7 +69,7 @@ int main(int argc, char **args)
   // Load the mesh. 
   Mesh mesh;
   ExodusIIReader mloader;
-  mloader.load("brick_with_hole_hex.e", &mesh);
+  mloader.load("../brick_with_hole_hex.e", &mesh);
 
   // Perform initial mesh refinement. 
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
