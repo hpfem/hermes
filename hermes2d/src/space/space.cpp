@@ -641,7 +641,7 @@ int Space::assign_dofs(Hermes::vector<Space*> spaces)
 }
 
 // Performs uniform global refinement of a FE space.
-Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase) const
+Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase)
 {
   _F_
   Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
@@ -663,7 +663,7 @@ Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *>
 }
 
 // Light version for a single space.
-Space* Space::construct_refined_space(Space* coarse, int order_increase) const
+Space* Space::construct_refined_space(Space* coarse, int order_increase)
 {
   _F_
   Mesh* ref_mesh = new Mesh;

@@ -296,8 +296,8 @@ public:
   virtual ESpaceType get_type() const = 0;
 
   /// Create globally refined space.
-  Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1) const;
-  Space* construct_refined_space(Space* coarse, int order_increase = 1) const;
+  static Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
+  static Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
   // updating time-dependent essential (Dirichlet) boundary conditions
   void update_essential_bc_values(Hermes::vector<Space*> spaces, double time) const;  // multiple spaces
