@@ -16,7 +16,7 @@
 #ifndef __H2D_SOLUTION_H
 #define __H2D_SOLUTION_H
 
-#include "function.h"
+#include "../function/function.h"
 #include "../space/space.h"
 #include "../mesh/refmap.h"
 #include "../../../hermes_common/matrix.h"
@@ -273,7 +273,7 @@ public:
   virtual unsigned int get_dimension();
 
   // Function representing an exact scalar-valued solution.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) { return 0;};
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
 };
 
 class HERMES_API ExactSolutionVector : public ExactSolution
@@ -286,7 +286,7 @@ public:
   virtual unsigned int get_dimension();
 
   // Function representing an exact vector-valued solution.
-  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) {return scalar2(0, 0);};
+  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) = 0;
 };
 
 

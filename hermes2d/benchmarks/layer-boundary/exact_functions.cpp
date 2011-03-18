@@ -1,8 +1,8 @@
 // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
-class MyExactFunction : public ExactSolutionScalar
+class MyExactFunction
 {
 public:
-  MyExactFunction(Mesh* mesh, double K) : ExactSolutionScalar(mesh), K(K) {};
+  MyExactFunction(double K) : K(K) {};
 
   double uhat(double x) {
     return 1. - (exp(K*x) + exp(-K*x)) / (exp(K) + exp(-K));
@@ -22,7 +22,7 @@ public:
 class MyRightHandSide : public MyExactFunction
 {
 public:
-  MyRightHandSide(Mesh* mesh, double K) : MyExactFunction(mesh, K) {};
+  MyRightHandSide(double K) : MyExactFunction(K) {};
 
   double rhs(double x, double y) {
     return -(dduhat_dxx(x)*uhat(y) + uhat(x)*dduhat_dxx(y)) + K*K*uhat(x)*uhat(y);
@@ -30,10 +30,10 @@ public:
 };
 
 // Exact solution.
-class MyExactSolution : public MyExactFunction
+class MyExactSolution : public ExactSolutionScalar, public MyExactFunction
 {
 public:
-  MyExactSolution(Mesh* mesh, double K) : MyExactFunction(mesh, K) {};
+  MyExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh), MyExactFunction(K) {};
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     dx = duhat_dx(x) * uhat(y);
