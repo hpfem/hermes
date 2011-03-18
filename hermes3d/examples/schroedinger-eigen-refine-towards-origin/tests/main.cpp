@@ -14,10 +14,9 @@ using Teuchos::RCP;
 using Teuchos::rcp;
 using Hermes::EigenSolver;
 
-
 int NUMBER_OF_EIGENVALUES = 1;
-const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
-const int REF_ORIGIN = 5;
+//const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
+//const int REF_ORIGIN = 5;
 
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
@@ -53,6 +52,20 @@ scalar  hopot(double x,double y, double z, scalar &dx, scalar &dy, scalar &dz){
 
 int main(int argc, char* argv[])
 {
+  int INIT_REF_NUM, REF_ORIGIN;
+  if (argc <2)
+    error("Not enough parameters, provide a test number!");
+  int test_type=atoi(argv[1]);
+  if ( test_type == 1){
+    INIT_REF_NUM = 0;
+    REF_ORIGIN = 5;
+  }
+  else if ( test_type == 2){
+    INIT_REF_NUM = 2;
+    REF_ORIGIN = 0;
+  }
+  else
+    error("Invalid test number"); 
   TimePeriod cpu_time;
   // Load the mesh.
   info("Loading mesh...");
@@ -118,8 +131,8 @@ int main(int argc, char* argv[])
   // Initialize matrices and matrix solver.
   RCP<CSCMatrix>  matrix_right = rcp(new CSCMatrix());
   info("Assembling RHS matrix....");
-  DiscreteProblem dp_right(&wf_right, &space, is_linear);
   cpu_time.reset();
+  DiscreteProblem dp_right(&wf_right, &space, is_linear);
   dp_right.assemble(matrix_right.get());
   cpu_time.tick();
   info("time taken to assemble RHS matrix: %g s", cpu_time.accumulated());
@@ -158,4 +171,3 @@ int main(int argc, char* argv[])
     }  
   return 0; 
 };
-
