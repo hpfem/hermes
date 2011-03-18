@@ -22,7 +22,6 @@
 #include "../mesh/refmap.h"
 #include "../quadrature/quad_all.h"
 #include "../mesh/traverse.h"
-#include "../function/norm.h"
 #include "../mesh/element_to_refine.h"
 #include "../ref_selectors/selector.h"
 #include "../views/scalar_view.h"

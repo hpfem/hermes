@@ -117,7 +117,9 @@ protected:
 
 
   /// Members.
-  
+  /// Global function class.
+  Hermes2D hermes2d;
+
   /// Matrix for the time derivative part of the equation (left-hand side).
   UMFPackMatrix matrix_left;
 

@@ -87,7 +87,7 @@ public:
   }
 
   /// Returns the polynomial order of the active shape function on given edge.
-  virtual int get_edge_fn_order(int edge) { return h2d_make_edge_order(mode, edge, shapeset->get_order(index)); }
+  virtual int get_edge_fn_order(int edge) { return Hermes2D::make_edge_order(mode, edge, shapeset->get_order(index)); }
 
   /// See Transformable::push_transform.
   virtual void push_transform(int son);

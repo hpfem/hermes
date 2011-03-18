@@ -87,7 +87,6 @@
 #include "function/solution.h"
 #include "function/filter.h"
 
-#include "function/norm.h"
 #include "graph.h"
 
 #include "views/view.h"
