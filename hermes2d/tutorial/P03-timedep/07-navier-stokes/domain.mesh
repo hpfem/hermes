@@ -7,8 +7,7 @@ R = 1             # circle radius
 A = 1/(2*sqrt(2)) # helper length
 EPS = 0.10        # vertical shift of the circle
 
-vertices =
-[
+vertices = [
   [ 0, 0 ],                 # 0
   [ S1 - A, 0 ],            # 1
   [ S1 + A, 0 ],            # 2
@@ -35,8 +34,7 @@ vertices =
   [ L, H ]                  # 23
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 7, 6, 0 ],
   [ 1, 2, 8, 7, 0 ],
   [ 2, 3, 9, 8, 0 ],
@@ -53,8 +51,7 @@ elements =
   [ 16, 17, 23, 22, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],
@@ -77,16 +74,14 @@ boundaries =
   [ 8, 7, 5]
 ]
 
-curves =
-[
+curves = [
   [ 7, 8, 90 ],   # 45 degrees circular arc
   [ 8, 14, 90 ],  # 45 degrees circular arc
   [ 14, 13, 90 ], # 45 degrees circular arc
   [ 13, 7, 90 ]   # 45 degrees circular arc
 ]
 
-refinements =
-[
+refinements = [
   [ 3, 2],
   [ 0, 0],
   [ 1, 1],

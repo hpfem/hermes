@@ -5,8 +5,7 @@ h2 = 4.5 # height of middle part of towers
 h3 = 4   # height of tip of middle part
 h4 = 7   # height of tip of towers
 
-vertices =
-{
+vertices = {
   { -w0/2 - w1, 0 },
   { -w0/2, 0 },
   { w0/2, 0 },
@@ -24,8 +23,7 @@ vertices =
   { w0/2 + w1/2, h1 + h2 + h4}
 }
 
-elements =
-{
+elements = {
   { 0, 1, 5, 4, 0 },
   { 1, 2, 6, 5, 0 },
   { 2, 3, 7, 6, 0 },
@@ -36,8 +34,7 @@ elements =
   { 11, 12, 14, 0 }
 }
 
-boundaries =
-{
+boundaries = {
   { 0, 1, 1 },
   { 1, 2, 1 },
   { 2, 3, 1 },

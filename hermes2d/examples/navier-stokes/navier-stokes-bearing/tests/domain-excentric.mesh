@@ -31,8 +31,7 @@ rr5 = ee*uc5x+sqrt(r2*r2-ee*ee*(1-uc5x*uc5x))	  # Outer radius from inner center
 rr6 = ee*uc6x+sqrt(r2*r2-ee*ee*(1-uc6x*uc6x))	  # Outer radius from inner center
 rr7 = ee*uc7x+sqrt(r2*r2-ee*ee*(1-uc7x*uc7x))	  # Outer radius from inner center
 
-vertices =
-[
+vertices = [
   [ r1*uc0x, r1*uc0y ],
   [ r1*uc1x, r1*uc1y ],
   [ r1*uc2x, r1*uc2y ],
@@ -51,8 +50,7 @@ vertices =
   [ rr7*uc7x, rr7*uc7y ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 8, 9, 1, 0 ],
   [ 1, 9, 10, 2, 0 ],
   [ 2, 10, 11, 3, 0 ],
@@ -63,8 +61,7 @@ elements =
   [ 7, 15, 8, 0, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],
@@ -83,8 +80,7 @@ boundaries =
   [ 15, 8, 2 ]
 ]
 
-curves =
-[
+curves = [
   [ 0, 1, 45 ],   
   [ 1, 2, 45 ],   
   [ 2, 3, 45 ],   

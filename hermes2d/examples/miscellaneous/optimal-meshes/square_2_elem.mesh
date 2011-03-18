@@ -1,5 +1,4 @@
-vertices =
-[
+vertices = [
   [ -1, 0 ],
   [ 0.124652795, 0 ],
   [ 1, 0 ],
@@ -8,14 +7,12 @@ vertices =
   [ -1, 1 ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 4, 5, 0 ],
   [ 1, 2, 3, 4, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 2 ],

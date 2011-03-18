@@ -1,18 +1,15 @@
-vertices =
-{
+vertices = {
   { -1, -1 },
   { 1, -1 },
   { 1, 1 },
   { -1, 1 }
 }
 
-elements =
-{
+elements = {
   { 0, 1, 2, 3, 0 }
 }
 
-boundaries =
-{
+boundaries = {
   { 0, 1, 1 },
   { 1, 2, 2 },
   { 2, 3, 1 },

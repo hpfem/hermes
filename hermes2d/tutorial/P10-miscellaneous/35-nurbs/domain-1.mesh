@@ -1,18 +1,15 @@
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ 2, 0 ],
   [ 2, 1 ],
   [ 0, 1 ]
 ]
 
-elements =
-[
+elements = [
   [ 2, 3, 0, 1, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 2, 3, 1 ],
   [ 3, 0, 1 ],
   [ 0, 1, 1 ],
@@ -21,15 +18,12 @@ boundaries =
 
 degree = 2
 num_inner_points = 1
-inner_points =
-[
+inner_points = [
   [ 1.5, 2.0, 2.0 ]
 ] 
-knots =
-[
+knots = [
   0, 0, 0, 1, 1, 1
 ]
-curves =
-[
+curves = [
   [2, 3, degree, inner_points, knots] 
 ]

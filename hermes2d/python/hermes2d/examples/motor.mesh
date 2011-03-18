@@ -1,7 +1,6 @@
 s = 1e-5
 
-vertices =
-{
+vertices = {
   { s*0, s*0 },
   { s*0.5, s*0 },
   { s*2, s*0 },
@@ -26,8 +25,7 @@ vertices =
   { s*200, s*400 }
 }
 
-elements =
-{
+elements = {
   { 0, 1, 5, 4, 1 },
   { 1, 2, 6, 5, 1 },
   { 2, 3, 7, 6, 1 },
@@ -42,8 +40,7 @@ elements =
   { 16, 17, 21, 20, 1 }
 }
 
-boundaries =
-{
+boundaries = {
   { 0, 1, 1 },
   { 4, 0, 1 },
   { 1, 2, 1 },
@@ -66,8 +63,7 @@ boundaries =
   { 21, 20, 1 }
 }
 
-refinements =
-{
+refinements = {
   { 7,  2 },
   { 5,  2 },
   { 10, 1 },

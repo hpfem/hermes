@@ -1,20 +1,17 @@
 # size of of the mesh
 a =  3.1415926535897931
-vertices =
-[
+vertices = [
   [ 0, 0 ],    # vertex 0
   [ a, 0 ],    # vertex 1
   [ a, a ],    # vertex 2
   [ 0, a ]    # vertex 3
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 2, 3, 0 ]  # quad 0
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1,1],
   [ 1, 2 ,2],
   [ 2, 3 ,3],

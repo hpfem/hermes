@@ -2,8 +2,7 @@ a = 1.5707963267948966
 x_pert = 0.3
 y_pert = 0.5
 
-vertices =
-[
+vertices = [
   [ -a, -a ],
   [  0, -a ],
   [  a, -a ],
@@ -15,16 +14,14 @@ vertices =
   [  x_pert, y_pert ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 8, 7, 0 ],
   [ 1, 2, 3, 8, 0 ],
   [ 7, 8, 5, 6, 0 ],
   [ 8, 3, 4, 5, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],

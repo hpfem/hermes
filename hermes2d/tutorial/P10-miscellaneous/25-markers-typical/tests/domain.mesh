@@ -1,5 +1,4 @@
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ 1, 0 ],
   [ 2, 0 ],
@@ -11,16 +10,14 @@ vertices =
   [ 2, 2 ]
 ]
 
-elements =
-[
+elements = [
   [ 1, 2, 5, 4, 10 ],
   [ 4, 5, 8, 7, 20 ],
   [ 3, 4, 7, 6, 30 ],
   [ 0, 1, 4, 3, 40 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 5, "Boundary marker SE" ],

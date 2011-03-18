@@ -1,6 +1,5 @@
 
-vertices =
-[
+vertices = [
   [0, 0],
   [9.4, 0],
   [14.4, 0],
@@ -35,8 +34,7 @@ vertices =
   [15.1, 35.6]
 ]
 
-elements =
-[
+elements = [
   [0, 1, 5, 4, 0],
   [1, 2, 6, 5, 0],
   [2, 3, 7, 6, 0],
@@ -56,8 +54,7 @@ sym = 1
 react = 2
 ext = 5
 
-boundaries =
-[
+boundaries = [
   [0, 1, ext],
   [1, 2, ext],
   [2, 3, ext],
@@ -84,7 +81,6 @@ boundaries =
   [4, 0, sym]
 ]
 
-refinements =
-[
+refinements = [
   [5, 1]
 ]

@@ -19,8 +19,7 @@ f = (l-t)*cos(delta)
 q = sqrt(2)/2
 
 
-vertices =
-{
+vertices = {
   { l-t, 0 },  # 0
   { l, 0 },    # 1
   { d, c },    # 2
@@ -51,8 +50,7 @@ vertices =
 
 m = 0
 
-elements =
-{
+elements = {
   { 0, 1, 3, 2, m },
   { 2, 3, 5, 4, m },
   { 6, 5, 3, m },
@@ -69,8 +67,7 @@ elements =
   { 20, 21, 8, m }
 }
 
-boundaries =
-{
+boundaries = {
   { 18, 1, left },
   { 1, 3, left },
   { 3, 6, left },
@@ -100,8 +97,7 @@ alpha = 180*alpha/pi
 beta  = 180*beta/pi
 gamma = 180*gamma/pi
 
-curves =
-{
+curves = {
   { 0, 2, alpha },
   { 2, 4, beta },
   { 4, 11, gamma },

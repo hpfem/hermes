@@ -1,5 +1,4 @@
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ 0.1, 0 ],
   [ 0.6, 0 ],
@@ -23,8 +22,7 @@ vertices =
 ]
 
 
-elements =
-[
+elements = [
   [ 0, 1, 7, 6, 0 ],
   [ 1, 2, 8, 7, 0 ],
   [ 2, 3, 9, 8, 0 ],
@@ -39,8 +37,7 @@ elements =
 ]
 
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],
@@ -64,8 +61,7 @@ boundaries =
 ]
 
 
-curves =
-[
+curves = [
   [ 11, 19, 90 ],
   [ 10, 15, 90 ],
   [ 16, 6, 90 ],

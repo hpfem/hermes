@@ -13,8 +13,7 @@ core = 2
 vacuum = 1
 sym = 2
 
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ ax, 0 ],
   [ bx, 0 ],
@@ -33,8 +32,7 @@ vertices =
   [ cx, cy ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 5, 4, reflector ],
   [ 1, 2, 6, 5, reflector ],
   [ 2, 3, 7, 6, reflector ],
@@ -46,8 +44,7 @@ elements =
   [ 10, 11, 15, 14, reflector ]
 ]
 
-boundaries =
-[
+boundaries = [
   [  0,  1, vacuum ],
   [  1,  2, vacuum ],
   [  2,  3, vacuum ],
@@ -67,8 +64,7 @@ boundaries =
   [ 9, 5, -1 ]
 ]
 
-refinements =
-[
+refinements = [
   [ 3, 1 ],
   [ 4, 1 ],
   [ 5, 1 ],
