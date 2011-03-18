@@ -36,10 +36,11 @@ const double mu = E / (2*(1 + nu));                        // Second Lame consta
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh mesh;
+  Mesh mesh, mesh1;
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
 
+  mesh1.copy(&mesh);
   // Perform uniform mesh refinement.
   mesh.refine_all_elements();
 
@@ -50,7 +51,7 @@ int main(int argc, char* argv[])
 
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, &bcs, P_INIT);
-  H1Space v_space(&mesh, &bcs, P_INIT);
+  H1Space v_space(&mesh1, &bcs, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
