@@ -20,22 +20,33 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
-const bool JFNK = false;                          // true = Jacobian-free method (for NOX),
+const bool JFNK = true;                          // true = Jacobian-free method (for NOX),
                                                   // false = Newton (for NOX).
 const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
                                                   // default ML preconditioner in case of Newton.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const char* iterative_method = "gmres";             // Name of the iterative method employed by AztecOO (ignored
+const char* iterative_method = "gmres";           // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
+// NOX parameters.
+unsigned message_type = NOX::Utils::MsgType::Error | NOX::Utils::MsgType::Warning | NOX::Utils::MsgType::OuterIteration | NOX::Utils::MsgType::InnerIteration |
+                             NOX::Utils::MsgType::Parameters | NOX::Utils::MsgType::Details;
+                                                  // Error messages, see NOX_Utils.h.
+
+double ls_tolerance = 1e-5;                       // Tolerance for linear system.
+unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
+double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
+double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+int max_iters = 100;                              // Max number of iterations.
 
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
@@ -63,7 +74,7 @@ int main(int argc, char **argv)
   
   // Initialize the weak formulation.
   WeakFormPoisson wf1;
-  
+
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
@@ -135,7 +146,8 @@ int main(int argc, char **argv)
   info("---- Assembling by DiscreteProblem, solving by NOX:");
 
   // Initialize the weak formulation for Trilinos.
-  WeakFormPoissonNox wf2;
+  bool is_matrix_free = JFNK;
+  WeakFormPoissonNox wf2(is_matrix_free);
   
   // Initialize DiscreteProblem.
   is_linear = false;
@@ -156,7 +168,8 @@ int main(int argc, char **argv)
   
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&dp2);
+  // NULL stands for preconditioning that is set later.
+  NoxSolver nox_solver(&dp2, message_type, ls_tolerance, NULL, flag_absresid, abs_resid, flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
   
   delete coeff_vec;

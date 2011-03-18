@@ -5,7 +5,8 @@
 class WeakFormPoissonNox : public WeakForm
 {
 public:
-  WeakFormPoissonNox() : WeakForm(1) {
+  WeakFormPoissonNox(bool is_matfree) : WeakForm(1) {
+    this->is_matfree = is_matfree;
     add_matrix_form(new MatrixFormVolPoissonNox(0, 0));
     add_vector_form(new VectorFormVolPoissonNox(0));
   };
