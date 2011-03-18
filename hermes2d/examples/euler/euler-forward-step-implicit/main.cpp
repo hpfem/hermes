@@ -69,6 +69,8 @@ int main(int argc, char* argv[])
   L2Space space_rho_v_x(&mesh, &bcs, P_INIT);
   L2Space space_rho_v_y(&mesh, &bcs, P_INIT);
   L2Space space_e(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
+  info("ndof: %d", ndof);
 
   // Initialize solutions, set initial conditions.
   InitialSolutionEulerDensity prev_rho(&mesh, RHO_EXT);

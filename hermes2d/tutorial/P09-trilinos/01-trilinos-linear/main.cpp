@@ -29,7 +29,7 @@ const bool PRECOND = true;                        // Preconditioning by jacobian
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const char* iterative_method = "cgstab";        // Name of the iterative method employed by AztecOO (ignored
+const char* iterative_method = "gmres";             // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
