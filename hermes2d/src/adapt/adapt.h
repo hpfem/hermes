@@ -16,7 +16,6 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "../function/norm.h"
 #include "../function/forms.h"
 #include "../space/space.h"
 #include "../../../hermes_common/vector.h"

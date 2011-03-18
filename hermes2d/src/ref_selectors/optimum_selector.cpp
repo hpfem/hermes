@@ -19,7 +19,7 @@ namespace RefinementSelectors {
     for(int i = 0; i < num_sons; i++) {
       if (i > 0)
         stream << " ";
-      stream << h2d_get_quad_order_str(cand.p[i]);
+      stream << Hermes2D::get_quad_order_str(cand.p[i]);
     }
     stream << "]";
     return stream;

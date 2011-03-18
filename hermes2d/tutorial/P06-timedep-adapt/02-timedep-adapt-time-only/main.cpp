@@ -2,7 +2,6 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "runge_kutta.h"
-#include "function/norm.h"
 
 using namespace RefinementSelectors;
 

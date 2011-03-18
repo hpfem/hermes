@@ -127,11 +127,11 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     // Measure the residual norm.
     if (residual_as_vector)
       // Calculate the l2-norm of residual vector.
-      residual_norm = get_l2_norm(&vector_right);
+      residual_norm = hermes2d.get_l2_norm(&vector_right);
     else {
       // Translate residual vector into residual functions.
       Solution::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift);
-      residual_norm = calc_norms(residuals_vector);
+      residual_norm = hermes2d.calc_norms(residuals_vector);
     }
 
     // Info for the user.

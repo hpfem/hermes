@@ -15,13 +15,13 @@
 
 #include "h2d_common.h"
 
-HERMES_API const std::string h2d_get_quad_order_str(const int quad_order) {
+const std::string Hermes2D::get_quad_order_str(const int quad_order) {
   std::stringstream str;
   str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
   return str.str();
 }
 
-HERMES_API int h2d_make_edge_order(int mode, int edge, int encoded_order)
+int Hermes2D::make_edge_order(int mode, int edge, int encoded_order)
 {
   assert(edge < 4);
 

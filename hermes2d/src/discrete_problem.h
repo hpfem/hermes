@@ -600,24 +600,6 @@ protected:
   AssemblingCaches assembling_caches;
 };
 
-/// Create globally refined space.
-HERMES_API Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
-HERMES_API Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
-HERMES_API double get_l2_norm(Vector* vec);
-
-/// New interface, still in developement
-/// HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-///		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
-///                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
-
-HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-			     Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
-                             bool residual_as_function = false,
-                             double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6);
-
-HERMES_API bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                             MatrixSolverType matrix_solver, double picard_tol,
-			     int picard_max_iter, bool verbose);
 
 #endif
