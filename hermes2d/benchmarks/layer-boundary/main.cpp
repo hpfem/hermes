@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   MyExactSolution exact_sln(&mesh, K);
 
   // Define right-hand side.
-  MyRightHandSide rhs(&mesh, K);
+  MyRightHandSide rhs(K);
 
   // Initialize the weak formulation.
   WeakFormPerturbedPoisson wf(&rhs);

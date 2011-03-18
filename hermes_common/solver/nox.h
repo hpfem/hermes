@@ -38,7 +38,33 @@ class NoxProblemInterface;
 class HERMES_API NoxSolver : public IterSolver
 {
 public:
+  // Basic constructor.
   NoxSolver(DiscreteProblemInterface *problem);
+#ifdef HAVE_NOX
+  // Enhanced constructor.
+  // For details of the parameter message_type, please see NOX_Utils.H, enum MsgType.
+  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, 
+    double ls_tolerance = 1e-8,
+    char* precond_type = "None",
+    unsigned flag_absresid = 1,
+    double abs_resid = 1.0e-6,
+    unsigned flag_relresid = 0,
+    double rel_resid = 1.0e-2,
+    int max_iters = 10,
+    double update = 1.0e-5,
+    char* ls_type = "GMRES",
+    int ls_max_iters = 800,
+    int ls_sizeof_krylov_subspace = 50,
+    NOX::Abstract::Vector::NormType norm_type = NOX::Abstract::Vector::TwoNorm,
+    NOX::StatusTest::NormF::ScaleType stype = NOX::StatusTest::NormF::Scaled,
+    double wrms_rtol = 1.0e-2,
+    double wrms_atol = 1.0e-8,
+    unsigned flag_update = 0,
+    unsigned flag_wrms = 0
+   );
+#endif
+
+
   virtual ~NoxSolver();
 
   bool set_init_sln(double *ic);
