@@ -59,17 +59,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double K = M_PI/2;
 const double ALPHA = 2.01;
 
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1, BDY_NEUMANN_LEFT = 2;
-
-// Eessential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  return fn(x, y);
-}
+const std::string BDY_DIRICHLET = "1", BDY_NEUMANN_LEFT = "2";
 
 // Weak forms.
 #include "forms.cpp"
@@ -84,28 +75,25 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-  bc_types.add_bc_neumann(BDY_NEUMANN_LEFT);
+  // Set exact solution.
+  ExactSolutionNIST10 exact(&mesh, K, ALPHA);
 
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionExact bc_dirichlet(BDY_DIRICHLET, &exact);
+  NaturalBoundaryCondition bc_natural(BDY_NEUMANN_LEFT);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+
+  // Define right-hand side.
+  RightHandSideNIST10 rhs(K, ALPHA);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
+  WeakFormPoisson wf(&rhs);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -124,13 +112,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = construct_refined_space(&space);
 
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -154,13 +144,12 @@ int main(int argc, char* argv[])
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
-    // Calculate exact error for each solution component.   
-    bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
-
+    // Calculate exact error.   
+    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("ndof_coarse: %d, ndof_fine: %d",
+      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.

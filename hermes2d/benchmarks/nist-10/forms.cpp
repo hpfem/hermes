@@ -1,22 +1,86 @@
-scalar rhs(scalar x, scalar y)
-{
-  if (x < 0) return fn(x, y)*K*K;
-  else return fn(x, y)*K*K-ALPHA*(ALPHA-1)*pow(x, ALPHA - 2.) - K*K*pow(x, ALPHA);
-}
+#include "weakform/weakform.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/boundaryconditions.h"
 
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt,Func<Scalar> *u_ext[],  Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-}
+// Exact solution.
+#include "exact_functions.cpp"
 
-scalar linear_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *v, Geom<scalar> *e, ExtData<scalar> *ext)
+class WeakFormPoisson : public WeakForm
 {
-  return int_F_v<scalar, scalar>(n, wt, rhs, v, e);
-}
+public:
+  WeakFormPoisson(RightHandSideNIST10* rhs) : WeakForm(1)
+  {
+    add_matrix_form(new MatrixFormVolPoisson(0, 0));
+    
+    add_vector_form(new VectorFormVolPoisson(0, rhs));
+  };
 
-// integration order for the linear_form
-Ord linear_form_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+private:
+  class MatrixFormVolPoisson : public WeakForm::MatrixFormVol
+  {
+  public:
+    MatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) {
+      sym = HERMES_SYM;
+    }
+
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    }
+  };
+
+  class VectorFormVolPoisson : public WeakForm::VectorFormVol
+  {
+  public:
+    VectorFormVolPoisson(int i, RightHandSideNIST10* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * rhs->value(e->x[i], e->y[i]) * v->val[i];
+      return result;
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return Ord(30);
+    }
+    
+    // Members.
+    RightHandSideNIST10* rhs;
+  };
+};
+
+class DirichletFunctionBoundaryConditionExact : public DirichletBoundaryCondition
 {
-  return Ord(30);
-}
+public:
+  DirichletFunctionBoundaryConditionExact(std::string marker, ExactSolutionNIST10* exact_solution) : 
+        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    markers.push_back(marker);
+  };
+  
+  ~DirichletFunctionBoundaryConditionExact() {};
+
+  virtual BoundaryConditionValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar function(double x, double y) const {
+    return exact_solution->fn(x, y);
+  };
+
+  ExactSolutionNIST10* exact_solution;
+};
