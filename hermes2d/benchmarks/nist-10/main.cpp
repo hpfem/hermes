@@ -59,17 +59,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double K = M_PI/2;
 const double ALPHA = 2.01;
 
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1, BDY_NEUMANN_LEFT = 2;
-
-// Eessential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  return fn(x, y);
-}
+const std::string BDY_DIRICHLET = "1", BDY_NEUMANN_LEFT = "2";
 
 // Weak forms.
 #include "forms.cpp"
@@ -84,28 +75,25 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-  bc_types.add_bc_neumann(BDY_NEUMANN_LEFT);
+  // Set exact solution.
+  ExactSolutionNIST10 exact(&mesh, K, ALPHA);
 
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  // Initialize boundary conditions
+  DirichletFunctionBoundaryConditionExact bc_dirichlet(BDY_DIRICHLET, &exact);
+  NaturalBoundaryCondition bc_natural(BDY_NEUMANN_LEFT);
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+
+  // Define right-hand side.
+  RightHandSideNIST10 rhs(K, ALPHA);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
+  WeakFormPoisson wf(&rhs);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));

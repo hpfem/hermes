@@ -20,7 +20,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOL
                                                            // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_1 = 1, BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5;
+const std::string BDY_1 = "1", BDY_2 = "2", BDY_3 = "3", BDY_4 = "4", BDY_5 = "5";
 
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).
@@ -44,26 +44,17 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_1);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_2, BDY_3, BDY_4, BDY_5));
-
-  // Enter Dirichlet boundary values;
-  BCValues bc_values;
-  bc_values.add_zero(BDY_1);
+  DirichletConstantBoundaryCondition bc_dirichlet(BDY_1, 0.0);
+  NaturalBoundaryCondition bc_natural(Hermes::vector<std::string>(BDY_2, BDY_3, BDY_4, BDY_5));
+  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
 
   // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, &bc_types, &bc_values, P_INIT);
-  H1Space v_space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space u_space(&mesh, &bcs, P_INIT);
+  H1Space v_space(&mesh, &bcs, P_INIT);
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // Note that only one symmetric part is
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms.
-  wf.add_vector_form_surf(0, callback(linear_form_surf_0), BDY_3);
-  wf.add_vector_form_surf(1, callback(linear_form_surf_1), BDY_3);
+  WeakFormLameEquations wf(mu, lambda, BDY_3, f_0, f_1);
 
   // Initialize the FE problem.
   bool is_linear = true;
