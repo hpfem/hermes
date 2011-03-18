@@ -270,8 +270,6 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
 
         if (disp)
         {
-          xdisp->force_transform(sln);
-          ydisp->force_transform(sln);
           xdisp->set_quad_order(1, H2D_FN_VAL);
           ydisp->set_quad_order(1, H2D_FN_VAL);
           scalar* dx = xdisp->get_fn_values();
@@ -348,10 +346,21 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], getval(idx[2]));
 
       // recur to sub-elements
-      sln->push_transform(0);  process_triangle(iv0, mid0, mid2,  level+1, val, phx, phy, tri_indices[1]);  sln->pop_transform();
-      sln->push_transform(1);  process_triangle(mid0, iv1, mid1,  level+1, val, phx, phy, tri_indices[2]);  sln->pop_transform();
-      sln->push_transform(2);  process_triangle(mid2, mid1, iv2,  level+1, val, phx, phy, tri_indices[3]);  sln->pop_transform();
-      sln->push_transform(3);  process_triangle(mid1, mid2, mid0, level+1, val, phx, phy, tri_indices[4]);  sln->pop_transform();
+      sln->push_transform(0);
+      process_triangle(iv0, mid0, mid2,  level+1, val, phx, phy, tri_indices[1]);
+      sln->pop_transform();
+      
+      sln->push_transform(1);
+      process_triangle(mid0, iv1, mid1,  level+1, val, phx, phy, tri_indices[2]);
+      sln->pop_transform();
+
+      sln->push_transform(2);
+      process_triangle(mid2, mid1, iv2,  level+1, val, phx, phy, tri_indices[3]);
+      sln->pop_transform();
+
+      sln->push_transform(3);
+      process_triangle(mid1, mid2, mid0, level+1, val, phx, phy, tri_indices[4]);
+      sln->pop_transform();
       return;
     }
   }
@@ -395,8 +404,6 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
 
         if (disp)
         {
-          xdisp->force_transform(sln);
-          ydisp->force_transform(sln);
           xdisp->set_quad_order(1, H2D_FN_VAL);
           ydisp->set_quad_order(1, H2D_FN_VAL);
           scalar* dx = xdisp->get_fn_values();
@@ -500,20 +507,41 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       // recur to sub-elements
       if (split == 3)
       {
-        sln->push_transform(0);  process_quad(iv0, mid0, mid4, mid3, level+1, val, phx, phy, quad_indices[1]);  sln->pop_transform();
-        sln->push_transform(1);  process_quad(mid0, iv1, mid1, mid4, level+1, val, phx, phy, quad_indices[2]);  sln->pop_transform();
-        sln->push_transform(2);  process_quad(mid4, mid1, iv2, mid2, level+1, val, phx, phy, quad_indices[3]);  sln->pop_transform();
-        sln->push_transform(3);  process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);  sln->pop_transform();
+        sln->push_transform(0);
+        process_quad(iv0, mid0, mid4, mid3, level+1, val, phx, phy, quad_indices[1]);
+        sln->pop_transform();
+
+        sln->push_transform(1);
+        process_quad(mid0, iv1, mid1, mid4, level+1, val, phx, phy, quad_indices[2]);
+        sln->pop_transform();
+
+        sln->push_transform(2);
+        process_quad(mid4, mid1, iv2, mid2, level+1, val, phx, phy, quad_indices[3]);
+        sln->pop_transform();
+
+        sln->push_transform(3);
+        process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);
+        sln->pop_transform();
       }
       else if (split == 1) // h-split
       {
-        sln->push_transform(4);  process_quad(iv0, iv1, mid1, mid3, level+1, val, phx, phy, quad_indices[5]);  sln->pop_transform();
-        sln->push_transform(5);  process_quad(mid3, mid1, iv2, iv3, level+1, val, phx, phy, quad_indices[6]);  sln->pop_transform();
+        sln->push_transform(4);
+        process_quad(iv0, iv1, mid1, mid3, level+1, val, phx, phy, quad_indices[5]);
+        sln->pop_transform();
+
+        sln->push_transform(5);
+        process_quad(mid3, mid1, iv2, iv3, level+1, val, phx, phy, quad_indices[6]);
+        sln->pop_transform();
       }
       else // v-split
       {
-        sln->push_transform(6);  process_quad(iv0, mid0, mid2, iv3, level+1, val, phx, phy, quad_indices[7]);  sln->pop_transform();
-        sln->push_transform(7);  process_quad(mid0, iv1, iv2, mid2, level+1, val, phx, phy, quad_indices[8]);  sln->pop_transform();
+        sln->push_transform(6);
+        process_quad(iv0, mid0, mid2, iv3, level+1, val, phx, phy, quad_indices[7]);
+        sln->pop_transform();
+
+        sln->push_transform(7);
+        process_quad(mid0, iv1, iv2, mid2, level+1, val, phx, phy, quad_indices[8]);
+        sln->pop_transform();
       }
       return;
     }
@@ -662,6 +690,12 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     error("Mesh is NULL in Linearizer:process_solution().");
   }
   int nn = mesh->get_num_elements();
+  if(disp) {
+    if(xdisp->get_mesh()->get_num_elements() > nn)
+      nn = xdisp->get_mesh()->get_num_elements();
+    if(ydisp->get_mesh()->get_num_elements() > nn)
+      nn = ydisp->get_mesh()->get_num_elements();
+  }
   int ev = std::max(32 * nn, 10000);  // todo: check this
   int et = std::max(64 * nn, 20000);
   int ee = std::max(24 * nn, 7500);
@@ -672,8 +706,8 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     unsigned seq1 = mesh->get_seq();
     unsigned seq2 = xdisp->get_mesh()->get_seq();
     unsigned seq3 = ydisp->get_mesh()->get_seq();
-    if (seq1 != seq2 || seq1 != seq3)
-      error("Displacements must be defined on the same mesh as the solution.");
+    //if (seq1 != seq2 || seq1 != seq3)
+     // error("Displacements must be defined on the same mesh as the solution.");
   }
 
   // reuse or allocate vertex, triangle and edge arrays
@@ -702,6 +736,12 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
   // all parent-son relations preserved; this is necessary for regularization to
   // work on irregular meshes
   nn = mesh->get_max_node_id();
+  if(disp) {
+    if(xdisp->get_mesh()->get_max_node_id() > nn)
+      nn = xdisp->get_mesh()->get_max_node_id();
+    if(ydisp->get_mesh()->get_max_node_id() > nn)
+      nn = ydisp->get_mesh()->get_max_node_id();
+  }
   int* id2id = new int[nn];
   memset(id2id, 0xff, sizeof(int) * nn);
   bool finished;
@@ -727,10 +767,35 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
   max = auto_max ? 0.0 : max_abs;
 
   // obtain the solution in vertices, estimate the maximum solution value
-  Element* e;
-  for_all_active_elements(e, mesh)
-  {
-    sln->set_active_element(e);
+  // Init multi-mesh traversal.
+  Mesh** meshes;
+  if(disp)
+    meshes = new Mesh*[3];
+  else
+    meshes = new Mesh*[1];
+
+  meshes[0] = sln->get_mesh();
+  if(disp) {
+    meshes[1] = xdisp->get_mesh();
+    meshes[2] = ydisp->get_mesh();
+  }
+  Transformable** trfs;
+  if(disp)
+    trfs = new Transformable*[3];
+  else
+    trfs = new Transformable*[1];
+  trfs[0] = sln;
+  if(disp) {
+    trfs[1] = xdisp;
+    trfs[2] = ydisp;
+  }
+  Traverse trav;
+  trav.begin(disp ? 3 : 1, meshes, trfs);
+
+  // Loop through all elements.
+  Element **e;
+  /*
+  while ((e = trav.get_next_state(NULL, NULL)) != NULL) {
     sln->set_quad_order(0, item);
     scalar* val = sln->get_values(ia, ib);
     if (val == NULL) error("Item not defined in the solution.");
@@ -738,70 +803,161 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     scalar *dx = NULL, *dy = NULL;
     if (disp)
     {
-      xdisp->set_active_element(e);
-      ydisp->set_active_element(e);
       xdisp->set_quad_order(0, H2D_FN_VAL);
       ydisp->set_quad_order(0, H2D_FN_VAL);
       dx = xdisp->get_fn_values();
       dy = ydisp->get_fn_values();
     }
 
-    for (unsigned int i = 0; i < e->nvert; i++)
+    for (unsigned int i = 0; i < e[0]->nvert; i++)
     {
+      // Multimesh.
+      if(sln->get_transform() != 0 || xdisp->get_transform() != 0 || ydisp->get_transform() != 0 ) {
+        if(sln->get_transform() != 0) {
+          uint64_t sub_idx = sln->get_transform();
+          int last_trf = sub_idx % 8;
+          if(e[0]->is_triangle()) {
+            if(last_trf != i + 1)
+              continue;
+          }
+          else
+            if(!(last_trf == i + 1 || (((last_trf == 5 || last_trf == 7) && i == 0) || 
+                                  ((last_trf == 6 || last_trf == 7) && i == 1) || 
+                                  ((last_trf == 6 || last_trf == 8) && i == 2) || 
+                                  ((last_trf == 5 || last_trf == 8) && i == 3))))
+            continue;
+          while(sub_idx >> 3 > 0)
+          if(e[0]->is_triangle()) {
+            if(last_trf != i + 1)
+              continue;
+          }
+          else
+            if(!(sub_idx % 8 == i + 1 || (((sub_idx % 8 == 5 || sub_idx % 8 == 7) && i == 0) || 
+                                    ((sub_idx % 8 == 6 || sub_idx % 8 == 7) && i == 1) || 
+                                    ((sub_idx % 8 == 6 || sub_idx % 8 == 8) && i == 2) || 
+                                    ((sub_idx % 8 == 5 || sub_idx % 8 == 8) && i == 3))))
+              continue;
+        }
+
+        if(xdisp->get_transform() != 0) {
+          uint64_t sub_idx = xdisp->get_transform();
+          int last_trf = sub_idx % 8;
+          if(e[0]->is_triangle()) {
+            if(last_trf != i + 1)
+              continue;
+          }
+          else
+            if(!(last_trf == i + 1 || (((last_trf == 5 || last_trf == 7) && i == 0) || 
+                                      ((last_trf == 6 || last_trf == 7) && i == 1) || 
+                                      ((last_trf == 6 || last_trf == 8) && i == 2) || 
+                                      ((last_trf == 5 || last_trf == 8) && i == 3))))
+              continue;
+          while(sub_idx >> 3 > 0)
+          if(e[0]->is_triangle()) {
+            if(last_trf != i + 1)
+              continue;
+          }
+          else
+            if(!(sub_idx % 8 == i + 1 || (((sub_idx % 8 == 5 || sub_idx % 8 == 7) && i == 0) || 
+                                    ((sub_idx % 8 == 6 || sub_idx % 8 == 7) && i == 1) || 
+                                    ((sub_idx % 8 == 6 || sub_idx % 8 == 8) && i == 2) || 
+                                    ((sub_idx % 8 == 5 || sub_idx % 8 == 8) && i == 3))))
+              continue;
+        }
+
+        if(ydisp->get_transform() != 0) {
+          uint64_t sub_idx = ydisp->get_transform();
+          int last_trf = sub_idx % 8;
+          if(e[0]->is_triangle()) {
+            if(last_trf != i + 1)
+              continue;
+          }
+          else
+            if(!(last_trf == i + 1 || (((last_trf == 5 || last_trf == 7) && i == 0) || 
+                                      ((last_trf == 6 || last_trf == 7) && i == 1) || 
+                                      ((last_trf == 6 || last_trf == 8) && i == 2) || 
+                                      ((last_trf == 5 || last_trf == 8) && i == 3))))
+              continue;
+          while(sub_idx >> 3 > 0)
+            if(e[0]->is_triangle()) {
+              if(last_trf != i + 1)
+                continue;
+            }
+            else
+              if(!(sub_idx % 8 == i + 1 || (((sub_idx % 8 == 4 || sub_idx % 8 == 7) && i == 0) || 
+                                      ((sub_idx % 8 == 6 || sub_idx % 8 == 7) && i == 1) || 
+                                      ((sub_idx % 8 == 6 || sub_idx % 8 == 8) && i == 2) || 
+                                      ((sub_idx % 8 == 5 || sub_idx % 8 == 8) && i == 3))))
+                continue;
+        }
+      }
+      // Multimesh.
       double f = getval(i);
       if (auto_max && finite(f) && fabs(f) > max) max = fabs(f);
-      int id = id2id[e->vn[i]->id];
+      int id = id2id[e[0]->vn[i]->id];
       verts[id][2] = f;
 
       if (disp)
       {
-        verts[id][0] = e->vn[i]->x + dmult*realpart(dx[i]);
-        verts[id][1] = e->vn[i]->y + dmult*realpart(dy[i]);
+        verts[id][0] = sln->get_refmap()->get_phys_x(0)[i] + dmult*realpart(dx[i]);
+        verts[id][1] = sln->get_refmap()->get_phys_y(0)[i] + dmult*realpart(dy[i]);
       }
     }
   }
 
-  // process all elements of the mesh
-  for_all_active_elements(e, mesh)
-  {
-    sln->set_active_element(e);
+  trav.finish();
+  trav.begin(disp ? 3 : 1, meshes, trfs);
+  */
+  // Loop through all elements.
+  while ((e = trav.get_next_state(NULL, NULL)) != NULL) {
     sln->set_quad_order(0, item);
     scalar* val = sln->get_values(ia, ib);
-    if (disp)
-    {
-      xdisp->set_active_element(e);
-      ydisp->set_active_element(e);
+    if (val == NULL) error("Item not defined in the solution.");
+
+    scalar *dx = NULL, *dy = NULL;
+    if (disp) {
+      xdisp->set_quad_order(0, H2D_FN_VAL);
+      ydisp->set_quad_order(0, H2D_FN_VAL);
+      dx = xdisp->get_fn_values();
+      dy = ydisp->get_fn_values();
     }
 
     int iv[4];
-    if(dynamic_cast<Solution*>(sln))
-      if(dynamic_cast<Solution*>(sln)->get_space_type() == HERMES_L2_SPACE)
-        for (unsigned int i = 0; i < e->nvert; i++)
-          iv[i] = get_vertex(-rand(), -rand(), verts[id2id[e->vn[i]->id]][0], verts[id2id[e->vn[i]->id]][1], getval(i));
-      else
-        for (unsigned int i = 0; i < e->nvert; i++)
-          iv[i] = get_top_vertex(id2id[e->vn[i]->id], getval(i));
-    else
-      for (unsigned int i = 0; i < e->nvert; i++)
-          iv[i] = get_top_vertex(id2id[e->vn[i]->id], getval(i));
+    for (unsigned int i = 0; i < e[0]->nvert; i++)
+    {
+      double f = getval(i);
+      if (auto_max && finite(f) && fabs(f) > max) 
+        max = fabs(f);
+
+      double x_disp = sln->get_refmap()->get_phys_x(0)[i];
+      double y_disp = sln->get_refmap()->get_phys_y(0)[i];
+
+      if (disp) {
+        x_disp += dmult*realpart(dx[i]);
+        y_disp += dmult*realpart(dy[i]);
+      }
+
+      iv[i] = get_vertex(-rand(), -rand(), x_disp, y_disp, f);
+    }
 
     // we won't bother calculating physical coordinates from the refmap if this is not a curved element
-    curved = e->is_curved();
-    cmax = e->get_diameter();
+    curved = e[0]->is_curved();
+    cmax = e[0]->get_diameter();
 
     // recur to sub-elements
-    if (e->is_triangle())
+    if (e[0]->is_triangle())
       process_triangle(iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL);
     else
       process_quad(iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL);
 
-    for (unsigned int i = 0; i < e->nvert; i++)
-      process_edge(iv[i], iv[e->next_vert(i)], e->en[i]->marker);
+    for (unsigned int i = 0; i < e[0]->nvert; i++)
+      process_edge(iv[i], iv[e[0]->next_vert(i)], e[0]->en[i]->marker);
   }
 
   delete [] id2id;
 
   // regularize the linear mesh
+  /*
   int num = nt;
   for (int i = 0; i < num; i++)
   {
@@ -815,6 +971,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
       regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
     }
   }
+  */
 
   find_min_max();
   //verbose("Linearizer: %d verts, %d tris in %0.3g sec", nv, nt, time_period.tick().last());
