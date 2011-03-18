@@ -56,6 +56,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char **argv)
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
   double time2 = cpu_time.tick().last();
 
   // Calculate errors.
-  double rel_err_1 = calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
+  double rel_err_1 = hermes2d.calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
   info("Assembly time: %g s, matrix solver time: %g s.", time1, time2);
   info("Xxact H1 error: %g%%.", rel_err_1);
 
@@ -204,7 +207,7 @@ int main(int argc, char **argv)
   //view2.show(&exact);
 
   // Calculate errors.
-  double rel_err_2 = calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
+  double rel_err_2 = hermes2d.calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
   info("Projection time: %g s, NOX assembly/solution time: %g s.", proj_time, time2);
   info("Exact H1 error: %g%%.)", rel_err_2);
  

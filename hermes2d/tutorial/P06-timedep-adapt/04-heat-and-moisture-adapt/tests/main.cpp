@@ -87,7 +87,7 @@ scalar essential_bc_values_T(double x, double y, double time)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh, T_mesh, M_mesh;
   H2DReader mloader;
-  mloader.load("domain2.mesh", &basemesh);
+  mloader.load("../domain2.mesh", &basemesh);
 
   // Create temperature and moisture meshes.
   // This also initializes the multimesh hp-FEM.

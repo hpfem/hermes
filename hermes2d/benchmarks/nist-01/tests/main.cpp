@@ -64,14 +64,17 @@ double EXACT_SOL_P = 10;                     // The exact solution is a polynomi
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);     // quadrilaterals
+  mloader.load("../square_quad.mesh", &mesh);     // quadrilaterals
   // mloader.load("square_tri.mesh", &mesh);   // triangles
 
   // Perform initial mesh refinements.
@@ -110,13 +113,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -141,8 +146,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.
-    bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

@@ -60,6 +60,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -69,8 +72,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   //mesh.refine_towards_vertex(3, 5);
 
-  
-   // Initialize the weak formulation.
+  // Initialize the weak formulation.
   WeakFormLinearLShape wf;
   
   // Set exact solution.
@@ -144,7 +146,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.
-    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
    
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

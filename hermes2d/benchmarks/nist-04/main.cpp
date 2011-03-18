@@ -65,6 +65,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -150,7 +153,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d",

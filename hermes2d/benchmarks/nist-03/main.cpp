@@ -94,6 +94,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();

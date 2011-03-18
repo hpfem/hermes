@@ -18,7 +18,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Flux definition.
-#include "fluxes.cpp"
+#include "../fluxes.cpp"
 
 // Boundary conditions.
 BCType bc_types(int marker)
@@ -34,7 +34,7 @@ Scalar g(int ess_bdy_marker, Real x, Real y)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();

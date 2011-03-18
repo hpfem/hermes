@@ -64,14 +64,14 @@ const int BDY_TOP_NE = 3;
 const int BDY_TOP_NW = 30;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Initialize boundary conditions.
   BCTypes bc_types;

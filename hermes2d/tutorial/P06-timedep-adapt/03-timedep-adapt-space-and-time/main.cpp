@@ -106,6 +106,9 @@ ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Choose a Butcher's table or define your own.
   ButcherTable* bt = new ButcherTable(butcher_table_type);
   if (bt->is_explicit()) info("Using a %d-stage explicit R-K method.", bt->get_size());
@@ -216,7 +219,7 @@ int main(int argc, char* argv[])
          current_time, time_step, bt->get_size());
       bool verbose = true;
       bool is_linear = false;
-      if (!rk_time_step(current_time, time_step, bt, sln_prev_time, &ref_sln, time_error_fn,
+      if (!RungeKutta::rk_time_step(current_time, time_step, bt, sln_prev_time, &ref_sln, time_error_fn,
                         ref_dp, matrix_solver, verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
         error("Runge-Kutta time step failed, try to decrease time step size.");
       }
@@ -235,7 +238,8 @@ int main(int argc, char* argv[])
         time_error_view.show_mesh(false);
         time_error_view.show(time_error_fn);
 
-        rel_err_time = calc_norm(time_error_fn, HERMES_H1_NORM) / calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
+        rel_err_time = hermes2d.calc_norm(time_error_fn, HERMES_H1_NORM) / 
+                       hermes2d.calc_norm(&ref_sln, HERMES_H1_NORM) * 100;
         if (ADAPTIVE_TIME_STEP_ON == false) info("rel_err_time: %g%%", rel_err_time);
       }
 
