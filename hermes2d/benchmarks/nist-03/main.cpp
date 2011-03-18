@@ -94,9 +94,6 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Hermes2D hermes2d;
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -164,7 +161,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Hermes::vector<Space *>* ref_spaces = hermes2d.construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
