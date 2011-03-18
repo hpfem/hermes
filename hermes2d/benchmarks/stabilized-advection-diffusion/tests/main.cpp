@@ -134,14 +134,14 @@ static double exact_sln(double x, double y, double& dx, double& dy)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);
+  mloader.load("../square_quad.mesh", &mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();

@@ -175,7 +175,7 @@ Real q(Real x, Real y) {
 const int BDY_DIRICHLET = 1;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Exact solutions.
 #include "exact_solution.cpp"
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh, mesh_T, mesh_phi;
   H2DReader mloader;
-  mloader.load("domain.mesh", &basemesh);
+  mloader.load("../domain.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_GLOB_REF_NUM; i++)

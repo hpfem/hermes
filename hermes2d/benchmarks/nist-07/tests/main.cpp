@@ -65,15 +65,15 @@ double ALPHA = 0.6;      // ALPHA greater than or equal to 1/2 determines the st
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);     // quadrilaterals
-  // mloader.load("square_tri.mesh", &mesh);   // triangles
+  mloader.load("../square_quad.mesh", &mesh);     // quadrilaterals
+  // mloader.load("../square_tri.mesh", &mesh);   // triangles
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();

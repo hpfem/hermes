@@ -41,7 +41,7 @@ const int BDY_SYM = 2;
 // Physical data of the problem for the 4 energy groups.
 #include "physical_parameters.cpp"
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Source function.
 void source_fn(int n, Hermes::vector<scalar*> values, scalar* out)
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("reactor.mesh", &mesh);
+  mloader.load("../reactor.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();

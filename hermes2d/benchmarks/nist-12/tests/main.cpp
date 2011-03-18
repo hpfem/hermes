@@ -77,14 +77,14 @@ const double EPSILON = 1.0 / 100.0;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("lshape.mesh", &mesh);     // quadrilaterals
+  mloader.load("../lshape.mesh", &mesh);     // quadrilaterals
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();

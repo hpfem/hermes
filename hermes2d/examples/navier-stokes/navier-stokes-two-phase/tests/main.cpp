@@ -40,7 +40,7 @@ const int P_INIT_LSET = 1;
 const int BDY_DIRICHLET = 1;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 scalar exactfn(double x, double y, scalar& dx , scalar& dy) { 
 /*  dx=-1; dy=0; //return (y<.48) ? -1 : 1;
@@ -312,13 +312,13 @@ int main(int argc, char* argv[])
   // Load the mesh file.
   Mesh mesh1;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh1);
+  mloader.load("../square_quad.mesh", &mesh1);
   mesh1.refine_all_elements();
   mesh1.refine_all_elements();
   mesh1.refine_all_elements();
 
   Mesh mesh2;
-  mloader.load("square_quad.mesh", &mesh2);
+  mloader.load("../square_quad.mesh", &mesh2);
   mesh2.refine_all_elements();
   mesh2.refine_all_elements();
 

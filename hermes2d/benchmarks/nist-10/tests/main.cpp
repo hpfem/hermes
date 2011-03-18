@@ -63,14 +63,14 @@ const double ALPHA = 2.01;
 const std::string BDY_DIRICHLET = "1", BDY_NEUMANN_LEFT = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square_quad.mesh", &mesh);
+  mloader.load("../square_quad.mesh", &mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();

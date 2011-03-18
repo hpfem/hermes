@@ -68,7 +68,7 @@ const int BDY_TOP = 3;
 const int BDY_HOLES = 4;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh xmesh, ymesh, tmesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &xmesh); // Master mesh.
+  mloader.load("../domain.mesh", &xmesh); // Master mesh.
 
   // Initialize multimesh hp-FEM.
   ymesh.copy(&xmesh);                  // Ydisp will share master mesh with xdisp.

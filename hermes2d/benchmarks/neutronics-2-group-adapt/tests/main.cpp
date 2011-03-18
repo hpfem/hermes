@@ -236,7 +236,7 @@ const double GAMMA = 8;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Weak forms:
 
-#include "forms.cpp"
+#include "../forms.cpp"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Functions for calculating errors:
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh1, mesh2;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh1);
+  mloader.load("../square.mesh", &mesh1);
 
   if (MULTIMESH) 
   {

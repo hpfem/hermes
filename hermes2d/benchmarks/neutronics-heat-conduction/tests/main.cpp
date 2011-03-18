@@ -128,7 +128,7 @@ Real q(Real x, Real y) {
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Exact solutions.
 #include "exact_solution.cpp"
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
   // Load the mesh file.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();

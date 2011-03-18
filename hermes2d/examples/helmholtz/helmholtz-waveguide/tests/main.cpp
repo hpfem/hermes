@@ -52,14 +52,14 @@ scalar essential_bc_values(double x, double y)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
     // Load the mesh.
     Mesh mesh;
     H2DReader mloader;
-    mloader.load("domain.mesh", &mesh);
+    mloader.load("../domain.mesh", &mesh);
 
     // Perform uniform mesh refinement.
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.

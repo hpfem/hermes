@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 36-markers-nontypical works correctly.
+// This test makes sure that example 30-markers-nontypical works correctly.
 
 int P_INIT = 2;                                   // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and

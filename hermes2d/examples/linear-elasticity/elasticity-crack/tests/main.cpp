@@ -56,14 +56,14 @@ const int BDY_TOP = 2;
 const int BDY_REST = 3;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
-  mloader.load("crack.mesh", &u_mesh);
+  mloader.load("../crack.mesh", &u_mesh);
 
   // Perform initial uniform mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) u_mesh.refine_all_elements();

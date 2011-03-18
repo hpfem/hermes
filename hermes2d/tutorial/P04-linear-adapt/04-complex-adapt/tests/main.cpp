@@ -69,7 +69,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain2.mesh", &mesh);
+  mloader.load("../domain2.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();

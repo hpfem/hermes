@@ -140,7 +140,7 @@ double init_cond(double x, double y, double& dx, double& dy) {
 #include "constitutive_relations.cpp"
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Initial condition.
 #include "initial_condition.cpp"

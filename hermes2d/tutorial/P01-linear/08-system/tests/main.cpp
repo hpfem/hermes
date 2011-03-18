@@ -19,14 +19,14 @@ const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constan
 const double mu = E / (2*(1 + nu));                        // Second Lame constant.
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("sample.mesh", &mesh);
+  mloader.load("../sample.mesh", &mesh);
 
   // Initialize boundary conditions.
   DirichletConstantBoundaryCondition bc_dirichlet(BDY_1, 0.0);

@@ -95,7 +95,7 @@ scalar init_cond(double x, double y, double& dx, double& dy)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[]) 
 {
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();

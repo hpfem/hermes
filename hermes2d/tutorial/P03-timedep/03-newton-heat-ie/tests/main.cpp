@@ -24,7 +24,7 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal c
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Initial condition.
 #include "initial_condition.cpp"
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();

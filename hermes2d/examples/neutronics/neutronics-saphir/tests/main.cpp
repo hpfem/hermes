@@ -74,14 +74,14 @@ double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 const int BDY_NEUMANN = 1;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial uniform mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();

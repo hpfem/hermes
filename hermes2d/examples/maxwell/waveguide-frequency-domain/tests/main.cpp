@@ -122,15 +122,15 @@ double er(int marker, Ord x, Ord y)
 {  return 1.0; }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  if (ALIGN_MESH) mloader.load("oven_load_circle.mesh", &mesh);
-  else mloader.load("oven_load_square.mesh", &mesh);
+  if (ALIGN_MESH) mloader.load("../oven_load_circle.mesh", &mesh);
+  else mloader.load("../oven_load_square.mesh", &mesh);
 
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
