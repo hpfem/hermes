@@ -294,11 +294,17 @@ public:
   /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
   /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
   virtual ESpaceType get_type() const = 0;
+
+  /// Create globally refined space.
+  Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1) const;
+  Space* construct_refined_space(Space* coarse, int order_increase = 1) const;
+
+  // updating time-dependent essential (Dirichlet) boundary conditions
+  void update_essential_bc_values(Hermes::vector<Space*> spaces, double time) const;  // multiple spaces
+  void update_essential_bc_values(Space *s, double time) const;    // one space
+
 };
 
-// updating time-dependent essential (Dirichlet) boundary conditions
-extern HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double time);  // multiple spaces
-extern HERMES_API void update_essential_bc_values(Space *s, double time);    // one space
 
 class Ord2
 {

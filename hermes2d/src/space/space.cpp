@@ -640,8 +640,42 @@ int Space::assign_dofs(Hermes::vector<Space*> spaces)
   return ndof;
 }
 
+// Performs uniform global refinement of a FE space.
+Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase) const
+{
+  _F_
+  Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
+  bool same_meshes = true;
+  unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
+  for (unsigned int i = 0; i < coarse.size(); i++) {
+    if(coarse[i]->get_mesh()->get_seq() != same_seq)
+      same_meshes = false;
+    Mesh* ref_mesh = new Mesh;
+    ref_mesh->copy(coarse[i]->get_mesh());
+    ref_mesh->refine_all_elements();
+    ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
+  }
+
+  if(same_meshes)
+    for (unsigned int i = 0; i < coarse.size(); i++)
+      ref_spaces->at(i)->get_mesh()->set_seq(same_seq);
+  return ref_spaces;
+}
+
+// Light version for a single space.
+Space* Space::construct_refined_space(Space* coarse, int order_increase) const
+{
+  _F_
+  Mesh* ref_mesh = new Mesh;
+  ref_mesh->copy(coarse->get_mesh());
+  ref_mesh->refine_all_elements();
+  Space* ref_space = coarse->dup(ref_mesh, order_increase);
+
+  return ref_space;
+}
+
 // updating time-dependent essential BC
-HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double time) {
+void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double time) const {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->get_boundary_conditions()->set_current_time(time);
@@ -649,7 +683,7 @@ HERMES_API void update_essential_bc_values(Hermes::vector<Space*> spaces, double
   }
 }
 
-HERMES_API void update_essential_bc_values(Space *s, double time) {
+void Space::update_essential_bc_values(Space *s, double time) const {
   s->get_boundary_conditions()->set_current_time(time);
   s->update_essential_bc_values();
 }
