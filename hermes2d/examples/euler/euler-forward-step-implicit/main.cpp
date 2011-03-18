@@ -120,6 +120,8 @@ int main(int argc, char* argv[])
   // Initialize NOX solver.
   NoxSolver solver(&dp);
   solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
+  solver.disable_abs_resid();
+  solver.set_conv_rel_resid(1.00);
 
   // Select preconditioner.
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
