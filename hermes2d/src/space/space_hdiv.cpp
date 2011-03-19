@@ -220,7 +220,7 @@ scalar* HdivSpace::get_bc_projection(SurfPos* surf_pos, int order)
         // Find out the (x,y) coordinate.
         double x, y;
         Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-        nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+        CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
         // Calculate.
         rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
           * bc->function(x, y) * el;
