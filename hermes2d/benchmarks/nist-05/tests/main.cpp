@@ -46,7 +46,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
                                                   // fine mesh and coarse mesh solution in percent).
@@ -70,14 +70,14 @@ const std::string BDY_BOTTOM = "4";
 
 // Weak forms.
 // In this example, some parameters are part of the weak formulation, see the file forms.cpp, class WeakFormNIST05.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("battery.mesh", &mesh);
+  mloader.load("../battery.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 3600;
+  int n_dof_allowed = 1450;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

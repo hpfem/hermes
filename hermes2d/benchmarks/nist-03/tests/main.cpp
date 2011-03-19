@@ -64,24 +64,27 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E = 1.0;                             // Young modulus.
 const double nu = 0.3;                            // Poisson ratio.
-const double k = 3.0 - 4.0 * nu;
-const double G = E / (2.0 * (1.0 + nu));
-const double lambda = 0.5444837367825;            // Mode 1.
-const double Q = 0.5430755788367;
-
-// TEMPORARY: if forms.cpp.bracket is used:
-//const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-//const double mu = E / (2*(1 + nu));
+#ifdef MODE_1
+  const double lambda = 0.5444837367825;          // lambda for mode-1 solution.
+  const double mu = E / (2 * (1 + nu));           // mu for mode-1 solution (mu is the same as G)
+  const double Q = 0.5430755788367;               // Q for mode-1 solution.
+#else
+  const double lambda = 0.9085291898461;          // lambda for mode-2 solution.
+  const double mu = E / (2 * (1 + nu));           // mu for mode-2 solution (mu is the same as G).
+  const double Q = -0.2189232362488;              // Q for mode-2 solution.
+#endif
 
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
-
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -89,7 +92,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
-  mloader.load("elasticity.mesh", &u_mesh);
+  mloader.load("../elasticity.mesh", &u_mesh);
 
   // Create initial mesh (master mesh).
   v_mesh.copy(&u_mesh);
@@ -239,7 +242,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
 
-  int n_dof_allowed = 1315;
+  int n_dof_allowed = 135;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
