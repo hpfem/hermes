@@ -64,7 +64,7 @@ double EXACT_SOL_P = 10;                     // The exact solution is a polynomi
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -81,13 +81,16 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST01 exact(&mesh, EXACT_SOL_P);
+  MyExactSolution exact(&mesh, EXACT_SOL_P);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(EXACT_SOL_P);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(EXACT_SOL_P);
+  MyWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
-  DirichletNonConstantExact bc(BDY_DIRICHLET, &exact);
+  DirichletNonConstant bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
