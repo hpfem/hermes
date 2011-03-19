@@ -23,14 +23,14 @@ public:
 
 // Dirichlet boundary conditions (uses the exact solution).
 #include "boundaryconditions/boundaryconditions.h"
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+class DirichletNonConstant : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(std::string marker, ExactSolutionLShape* exact_solution)
+  DirichletNonConstant(std::string marker, ExactSolutionLShape* exact_solution)
         : DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) {
     markers.push_back(marker);
   }
 
-  ~DirichletFunctionBoundaryCondition() { }
+  ~DirichletNonConstant() { }
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

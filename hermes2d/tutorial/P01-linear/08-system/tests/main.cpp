@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   mloader.load("../sample.mesh", &mesh);
 
   // Initialize boundary conditions.
-  DirichletConstantBoundaryCondition bc_dirichlet(BDY_1, 0.0);
+  DirichletConstant bc_dirichlet(BDY_1, 0.0);
   NaturalBoundaryCondition bc_natural(Hermes::vector<std::string>(BDY_2, BDY_3, BDY_4, BDY_5));
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
 

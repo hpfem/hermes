@@ -174,16 +174,16 @@ template<typename Real, typename Scalar>
   };
 };
 
-class DirichletFunctionBoundaryConditionExactU : public DirichletBoundaryCondition
+class DirichletNonConstantExactU : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryConditionExactU(std::string marker, ExactSolutionNIST03U* exact_solution) : 
+  DirichletNonConstantExactU(std::string marker, ExactSolutionNIST03U* exact_solution) : 
         DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~DirichletFunctionBoundaryConditionExactU() {}
+  ~DirichletNonConstantExactU() {}
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 
@@ -196,16 +196,16 @@ public:
   ExactSolutionNIST03U* exact_solution;
 };
 
-class DirichletFunctionBoundaryConditionExactV : public DirichletBoundaryCondition
+class DirichletNonConstantExactV : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryConditionExactV(std::string marker, ExactSolutionNIST03V* exact_solution) : 
+  DirichletNonConstantExactV(std::string marker, ExactSolutionNIST03V* exact_solution) : 
         DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~DirichletFunctionBoundaryConditionExactV() {}
+  ~DirichletNonConstantExactV() {}
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 

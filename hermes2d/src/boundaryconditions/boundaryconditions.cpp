@@ -43,11 +43,11 @@ scalar DirichletBoundaryCondition::function(double x, double y) const {
 };
 
 // Dirichlet BC Value
-DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
+DirichletConstant::DirichletConstant(Hermes::vector<std::string> markers, scalar value) : DirichletBoundaryCondition(markers) {
   this->value = value;
 }
 
-DirichletConstantBoundaryCondition::DirichletConstantBoundaryCondition(std::string marker, scalar value) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
+DirichletConstant::DirichletConstant(std::string marker, scalar value) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
   this->value = value;
   markers.push_back(marker);
 }

@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   WeakFormHeatTransferNewton wf;
 
   // Initialize boundary conditions.
-  DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);
+  DirichletConstant bc(BDY_DIRICHLET, 0.0);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.

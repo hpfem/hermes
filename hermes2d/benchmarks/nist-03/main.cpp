@@ -121,10 +121,10 @@ int main(int argc, char* argv[])
   WeakFormNIST03 wf(&exact_u, &exact_v);
   
   // Initialize boundary conditions
-  DirichletFunctionBoundaryConditionExactU bc_u(BDY_DIRICHLET, &exact_u);
+  DirichletNonConstantExactU bc_u(BDY_DIRICHLET, &exact_u);
   BoundaryConditions bcs_u(&bc_u);
   
-  DirichletFunctionBoundaryConditionExactV bc_v(BDY_DIRICHLET, &exact_v);
+  DirichletNonConstantExactV bc_v(BDY_DIRICHLET, &exact_v);
   BoundaryConditions bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.

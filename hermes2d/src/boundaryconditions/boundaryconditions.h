@@ -89,11 +89,11 @@ public:
 };
 
 /// Class representing Dirichlet boundary condition of the form u|_{\Gamma_Dirichlet} = u_Dirichlet given by value.
-class HERMES_API DirichletConstantBoundaryCondition : public DirichletBoundaryCondition {
+class HERMES_API DirichletConstant : public DirichletBoundaryCondition {
 public:
   /// Constructors.
-  DirichletConstantBoundaryCondition(Hermes::vector<std::string> markers, scalar value);
-  DirichletConstantBoundaryCondition(std::string marker, scalar value);
+  DirichletConstant(Hermes::vector<std::string> markers, scalar value);
+  DirichletConstant(std::string marker, scalar value);
 
   /// Function giving info that u_Dirichlet is a constant.
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_VALUE; }

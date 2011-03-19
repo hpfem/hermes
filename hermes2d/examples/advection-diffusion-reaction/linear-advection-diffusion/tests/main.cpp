@@ -66,8 +66,8 @@ int main(int argc, char* argv[])
   WeakFormLinearAdvectionDiffusion wf(STABILIZATION_ON, SHOCK_CAPTURING_ON, B1, B2, EPSILON);
   
   // Initialize boundary conditions
-  DirichletConstantBoundaryCondition bc_rest(BDY_REST, 1.0);
-  DirichletFunctionBoundaryCondition bc_layer(BDY_LAYER);
+  DirichletConstant bc_rest(BDY_REST, 1.0);
+  DirichletNonConstant bc_layer(BDY_LAYER);
 
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_rest, &bc_layer));
 

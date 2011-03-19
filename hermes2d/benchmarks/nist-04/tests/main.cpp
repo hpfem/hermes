@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   WeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
   
   // Initialize boundary conditions
-  DirichletFunctionBoundaryConditionExact bc(BDY_DIRICHLET, &exact);
+  DirichletNonConstantExact bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.

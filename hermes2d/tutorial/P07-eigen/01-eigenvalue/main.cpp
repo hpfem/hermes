@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DirichletConstantBoundaryCondition bc(BDY_ALL, 0.0);
+  DirichletConstant bc(BDY_ALL, 0.0);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.

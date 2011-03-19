@@ -82,9 +82,9 @@ int main(int argc, char* argv[])
   WeakFormFitzHughNagumo wf(&exact_u, &exact_v);
   
   // Initialize boundary conditions
-  DirichletConstantBoundaryCondition bc_u(OUTER_BDY, 0.0);
+  DirichletConstant bc_u(OUTER_BDY, 0.0);
   BoundaryConditions bcs_u(&bc_u);
-  DirichletConstantBoundaryCondition bc_v(OUTER_BDY, 0.0);
+  DirichletConstant bc_v(OUTER_BDY, 0.0);
   BoundaryConditions bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.

@@ -64,16 +64,16 @@ private:
   };
 };
 
-class DirichletFunctionBoundaryConditionExact : public DirichletBoundaryCondition
+class DirichletNonConstantExact : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryConditionExact(std::string marker, ExactSolutionNIST11* exact_solution) : 
+  DirichletNonConstantExact(std::string marker, ExactSolutionNIST11* exact_solution) : 
         DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   };
   
-  ~DirichletFunctionBoundaryConditionExact() {};
+  ~DirichletNonConstantExact() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   ExactSolutionNIST10 exact(&mesh, K, ALPHA);
 
   // Initialize boundary conditions
-  DirichletFunctionBoundaryConditionExact bc_dirichlet(BDY_DIRICHLET, &exact);
+  DirichletNonConstantExact bc_dirichlet(BDY_DIRICHLET, &exact);
   NaturalBoundaryCondition bc_natural(BDY_NEUMANN_LEFT);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
 

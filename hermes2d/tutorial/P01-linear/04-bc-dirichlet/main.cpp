@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   WeakFormPoisson wf(CONST_F);
 
   // Initialize boundary conditions
-  DirichletFunctionBoundaryCondition bc(Hermes::vector<std::string>("1", "2", "3", "4"), CONST_F);
+  DirichletNonConstant bc(Hermes::vector<std::string>("1", "2", "3", "4"), CONST_F);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.

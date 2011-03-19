@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
   WeakFormElectrostaticTutorial wf;
   
   // Initialize boundary conditions
-  DirichletConstantBoundaryCondition bc_out(OUTER_BDY, 0.0);
-  DirichletConstantBoundaryCondition bc_stator(STATOR_BDY, VOLTAGE);
+  DirichletConstant bc_out(OUTER_BDY, 0.0);
+  DirichletConstant bc_stator(STATOR_BDY, VOLTAGE);
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.

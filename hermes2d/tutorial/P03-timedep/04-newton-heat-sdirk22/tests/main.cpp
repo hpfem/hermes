@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET);
+  DirichletNonConstant bc(BDY_DIRICHLET);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.

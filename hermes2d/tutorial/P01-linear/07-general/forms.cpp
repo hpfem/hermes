@@ -2,14 +2,14 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
 
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+class DirichletNonConstant : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(std::string marker) : DirichletBoundaryCondition(Hermes::vector<std::string>())
+  DirichletNonConstant(std::string marker) : DirichletBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
 
-  ~DirichletFunctionBoundaryCondition() {};
+  ~DirichletNonConstant() {};
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

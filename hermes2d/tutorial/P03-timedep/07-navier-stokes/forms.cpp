@@ -548,17 +548,17 @@ protected:
   Solution* y_vel_previous_time;
 };
 
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition
+class DirichletNonConstant : public DirichletBoundaryCondition
 {
 public:
-  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+  DirichletNonConstant(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
         DirichletBoundaryCondition(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
-  DirichletFunctionBoundaryCondition(std::string marker, double vel_inlet, double H, double startup_time) : 
+  DirichletNonConstant(std::string marker, double vel_inlet, double H, double startup_time) : 
         DirichletBoundaryCondition(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
     markers.push_back(marker);
   };
   
-  ~DirichletFunctionBoundaryCondition() {};
+  ~DirichletNonConstant() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 

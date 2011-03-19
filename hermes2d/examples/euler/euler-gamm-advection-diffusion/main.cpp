@@ -111,15 +111,15 @@ int main(int argc, char* argv[])
   switch(SETUP_VARIANT) {
   case 0:
     bcs_concentration.add_boundary_condition(new NaturalBoundaryCondition(Hermes::vector<std::string>(BDY_OUTLET, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP)));
-    bcs_concentration.add_boundary_condition(new DirichletConstantBoundaryCondition(BDY_INLET, CONCENTRATION_EXT));
+    bcs_concentration.add_boundary_condition(new DirichletConstant(BDY_INLET, CONCENTRATION_EXT));
     break;
   case 1:
     bcs_concentration.add_boundary_condition(new NaturalBoundaryCondition(Hermes::vector<std::string>(BDY_OUTLET, BDY_INLET, BDY_SOLID_WALL_TOP)));
-    bcs_concentration.add_boundary_condition(new DirichletConstantBoundaryCondition(BDY_SOLID_WALL_BOTTOM, CONCENTRATION_EXT));
+    bcs_concentration.add_boundary_condition(new DirichletConstant(BDY_SOLID_WALL_BOTTOM, CONCENTRATION_EXT));
     break;
   case 2:
     bcs_concentration.add_boundary_condition(new NaturalBoundaryCondition(Hermes::vector<std::string>(BDY_OUTLET, BDY_SOLID_WALL_BOTTOM, BDY_INLET)));
-    bcs_concentration.add_boundary_condition(new DirichletConstantBoundaryCondition(BDY_SOLID_WALL_TOP, CONCENTRATION_EXT));
+    bcs_concentration.add_boundary_condition(new DirichletConstant(BDY_SOLID_WALL_TOP, CONCENTRATION_EXT));
     break;
   }
 

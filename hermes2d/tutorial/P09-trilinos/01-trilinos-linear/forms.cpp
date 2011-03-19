@@ -61,14 +61,14 @@ private:
   };
 };
 
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+class DirichletNonConstant : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(std::string marker, ExactSolutionPoisson* exact_solution) : DirichletBoundaryCondition(Hermes::vector<std::string>()),
+  DirichletNonConstant(std::string marker, ExactSolutionPoisson* exact_solution) : DirichletBoundaryCondition(Hermes::vector<std::string>()),
     exact_solution(exact_solution) {
       markers.push_back(marker);
   }
 
-  ~DirichletFunctionBoundaryCondition() { }
+  ~DirichletNonConstant() { }
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

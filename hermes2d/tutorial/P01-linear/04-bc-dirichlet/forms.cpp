@@ -54,13 +54,13 @@ private:
 };
 
 
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+class DirichletNonConstant : public DirichletBoundaryCondition {
 public:
-  DirichletFunctionBoundaryCondition(Hermes::vector<std::string> markers, double const_f) : DirichletBoundaryCondition(markers),
+  DirichletNonConstant(Hermes::vector<std::string> markers, double const_f) : DirichletBoundaryCondition(markers),
     const_f(const_f) {
   }
 
-  ~DirichletFunctionBoundaryCondition() { }
+  ~DirichletNonConstant() { }
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

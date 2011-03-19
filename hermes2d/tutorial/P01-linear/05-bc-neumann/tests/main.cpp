@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  DirichletConstantBoundaryCondition bc1(BDY_INNER, 0.0);
+  DirichletConstant bc1(BDY_INNER, 0.0);
   NaturalBoundaryCondition bc2(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
   BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
 

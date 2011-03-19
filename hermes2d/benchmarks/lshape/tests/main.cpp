@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
   ExactSolutionLShape exact(&mesh);
 
   // Initialize boundary conditions
-  DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET, &exact);
+  DirichletNonConstant bc(BDY_DIRICHLET, &exact);
 
   BoundaryConditions bcs(&bc);
 
