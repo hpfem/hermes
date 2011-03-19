@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
      
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
       else {
         info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
         OGProjection::project_global(ref_space, &ref_sln, coeff_vec, matrix_solver);
-        delete ref_sln.get_mesh(); // This deletes the mesh allocated by previous construct_refined_space.
+        delete ref_sln.get_mesh(); // This deletes the mesh allocated by previous Space::construct_refined_space.
       }
 
       // Initialize the FE problem.

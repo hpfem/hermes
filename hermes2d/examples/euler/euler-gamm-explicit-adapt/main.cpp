@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
       // Construct globally refined reference mesh and setup reference space.
       // Global polynomial order increase = 0;
       int order_increase = 0;
-      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+      Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
 
       // Project the previous time level solution onto the new fine mesh.

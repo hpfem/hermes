@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     double err_est;
     do {
       // Construct globally refined reference mesh and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
 
       // Initialize discrete problem on reference mesh.
       DiscreteProblem* ref_dp = new DiscreteProblem(&wf, ref_space);

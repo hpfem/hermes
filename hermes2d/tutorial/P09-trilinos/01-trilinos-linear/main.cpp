@@ -37,8 +37,7 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
 // NOX parameters.
-unsigned message_type = NOX::Utils::MsgType::Error | NOX::Utils::MsgType::Warning | NOX::Utils::MsgType::OuterIteration | NOX::Utils::MsgType::InnerIteration |
-                             NOX::Utils::MsgType::Parameters | NOX::Utils::MsgType::Details;
+unsigned message_type = NOX::Utils::MsgType::Error | NOX::Utils::MsgType::Warning | NOX::Utils::MsgType::OuterIteration | NOX::Utils::MsgType::InnerIteration | NOX::Utils::MsgType::Parameters | NOX::Utils::MsgType::Details;
                                                   // Error messages, see NOX_Utils.h.
 
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
@@ -169,7 +168,8 @@ int main(int argc, char **argv)
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
   // NULL stands for preconditioning that is set later.
-  NoxSolver nox_solver(&dp2, message_type, ls_tolerance, NULL, flag_absresid, abs_resid, flag_relresid, rel_resid, max_iters);
+  NoxSolver nox_solver(&dp2, message_type, ls_tolerance, NULL, flag_absresid, abs_resid, 
+                       flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
   
   delete coeff_vec;

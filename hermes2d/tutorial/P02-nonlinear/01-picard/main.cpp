@@ -35,6 +35,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -60,8 +63,8 @@ int main(int argc, char* argv[])
 
   // Perform the Picard's iteration.
   bool verbose = true;
-  solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
-	       PICARD_MAX_ITER, verbose);
+  hermes2d.solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+	                PICARD_MAX_ITER, verbose);
 
   // Visualise the solution and mesh.
   ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));

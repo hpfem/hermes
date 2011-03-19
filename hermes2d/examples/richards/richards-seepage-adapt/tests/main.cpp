@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
   do
   {
     // Setup space for the reference solution.
-    Space *rspace = construct_refined_space(&init_space);
+    Space *rspace = Space::construct_refined_space(&init_space);
 
     // Assign the function f() to the fine mesh.
     ref_sln.set_exact(rspace->get_mesh(), init_cond);
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
      

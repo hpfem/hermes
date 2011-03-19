@@ -53,6 +53,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[]) 
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -116,7 +119,7 @@ int main(int argc, char* argv[])
     info("SDIRK-22 time step (t = %g, tau = %g)", current_time, time_step);
     info("---- Stage I:");
     bool verbose = true;
-    if (!solve_newton(coeff_vec1, &dp1, solver, matrix,
+    if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix,
 		      rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
       error("Newton's iteration did not converge."); 
 
@@ -126,7 +129,7 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration for the final solution.
     info("---- Stage II:");
 
-    if (!solve_newton(coeff_vec2, &dp2, solver, matrix,
+    if (!hermes2d.solve_newton(coeff_vec2, &dp2, solver, matrix,
 	       	      rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
       error("Newton's iteration did not converge."); 
 

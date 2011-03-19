@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
       ndof = Space::get_num_dofs(ref_space);
 
       // Next we need to calculate the reference solution.

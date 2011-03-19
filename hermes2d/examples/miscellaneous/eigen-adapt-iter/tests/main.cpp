@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    ref_space = construct_refined_space(&space);
+    ref_space = Space::construct_refined_space(&space);
     int ndof_ref = Space::get_num_dofs(ref_space);
     info("ndof: %d, ndof_ref: %d", ndof, ndof_ref);
 

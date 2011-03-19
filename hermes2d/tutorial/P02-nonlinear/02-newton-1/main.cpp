@@ -37,6 +37,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -79,7 +82,7 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration.
   bool verbose = true;
-  if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.

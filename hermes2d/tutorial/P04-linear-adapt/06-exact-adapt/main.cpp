@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = construct_refined_space(&space);
+    Space* ref_space = Space::construct_refined_space(&space);
 
     // Assign the function f() to the fine mesh.
     info("Assigning f() to the reference mesh.");

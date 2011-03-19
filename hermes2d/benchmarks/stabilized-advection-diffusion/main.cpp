@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
       actual_sln_space = space;
     else
       // Construct globally refined reference mesh and setup reference space.
-      actual_sln_space = construct_refined_space(space, ORDER_INCREASE);
+      actual_sln_space = Space::construct_refined_space(space, ORDER_INCREASE);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");

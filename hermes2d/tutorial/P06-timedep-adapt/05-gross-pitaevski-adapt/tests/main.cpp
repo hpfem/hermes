@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
       DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);

@@ -142,7 +142,7 @@ const std::string BDY_DIRICHLET = "1";
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = construct_refined_space(&space);
+    Space* ref_space = Space::construct_refined_space(&space);
 
     // Initialize discrete problem on the reference mesh.
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);

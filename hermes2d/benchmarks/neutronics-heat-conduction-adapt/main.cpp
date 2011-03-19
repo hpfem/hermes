@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(spaces, ORDER_INCREASE);
+      Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(spaces, ORDER_INCREASE);
 
       // Newton's loop on the refined meshes.
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];

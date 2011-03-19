@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = construct_refined_space(&space);
+    Space* ref_space = Space::construct_refined_space(&space);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");

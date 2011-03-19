@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh
       // and setup reference space.
-      Hermes::vector<Space *>* ref_spaces = construct_refined_spaces(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+      Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
 

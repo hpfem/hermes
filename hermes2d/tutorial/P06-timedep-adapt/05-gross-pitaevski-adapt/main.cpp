@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
       info("Time step %d, adaptivity step %d:", ts, as);
 
       // Construct globally refined reference mesh and setup reference space.
-      Space* ref_space = construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
 
       // Initialize matrix solver.
       SparseMatrix* matrix = create_matrix(matrix_solver);

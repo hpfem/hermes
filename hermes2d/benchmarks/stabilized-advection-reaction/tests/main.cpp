@@ -377,7 +377,7 @@ int main(int argc, char* args[])
       actual_sln_space = space;
     else
       // Construct globally refined reference mesh and setup reference space.
-      actual_sln_space = construct_refined_space(space, ORDER_INCREASE);
+      actual_sln_space = Space::construct_refined_space(space, ORDER_INCREASE);
     
     // Initialize the FE problem.
     bool is_linear = true;
