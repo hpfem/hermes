@@ -242,7 +242,7 @@ void SuperLUMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
 #else
       a=cplx(Ax[i].r,Ax[i].i);
 #endif
-      vector_out[Ap[i]]+=vector_in[c]*a;
+      vector_out[c]+=vector_in[Ai[i]]*a;
     }
   }
 }

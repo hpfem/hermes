@@ -283,7 +283,7 @@ void MumpsMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
 #else
     a=cplx(Ax[i].r,Ax[i].i);
 #endif
-    vector_out[irn[i]]+=vector_in[jcn[i]]*a;
+    vector_out[jcn[i]]+=vector_in[irn[i]]*a;
   }
 }
   // Multiplies matrix with a scalar.

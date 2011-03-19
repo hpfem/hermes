@@ -243,9 +243,11 @@ void PetscMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, 
 }
 // Duplicates a matrix (including allocation).
 PetscMatrix* PetscMatrix::duplicate(){
-    PetscMatrix*ptscmatrix=new PetscMatrix();        
-    MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
-    return ptscmatrix;
+  PetscMatrix*ptscmatrix=new PetscMatrix();        
+  MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
+  ptscmatrix->size=size;
+  ptscmatrix->nnz=nnz;
+  return ptscmatrix;
 };
 
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
