@@ -271,6 +271,85 @@ double MumpsMatrix::get_fill_in() const
   return Ap[size] / (double) (size * size);
 }
 
+  // Applies the matrix to vector_in and saves result to vector_out.
+void MumpsMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+  for(unsigned int i=0;i<size;i++){
+    vector_out[i]=0;
+  }
+  scalar a;
+  for (unsigned int i=0;i<nnz;i++){
+#ifndef HERMES_COMMON_COMPLEX
+    a=Ax[i];
+#else
+    a=cplx(Ax[i].r,Ax[i].i);
+#endif
+    vector_out[irn[i]]+=vector_in[jcn[i]]*a;
+  }
+}
+  // Multiplies matrix with a scalar.
+void MumpsMatrix::multiply_with_scalar(scalar value){
+  int n=nnz;
+  scalar a;
+  for(int i=0;i<n;i++){
+#ifndef HERMES_COMMON_COMPLEX
+    Ax[i]=Ax[i]*value;
+#else
+    a=cplx(Ax[i].r,Ax[i].i);
+    a=a*value;
+    Ax[i].r=a.real();
+    Ax[i].i=a.imag();
+#endif
+  }
+}
+  // Creates matrix using size, nnz, and the three arrays.
+void MumpsMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  this->nnz = nnz;
+  this->size = size;
+  this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
+  this->Ai = new int[nnz];    assert(this->Ai != NULL);
+  this->Ax = new mumps_scalar[nnz]; assert(this->Ax != NULL);
+  irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
+  jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
+
+  for (unsigned int i = 0; i < size; i++){
+    this->Ap[i] = ap[i];
+    for (int j=ap[i];j<ap[i+1];j++) jcn[j]=i;
+  }
+  this->Ap[size]=ap[size];
+  for (unsigned int i = 0; i < nnz; i++) {
+#ifndef HERMES_COMMON_COMPLEX
+    this->Ax[i] = ax[i]; 
+#else
+    this->Ax[i].r=ax[i].real();
+    this->Ax[i].i=ax[i].imag();
+#endif
+    this->Ai[i] = ai[i];
+    irn[i]=ai[i];
+  } 
+}
+  // Duplicates a matrix (including allocation).
+MumpsMatrix* MumpsMatrix::duplicate(){
+  MumpsMatrix * nmat=new MumpsMatrix();
+
+  nmat->nnz = nnz;
+  nmat->size = size;
+  nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
+  nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
+  nmat->Ax = new mumps_scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
+  nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
+  for (unsigned int i = 0;i<nnz;i++){
+    nmat->Ai[i]=Ai[i];
+    nmat->Ax[i]=Ax[i];
+    nmat->irn[i]=irn[i];
+    nmat->jcn[i]=jcn[i];
+  }
+  return nmat;
+  for (unsigned int i = 0;i<size+1;i++){
+    nmat->Ap[i]=Ap[i];
+  }
+}
+
 // MumpsVector /////////////////////////////////////////////////////////////////////////////////////
 
 MumpsVector::MumpsVector()
