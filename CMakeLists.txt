@@ -293,14 +293,12 @@ endif(WITH_PYTHON)
 # Solvers (TODO: This could maybe go into hermes_common/solver/CMakeLists.txt).
 if(MSVC)
 	if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-	    if (NOT CLAPACK_FOUND)
-    		find_package(CLAPACK REQUIRED)
-	    	include_directories(${CLAPACK_INCLUDE_DIRS})
-	    endif (NOT CLAPACK_FOUND)
-	 
-	    # If the library was found, prevent searching for it again in subsequent 
-	    # invocations of cmake .
-	    set(CLAPACK_FOUND    YES CACHE STRING "Lapack/BLAS library.")   
+	    # The search for CLAPACK and associated libraries will be performed 
+	    # every time the project is configured in MSVC (TODO: Find out if 
+	    # CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
+	    # could be cached to improve subsequent configuration performance).
+	    find_package(CLAPACK REQUIRED)
+	    include_directories(${CLAPACK_INCLUDE_DIRS})
 	endif(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 else(MSVC)
   # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
@@ -309,13 +307,16 @@ else(MSVC)
     if (NOT LAPACK_FOUND)
         enable_language(Fortran)
         find_package(LAPACK REQUIRED)
+            
+        # If no error occured, LAPACK library has been found. Save the path to
+        # it to cache, so that it will not be searched for during next 'cmake .'
+        set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES} 
+                CACHE STRING  "Path to LAPACK/BLAS libraries.")
+        set(LAPACK_FOUND      YES 
+                CACHE STRING  "Have LAPACK/BLAS libraries been found?")
     endif (NOT LAPACK_FOUND)
     
-    add_definitions(-DWITH_BLAS)
-    
-    # If the library was found, prevent searching for it again in subsequent 
-	# invocations of cmake .
-	set(LAPACK_FOUND    YES CACHE STRING "Lapack/BLAS library.")
+    add_definitions(-DWITH_BLAS)	
   endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
 endif(MSVC)  
 
@@ -383,6 +384,11 @@ if(WITH_MPI)
   endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
   include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
+
+# Use modified search procedures for some libraries on MacOS.
+IF (APPLE)
+    include(${CMAKE_HOME_DIRECTORY}/OSX.cmake)
+ENDIF (APPLE)
 
 
 #------------------------------------------------------------------------------
