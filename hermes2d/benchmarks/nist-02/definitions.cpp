@@ -1,16 +1,17 @@
-class ExactSolutionNIST02 : public ExactSolutionScalar
+// Exact solution.
+class MyExactSolution : public ExactSolutionScalar
 {
 public:
-  ExactSolutionNIST02(Mesh* mesh, int problem_parameter) : ExactSolutionScalar(mesh), problem_parameter(problem_parameter) {
-    if (problem_parameter == 0) {
+  MyExactSolution(Mesh* mesh, int param) : ExactSolutionScalar(mesh), param(param) {
+    if (param == 0) {
       OMEGA = ((5.0 * M_PI)/ 4.0);
       ALPHA = (M_PI/ OMEGA);
      }
-    else if (problem_parameter == 1) {
+    else if (param == 1) {
       OMEGA = ((3.0 * M_PI)/ 2.0);
       ALPHA = (M_PI/ OMEGA);
     }
-    else if (problem_parameter == 2) {
+    else if (param == 2) {
       OMEGA = ((7.0 * M_PI)/ 4.0);
       ALPHA = (M_PI/ OMEGA);
     }
@@ -27,7 +28,7 @@ public:
     return theta;
   };
 
-  double fn(double x, double y)
+  double value(double x, double y)
   {
     return (pow(sqrt(x*x + y*y), ALPHA) * sin(ALPHA * get_angle(y, x)));
   };
@@ -42,11 +43,33 @@ public:
     dx = (((ALPHA* x* sin(ALPHA * get_angle(y,x)) *b)/a) - ((ALPHA *y *cos(ALPHA * get_angle(y, x)) * c)/(pow(x, 2.0) *d)));
     dy = (((ALPHA* cos(ALPHA* get_angle(y, x)) *c)/(x * d)) + ((ALPHA* y* sin(ALPHA* get_angle(y, x)) *b)/a));
 
-    return fn(x, y);
+    return value(x, y);
   };
 
   // Members.
-  int problem_parameter;
+  int param;
   double OMEGA;
   double ALPHA;
 };
+
+// Dirichlet boundary conditions (uses the exact solution).
+#include "boundaryconditions/boundaryconditions.h"
+class DirichletNonConstant : public DirichletBoundaryCondition {
+public:
+  DirichletNonConstant(std::string marker, MyExactSolution* exact_solution)
+        : DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) {
+    markers.push_back(marker);
+  }
+
+  ~DirichletNonConstant() { }
+
+  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+
+  scalar function(double x, double y) const {
+    return exact_solution->value(x, y);
+  }
+
+  // Member.
+  MyExactSolution* exact_solution;
+};
+

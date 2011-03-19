@@ -5,7 +5,7 @@
 using namespace RefinementSelectors;
 
 //  This is the second in the series of NIST benchmarks with known exact solutions. This benchmark
-//  has four different versions, use the global variable PROB_PARAM below to switch among them.
+//  has four different versions, use the global variable PARAM below to switch among them.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
@@ -21,7 +21,7 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-int PROB_PARAM = 1;    // PROB_PARAM determines which parameter values you wish to use for the strength of the singularity in
+int PARAM = 1;         // PARAM determines which parameter values you wish to use for the strength of the singularity in
                        // the current (nist-2)  Reentrant Corner problem.
                        //       strength      OMEGA             ALPHA
                        // 0:    1             5*Pi/4            4/5
@@ -65,7 +65,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "weakform/sample_weak_forms.h"
+
+// Exact solution, boundary conditions.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -76,25 +79,25 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H2DReader mloader;
 
-  switch (PROB_PARAM) {
+  switch (PARAM) {
     case 0: mloader.load("geom0.mesh", &mesh); break;
     case 1: mloader.load("geom1.mesh", &mesh); break;
     case 2: mloader.load("geom2.mesh", &mesh); break;
     case 3: mloader.load("geom3.mesh", &mesh); break;
-    default: error("Admissible values of PROB_PARAM are 0, 1, 2, 3.");
+    default: error("Admissible values of PARAM are 0, 1, 2, 3.");
   }
 
   // Perform initial mesh refinements.
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST02 exact(&mesh, PROB_PARAM);
+  MyExactSolution exact(&mesh, PARAM);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf;
+  WeakFormLaplace wf;
   
   // Initialize boundary conditions
-  DirichletNonConstantExact bc(BDY_DIRICHLET, &exact);
+  DirichletNonConstant bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
