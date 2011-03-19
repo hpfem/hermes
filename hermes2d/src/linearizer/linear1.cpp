@@ -690,12 +690,14 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     error("Mesh is NULL in Linearizer:process_solution().");
   }
   int nn = mesh->get_num_elements();
+  /*
   if(disp) {
     if(xdisp->get_mesh()->get_num_elements() > nn)
       nn = xdisp->get_mesh()->get_num_elements();
     if(ydisp->get_mesh()->get_num_elements() > nn)
       nn = ydisp->get_mesh()->get_num_elements();
   }
+  */
   int ev = std::max(32 * nn, 10000);  // todo: check this
   int et = std::max(64 * nn, 20000);
   int ee = std::max(24 * nn, 7500);
@@ -706,8 +708,6 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     unsigned seq1 = mesh->get_seq();
     unsigned seq2 = xdisp->get_mesh()->get_seq();
     unsigned seq3 = ydisp->get_mesh()->get_seq();
-    //if (seq1 != seq2 || seq1 != seq3)
-     // error("Displacements must be defined on the same mesh as the solution.");
   }
 
   // reuse or allocate vertex, triangle and edge arrays
@@ -736,6 +736,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
   // all parent-son relations preserved; this is necessary for regularization to
   // work on irregular meshes
   nn = mesh->get_max_node_id();
+  /*
   if(disp) {
     if(xdisp->get_mesh()->get_max_node_id() > nn)
       nn = xdisp->get_mesh()->get_max_node_id();
@@ -762,6 +763,7 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
     }
   }
   while (!finished);
+  */
 
   auto_max = (max_abs < 0.0);
   max = auto_max ? 0.0 : max_abs;
@@ -840,8 +842,9 @@ void Linearizer::process_solution(MeshFunction* sln, int item, double eps, doubl
       process_edge(iv[i], iv[e[0]->next_vert(i)], e[0]->en[i]->marker);
   }
 
+  /*
   delete [] id2id;
-
+  */
   // regularize the linear mesh
   /*
   int num = nt;

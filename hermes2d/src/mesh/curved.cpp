@@ -65,7 +65,6 @@ double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
   }
 }
 
-
 // nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
 void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y)
 {
@@ -99,17 +98,11 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
   }
 }
 
-
-
 //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
 const double2 CurvMap::ref_vert[2][4] = {
     { { -1.0, -1.0 }, { 1.0, -1.0 }, { -1.0, 1.0 }, {  0.0, 0.0 } },
     { { -1.0, -1.0 }, { 1.0, -1.0 }, {  1.0, 1.0 }, { -1.0, 1.0 } }
   };
-
-
-
-
 
 // subtraction of straight edge and nurbs curve
 void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y)
@@ -126,7 +119,6 @@ void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double&
   y *= k;
 }
 
-
 // calculation of nonpolynomial reference mapping on curved element
 void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y)
 {
@@ -138,8 +130,8 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
   {
     int va = j;
     int vb = e->next_vert(j);
-    double l_a;
-    double l_b;
+    double l_a = 0;
+    double l_b = 0;
     switch(va) {
     case 0:
       l_a = lambda_0(xi_1, xi_2);
@@ -234,8 +226,8 @@ void CurvMap::precalculate_cholesky_projection_matrix_edge()
       double val = 0.0;
       for (int k = 0; k < quad1d.get_num_points(o); k++)
       {
-        double fi;
-        double fj;
+        double fi = 0;
+        double fj = 0;
         double x = pt[k][0];
         switch(i+2) {
         case 0:
@@ -462,7 +454,7 @@ void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int orde
       for (j = 0; j < np; j++)
       {
         double t = pt[j][0];
-        double fi;
+        double fi = 0;
         switch(i+2) {
         case 0:
           fi = lob0(t);
