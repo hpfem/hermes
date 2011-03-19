@@ -58,8 +58,8 @@ const double K = 1e2;
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Weak forms.
-#include "forms.cpp"
+// Right-hand side, exact solutionm weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   MyRightHandSide rhs(K);
 
   // Initialize the weak formulation.
-  WeakFormPerturbedPoisson wf(&rhs);
+  MyWeakFormPerturbedPoisson wf(&rhs);
   
   // Initialize boundary conditions.
   DirichletConstantBoundaryCondition bc(BDY_DIRICHLET, 0.0);

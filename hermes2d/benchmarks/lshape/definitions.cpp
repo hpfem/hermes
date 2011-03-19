@@ -10,7 +10,7 @@ public:
     return pow(r, 2.0/3.0) * sin(2.0*a/3.0 + M_PI/3);
   }
 
-  // Function representing an exact one-dimension valued solution.
+  // Function representing an exact scalar-valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     double t1 = 2.0/3.0*atan2(x, y) + M_PI/3;
     double t2 = pow(x*x + y*y, 1.0/3.0);
@@ -21,7 +21,7 @@ public:
   };
 };
 
-// Dirichlet boundary conditions (use the exact solution).
+// Dirichlet boundary conditions (uses the exact solution).
 #include "boundaryconditions/boundaryconditions.h"
 class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
 public:

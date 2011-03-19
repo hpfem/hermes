@@ -18,7 +18,12 @@
 
 #include "../integrals/integrals_h1.h"
 
-/* Laplace equation -Laplace u = 0 */
+/* Laplace equation -Laplace u = 0 
+   with Dirichlet boundary conditions.
+
+   Neumann and Newton boundary conditions can be enabled by 
+   creating a descendant and adding surface forms to it. 
+*/
 
 class WeakFormLaplace : public WeakForm
 {
@@ -52,5 +57,7 @@ private:
     }
   };
 };
+
+
 
 #endif

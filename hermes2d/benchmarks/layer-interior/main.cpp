@@ -58,8 +58,8 @@ double SLOPE = 60;                                // Slope of the layer.
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Weak forms.
-#include "forms.cpp"
+// Right-hand side, exact solution, weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -76,10 +76,13 @@ int main(int argc, char* argv[])
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Set exact solution.
-  ExactSolutionPoisson exact(&mesh, SLOPE);
+  MyExactSolution exact(&mesh, SLOPE);
   
+  // Define right-hand side.
+  MyRightHandSide rhs(SLOPE);
+
   // Initialize the weak formulation.
-  WeakFormPoisson wf(SLOPE);
+  MyWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET, &exact);

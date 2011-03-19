@@ -58,7 +58,7 @@ const std::string BDY_DIRICHLET = "1";
 // Weak forms.
 #include "weakform/sample_weak_forms.h"
 
-// Exact solution and boundary conditions.
+// Exact solution, boundary conditions.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
