@@ -62,7 +62,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "weakform/sample_weak_forms.h"
+
+// Exact solution and boundary conditions.
+#include "../extras.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -78,7 +81,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  WeakFormLinearLShape wf;
+  WeakFormLaplace wf;
   
   // Set exact solution.
   ExactSolutionLShape exact(&mesh);
