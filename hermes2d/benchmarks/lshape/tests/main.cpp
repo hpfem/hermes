@@ -80,11 +80,11 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   mesh.refine_all_elements();
 
+  // Set exact solution.
+  MyExactSolution exact(&mesh);
+
   // Initialize the weak formulation.
   WeakFormLaplace wf;
-  
-  // Set exact solution.
-  ExactSolutionLShape exact(&mesh);
 
   // Initialize boundary conditions
   DirichletNonConstant bc(BDY_DIRICHLET, &exact);
@@ -114,13 +114,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.

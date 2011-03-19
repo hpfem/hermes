@@ -1,8 +1,8 @@
 // Exact solution to the L-Shape problem.
-class ExactSolutionLShape : public ExactSolutionScalar
+class MyExactSolution : public ExactSolutionScalar
 {
 public:
-  ExactSolutionLShape(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+  MyExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   static double fn(double x, double y) {
     double r = sqrt(x*x + y*y);
@@ -25,7 +25,7 @@ public:
 #include "boundaryconditions/boundaryconditions.h"
 class DirichletNonConstant : public DirichletBoundaryCondition {
 public:
-  DirichletNonConstant(std::string marker, ExactSolutionLShape* exact_solution)
+  DirichletNonConstant(std::string marker, MyExactSolution* exact_solution)
         : DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) {
     markers.push_back(marker);
   }
@@ -39,6 +39,6 @@ public:
   }
 
   // Member.
-  ExactSolutionLShape* exact_solution;
+  MyExactSolution* exact_solution;
 };
 
