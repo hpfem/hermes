@@ -58,14 +58,14 @@ const double K = 100;
 const std::string OUTER_BDY = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &u_mesh);
+  mloader.load("../square.mesh", &u_mesh);
   if (MULTI == false) u_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
 
   // Create initial mesh (master mesh).

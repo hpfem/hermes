@@ -50,7 +50,7 @@ const double kappa  = 1.0;
 const double lambda = 1.0;
 
 // Bessel functions, exact solution, and weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Boundary markers.
 const int BDY_1 = 1, BDY_6 = 6;  // perfect conductor
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("lshape3q.mesh", &mesh);    // quadrilaterals
-  //mloader.load("lshape3t.mesh", &mesh);  // triangles
+  mloader.load("../lshape3q.mesh", &mesh);    // quadrilaterals
+  //mloader.load("../lshape3t.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinemets.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();

@@ -2,21 +2,18 @@
 a = 0.5 * 3.141592653589793
 b = 0.5 * 3.141592653589793
 
-vertices =
-[
+vertices = [
   [ -a, -b ],
   [ a, -b ],
   [ a, b ],
   [ -a, b ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 2, 3, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],

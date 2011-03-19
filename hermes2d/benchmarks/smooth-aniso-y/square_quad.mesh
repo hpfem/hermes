@@ -1,18 +1,15 @@
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ pi, 0 ],
   [ pi, pi ],
   [ 0, pi ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 2, 3, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 2 ],
   [ 2, 3, 1 ],

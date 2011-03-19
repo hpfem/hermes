@@ -58,14 +58,14 @@ const int WATER_2 = 2;
 const int IRON = 3;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   ExodusIIReader mloader;
-  if (!mloader.load("iron-water.e", &mesh)) error("ExodusII mesh load failed.");
+  if (!mloader.load("../iron-water.e", &mesh)) error("ExodusII mesh load failed.");
 
   // Perform initial uniform mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();

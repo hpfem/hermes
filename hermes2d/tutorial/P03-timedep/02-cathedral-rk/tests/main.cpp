@@ -54,7 +54,7 @@ template<typename Real>
 Real heat_src(Real x, Real y) { return 0.0;}
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("cathedral.mesh", &mesh);
+  mloader.load("../cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();

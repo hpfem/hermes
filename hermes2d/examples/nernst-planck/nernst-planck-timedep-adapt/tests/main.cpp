@@ -73,7 +73,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms
-#include "forms.cpp"
+#include "../forms.cpp"
 
 
 /*** Boundary types and conditions ***/
@@ -98,7 +98,7 @@ int main (int argc, char* argv[]) {
   // Load the mesh file.
   Mesh C_mesh, phi_mesh, basemesh;
   H2DReader mloader;
-  mloader.load("small.mesh", &basemesh);
+  mloader.load("../small.mesh", &basemesh);
   
   // When nonadaptive solution, refine the mesh.
   basemesh.refine_towards_boundary(BDY_TOP, REF_INIT);

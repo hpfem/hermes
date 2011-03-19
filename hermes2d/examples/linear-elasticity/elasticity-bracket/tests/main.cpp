@@ -57,7 +57,7 @@ const int BDY_TOP = 2;
 const int BDY_REST = 3;
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
-  mloader.load("bracket.mesh", &u_mesh);
+  mloader.load("../bracket.mesh", &u_mesh);
 
   // Initial mesh refinements.
   u_mesh.refine_element_id(1);

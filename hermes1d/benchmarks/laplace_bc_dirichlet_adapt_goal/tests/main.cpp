@@ -67,7 +67,7 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM])
 }
 
 // Weak forms for Jacobi matrix and residual.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Sample quantity of interest - solution value u[0] at 'x'.
 // NOTE: quantity of interest is any linear functional of solution.

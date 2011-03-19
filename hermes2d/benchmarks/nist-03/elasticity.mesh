@@ -1,7 +1,6 @@
 # quadrilateral mesh consisting of 4 quads for the linear elasticity problem
 
-vertices =
-[
+vertices = [
   [ -1, -1 ],
   [ 0, -1 ],
   [ 1, -1 ],
@@ -14,16 +13,14 @@ vertices =
   [ -1, 0 ]
 ]
 
-elements =
-[
+elements = [
   [ 2, 3, 4, 1, 0 ],
   [ 4, 5, 6, 7, 0 ], 
   [ 7, 8, 9, 4, 0 ], 
   [ 1, 4, 9, 0, 0 ]
 ]
 
-boundaries =
-[ 
+boundaries = [ 
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],

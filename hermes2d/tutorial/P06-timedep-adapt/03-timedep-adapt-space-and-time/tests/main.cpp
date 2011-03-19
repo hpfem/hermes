@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &basemesh);
+  mloader.load("../square.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();

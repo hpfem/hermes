@@ -149,7 +149,7 @@ Real F(Real x, Real y)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Exact solution.
 #include "exact.h"
@@ -270,7 +270,7 @@ int main(int argc, char* args[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();

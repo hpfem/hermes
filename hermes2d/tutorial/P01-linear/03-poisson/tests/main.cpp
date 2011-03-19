@@ -10,14 +10,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   mesh.refine_element_id(0);

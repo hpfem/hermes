@@ -3,8 +3,7 @@
 # Edges are positively oriented
 
 # Vertices:
-vertices =
-[
+vertices = [
   [ 0, 0 ],
   [ 0, -0.5 ],
   [ 0, -1 ],
@@ -33,8 +32,7 @@ vertices =
 ]
 
 # Elements:
-elements =
-[
+elements = [
   [ 0, 1, 18, 0 ],
   [ 0, 18, 17, 0 ],
   [ 0, 17, 16, 0 ],
@@ -71,8 +69,7 @@ elements =
 
 # Boundary markers:
 # (bdy_vertex_1 bdy_vertex_2 edge_index)
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],
@@ -93,6 +90,5 @@ boundaries =
 
 # Circular arcs:
 # (bdy_vertex_1 bdy_vertex_2 central_angle)
-curves =
-[
+curves = [
 ]

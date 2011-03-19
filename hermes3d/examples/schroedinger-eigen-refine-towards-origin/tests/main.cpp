@@ -1,6 +1,6 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_ERROR
-#include "config.h"
+#include "../config.h"
 #include "hermes3d.h"
 #include <stdio.h>
 // test of refinement towards the origin for hermes3d
@@ -38,7 +38,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // potential and weight function for respective molecule
  double TARGET_VALUE = 3.0;
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int P_INIT = P;
 int P_INIT_X = P_INIT;                                   // Uniform polynomial degree of mesh elements.
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   H3DReader mloader;
   cpu_time.reset();
-  mloader.load("box.mesh3d", &mesh);
+  mloader.load("../box.mesh3d", &mesh);
   cpu_time.tick();
   info("time taken for loading mesh : %g s", cpu_time.accumulated());
   cpu_time.reset();

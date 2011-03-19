@@ -109,7 +109,7 @@ scalar essential_bc_values(double x, double y)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &basemesh);
+  mloader.load("../square.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   mesh.copy(&basemesh);

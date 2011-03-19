@@ -13,14 +13,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
   mesh.refine_all_elements();
 
   // Initialize the weak formulation.

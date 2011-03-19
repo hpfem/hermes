@@ -88,7 +88,7 @@ scalar essential_bc_values_xvel(double x, double y, double time) {
   }
 
 // Weak forms
-#include "forms.cpp"
+#include "../forms.cpp"
 
 void mag(int n, scalar* a, scalar* dadx, scalar* dady,
                 scalar* b, scalar* dbdx, scalar* dbdy,
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   // Load the mesh file.
   Mesh basemesh, mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &basemesh);  // Master mesh.
+  mloader.load("../domain.mesh", &basemesh);  // Master mesh.
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();

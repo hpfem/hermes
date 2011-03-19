@@ -3,8 +3,7 @@
 # Edges are positively oriented
 
 # Vertices:
-vertices =
-[
+vertices = [
   [ -1.5708, -1.5708 ],
   [ -0.523599, -1.5708 ],
   [ 0.523599, -1.5708 ],
@@ -28,8 +27,7 @@ vertices =
 ]
 
 # Elements:
-elements =
-[
+elements = [
   [ 0, 1, 17, 0 ],
   [ 0, 17, 11, 0 ],
   [ 11, 17, 15, 0 ],
@@ -60,8 +58,7 @@ elements =
 
 # Boundary markers:
 # (bdy_vertex_1 bdy_vertex_2 edge_index)
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],

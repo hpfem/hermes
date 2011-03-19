@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Empty boundary conditions.
   BoundaryConditions bcs;

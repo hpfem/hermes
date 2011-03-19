@@ -29,14 +29,14 @@ const double CONST_GAMMA_OUTER = 1.0;             // Outer normal derivative on 
 const double CONST_GAMMA_LEFT = -0.5;             // Outer normal derivative on Gamma_3.
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);

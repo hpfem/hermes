@@ -1,21 +1,18 @@
 Lx = 100.0 # domain size in the x and y dimensions
 Ly = 100.0
 
-vertices =
-[
+vertices = [
   [ 0, 0 ],    # vertex 0
   [ Lx, 0 ],    # vertex 1
   [ Lx,  Ly ],    # vertex 2
   [ 0,  Ly]     # vertex 3
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 2, 3, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],

@@ -1,5 +1,4 @@
-vertices =
-[
+vertices = [
  [ 0, 0 ],       # vertex 0
  [ 1.0 , 0 ],    # vertex 1
  [ 2.3 , 0 ],    # vertex 2
@@ -37,8 +36,7 @@ vertices =
  [ 8.0 , -6.5 ]     # vertex 34
 ]
 
-elements =
-[
+elements = [
  [ 0 , 5 , 6 , 1 , 0  ],      # quad 0
  [ 1 , 6 , 7 , 2 , 0  ],      # quad 1
  [ 2 , 7 , 8 , 3 , 0  ],      # quad 2
@@ -65,8 +63,7 @@ elements =
  [ 28 , 33 , 34 , 29 , 2  ]   # quad 23
 ]
 
-boundaries =
-[
+boundaries = [
  [ 10, 15, 5],
  [ 15, 20, 5],
  [ 20, 25, 5],

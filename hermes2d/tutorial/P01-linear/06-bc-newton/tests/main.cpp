@@ -19,14 +19,14 @@ const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
 const double h  = 0.05;       // Heat flux on Gamma_bottom.
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh file.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();

@@ -74,7 +74,7 @@ double TOL_PIT_RM = 1e-6;   // Tolerance for eigenvalue convergence when solving
 // Physical data of the problem for the given number of energy groups (N_GROUPS).
 #include "physical_parameters.cpp"
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 // Norms in the axisymmetric coordinate system.
 #include "norms.cpp"
 
@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
   
   // Load the mesh for the 1st group.
   H2DReader mloader;
-  mloader.load("reactor.mesh", meshes[0]);
+  mloader.load("../reactor.mesh", meshes[0]);
  
   for (int g = 1; g < N_GROUPS; g++) {
     // Obtain meshes for the 2nd to 4th group by cloning the mesh loaded for the 1st group.

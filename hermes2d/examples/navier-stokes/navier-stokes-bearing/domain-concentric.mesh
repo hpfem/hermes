@@ -2,8 +2,7 @@ r1 = 0.7          # Inner radius
 r2 = 1            # Outer radius
 da = pi/4.        # Angular increment 
 
-vertices =
-[
+vertices = [
   [ r1*cos(da*0), r1*sin(da*0) ],
   [ r1*cos(da*1), r1*sin(da*1) ],
   [ r1*cos(da*2), r1*sin(da*2) ],
@@ -22,8 +21,7 @@ vertices =
   [ r2*cos(da*7), r2*sin(da*7) ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 8, 9, 1, 0 ],
   [ 1, 9, 10, 2, 0 ],
   [ 2, 10, 11, 3, 0 ],
@@ -34,8 +32,7 @@ elements =
   [ 7, 15, 8, 0, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 1, 2, 1 ],
   [ 2, 3, 1 ],
@@ -54,8 +51,7 @@ boundaries =
   [ 15, 8, 2 ]
 ]
 
-curves =
-[
+curves = [
   [ 0, 1, 45 ],   
   [ 1, 2, 45 ],   
   [ 2, 3, 45 ],   

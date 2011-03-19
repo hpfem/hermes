@@ -1,7 +1,6 @@
 # triangular mesh consisting of 8 triangles for the SCREEN problem
 
-vertices =
-[
+vertices = [
   [ -1, -1 ],
   [ 0, -1 ],
   [ 1, -1 ],
@@ -14,8 +13,7 @@ vertices =
   [ -1, 0 ]
 ]
 
-elements =
-[
+elements = [
   [ 0, 1, 9, 0 ],
   [ 1, 8, 9, 0 ],
   [ 1, 2, 3, 0 ],
@@ -26,8 +24,7 @@ elements =
   [ 7, 5, 6, 0 ]
 ]
 
-boundaries =
-[
+boundaries = [
   [ 0, 1, 1 ],
   [ 9, 0, 4 ],
   [ 8, 9, 3 ],
