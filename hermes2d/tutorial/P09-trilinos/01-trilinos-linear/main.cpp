@@ -20,7 +20,7 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const bool JFNK = true;                          // true = Jacobian-free method (for NOX),
                                                   // false = Newton (for NOX).
@@ -37,8 +37,8 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
 // NOX parameters.
-unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
-                                                  // Error messages, see NOX_Utils.h.
+unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;                          
+                                                  // NOX error messages, see NOX_Utils.h.
 
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
 unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
   // Calculate errors.
   double rel_err_2 = hermes2d.calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
   info("Projection time: %g s, NOX assembly/solution time: %g s.", proj_time, time2);
-  info("Exact H1 error: %g%%.)", rel_err_2);
+  info("Exact H1 error: %g%%.", rel_err_2);
  
   // Wait for all views to be closed.
   View::wait();
