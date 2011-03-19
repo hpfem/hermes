@@ -151,6 +151,15 @@ public:
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
 
+  // Applies the matrix to vector_in and saves result to vector_out.
+  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  // Multiplies matrix with a scalar.
+  void multiply_with_scalar(scalar value);
+  // Creates matrix using size, nnz, and the three arrays.
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  // Duplicates a matrix (including allocation).
+  SuperLUMatrix* duplicate();
+
 protected:
   // SUPERLU specific data structures for storing the matrix (CSC format).
   slu_scalar *Ax; // Matrix entries (column-wise).
