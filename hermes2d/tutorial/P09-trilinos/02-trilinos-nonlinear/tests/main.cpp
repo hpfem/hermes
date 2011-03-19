@@ -41,13 +41,16 @@ double init_cond(double x, double y, double &dx, double &dy)
 }
 
 // Exact solution.
-#include "exact_solution.cpp"
+#include "../exact_solution.cpp"
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -55,7 +58,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
@@ -215,14 +218,15 @@ int main(int argc, char* argv[])
   double nox_time = cpu_time.tick().last();
 
   // Calculate errors.
-  Solution ex;
-  ex.set_exact(&mesh, &exact);
+  Solution ex(&mesh, &exact);
   Adapt adaptivity(&space);
   bool solutions_for_adapt = false;
-  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt) * 100;
-  info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt) * 100;
-  info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
+  double err_est_rel_1 = hermes2d.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt) * 100;
+  info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", 
+       MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
+  double err_est_rel_2 = hermes2d.calc_err_exact(&sln_nox, &ex, solutions_for_adapt) * 100;
+  info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", 
+       err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
 
   info("Coordinate ( 0.6,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.6));
   info("Coordinate ( 0.4,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.4,  0.6));

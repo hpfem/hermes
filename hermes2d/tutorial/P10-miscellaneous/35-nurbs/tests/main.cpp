@@ -3,9 +3,9 @@
 
 // This test makes sure that example 37-nurbs works correctly.
 
-const char* mesh_file_1 = "domain-1.mesh";          // One control point.
-const char* mesh_file_2 = "domain-2.mesh";          // Two control points.
-const char* mesh_file_3 = "domain-3.mesh";          // Three control points.
+const char* mesh_file_1 = "../domain-1.mesh";          // One control point.
+const char* mesh_file_2 = "../domain-2.mesh";          // Two control points.
+const char* mesh_file_3 = "../domain-3.mesh";          // Three control points.
 
 // The following parameters can be also changed:
 
@@ -21,7 +21,7 @@ const int BDY_MARKER = 1;
 const double CONST_F = 1.0;  
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {

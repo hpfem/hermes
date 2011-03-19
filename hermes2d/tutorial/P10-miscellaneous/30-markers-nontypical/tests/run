@@ -1,4 +1,0 @@
-rm *~ 
-./markers
-python plot_graph.py &
-

@@ -47,10 +47,6 @@ const double VOLTAGE = 50.0;
 
 int main(int argc, char* argv[])
 {
-
-  // Instantiate the class with global functions.
-  Hermes2D hermes2d;
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -94,7 +90,7 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = hermes2d.Space::construct_refined_space(&space);
+    Space* ref_space = Space::construct_refined_space(&space);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);

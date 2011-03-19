@@ -62,6 +62,9 @@ double init_cond(double x, double y, double &dx, double &dy)
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -226,11 +229,10 @@ int main(int argc, char* argv[])
   double time2 = cpu_time.tick().last();
 
   // Calculate errors.
-  Solution ex;
-  ex.set_exact(&mesh, &exact);
-  double rel_err_1 = calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
+  Solution ex(&mesh, &exact);
+  double rel_err_1 = hermes2d.calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
+  double rel_err_2 = hermes2d.calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Show both solutions.

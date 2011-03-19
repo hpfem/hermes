@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("../square.mesh", &mesh);
 
   // Perform uniform mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -33,7 +33,6 @@ int main(int argc, char* argv[])
 
   // Create an L2 space with default shapeset.
   L2Space space(&mesh, &bc_types, &bc_values, P_INIT);
-
 
   // Assemble and solve the finite element problem.
   WeakForm wf_dummy;

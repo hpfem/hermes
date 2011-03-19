@@ -22,6 +22,15 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
+// NOX parameters.
+unsigned message_type = NOX::Utils::MsgType::Error | NOX::Utils::MsgType::Warning | NOX::Utils::MsgType::OuterIteration | NOX::Utils::MsgType::InnerIteration | NOX::Utils::MsgType::Parameters | NOX::Utils::MsgType::Details;
+                                                  // Error messages, see NOX_Utils.h.
+double ls_tolerance = 1e-5;                       // Tolerance for linear system.
+unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
+double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
+double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+int max_iters = 100;                              // Max number of iterations.
 
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
@@ -32,6 +41,9 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char **argv)
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -49,7 +61,7 @@ int main(int argc, char **argv)
   
   // Initialize the weak formulation.
   WeakFormPoisson wf1;
-  
+
   // Initialize boundary conditions
   DirichletFunctionBoundaryCondition bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
@@ -60,9 +72,6 @@ int main(int argc, char **argv)
   info("ndof: %d", ndof);
 
   info("---- Assembling by DiscreteProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
-
-  // Time measurement.
-  cpu_time.tick(HERMES_SKIP);
 
   // Initialize the solution.
   Solution sln1;
@@ -83,24 +92,36 @@ int main(int argc, char **argv)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
   
+  // Begin time measurement of assembly.
+  cpu_time.tick(HERMES_SKIP);
+
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
   dp1.assemble(matrix, rhs);
   
+  // Record assembly time.
+  double time1 = cpu_time.tick().last();
+  cpu_time.reset();
+
   // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
+  info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
   if(solver->solve())
     Solution::vector_to_solution(solver->get_solution(), &space, &sln1);
   else
     error ("Matrix solver failed.\n");
 
+  // CPU time needed by UMFpack to solve the matrix problem.
+  double time2 = cpu_time.tick().last();
+
+  // Calculate errors.
+  double rel_err_1 = hermes2d.calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
+  info("Assembly time: %g s, matrix solver time: %g s.", time1, time2);
+  info("Xxact H1 error: %g%%.", rel_err_1);
+
   delete(matrix);
   delete(rhs);
   delete(solver);
     
-  // CPU time needed by UMFpack.
-  double time1 = cpu_time.tick().last();
-
   // View the solution and mesh.
   //ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   //sview.show(&sln1);
@@ -112,7 +133,8 @@ int main(int argc, char **argv)
   info("---- Assembling by DiscreteProblem, solving by NOX:");
 
   // Initialize the weak formulation for Trilinos.
-  WeakFormPoissonNox wf2;
+  bool is_matrix_free = JFNK;
+  WeakFormPoissonNox wf2(is_matrix_free);
   
   // Initialize DiscreteProblem.
   is_linear = false;
@@ -133,7 +155,9 @@ int main(int argc, char **argv)
   
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&dp2);
+  // NULL stands for preconditioning that is set later.
+  NoxSolver nox_solver(&dp2, message_type, ls_tolerance, NULL, flag_absresid, abs_resid, 
+                       flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
   
   delete coeff_vec;
@@ -160,7 +184,7 @@ int main(int argc, char **argv)
   else error("NOX failed");
 
   // CPU time needed by NOX.
-  double time2 = cpu_time.tick().last();
+  time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
   //ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
@@ -168,12 +192,11 @@ int main(int argc, char **argv)
   //view2.show(&exact);
 
   // Calculate errors.
-  //Solution ex(&mesh, &exact);
-  double rel_err_1 = calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
-  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
+  double rel_err_2 = hermes2d.calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
+  info("Projection time: %g s, NOX assembly/solution time: %g s.", proj_time, time2);
+  info("Exact H1 error: %g%%.)", rel_err_2);
  
+
   /* TESTING */
 
   info("Coordinate (-0.6, -0.6) hermes value = %lf", sln1.get_pt_value(-0.6, -0.6));

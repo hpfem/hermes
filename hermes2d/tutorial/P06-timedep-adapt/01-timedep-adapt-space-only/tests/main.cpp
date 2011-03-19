@@ -58,17 +58,20 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal c
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 // Initial condition.
-#include "initial_condition.cpp"
+#include "../initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh, basemesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &basemesh);
+  mloader.load("../square.mesh", &basemesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
@@ -139,7 +142,7 @@ int main(int argc, char* argv[])
       // Newton's loop on the coarse mesh.
       info("Solving on coarse mesh:");
       bool verbose = true;
-      if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+      if (!hermes2d.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
           NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
       Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
 
@@ -184,7 +187,7 @@ int main(int argc, char* argv[])
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
       bool verbose = true;
-      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+      if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  	        NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Store the result in ref_sln.

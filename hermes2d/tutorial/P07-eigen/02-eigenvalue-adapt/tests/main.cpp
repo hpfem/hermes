@@ -3,6 +3,9 @@
 #include <stdio.h>
 
 using namespace RefinementSelectors;
+using Teuchos::RCP;
+using Teuchos::rcp;
+using Hermes::EigenSolver;
 
 // This test makes sure that example 51-eigenvalue-adapt works correctly.
 
@@ -47,40 +50,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
 
 // Weak forms.
-#include "forms.cpp"
-
-// Write the matrix in Matrix Market format.
-void write_matrix_mm(const char* filename, Matrix* mat) 
-{
-  int ndof = mat->get_size();
-  FILE *out = fopen(filename, "w" );
-  int nz=0;
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) nz++;
-    }
-  } 
-
-  fprintf(out,"%%%%MatrixMarket matrix coordinate real symmetric\n");
-  fprintf(out,"%d %d %d\n", ndof, ndof, nz);
-  for (int i=0; i < ndof; i++) {
-    for (int j=0; j <=i; j++) { 
-      double tmp = mat->get(i,j);
-      if (fabs(tmp) > 1e-15) fprintf(out, "%d %d %24.15e\n", i+1, j+1, tmp);
-    }
-  } 
-  fclose(out);
-}
+#include "../forms.cpp"
 
 int main(int argc, char* argv[])
 {
+  if (NUMBER_OF_EIGENVALUES > 6) error("Maximum number of eigenvalues is 6.");
   info("Desired number of eigenvalues: %d.", NUMBER_OF_EIGENVALUES);
 
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -91,7 +71,6 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
 
   // Initialize the weak formulation.
   WeakFormEigenLeft wf_left;
@@ -99,6 +78,27 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize views.
+  ScalarView sview_1("", new WinGeom(0, 0, 400, 360));
+  sview_1.show_mesh(false);
+  sview_1.fix_scale_width(60);
+  ScalarView sview_2("", new WinGeom(405, 0, 400, 360));
+  sview_2.show_mesh(false);
+  sview_2.fix_scale_width(60);
+  ScalarView sview_3("", new WinGeom(810, 0, 400, 360));
+  sview_3.show_mesh(false);
+  sview_3.fix_scale_width(60);
+  ScalarView sview_4("", new WinGeom(0, 410, 400, 360));
+  sview_4.show_mesh(false);
+  sview_4.fix_scale_width(60);
+  ScalarView sview_5("", new WinGeom(405, 410, 400, 360));
+  sview_5.show_mesh(false);
+  sview_5.fix_scale_width(60);
+  ScalarView sview_6("", new WinGeom(810, 410, 400, 360));
+  sview_6.show_mesh(false);
+  sview_6.fix_scale_width(60);
+  OrderView  oview("Polynomial orders", new WinGeom(1215, 0, 400, 360));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -123,80 +123,121 @@ int main(int argc, char* argv[])
     info("ref_ndof: %d.", ref_ndof);
 
     // Initialize matrices and matrix solver on referenc emesh.
-    SparseMatrix* matrix_left = create_matrix(matrix_solver);
-    SparseMatrix* matrix_right = create_matrix(matrix_solver);
-    Vector* eivec = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix_left, eivec);
+    RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
+    RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
+    Solver* solver = create_linear_solver(matrix_solver, matrix_left.get());
 
     // Assemble the matrices on reference mesh.
     bool is_linear = true;
     DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space, is_linear);
-    dp_left->assemble(matrix_left, eivec);
+    dp_left->assemble(matrix_left.get());
     DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space, is_linear);
-    dp_right->assemble(matrix_right, eivec);
+    dp_right->assemble(matrix_right.get());
 
     // Time measurement.
     cpu_time.tick();
 
-    // Write matrix_left in MatrixMarket format.
-    write_matrix_mm("mat_left.mtx", matrix_left);
-
-    // Write matrix_left in MatrixMarket format.
-    write_matrix_mm("mat_right.mtx", matrix_right);
-
     // Time measurement.
     cpu_time.tick(HERMES_SKIP);
 
-    // Calling Python eigensolver. Solution will be written to "eivecs.dat".
-    char call_cmd[255];
-    sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_left.mtx mat_right.mtx %g %d %g %d", 
-	    TARGET_VALUE, NUMBER_OF_EIGENVALUES, TOL, MAX_ITER);
-    system(call_cmd);
+    EigenSolver es(matrix_left, matrix_right);
+    info("Calling Pysparse...");
+    es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE, TOL, MAX_ITER);
+    info("Pysparse finished.");
+    es.print_eigenvalues();
 
     // Initializing solution vector, solution and ScalarView.
-    double* ref_coeff_vec = new double[ref_ndof];
+    double* ref_coeff_vec;
+    //Solution sln[NUMBER_OF_EIGENVALUES], ref_sln[NUMBER_OF_EIGENVALUES];
+    //ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
 
     // Reading solution vectors from file and visualizing.
-    FILE *file = fopen("eivecs.dat", "r");
-    char line [64];                  // Maximum line size.
-    fgets(line, sizeof line, file);  // ref_ndof
-    int n = atoi(line);            
-    if (n != ref_ndof) error("Mismatched ndof in the eigensolver output file.");  
-    fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-    int neig = atoi(line);
+    double eigenval[NUMBER_OF_EIGENVALUES];
+    int neig = es.get_n_eigs();
     if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
     for (int ieig = 0; ieig < NUMBER_OF_EIGENVALUES; ieig++) {
-      // Get next eigenvector from the file.
-      for (int i = 0; i < ref_ndof; i++) {  
-        fgets(line, sizeof line, file);
-        ref_coeff_vec[i] = atof(line);
-      }
-
+      eigenval[ieig] = es.get_eigenvalue(ieig);
+      int n;
+      es.get_eigenvector(ieig, &ref_coeff_vec, &n);
       // Convert coefficient vector into a Solution.
       Solution::vector_to_solution(ref_coeff_vec, ref_space, &(ref_sln[ieig]));
 
       // Project the fine mesh solution onto the coarse mesh.
-      info("Projecting reference solution on coarse mesh.");
+      info("Projecting reference solution %d on coarse mesh.", ieig);
       OGProjection::project_global(&space, &(ref_sln[ieig]), &(sln[ieig]), matrix_solver);
     }  
-    fclose(file);
-    delete [] ref_coeff_vec;
 
     // FIXME: Below, the adaptivity is done for the last eigenvector only,
     // this needs to be changed to take into account all eigenvectors.
 
+    // View the coarse mesh solution and polynomial orders.
+    
+    //char title[100];
+    //if (NUMBER_OF_EIGENVALUES > 0) {
+    //  sprintf(title, "Solution 0, val = %g", eigenval[0]);
+    //  sview_1.set_title(title);
+    //  sview_1.show(&(sln[0]));
+    //}
+    //if (NUMBER_OF_EIGENVALUES > 1) {
+    //  sprintf(title, "Solution 1, val = %g", eigenval[1]);
+    //  sview_2.set_title(title);
+    //  sview_2.show(&(sln[1]));
+    //}
+    //if (NUMBER_OF_EIGENVALUES > 2) {
+    //  sprintf(title, "Solution 2, val = %g", eigenval[2]);
+    //  sview_3.set_title(title);
+    //  sview_3.show(&(sln[2]));
+    //}
+    //if (NUMBER_OF_EIGENVALUES > 3) {
+    //  sprintf(title, "Solution 3, val = %g", eigenval[3]);
+    //  sview_4.set_title(title);
+    //  sview_4.show(&(sln[3]));
+    //}
+    //if (NUMBER_OF_EIGENVALUES > 4) {
+    //  sprintf(title, "Solution 4, val = %g", eigenval[4]);
+    //  sview_5.set_title(title);
+    //  sview_5.show(&(sln[4]));
+    //}
+    //if (NUMBER_OF_EIGENVALUES > 5) {
+    //  sprintf(title, "Solution 5, val = %g", eigenval[5]);
+    //  sview_6.set_title(title);
+    //  sview_6.show(&(sln[5]));
+    //}
+    //oview.show(&space);
+
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate and exact error.");
-    Adapt* adaptivity = new Adapt(&space);
-    bool solutions_for_adapt = true;
-    double err_est_rel = adaptivity->calc_err_est(&(sln[NUMBER_OF_EIGENVALUES-1]), 
-                         &(ref_sln[NUMBER_OF_EIGENVALUES-1])) * 100;
+    info("Calculating error estimate.");
+    Hermes::vector<Space *> spaces;
+    for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++) spaces.push_back(&space);
+    Adapt* adaptivity = new Adapt(spaces);
+ 
+    Hermes::vector<Solution *> slns;
+    if (NUMBER_OF_EIGENVALUES > 0) slns.push_back(&sln[0]);
+    if (NUMBER_OF_EIGENVALUES > 1) slns.push_back(&sln[1]);
+    if (NUMBER_OF_EIGENVALUES > 2) slns.push_back(&sln[2]);
+    if (NUMBER_OF_EIGENVALUES > 3) slns.push_back(&sln[3]);
+    if (NUMBER_OF_EIGENVALUES > 4) slns.push_back(&sln[4]);
+    if (NUMBER_OF_EIGENVALUES > 5) slns.push_back(&sln[5]);
+    
+    Hermes::vector<Solution *> ref_slns;
+    if (NUMBER_OF_EIGENVALUES > 0) ref_slns.push_back(&ref_sln[0]);
+    if (NUMBER_OF_EIGENVALUES > 1) ref_slns.push_back(&ref_sln[1]);
+    if (NUMBER_OF_EIGENVALUES > 2) ref_slns.push_back(&ref_sln[2]);
+    if (NUMBER_OF_EIGENVALUES > 3) ref_slns.push_back(&ref_sln[3]);
+    if (NUMBER_OF_EIGENVALUES > 4) ref_slns.push_back(&ref_sln[4]);
+    if (NUMBER_OF_EIGENVALUES > 5) ref_slns.push_back(&ref_sln[5]);
+    Hermes::vector<double> component_errors;
+    double err_est_rel = adaptivity->calc_err_est(slns, ref_slns, &component_errors) * 100;
 
     // Report results.
-    ndof = Space::get_num_dofs(&space);
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-         ndof, Space::get_num_dofs(ref_space), err_est_rel);
-
+    info("ndof_coarse: %d, ndof_fine: %d.", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    if (NUMBER_OF_EIGENVALUES > 0) info("err_est_rel[0]: %g%%", component_errors[0] * 100);
+    if (NUMBER_OF_EIGENVALUES > 1) info("err_est_rel[1]: %g%%", component_errors[1] * 100);
+    if (NUMBER_OF_EIGENVALUES > 2) info("err_est_rel[2]: %g%%", component_errors[2] * 100);
+    if (NUMBER_OF_EIGENVALUES > 3) info("err_est_rel[3]: %g%%", component_errors[3] * 100);
+    if (NUMBER_OF_EIGENVALUES > 4) info("err_est_rel[4]: %g%%", component_errors[4] * 100);
+    if (NUMBER_OF_EIGENVALUES > 5) info("err_est_rel[5]: %g%%", component_errors[5] * 100);
+   
     // Time measurement.
     cpu_time.tick();
 
@@ -206,12 +247,18 @@ int main(int argc, char* argv[])
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
 
+    // Wait for keypress.
+    //View::wait(HERMES_WAIT_KEYPRESS);
+
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else
     {
       info("Adapting coarse mesh.");
-      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      Hermes::vector<RefinementSelectors::Selector *> selectors;
+      for(int i = 0; i < NUMBER_OF_EIGENVALUES; i++)
+        selectors.push_back(&selector);
+      done = adaptivity->adapt(selectors, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
@@ -220,9 +267,6 @@ int main(int argc, char* argv[])
 
     // Clean up.
     delete solver;
-    delete matrix_left;
-    delete matrix_right;
-    delete eivec;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
@@ -231,31 +275,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  /* THIS TEST CANNOT BE DONE LIKE THIS, SINCE THE EIGENFUNCTIONS TEND TO
-     SWITCH ORDER AND FOR REPEATED EIGENVALUES THEY CREATE VARIOUS LINEAR
-     COMBINATIONS. SO FOR NOW WE'LL JUST BE HAPPY IF THE TEST RUNS.
-  info("Coordinate ( 0.5, 0.5) value = %lf", sln[5].get_pt_value(0.5, 0.5));
-  info("Coordinate ( 1.0, 0.5) value = %lf", sln[5].get_pt_value(1.0, 0.5));
-  info("Coordinate ( 1.5, 0.5) value = %lf", sln[5].get_pt_value(1.5, 0.5));
-  info("Coordinate ( 2.0, 0.5) value = %lf", sln[5].get_pt_value(2.0, 0.5));
-
-  double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
-  double coor_y = 0.5;
-  double t_value[4] = {0.154053, -0.1783, -0.530477, -0.313066};
-  bool success = true;
-  for (int i = 0; i < 4; i++)
-  {
-    if (abs(t_value[i] - sln[5].get_pt_value(coor_x[i], coor_y)) > 1E-3) success = false;
-  }
-  if (success) {
-    printf("Success!\n");
-    return ERR_SUCCESS;
-  }
-  else {
-    printf("Failure!\n");
-    return ERR_FAILURE;
-  }
-  */
+  int ndof = Space::get_num_dofs(&space);
 
   if (ndof < 450) {          // Was 401 when this test was created.
     printf("Success!\n");

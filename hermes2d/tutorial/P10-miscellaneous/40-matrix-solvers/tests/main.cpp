@@ -12,7 +12,7 @@
 // Sample usage: "matrix-solvers umfpack linsys-N.txt" where N = 1, 2, 3.
 
 // Include helpers.
-#include "helpers.cpp"
+#include "../helpers.cpp"
 
 // Main function
 int main(int argc, char *argv[]) {
