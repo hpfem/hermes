@@ -109,8 +109,10 @@ endif(MSVC)
 #
 
 if(H2D_WITH_GLUT)
-  find_package(GLUT REQUIRED)
-  find_package(GLEW REQUIRED)
+  if(NOT APPLE)   # See hermes/OSX.cmake for APPLE-specific search procedures.
+    find_package(GLUT REQUIRED)
+    find_package(GLEW REQUIRED)
+  endif(NOT APPLE)
 else(H2D_WITH_GLUT)
   add_definitions(-DNOGLUT)
 endif(H2D_WITH_GLUT)
