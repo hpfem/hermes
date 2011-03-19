@@ -89,8 +89,8 @@ const double nu = 0.3;                            // Poisson ratio.
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Weak forms.
-#include "forms.cpp"
+// Exact solution, weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -113,12 +113,15 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) u_mesh.refine_all_elements();
   for (int i = 0; i < INIT_REF_NUM; i++) v_mesh.refine_all_elements();
 
-  // Set exact solutions.
-  ExactSolutionNIST03U exact_u(&u_mesh, E, nu, lambda, Q);
-  ExactSolutionNIST03V exact_v(&v_mesh, E, nu, lambda, Q);
+  // Set exact solution for each displacement component.
+  MyExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
+  MyExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize the weak formulation.
-  WeakFormNIST03 wf(&exact_u, &exact_v);
+  // NOTE: We pass all four parameters (temporarily) 
+  // since in Mitchell's paper (NIST benchmarks) they 
+  // are mutually inconsistent.
+  MyWeakFormLinearElasticity wf(E, nu, mu, lambda);
   
   // Initialize boundary conditions
   DirichletNonConstantExactU bc_u(BDY_DIRICHLET, &exact_u);
