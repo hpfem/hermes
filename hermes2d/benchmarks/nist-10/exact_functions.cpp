@@ -32,7 +32,7 @@ public:
 class ExactSolutionNIST10 : public ExactSolutionScalar, public ExactFunctionNIST10
 {
 public:
-  ExactSolutionNIST10(Mesh* mesh, double K, double alpha) : ExactSolutionScalar(mesh), ExactFunctionNIST10(k, alpha) {};
+  ExactSolutionNIST10(Mesh* mesh, double k, double alpha) : ExactSolutionScalar(mesh), ExactFunctionNIST10(k, alpha) {};
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     if (x <= 0) 
