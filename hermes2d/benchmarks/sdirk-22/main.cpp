@@ -106,6 +106,9 @@ scalar init_cond(double x, double y, double& dx, double& dy)
 
 int main(int argc, char* argv[]) 
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // This is a hack I used to run the code a dozen of times when plotting convergence graphs.
   if (argc > 1) {
     if (argv[1][0] == 'e') method = IE;
@@ -265,7 +268,7 @@ int main(int argc, char* argv[])
         rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
+        double res_l2_norm = hermes2d.get_l2_norm(rhs);
 
         // Info for user.
         info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
@@ -304,7 +307,7 @@ int main(int argc, char* argv[])
         rhs->change_sign();
 
         // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
+        double res_l2_norm = hermes2d.get_l2_norm(rhs);
 
         // Info for user.
         info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
@@ -335,7 +338,7 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_l2_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
+      double exact_l2_error = hermes2d.calc_abs_error(&u_prev_time, &exact_sln, HERMES_L2_NORM);
       info("TIME: %g s.", TIME);
       info("Exact error in l2-norm: %g.", exact_l2_error);
 
@@ -348,7 +351,7 @@ int main(int argc, char* argv[])
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
+    info("SDIRK: tau %g, abs_error %g.", TAU, hermes2d.calc_abs_error(&u_prev_time, &citrouille, HERMES_L2_NORM));
   }
 
   // Wait for all views to be closed.

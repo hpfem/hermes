@@ -95,10 +95,13 @@ scalar init_cond(double x, double y, double& dx, double& dy)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "../forms.cpp"
 
 int main(int argc, char* argv[]) 
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // This is a hack I used to run the code a dozen of times when plotting convergence graphs.
   if (argc > 1) {
     if (argv[1][0] == 'e') method = IE;
@@ -186,7 +189,7 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
+      double exact_h1_error = hermes2d.calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
       info("Exact error in l2-norm: %g.", exact_h1_error);
     } 
@@ -247,7 +250,7 @@ int main(int argc, char* argv[])
 
 
         // Calculate the l2-norm of residual vector.
-        double res_l2_norm = get_l2_norm(rhs);
+        double res_l2_norm = hermes2d.get_l2_norm(rhs);
 
         // Info for user.
         info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
@@ -317,14 +320,14 @@ int main(int argc, char* argv[])
 
       // Compute exact error.
       Solution exact_sln(&mesh, exact_solution);
-      double exact_h1_error = calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
+      double exact_h1_error = hermes2d.calc_abs_error(&u_prev_time, &exact_sln, HERMES_H1_NORM);
       info("TIME: %g s.", TIME);
       info("Exact error in H1-norm: %g.", exact_h1_error);
     } while (ts < N_STEP);
 
     // Hack to extract error at final time for convergence graph.
     Solution citrouille(&mesh, exact_solution);
-    info("SDIRK: tau %g, abs_error %g.", TAU, calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
+    info("SDIRK: tau %g, abs_error %g.", TAU, hermes2d.calc_abs_error(&u_prev_time, &citrouille, HERMES_H1_NORM));
   }
 
   info("Coordinate ( 0.0, 0.0) u_prev_time value = %lf", u_prev_time.get_pt_value(0.0, 0.0));
