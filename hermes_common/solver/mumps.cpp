@@ -344,10 +344,10 @@ MumpsMatrix* MumpsMatrix::duplicate(){
     nmat->irn[i]=irn[i];
     nmat->jcn[i]=jcn[i];
   }
-  return nmat;
   for (unsigned int i = 0;i<size+1;i++){
     nmat->Ap[i]=Ap[i];
   }
+  return nmat;
 }
 
 // MumpsVector /////////////////////////////////////////////////////////////////////////////////////
