@@ -149,6 +149,7 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, 
 bool H2DReader::load(const char *filename, Mesh *mesh)
 {
   std::ifstream s(filename);
+  if (!s.good()) error("Mesh file not found.");
   return this->load_stream(s, mesh, filename);
 }
 
