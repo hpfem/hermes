@@ -385,6 +385,11 @@ if(WITH_MPI)
   include_directories(MPI_INCLUDE_PATH)	  
 endif(WITH_MPI)
 
+# Use modified search procedures for some libraries on MacOS.
+IF (APPLE)
+    include(${CMAKE_HOME_DIRECTORY}/OSX.cmake)
+ENDIF (APPLE)
+
 
 #------------------------------------------------------------------------------
 # Project-wide compiler settings.
