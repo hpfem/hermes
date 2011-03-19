@@ -23,8 +23,9 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
 // NOX parameters.
-unsigned message_type = NOX::Utils::MsgType::Error | NOX::Utils::MsgType::Warning | NOX::Utils::MsgType::OuterIteration | NOX::Utils::MsgType::InnerIteration | NOX::Utils::MsgType::Parameters | NOX::Utils::MsgType::Details;
+unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
                                                   // Error messages, see NOX_Utils.h.
+
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
 unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
 double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
