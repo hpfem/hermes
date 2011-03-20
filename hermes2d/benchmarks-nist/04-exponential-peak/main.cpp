@@ -61,7 +61,7 @@ double Y_LOC = 0.5;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -78,13 +78,13 @@ int main(int argc, char* argv[])
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST04 exact(&mesh, ALPHA_P, X_LOC, Y_LOC);
+  MyExactSolution exact(&mesh, ALPHA_P, X_LOC, Y_LOC);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
+  MyWeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
   
   // Initialize boundary conditions
-  DirichletNonConstantExact bc(BDY_DIRICHLET, &exact);
+  DirichletNonConstant bc(BDY_DIRICHLET, &exact);
   BoundaryConditions bcs(&bc);
 
   // Create an H1 space with default shapeset.
