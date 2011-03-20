@@ -18,7 +18,7 @@
 #include "../../../hermes_common/matrix.h"
 #include "../quadrature/quad_all.h"
 #include "../shapeset/shapeset_l2_all.h"
-#include "../boundaryconditions/boundaryconditions.h"
+#include "../boundaryconditions/essential_bcs.h"
 
 void L2Space::init(Shapeset* shapeset, Ord2 p_init)
 {
@@ -38,8 +38,15 @@ void L2Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-L2Space::L2Space(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init, Shapeset* shapeset)
+L2Space::L2Space(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
+{
+  _F_
+  init(shapeset, Ord2(p_init, p_init));
+}
+
+L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -144,12 +151,12 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-  if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
+  if (bc->get_value_type() == EssentialBC::BC_VALUE)
     proj[0] = proj[1] = bc->value;
   // If the BC is not constant.
-  else if (bc->get_value_type() == BoundaryCondition::BC_FUNCTION)
+  else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
   {
     surf_pos->t = surf_pos->lo;
     // Find out the (x,y) coordinates for the first endpoint.
@@ -184,15 +191,15 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        DirichletBoundaryCondition *bc = static_cast<DirichletBoundaryCondition *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-        if (bc->get_value_type() == BoundaryCondition::BC_VALUE)
+        if (bc->get_value_type() == EssentialBC::BC_VALUE)
         {
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
           * (bc->value - l);
         }
         // If the BC is not constant.
-        else if (bc->get_value_type() == BoundaryCondition::BC_FUNCTION)
+        else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
         {
           // Find out the (x,y) coordinate.
           double x, y;

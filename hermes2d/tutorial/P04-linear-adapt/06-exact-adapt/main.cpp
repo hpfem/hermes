@@ -53,11 +53,8 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("square.mesh", &mesh);
   
-  // Empty boundary conditions.
-  BoundaryConditions bcs;
- 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space space(&mesh, P_INIT);
 
   // Initialize the weak formulation.
   WeakForm wf_dummy;

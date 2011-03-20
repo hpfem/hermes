@@ -45,7 +45,7 @@
 #include "../hermes_common/solver/precond_ml.h"
 
 // boundary conditions
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 // Eigensolver
 #include "../hermes_common/solver/eigensolver.h"

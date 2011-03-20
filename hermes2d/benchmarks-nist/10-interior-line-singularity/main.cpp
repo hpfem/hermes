@@ -82,9 +82,8 @@ int main(int argc, char* argv[])
   ExactSolutionNIST10 exact(&mesh, K, ALPHA);
 
   // Initialize boundary conditions
-  DirichletNonConstantExact bc_dirichlet(BDY_DIRICHLET, &exact);
-  NaturalBoundaryCondition bc_natural(BDY_NEUMANN_LEFT);
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
+  EssentialBCNonConstantExact bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

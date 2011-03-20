@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
   MyWeakFormPerturbedPoisson wf(&rhs);
   
   // Initialize boundary conditions.
-  DirichletConstant bc(BDY_DIRICHLET, 0.0);
-  BoundaryConditions bcs(&bc);
+  EssentialBC bc_essential(BDY_DIRICHLET, 0.0);
+  EssentialBCS bcs(&bc);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

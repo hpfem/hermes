@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
 class MyExactFunction

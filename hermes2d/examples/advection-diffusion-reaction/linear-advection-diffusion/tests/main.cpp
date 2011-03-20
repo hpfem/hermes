@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
   WeakFormLinearAdvectionDiffusion wf(STABILIZATION_ON, SHOCK_CAPTURING_ON, B1, B2, EPSILON);
   
   // Initialize boundary conditions
-  DirichletConstant bc_rest(BDY_REST, 1.0);
-  DirichletNonConstant bc_layer(BDY_LAYER);
+  EssentialBC bc_essential_rest(BDY_REST, 1.0);
+  EssentialBCNonConstant bc_layer(BDY_LAYER);
 
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc_rest, &bc_layer));
+  EssentialBCS bcs(Hermes::vector<BoundaryCondition *>(&bc_rest, &bc_layer));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

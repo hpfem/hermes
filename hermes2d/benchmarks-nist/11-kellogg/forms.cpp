@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 // Exact solution.
 #include "exact_solution.cpp"
@@ -64,16 +64,16 @@ private:
   };
 };
 
-class DirichletNonConstantExact : public DirichletBoundaryCondition
+class EssentialBCNonConstantExact : public EssentialBC
 {
 public:
-  DirichletNonConstantExact(std::string marker, ExactSolutionNIST11* exact_solution) : 
-        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  EssentialBCNonConstantExact(std::string marker, ExactSolutionNIST11* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   };
   
-  ~DirichletNonConstantExact() {};
+  ~EssentialBCNonConstantExact() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 

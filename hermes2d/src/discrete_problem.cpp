@@ -28,7 +28,7 @@
 #include "neighbor.h"
 #include "views/scalar_view.h"
 #include "views/base_view.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, 
          bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
@@ -846,7 +846,7 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     if (isempty[j])
       continue;
     if(marker > 0)
-      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker))->get_type() != BoundaryCondition::BC_DIRICHLET);
+      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker)) != NULL);
     spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
   }
 

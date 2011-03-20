@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 class WeakFormLinearAdvectionDiffusion : public WeakForm
 {
@@ -67,13 +67,13 @@ private:
   bool shock_capturing_on;
 };
 
-class DirichletNonConstant : public DirichletBoundaryCondition {
+class EssentialBCNonConstant : public EssentialBC {
 public:
-  DirichletNonConstant(std::string marker) : DirichletBoundaryCondition(Hermes::vector<std::string>()) {
+  EssentialBCNonConstant(std::string marker) : EssentialBC(Hermes::vector<std::string>()) {
     markers.push_back(marker);
   }
 
-  ~DirichletNonConstant() { }
+  ~EssentialBCNonConstant() { }
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

@@ -5,7 +5,7 @@
 
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 class WeakFormRichardsNewtonEuler : public WeakForm
 {
@@ -275,16 +275,16 @@ private:
   };
 };
 
-class RichardsDirichletBoundaryCondition : public DirichletBoundaryCondition {
+class RichardsEssentialBC : public EssentialBC {
 public:
 
-  RichardsDirichletBoundaryCondition(std::string marker, double h_elevation, double pulse_end_time, double h_init, double startup_time) :
-  DirichletBoundaryCondition(Hermes::vector<std::string>()), h_elevation(h_elevation), pulse_end_time(pulse_end_time), h_init(h_init), startup_time(startup_time)
+  RichardsEssentialBC(std::string marker, double h_elevation, double pulse_end_time, double h_init, double startup_time) :
+  EssentialBC(Hermes::vector<std::string>()), h_elevation(h_elevation), pulse_end_time(pulse_end_time), h_init(h_init), startup_time(startup_time)
   {
     markers.push_back(marker);
   }
 
-  ~RichardsDirichletBoundaryCondition() {}
+  ~RichardsEssentialBC() {}
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

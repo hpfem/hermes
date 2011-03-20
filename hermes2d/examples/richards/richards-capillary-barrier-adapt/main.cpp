@@ -212,9 +212,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_TOP, INIT_REF_NUM_BDY_TOP);
 
   // Initialize boundary conditions.
-  NaturalBoundaryCondition bc_natural(Hermes::vector<std::string>(BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));
-  RichardsDirichletBoundaryCondition bc_dirichlet(BDY_TOP, H_ELEVATION, PULSE_END_TIME, H_INIT, STARTUP_TIME);
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_natural, &bc_dirichlet));
+  RichardsEssentialBC bc_essential(BDY_TOP, H_ELEVATION, PULSE_END_TIME, H_INIT, STARTUP_TIME);
+  EssentialBCS bcs(&bc_essential);
 
 
   // Create an H1 space with default shapeset.
@@ -345,7 +344,7 @@ int main(int argc, char* argv[])
         for (int i=0; i < ndof; i++) save_coeff_vec[i] = coeff_vec[i];
         double damping_coeff = 1.0;
 
-        bc_dirichlet.set_current_time(current_time);
+        bc_essential.set_current_time(current_time);
 
         while (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
                              NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff)) {
@@ -388,7 +387,7 @@ int main(int argc, char* argv[])
         info("Performing Picard's iteration (tau = %g days):", time_step);
         bool verbose = true;
 
-        bc_dirichlet.set_current_time(current_time);
+        bc_essential.set_current_time(current_time);
 
         while(!solve_picard(wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {

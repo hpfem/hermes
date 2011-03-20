@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 class WeakFormPoisson : public WeakForm
 {
@@ -54,13 +54,13 @@ private:
 };
 
 
-class DirichletNonConstant : public DirichletBoundaryCondition {
+class EssentialBCNonConstant : public EssentialBC {
 public:
-  DirichletNonConstant(Hermes::vector<std::string> markers, double const_f) : DirichletBoundaryCondition(markers),
+  EssentialBCNonConstant(Hermes::vector<std::string> markers, double const_f) : EssentialBC(markers),
     const_f(const_f) {
   }
 
-  ~DirichletNonConstant() { }
+  ~EssentialBCNonConstant() { }
 
   inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
 

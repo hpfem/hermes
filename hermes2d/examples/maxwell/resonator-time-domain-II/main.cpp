@@ -88,8 +88,8 @@ int main(int argc, char* argv[])
   WeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
   
   // Initialize boundary conditions
-  DirichletConstant bc(BDY, 0.0);
-  BoundaryConditions bcs(&bc);
+  EssentialBC bc_essential(BDY, 0.0);
+  EssentialBCS bcs(&bc);
 
   // Create x- and y- displacement space using the default H1 shapeset.
   HcurlSpace E_space(&mesh, &bcs, P_INIT);

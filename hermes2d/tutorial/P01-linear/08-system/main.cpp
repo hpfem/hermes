@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DirichletConstant zero_disp(BDY_1, 0.0);
-  BoundaryConditions bcs(&zero_disp);
+  EssentialBCConstant zero_disp(BDY_1, 0.0);
+  EssentialBCS bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u1_space(&mesh, &bcs, P_INIT);

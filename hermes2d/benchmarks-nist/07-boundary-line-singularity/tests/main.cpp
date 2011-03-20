@@ -88,8 +88,8 @@ int main(int argc, char* argv[])
   WeakFormNIST07 wf;
   
   // Initialize boundary conditions
-  DirichletNonConstantExact bc(BDY_DIRICHLET, &exact);
-  BoundaryConditions bcs(&bc);
+  EssentialBCNonConstantExact bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

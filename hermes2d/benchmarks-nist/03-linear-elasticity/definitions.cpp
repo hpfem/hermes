@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 // Exact solution.
 class MyExactSolutionU : public ExactSolutionScalar
@@ -566,16 +566,16 @@ private:
   */
 };
 
-class DirichletNonConstantU : public DirichletBoundaryCondition
+class EssentialBCNonConstantU : public EssentialBC
 {
 public:
-  DirichletNonConstantU(std::string marker, MyExactSolutionU* exact_solution) : 
-        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  EssentialBCNonConstantU(std::string marker, MyExactSolutionU* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~DirichletNonConstantU() {}
+  ~EssentialBCNonConstantU() {}
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 
@@ -588,16 +588,16 @@ public:
   MyExactSolutionU* exact_solution;
 };
 
-class DirichletNonConstantV : public DirichletBoundaryCondition
+class EssentialBCNonConstantV : public EssentialBC
 {
 public:
-  DirichletNonConstantV(std::string marker, MyExactSolutionV* exact_solution) : 
-        DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  EssentialBCNonConstantV(std::string marker, MyExactSolutionV* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~DirichletNonConstantV() {}
+  ~EssentialBCNonConstantV() {}
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 

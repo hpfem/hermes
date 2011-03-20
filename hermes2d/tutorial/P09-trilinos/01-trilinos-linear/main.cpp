@@ -78,8 +78,8 @@ int main(int argc, char **argv)
   WeakFormPoisson wf1;
 
   // Initialize boundary conditions
-  DirichletNonConstant bc(BDY_DIRICHLET, &exact);
-  BoundaryConditions bcs(&bc);
+  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
+  EssentialBCS bcs(&bc);
  
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

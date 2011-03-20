@@ -16,9 +16,9 @@
 #include "../h2d_common.h"
 #include "space.h"
 #include "../../../hermes_common/matrix.h"
-#include "../boundaryconditions/boundaryconditions.h"
+#include "../boundaryconditions/essential_bcs.h"
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, BoundaryConditions* boundary_conditions, Ord2 p_init)
+Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCS* boundary_conditions, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
   _F_
@@ -421,7 +421,7 @@ void Space::reset_dof_assignment()
   int i, j;
   for (i = 0; i < mesh->get_max_node_id(); i++)
   {
-    ndata[i].n = BoundaryCondition::BC_NATURAL;
+    ndata[i].n = 0;
     ndata[i].dof = H2D_UNASSIGNED_DOF;
   }
 
@@ -433,11 +433,11 @@ void Space::reset_dof_assignment()
     for (unsigned int i = 0; i < e->nvert; i++)
     {
       if (e->en[i]->bnd
-        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
       {
         j = e->next_vert(i);
-        ndata[e->vn[i]->id].n = BoundaryCondition::BC_DIRICHLET;
-        ndata[e->vn[j]->id].n = BoundaryCondition::BC_DIRICHLET;
+        ndata[e->vn[i]->id].n = 0;
+        ndata[e->vn[j]->id].n = 0;
       }
     }
   }
@@ -499,7 +499,7 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-void Space::set_boundary_conditions(BoundaryConditions* boundary_conditions)
+void Space::set_boundary_conditions(EssentialBCS* boundary_conditions)
 {
   _F_
   this->boundary_conditions = boundary_conditions;
@@ -554,7 +554,7 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 
     if (nd->dof != H2D_UNASSIGNED_DOF
         && en->bnd
-        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker))->get_type() == BoundaryCondition::BC_DIRICHLET)
+        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL)
     {
       int order = get_edge_order_internal(en);
       surf_pos->marker = en->marker;

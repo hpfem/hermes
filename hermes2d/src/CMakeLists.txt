@@ -75,7 +75,7 @@ set(SRC
        h2d_common.cpp  
        discrete_problem.cpp
        runge_kutta.cpp
-       boundaryconditions/boundaryconditions.cpp
+       boundaryconditions/essential_bcs.cpp
        )
 
 #

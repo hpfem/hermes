@@ -42,9 +42,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  DirichletConstant bc1(BDY_INNER, 0.0);
-  NaturalBoundaryCondition bc2(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT));
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
+  EssentialBCConstant bc_essential(BDY_INNER, 0.0);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

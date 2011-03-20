@@ -26,7 +26,10 @@
 class HERMES_API L2Space : public Space
 {
 public:
-  L2Space(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init = 1,
+  L2Space(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init = 1,
+          Shapeset* shapeset = NULL);
+
+  L2Space(Mesh* mesh, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   // Common code for the constructors.

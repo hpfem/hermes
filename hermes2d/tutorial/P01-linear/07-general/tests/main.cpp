@@ -34,9 +34,8 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions
-  DirichletNonConstant bc1(BDY_HORIZONTAL);
-  NaturalBoundaryCondition bc2(BDY_VERTICAL);
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2));
+  EssentialBCNonConstant bc_essential(BDY_HORIZONTAL);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

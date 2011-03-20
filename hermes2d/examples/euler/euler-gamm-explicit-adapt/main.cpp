@@ -108,15 +108,11 @@ int main(int argc, char* argv[])
   basemesh.refine_by_criterion(criterion, 2);
   mesh.copy(&basemesh);
 
-  // Boundary condition types;
-  NaturalBoundaryCondition bc(Hermes::vector<std::string>(BDY_SOLID_WALL, BDY_INLET_OUTLET));
-  BoundaryConditions bcs(&bc);
-
   // Initialize boundary condition types and spaces with default shapesets.
-  L2Space space_rho(&mesh, &bcs, P_INIT);
-  L2Space space_rho_v_x(&mesh, &bcs, P_INIT);
-  L2Space space_rho_v_y(&mesh, &bcs, P_INIT);
-  L2Space space_e(&mesh, &bcs, P_INIT);
+  L2Space space_rho(&mesh, P_INIT);
+  L2Space space_rho_v_x(&mesh, P_INIT);
+  L2Space space_rho_v_y(&mesh, P_INIT);
+  L2Space space_e(&mesh, P_INIT);
 
   // Initialize solutions, set initial conditions.
   InitialSolutionEulerDensity sln_rho(&mesh, RHO_EXT);

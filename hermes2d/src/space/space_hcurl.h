@@ -27,7 +27,10 @@
 class HERMES_API HcurlSpace : public Space
 {
 public:
-  HcurlSpace(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init = 1,
+  HcurlSpace(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init = 1,
+          Shapeset* shapeset = NULL);
+
+  HcurlSpace(Mesh* mesh, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   // Common code for the constructors.

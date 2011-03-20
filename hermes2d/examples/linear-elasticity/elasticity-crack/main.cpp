@@ -90,8 +90,8 @@ int main(int argc, char* argv[])
   u2_mesh.copy(&u1_mesh);
 
   // Initialize boundary conditions
-  DirichletConstant zero_disp(BDY_LEFT, 0.0);
-  BoundaryConditions bcs(&zero_disp);
+  EssentialBCConstant zero_disp(BDY_LEFT, 0.0);
+  EssentialBCS bcs(&zero_disp);
 
   // Initialize the weak formulation.
   WeakFormLinearElasticity wf(E, nu, g1*rho);

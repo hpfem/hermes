@@ -14,12 +14,8 @@ int main(int argc, char* argv[])
   // sample element refinement, to see more basis functions
   //mesh.refine_all_elements();
 
-  // Enter boundary markers 
-  // (If no markers are entered, default is a natural BC).
-  BoundaryConditions bcs;
-
   // Create an H1 space with default shapeset and natural BC.
-  H1Space space(&mesh, &bcs, 1);
+  H1Space space(&mesh, 1);
 
   // new code for the test
   int n_dof[10], dof_max[10];

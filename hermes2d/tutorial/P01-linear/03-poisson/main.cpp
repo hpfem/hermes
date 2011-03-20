@@ -42,8 +42,8 @@ int main(int argc, char* argv[])
   WeakFormPoisson wf(CONST_F);
   
   // Initialize boundary conditions
-  DirichletConstant bc(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
-  BoundaryConditions bcs(&bc);
+  EssentialBC bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  EssentialBCS bcs(&bc);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

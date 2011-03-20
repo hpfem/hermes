@@ -26,7 +26,10 @@
 class HERMES_API H1Space : public Space
 {
 public:
-  H1Space(Mesh* mesh, BoundaryConditions* boundary_conditions, int p_init = 1,
+  H1Space(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init = 1,
+          Shapeset* shapeset = NULL);
+
+  H1Space(Mesh* mesh, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   // Common code for the constructors.

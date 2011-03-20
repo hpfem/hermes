@@ -1,7 +1,7 @@
 #include "weakform/weakform.h"
 #include "weakform/sample_weak_forms.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
 class MyWeakForm : public WeakFormLinearElasticity
 {
