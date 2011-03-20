@@ -18,7 +18,7 @@
 //
 //     1) Dirichlet boundary condition Ex = 0 (perfect eletric conductor) on Gamma_1 and Gamma_2.
 //     2) Essential (Dirichlet) boundary condition on Gamma_3
-//          Ex(y) = E_0 * cos(y*M_PI/h), where h is height of the waveguide
+//          Ex(y) = E_0 * cos(y*M_PI/h), where h is height of the waveguide ()
 //     3) Newton boundary condition (impedance matching) on Gamma_4
 //          dE/dn = j*beta*E
 //
@@ -27,32 +27,27 @@
 const int P_INIT = 6;                                  // Initial polynomial degree of all elements.
 const int INIT_REF_NUM = 3;                            // Number of initial mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;       // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                       // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_PERFECT = 1, BDY_LEFT = 2, BDY_IMPEDANCE = 3;
+const std::string BDY_PERFECT = "1", BDY_LEFT = "2", BDY_IMPEDANCE = "3";
 
 // Problem parameters.
 const double epsr = 1.0;                    // Relative permittivity
 const double eps0 = 8.85418782e-12;         // Permittivity of vacuum F/m
+const double eps = epsr * eps0;
 const double mur = 1.0;                     // Relative permeablity
 const double mu0 = 4*M_PI*1e-7;             // Permeability of vacuum H/m
+const double mu = mur * mu0;
 const double frequency = 3e9;               // Frequency MHz
 const double omega = 2*M_PI * frequency;    // Angular velocity
 const double sigma = 0;                     // Conductivity Ohm/m
 const double beta = 54;                     // Propagation constant
-const double E0 = 100;                      // Input electric intensity
+const double E0 = 100;                        // Input electric intensity
 const double h = 0.1;                       // Height of waveguide
 
-
-// Distribution of electric field for TE1 mode
-scalar essential_bc_values(double x, double y)
-{    
-    return E0*cos(y*M_PI/h); //
-}
-
 // Weak forms.
-#include "../forms.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -64,37 +59,26 @@ int main(int argc, char* argv[])
     // Perform uniform mesh refinement.
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
-    // Initialize boundary conditions.
-    BCTypes bc_types;    
-    bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_LEFT, BDY_PERFECT));
-    bc_types.add_bc_newton(Hermes::vector<int>(BDY_IMPEDANCE));
+    // Initialize boundary conditions
+    DirichletConstantBoundaryCondition bc1 (BDY_PERFECT, 0.0);
+    DirichletFunctionBoundaryCondition bc2 (BDY_LEFT);
+    NaturalBoundaryCondition bc3(BDY_IMPEDANCE);
+    BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2, &bc3));
 
-    // Enter Dirichlet boundary values;
-    BCValues bc_values_r;
-    bc_values_r.add_const(BDY_PERFECT, 0.0);
-    bc_values_r.add_function(BDY_LEFT, essential_bc_values);
-
-    BCValues bc_values_i;
-    bc_values_i.add_const(BDY_LEFT, 0.0);
-    bc_values_i.add_const(BDY_PERFECT, 0.0);
-
-    // Create H1 shapeset.
-    H1Space e_r_space(&mesh, &bc_types, &bc_values_r, P_INIT);
-    H1Space e_i_space(&mesh, &bc_types, &bc_values_i, P_INIT);
-    info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&e_r_space, &e_i_space)));
+    // Create an H1 space with default shapeset.
+    H1Space e_r_space(&mesh, &bcs, P_INIT);
+    H1Space e_i_space(&mesh, &bcs, P_INIT);
+    int ndof = Space::get_num_dofs(&e_r_space);
+    info("ndof = %d", ndof);
 
     // Initialize the weak formulation
     // Weak forms for real and imaginary parts
 
-    WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(matrix_form_real_real));
-    wf.add_matrix_form(0, 1, callback(matrix_form_real_imag));
-    wf.add_matrix_form(1, 1, callback(matrix_form_imag_imag));
-    wf.add_matrix_form(1, 0, callback(matrix_form_imag_real));
+    // Initialize the weak formulation.
+    WeakFormHelmholtz wf(eps, mu, omega, sigma, beta, E0, h);
 
-    // Impedance matching - Newton boundary condition
-    wf.add_matrix_form_surf(0, 1, callback(matrix_form_surface_imag_real), BDY_IMPEDANCE);
-    wf.add_matrix_form_surf(1, 0, callback(matrix_form_surface_real_imag), BDY_IMPEDANCE);
+    // Initialize the solutions.
+    Solution e_r_sln, e_i_sln;
 
     int success = 1;
     for (int p_init = 2; p_init <= 10; p_init++) {
@@ -111,9 +95,6 @@ int main(int argc, char* argv[])
         SparseMatrix* matrix = create_matrix(matrix_solver);
         Vector* rhs = create_vector(matrix_solver);
         Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-        // Initialize the solutions.
-        Solution e_r_sln, e_i_sln;
 
         // Assemble the stiffness matrix and right-hand side vector.
         info("Assembling the stiffness matrix and right-hand side vector.");
@@ -138,16 +119,16 @@ int main(int argc, char* argv[])
         // Actual test. The values of 'sum' depend on the
         // current shapeset. If you change the shapes  et,
         // you need to correct these numbers.
-        if (p_init == 2 && fabs(sum - 29.6682) > 1e-3) success = 0;
-        if (p_init == 3 && fabs(sum - 153.823) > 1e-3) success = 0;
-        if (p_init == 4 && fabs(sum - 112.541) > 1e-3) success = 0;
-        if (p_init == 5 && fabs(sum - 117.415) > 1e-3) success = 0;
-        if (p_init == 6 && fabs(sum - 118.358) > 1e-3) success = 0;
-        if (p_init == 7 && fabs(sum - 118.213) > 1e-3) success = 0;
-        if (p_init == 8 && fabs(sum - 118.198) > 1e-3) success = 0;
-        if (p_init == 9 && fabs(sum - 118.2) > 1e-3) success = 0;
-        if (p_init == 10 && fabs(sum - 118.2) > 1e-3) success = 0;
-    }
+        if (p_init == 2 && fabs(sum - 65.582) > 1e-3) success = 0;
+        if (p_init == 3 && fabs(sum + 48.9119) > 1e-3) success = 0;
+        if (p_init == 4 && fabs(sum + 46.299) > 1e-3) success = 0;
+        if (p_init == 5 && fabs(sum + 39.8476) > 1e-3) success = 0;
+        if (p_init == 6 && fabs(sum + 40.5802) > 1e-3) success = 0;
+        if (p_init == 7 && fabs(sum + 40.8093) > 1e-3) success = 0;
+        if (p_init == 8 && fabs(sum + 40.7958) > 1e-3) success = 0;
+        if (p_init == 9 && fabs(sum + 40.7928) > 1e-3) success = 0;
+        if (p_init == 10 && fabs(sum + 40.7929) > 1e-3) success = 0;
+    }    
 
     if (success == 1) {
         printf("Success!\n");
