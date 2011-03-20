@@ -89,10 +89,10 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions.
   EssentialBCNonConstant bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   EssentialBCConstant bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
-  EssentialBCS bcs_vel_x(Hermes::vector<EssentialBC *>(&bc_left_vel_x, &bc_other_vel_x));
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBC *>(&bc_left_vel_x, &bc_other_vel_x));
   EssentialBCConstant bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
-  EssentialBCS bcs_vel_y(&bc_vel_y);
-  EssentialBCS bcs_pressure;
+  EssentialBCs bcs_vel_y(&bc_vel_y);
+  EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);

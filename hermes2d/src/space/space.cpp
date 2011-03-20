@@ -18,7 +18,7 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCS* boundary_conditions, Ord2 p_init)
+Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* boundary_conditions, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
   _F_
@@ -499,7 +499,7 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-void Space::set_boundary_conditions(EssentialBCS* boundary_conditions)
+void Space::set_boundary_conditions(EssentialBCs* boundary_conditions)
 {
   _F_
   this->boundary_conditions = boundary_conditions;

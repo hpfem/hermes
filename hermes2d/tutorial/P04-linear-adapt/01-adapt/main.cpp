@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions
   EssentialBCConstant bc_essential_out(OUTER_BDY, 0.0);
   EssentialBCConstant bc_essential_stator(STATOR_BDY, VOLTAGE);
-  EssentialBCS bcs(Hermes::vector<EssentialBC *>(&bc_essential_out, &bc_essential_stator));
+  EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc_essential_out, &bc_essential_stator));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

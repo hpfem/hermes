@@ -33,7 +33,7 @@
 /// There are four main functions the Space class provides:
 /// <ol>
 ///    <li> It handles the Dirichlet (essential) boundary conditions. The user provides a pointer
-///         to an instance of the EssentialBCS class that determines
+///         to an instance of the EssentialBCs class that determines
 ///         which markers represent the Dirichlet part of the boundary, and which markers represent
 ///         the Neumann and Newton parts. It is also possible to use the value BC_NONE
 ///         which supresses all BC processing on such part of the boundary.
@@ -83,13 +83,13 @@ class Ord2;
 class HERMES_API Space
 {
 public:
-  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCS* boundary_conditions, Ord2 p_init);
+  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* boundary_conditions, Ord2 p_init);
 
   virtual ~Space();
   virtual void free();
 
   /// Sets the boundary condition.
-  void set_boundary_conditions(EssentialBCS* boundary_conditions);
+  void set_boundary_conditions(EssentialBCs* boundary_conditions);
   /// Sets element polynomial order. Can be called by the user. Should not be called
   /// for many elements at once, since assign_dofs() is called at the end of this function.
   virtual void set_element_order(int id, int order);
@@ -159,7 +159,7 @@ public:
   int ndof;
 
   /// Obtains an boundary conditions
-  inline EssentialBCS* get_boundary_conditions() { return boundary_conditions; }
+  inline EssentialBCs* get_boundary_conditions() { return boundary_conditions; }
 
   /// Obtains an assembly list for the given element.
   virtual void get_element_assembly_list(Element* e, AsmList* al);
@@ -186,7 +186,7 @@ protected:
   bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
   // boundary conditions
-  EssentialBCS* boundary_conditions;
+  EssentialBCs* boundary_conditions;
 
   /// FE mesh
   Mesh* mesh;

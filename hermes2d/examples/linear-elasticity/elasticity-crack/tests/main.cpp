@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   EssentialBCConstant zero_disp(BDY_LEFT, 0.0);
-  EssentialBCS bcs(&zero_disp);
+  EssentialBCs bcs(&zero_disp);
 
   // Initialize the weak formulation.
   WeakFormLinearElasticity wf(E, nu, g1*rho);

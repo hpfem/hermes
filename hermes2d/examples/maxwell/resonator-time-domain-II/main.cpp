@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   
   // Initialize boundary conditions
   EssentialBCConstant bc_essential(BDY, 0.0);
-  EssentialBCS bcs(&bc_essential);
+  EssentialBCs bcs(&bc_essential);
 
   // Create x- and y- displacement space using the default H1 shapeset.
   HcurlSpace E_space(&mesh, &bcs, P_INIT);

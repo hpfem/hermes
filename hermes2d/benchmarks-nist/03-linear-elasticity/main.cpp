@@ -119,9 +119,9 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   EssentialBCNonConstantU bc_u(BDY_DIRICHLET, &exact_u);
-  EssentialBCS bcs_u(&bc_u);
+  EssentialBCs bcs_u(&bc_u);
   EssentialBCNonConstantV bc_v(BDY_DIRICHLET, &exact_v);
-  EssentialBCS bcs_v(&bc_v);
+  EssentialBCs bcs_v(&bc_v);
 
   // Initialize the weak formulation.
   // NOTE: We pass all four parameters (temporarily) 

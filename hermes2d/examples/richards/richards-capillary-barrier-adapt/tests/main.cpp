@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions.
   RichardsEssentialBC bc_essential(BDY_TOP, H_ELEVATION, PULSE_END_TIME, H_INIT, STARTUP_TIME);
-  EssentialBCS bcs(&bc_essential);
+  EssentialBCs bcs(&bc_essential);
 
 
   // Create an H1 space with default shapeset.

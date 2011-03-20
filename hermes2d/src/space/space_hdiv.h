@@ -27,7 +27,7 @@
 class HERMES_API HdivSpace : public Space
 {
 public:
-  HdivSpace(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init = 1,
+  HdivSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
           Shapeset* shapeset = NULL);
   
   HdivSpace(Mesh* mesh, int p_init = 1,

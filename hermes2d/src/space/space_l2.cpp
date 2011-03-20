@@ -38,7 +38,7 @@ void L2Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-L2Space::L2Space(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init, Shapeset* shapeset)
+L2Space::L2Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
 {
   _F_

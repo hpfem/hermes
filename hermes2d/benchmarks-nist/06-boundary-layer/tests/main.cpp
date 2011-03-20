@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   
   // Initialize boundary conditions
   EssentialBCNonConstantExact bc_esssential(BDY_DIRICHLET, &exact);
-  EssentialBCS bcs(&bc_esssential);
+  EssentialBCs bcs(&bc_esssential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

@@ -50,21 +50,21 @@ EssentialBCConstant::EssentialBCConstant(std::string marker, scalar value) : Ess
   markers.push_back(marker);
 }
 
-// EssentialBCS.
-EssentialBCS::EssentialBCS() {
+// EssentialBCs.
+EssentialBCs::EssentialBCs() {
 };
 
-EssentialBCS::EssentialBCS(Hermes::vector<EssentialBC *> essential_bcs) {
+EssentialBCs::EssentialBCs(Hermes::vector<EssentialBC *> essential_bcs) {
   add_boundary_conditions(essential_bcs);
 };
 
-EssentialBCS::EssentialBCS(EssentialBC * boundary_condition) {
+EssentialBCs::EssentialBCs(EssentialBC * boundary_condition) {
   Hermes::vector<EssentialBC *> boundary_conditions;
   boundary_conditions.push_back(boundary_condition);
   add_boundary_conditions(boundary_conditions);
 };
 
-void EssentialBCS::add_boundary_conditions(Hermes::vector<EssentialBC *> boundary_conditions) {
+void EssentialBCs::add_boundary_conditions(Hermes::vector<EssentialBC *> boundary_conditions) {
   for(Hermes::vector<EssentialBC *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
         all.push_back(*it);
 
@@ -72,24 +72,24 @@ void EssentialBCS::add_boundary_conditions(Hermes::vector<EssentialBC *> boundar
   create_marker_cache();
 };
 
-void EssentialBCS::add_boundary_condition(EssentialBC * boundary_condition) {
+void EssentialBCs::add_boundary_condition(EssentialBC * boundary_condition) {
   Hermes::vector<EssentialBC *> boundary_conditions;
   boundary_conditions.push_back(boundary_condition);
   add_boundary_conditions(boundary_conditions);
 };
 
-Hermes::vector<EssentialBC *>::const_iterator EssentialBCS::begin() const {
+Hermes::vector<EssentialBC *>::const_iterator EssentialBCs::begin() const {
   return all.begin();
 }
 
-Hermes::vector<EssentialBC *>::const_iterator EssentialBCS::end() const {
+Hermes::vector<EssentialBC *>::const_iterator EssentialBCs::end() const {
   return all.end();
 }
 
-EssentialBCS::~EssentialBCS() {
+EssentialBCs::~EssentialBCs() {
 };
 
-void EssentialBCS::create_marker_cache() {
+void EssentialBCs::create_marker_cache() {
   for(this->iterator = begin(); iterator != end(); iterator++)
     for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++) {
       if (markers[*it] != NULL)
@@ -99,14 +99,14 @@ void EssentialBCS::create_marker_cache() {
 }
 
 
-EssentialBC* EssentialBCS::get_boundary_condition(std::string marker) {
+EssentialBC* EssentialBCs::get_boundary_condition(std::string marker) {
   if(markers.find(marker) == markers.end())
     return NULL;
   else
     return markers[marker];
 }
 
-void EssentialBCS::set_current_time(double time) {
+void EssentialBCs::set_current_time(double time) {
   for(iterator = begin(); iterator != end(); iterator++)
     (*iterator)->set_current_time(time);
 };

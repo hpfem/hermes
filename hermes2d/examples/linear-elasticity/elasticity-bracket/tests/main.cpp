@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions.
   EssentialBCConstant zero_disp(BDY_RIGHT, 0.0);
-  EssentialBCS bcs(&zero_disp);
+  EssentialBCs bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u1_space(&u1_mesh, &bcs, P_INIT);

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   EssentialBCNonConstant bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), CONST_F);
-  EssentialBCS bcs(&bc_essential);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

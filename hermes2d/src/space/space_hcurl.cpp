@@ -49,7 +49,7 @@ void HcurlSpace::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init, Shapeset* shapeset)
+HcurlSpace::HcurlSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
 {
   _F_

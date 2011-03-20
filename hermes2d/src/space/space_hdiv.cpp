@@ -49,7 +49,7 @@ void HdivSpace::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-HdivSpace::HdivSpace(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init, Shapeset* shapeset)
+HdivSpace::HdivSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
 {
   _F_

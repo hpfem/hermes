@@ -46,7 +46,7 @@ void H1Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-H1Space::H1Space(Mesh* mesh, EssentialBCS* boundary_conditions, int p_init, Shapeset* shapeset)
+H1Space::H1Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
 {
   _F_

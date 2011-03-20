@@ -60,7 +60,7 @@ protected:
   Hermes::vector<std::string> markers;
 
   // Friend class.
-  friend class EssentialBCS;
+  friend class EssentialBCs;
 };
 
 /// Class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential given by value.
@@ -75,18 +75,18 @@ public:
 };
 
 /// Class encapsulating all boundary conditions of one problem.
-/// Using the class EssentialBCS and its descendants.
-class HERMES_API EssentialBCS {
+/// Using the class EssentialBCs and its descendants.
+class HERMES_API EssentialBCs {
 public:
   /// Default constructor.
-  EssentialBCS();
+  EssentialBCs();
 
   /// Constructor with all boundary conditions of a problem.
-  EssentialBCS(Hermes::vector<EssentialBC *> essential_bcs);
-  EssentialBCS(EssentialBC * boundary_condition);
+  EssentialBCs(Hermes::vector<EssentialBC *> essential_bcs);
+  EssentialBCs(EssentialBC * boundary_condition);
 
   /// Default destructor.
-  ~EssentialBCS();
+  ~EssentialBCs();
 
   /// Initializes the class, fills the structures.
   void add_boundary_conditions(Hermes::vector<EssentialBC *> essential_bcs);

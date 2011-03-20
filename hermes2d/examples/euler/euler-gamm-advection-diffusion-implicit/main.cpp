@@ -108,10 +108,10 @@ int main(int argc, char* argv[])
 
   // Initialize boundary condition types and spaces with default shapesets.
   // For the flow.
-  EssentialBCS bcs_flow;
+  EssentialBCs bcs_flow;
 
   // For the concentration.
-  EssentialBCS bcs_concentration;
+  EssentialBCs bcs_concentration;
 
   switch(SETUP_VARIANT) {
   case 0:

@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   EssentialBCConstant bc_rest(BDY_REST, 1.0);
   EssentialBCNonConstant bc_layer(BDY_LAYER);
 
-  EssentialBCS bcs(Hermes::vector<EssentialBC *>(&bc_rest, &bc_layer));
+  EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc_rest, &bc_layer));
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
