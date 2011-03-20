@@ -42,7 +42,7 @@ if (NOT DEBUG AND NOT RELEASE)
                        Re-run with DEBUG and/or RELEASE set to YES.")
 endif (NOT DEBUG AND NOT RELEASE)
 
-# Depending on the setting of H1D_DEBUG and H1D_REAL, the user will have 
+# Depending on the setting of H1D_DEBUG and H1D_RELEASE, the user will have 
 # two variables at his disposal: HERMES1D_RELEASE and/or HERMES1D_DEBUG
 # (corresponding to the two libraries built on his system). He can use these
 # to selectively link his project to either the optimized version or
@@ -53,9 +53,14 @@ endif (NOT DEBUG AND NOT RELEASE)
 # the Release version will be selected. The appropriate version of hermes_common
 # will be linked as well.
 if(MSVC)
-  set(HERMES1D hermes1d)                # Base name of the library.
-  set(HERMES1D_RELEASE ${HERMES1D})     # Name of the release version.
-  set(HERMES1D_DEBUG ${HERMES1D}-debug) # Name of the debug version.
+    set(HERMES1D_RELEASE "hermes1d")
+    set(HERMES1D_DEBUG "hermes1d-debug")
+    if(RELEASE)
+		set(HERMES1D ${HERMES1D_RELEASE})
+	endif(RELEASE)
+	if(DEBUG)
+		set(HERMES1D ${HERMES1D_DEBUG})
+	endif(DEBUG)
 else(MSVC)
   if(RELEASE)
     set(HERMES1D_RELEASE "hermes1d")

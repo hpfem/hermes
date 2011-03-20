@@ -18,5 +18,6 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS ${FLAGS})
 
 include(PickRealOrCplxLibs)
 PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON} ${PROJECT_NAME})
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${hermes1d_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} ${HERMES})
