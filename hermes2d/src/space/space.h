@@ -300,8 +300,8 @@ public:
   static Space* construct_refined_space(Space* coarse, int order_increase = 1);
 
   // updating time-dependent essential (Dirichlet) boundary conditions
-  void update_essential_bc_values(Hermes::vector<Space*> spaces, double time) const;  // multiple spaces
-  void update_essential_bc_values(Space *s, double time) const;    // one space
+  static void update_essential_bc_values(Hermes::vector<Space*> spaces, double time);  // multiple spaces
+  static void update_essential_bc_values(Space *s, double time);    // one space
 
 };
 

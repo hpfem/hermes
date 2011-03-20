@@ -73,6 +73,8 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2D hermes_2D;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -169,15 +171,14 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BCs.
     if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
-    }
+      Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
 
     if (NEWTON) 
     {
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.

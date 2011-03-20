@@ -78,12 +78,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  NaturalBoundaryCondition bc(Hermes::vector<std::string>(BDY_TOP, BDY_RIGHT, BDY_BOTTOM, BDY_LEFT));
-  BoundaryConditions bcs(&bc);
-
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space space(&mesh, P_INIT);
 
   // Initialize the weak formulation.
   WeakFormNIST05 wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);

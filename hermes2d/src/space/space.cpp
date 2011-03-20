@@ -675,7 +675,7 @@ Space* Space::construct_refined_space(Space* coarse, int order_increase)
 }
 
 // updating time-dependent essential BC
-void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double time) const {
+void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double time) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->get_boundary_conditions()->set_current_time(time);
@@ -683,7 +683,7 @@ void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double tim
   }
 }
 
-void Space::update_essential_bc_values(Space *s, double time) const {
+void Space::update_essential_bc_values(Space *s, double time) {
   s->get_boundary_conditions()->set_current_time(time);
   s->update_essential_bc_values();
 }

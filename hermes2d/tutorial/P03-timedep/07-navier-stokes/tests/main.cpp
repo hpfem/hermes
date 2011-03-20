@@ -50,6 +50,8 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2D hermes_2D;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
   mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
 
-  // Initialize boundary conditions
+  // Initialize boundary conditions.
   EssentialBCNonConstant bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   EssentialBCConstant bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   EssentialBCS bcs_vel_x(Hermes::vector<EssentialBC *>(&bc_left_vel_x, &bc_other_vel_x));
@@ -137,15 +139,14 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BCs.
     if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
-    }
+      Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
 
     if (NEWTON) 
     {
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
