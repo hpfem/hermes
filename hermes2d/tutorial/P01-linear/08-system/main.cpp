@@ -9,9 +9,11 @@
 //
 // PDE: Lame equations of linear elasticity.
 //
-// BC: du_1/dn = f0 on Gamma_3 and du_1/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
-//     du_2/dn = f1 on Gamma_3 and du_2/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
-//     u_1 = 0 and u_2 = 0 on Gamma_1.
+// BC: du_1/dn = f0 on Gamma_3 (top edge),
+//     du_2/dn = f1 on Gamma_3 (top edge),
+//     u_1 = 0 and u_2 = 0 on Gamma_1 (bottom edge),
+//     du_1/dn = 0 on Gamma_2, Gamma_4, Gamma_5 (rest of boundary),
+//     du_2/dn = 0 on Gamma_2, Gamma_4, Gamma_5 (rest of boundary).
 //
 // The following parameters can be changed:
 
@@ -27,8 +29,8 @@ const double E  = 200e9;                                   // Young modulus (ste
 const double nu = 0.3;                                     // Poisson ratio.
 const double rho = 8000.0;                                 // Density.
 const double g1 = -9.81;                                   // Gravitational acceleration.
-const double f0  = 0;                                      // External force in x-direction.
-const double f1  = 8e4;                                    // External force in y-direction.
+const double f0  = 0;                                      // Surface force in x-direction.
+const double f1  = 8e4;                                    // Surface force in y-direction.
 
 // Weak forms.
 #include "definitions.cpp"

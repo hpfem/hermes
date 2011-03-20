@@ -44,20 +44,19 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+// Boundary markers.
+const std::string BDY_RIGHT = "1", BDY_TOP = "2";
+
 // Problem parameters.
 const double E  = 200e9;                          // Young modulus for steel: 200 GPa.
 const double nu = 0.3;                            // Poisson ratio.
-const double f  = 1e3;                            // Load force: 10^3 N.
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-const double mu = E / (2*(1 + nu));
-
-// Boundary markers.
-const int BDY_LEFT = 1;
-const int BDY_TOP = 2;
-const int BDY_REST = 3;
+const double rho = 8000.0;                        // Density.
+const double g1 = -9.81;                          // Gravitational acceleration.
+const double f0  = 0;                             // Surface force in x-direction.
+const double f1  = 1e3;                           // Surface force in y-direction.
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -66,43 +65,48 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Load the mesh.
-  Mesh u_mesh, v_mesh;
+  Mesh u1_mesh, u2_mesh;
   H2DReader mloader;
-  mloader.load("../bracket.mesh", &u_mesh);
+  mloader.load("../bracket.mesh", &u1_mesh);
 
   // Initial mesh refinements.
-  u_mesh.refine_element_id(1);
-  u_mesh.refine_element_id(4);
+  u1_mesh.refine_element_id(1);
+  u1_mesh.refine_element_id(4);
 
   // Create initial mesh for the vertical displacement component.
   // This also initializes the multimesh hp-FEM.
-  v_mesh.copy(&u_mesh);
+  u2_mesh.copy(&u1_mesh);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_TOP, BDY_REST));
+  DirichletConstant zero_disp(BDY_RIGHT, 0.0);
+  BoundaryConditions bcs(&zero_disp);
 
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_LEFT);
-    
-  // Create H1 spaces with default shapesets.
-  H1Space u_space(&u_mesh, &bc_types, &bc_values, P_INIT);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types, &bc_values, P_INIT);
+  // Create x- and y- displacement space using the default H1 shapeset.
+  H1Space u1_space(&u1_mesh, &bcs, P_INIT);
+  H1Space u2_space(&u2_mesh, &bcs, P_INIT);
+  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);  // note that only one symmetric part is
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);  // added in the case of symmetric bilinear
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);  // forms
-  wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
+  MyWeakForm wf(E, nu, rho*g1, BDY_TOP, f0, f1);
+
+  // Initialize the FE problem.
+  bool is_linear = true;
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space), is_linear);
 
   // Initialize coarse and reference mesh solutions.
-  Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
+  Solution u1_sln, u2_sln, u1_ref_sln, u2_ref_sln;
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize views.
+  //ScalarView s_view_0("Solution (x-displacement)", new WinGeom(0, 0, 400, 350));
+  //s_view_0.show_mesh(false);
+  //ScalarView s_view_1("Solution (y-displacement)", new WinGeom(760, 0, 400, 350));
+  //s_view_1.show_mesh(false);
+  //OrderView  o_view_0("Mesh (x-displacement)", new WinGeom(410, 0, 340, 350));
+  //OrderView  o_view_1("Mesh (y-displacement)", new WinGeom(1170, 0, 340, 350));
+  //ScalarView mises_view("Von Mises stress [Pa]", new WinGeom(0, 405, 400, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -115,15 +119,17 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u1_space, &u2_space));
+
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -131,7 +137,7 @@ int main(int argc, char* argv[])
     
     // Solve the linear system of the reference problem. If successful, obtain the solutions.
     if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                                      Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
+                                            Hermes::vector<Solution *>(&u1_ref_sln, &u2_ref_sln));
     else error ("Matrix solver failed.\n");
   
     // Time measurement.
@@ -139,36 +145,56 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Hermes::vector<Space *>(&u_space, &v_space), Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
-                   Hermes::vector<Solution *>(&u_sln, &v_sln), matrix_solver); 
+    OGProjection::project_global(Hermes::vector<Space *>(&u1_space, &u2_space), 
+                                 Hermes::vector<Solution *>(&u1_ref_sln, &u2_ref_sln), 
+                                 Hermes::vector<Solution *>(&u1_sln, &u2_sln), matrix_solver); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    //s_view_0.show(&u1_sln); 
+    //o_view_0.show(&u1_space);
+    //s_view_1.show(&u2_sln); 
+    //o_view_1.show(&u2_space);
+    // For von Mises stress Filter.
+    //double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
+    //double mu = E / (2*(1 + nu));
+    //VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u1_sln, &u2_sln), lambda, mu);
+    //mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u1_sln, &u2_sln, 1e4);
 
-    // Calculate element errors.
-    info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&u_space, &v_space));
+    // Skip visualization time.
+    cpu_time.tick(HERMES_SKIP);
+
+    // Initialize adaptivity.
+    Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&u1_space, &u2_space));
+
+    /* 
+    // Register custom forms for error calculation.
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
     adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
+    */
 
     // Calculate error estimate for each solution component and the total error estimate.
+    info("Calculating error estimate and exact error."); 
     Hermes::vector<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&u_sln, &v_sln), 
-                               Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
-                               &err_est_rel) * 100;
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&u1_sln, &u2_sln), 
+                               Hermes::vector<Solution *>(&u1_ref_sln, &u2_ref_sln), &err_est_rel) * 100;
 
     // Time measurement.
     cpu_time.tick();
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d, err_est_rel[0]: %g%%", 
-         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs(), err_est_rel[0]*100);
+         u1_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]), err_est_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d, err_est_rel[1]: %g%%",
-         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs(), err_est_rel[1]*100);
+         u2_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]), err_est_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d, err_est_rel_total: %g%%",
-         Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+         Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)), 
+         Space::get_num_dofs(*ref_spaces), err_est_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), err_est_rel_total);
+    graph_dof_est.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)), 
+                             err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
@@ -182,7 +208,7 @@ int main(int argc, char* argv[])
       done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
+    if (Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete solver;
@@ -200,11 +226,9 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  verbose("Total running time: %g s", cpu_time.accumulated());
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space));
 
-  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
-
-  int ndof_allowed = 1450;
+  int ndof_allowed = 1420;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
   if (ndof <= ndof_allowed) {      // ndofs was 1414 at the time this test was created

@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../sample.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform uniform mesh refinement.
   mesh.refine_all_elements();
