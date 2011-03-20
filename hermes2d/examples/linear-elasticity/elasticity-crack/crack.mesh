@@ -1,5 +1,5 @@
 
-a = 0.25   # horizontal size of an eleemnt
+a = 0.25   # horizontal size of an element
 b = 0.1    # vertical size of an element
 w = 0.001  # width of the cracks
 

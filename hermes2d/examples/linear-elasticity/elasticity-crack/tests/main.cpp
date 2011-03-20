@@ -9,7 +9,8 @@ using namespace RefinementSelectors;
 // This test makes sure that example "crack" works correctly.
 
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT_U = 2;                           // Initial polynomial degree of all mesh elements (u-displacement).
+const int P_INIT_V = 2;                           // Initial polynomial degree of all mesh elements (v-displacement).
 const bool MULTI = true;                          // true = use multi-mesh, false = use single-mesh.
                                                   // Note: in the single mesh option, the meshes are
                                                   // forced to be geometrically the same but the
@@ -46,17 +47,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E  = 200e9;                          // Young modulus for steel: 200 GPa.
 const double nu = 0.3;                            // Poisson ratio.
-const double f  = 1e3;                            // Load force.
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-const double mu = E / (2*(1 + nu));
+const double g1 = -9.81;                          // Gravitational acceleration.
+const double rho = 8000.0;                        // Material density in kg / m^3. 
 
 // Boundary markers.
-const int BDY_LEFT = 1;
-const int BDY_TOP = 2;
-const int BDY_REST = 3;
+const std::string BDY_LEFT = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "weakform/sample_weak_forms.h"
 
 int main(int argc, char* argv[])
 {
@@ -72,25 +70,16 @@ int main(int argc, char* argv[])
   // This also initializes the multimesh hp-FEM.
   v_mesh.copy(&u_mesh);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types_xy;
-  bc_types_xy.add_bc_dirichlet(BDY_LEFT);
-  bc_types_xy.add_bc_neumann(Hermes::vector<int>(BDY_TOP, BDY_REST));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_LEFT);
-
-  // Create H1 spaces with default shapesets.
-  H1Space u_space(&u_mesh, &bc_types_xy, &bc_values, P_INIT);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types_xy, &bc_values, P_INIT);
+  // Initialize boundary conditions
+  DirichletConstant zero_disp(BDY_LEFT, 0.0);
+  BoundaryConditions bcs(&zero_disp);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
-  wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
+  WeakFormLinearElasticity wf(E, nu, g1*rho);
+
+  // Create H1 spaces with default shapeset for both displacement components.
+  H1Space u_space(&u_mesh, &bcs, P_INIT_U);
+  H1Space v_space(&v_mesh, &bcs, P_INIT_V);
 
   // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
@@ -115,13 +104,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
 
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -140,15 +131,18 @@ int main(int argc, char* argv[])
     OGProjection::project_global(Hermes::vector<Space *>(&u_space, &v_space), Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
                    Hermes::vector<Solution *>(&u_sln, &v_sln), matrix_solver); 
 
-    // Calculate element errors.
-    info("Calculating error estimate and exact error."); 
+    // Initialize adaptivity.
     Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&u_space, &v_space));
+
+    /* FIXME - this needs to be implemented.
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
     adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
+    */
       
     // Calculate error estimate for each solution component and the total error estimate.
+    info("Calculating error estimate and exact error."); 
     Hermes::vector<double> err_est_rel;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&u_sln, &v_sln), 
                                Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
@@ -201,7 +195,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
 
-  int ndof_allowed = 920;
+  int ndof_allowed = 600;
   printf("ndof actual = %d\n", ndof);
   printf("ndof allowed = %d\n", ndof_allowed);
   if (ndof <= ndof_allowed) {      // ndofs was 908 at the time this test was created

@@ -29,48 +29,52 @@ can be changed in the mesh file `crack.mesh
     w = 0.001  # width of the cracks
 
 Solved are equations of linear elasticity with the following boundary conditions: 
-$u_1 = u_2 = 0$ on the left edge, external force $f$ on the upper edge, and zero Neumann
-conditions for $u_1$ and $u_2$ on the right and bottom edges as well as on the crack 
-boundaries. 
+$u_1 = u_2 = 0$ on the left edge, zero external force on the rest of the boundary.
+The elastic body is loaded with its own weight.
 
 Weak forms
 ~~~~~~~~~~
 
-Translated into the weak forms, this becomes::
+The weak forms of linear elasticity are provided by Hermes by default and they can be found in the file 
+`src/weakform/sample_weak_forms.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/sample_weak_forms.h>`_.
+They look as follows::
 
-    // linear and bilinear forms
     template<typename Real, typename Scalar>
-    Scalar bilinear_form_0_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
                           mu * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
     }
 
     template<typename Real, typename Scalar>
-    Scalar bilinear_form_0_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
                  mu * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
     }
 
     template<typename Real, typename Scalar>
-    Scalar bilinear_form_1_0(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      return     mu * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-             lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
+      return      mu * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
+              lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
     }
 
     template<typename Real, typename Scalar>
-    Scalar bilinear_form_1_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       return              mu * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
              (lambda + 2*mu) * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
     }
 
     template<typename Real, typename Scalar>
-    Scalar linear_form_surf_1(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return -f * int_v<Real, Scalar>(n, wt, v);
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
+      return rho_g * int_v<Real, Scalar>(n, wt, v);
     }
 
 Activating multimesh
@@ -96,35 +100,26 @@ Defining boundary conditions
 
 ::
 
-    // Enter boundary markers.
-    BCTypes bc_types_xy;
-    bc_types_xy.add_bc_dirichlet(BDY_LEFT);
-    bc_types_xy.add_bc_neumann(Hermes::Tuple<int>(BDY_TOP, BDY_REST));
+    // Initialize boundary conditions
+    DirichletConstant zero_disp(BDY_LEFT, 0.0);
+    BoundaryConditions bcs(&zero_disp);
 
-    // Enter Dirichlet boundary values.
-    BCValues bc_values;
-    bc_values.add_zero(BDY_LEFT);
+Creating weak forms
+~~~~~~~~~~~~~~~~~~~
+
+::
+
+    // Initialize the weak formulation.
+    WeakFormLinearElasticity wf(E, nu, g1*rho);
 
 Defining individual spaces for displacement componants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Then we define separate spaces for $u_1$ and $u_2$::
+::
 
-    // Create H1 spaces with default shapesets.
-    H1Space u_space(&u_mesh, &bc_types_xy, &bc_values, P_INIT);
-    H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types_xy, &bc_values, P_INIT);
-
-Registering weak forms
-~~~~~~~~~~~~~~~~~~~~~~
-
-The weak forms are registered as usual::
-
-    // Initialize the weak formulation.
-    WeakForm wf(2);
-    wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
-    wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
-    wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
+    // Create H1 spaces with default shapeset for both displacement components.
+    H1Space u_space(&u_mesh, &bcs, P_INIT_U);
+    H1Space v_space(&v_mesh, &bcs, P_INIT_V);
 
 Creating a refinement selector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

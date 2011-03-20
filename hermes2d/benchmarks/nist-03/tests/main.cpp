@@ -105,18 +105,17 @@ int main(int argc, char* argv[])
   MyExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
   MyExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
+  // Initialize boundary conditions
+  DirichletNonConstantU bc_u(BDY_DIRICHLET, &exact_u);
+  BoundaryConditions bcs_u(&bc_u);
+  DirichletNonConstantV bc_v(BDY_DIRICHLET, &exact_v);
+  BoundaryConditions bcs_v(&bc_v);
+
   // Initialize the weak formulation.
   // NOTE: We pass all four parameters since in Mitchell's 
   // papers they are mutually inconsistent.
   MyWeakFormLinearElasticity wf(E, nu, mu, lambda);
   
-  // Initialize boundary conditions
-  DirichletNonConstantExactU bc_u(BDY_DIRICHLET, &exact_u);
-  BoundaryConditions bcs_u(&bc_u);
-  
-  DirichletNonConstantExactV bc_v(BDY_DIRICHLET, &exact_v);
-  BoundaryConditions bcs_v(&bc_v);
-
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);
   H1Space v_space(&v_mesh, &bcs_v, P_INIT_V);

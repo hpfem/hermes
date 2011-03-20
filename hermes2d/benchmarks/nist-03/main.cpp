@@ -117,23 +117,23 @@ int main(int argc, char* argv[])
   MyExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
   MyExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
+  // Initialize boundary conditions
+  DirichletNonConstantU bc_u(BDY_DIRICHLET, &exact_u);
+  BoundaryConditions bcs_u(&bc_u);
+  DirichletNonConstantV bc_v(BDY_DIRICHLET, &exact_v);
+  BoundaryConditions bcs_v(&bc_v);
+
   // Initialize the weak formulation.
   // NOTE: We pass all four parameters (temporarily) 
   // since in Mitchell's paper (NIST benchmarks) they 
   // are mutually inconsistent.
   MyWeakFormLinearElasticity wf(E, nu, mu, lambda);
-  
-  // Initialize boundary conditions
-  DirichletNonConstantExactU bc_u(BDY_DIRICHLET, &exact_u);
-  BoundaryConditions bcs_u(&bc_u);
-  
-  DirichletNonConstantExactV bc_v(BDY_DIRICHLET, &exact_v);
-  BoundaryConditions bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);
   H1Space v_space(&v_mesh, &bcs_v, P_INIT_V);
 
+  // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
 
   // Initialize refinement selector.
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     s_view_v.show(&v_sln); 
     o_view_v.show(&v_space);
     VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
-    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1e5);
+    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 0.05);
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 

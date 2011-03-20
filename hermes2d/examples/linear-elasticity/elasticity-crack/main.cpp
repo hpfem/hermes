@@ -10,12 +10,12 @@ using namespace RefinementSelectors;
 // of linear elasticity. Note that since both displacement components
 // have similar qualitative behavior, the advantage of the multimesh 
 // discretization is less striking than for example in the tutorial 
-// example 11-adapt-system.
+// example P04-linear-adapt/02-system-adapt.
 //
-// PDE: Lame equations of linear elasticity.
+// PDE: Lame equations of linear elasticity. No external forces, the 
+//      object is loaded with its own weight.
 //
 // BC: u_1 = u_2 = 0 on Gamma_1 (left edge)
-//     du_2/dn = f on Gamma_2 (upper edge)
 //     du_1/dn = du_2/dn = 0 elsewhere, including two horizontal
 //               cracks inside the domain. The width of the cracks
 //               is currently zero, it can be set in the mesh file
@@ -24,7 +24,8 @@ using namespace RefinementSelectors;
 // The following parameters can be changed:
 
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT_U = 2;                           // Initial polynomial degree of all mesh elements (u-displacement).
+const int P_INIT_V = 2;                           // Initial polynomial degree of all mesh elements (v-displacement).
 const bool MULTI = true;                          // true = use multi-mesh, false = use single-mesh.
                                                   // Note: in the single mesh option, the meshes are
                                                   // forced to be geometrically the same but the
@@ -61,17 +62,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double E  = 200e9;                          // Young modulus for steel: 200 GPa.
 const double nu = 0.3;                            // Poisson ratio.
-const double f  = 1e3;                            // Load force.
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
-const double mu = E / (2*(1 + nu));
+const double g1 = -9.81;                          // Gravitational acceleration.
+const double rho = 8000;                          // Material density in kg / m^3. 
 
 // Boundary markers.
-const int BDY_LEFT = 1;
-const int BDY_TOP = 2;
-const int BDY_REST = 3;
+const std::string BDY_LEFT = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "weakform/sample_weak_forms.h"
 
 int main(int argc, char* argv[])
 {
@@ -91,25 +89,16 @@ int main(int argc, char* argv[])
   // This also initializes the multimesh hp-FEM.
   v_mesh.copy(&u_mesh);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types_xy;
-  bc_types_xy.add_bc_dirichlet(BDY_LEFT);
-  bc_types_xy.add_bc_neumann(Hermes::vector<int>(BDY_TOP, BDY_REST));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_LEFT);
-
-  // Create H1 spaces with default shapesets.
-  H1Space u_space(&u_mesh, &bc_types_xy, &bc_values, P_INIT);
-  H1Space v_space(MULTI ? &v_mesh : &u_mesh, &bc_types_xy, &bc_values, P_INIT);
+  // Initialize boundary conditions
+  DirichletConstant zero_disp(BDY_LEFT, 0.0);
+  BoundaryConditions bcs(&zero_disp);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0), HERMES_SYM);
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1), HERMES_SYM);
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1), HERMES_SYM);
-  wf.add_vector_form_surf(1, linear_form_surf_1, linear_form_surf_1_ord, BDY_TOP);
+  WeakFormLinearElasticity wf(E, nu, g1*rho);
+
+  // Create H1 spaces with default shapeset for both displacement components.
+  H1Space u_space(&u_mesh, &bcs, P_INIT_U);
+  H1Space v_space(&v_mesh, &bcs, P_INIT_V);
 
   // Initialize coarse and reference mesh solutions.
   Solution u_sln, v_sln, u_ref_sln, v_ref_sln;
@@ -118,12 +107,13 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView s_view_0("Solution[0]", new WinGeom(0, 0, 900, 300));
+  ScalarView s_view_0("Solution (u-displacement)", new WinGeom(0, 0, 600, 300));
   s_view_0.show_mesh(false);
-  ScalarView s_view_1("Solution[1]", new WinGeom(910, 0, 900, 300));
+  ScalarView s_view_1("Solution (v-displacement)", new WinGeom(610, 0, 600, 300));
   s_view_1.show_mesh(false);
-  OrderView  o_view_0("Mesh[0]", new WinGeom(0, 355, 900, 300));
-  OrderView  o_view_1("Mesh[1]", new WinGeom(910, 355, 900, 300));
+  OrderView  o_view_0("Mesh[0]", new WinGeom(0, 355, 600, 300));
+  OrderView  o_view_1("Mesh[1]", new WinGeom(610, 355, 600, 300));
+  ScalarView mises_view("Von Mises stress [Pa]", new WinGeom(1220, 0, 600, 300));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -171,17 +161,26 @@ int main(int argc, char* argv[])
     o_view_0.show(&u_space);
     s_view_1.show(&v_sln); 
     o_view_1.show(&v_space);
+    // For von Mises stress Filter.
+    double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
+    double mu = E / (2*(1 + nu));
+    VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
+    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1e3);
 
     // Skip visualization time.
     cpu_time.tick(HERMES_SKIP);
 
-    // Register custom forms for error calculation.
+    // Initialize adaptivity.
     Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&u_space, &v_space));
+
+    /*
+    // Register custom forms for error calculation.
     adaptivity->set_error_form(0, 0, bilinear_form_0_0<scalar, scalar>, bilinear_form_0_0<Ord, Ord>);
     adaptivity->set_error_form(0, 1, bilinear_form_0_1<scalar, scalar>, bilinear_form_0_1<Ord, Ord>);
     adaptivity->set_error_form(1, 0, bilinear_form_1_0<scalar, scalar>, bilinear_form_1_0<Ord, Ord>);
     adaptivity->set_error_form(1, 1, bilinear_form_1_1<scalar, scalar>, bilinear_form_1_1<Ord, Ord>);
-      
+    */
+    
     // Calculate error estimate for each solution component and the total error estimate.
     info("Calculating error estimate and exact error."); 
     Hermes::vector<double> err_est_rel;
@@ -237,9 +236,9 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
-  s_view_0.set_title("Fine mesh Solution[0]");
+  s_view_0.set_title("Fine mesh solution (u-displacement)");
   s_view_0.show(&u_ref_sln);
-  s_view_1.set_title("Fine mesh Solution[1]");
+  s_view_1.set_title("Fine mesh solution (v-displacement)");
   s_view_1.show(&v_ref_sln);
 
   // Wait for all views to be closed.
