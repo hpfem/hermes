@@ -34,7 +34,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Boundary vertical";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
