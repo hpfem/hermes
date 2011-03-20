@@ -424,6 +424,21 @@ Space::Space(double a, double b, int n_base_elem,
   this->assign_dofs();
 }
 
+Space::Space(double a, double b, int n_base_elem, 
+             std::pair<int, double> left_boundary_condition, 
+             std::pair<int, double> right_boundary_condition, 
+             int p_init, int n_eq, int n_sln, bool print_banner)
+{
+  this->init(a, b, n_base_elem, p_init, n_eq, n_sln, print_banner);
+
+  // Assign Dirichlet boundary conditions.
+  this->set_bc_left_dirichlet(left_boundary_condition.first, left_boundary_condition.second);
+  this->set_bc_right_dirichlet(right_boundary_condition.first, right_boundary_condition.second);
+
+  // Assign degrees of freedom.
+  this->assign_dofs();
+}
+
 // FIXME: This is OBSOLETE and only kept because of Python wrappers. Use the next constructor instead.
 Space::Space(int n_macro_elem, 
              double *pts_array, int *p_array, int *m_array, int *div_array, 
@@ -536,6 +551,61 @@ Space::Space(int n_macro_elem,
   if(right_boundary_conditions != Hermes::vector<std::pair<int, double> *>())
     for(unsigned int i = 0; i < right_boundary_conditions.size(); i++)
       this->set_bc_right_dirichlet(right_boundary_conditions.at(i)->first, right_boundary_conditions.at(i)->second);
+  // Assign degrees of freedom.
+  this->assign_dofs();
+}
+
+Space::Space(int n_macro_elem, 
+             double *pts_array, int *p_array, int *m_array, int *div_array, 
+             std::pair<int, double> left_boundary_condition, 
+             std::pair<int, double> right_boundary_condition,
+             int n_eq, int n_sln, bool print_banner)
+{
+  // check maximum number of equations
+  if(n_eq > MAX_EQN_NUM) 
+  error("Maximum number of equations exceeded (set in common.h)");
+
+  // calculate n_base_elem
+  int n_base_elem = 0;
+  for (int i=0; i < n_macro_elem; i++) {
+    if(div_array[i] <= 0) error("Inadmissible macroelement subdivision.");
+    if(p_array[i] <= 0) error("Inadmissible macroelement poly degree.");
+    if (p_array[i] > MAX_P) error("Max element order exceeded (set in common.h).");
+    if(m_array[i] < 0) error("Inadmissible macroelement material marker.");
+    if(pts_array[i] >= pts_array[i+1]) error("Inadmissible macroelement grid point.");
+    n_base_elem += div_array[i];
+  }
+  info("Number of elements: %d", n_base_elem);
+
+  // define all Space class variables
+  this->left_endpoint = pts_array[0];
+  this->right_endpoint = pts_array[n_macro_elem];
+  this->n_base_elem = n_base_elem;
+  this->n_eq = n_eq;
+  this->n_sln = n_sln;
+  this->n_active_elem = n_base_elem;
+
+  // allocate base element array
+  this->base_elems = new Element[this->n_base_elem];     
+  if (base_elems == NULL) error("Not enough memory for base element array in Space::create().");
+
+  // initialize element array
+  int count = 0;
+  for(int i=0; i < n_macro_elem; i++) {
+    double length = (pts_array[i+1] - pts_array[i])/div_array[i];
+    for(int j=0; j < div_array[i]; j++) {
+      int id = count;
+      int active = 1;
+      int level = 0;
+      double x_left = pts_array[i] + length * j;
+      double x_right = x_left + length;
+      this->base_elems[count].init(x_left, x_right, p_array[i], id, active, level, n_eq, n_sln, m_array[i]);
+      count++;
+    }
+  }
+  // Assign Dirichlet boundary conditions.
+  this->set_bc_left_dirichlet(left_boundary_condition.first, left_boundary_condition.second);
+  this->set_bc_right_dirichlet(right_boundary_condition.first, right_boundary_condition.second);
   // Assign degrees of freedom.
   this->assign_dofs();
 }

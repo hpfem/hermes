@@ -85,6 +85,12 @@ class HERMES_API Space {
               int n_eq = 1, 
               int n_sln = 1, 
               bool print_banner = true);
+
+        Space(double a, double b, int n_base_elem, std::pair<int, double> left_boundary_condition, 
+              std::pair<int, double> right_boundary_condition, int p_init = 1, 
+              int n_eq = 1, 
+              int n_sln = 1, 
+              bool print_banner = true);
         // Creates a general space (used, e.g., in example "neutronics").
         // n_macro_elem... number of macro elements
         // pts_array[]...  array of macroelement grid points
@@ -101,6 +107,13 @@ class HERMES_API Space {
               int n_sln=1, 
               bool print_banner=true);
         
+        Space(int n_macro_elem, 
+              double *pts_array, int *p_array, int *m_array, int *div_array, 
+              std::pair<int, double> left_boundary_condition, 
+              std::pair<int, double> right_boundary_condition, 
+              int n_eq=1, 
+              int n_sln=1, 
+              bool print_banner=true);
         //FIXME: We currently do not have a Python wrapper for Hermes::vector, so we
         // cannot wrap the above constructor. This constructor is required to ensure
         // compatibility with the wrappers, but should not be used.

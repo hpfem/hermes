@@ -39,8 +39,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
-Hermes::vector<BCSpec *> DIR_BC_LEFT =  Hermes::vector<BCSpec *>(new BCSpec(0,0));
-Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>(new BCSpec(0,0));
+BCSpec DIR_BC_LEFT(0, 0);
+BCSpec DIR_BC_RIGHT(0, 0);
 
 // Function f(x).
 double f(double x) 
