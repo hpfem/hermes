@@ -57,18 +57,18 @@ Thank you in advance for helping us improve Hermes!
 .. toctree::
     :maxdepth: 1
 
-    src/hermes2d/linear
-    src/hermes2d/nonlinear
-    src/hermes2d/timedep
-    src/hermes2d/linear-adapt
-    src/hermes2d/nonlinear-adapt
-    src/hermes2d/timedep-adapt
-    src/hermes2d/eigen
-    src/hermes2d/fvm-and-dg
-    src/hermes2d/trilinos
-    src/hermes2d/miscellaneous
-    src/hermes2d/benchmarks
-    src/hermes2d/nist
+    src/hermes2d/P01-linear
+    src/hermes2d/P02-nonlinear
+    src/hermes2d/P03-timedep
+    src/hermes2d/P04-linear-adapt
+    src/hermes2d/P05-nonlinear-adapt
+    src/hermes2d/P06-timedep-adapt
+    src/hermes2d/P07-eigen
+    src/hermes2d/P08-fvm-and-dg
+    src/hermes2d/P09-trilinos
+    src/hermes2d/P10-miscellaneous
+    src/hermes2d/benchmarks-general
+    src/hermes2d/benchmarks-nist
     src/hermes2d/examples
     
 4. Hermes3D

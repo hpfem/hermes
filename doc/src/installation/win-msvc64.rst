@@ -1,5 +1,5 @@
 Windows 64bit (MSVC)
-==============
+====================
 
 This section describes how to build and use Hermes in Microsoft Visual C++ 2010 (Professional Edition). 
 These instructions should probably work even for older versions of MS Visual C++ down to version 2005.

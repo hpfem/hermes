@@ -156,7 +156,8 @@ if(WITH_EXAMPLES)
 endif(WITH_EXAMPLES)
 
 if(WITH_BENCHMARKS)
-  add_subdirectory(benchmarks)
+  add_subdirectory(benchmarks-general)
+  add_subdirectory(benchmarks-nist)
 endif(WITH_BENCHMARKS)
 
 if(WITH_TUTORIAL)
