@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
     // Initialize boundary conditions
-    DirichletConstantBoundaryCondition bc1 (BDY_PERFECT, 0.0);    
-    DirichletFunctionBoundaryCondition bc2 (BDY_LEFT);
+    DirichletConstant bc1(BDY_PERFECT, 0.0);    
+    DirichletFunctionBoundaryCondition bc2(BDY_LEFT);
     NaturalBoundaryCondition bc3(BDY_IMPEDANCE);
     BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2, &bc3));
 
