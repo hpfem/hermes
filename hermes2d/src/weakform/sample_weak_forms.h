@@ -36,9 +36,7 @@ private:
   class MatrixFormLaplace : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormLaplace(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_SYM;
-    }
+    MatrixFormLaplace(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -74,8 +72,7 @@ public:
     double mu = E / (2*(1 + nu));
     
     add_matrix_form(new MatrixFormVolLinearElasticity_0_0(lambda, mu));
-    add_matrix_form(new MatrixFormVolLinearElasticity_0_1(lambda, mu));
-    add_matrix_form(new MatrixFormVolLinearElasticity_1_0(lambda, mu));
+    add_matrix_form(new MatrixFormVolLinearElasticity_0_1(lambda, mu)); 
     add_matrix_form(new MatrixFormVolLinearElasticity_1_1(lambda, mu));
     add_vector_form(new VectorFormGravity(rho_g));                   // gravity loading
   }
@@ -85,7 +82,7 @@ private:
   {
   public:
     MatrixFormVolLinearElasticity_0_0(double lambda, double mu) 
-            : WeakForm::MatrixFormVol(0, 0), lambda(lambda), mu(mu) {}
+      : WeakForm::MatrixFormVol(0, 0, HERMES_SYM), lambda(lambda), mu(mu) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -115,7 +112,7 @@ private:
   {
   public:
     MatrixFormVolLinearElasticity_0_1(double lambda, double mu) 
-            : WeakForm::MatrixFormVol(0, 1), lambda(lambda), mu(mu) {}
+            : WeakForm::MatrixFormVol(0, 1, HERMES_SYM), lambda(lambda), mu(mu) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -141,41 +138,11 @@ private:
     double lambda, mu;
   };
 
-  class MatrixFormVolLinearElasticity_1_0 : public WeakForm::MatrixFormVol
-  {
-  public:
-    MatrixFormVolLinearElasticity_1_0(double lambda, double mu) 
-              : WeakForm::MatrixFormVol(1, 0), lambda(lambda), mu(mu) {}
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return      mu * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-              lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
-       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    // Members.
-    double lambda, mu;
-  };
-
   class MatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
   {
   public:
     MatrixFormVolLinearElasticity_1_1(double lambda, double mu) 
-            : WeakForm::MatrixFormVol(1, 1), lambda(lambda), mu(mu) {}
+            : WeakForm::MatrixFormVol(1, 1, HERMES_SYM), lambda(lambda), mu(mu) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

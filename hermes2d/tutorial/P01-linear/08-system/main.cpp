@@ -9,8 +9,8 @@
 //
 // PDE: Lame equations of linear elasticity.
 //
-// BC: du_1/dn = f_0 on Gamma_3 and du_1/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
-//     du_2/dn = f_1 on Gamma_3 and du_2/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
+// BC: du_1/dn = f0 on Gamma_3 and du_1/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
+//     du_2/dn = f1 on Gamma_3 and du_2/dn = 0 on Gamma_2, Gamma_4, Gamma_5,
 //     u_1 = 0 and u_2 = 0 on Gamma_1.
 //
 // The following parameters can be changed:
@@ -20,18 +20,18 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOL
                                                            // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const std::string BDY_1 = "1", BDY_2 = "2", BDY_3 = "3", BDY_4 = "4", BDY_5 = "5";
+const std::string BDY_1 = "1", BDY_3 = "3";
 
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).
 const double nu = 0.3;                                     // Poisson ratio.
-const double f_0  = 0;                                     // External force in x-direction.
-const double f_1  = 1e4;                                   // External force in y-direction.
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
-const double mu = E / (2*(1 + nu));                        // Second Lame constant.
+const double rho = 8000.0;                                 // Density.
+const double g1 = -9.81;                                   // Gravitational acceleration.
+const double f0  = 0;                                      // External force in x-direction.
+const double f1  = 8e4;                                    // External force in y-direction.
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -40,26 +40,24 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
 
-  mesh1.copy(&mesh);
   // Perform uniform mesh refinement.
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DirichletConstant bc_dirichlet(BDY_1, 0.0);
-  NaturalBoundaryCondition bc_natural(Hermes::vector<std::string>(BDY_2, BDY_3, BDY_4, BDY_5));
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
+  DirichletConstant zero_disp(BDY_1, 0.0);
+  BoundaryConditions bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, &bcs, P_INIT);
-  H1Space v_space(&mesh1, &bcs, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
+  H1Space u1_space(&mesh, &bcs, P_INIT);
+  H1Space u2_space(&mesh, &bcs, P_INIT);
+  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
 
   // Initialize the weak formulation.
-  WeakFormLameEquations wf(mu, lambda, BDY_3, f_0, f_1);
+  MyWeakForm wf(E, nu, rho*g1, BDY_3, f0, f1);
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u_space, &v_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space), is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -67,7 +65,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solutions.
-  Solution u_sln, v_sln;
+  Solution u1_sln, u2_sln;
 
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
@@ -75,15 +73,17 @@ int main(int argc, char* argv[])
 
   // Solve the linear system and if successful, obtain the solutions.
   info("Solving the matrix problem.");
-  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u_space, &v_space), 
-                                                    Hermes::vector<Solution *>(&u_sln, &v_sln));
+  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u1_space, &u2_space), 
+                                                    Hermes::vector<Solution *>(&u1_sln, &u2_sln));
   else error ("Matrix solver failed.\n");
   
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
-  VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
+  double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
+  double mu = E / (2*(1 + nu));                        // Second Lame constant.
+  VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u1_sln, &u2_sln), lambda, mu);
   view.show_mesh(false);
-  view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 1.5e5);
+  view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u1_sln, &u2_sln, 1.5e5);
 
   // Wait for the view to be closed.
   View::wait();

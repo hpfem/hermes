@@ -8,18 +8,18 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOL
                                                            // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const std::string BDY_1 = "1", BDY_2 = "2", BDY_3 = "3", BDY_4 = "4", BDY_5 = "5";
+const std::string BDY_1 = "1", BDY_3 = "3";
 
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).
 const double nu = 0.3;                                     // Poisson ratio.
-const double f_0  = 0;                                     // External force in x-direction.
-const double f_1  = 1e4;                                   // External force in y-direction.
-const double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
-const double mu = E / (2*(1 + nu));                        // Second Lame constant.
+const double rho = 8000.0;                                 // Density.
+const double g1 = -9.81;                                   // Gravitational acceleration.
+const double f0  = 0;                                      // External force in x-direction.
+const double f1  = 8e4;                                    // External force in y-direction.
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -28,18 +28,20 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("../sample.mesh", &mesh);
 
+  // Perform uniform mesh refinement.
+  mesh.refine_all_elements();
+
   // Initialize boundary conditions.
-  DirichletConstant bc_dirichlet(BDY_1, 0.0);
-  NaturalBoundaryCondition bc_natural(Hermes::vector<std::string>(BDY_2, BDY_3, BDY_4, BDY_5));
-  BoundaryConditions bcs(Hermes::vector<BoundaryCondition*>(&bc_dirichlet, &bc_natural));
+  DirichletConstant zero_disp(BDY_1, 0.0);
+  BoundaryConditions bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
-  H1Space u_space(&mesh, &bcs, P_INIT);
-  H1Space v_space(&mesh, &bcs, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
+  H1Space u1_space(&mesh, &bcs, P_INIT);
+  H1Space u2_space(&mesh, &bcs, P_INIT);
+  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
 
   // Initialize the weak formulation.
-  WeakFormLameEquations wf(mu, lambda, BDY_3, f_0, f_1);
+  MyWeakForm wf(E, nu, rho*g1, BDY_3, f0, f1);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
@@ -47,12 +49,12 @@ int main(int argc, char* argv[])
   Solution xsln, ysln;
   for (int p_init = 1; p_init <= 10; p_init++) {
     printf("********* p_init = %d *********\n", p_init);
-    u_space.set_uniform_order(p_init);
-    v_space.set_uniform_order(p_init);
+    u1_space.set_uniform_order(p_init);
+    u2_space.set_uniform_order(p_init);
 
     // Initialize the FE problem.
     bool is_linear = true;
-    DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u_space, &v_space), is_linear);
+    DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space), is_linear);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -60,7 +62,7 @@ int main(int argc, char* argv[])
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
     // Initialize the solutions.
-    Solution u_sln, v_sln;
+    Solution u1_sln, u2_sln;
 
     // Assemble the stiffness matrix and right-hand side vector.
     info("Assembling the stiffness matrix and right-hand side vector.");
@@ -69,11 +71,12 @@ int main(int argc, char* argv[])
     // Solve the linear system and if successful, obtain the solutions.
     info("Solving the matrix problem.");
     if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u_space, &v_space), Hermes::vector<Solution *>(&u_sln, &v_sln));
+      Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u1_space, &u2_space), 
+                                    Hermes::vector<Solution *>(&u1_sln, &u2_sln));
     else
       error ("Matrix solver failed.\n");
 
-    int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
+    int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space));
     printf("ndof = %d\n", ndof);
     double sum = 0;
     for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
