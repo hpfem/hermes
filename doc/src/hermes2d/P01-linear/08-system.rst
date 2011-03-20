@@ -130,8 +130,149 @@ Definition of weak forms
 Hermes provides a generic class WeakFormLinearElasticity in the file 
 `src/weakform/sample_weak_forms.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/sample_weak_forms.h>`_.
 These are volumetric forms that can be used for problems with Dirichlet and/or zero Neumann
-boundary conditions. Nonzero Neumann conditions that we need in our case can be implemented by 
-subclassing the WeakFormLinearElasticity class and adding surface forms::
+boundary conditions::
+
+    /* Linear elasticity (Lame equations)  
+       with Dirichlet and/or zero Neumann BC (just volumetric forms).
+
+       Nonzero Neumann and Newton boundary conditions can be enabled 
+       by creating a descendant and adding surface forms to it. 
+    */
+
+    class WeakFormLinearElasticity : public WeakForm
+    {
+    public:
+      WeakFormLinearElasticity(double E, double nu, double rho_g) : WeakForm(2)
+      {
+	double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
+	double mu = E / (2*(1 + nu));
+
+	add_matrix_form(new MatrixFormVolLinearElasticity_0_0(lambda, mu));
+	add_matrix_form(new MatrixFormVolLinearElasticity_0_1(lambda, mu)); 
+	add_matrix_form(new MatrixFormVolLinearElasticity_1_1(lambda, mu));
+	add_vector_form(new VectorFormGravity(rho_g));                   // gravity loading
+      }
+
+    private:
+      class MatrixFormVolLinearElasticity_0_0 : public WeakForm::MatrixFormVol
+      {
+      public:
+	MatrixFormVolLinearElasticity_0_0(double lambda, double mu) 
+	  : WeakForm::MatrixFormVol(0, 0, HERMES_SYM), lambda(lambda), mu(mu) {}
+
+	template<typename Real, typename Scalar>
+	Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+			   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+	{
+	  return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
+			      mu * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+	}
+
+	scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+		     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+	{
+	  return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+		Geom<Ord> *e, ExtData<Ord> *ext)
+	{
+	   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	// Members.
+	double lambda, mu;
+      };
+
+      class MatrixFormVolLinearElasticity_0_1 : public WeakForm::MatrixFormVol
+      {
+      public:
+	MatrixFormVolLinearElasticity_0_1(double lambda, double mu) 
+		: WeakForm::MatrixFormVol(0, 1, HERMES_SYM), lambda(lambda), mu(mu) {}
+
+	template<typename Real, typename Scalar>
+	Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+			   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+	{
+	  return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
+		     mu * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
+	}
+
+	scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+		     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+	{
+	  return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+		Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+	{
+	   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	// Members.
+	double lambda, mu;
+      };
+
+      class MatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
+      {
+      public:
+	MatrixFormVolLinearElasticity_1_1(double lambda, double mu) 
+		: WeakForm::MatrixFormVol(1, 1, HERMES_SYM), lambda(lambda), mu(mu) {}
+
+	template<typename Real, typename Scalar>
+	Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+			   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+	{
+	  return              mu * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
+		 (lambda + 2*mu) * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+	}
+
+	scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+		     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+	{
+	  return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+		Geom<Ord> *e, ExtData<Ord> *ext)
+	{
+	   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+	}
+
+	// Members.
+	double lambda, mu;
+      };
+
+      class VectorFormGravity : public WeakForm::VectorFormVol
+      {
+      public:
+	VectorFormGravity(double rho_g) : WeakForm::VectorFormVol(1), rho_g(rho_g) { }
+
+	template<typename Real, typename Scalar>
+	Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+			   Geom<Real> *e, ExtData<Scalar> *ext) {
+	  return rho_g * int_v<Real, Scalar>(n, wt, v);
+	}
+
+	scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+		     Geom<double> *e, ExtData<scalar> *ext) {
+	  return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+	}
+
+	Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+		ExtData<Ord> *ext) {
+	  return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);;
+	}
+
+	// Member.
+	double rho_g;
+      };
+    };
+
+In our example, we need to add nonzero Neumann conditions. This is done 
+by creating a descendant of the WeakFormLinearElasticity class and adding 
+surface forms there::
 
     class MyWeakForm : public WeakFormLinearElasticity
     {

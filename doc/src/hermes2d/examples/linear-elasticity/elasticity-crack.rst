@@ -37,45 +37,6 @@ Weak forms
 
 The weak forms of linear elasticity are provided by Hermes by default and they can be found in the file 
 `src/weakform/sample_weak_forms.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform/sample_weak_forms.h>`_.
-They look as follows::
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-                          mu * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-                 mu * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return      mu * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-              lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return              mu * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-             (lambda + 2*mu) * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
-      return rho_g * int_v<Real, Scalar>(n, wt, v);
-    }
 
 Activating multimesh
 ~~~~~~~~~~~~~~~~~~~~
