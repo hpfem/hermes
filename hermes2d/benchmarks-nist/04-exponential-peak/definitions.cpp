@@ -1,6 +1,7 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/boundaryconditions.h"
+#include "weakform/sample_weak_forms.h"
 
 // Exact solution.
 class MyExactSolution : public ExactSolutionScalar
@@ -13,7 +14,7 @@ public:
     return exp(-ALPHA_P * (pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));
   };
 
-  // Function representing an exact one-dimension valued solution.
+  // Function representing an exact scalar-valued solution.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     double a = -ALPHA_P * ( (x - X_LOC) * (x - X_LOC) + (y - Y_LOC) * (y - Y_LOC));
 
@@ -29,56 +30,40 @@ public:
   double Y_LOC;
 };
 
-class MyWeakFormPoisson : public WeakForm
+// Weak forms.
+class MyWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  MyWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm(1)
+  MyWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakFormLaplace()
   {
-    add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
-    
     MyVectorFormVolPoisson* wfp = new MyVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
     add_vector_form(wfp);
   };
 
 private:
-  class MyMatrixFormVolPoisson : public WeakForm::MatrixFormVol
-  {
-  public:
-    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-    }
-  };
-
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm::VectorFormVol(i), 
+    MyVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) 
+            : WeakForm::VectorFormVol(i), 
     ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
         result -= wt[i] * (rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+            ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -96,6 +81,7 @@ private:
   };
 };
 
+// Boundary conditions (use values provided by exact solution).
 class DirichletNonConstant : public DirichletBoundaryCondition
 {
 public:
