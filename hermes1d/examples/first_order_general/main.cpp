@@ -32,9 +32,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary conditions.
-BCSpec * bc = new BCSpec(0,YA);
-Hermes::vector<BCSpec *>DIR_BC_LEFT =  Hermes::vector<BCSpec *>(bc);
-Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
+BCSpec DIR_BC_LEFT(0, YA);
+BCSpec DIR_BC_RIGHT;
 
 // Function f(y, x).
 double f(double y, double x) {
@@ -122,7 +121,6 @@ int main()
   delete solver;
   delete[] coeff_vec;
   delete space;
-  delete bc;
   delete matrix;
 
   info("Done.");
