@@ -577,7 +577,7 @@ public:
   
   ~EssentialBCNonConstantU() {}
 
-  virtual BoundaryConditionValueType get_value_type() const { 
+  virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
   }
 
@@ -599,7 +599,7 @@ public:
   
   ~EssentialBCNonConstantV() {}
 
-  virtual BoundaryConditionValueType get_value_type() const { 
+  virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
   }
 

@@ -71,10 +71,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  EssentialBC bc_essential_left(BDY_LEFT, T1);
-  NeumannConstantBoundaryCondition bc_outer_inner(Hermes::vector<std::string>(BDY_OUTER, BDY_INNER), 0.0);
-  NeumannConstantBoundaryCondition bc_bottom(BDY_BOTTOM, 0.0);
-  EssentialBCS bcs(Hermes::vector<BoundaryCondition *>(&bc_left, &bc_outer_inner, &bc_bottom));
+  EssentialBCConstant bc_essential(BDY_LEFT, T1);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

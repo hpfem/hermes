@@ -41,9 +41,9 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   WeakFormPoisson wf(CONST_F);
   
-  // Initialize boundary conditions
-  EssentialBC bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
-  EssentialBCS bcs(&bc);
+  // Initialize boundary conditions.
+  EssentialBCConstant bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

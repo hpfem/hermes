@@ -421,7 +421,7 @@ void Space::reset_dof_assignment()
   int i, j;
   for (i = 0; i < mesh->get_max_node_id(); i++)
   {
-    ndata[i].n = 0;
+    ndata[i].n = 1; // Natural boundary condition. The point is that it is not (0 == Dirichlet).
     ndata[i].dof = H2D_UNASSIGNED_DOF;
   }
 

@@ -75,7 +75,7 @@ public:
 
   ~EssentialBCNonConstant() { }
 
-  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 
   scalar function(double x, double y) const {
     return 2 - pow(x, 0.1) - pow(y, 0.1);

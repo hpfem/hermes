@@ -48,8 +48,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  EssentialBC bc_essential(BDY_DIRICHLET, 0.0);
-  EssentialBCS bcs(&bc);
+  EssentialBCConstant bc_essential(BDY_DIRICHLET, 0.0);
+  EssentialBCS bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);

@@ -63,7 +63,7 @@ public:
 
   ~EssentialBCNonConstant() { }
 
-  inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 
   scalar function(double x, double y) const {
     return exact_solution->value(x, y);

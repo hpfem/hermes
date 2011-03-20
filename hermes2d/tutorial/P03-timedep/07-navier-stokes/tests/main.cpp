@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions
   EssentialBCNonConstant bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
-  EssentialBC bc_essential_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
-  EssentialBCS bcs_vel_x(Hermes::vector<BoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
-  EssentialBC bc_essential_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  EssentialBCConstant bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
+  EssentialBCS bcs_vel_x(Hermes::vector<EssentialBC *>(&bc_left_vel_x, &bc_other_vel_x));
+  EssentialBCConstant bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   EssentialBCS bcs_vel_y(&bc_vel_y);
   EssentialBCS bcs_pressure;
 

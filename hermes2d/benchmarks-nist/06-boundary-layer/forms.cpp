@@ -79,7 +79,7 @@ public:
   
   ~EssentialBCNonConstantExact() {};
 
-  virtual BoundaryConditionValueType get_value_type() const { 
+  virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
   };
 

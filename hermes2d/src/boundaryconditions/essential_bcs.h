@@ -75,7 +75,7 @@ public:
 };
 
 /// Class encapsulating all boundary conditions of one problem.
-/// Using the class BoundaryCondition and its descendants.
+/// Using the class EssentialBCS and its descendants.
 class HERMES_API EssentialBCS {
 public:
   /// Default constructor.
