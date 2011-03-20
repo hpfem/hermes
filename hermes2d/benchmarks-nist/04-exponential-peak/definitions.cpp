@@ -3,26 +3,48 @@
 #include "boundaryconditions/boundaryconditions.h"
 
 // Exact solution.
-#include "exact_solution.cpp"
-
-class WeakFormPoisson : public WeakForm
+class MyExactSolution : public ExactSolutionScalar
 {
 public:
-  WeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm(1)
+  MyExactSolution(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) 
+         : ExactSolutionScalar(mesh), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) {};
+
+  double fn(double x, double y) {
+    return exp(-ALPHA_P * (pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));
+  };
+
+  // Function representing an exact one-dimension valued solution.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    double a = -ALPHA_P * ( (x - X_LOC) * (x - X_LOC) + (y - Y_LOC) * (y - Y_LOC));
+
+    dx = -exp(a) * (2 * ALPHA_P * (x - X_LOC));
+    dy = -exp(a) * (2 * ALPHA_P * (y - Y_LOC));
+
+    return fn(x, y);
+  };
+
+  // Members.
+  double ALPHA_P;
+  double X_LOC;
+  double Y_LOC;
+};
+
+class MyWeakFormPoisson : public WeakForm
+{
+public:
+  MyWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm(1)
   {
-    add_matrix_form(new MatrixFormVolPoisson(0, 0));
+    add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
     
-    VectorFormVolPoisson* wfp= new VectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
+    MyVectorFormVolPoisson* wfp = new MyVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
     add_vector_form(wfp);
   };
 
 private:
-  class MatrixFormVolPoisson : public WeakForm::MatrixFormVol
+  class MyMatrixFormVolPoisson : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_SYM;
-    }
+    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -38,10 +60,10 @@ private:
     }
   };
 
-  class VectorFormVolPoisson : public WeakForm::VectorFormVol
+  class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm::VectorFormVol(i), 
+    MyVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) : WeakForm::VectorFormVol(i), 
     ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
 
     template<typename Real, typename Scalar>
@@ -74,16 +96,16 @@ private:
   };
 };
 
-class DirichletNonConstantExact : public DirichletBoundaryCondition
+class DirichletNonConstant : public DirichletBoundaryCondition
 {
 public:
-  DirichletNonConstantExact(std::string marker, ExactSolutionNIST04* exact_solution) : 
+  DirichletNonConstant(std::string marker, MyExactSolution* exact_solution) : 
         DirichletBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   };
   
-  ~DirichletNonConstantExact() {};
+  ~DirichletNonConstant() {};
 
   virtual BoundaryConditionValueType get_value_type() const { 
     return BC_FUNCTION; 
@@ -93,5 +115,5 @@ public:
     return exact_solution->fn(x, y);
   };
 
-  ExactSolutionNIST04* exact_solution;
+  MyExactSolution* exact_solution;
 };
