@@ -1,6 +1,7 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
+#include "weakform/sample_weak_forms.h"
 
 // Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
 class MyRightHandSide
@@ -18,22 +19,25 @@ public:
     Real f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
     Real g = pow(x-1.0, poly_deg);
 
-    return poly_deg*a*pow(x, 8.0)*b*c*pow(y, poly_deg)*d + poly_deg*a*pow(y, 8.0)*e*f*pow(x, poly_deg)*g;
+    return poly_deg*a*pow(x, 8.0)*b*c*pow(y, poly_deg)*d 
+           + poly_deg*a*pow(y, 8.0)*e*f*pow(x, poly_deg)*g;
   }
 
   // Member.
   double poly_deg;
 };
 
-// Exact solution (needed in the Dirichlet condition).
+// Exact solution (needed for the Dirichlet condition).
 class MyExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double poly_deg) : ExactSolutionScalar(mesh), poly_deg(poly_deg) {};
+  MyExactSolution(Mesh* mesh, double poly_deg) 
+            : ExactSolutionScalar(mesh), poly_deg(poly_deg) {};
 
   // Exact solution.
   double value(double x, double y) {
-    return pow(2, 4 * poly_deg) * pow(x, poly_deg) * pow(1 - x, poly_deg) * pow(y, poly_deg) * pow(1 - y, poly_deg);
+    return pow(2, 4 * poly_deg) * pow(x, poly_deg) * pow(1 - x, poly_deg) 
+           * pow(y, poly_deg) * pow(1 - y, poly_deg);
   }
 
   // Exact solution with derivatives.
@@ -43,8 +47,10 @@ public:
     double C = pow(y, poly_deg);
     double D = pow(x, poly_deg);
 
-    dx = ((poly_deg * pow(16.0, poly_deg)*A*C) / (x-1.0) + (poly_deg*pow(16.0, poly_deg)*A*C)/x)*B*D;
-    dy = ((poly_deg*pow(16.0, poly_deg)*B*D)/(y-1.0)+(poly_deg*pow(16.0, poly_deg)*B*D)/y)*A*C;
+    dx = ((poly_deg * pow(16.0, poly_deg)*A*C) / (x-1.0) 
+         + (poly_deg*pow(16.0, poly_deg)*A*C)/x)*B*D;
+    dy = ((poly_deg*pow(16.0, poly_deg)*B*D)/(y-1.0)
+         + (poly_deg*pow(16.0, poly_deg)*B*D)/y)*A*C;
 
     return value(x, y);
   };
@@ -55,7 +61,8 @@ public:
 
 class EssentialBCNonConstant : public EssentialBC {
 public:
-  EssentialBCNonConstant(std::string marker, MyExactSolution* exact_solution) : EssentialBC(Hermes::vector<std::string>()),
+  EssentialBCNonConstant(std::string marker, MyExactSolution* exact_solution) 
+              : EssentialBC(Hermes::vector<std::string>()),
     exact_solution(exact_solution) {
     markers.push_back(marker);
   }
@@ -72,39 +79,14 @@ public:
   MyExactSolution* exact_solution;
 };
 
-class MyWeakFormPoisson : public WeakForm
+class MyWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  MyWeakFormPoisson(MyRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
+  MyWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace() {
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };
 
 private:
-  class MyMatrixFormVolPoisson : public WeakForm::MatrixFormVol
-  {
-  public:
-    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_SYM;
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
-      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-    }
-  };
-
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
@@ -125,7 +107,8 @@ private:
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
