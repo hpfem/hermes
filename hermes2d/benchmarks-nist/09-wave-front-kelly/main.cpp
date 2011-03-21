@@ -2,10 +2,9 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-using namespace RefinementSelectors;
-
 //  This is the ninth in the series of NIST benchmarks with known exact solutions. This benchmark
 //  has four different versions, use the global variable PROB_PARAM below to switch among them.
+//  It differs from 09-wave-front in the mesh adaptation method.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
@@ -42,18 +41,12 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO_H;        // Predefined list of element refinement candidates. Possible values are
-                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                                  // See User Documentation for details.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
                                                   // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
                                                   // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
-                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
@@ -128,7 +121,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   MyWeakFormPoisson wf(&rhs);
 
-  // Initialize boundary conditions
+  // Initialize boundary conditions.
   EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
@@ -137,9 +130,6 @@ int main(int argc, char* argv[])
   
   // Initialize approximate solution.
   Solution sln;
-
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
@@ -185,16 +175,13 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space, HERMES_H1_NORM);
+    BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space);
     
-    // Use energy norm for error estimate normalization and measuring of exact error.
-    // FIXME: This needs to be updated after the change in weak forms.
-    /*
-    adaptivity->set_error_form(callback(bilinear_form));
-    */
+    // Use energy norm for error estimate normalization and measuring of exact error.    
+    adaptivity->set_error_form(new EnergyErrorForm(&wf));
 
     if (USE_RESIDUAL_ESTIMATOR) 
-      adaptivity->add_error_estimator_vol(callback(residual_estimator));
+      adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel = adaptivity->calc_err_est(&sln) * 100;  
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact) * 100;
