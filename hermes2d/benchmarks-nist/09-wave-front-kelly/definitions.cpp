@@ -2,6 +2,7 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform/sample_weak_forms.h"
+#include "adapt/kelly_type_adapt.h"
 
 // Right-hand side.
 class MyRightHandSide
@@ -115,4 +116,71 @@ public:
   };
 
   MyExactSolution* exact_solution;
+};
+
+// Bilinear form inducing the energy norm.
+class EnergyErrorForm : public Adapt::MatrixFormVolError
+{
+public:
+  EnergyErrorForm(WeakForm* problem_wf) : MatrixFormVolError(HERMES_UNSET_NORM)
+  {
+    this->form = problem_wf->mfvol[0];
+  }
+  
+  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+                        Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
+                        ExtData<scalar> *ext)
+  {
+    return this->form->value(n, wt, u_ext, u, v, e, ext);
+  }
+
+  virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                  Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
+                  ExtData<Ord> *ext)
+  {
+    return this->form->ord(n, wt, u_ext, u, v, e, ext);
+  }
+    
+private:
+  WeakForm::MatrixFormVol* form;
+};
+
+// Linear form for the residual error estimator.
+class ResidualErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
+{
+public:
+  ResidualErrorForm(MyRightHandSide* rhs) : ErrorEstimatorForm(0), rhs(rhs) {};
+  
+  template<typename Real, typename Scalar>
+  Scalar residual_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext)
+  {
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+    Scalar result = 0.;
+    
+    for (int i = 0; i < n; i++)
+      result += wt[i] * sqr( rhs->value(e->x[i], e->y[i]) - u->laplace[i] );
+    
+    return result * sqr(e->diam);
+#else
+    error("Define H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h if you want to use second derivatives of shape functions in weak forms.");
+#endif
+  }
+  
+  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+              Func<scalar> *u, Geom<double> *e,
+              ExtData<scalar> *ext)
+  {
+    return residual_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
+  }
+  
+  virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                    Func<Ord> *u, Geom<Ord> *e,
+                    ExtData<Ord> *ext)
+  {
+    return residual_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
+  }
+  
+private:  
+  MyRightHandSide* rhs;
+  
 };

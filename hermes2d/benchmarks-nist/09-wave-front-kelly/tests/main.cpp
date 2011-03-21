@@ -4,9 +4,9 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_nist-09-kelly benchmarks/nist-09-kelly
+/** \addtogroup t_bench_nist-09-kelly benchmarks-nist/09-wave-front-kelly
  *  \{
- *  \brief This test makes sure that the benchmark nist-09-kelly works correctly.
+ *  \brief This test makes sure that the benchmark 09-wave-front-kelly works correctly.
  *  (Testing version NIST-09 "well")
  *
  *  \section s_params Parameters
@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
  *   - MESH_REGULARITY=-1
  *   - USE_RESIDUAL_ESTIMATOR = false
  *   - ERR_STOP=1.0
- *   - NDOF_STOP=60000
+ *   - NDOF_STOP=10000
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *
@@ -62,26 +62,85 @@ const int NDOF_STOP = 10000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Problem parameters.
-double ALPHA;          // (X_LOC, Y_LOC) is the center of the circular wave front, R_ZERO is the distance from the 
-double X_LOC;          // wave front to the center of the circle, and ALPHA gives the steepness of the wave front.
-double Y_LOC;
-double R_ZERO;
-
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y) { return fn(x, y);}
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
+
+// Linear form for the interface error estimator.
+class InterfaceErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
+{
+public:
+  InterfaceErrorForm() : ErrorEstimatorForm(0, H2D_DG_INNER_EDGE) {};
+  
+  template<typename Real, typename Scalar>
+  Scalar interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext)
+  {
+    Scalar result = 0.;
+    for (int i = 0; i < n; i++)
+      result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
+                             e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+    return result * e->diam / 24.;
+  }
+
+  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+              Func<scalar> *u, Geom<double> *e,
+              ExtData<scalar> *ext)
+  {
+    return interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
+  }
+  
+  virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                    Func<Ord> *u, Geom<Ord> *e,
+                    ExtData<Ord> *ext)
+  {
+    return interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
+  }  
+};
 
 int main(int argc, char* argv[])
 {
+  // Define problem parameters: (x_loc, y_loc) is the center of the circular wave front, R_ZERO is the distance from the 
+  // wave front to the center of the circle, and alpha gives the steepness of the wave front.
+  double alpha, x_loc, y_loc, r_zero;
+  switch(PROB_PARAM) {
+    case 0:
+      alpha = 20;
+      x_loc = -0.05;
+      y_loc = -0.05;
+      r_zero = 0.7;
+      break;
+    case 1:
+      alpha = 1000;
+      x_loc = -0.05;
+      y_loc = -0.05;
+      r_zero = 0.7;
+      break;
+    case 2:
+      alpha = 1000;
+      x_loc = 1.5;
+      y_loc = 0.25;
+      r_zero = 0.92;
+      break;
+    case 3:
+      alpha = 50;
+      x_loc = 0.5;
+      y_loc = 0.5;
+      r_zero = 0.25;
+      break;
+    default:   // The same as 0.
+      alpha = 20;
+      x_loc = -0.05;
+      y_loc = -0.05;
+      r_zero = 0.7;
+      break;
+  }
+  
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+  
+  
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -90,37 +149,33 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-
+  // Set exact solution.
+  MyExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
+  
+  // Define right-hand side.
+  MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
+  
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
+  MyWeakFormPoisson wf(&rhs);
+  
+  // Initialize boundary conditions.
+  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
+  EssentialBCs bcs(&bc);
+  
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);  
   
   // Initialize approximate solution.
   Solution sln;
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
   
-  // Initialize the matrix solver.
+  // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  Vector* rhs_vec = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs_vec);
 
   // Adaptivity loop:
   int as = 1;
@@ -134,7 +189,7 @@ int main(int argc, char* argv[])
     info("Solving.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
-    dp->assemble(matrix, rhs);
+    dp->assemble(matrix, rhs_vec);
 
     // Time measurement.
     cpu_time.tick();
@@ -146,12 +201,12 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space);
-    
-    if (USE_RESIDUAL_ESTIMATOR)
-      adaptivity->add_error_estimator_vol(callback(residual_estimator));
+       
+    if (USE_RESIDUAL_ESTIMATOR) 
+      adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel = adaptivity->calc_err_est(&sln) * 100;  
-    err_exact_rel = adaptivity->calc_err_exact(&sln, &exact) * 100;   
+    err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, false) * 100;   
     
     // Time measurement.
     cpu_time.tick();
@@ -162,15 +217,15 @@ int main(int argc, char* argv[])
     
     // This is to ensure that the two possible approaches to interface error estimators accumulation give
     // same results.
-    KellyTypeAdapt* adaptivity2 = new KellyTypeAdapt(&space, Hermes::vector<ProjNormType>(), false);
+    KellyTypeAdapt* adaptivity2 = new KellyTypeAdapt(&space, HERMES_UNSET_NORM, false);
     adaptivity2->disable_aposteriori_interface_scaling();
-    adaptivity2->add_error_estimator_surf(callback(interface_estimator));
-
+    adaptivity2->add_error_estimator_surf(new InterfaceErrorForm);
+    
     if (USE_RESIDUAL_ESTIMATOR)
-      adaptivity2->add_error_estimator_vol(callback(residual_estimator));
+      adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel2 = adaptivity2->calc_err_est(&sln) * 100;  
-    double err_exact_rel2 = adaptivity2->calc_err_exact(&sln, &exact) * 100;
+    double err_exact_rel2 = adaptivity2->calc_err_exact(&sln, &exact, false) * 100;
     
     info("err_est_rel_2: %1.15g%%, err_exact_rel_2: %1.15g%%", err_est_rel2, err_exact_rel2);
     
@@ -207,7 +262,7 @@ int main(int argc, char* argv[])
   // Clean up.
   delete solver;
   delete matrix;
-  delete rhs;
+  delete rhs_vec;
 
   verbose("Total running time: %g s", cpu_time.accumulated());
 
