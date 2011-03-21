@@ -183,6 +183,11 @@ public:
                    Hermes::vector<interface_estimator_scaling_fn_t>
                         interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
 
+    KellyTypeAdapt(Space * space_,
+                   ProjNormType norm_ = HERMES_UNSET_NORM,
+                   bool ignore_visited_segments_ = true,
+                   interface_estimator_scaling_fn_t interface_scaling_fn_ = NULL);
+                   
     /// Destructor.
     virtual ~KellyTypeAdapt()
     {
@@ -287,21 +292,33 @@ public:
       return result;
     }
   };
-    /// Constructor.
-    ///
-    /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
-    ///
-    BasicKellyAdapt(Hermes::vector<Space *> spaces_,
-                    Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-                    double const_by_laplacian = 1.0) : KellyTypeAdapt(spaces_, norms_)
-    {
-      interface_scaling_const = 1./(24.*const_by_laplacian);
-      volumetric_scaling_const = interface_scaling_const;
-      boundary_scaling_const = interface_scaling_const;
-
-      for (int i = 0; i < num; i++)
-        this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
-    }
+  
+  /// Constructor.
+  ///
+  /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
+  ///
+  BasicKellyAdapt(Hermes::vector<Space *> spaces_,
+                  Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
+                  double const_by_laplacian = 1.0) : KellyTypeAdapt(spaces_, norms_)
+  {
+    set_scaling_consts(const_by_laplacian);   
+    for (int i = 0; i < num; i++)
+      this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
+  }
+  
+  BasicKellyAdapt(Space* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0) : KellyTypeAdapt(space_, norm_) 
+  {
+    set_scaling_consts(const_by_laplacian);
+    this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0));
+  }
+  
+private:
+  void set_scaling_consts(double C)
+  {
+    interface_scaling_const = 1./(24.*C);
+    volumetric_scaling_const = interface_scaling_const;
+    boundary_scaling_const = interface_scaling_const;
+  }
 };
 
 // #endif

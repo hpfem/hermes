@@ -26,6 +26,25 @@ KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
   boundary_markers_conversion = spaces_[0]->get_mesh()->boundary_markers_conversion;
 }
 
+KellyTypeAdapt::KellyTypeAdapt(Space* space_, 
+                               ProjNormType norm_, 
+                               bool ignore_visited_segments_, 
+                               interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt(space_, norm_)
+{ 
+  if (interface_scaling_fn_ == NULL)
+    interface_scaling_fns.push_back(scale_by_element_diameter);
+  else
+    interface_scaling_fns.push_back(interface_scaling_fn_);
+  
+  use_aposteriori_interface_scaling = true;
+
+  interface_scaling_const = boundary_scaling_const = volumetric_scaling_const = 1.0;
+  ignore_visited_segments = ignore_visited_segments_;
+  
+  element_markers_conversion = space_->get_mesh()->element_markers_conversion;
+  boundary_markers_conversion = space_->get_mesh()->boundary_markers_conversion;
+}
+
 bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_processed)
 {
   Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
@@ -48,7 +67,7 @@ void KellyTypeAdapt::add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm*
 void KellyTypeAdapt::add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form)
 {
   error_if (form->i < 0 || form->i >= this->num,
-            "Invalid equation number.");
+            "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
 
   form->adapt = this;
   this->error_estimators_surf.push_back(form);
