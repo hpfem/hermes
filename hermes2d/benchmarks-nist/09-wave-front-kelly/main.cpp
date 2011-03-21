@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
       adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel = adaptivity->calc_err_est(&sln) * 100;  
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact) * 100;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, false) * 100;
 
     // Time measurement.
     cpu_time.tick();

@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
  *   - MESH_REGULARITY=-1
  *   - USE_RESIDUAL_ESTIMATOR = false
  *   - ERR_STOP=1.0
- *   - NDOF_STOP=60000
+ *   - NDOF_STOP=10000
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *
@@ -57,7 +57,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 const bool USE_RESIDUAL_ESTIMATOR = false;        // Add also the norm of the residual to the error estimate of each element.
 const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
+const int NDOF_STOP = 10000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -201,12 +201,12 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space);
-    
+       
     if (USE_RESIDUAL_ESTIMATOR) 
       adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel = adaptivity->calc_err_est(&sln) * 100;  
-    err_exact_rel = adaptivity->calc_err_exact(&sln, &exact) * 100;   
+    err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, false) * 100;   
     
     // Time measurement.
     cpu_time.tick();
@@ -220,12 +220,12 @@ int main(int argc, char* argv[])
     KellyTypeAdapt* adaptivity2 = new KellyTypeAdapt(&space, HERMES_UNSET_NORM, false);
     adaptivity2->disable_aposteriori_interface_scaling();
     adaptivity2->add_error_estimator_surf(new InterfaceErrorForm);
-
+    
     if (USE_RESIDUAL_ESTIMATOR)
       adaptivity->add_error_estimator_vol(new ResidualErrorForm(&rhs));
     
     double err_est_rel2 = adaptivity2->calc_err_est(&sln) * 100;  
-    double err_exact_rel2 = adaptivity2->calc_err_exact(&sln, &exact) * 100;
+    double err_exact_rel2 = adaptivity2->calc_err_exact(&sln, &exact, false) * 100;
     
     info("err_est_rel_2: %1.15g%%, err_exact_rel_2: %1.15g%%", err_est_rel2, err_exact_rel2);
     
