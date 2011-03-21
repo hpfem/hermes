@@ -63,7 +63,7 @@ const double ALPHA = 2.01;
 const std::string BDY_DIRICHLET = "1", BDY_NEUMANN_LEFT = "2";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -79,20 +79,20 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST10 exact(&mesh, K, ALPHA);
+  MyExactSolution exact(&mesh, K, ALPHA);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(K, ALPHA);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
 
-  // Define right-hand side.
-  RightHandSideNIST10 rhs(K, ALPHA);
-
   // Initialize the weak formulation.
-  WeakFormPoisson wf(&rhs);
+  MyWeakFormPoisson wf(&rhs);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
