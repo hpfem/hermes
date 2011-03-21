@@ -49,8 +49,8 @@ void HcurlSpace::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-HcurlSpace::HcurlSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
+HcurlSpace::HcurlSpace(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -78,7 +78,7 @@ HcurlSpace::~HcurlSpace()
 Space* HcurlSpace::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME
-  // HcurlSpace* space = new HcurlSpace(mesh, boundary_conditions, 0, this->shapeset);
+  // HcurlSpace* space = new HcurlSpace(mesh, essential_bcs, 0, this->shapeset);
   // space->copy_orders(this, order_increase);
   // return space;
   return NULL;
@@ -125,25 +125,28 @@ void HcurlSpace::assign_edge_dofs()
   Node* en;
   for_all_edge_nodes(en, mesh)
   {
-    if (en->ref > 1 || en->bnd || mesh->peek_vertex_node(en->p1, en->p2) != NULL)
-    {
+    if (en->ref > 1 || en->bnd || mesh->peek_vertex_node(en->p1, en->p2) != NULL) {
       int ndofs = get_edge_order_internal(en) + 1;
       ndata[en->id].n = ndofs;
-
-      if (en->bnd && this->boundary_conditions->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker((en->marker))) != NULL)
-      {
-        ndata[en->id].dof = -1;
-      }
-      else
-      {
+      if (en->bnd)
+        if(essential_bcs != NULL)
+          if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL)
+            ndata[en->id].dof = H2D_CONSTRAINED_DOF;
+          else {
+            ndata[en->id].dof = next_dof;
+            next_dof += ndofs * stride;
+          }
+        else {
+          ndata[en->id].dof = next_dof;
+          next_dof += ndofs * stride;
+        }
+      else {
         ndata[en->id].dof = next_dof;
         next_dof += ndofs * stride;
       }
     }
     else
-    {
       ndata[en->id].n = -1;
-    }
   }
 }
 
@@ -223,7 +226,7 @@ scalar* HcurlSpace::get_bc_projection(SurfPos* surf_pos, int order)
       surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
       // If the BC on this part of the boundary is constant.
-      EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+      EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
       if (bc->get_value_type() == EssentialBC::BC_VALUE)
       {

@@ -18,7 +18,7 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* boundary_conditions, Ord2 p_init)
+Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
   _F_
@@ -34,8 +34,7 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* boundary_conditions, 
   this->was_assigned = false;
   this->ndof = 0;
 
-  if(boundary_conditions == NULL) error("Boundary conditions pointer cannot be NULL in Space::Space().");
-  this->boundary_conditions = boundary_conditions;
+  this->essential_bcs = essential_bcs;
 
   own_shapeset = (shapeset == NULL);
 }
@@ -432,13 +431,13 @@ void Space::reset_dof_assignment()
   {
     for (unsigned int i = 0; i < e->nvert; i++)
     {
-      if (e->en[i]->bnd
-        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
-      {
-        j = e->next_vert(i);
-        ndata[e->vn[i]->id].n = 0;
-        ndata[e->vn[j]->id].n = 0;
-      }
+      if (e->en[i]->bnd)
+        if(essential_bcs != NULL)
+          if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL) {
+            j = e->next_vert(i);
+            ndata[e->vn[i]->id].n = 0;
+            ndata[e->vn[j]->id].n = 0;
+          }
     }
   }
 }
@@ -499,13 +498,11 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-void Space::set_boundary_conditions(EssentialBCs* boundary_conditions)
+void Space::set_essential_bcs(EssentialBCs* essential_bcs)
 {
   _F_
-  this->boundary_conditions = boundary_conditions;
-  if (boundary_conditions == NULL)
-    return;
-
+  this->essential_bcs = essential_bcs;
+  
   // since space changed, enumerate basis functions
   this->assign_dofs();
 }
@@ -552,19 +549,18 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
     NodeData* nd = &ndata[en->id];
     nd->edge_bc_proj = NULL;
 
-    if (nd->dof != H2D_UNASSIGNED_DOF
-        && en->bnd
-        && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL)
-    {
-      int order = get_edge_order_internal(en);
-      surf_pos->marker = en->marker;
-      nd->edge_bc_proj = get_bc_projection(surf_pos, order);
-      extra_data.push_back(nd->edge_bc_proj);
+    if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd)
+      if(essential_bcs != NULL)
+        if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL) {
+          int order = get_edge_order_internal(en);
+          surf_pos->marker = en->marker;
+          nd->edge_bc_proj = get_bc_projection(surf_pos, order);
+          extra_data.push_back(nd->edge_bc_proj);
 
-      int i = surf_pos->surf_num, j = e->next_vert(i);
-      ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
-      ndata[e->vn[j]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
-    }
+          int i = surf_pos->surf_num, j = e->next_vert(i);
+          ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
+          ndata[e->vn[j]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
+        }
   }
   else
   {
@@ -678,13 +674,13 @@ Space* Space::construct_refined_space(Space* coarse, int order_increase)
 void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double time) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
-    spaces[i]->get_boundary_conditions()->set_current_time(time);
+    spaces[i]->get_essential_bcs()->set_current_time(time);
     spaces[i]->update_essential_bc_values();
   }
 }
 
 void Space::update_essential_bc_values(Space *s, double time) {
-  s->get_boundary_conditions()->set_current_time(time);
+  s->get_essential_bcs()->set_current_time(time);
   s->update_essential_bc_values();
 }
 

@@ -845,8 +845,12 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
     int j = stage.idx[i];
     if (isempty[j])
       continue;
-    if(marker > 0)
-      nat[j] = (spaces[j]->get_boundary_conditions()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker)) != NULL);
+    if(marker > 0) {
+      nat[j] = true;
+      if(spaces[j]->get_essential_bcs() != NULL)
+        if(spaces[j]->get_essential_bcs()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker)) != NULL)
+          nat[j] = false;
+    }
     spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
   }
 

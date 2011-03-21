@@ -38,8 +38,8 @@ void L2Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-L2Space::L2Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
+L2Space::L2Space(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -63,7 +63,7 @@ L2Space::~L2Space()
 Space* L2Space::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME - not tested
-  L2Space* space = new L2Space(mesh, boundary_conditions, 0, shapeset);
+  L2Space* space = new L2Space(mesh, essential_bcs, 0, shapeset);
   space->copy_orders(this, order_increase);
   return space;
 }
@@ -151,7 +151,7 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
   if (bc->get_value_type() == EssentialBC::BC_VALUE)
     proj[0] = proj[1] = bc->value;
@@ -191,7 +191,7 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
         if (bc->get_value_type() == EssentialBC::BC_VALUE)
         {

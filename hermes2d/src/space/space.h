@@ -83,13 +83,13 @@ class Ord2;
 class HERMES_API Space
 {
 public:
-  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* boundary_conditions, Ord2 p_init);
+  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p_init);
 
   virtual ~Space();
   virtual void free();
 
   /// Sets the boundary condition.
-  void set_boundary_conditions(EssentialBCs* boundary_conditions);
+  void set_essential_bcs(EssentialBCs* essential_bcs);
   /// Sets element polynomial order. Can be called by the user. Should not be called
   /// for many elements at once, since assign_dofs() is called at the end of this function.
   virtual void set_element_order(int id, int order);
@@ -159,7 +159,7 @@ public:
   int ndof;
 
   /// Obtains an boundary conditions
-  inline EssentialBCs* get_boundary_conditions() { return boundary_conditions; }
+  inline EssentialBCs* get_essential_bcs() { return essential_bcs; }
 
   /// Obtains an assembly list for the given element.
   virtual void get_element_assembly_list(Element* e, AsmList* al);
@@ -186,7 +186,7 @@ protected:
   bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
   // boundary conditions
-  EssentialBCs* boundary_conditions;
+  EssentialBCs* essential_bcs;
 
   /// FE mesh
   Mesh* mesh;

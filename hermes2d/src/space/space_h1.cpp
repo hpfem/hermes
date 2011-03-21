@@ -46,8 +46,8 @@ void H1Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-H1Space::H1Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, boundary_conditions, Ord2(p_init, p_init))
+H1Space::H1Space(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+    : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -86,7 +86,7 @@ void H1Space::set_shapeset(Shapeset *shapeset)
 Space* H1Space::dup(Mesh* mesh, int order_increase) const
 {
   _F_
-  H1Space* space = new H1Space(mesh, boundary_conditions, 1, shapeset);
+  H1Space* space = new H1Space(mesh, essential_bcs, 1, shapeset);
   space->copy_orders(this, order_increase);
   return space;
 }
@@ -142,21 +142,25 @@ void H1Space::assign_vertex_dofs()
             int ndofs = get_edge_order_internal(en) - 1;
             nd->n = ndofs;
 
-            if (en->bnd
-              && boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
-            {
-              nd->dof = H2D_CONSTRAINED_DOF;
-            }
-            else
-            {
+            if (en->bnd)
+              if(essential_bcs != NULL)
+                if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
+                  nd->dof = H2D_CONSTRAINED_DOF;
+                else {
+                  nd->dof = next_dof;
+                  next_dof += ndofs * stride;
+                }
+              else {
+                nd->dof = next_dof;
+                next_dof += ndofs * stride;
+              }
+            else {
               nd->dof = next_dof;
               next_dof += ndofs * stride;
             }
           }
           else // constrained edge node
-          {
             nd->n = -1;
-          }
         }
       }
     }
@@ -242,7 +246,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
   if (bc->get_value_type() == EssentialBC::BC_VALUE)
   {
@@ -283,7 +287,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBC *bc = static_cast<EssentialBC *>(boundary_conditions->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
         if (bc->get_value_type() == EssentialBC::BC_VALUE)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
