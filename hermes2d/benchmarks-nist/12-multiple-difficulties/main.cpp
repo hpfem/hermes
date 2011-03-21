@@ -12,7 +12,7 @@ using namespace RefinementSelectors;
 //  PDE: -Laplace u = f.
 //
 //  Known exact solution: 
-//  See functions fn() and fndd() in "exact_solution.cpp".
+//  See the class MyExactSolution.
 //
 //  Domain: L-shaped domain (-1,1)x(-1,1)\(0,1)x(-1,0), see the file "lshape.mesh".
 //
@@ -70,7 +70,7 @@ const double EPSILON = 1.0 / 100.0;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -86,13 +86,16 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST12 exact(&mesh, ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
+  MyExactSolution exact(&mesh, ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(&exact);
+  MyWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
   
   // Create an H1 space with default shapeset.

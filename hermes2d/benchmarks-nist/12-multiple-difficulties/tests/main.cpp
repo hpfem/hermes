@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -18,13 +16,13 @@ using namespace RefinementSelectors;
  *   - CAND_LIST=H2D_HP_ANISO_H
  *   - MESH_REGULARITY=-1
  *   - CONV_EXP=1.0
- *   - ERR_STOP=3.0
+ *   - ERR_STOP=6.0
  *   - NDOF_STOP=60000
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: 2928
- *   - Adaptivity steps: 21
+ *   - DOFs: 2228
+ *   - Adaptivity steps: 19
  */
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
@@ -52,7 +50,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 6.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -77,7 +75,7 @@ const double EPSILON = 1.0 / 100.0;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -93,15 +91,18 @@ int main(int argc, char* argv[])
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST12 exact(&mesh, ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
+  MyExactSolution exact(&mesh, ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(ALPHA_P, X_P, Y_P, ALPHA_W, X_W, Y_W, OMEGA_C, R_0, EPSILON);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(&exact);
+  MyWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc(BDY_DIRICHLET, &exact);
-  EssentialBCs bcs(&bc);
-
+  EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCs bcs(&bc_essential);
+  
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
 
@@ -204,7 +205,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 2930;
+  int n_dof_allowed = 2250;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
