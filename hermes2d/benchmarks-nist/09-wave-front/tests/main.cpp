@@ -26,7 +26,7 @@ using namespace RefinementSelectors;
  *   - Adaptivity steps: 14
  */
 
-int PROB_PARAM = 3;    // PROB_PARAM determines which parameter values you wish to use for the steepness and location of the wave front. 
+int PARAM = 3;         // PARAM determines which parameter values you wish to use for the steepness and location of the wave front. 
                        // #| name   |   ALPHA | X_LOC	| Y_LOC | R_ZERO
                        // 0: mild		    20      -0.05  -0.05    0.7
                        // 1: steep      1000    -0.05  -0.05    0.7
@@ -69,10 +69,45 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Define problem parameters.
+  double alpha, x_loc, y_loc, r_zero;
+  switch(PARAM) {
+  case 0:
+    alpha = 20;
+    x_loc = -0.05;
+    y_loc = -0.05;
+    r_zero = 0.7;
+    break;
+  case 1:
+    alpha = 1000;
+    x_loc = -0.05;
+    y_loc = -0.05;
+    r_zero = 0.7;
+    break;
+  case 2:
+    alpha = 1000;
+    x_loc = 1.5;
+    y_loc = 0.25;
+    r_zero = 0.92;
+    break;
+  case 3:
+    alpha = 50;
+    x_loc = 0.5;
+    y_loc = 0.5;
+    r_zero = 0.25;
+    break;
+  default:   // The same as 0.
+    alpha = 20;
+    x_loc = -0.05;
+    y_loc = -0.05;
+    r_zero = 0.7;
+    break;
+  }
+
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
 
@@ -86,13 +121,16 @@ int main(int argc, char* argv[])
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST09 exact(&mesh, PROB_PARAM);
+  MyExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(&exact);
+  MyWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
