@@ -6,12 +6,12 @@ class WeakFormNewton : public WeakForm
 {
 public:
   // Problem parameters.
-  WeakFormNewton(double h, double T0) : WeakForm(1)
+  WeakFormNewton(double h, double T0, std::string natural_bc_bnd_part) : WeakForm(1)
   {
     add_matrix_form(new MatrixFormVolNewton(0, 0));
 
-    add_matrix_form_surf(new MatrixFormSurfNewton(0, 0, BDY_BOTTOM, h));
-    add_vector_form_surf(new VectorFormSurfNewton(0, BDY_BOTTOM, h, T0));
+    add_matrix_form_surf(new MatrixFormSurfNewton(0, 0, natural_bc_bnd_part, h));
+    add_vector_form_surf(new VectorFormSurfNewton(0, natural_bc_bnd_part, h, T0));
   };
 
 private:
