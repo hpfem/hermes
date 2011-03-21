@@ -14,12 +14,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Projected function.
-scalar F(double x, double y, double& dx, double& dy)
-{
-  return - pow(x, 4) * pow(y, 5); 
-  dx = 0; // not needed for L2-projection
-  dy = 0; // not needed for L2-projection
-}
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -31,14 +26,8 @@ int main(int argc, char* argv[])
   // Perform uniform mesh refinements.
   for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Enter boundary markers (default is Neumann boundary).
-  BCTypes bc_types;
-
-  // Enter Dirichlet boundary values (not relevant here).
-  BCValues bc_values;
-
   // Create an L2 space with default shapeset.
-  L2Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  L2Space space(&mesh, P_INIT);
 
   // View basis functions.
   BaseView bview("BaseView", new WinGeom(0, 0, 600, 500));
@@ -50,7 +39,7 @@ int main(int argc, char* argv[])
 
   // Initialize the exact and projected solution.
   Solution sln;
-  Solution sln_exact(&mesh, F);
+  MyExactSolution sln_exact(&mesh);
 
   OGProjection::project_global(&space, &sln_exact, &sln, matrix_solver);
 
