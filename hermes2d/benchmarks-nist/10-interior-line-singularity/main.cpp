@@ -19,7 +19,7 @@ using namespace RefinementSelectors;
 //
 //  Domain: square, see the file singpert.mesh.
 //
-//  BC:  Homogeneous Dirichlet.
+//  BC:  Dirichlet given by the exact solution.
 //
 //  The following parameters can be changed:
 
