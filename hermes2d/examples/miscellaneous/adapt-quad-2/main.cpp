@@ -43,11 +43,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int OUTER_BDY = 1, STATOR_BDY = 2;
+const std::string OUTER_BDY = "1", STATOR_BDY = "2";
 
 // Problem parameters.
-const int MATERIAL_1 = 1;
-const int MATERIAL_2 = 2;
+const std::string MATERIAL_1 = "1";
+const std::string MATERIAL_2 = "2";
 const double EPS_1 = 1.0;       // Relative electric permittivity in Omega_1.
 const double EPS_2 = 10.0;      // Relative electric permittivity in Omega_2.
 const double VOLTAGE = 50.0;    // Voltage on the stator.
@@ -62,36 +62,23 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("motor.mesh", &mesh);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(OUTER_BDY, STATOR_BDY));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(STATOR_BDY, VOLTAGE);
-  bc_values.add_const(OUTER_BDY, 0.0);
+  // Initialize boundary conditions
+  EssentialBCConstant bc_essential_out(OUTER_BDY, 0.0);
+  EssentialBCConstant bc_essential_stator(STATOR_BDY, VOLTAGE);
+  EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc_essential_out, &bc_essential_stator));
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
   int adapt_order_increase = 1;
   double adapt_rel_error_tol = 1e1;
-  WeakForm wf;
-  if (ADAPTIVE_QUADRATURE) {
+  CustomWeakForm wf(MATERIAL_1, EPS_1, MATERIAL_2, EPS_2, ADAPTIVE_QUADRATURE, adapt_order_increase, adapt_rel_error_tol);
+  
+  if (ADAPTIVE_QUADRATURE)
     info("Adaptive quadrature ON.");    
-    wf.add_matrix_form(biform1, HERMES_SYM, MATERIAL_1, 
-                       Hermes::vector<MeshFunction*>(), 
-                       adapt_order_increase, adapt_rel_error_tol);
-    wf.add_matrix_form(biform2, HERMES_SYM, MATERIAL_2, 
-                       Hermes::vector<MeshFunction*>(), 
-                       adapt_order_increase, adapt_rel_error_tol);
-  }
-  else {
+  else
     info("Adaptive quadrature OFF.");    
-    wf.add_matrix_form(callback(biform1), HERMES_SYM, MATERIAL_1);
-    wf.add_matrix_form(callback(biform2), HERMES_SYM, MATERIAL_2);
-  }
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
