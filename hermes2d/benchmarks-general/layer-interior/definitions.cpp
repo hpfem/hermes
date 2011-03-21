@@ -79,9 +79,7 @@ private:
   class MyMatrixFormVolPoisson : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_SYM;
-    }
+    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -103,8 +101,7 @@ private:
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), 
-          rhs(rhs) { }
+    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 

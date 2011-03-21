@@ -14,7 +14,7 @@ using namespace RefinementSelectors;
 //
 //  PDE: -EPSILON Laplace u + 2du/dx + du/dy = f
 //
-//  Known exact solution, see functions fn() and fndd().
+//  Known exact solution, see the class MyExactSolution.
 //
 //  Domain: unit square (-1, 1)x(-1, 1), see the file square.mesh.
 //
@@ -61,7 +61,7 @@ const double EPSILON = 1e-1;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -77,13 +77,16 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Set exact solution.
-  ExactSolutionNIST06 exact(&mesh, EPSILON);
+  MyExactSolution exact(&mesh, EPSILON);
 
+  // Define right-hand side.
+  MyRightHandSide rhs(EPSILON);
+ 
   // Initialize the weak formulation.
-  WeakFormNIST06 wf(&exact);
+  MyWeakForm wf(&rhs);
   
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

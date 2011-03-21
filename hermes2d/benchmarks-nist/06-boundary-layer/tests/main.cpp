@@ -67,7 +67,7 @@ const double EPSILON = 1e-1;
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -83,13 +83,16 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionNIST06 exact(&mesh, EPSILON);
+  MyExactSolution exact(&mesh, EPSILON);
+
+  // Define right-hand side.
+  MyRightHandSide rhs(EPSILON);
 
   // Initialize the weak formulation.
-  WeakFormNIST06 wf(&exact);
+  MyWeakForm wf(&rhs);
   
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc_esssential(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc_esssential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_esssential);
 
   // Create an H1 space with default shapeset.
