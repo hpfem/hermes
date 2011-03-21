@@ -73,10 +73,10 @@ void KellyTypeAdapt::add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm
   this->error_estimators_surf.push_back(form);
 }
 
-double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
-                                         Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns,
+                                         Hermes::vector<double>* component_errors,
                                          unsigned int error_flags)
-{
+{    
   int n = slns.size();
   error_if (n != this->num,
             "Wrong number of solutions.");

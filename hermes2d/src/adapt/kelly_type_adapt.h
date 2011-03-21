@@ -139,9 +139,11 @@ public:
     bool ignore_visited_segments;
 
     /// Calculates error estimates for each solution component, the total error estimate, and possibly also
-    /// their normalizations.
-    virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
-                                     Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+    /// their normalizations. If called with a pair of solutions, the version from Adapt is used (this is e.g.
+    /// done when comparing approximate solution to the exact one - in this case, we do not want to compute 
+    /// the Kelly estimator value, but rather the ordinary difference between the solutions).
+    virtual double calc_err_internal(Hermes::vector<Solution *> slns,
+                                     Hermes::vector<double>* component_errors,
                                      unsigned int error_flags);
 
   public:
@@ -233,7 +235,7 @@ public:
                         Hermes::vector<double>* component_errors = NULL,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
-      return calc_err_internal(slns, Hermes::vector<Solution *>(), component_errors, false, error_flags);
+      return calc_err_internal(slns, component_errors, error_flags);
     }
 
     /// Refines the elements selected by the \code RefinementSelectors::HOnlySelector \endcode according
