@@ -6,6 +6,9 @@ using namespace RefinementSelectors;
 
 //  This is the ninth in the series of NIST benchmarks with known exact solutions. This benchmark
 //  has four different versions, use the global variable PROB_PARAM below to switch among them.
+//  The difference from benchmark 'nist-09' is that h-adaptivity with Kelly error estimator is used
+//  here instead of the general hp-adaptivity using reference solutions and their projections
+//  onto coarse meshes.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
@@ -13,24 +16,23 @@ using namespace RefinementSelectors;
 //  PDE: -Laplace u = f
 //
 //  Known exact solution; atan(ALPHA * (sqrt(pow(x - X_LOC, 2) + pow(y - Y_LOC, 2)) - R_ZERO));
-//  See the class MyExactSolution.
+//  See functions fn() and fndd() in "exact_solution.cpp".
 //
-//  Domain: unit square (0, 1) x (0, 1), see the file square.mesh.
+//  Domain: unit square (0, 1)x(0, 1), see the file square.mesh.
 //
 //  BC:  Dirichlet, given by exact solution.
 //
 //  The following parameters can be changed:
 
-int PARAM = 3;         // PARAM determines which parameter values you wish to use 
-                       //            for the steepness and location of the wave front. 
-                       // #| name   |   ALPHA | X_LOC	| Y_LOC | R_ZERO
-                       // 0: mild		    20      -0.05  -0.05    0.7
-                       // 1: steep      1000    -0.05  -0.05    0.7
-                       // 2: asymmetric 1000     1.5    0.25    0.92
-                       // 3: well       50       0.5    0.5     0.25
+int PARAM = 3;         // PARAM determines which parameter values you wish to use for the steepness and location of the wave front. 
+                       //    name		ALPHA	X_LOC	Y_LOC	R_ZERO
+                       // 0: mild		20	-0.05	-0.05	0.7
+                       // 1: steep		1000	-0.05	-0.05	0.7
+                       // 2: asymmetric         1000	 1.5	 0.25	0.92
+                       // 3: well		50	 0.5	 0.5	0.25
 
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -41,75 +43,41 @@ const int STRATEGY = 0;                           // Adaptive strategy:
                                                   //   than THRESHOLD times maximum element error.
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
-                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO_H;        // Predefined list of element refinement candidates. Possible values are
-                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                                  // See User Documentation for details.
+                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp
+const bool USE_RESIDUAL_ESTIMATOR = true;        // Add also the norm of the residual to the error estimate of each element.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
                                                   // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
                                                   // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
-                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.                                            
 
-const bool USE_RESIDUAL_ESTIMATOR = true;         // Add also the norm of the residual to the error estimate of each element.
+// Problem parameters.
+double ALPHA;          // (X_LOC, Y_LOC) is the center of the circular wave front, R_ZERO is the distance from the 
+double X_LOC;          // wave front to the center of the circle, and ALPHA gives the steepness of the wave front.
+double Y_LOC;
+double R_ZERO;
+
+// Exact solution.
+#include "exact_solution.cpp"
 
 // Boundary markers.
-const std::string BDY_DIRICHLET = "1";
+const int BDY_DIRICHLET = 1;
+
+// Essential (Dirichlet) boundary condition values.
+scalar essential_bc_values(double x, double y) { return fn(x, y);}
 
 // Weak forms.
-#include "definitions.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
-  // Define problem parameters: (x_loc, y_loc) is the center of the circular wave front, R_ZERO is the distance from the 
-  // wave front to the center of the circle, and alpha gives the steepness of the wave front.
-  double alpha, x_loc, y_loc, r_zero;
-  switch(PARAM) {
-  case 0:
-    alpha = 20;
-    x_loc = -0.05;
-    y_loc = -0.05;
-    r_zero = 0.7;
-    break;
-  case 1:
-    alpha = 1000;
-    x_loc = -0.05;
-    y_loc = -0.05;
-    r_zero = 0.7;
-    break;
-  case 2:
-    alpha = 1000;
-    x_loc = 1.5;
-    y_loc = 0.25;
-    r_zero = 0.92;
-    break;
-  case 3:
-    alpha = 50;
-    x_loc = 0.5;
-    y_loc = 0.5;
-    r_zero = 0.25;
-    break;
-  default:   // The same as 0.
-    alpha = 20;
-    x_loc = -0.05;
-    y_loc = -0.05;
-    r_zero = 0.7;
-    break;
-  }
-
-  // Instantiate a class with global functions.
-  Hermes2D hermes2d;
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -118,34 +86,34 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  
-  // Set exact solution.
-  MyExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
 
-  // Define right-hand side.
-  MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
+  // Initialize boundary conditions.
+  BCTypes bc_types;
+  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
 
-  // Initialize the weak formulation.
-  MyWeakFormPoisson wf(&rhs);
-
-  // Initialize boundary conditions
-  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
-  EssentialBCs bcs(&bc);
+  // Enter Dirichlet boudnary values.
+  BCValues bc_values;
+  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+
+  // Initialize the weak formulation.
+  WeakForm wf;
+  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
+  wf.add_vector_form(callback(linear_form));
   
   // Initialize approximate solution.
   Solution sln;
 
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  // Set exact solution.
+  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
   sview.show_mesh(false);
   sview.fix_scale_width(50);
-  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 420, 350));
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 640, 480));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -153,11 +121,11 @@ int main(int argc, char* argv[])
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
-
-  // Set up the solver, matrix, and rhs according to the solver selection.
+  
+  // Initialize the matrix solver.
   SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs_vec = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs_vec);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Adaptivity loop:
   int as = 1;
@@ -170,7 +138,7 @@ int main(int argc, char* argv[])
     info("Solving.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
-    dp->assemble(matrix, rhs_vec);
+    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
@@ -185,14 +153,11 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
-    BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space, HERMES_H1_NORM);
+    BasicKellyAdapt* adaptivity = new BasicKellyAdapt(&space);
     
     // Use energy norm for error estimate normalization and measuring of exact error.
-    // FIXME: This needs to be updated after the change in weak forms.
-    /*
     adaptivity->set_error_form(callback(bilinear_form));
-    */
-
+    
     if (USE_RESIDUAL_ESTIMATOR) 
       adaptivity->add_error_estimator_vol(callback(residual_estimator));
     
@@ -236,6 +201,11 @@ int main(int argc, char* argv[])
     delete dp;
   }
   while (done == false);
+  
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
 
   verbose("Total running time: %g s", cpu_time.accumulated());
 

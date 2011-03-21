@@ -69,7 +69,8 @@ const std::string BDY_DIRICHLET = "1";
 
 int main(int argc, char* argv[])
 {
-  // Define problem parameters.
+  // Define problem parameters: (x_loc, y_loc) is the center of the circular wave front, R_ZERO is the distance from the 
+  // wave front to the center of the circle, and alpha gives the steepness of the wave front.
   double alpha, x_loc, y_loc, r_zero;
   switch(PARAM) {
   case 0:
