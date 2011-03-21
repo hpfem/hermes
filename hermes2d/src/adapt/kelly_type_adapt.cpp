@@ -193,17 +193,19 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes
 
         for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
         {
-          /*
+            /*
           if (error_estimators_surf[iest].area > 0 &&
               error_estimators_surf[iest].area != surf_pos[isurf].marker) continue;
           */
           if (bnd[isurf])   // Boundary
           {
+            if (error_estimators_surf[iest]->area == H2D_DG_INNER_EDGE) continue;
+            
             /*
             if (boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest].area) < 0 &&
                 error_estimators_surf[iest].area != HERMES_ANY) continue;
-                */
-
+            */    
+            
             err += eval_boundary_estimator(error_estimators_surf[iest], rm, surf_pos);
           }
           else              // Interface
