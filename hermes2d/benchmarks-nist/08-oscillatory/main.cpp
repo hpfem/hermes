@@ -12,7 +12,7 @@ using namespace RefinementSelectors;
 //
 //  The problem is made harder for adaptive algorithms by decreasing the parameter ALPHA.
 //
-//  PDE: -Laplace u - u/(ALPHA + r) = f where r(x,y) = sqrt(x*x + y*y)
+//  PDE: -Laplace u - u/(ALPHA + r(x, y)) = f where r(x, y) = sqrt(x*x + y*y)
 //
 //  Known exact solution, see functions fn() and fndd().
 //
@@ -47,7 +47,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -61,7 +61,7 @@ const double ALPHA = 1/(10*M_PI);
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -76,15 +76,14 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  
   // Set exact solution.
-  ExactSolutionNIST08 exact(&mesh, ALPHA);
+  MyExactSolution exact(&mesh, ALPHA);
 
   // Initialize the weak formulation.
-  WeakFormNIST08 wf(ALPHA);
+  MyWeakForm wf(ALPHA);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.

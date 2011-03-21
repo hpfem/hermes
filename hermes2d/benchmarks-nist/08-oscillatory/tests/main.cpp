@@ -66,7 +66,7 @@ const double ALPHA = 1/(10*M_PI);
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -83,13 +83,13 @@ int main(int argc, char* argv[])
 
 
   // Set exact solution.
-  ExactSolutionNIST08 exact(&mesh, ALPHA);
+  MyExactSolution exact(&mesh, ALPHA);
 
   // Initialize the weak formulation.
-  WeakFormNIST08 wf(ALPHA);
+  MyWeakForm wf(ALPHA);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantExact bc(BDY_DIRICHLET, &exact);
+  EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.

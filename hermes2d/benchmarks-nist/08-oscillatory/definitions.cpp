@@ -3,24 +3,44 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Exact solution.
-#include "exact_solution.cpp"
-
-class WeakFormNIST08 : public WeakForm
+class MyExactSolution : public ExactSolutionScalar
 {
 public:
-  WeakFormNIST08(double alpha) : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolNIST08(0, 0, alpha));
-    
-    add_vector_form(new VectorFormVolNIST08(0, alpha));
+  MyExactSolution(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
+
+  // Exact solution.
+  double value(double x, double y) {
+    double r = sqrt(x*x + y*y);
+    return sin(1/(alpha + r));
+  };
+
+  // Exact solution with derivatives.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    double r = sqrt(x*x + y*y);
+    double h = 1/(alpha + r);
+    dx = -cos(h) * h * h * x / r;
+    dy = -cos(h) * h * h * y / r;
+    return value(x, y);
+  };
+
+  // Members.
+  double alpha;
+};
+
+// Weak forms.
+class MyWeakForm : public WeakForm
+{
+public:
+  MyWeakForm(double alpha) : WeakForm(1) {
+    add_matrix_form(new MyMatrixFormVol(0, 0, alpha));
+    add_vector_form(new MyVectorFormVol(0, alpha));
   };
 
 private:
-  class MatrixFormVolNIST08 : public WeakForm::MatrixFormVol
+  class MyMatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolNIST08(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j), alpha(alpha) {
-      sym = HERMES_SYM;
-    }
+    MyMatrixFormVol(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j, HERMES_SYM), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -49,10 +69,10 @@ private:
     double alpha;
   };
 
-  class VectorFormVolNIST08 : public WeakForm::VectorFormVol
+  class MyVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolNIST08(int i, double alpha) : WeakForm::VectorFormVol(i), alpha(alpha) { }
+    MyVectorFormVol(int i, double alpha) : WeakForm::VectorFormVol(i), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -87,24 +107,25 @@ private:
   };
 };
 
-class EssentialBCNonConstantExact : public EssentialBC
+// Essential boundary conditions.
+class EssentialBCNonConstant : public EssentialBC
 {
 public:
-  EssentialBCNonConstantExact(std::string marker, ExactSolutionNIST08* exact_solution) : 
+  EssentialBCNonConstant(std::string marker, MyExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   };
   
-  ~EssentialBCNonConstantExact() {};
+  ~EssentialBCNonConstant() {};
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
   };
 
   virtual scalar function(double x, double y) const {
-    return exact_solution->fn(x, y);
+    return exact_solution->value(x, y);
   };
 
-  ExactSolutionNIST08* exact_solution;
+  MyExactSolution* exact_solution;
 };
