@@ -40,8 +40,10 @@ public:
     double c = pow(a, ALPHA);
     double d = ((y*y)/(x*x) + 1.0 );
 
-    dx = (((ALPHA* x* sin(ALPHA * get_angle(y,x)) *b)/a) - ((ALPHA *y *cos(ALPHA * get_angle(y, x)) * c)/(pow(x, 2.0) *d)));
-    dy = (((ALPHA* cos(ALPHA* get_angle(y, x)) *c)/(x * d)) + ((ALPHA* y* sin(ALPHA* get_angle(y, x)) *b)/a));
+    dx = (((ALPHA* x* sin(ALPHA * get_angle(y,x)) *b)/a) 
+         - ((ALPHA *y *cos(ALPHA * get_angle(y, x)) * c)/(pow(x, 2.0) *d)));
+    dy = (((ALPHA* cos(ALPHA* get_angle(y, x)) *c)/(x * d)) 
+         + ((ALPHA* y* sin(ALPHA* get_angle(y, x)) *b)/a));
 
     return value(x, y);
   };

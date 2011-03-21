@@ -14,7 +14,7 @@ using namespace RefinementSelectors;
 //
 //  Exact solution: unknown.
 //
-//  Domain: square (0, 8.4)x(0, 24), see the file "battery.mesh".
+//  Domain: square (0, 8.4) x (0, 24), see the file "battery.mesh".
 //
 //  BC: Zero Neumann on left edge, Newton on the rest of the boundary:
 //
@@ -65,8 +65,9 @@ const std::string BDY_RIGHT = "3";
 const std::string BDY_BOTTOM = "4";
 
 // Weak forms.
-// In this example, some parameters are part of the weak formulation, see the file forms.cpp, class WeakFormNIST05.
-#include "forms.cpp"
+// In this example, some parameters are part of the weak formulation, 
+// see the file definitions.cpp, class MyWeakFormPoisson.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +83,8 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, P_INIT);
 
   // Initialize the weak formulation.
-  WeakFormNIST05 wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
+  MyWeakFormPoisson wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, 
+                       BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;

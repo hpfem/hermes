@@ -45,8 +45,7 @@ private:
   {
   public:
     MyVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) 
-            : WeakForm::VectorFormVol(i), 
-    ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
+            : WeakForm::VectorFormVol(i), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
@@ -71,7 +70,8 @@ private:
     Real rhs(Real x, Real y) {
       Real a_P = (-ALPHA_P * pow((x - X_LOC), 2) - ALPHA_P * pow((y - Y_LOC), 2));
   
-      return 4 * exp(a_P) * ALPHA_P * (ALPHA_P * (x - X_LOC) * (x - X_LOC) + ALPHA_P * (y - Y_LOC) * (y - Y_LOC) - 1);
+      return 4 * exp(a_P) * ALPHA_P * (ALPHA_P * (x - X_LOC) * (x - X_LOC) 
+             + ALPHA_P * (y - Y_LOC) * (y - Y_LOC) - 1);
     }
     
     // Members.
