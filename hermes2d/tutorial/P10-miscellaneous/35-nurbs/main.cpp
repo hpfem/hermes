@@ -24,7 +24,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_MARKER = 1;
+const std::string BDY_MARKER = "1";
 
 // Problem parameters.
 const double CONST_F = 1.0;  
@@ -43,21 +43,16 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_MARKER);
-
-  // Enter zero Dirichlet boundary values.
-  BCValues bc_values;
+  EssentialBCConstant bc_essential(BDY_MARKER, 0.0);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
+  WeakFormPoisson wf(CONST_F);
 
   // Initialize the FE problem.
   bool is_linear = true;
