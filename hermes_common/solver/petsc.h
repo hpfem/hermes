@@ -49,6 +49,9 @@ public:
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
+  virtual void add_matrix(PetscMatrix* mat);
+  virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
+  virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
 
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(scalar* vector_in, scalar* vector_out);

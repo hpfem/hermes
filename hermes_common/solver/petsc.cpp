@@ -231,6 +231,31 @@ void PetscMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
     }
   }
 }
+
+void PetscMatrix::add_matrix(PetscMatrix* mat){
+        MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
+}
+
+void PetscMatrix::add_to_diagonal_blocks(int num_stages, PetscMatrix* mat){
+  _F_
+  int ndof = mat->get_size();
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
+    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat);
+  }
+}
+
+void PetscMatrix::add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat){
+        unsigned int block_size=mat->get_size();
+        for (unsigned int r=0;r<block_size;r++){
+                for (unsigned int c=0;c<block_size;c++){
+                        this->add(i+r,j+c,mat->get(i,j));
+                }
+        }
+}
+
 // Multiplies matrix with a scalar.
 void PetscMatrix::multiply_with_scalar(scalar value){
   MatScale(matrix,value);
