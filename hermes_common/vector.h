@@ -14,10 +14,11 @@ namespace Hermes
 /// A vector of values.
 /** This class is used to pass a variable number of parameters in a type-safe fashion.
  *  \par Suggested Use
- *  Let us assume a function foo(const vector<Solution*>&) and instances sln1-sln3 of a class Solution. Then,
- *  - 1 parameter: foo(&sln1);
- *  - 2 up to 10 parameters: foo(vector<double>(&sln1, &sln2, &sln3));
- *  - more than 10 parameters: Fill the instance similar to STL vector (std::vector). */
+ *  Let us assume a function foo(Hermes::vector<Solution*>&) and instances sln1-sln3 of a class Solution. Then,
+ *  - 2 up to 10 parameters: foo(Hermes::vector<Solution*>(&sln1, &sln2, &sln3));
+ *  - more than 10 parameters: Fill the instance similarly to STL vector (std::vector).
+ *  If needed, the one-parameter version of foo must be created separately, without using Hermes::vector.
+ */
 template<typename T>
 class vector : public std::vector<T>
 {

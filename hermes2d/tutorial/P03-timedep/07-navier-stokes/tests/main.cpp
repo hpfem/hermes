@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
       Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
+    }
 
     if (NEWTON) 
     {

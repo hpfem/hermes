@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormNewton wf(h, T0);
+  WeakFormNewton wf(h, T0, BDY_BOTTOM);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10

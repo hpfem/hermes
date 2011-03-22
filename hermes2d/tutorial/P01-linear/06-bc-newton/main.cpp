@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormNewton wf(h, T0);
+  WeakFormNewton wf(h, T0, BDY_BOTTOM);
 
   // Initialize the FE problem.
   bool is_linear = true;

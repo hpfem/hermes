@@ -39,6 +39,28 @@ typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
 class HERMES_API KellyTypeAdapt : public Adapt
 {
 public:
+  /// Class representing the weak form of an error estimator.
+  /// 
+  /// A user must derive his own representation of the estimator from this class (an example is provided by the class
+  /// \c BasicKellyAdapt below). The three attributes have the following meaning:
+  ///
+  ///   - i     ... with a multi-component solution, this defines for which component this estimate applies,
+  ///   - area  ... defines in which geometric parts of the domain should the estimate be used - e.g. by defining 
+  ///               area = H2D_DG_INNER_EDGE, errors at element interfaces will be tracked by the estimator,
+  ///   - ext   ... vector with external functions possibly used within the estimator (e.g. previous time-level 
+  ///               solutions appearing in the residual) - currently not used.
+  ///
+  /// Every estimator form must also implement the two methods \c ord and \c value, which are used for determining
+  /// the integration order and for the actual evaluation of the form, respectively. During the evaluation, their 
+  /// parameters will be interpreted as follows:
+  ///
+  ///   - int n,                 ... number of integration points in the currently processed element
+  ///   - double *wt,            ... corresponding integration weights
+  ///   - Func\<scalar\> *u[],   ... all solution components
+  ///   - Func\<double\> *u,     ... currently processed solution component
+  ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
+  ///   - ExtData\<scalar\> *ext ... external functions (currently unused).
+  ///
   class HERMES_API ErrorEstimatorForm
   {
   public:
@@ -53,14 +75,14 @@ public:
                Func<scalar> *u, Geom<double> *e,
                ExtData<scalar> *ext)
     {
-      error("Adapt::::ErrorEstimatorForm::ord must be overrided.");
+      error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overriden.");
       return 0.0;
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                      Func<Ord> *u, Geom<Ord> *e,
                      ExtData<Ord> *ext)
     {
-      error("Adapt::::ErrorEstimatorForm::ord must be overrided.");
+      error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overriden.");
       return Ord();
     }
 
@@ -117,9 +139,11 @@ public:
     bool ignore_visited_segments;
 
     /// Calculates error estimates for each solution component, the total error estimate, and possibly also
-    /// their normalizations.
-    virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
-                                     Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+    /// their normalizations. If called with a pair of solutions, the version from Adapt is used (this is e.g.
+    /// done when comparing approximate solution to the exact one - in this case, we do not want to compute 
+    /// the Kelly estimator value, but rather the ordinary difference between the solutions).
+    virtual double calc_err_internal(Hermes::vector<Solution *> slns,
+                                     Hermes::vector<double>* component_errors,
                                      unsigned int error_flags);
 
   public:
@@ -161,6 +185,11 @@ public:
                    Hermes::vector<interface_estimator_scaling_fn_t>
                         interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
 
+    KellyTypeAdapt(Space * space_,
+                   ProjNormType norm_ = HERMES_UNSET_NORM,
+                   bool ignore_visited_segments_ = true,
+                   interface_estimator_scaling_fn_t interface_scaling_fn_ = NULL);
+                   
     /// Destructor.
     virtual ~KellyTypeAdapt()
     {
@@ -175,22 +204,19 @@ public:
     ///
     /// For example, element residual norms may be represented by such a form.
     ///
-    /// \c vector_form_val_t is defined in \c weakform/weakform.h and its arguments will be interpreted during
-    /// evaluation of the estimator as follows:
-    ///
-    ///   - ErrorEstimatorForm* form ... error estimator class
+    /// \param[in]  form ... object representing the form. A class derived from \c KellyTypeAdapt::ErrorEstimatorForm 
+    ///                      defines its datatype.
     ///
     void add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm* form);
 
     /// Append boundary or interface error estimator form.
     ///
-    /// Interpretation of the \c vector_form_val_t arguments is as in the volumetric forms, except now
-    /// with respect to the processed interface/boundary instead of  to the element. Interface form is defined
-    /// by <c> area == H2D_DG_INNER_EDGE </c> and then the effective types for \c u, \c vi and \c e are,
-    /// respectively \c DiscontinuousFunc, \c DiscontinuousFunc and \c InterfaceGeom.
+    /// Interface form is defined by <c> form::area == H2D_DG_INNER_EDGE </c>. The effective types for \c u_ext, \c u 
+    /// and \c e (three of the obligatory parameters of form::value() and form::ord()) will then be, respectively 
+    /// \c DiscontinuousFunc*[], \c DiscontinuousFunc* and \c InterfaceGeom*.
     ///
-    void add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form); // std::string area = H2D_DG_INNER_EDGE,
-
+    void add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form); 
+    
     ///
     /// The following two methods calculate the error of the given \c sln, using \code calc_err_internal \endcode.
     ///
@@ -209,7 +235,7 @@ public:
                         Hermes::vector<double>* component_errors = NULL,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
-      return calc_err_internal(slns, Hermes::vector<Solution *>(), component_errors, false, error_flags);
+      return calc_err_internal(slns, component_errors, error_flags);
     }
 
     /// Refines the elements selected by the \code RefinementSelectors::HOnlySelector \endcode according
@@ -237,7 +263,7 @@ public:
 
 class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
 {
-  public:
+public:
   class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt::ErrorEstimatorForm
   {
   public:
@@ -268,21 +294,33 @@ class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
       return result;
     }
   };
-    /// Constructor.
-    ///
-    /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
-    ///
-    BasicKellyAdapt(Hermes::vector<Space *> spaces_,
-                    Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-                    double const_by_laplacian = 1.0) : KellyTypeAdapt(spaces_, norms_)
-    {
-      interface_scaling_const = 1./(24.*const_by_laplacian);
-      volumetric_scaling_const = interface_scaling_const;
-      boundary_scaling_const = interface_scaling_const;
-
-      for (int i = 0; i < num; i++)
-        this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
-    }
+  
+  /// Constructor.
+  ///
+  /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
+  ///
+  BasicKellyAdapt(Hermes::vector<Space *> spaces_,
+                  Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
+                  double const_by_laplacian = 1.0) : KellyTypeAdapt(spaces_, norms_)
+  {
+    set_scaling_consts(const_by_laplacian);   
+    for (int i = 0; i < num; i++)
+      this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
+  }
+  
+  BasicKellyAdapt(Space* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0) : KellyTypeAdapt(space_, norm_) 
+  {
+    set_scaling_consts(const_by_laplacian);
+    this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0));
+  }
+  
+private:
+  void set_scaling_consts(double C)
+  {
+    interface_scaling_const = 1./(24.*C);
+    volumetric_scaling_const = interface_scaling_const;
+    boundary_scaling_const = interface_scaling_const;
+  }
 };
 
 // #endif
