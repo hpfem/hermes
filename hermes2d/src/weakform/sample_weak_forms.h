@@ -61,11 +61,10 @@ private:
   class VectorFormConstant : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormConstant(int i) : WeakForm::VectorFormVol(i) { }
+    VectorFormConstant(int i, double const_f) : WeakForm::VectorFormVol(i), const_f(const_f) { }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                  Geom<double> *e, ExtData<scalar> *ext) {
-      scalar const_f = ext->param[0];
       return const_f * int_v<scalar, scalar>(n, wt, v);
     }
 
@@ -73,6 +72,9 @@ private:
             Geom<Ord> *e, ExtData<Ord> *ext) {
       return v->val[0]; // Make the parser return the polynomial degree of 'v'.
     }
+
+    // Constant right hand side.
+    double const_f;
   };
 
 /* Default (vector-valued) weak form for linear elasticity (Lame equations)  

@@ -7,9 +7,9 @@ class MyWeakFormPoisson : public WeakFormLaplace
 {
 public:
   MyWeakFormPoisson(double const_f) : WeakFormLaplace() {
-    VectorFormConstant* my_vector_form = new VectorFormConstant(0);
-    my_vector_form->param.push_back(const_f);
-    add_vector_form(my_vector_form);
+    add_vector_form(new VectorFormConstant(0, const_f));
   };
+private:
+  double const_f;
 };
 
