@@ -16,27 +16,31 @@ using namespace RefinementSelectors;
 #define NOSCREENSHOT
 
 /*** Fundamental coefficients ***/
-const double D = 10e-11; 	                  // [m^2/s] Diffusion coefficient.
-const double R = 8.31; 		                  // [J/mol*K] Gas constant.
-const double T = 293; 		                  // [K] Aboslute temperature.
-const double F = 96485.3415;	                  // [s * A / mol] Faraday constant.
-const double eps = 2.5e-2; 	                  // [F/m] Electric permeability.
+const double D = 10e-11; 	                        // [m^2/s] Diffusion coefficient.
+const double R = 8.31; 		                        // [J/mol*K] Gas constant.
+const double T = 293; 		                        // [K] Aboslute temperature.
+const double F = 96485.3415;	                    // [s * A / mol] Faraday constant.
+const double eps = 2.5e-2; 	                      // [F/m] Electric permeability.
 const double mu = D / (R * T);                    // Mobility of ions.
-const double z = 1;		                  // Charge number.
+const double z = 1;		                            // Charge number.
 const double K = z * mu * F;                      // Constant for equation.
-const double L =  F / eps;	                  // Constant for equation.
-const double VOLTAGE = 1;	                  // [V] Applied voltage.
+const double L =  F / eps;	                      // Constant for equation.
+const double VOLTAGE = 1;	                        // [V] Applied voltage.
 const scalar C0 = 1200;	                          // [mol/m^3] Anion and counterion concentration.
-
+const double mech_E = 0.5e9;                      // [Pa]
+const double mech_nu = 0.487;                     // Poisson ratio
+const double mech_mu = mech_E / (2 * (1 + mech_nu));
+const double mech_lambda = mech_E * mech_nu / ((1 + mech_nu) * (1 - 2 * mech_nu));
+const double lin_force_coup = 1e5;
 
 /* Simulation parameters */
 const double T_FINAL = 0.2;
 double INIT_TAU = 0.1;
 double *TAU = &INIT_TAU;                          // Size of the time step
-const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
-const int REF_INIT = 3;     	                  // Number of initial refinements.
-const bool MULTIMESH = true;	                  // Multimesh?
-const int TIME_DISCR = 2;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
+const int P_INIT = 2;       	                    // Initial polynomial degree of all mesh elements.
+const int REF_INIT = 3;     	                    // Number of initial refinements.
+const bool MULTIMESH = true;	                    // Multimesh?
+const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
 
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
 const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
@@ -66,34 +70,27 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const int NDOF_STOP = 5000;	                  // To prevent adaptivity from going on forever.
+const int NDOF_STOP = 5000;	                      // To prevent adaptivity from going on forever.
 const double ERR_STOP = 1;                        // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms
-#include "../forms.cpp"
+#include "forms.cpp"
 
 
-/*** Boundary types and conditions ***/
+// Initial conditions.
+#include "initial_conditions.cpp"
 
 // Boundary markers.
-const int BDY_SIDE = 1;
-const int BDY_TOP = 2;
-const int BDY_BOT = 3;
-
-scalar voltage_ic(double x, double y, double &dx, double &dy) {
-  // y^2 function for the domain.
-  //return (y+100e-6) * (y+100e-6) / (40000e-12);
-  return 0.0;
-}
-
-scalar concentration_ic(double x, double y, double &dx, double &dy) {
-  return C0;
-}
+const std::string BDY_SIDE = "1";
+const std::string BDY_TOP = "2";
+const std::string BDY_BOT = "3";
 
 int main (int argc, char* argv[]) {
+  // Initialize the library's global functions.
+  Hermes2D hermes2D;
 
   // Load the mesh file.
   Mesh C_mesh, phi_mesh, basemesh;
@@ -108,56 +105,27 @@ int main (int argc, char* argv[]) {
   C_mesh.copy(&basemesh);
   phi_mesh.copy(&basemesh);
 
-  // Enter Neumann boundary markers for Nernst-Planck.
-  BCTypes C_bc_types;
-  C_bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SIDE, BDY_TOP, BDY_BOT));
-
-  // Enter Dirichlet and Neumann boundary markers for Poisson.
-  BCTypes phi_bc_types;
-  phi_bc_types.add_bc_neumann(BDY_SIDE);
-  phi_bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_BOT));
-
-  // Enter Dirichlet boundary values.
-  BCValues phi_bc_values;
-  phi_bc_values.add_const(BDY_TOP, VOLTAGE);
-  phi_bc_values.add_zero(BDY_BOT);
-
-  BCValues C_bc_values;
-//  C_bc_values.add_zero(Hermes::vector<int>(BDY_SIDE, BDY_TOP, BDY_BOT));
+  EssentialBCConstant bc_phi_voltage(BDY_TOP, VOLTAGE);
+  EssentialBCConstant bc_phi_zero(BDY_BOT, 0.0);
+  EssentialBCs bcs_phi(Hermes::vector<EssentialBC*>(&bc_phi_voltage, &bc_phi_zero));
 
   // Spaces for concentration and the voltage.
-  H1Space C_space(&C_mesh, &C_bc_types, &C_bc_values, P_INIT);
-  H1Space phi_space(MULTIMESH ? &phi_mesh : &C_mesh, &phi_bc_types, &phi_bc_values, P_INIT);
+  H1Space C_space(&C_mesh, P_INIT);
+  H1Space phi_space(MULTIMESH ? &phi_mesh : &C_mesh, &bcs_phi, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&C_space, &phi_space));
 
   Solution C_sln, C_ref_sln;
   Solution phi_sln, phi_ref_sln; 
 
   // Assign initial condition to mesh.
-  Solution C_prev_time(&C_mesh, concentration_ic);
-  Solution phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh, voltage_ic);
+  InitialSolutionConcentration C_prev_time(&C_mesh, C0);
+  InitialSolutionVoltage phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh);
 
   // The weak form for 2 equations.
-  WeakForm wf(2);
+  WeakFormNernstPlanckEuler wf(TAU, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D, &C_prev_time);
   // Add the bilinear and linear forms.
-  if (TIME_DISCR == 1) {  // Implicit Euler.
-  wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_NONSYM);
-  wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM);
-  wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
-  wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
-  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY, 
-                     Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-  wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY, 
-                     Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-  } else {
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_NONSYM);
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_NONSYM);
-    wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_NONSYM);
-    wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_NONSYM);
-    wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
-  }
+  if (TIME_DISCR == 2)
+	  error("Crank-Nicholson forms are not implemented yet");
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -182,7 +150,7 @@ int main (int argc, char* argv[]) {
   // Newton's loop on the coarse mesh.
   info("Solving on coarse mesh:");
   bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+  if (!hermes2D.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
       NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
@@ -256,7 +224,7 @@ int main (int argc, char* argv[]) {
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
-      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+      if (!hermes2D.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  	      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
 

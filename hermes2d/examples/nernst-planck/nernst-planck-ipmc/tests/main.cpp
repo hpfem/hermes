@@ -15,19 +15,19 @@ using namespace RefinementSelectors;
 #define TWO_BASE_MESH
 
 /*** Fundamental coefficients ***/
-const double D = 10e-11; 	                  // [m^2/s] Diffusion coefficient.
-const double R = 8.31; 		                  // [J/mol*K] Gas constant.
-const double T = 293; 		                  // [K] Aboslute temperature.
-const double F = 96485.3415;	                  // [s * A / mol] Faraday constant.
-const double eps = 2.5e-2; 	                  // [F/m] Electric permeability.
+const double D = 10e-11; 	                        // [m^2/s] Diffusion coefficient.
+const double R = 8.31; 		                        // [J/mol*K] Gas constant.
+const double T = 293; 		                        // [K] Aboslute temperature.
+const double F = 96485.3415;	                    // [s * A / mol] Faraday constant.
+const double eps = 2.5e-2; 	                      // [F/m] Electric permeability.
 const double mu = D / (R * T);                    // Mobility of ions.
-const double z = 1;		                  // Charge number.
+const double z = 1;		                            // Charge number.
 const double K = z * mu * F;                      // Constant for equation.
-const double L =  F / eps;	                  // Constant for equation.
-const double VOLTAGE = 1;	                  // [V] Applied voltage.
+const double L =  F / eps;	                      // Constant for equation.
+const double VOLTAGE = 1;	                        // [V] Applied voltage.
 const scalar C0 = 1200;	                          // [mol/m^3] Anion and counterion concentration.
-const double mech_E = 0.5e9;              //[Pa]
-const double mech_nu = 0.487;              // Poisson ratio
+const double mech_E = 0.5e9;                      // [Pa]
+const double mech_nu = 0.487;                     // Poisson ratio
 const double mech_mu = mech_E / (2 * (1 + mech_nu));
 const double mech_lambda = mech_E * mech_nu / ((1 + mech_nu) * (1 - 2 * mech_nu));
 const double lin_force_coup = 1e5;
@@ -36,9 +36,9 @@ const double lin_force_coup = 1e5;
 const double T_FINAL = 0.1;
 double INIT_TAU = 0.05;
 double *TAU = &INIT_TAU;                          // Size of the time step
-const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
-const int REF_INIT = 3;     	                  // Number of initial refinements.
-const bool MULTIMESH = true;	                  // Multimesh?
+const int P_INIT = 2;       	                    // Initial polynomial degree of all mesh elements.
+const int REF_INIT = 3;     	                    // Number of initial refinements.
+const bool MULTIMESH = true;	                    // Multimesh?
 const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
 
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
@@ -69,14 +69,14 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const int NDOF_STOP = 5000;	                  // To prevent adaptivity from going on forever.
+const int NDOF_STOP = 5000;	                      // To prevent adaptivity from going on forever.
 const double ERR_STOP = 5.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms
-#include "../forms.cpp"
+#include "forms.cpp"
 
 // Initial conditions.
 #include "initial_conditions.cpp"
@@ -251,7 +251,7 @@ int main (int argc, char* argv[]) {
           Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
-      DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -279,7 +279,7 @@ int main (int argc, char* argv[]) {
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
-      if (!hermes2D.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+      if (!hermes2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 	  	      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
 
@@ -295,9 +295,9 @@ int main (int argc, char* argv[]) {
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
+      Adapt adaptivity (Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
       Hermes::vector<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&C_sln, &phi_sln, &u1_sln, &u2_sln),
+      double err_est_rel_total = adaptivity.calc_err_est(Hermes::vector<Solution *>(&C_sln, &phi_sln, &u1_sln, &u2_sln),
                                  Hermes::vector<Solution *>(&C_ref_sln, &phi_ref_sln, &u1_ref_sln, &u2_ref_sln),
                                  &err_est_rel) * 100;
 
@@ -324,7 +324,7 @@ int main (int argc, char* argv[]) {
       if (err_est_rel_total < ERR_STOP) done = true;
       else {
         info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector),
+        done = adaptivity.adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector),
           THRESHOLD, STRATEGY, MESH_REGULARITY);
         
         info("Adapted...");
@@ -337,19 +337,10 @@ int main (int argc, char* argv[]) {
       }
 
       // Clean up.
-      info("delete solver");
       delete solver;
-      info("delete matrix");
       delete matrix;
-      info("delete rhs");
       delete rhs;
-      info("delete adaptivity");
-      delete adaptivity;
-      info("delete[] ref_spaces");
       delete ref_spaces;
-      info("delete dp");
-      delete dp;
-      info("delete[] coeff_vec");
       delete[] coeff_vec;
     }
     while (done == false);

@@ -54,19 +54,19 @@ using namespace RefinementSelectors;
 #define TWO_BASE_MESH
 
 /*** Fundamental coefficients ***/
-const double D = 10e-11; 	                  // [m^2/s] Diffusion coefficient.
-const double R = 8.31; 		                  // [J/mol*K] Gas constant.
-const double T = 293; 		                  // [K] Aboslute temperature.
-const double F = 96485.3415;	                  // [s * A / mol] Faraday constant.
-const double eps = 2.5e-2; 	                  // [F/m] Electric permeability.
+const double D = 10e-11; 	                        // [m^2/s] Diffusion coefficient.
+const double R = 8.31; 		                        // [J/mol*K] Gas constant.
+const double T = 293; 		                        // [K] Aboslute temperature.
+const double F = 96485.3415;	                    // [s * A / mol] Faraday constant.
+const double eps = 2.5e-2; 	                      // [F/m] Electric permeability.
 const double mu = D / (R * T);                    // Mobility of ions.
-const double z = 1;		                  // Charge number.
+const double z = 1;		                            // Charge number.
 const double K = z * mu * F;                      // Constant for equation.
-const double L =  F / eps;	                  // Constant for equation.
-const double VOLTAGE = 1;	                  // [V] Applied voltage.
+const double L =  F / eps;	                      // Constant for equation.
+const double VOLTAGE = 1;	                        // [V] Applied voltage.
 const scalar C0 = 1200;	                          // [mol/m^3] Anion and counterion concentration.
-const double mech_E = 0.5e9;              //[Pa]
-const double mech_nu = 0.487;              // Poisson ratio
+const double mech_E = 0.5e9;                      // [Pa]
+const double mech_nu = 0.487;                     // Poisson ratio
 const double mech_mu = mech_E / (2 * (1 + mech_nu));
 const double mech_lambda = mech_E * mech_nu / ((1 + mech_nu) * (1 - 2 * mech_nu));
 const double lin_force_coup = 1e5;
@@ -74,10 +74,10 @@ const double lin_force_coup = 1e5;
 /* Simulation parameters */
 const double T_FINAL = 1;
 double INIT_TAU = 0.05;
-double *TAU = &INIT_TAU;                        // Size of the time step
-const int P_INIT = 2;       	                  // Initial polynomial degree of all mesh elements.
-const int REF_INIT = 3;     	                  // Number of initial refinements.
-const bool MULTIMESH = true;	                  // Multimesh?
+double *TAU = &INIT_TAU;                          // Size of the time step
+const int P_INIT = 2;       	                    // Initial polynomial degree of all mesh elements.
+const int REF_INIT = 3;     	                    // Number of initial refinements.
+const bool MULTIMESH = true;	                    // Multimesh?
 const int TIME_DISCR = 1;                         // 1 for implicit Euler, 2 for Crank-Nicolson.
 
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on coarse mesh.
@@ -108,8 +108,8 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const int NDOF_STOP = 5000;	                  // To prevent adaptivity from going on forever.
-const double ERR_STOP = 1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const int NDOF_STOP = 5000;	                      // To prevent adaptivity from going on forever.
+const double ERR_STOP = 1;                        // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
