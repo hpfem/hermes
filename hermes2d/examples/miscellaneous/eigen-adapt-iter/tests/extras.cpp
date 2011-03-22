@@ -175,6 +175,8 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
                         double newton_tol, int newton_max_iter)
 {
+  Hermes2D hermes2D;
+
   ScalarView sview("", new WinGeom(0, 0, 440, 350));
   OrderView oview("", new WinGeom(450, 0, 410, 350));
   int ndof_ref = matrix_M_ref->get_size();
@@ -221,7 +223,7 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Calculate relative error of the increment.
     Solution ref_sln_new;
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-    newton_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+    newton_err_rel = hermes2D.calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
 
     // Updating reference solution.
     ref_sln_prev.copy(&ref_sln_new);
@@ -252,6 +254,8 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
                         double picard_tol, int picard_max_iter)
 {
+  Hermes2D hermes2D;
+
   int ndof_ref = matrix_M_ref->get_size();
   double picard_err_rel;
   UMFPackVector* vec_lambda_MY = new UMFPackVector(ndof_ref);
@@ -290,7 +294,7 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Calculate relative error of the increment.
     Solution ref_sln_new;
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-    picard_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+    picard_err_rel = hermes2D.calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
 
     // Updating reference solution.
     ref_sln_prev.copy(&ref_sln_new);
