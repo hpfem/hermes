@@ -1,4 +1,4 @@
-project(P10-35-nurbs)
+project(P10-30-nurbs)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
