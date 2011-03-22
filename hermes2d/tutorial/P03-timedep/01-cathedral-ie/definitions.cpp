@@ -7,13 +7,13 @@ class MyWeakFormHeatRK1 : public WeakForm
 public:
   // Problem parameters.
   MyWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
-                    double time_step, double* current_time, double temp_init, double t_final, Solution* temp_prev) : WeakForm(1)
+                    double time_step, double* current_time_ptr, double temp_init, double t_final, Solution* temp_prev) : WeakForm(1)
   {
     add_matrix_form(new MyMatrixFormVolHeatRK1(0, 0, alpha, lambda, heatcap, rho, time_step));
     add_vector_form(new MyVectorFormVolHeatRK1(0, alpha, heatcap, rho, time_step, temp_prev));
 
     add_matrix_form_surf(new MyMatrixFormSurfHeatRK1(0, 0, bdy_air, alpha, lambda));
-    add_vector_form_surf(new MyVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time, temp_init, t_final));
+    add_vector_form_surf(new MyVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
   };
 
 private:
@@ -49,7 +49,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return heatcap * rho * int_u_v<Real, Scalar>(n, wt, temp_prev, v) / time_step;
+      return heatcap * rho * int_u_v<Real, Scalar>(n, wt, (Func<Real>*)temp_prev, v) / time_step;
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -93,8 +93,10 @@ private:
   private:
       double h;
   public:
-    MyVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda, double* current_time_ptr, double temp_init, double t_final) 
-      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr), temp_init(temp_init), t_final(t_final) { }
+    MyVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda, 
+                            double* current_time_ptr, double temp_init, double t_final) 
+      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr), 
+                                 temp_init(temp_init), t_final(t_final) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
