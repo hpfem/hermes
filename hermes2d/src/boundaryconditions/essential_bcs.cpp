@@ -25,6 +25,12 @@ EssentialBC::EssentialBC(Hermes::vector<std::string> markers) : markers(markers)
   value = 0.0;
 };
 
+EssentialBC::EssentialBC(std::string marker) {
+  markers.push_back(marker);
+  current_time = 0.0;
+  value = 0.0;
+};
+
 EssentialBC::~EssentialBC() {};
 
 scalar EssentialBC::function(double x, double y) const {

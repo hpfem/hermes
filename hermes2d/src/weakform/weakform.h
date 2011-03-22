@@ -51,8 +51,7 @@ enum SymFlag
 /// a (neq x neq) matrix of bilinear forms a_mn(u,v) and L(V) is a neq-component vector
 /// of linear forms l(v). U and V are the vectors of basis and test functions.
 ///
-///
-///
+
 
 class HERMES_API WeakForm
 {
@@ -61,8 +60,12 @@ public:
   WeakForm(unsigned int neq = 1, bool mat_free = false);
   ~WeakForm();
 
-  Mesh::ElementMarkersConversion* get_element_markers_conversion() { return element_markers_conversion; };
-  Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return boundary_markers_conversion; };
+  Mesh::ElementMarkersConversion* get_element_markers_conversion() { 
+    return element_markers_conversion; 
+  };
+  Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { 
+    return boundary_markers_conversion; 
+  };
 
   // General case.
 
@@ -70,12 +73,14 @@ public:
   {
   public:
     Form(std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+         Hermes::vector<scalar> param = Hermes::vector<scalar>(),
+         double scaling_factor = 1.0, int u_ext_offset = 0);
 
     inline void set_weakform(WeakForm* wf) { this->wf = wf; }
 
     std::string area;
     Hermes::vector<MeshFunction *> ext;
+    Hermes::vector<scalar> param;
     // Form will be always multiplied (scaled) with this number.
     double scaling_factor;
     // External solutions for this form will start
@@ -100,8 +105,11 @@ public:
   class HERMES_API MatrixFormVol : public Form
   {
   public:
-    MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym = HERMES_NONSYM, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+    MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym = HERMES_NONSYM, 
+                  std::string area = HERMES_ANY, 
+                  Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+                  Hermes::vector<scalar> param = Hermes::vector<scalar>(),
+                  double scaling_factor = 1.0, int u_ext_offset = 0);
 
     virtual MatrixFormVol* clone();
 
@@ -109,7 +117,7 @@ public:
     int sym;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-      Geom<double> *e, ExtData<scalar> *ext);
+                         Geom<double> *e, ExtData<scalar> *ext);
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                     Geom<Ord> *e, ExtData<Ord> *ext);
   };
@@ -117,8 +125,10 @@ public:
   class HERMES_API MatrixFormSurf : public Form
   {
   public:
-    MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+    MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY, 
+                   Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+                   Hermes::vector<scalar> param = Hermes::vector<scalar>(),
+                   double scaling_factor = 1.0, int u_ext_offset = 0);
 
     virtual MatrixFormSurf* clone();
 
@@ -133,29 +143,37 @@ public:
   class HERMES_API VectorFormVol : public Form
   {
   public:
-    VectorFormVol(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+    VectorFormVol(unsigned int i, std::string area = HERMES_ANY, 
+                  Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+                  Hermes::vector<scalar> param = Hermes::vector<scalar>(),
+                  double scaling_factor = 1.0, int u_ext_offset = 0);
 
     virtual VectorFormVol* clone();
 
     unsigned int i;
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext);
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext);
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext);
   };
 
   class HERMES_API VectorFormSurf : public Form
   {
   public:
-    VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+    VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, 
+                   Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction*>(),
+                   Hermes::vector<scalar> param = Hermes::vector<scalar>(),
+                   double scaling_factor = 1.0, int u_ext_offset = 0);
     
     virtual VectorFormSurf* clone();
 
     unsigned int i;
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext);
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext);
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                      Geom<Ord> *e, ExtData<Ord> *ext);
   };
 
   // General case.
@@ -164,7 +182,7 @@ public:
   void add_vector_form(VectorFormVol* vfv);
   void add_vector_form_surf(VectorFormSurf* vfs);
 
-  void set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext = Hermes::vector<MeshFunction*>());
+  void set_ext_fns(void* fn, Hermes::vector<MeshFunction*> ext = Hermes::vector<MeshFunction*>());
 
   /// Returns the number of equations.
   unsigned int get_neq() { return neq; }
@@ -254,7 +272,8 @@ public:
   friend class Precond;
 
   // To be called only by the constructor of DiscreteProblem.
-  void set_markers_conversion(Mesh::ElementMarkersConversion* element_markers_conversion, Mesh::BoundaryMarkersConversion* boundary_markers_conversion)
+  void set_markers_conversion(Mesh::ElementMarkersConversion* element_markers_conversion, 
+                              Mesh::BoundaryMarkersConversion* boundary_markers_conversion)
   {
     this->element_markers_conversion = element_markers_conversion;
     this->boundary_markers_conversion = boundary_markers_conversion;

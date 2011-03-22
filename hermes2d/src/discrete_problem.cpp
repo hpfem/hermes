@@ -1600,24 +1600,38 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Initialize integration order for external functions
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, 
+                                                Hermes::vector<scalar> &param)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
+
+  // External functions.
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
   for (int i = 0; i < fake_ext->nf; i++)
     fake_ext_fn[i] = get_fn_ord(ext[i]->get_fn_order());
   fake_ext->fn = fake_ext_fn;
 
+  // External parameters.
+  // FIXME: probably this is not needed.
+  fake_ext->np = param.size();
+  Ord* fake_ext_param = new Ord[fake_ext->np];
+  for (int i = 0; i < fake_ext->np; i++) fake_ext_param[i] = Ord(0);
+  fake_ext->param = fake_ext_param;
+  
   return fake_ext;
 }
 
 // Initialize external functions (obtain values, derivatives,...)
-ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, RefMap *rm, const int order)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
+                                               Hermes::vector<scalar> &param, 
+                                               RefMap *rm, const int order)
 {
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
+
+  // Copy external functions.
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
   for (unsigned i = 0; i < ext.size(); i++) {
     if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
@@ -1626,27 +1640,44 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &e
   ext_data->nf = ext.size();
   ext_data->fn = ext_fn;
 
-  return ext_data;
+  // Copy external parameters.
+  scalar* ext_param = new scalar[param.size()];
+  for (unsigned i = 0; i < param.size(); i++) ext_param[i] = param[i];
+  ext_data->np = param.size();
+  ext_data->param = ext_param;
 
+  return ext_data;
 }
 
 // Initialize integration order on a given edge for external functions
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, 
+                                                Hermes::vector<scalar> &param, int edge)
 {
   _F_
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
+
+  // External functions.
   fake_ext->nf = ext.size();
   Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
   for (int i = 0; i < fake_ext->nf; i++)
     fake_ext_fn[i] = get_fn_ord(ext[i]->get_edge_fn_order(edge));
   fake_ext->fn = fake_ext_fn;
 
+  // External parameters.
+  // FIXME: probably this is not needed.
+  fake_ext->np = param.size();
+  Ord* fake_ext_param = new Ord[fake_ext->np];
+  for (int i = 0; i < fake_ext->np; i++) fake_ext_param[i] = Ord(0);
+  fake_ext->param = fake_ext_param;
+
   return fake_ext;
 }
 
 // Initialize discontinuous external functions (obtain values, derivatives,... on both sides of the
 // supplied NeighborSearch's active edge).
-ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches, int order)
+ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
+                                               Hermes::vector<scalar> &param, 
+                                               LightArray<NeighborSearch*>& neighbor_searches, int order)
 {
   _F_
   Func<scalar>** ext_fns = new Func<scalar>*[ext.size()];
@@ -1655,24 +1686,36 @@ ExtData<scalar>* DiscreteProblem::init_ext_fns(Hermes::vector<MeshFunction *> &e
     ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j]);
   }
 
+  scalar* ext_param = new scalar[param.size()];
+  for(unsigned int j = 0; j < param.size(); j++) ext_param[j] = param[j];
+
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   ext_data->fn = ext_fns;
   ext_data->nf = ext.size();
+  ext_data->param = ext_param;
+  ext_data->np = param.size();
 
   return ext_data;
 }
 
 // Initialize integration order for discontinuous external functions.
-ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, LightArray<NeighborSearch*>& neighbor_searches)
+ExtData<Ord>* DiscreteProblem::init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, 
+                                                Hermes::vector<scalar> &param, 
+                                                LightArray<NeighborSearch*>& neighbor_searches)
 {
   _F_
   Func<Ord>** fake_ext_fns = new Func<Ord>*[ext.size()];
   for (unsigned int j = 0; j < ext.size(); j++)
     fake_ext_fns[j] = init_ext_fn_ord(neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq), ext[j]);
 
+  Ord* fake_ext_param = new Ord[param.size()];
+  for (unsigned int j = 0; j < param.size(); j++) fake_ext_param[j] = Ord(0);
+
   ExtData<Ord>* fake_ext = new ExtData<Ord>;
   fake_ext->fn = fake_ext_fns;
   fake_ext->nf = ext.size();
+  fake_ext->param = fake_ext_param;
+  fake_ext->np = param.size();
 
   return fake_ext;
 }
@@ -1861,7 +1904,7 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext, mfv->param);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
     double fake_wt = 1.0;
@@ -1930,7 +1973,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
   Func<double>* u = get_fn(fu, ru, order);
   Func<double>* v = get_fn(fv, rv, order);
 
-  ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
+  ExtData<scalar>* ext = init_ext_fns(mfv->ext, mfv->param, rv, order);
 
   // The actual calculation takes place here.
   scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
@@ -2119,7 +2162,7 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv,
     Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext, vfv->param);
 
     // Order of geometric attributes (eg. for multiplication of 
     // a solution with coordinates, normals, etc.).
@@ -2186,7 +2229,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormVol 
       prev[i] = NULL;
 
   Func<double>* v = get_fn(fv, rv, order);
-  ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
+  ExtData<scalar>* ext = init_ext_fns(vfv->ext, vfv->param, rv, order);
 
   // The actual calculation takes place here.
   scalar res = vfv->value(np, jwt, prev, v, e, ext) * vfv->scaling_factor;
@@ -2363,7 +2406,7 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, surf_pos->surf_num);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, mfs->param, surf_pos->surf_num);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
     double fake_wt = 1.0;
@@ -2425,7 +2468,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormSurf
 
   Func<double>* u = get_fn(fu, ru, eo);
   Func<double>* v = get_fn(fv, rv, eo);
-  ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, mfs->param, rv, eo);
 
   // The actual calculation takes place here.
   scalar res = mfs->value(np, jwt, prev, u, v, e, ext) * mfs->scaling_factor;
@@ -2606,7 +2649,7 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, vfs->param);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
     double fake_wt = 1.0;
@@ -2666,7 +2709,7 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::VectorFormSurf
       prev[i] = NULL;
 
   Func<double>* v = get_fn(fv, rv, eo);
-  ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, vfs->param, rv, eo);
 
   // The actual calculation takes place here.
   scalar res = vfs->value(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
@@ -2807,7 +2850,7 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
     DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_v);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, neighbor_searches);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, mfs->param, neighbor_searches);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
     Geom<Ord>* fake_e = new InterfaceGeom<Ord>(&geom_ord, nbs_u->neighb_el->marker, 
@@ -2900,7 +2943,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
   DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
     neighbor_supp_v, nbs_v->neighbor_edge.orientation);
   
-  ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, mfs->param, neighbor_searches, order);
 
   scalar res = mfs->value(np, jwt, prev, u, v, e, ext);
 
@@ -2964,7 +3007,7 @@ int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, He
     Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
     // Order of additional external functions.
-    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, neighbor_searches);
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, vfs->param, neighbor_searches);
 
     // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
     Geom<Ord>* fake_e = new InterfaceGeom<Ord>(&geom_ord,
@@ -3043,7 +3086,7 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
       prev[i] = NULL;
 
   Func<double>* v = get_fn(fv, rv, eo);
-  ExtData<scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, vfs->param, neighbor_searches, order);
 
   scalar res = vfs->value(np, jwt, prev, v, e, ext);
 

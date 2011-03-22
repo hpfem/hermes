@@ -21,14 +21,14 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 4, 2 ],
-  [ 3, 0, 4 ],
-  [ 4, 7, 2 ],
-  [ 7, 6, 2 ],
-  [ 2, 3, 4 ],
-  [ 6, 5, 2 ],
-  [ 5, 2, 3 ]
+  [ 0, 1, "Dirichlet" ],
+  [ 1, 4, "Dirichlet" ],
+  [ 3, 0, "Dirichlet" ],
+  [ 4, 7, "Dirichlet" ],
+  [ 7, 6, "Dirichlet" ],
+  [ 2, 3, "Dirichlet" ],
+  [ 6, 5, "Dirichlet" ],
+  [ 5, 2, "Dirichlet" ]
 ]
 
 curves = [

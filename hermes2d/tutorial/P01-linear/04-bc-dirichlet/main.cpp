@@ -23,9 +23,6 @@ const int INIT_REF_NUM = 2;                       // Number of initial uniform m
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
-
 // Problem parameters.
 const double CONST_F = -4.0; 
 
@@ -43,10 +40,10 @@ int main(int argc, char* argv[])
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(CONST_F);
+  MyWeakFormPoisson wf(CONST_F);
 
   // Initialize boundary conditions
-  EssentialBCNonConstant bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), CONST_F);
+  EssentialBCNonConstant bc_essential("Dirichlet", CONST_F);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

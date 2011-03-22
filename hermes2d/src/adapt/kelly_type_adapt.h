@@ -67,20 +67,23 @@ public:
     int i;
     std::string area;
     Hermes::vector<MeshFunction *> ext;
+    Hermes::vector<scalar> param;
 
-    ErrorEstimatorForm(int i, std::string area = HERMES_ANY, Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction *>()) :
-      i(i), area(area), ext(ext) {}
+    ErrorEstimatorForm(int i, std::string area = HERMES_ANY, 
+                       Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction *>(), 
+                       Hermes::vector<scalar> param = Hermes::vector<scalar>()) :
+    i(i), area(area), ext(ext), param(param) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-               Func<scalar> *u, Geom<double> *e,
-               ExtData<scalar> *ext)
+                         Func<scalar> *u, Geom<double> *e,
+                         ExtData<scalar> *ext)
     {
       error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overriden.");
       return 0.0;
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
-                     Func<Ord> *u, Geom<Ord> *e,
-                     ExtData<Ord> *ext)
+                    Func<Ord> *u, Geom<Ord> *e,
+                    ExtData<Ord> *ext)
     {
       error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overriden.");
       return Ord();
@@ -270,14 +273,14 @@ public:
     ErrorEstimatorFormKelly(int i) : ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-               Func<scalar> *u, Geom<double> *e,
-               ExtData<scalar> *ext)
+                         Func<scalar> *u, Geom<double> *e,
+                         ExtData<scalar> *ext)
     {
       return original_kelly_interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
-                     Func<Ord> *u, Geom<Ord> *e,
-                     ExtData<Ord> *ext)
+                    Func<Ord> *u, Geom<Ord> *e,
+                    ExtData<Ord> *ext)
     {
       return original_kelly_interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
     }

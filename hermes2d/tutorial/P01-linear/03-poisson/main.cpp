@@ -39,10 +39,10 @@ int main(int argc, char* argv[])
   //mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  WeakFormPoisson wf(CONST_F);
+  MyWeakFormPoisson wf(CONST_F);
   
   // Initialize boundary conditions.
-  EssentialBCConstant bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  EssentialBCConstant bc_essential("Dirichlet", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

@@ -20,8 +20,9 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) :
-  area(area), ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, Hermes::vector<scalar> param, 
+                     double scaling_factor, int u_ext_offset) :
+  area(area), ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
   adapt_eval = false;
 }
@@ -47,7 +48,9 @@ WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
 }
 
 WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
-                                       std::string area, Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+                                       std::string area, Hermes::vector<MeshFunction *> ext, 
+                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
 {
 }
 
@@ -72,17 +75,21 @@ WeakForm::MatrixFormSurf* WeakForm::MatrixFormSurf::clone()
 }
 
 WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
+                                         Hermes::vector<MeshFunction *> ext, 
+                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
 {
 }
 
-scalar WeakForm::VectorFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+scalar WeakForm::VectorFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                                      Geom<double> *e, ExtData<scalar> *ext)
 {
   error("WeakForm::VectorFormVol::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                                 Geom<Ord> *e, ExtData<Ord> *ext)
 {
   error("WeakForm::VectorFormVol::ord must be overrided.");
   return Ord();
@@ -95,22 +102,28 @@ WeakForm::VectorFormVol* WeakForm::VectorFormVol::clone()
 }
 
 WeakForm::VectorFormVol::VectorFormVol(unsigned int i, std::string area,
-                                       Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
+                                       Hermes::vector<MeshFunction *> ext, 
+                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
 WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, double scaling_factor, int u_ext_offset) : Form(area, ext, scaling_factor, u_ext_offset), i(i)
+                                         Hermes::vector<MeshFunction *> ext, 
+                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
-scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                                       Geom<double> *e, ExtData<scalar> *ext)
 {
   error("WeakForm::VectorFormSurf::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                                  Geom<Ord> *e, ExtData<Ord> *ext)
 {
   error("WeakForm::VectorFormSurf::ord must be overrided.");
   return Ord();
@@ -186,10 +199,10 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
   seq++;
 }
 
-void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*>ext)
+void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*> ext)
 {
   _F_
-      error("Not implemented yet.");
+  error("Not implemented yet.");
 }
 
 

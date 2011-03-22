@@ -29,6 +29,7 @@ class HERMES_API EssentialBC
 public:
   /// Default constructor.
   EssentialBC(Hermes::vector<std::string> markers);
+  EssentialBC(std::string marker);
 
   /// Virtual destructor.
   virtual ~EssentialBC();

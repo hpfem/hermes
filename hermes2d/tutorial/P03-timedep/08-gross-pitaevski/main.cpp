@@ -47,7 +47,7 @@ scalar init_cond(double x, double y, scalar& dx, scalar& dy)
 }
 
 // Boundary markers.
-const int BDY_DIRICHLET_1 = 1, BDY_DIRICHLET_2 = 2, BDY_DIRICHLET_3 = 3, BDY_DIRICHLET_4 = 4;
+const int BDY_DIRICHLET = 1;
 
 // Weak forms.
 #include "forms.cpp"
@@ -62,32 +62,20 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+  // Initialize the weak formulation.
+  WeakFormPoisson wf(CONST_F);
 
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_DIRICHLET_1, BDY_DIRICHLET_2, BDY_DIRICHLET_3, BDY_DIRICHLET_4));
+  // Initialize boundary conditions.
+  EssentialBCConstant bc_essential(Hermes::vector<std::string>("1", "2", "3", "4"), 0.0);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
+  info("ndof = %d", ndof);
 
   // Previous time level solution.
   Solution psi_prev_time(&mesh, init_cond);
-
-  // Initialize the weak formulation.
-  WeakForm wf;
-  if(TIME_INTEGRATION == 1) {
-    wf.add_matrix_form(callback(J_euler), HERMES_NONSYM, HERMES_ANY);
-    wf.add_vector_form(callback(F_euler), HERMES_ANY, &psi_prev_time);
-  }
-  else {
-    wf.add_matrix_form(callback(J_cranic), HERMES_NONSYM, HERMES_ANY);
-    wf.add_vector_form(callback(F_cranic), HERMES_ANY, &psi_prev_time);
-  }
 
   // Initialize the FE problem.
   bool is_linear = false;

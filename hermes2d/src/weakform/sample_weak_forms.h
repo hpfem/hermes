@@ -18,7 +18,7 @@
 
 #include "../integrals/integrals_h1.h"
 
-/* Laplace equation -Laplace u = 0 
+/* Default weak form for the Laplace equation -Laplace u = 0 
    with Dirichlet and/or zero Neumann BC (just volumetric forms).
 
    Nonzero Neumann and Newton boundary conditions can be enabled 
@@ -56,7 +56,26 @@ private:
   };
 };
 
-/* Linear elasticity (Lame equations)  
+/* Default vector form corresponding to constant right-hand side */
+
+  class VectorFormConstant : public WeakForm::VectorFormVol
+  {
+  public:
+    VectorFormConstant(int i) : WeakForm::VectorFormVol(i) { }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) {
+      scalar const_f = ext->param[0];
+      return const_f * int_v<scalar, scalar>(n, wt, v);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
+      return v->val[0]; // Make the parser return the polynomial degree of 'v'.
+    }
+  };
+
+/* Default (vector-valued) weak form for linear elasticity (Lame equations)  
    with Dirichlet and/or zero Neumann BC (just volumetric forms).
 
    Nonzero Neumann and Newton boundary conditions can be enabled 
