@@ -120,8 +120,8 @@ int main(int argc, char **args)
   double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL);
 
   if (err_exact > EPS)
-		// Calculated solution is not precise enough.
-		success_test = 0;
+    // Calculated solution is not precise enough.
+    success_test = 0;
 
   // Clean up.
   delete matrix;

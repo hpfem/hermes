@@ -99,8 +99,13 @@ public:
   /// FE mesh
   Mesh *mesh;
 
+  /// Create globally refined space.
+  static Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
+  static Space* construct_refined_space(Space* coarse, int order_increase = 1);
+
   static int get_num_dofs(Hermes::vector<Space *> spaces);
-  static int assign_dofs(Hermes::vector<Space*> spaces) ;
+  static int get_num_dofs(Space* space);
+  static int assign_dofs(Hermes::vector<Space*> spaces);
 
 protected:
   Shapeset *shapeset;
