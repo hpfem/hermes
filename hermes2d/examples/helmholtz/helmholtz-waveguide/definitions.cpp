@@ -1,17 +1,17 @@
 #include "weakform/weakform.h"
 #include <integrals/integrals_h1.h>
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
-class DirichletFunctionBoundaryCondition : public DirichletBoundaryCondition {
+class EssentialBCNonConstant : public EssentialBC {
 public:
-    DirichletFunctionBoundaryCondition(std::string marker) : DirichletBoundaryCondition(Hermes::vector<std::string>())
+    EssentialBCNonConstant(std::string marker) : EssentialBC(Hermes::vector<std::string>())
     {
         markers.push_back(marker);
     }
 
-    ~DirichletFunctionBoundaryCondition() {};
+    ~EssentialBCNonConstant() {};
 
-    inline BoundaryConditionValueType get_value_type() const { return BoundaryCondition::BC_FUNCTION; }
+    inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 
     scalar function(double x, double y) const
     {
@@ -25,9 +25,9 @@ public:
     // Problems parameters
     WeakFormHelmholtz(double eps, double mu, double omega, double sigma, double beta, double E0, double h) : WeakForm(2)
     {
-        add_matrix_form(new MatrixFormHelmholtzEquation_real_real(0, 0, eps, mu, omega));
-        add_matrix_form(new MatrixFormHelmholtzEquation_real_imag(0, 1, eps, mu, omega, sigma));
-        add_matrix_form(new MatrixFormHelmholtzEquation_imag_real(1, 0, eps, mu, omega, sigma));
+        add_matrix_form(new MatrixFormHelmholtzEquation_real_real(0, 0, eps, mu));
+        add_matrix_form(new MatrixFormHelmholtzEquation_real_imag(0, 1, mu, omega, sigma));
+        add_matrix_form(new MatrixFormHelmholtzEquation_imag_real(1, 0, mu, omega, sigma));
         add_matrix_form(new MatrixFormHelmholtzEquation_imag_imag(1, 1, eps, mu, omega));
 
         add_matrix_form_surf(new  MatrixFormSurfHelmholtz_real_imag(0, 1, BDY_IMPEDANCE, beta));
@@ -38,8 +38,8 @@ private:
     class MatrixFormHelmholtzEquation_real_real : public WeakForm::MatrixFormVol
     {
     public:
-        MatrixFormHelmholtzEquation_real_real(int i, int j, double eps, double mu, double omega) :
-            WeakForm::MatrixFormVol(i, j), eps(eps), mu(mu), omega(omega) {
+        MatrixFormHelmholtzEquation_real_real(int i, int j, double eps, double mu) :
+            WeakForm::MatrixFormVol(i, j), eps(eps), mu(mu) {
         }
 
         template<typename Real, typename Scalar>
@@ -60,7 +60,6 @@ private:
         // Memebers.
         double eps;
         double mu;
-        double omega;
     };
 
     class MatrixFormHelmholtzEquation_real_imag : public WeakForm::MatrixFormVol
@@ -68,14 +67,13 @@ private:
 
     private:
         // Memebers.
-        double eps;
         double mu;
         double omega;
         double sigma;
 
     public:
-        MatrixFormHelmholtzEquation_real_imag(int i, int j, double eps, double mu, double omega, double sigma) :
-            WeakForm::MatrixFormVol(i, j), eps(eps), mu(mu), omega(omega), sigma(sigma) {
+        MatrixFormHelmholtzEquation_real_imag(int i, int j, double mu, double omega, double sigma) :
+            WeakForm::MatrixFormVol(i, j), mu(mu), omega(omega), sigma(sigma) {
         }
 
         template<typename Real, typename Scalar>
@@ -98,13 +96,12 @@ private:
     private:
         // Memebers.
         double mu;
-        double eps;
         double omega;
         double sigma;
 
     public:
-        MatrixFormHelmholtzEquation_imag_real(int i, int j, double eps, double mu, double omega, double sigma) :
-            WeakForm::MatrixFormVol(i, j), eps(eps), mu(mu), omega(omega), sigma(sigma) {
+        MatrixFormHelmholtzEquation_imag_real(int i, int j, double mu, double omega, double sigma) :
+            WeakForm::MatrixFormVol(i, j), mu(mu), omega(omega), sigma(sigma) {
         }
 
         template<typename Real, typename Scalar>
