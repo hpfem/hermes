@@ -139,7 +139,7 @@ int main(int argc, char **args)
 #ifdef RHS2
 	WeakForm wf;
 	wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
-	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY, &fsln);
+	wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY_INT, &fsln);
 
 	// Initialize discrete problem.
 	bool is_linear = true;

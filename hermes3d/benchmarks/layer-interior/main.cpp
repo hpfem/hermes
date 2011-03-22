@@ -83,8 +83,8 @@ int main(int argc, char **args)
 
   // Initialize weak formulation. 
   WeakForm wf;
-  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY);
-  wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY);
+  wf.add_matrix_form(biform<double, double>, biform<Ord, Ord>, HERMES_SYM, HERMES_ANY_INT);
+  wf.add_vector_form(liform<double, double>, liform<Ord, Ord>, HERMES_ANY_INT);
 
   // Set exact solution.
   ExactSolution exact(&mesh, fndd);
@@ -104,7 +104,7 @@ int main(int argc, char **args)
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = construct_refined_space(&space, 1);
+    Space* ref_space = Space::construct_refined_space(&space, 1);
     
     // Initialize discrete problem.
     bool is_linear = true;
@@ -142,7 +142,7 @@ int main(int argc, char **args)
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln(space.get_mesh());
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_H1_NORM);
 
     // Time measurement.
     cpu_time.tick();

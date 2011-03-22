@@ -60,7 +60,7 @@ int main(int argc, char **args)
   // Initialize weak formulation. 
   WeakForm wf;
   wf.add_matrix_form(bilinear_form<double, scalar>, bilinear_form<Ord, Ord>, HERMES_SYM);
-  wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY);
+  wf.add_vector_form(linear_form<double, scalar>, linear_form<Ord, Ord>, HERMES_ANY_INT);
 
   // Initialize discrete problem.
   bool is_linear = true;
