@@ -221,6 +221,64 @@ double PetscMatrix::get_fill_in() const {
   return (double) nnz / ((double)size*size);
 }
 
+
+void PetscMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+  int n=size;
+  for (int i=0;i<n;i++){
+    vector_out[i]=0;
+    for (int j=0;j<n;j++){
+        vector_out[i]+=vector_in[j]*get(i,j);
+    }
+  }
+}
+
+void PetscMatrix::add_matrix(PetscMatrix* mat){
+        MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
+}
+
+void PetscMatrix::add_to_diagonal_blocks(int num_stages, PetscMatrix* mat){
+  _F_
+  int ndof = mat->get_size();
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
+    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat);
+  }
+}
+
+void PetscMatrix::add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat){
+  _F_
+  unsigned int block_size=mat->get_size();
+  for (unsigned int r=0;r<block_size;r++){
+    for (unsigned int c=0;c<block_size;c++){
+      this->add(i+r,j+c,mat->get(i,j));
+    }
+  }
+}
+
+// Multiplies matrix with a scalar.
+void PetscMatrix::multiply_with_scalar(scalar value){
+  _F_
+  MatScale(matrix,value);
+}
+// Creates matrix in PETSC format using size, nnz, and the three arrays.
+void PetscMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  _F_
+  this->size=size;
+  this->nnz=nnz;
+  MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,ax,&matrix);
+}
+// Duplicates a matrix (including allocation).
+PetscMatrix* PetscMatrix::duplicate(){
+  _F_
+  PetscMatrix*ptscmatrix=new PetscMatrix();        
+  MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
+  ptscmatrix->size=size;
+  ptscmatrix->nnz=nnz;
+  return ptscmatrix;
+};
+
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PetscVector::PetscVector() {

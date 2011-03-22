@@ -71,6 +71,18 @@ public:
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
+  virtual void add_matrix(MumpsMatrix* mat);
+  virtual void add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat);
+  virtual void add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat);
+
+  // Applies the matrix to vector_in and saves result to vector_out.
+  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  // Multiplies matrix with a scalar.
+  void multiply_with_scalar(scalar value);
+  // Creates matrix using size, nnz, and the three arrays.
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  // Duplicates a matrix (including allocation).
+  MumpsMatrix* duplicate();
 
 protected:
   // MUMPS specific data structures for storing the system matrix (CSC format).
