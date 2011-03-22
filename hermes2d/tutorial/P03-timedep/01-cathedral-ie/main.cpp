@@ -44,14 +44,8 @@ const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 double current_time = 0;
 
-// Time-dependent exterior temperature.
-template<typename Real>
-Real temp_ext(Real t) {
-  return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
-}
-
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -65,30 +59,21 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
   mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND));
-  bc_types.add_bc_newton(BDY_AIR);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_GROUND, TEMP_INIT);
-
-  // Initialize an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
- 
   // Previous time level solution (initialized by the external temperature).
   Solution tsln(&mesh, TEMP_INIT);
 
-  // Initialize weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_matrix_form_surf(callback(bilinear_form_surf), BDY_AIR);
-  wf.add_vector_form(callback(linear_form), HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(callback(linear_form_surf), BDY_AIR);
+  // Initialize the weak formulation.
+  MyWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, &current_time, &tsln);
+  
+  // Initialize boundary conditions.
+  EssentialBCConstant bc_essential(Hermes::vector<std::string>(BDY_GROUND), TEMP_INIT);
+  EssentialBCs bcs(&bc_essential);
 
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
+  info("ndof = %d", ndof);
+ 
   // Initialize the FE problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
