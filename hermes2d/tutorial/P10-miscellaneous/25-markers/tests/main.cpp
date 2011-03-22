@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 30-markers-nontypical works correctly.
+// This test makes sure that example 25-markers-typical works correctly.
 
 int P_INIT = 2;                                   // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
@@ -43,10 +43,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double RHS = 1.0;
 
 // Material markers.
-const int SOUTH_EAST = 10;
-const int NORTH_EAST = 20;
-const int NORTH_WEST = 30;
-const int SOUTH_WEST = 40;
+const std::string SOUTH_EAST = "10";
+const std::string NORTH_EAST = "20";
+const std::string NORTH_WEST = "30";
+const std::string SOUTH_WEST = "40";
 
 // Corresponding material constants.
 const double A_SE = 1.0;
@@ -55,12 +55,16 @@ const double A_NW = 0.5;
 const double A_SW = 2.0;
 
 // Boundary markers.
-const int BDY_BOTTOM = 1;
-const int BDY_VERTICAL = 2;
-const int BDY_TOP = 3;
+const std::string BDY_BOTTOM = "1";
+const std::string BDY_VERTICAL_SE = "Boundary marker SE";
+const std::string BDY_VERTICAL_NE = "Boundary marker NE";
+const std::string BDY_VERTICAL_NW = "Boundary marker NW";
+const std::string BDY_VERTICAL_SW = "Boundary marker SW";
+const std::string BDY_TOP_NE = "3";
+const std::string BDY_TOP_NW = "30";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -70,23 +74,15 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_VERTICAL, BDY_TOP));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_BOTTOM);
+  EssentialBCConstant essential_bc(BDY_BOTTOM, 0.0);
+  EssentialBCs bcs(&essential_bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_vol));
-  wf.add_vector_form(callback(linear_form_vol));
-  wf.add_vector_form_surf(callback(linear_form_surf));
-
+  CustomWeakForm wf(A_SE, A_NE, A_SW, A_NW, RHS);
+  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -100,8 +96,7 @@ int main(int argc, char* argv[])
   // Adaptivity loop:
   int as = 1;
   bool done = false;
-  do
-  {
+  do {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
@@ -179,7 +174,7 @@ int main(int argc, char* argv[])
 
   printf("ndof allowed = %d\n", 210);
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 210) {      // ndofs was 206 at the time this test was created
+  if (ndof < 210) {      // ndofs was 208 at the time this test was created
     printf("Success!\n");
     return ERR_SUCCESS;
   }
@@ -187,4 +182,5 @@ int main(int argc, char* argv[])
     printf("Failure!\n");
     return ERR_FAILURE;
   }
+
 }

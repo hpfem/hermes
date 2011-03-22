@@ -24,16 +24,11 @@ const double FINAL_TIME = 18000;                  // Length of time interval (24
 // Global time variable.
 double TIME = 0;
 
-// Time-dependent exterior temperature.
-double temp_ext(double t) {
-  return T_INIT + 10. * sin(2*M_PI*t/FINAL_TIME);
-}
-
 // Boundary markers.
-const int BDY_GROUND = 1, BDY_AIR = 2;
+const std::string BDY_GROUND = "1", BDY_AIR = "2";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -47,31 +42,22 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_GROUND);
-  bc_types.add_bc_newton(BDY_AIR);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_GROUND, T_INIT);
+  EssentialBCConstant essential_bc(BDY_GROUND, T_INIT);
+  EssentialBCs bcs(&essential_bc);
 
   // Initialize an H1 space with default shepeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Initialize the solution.
-  Solution tsln;
+  // Initialize and set the initial condition.
+  Solution tsln(&mesh, T_INIT);
 
-  // Set the initial condition.
-  tsln.set_const(&mesh, T_INIT);
+  // Initialize the exact function representing the external temperature.
+  CustomExactFunction exact_ext_temp(T_INIT, FINAL_TIME);
 
   // Initialize weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form<double, double>, bilinear_form<Ord, Ord>);
-  wf.add_matrix_form_surf(bilinear_form_surf<double, double>, bilinear_form_surf<Ord, Ord>, BDY_AIR);
-  wf.add_vector_form(linear_form<double, double>, linear_form<Ord, Ord>, HERMES_ANY, &tsln);
-  wf.add_vector_form_surf(linear_form_surf<double, double>, linear_form_surf<Ord, Ord>, BDY_AIR);
+  CustomWeakForm wf(HEATCAP, RHO, LAMBDA, TAU, ALPHA, &tsln, &exact_ext_temp);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -85,7 +71,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
   char title[100];
-  sprintf(title, "Time %3.5f, exterior temperature %3.5f", TIME, temp_ext(TIME));
+  sprintf(title, "Time %3.5f, exterior temperature %3.5f", TIME, exact_ext_temp.temp_ext(TIME));
   Tview.set_min_max_range(0,20);
   Tview.set_title(title);
   Tview.fix_scale_width(3);
@@ -95,12 +81,13 @@ int main(int argc, char* argv[])
   bool rhs_only = false;
   for(int ts = 1; ts <= nsteps; ts++)
   {
-    info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, temp_ext(TIME));
+    info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, exact_ext_temp.temp_ext(TIME));
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
     if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
     else info("Assembling the right-hand side vector (only).");
+    wf.set_current_time(TIME);
     dp.assemble(matrix, rhs, rhs_only);
     rhs_only = true;
 
@@ -160,13 +147,9 @@ int main(int argc, char* argv[])
 
   info("Visualizing Mesh and Orders extracted from the Solution.");
  
-  // Initialize boundary conditions.
-  BCTypes bc_types_null;
-  BCValues bc_values_null;
-
   int p_init = 1;
  
-  H1Space space_from_file(sln_from_file.get_mesh(), &bc_types_null, &bc_values_null, p_init);
+  H1Space space_from_file(sln_from_file.get_mesh(), p_init);
   space_from_file.set_element_orders(sln_from_file.get_element_orders());
   WinGeom* win_geom_3 = new WinGeom(920, 0, 450, 600);
   OrderView oview("Saved Solution -> Space", win_geom_3);

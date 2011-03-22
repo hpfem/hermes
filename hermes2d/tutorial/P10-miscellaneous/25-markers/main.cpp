@@ -1,12 +1,26 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 25-markers-typical works correctly.
+//  This example shows how to solve a problem with complex area / boundary
+//  properties using the typical approach -- to define an individual weak form 
+//  for each element and boundary marker and register them separately.
+//
+//  PDE: -div(a(x,y).grad(u)) = f.
+//
+//  Domain: square domain (0, 2) x (0, 2) subdivided into 4 quadrants 
+//          with different element markers (see mesh file "domain.mesh").
+//
+//  a(x,y) is a piecewise constant function, each of the four quadrants has
+//         a different constant A_SE, A_NE, A_NW and A_SW.
+//
+//  BC:  Zero Dirichlet along the bottom edge.
+//       Neumann du/dn = 1 along the top edge.
+//       Neumann du/dn = -1 along the vertical edges.
+//
+//  The following parameters can be changed:
 
 int P_INIT = 2;                                   // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
@@ -43,10 +57,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double RHS = 1.0;
 
 // Material markers.
-const int SOUTH_EAST = 10;
-const int NORTH_EAST = 20;
-const int NORTH_WEST = 30;
-const int SOUTH_WEST = 40;
+const std::string SOUTH_EAST = "10";
+const std::string NORTH_EAST = "20";
+const std::string NORTH_WEST = "30";
+const std::string SOUTH_WEST = "40";
 
 // Corresponding material constants.
 const double A_SE = 1.0;
@@ -55,55 +69,41 @@ const double A_NW = 0.5;
 const double A_SW = 2.0;
 
 // Boundary markers.
-const int BDY_BOTTOM = 1;
+const std::string BDY_BOTTOM = "1";
 const std::string BDY_VERTICAL_SE = "Boundary marker SE";
 const std::string BDY_VERTICAL_NE = "Boundary marker NE";
 const std::string BDY_VERTICAL_NW = "Boundary marker NW";
 const std::string BDY_VERTICAL_SW = "Boundary marker SW";
-const int BDY_TOP_NE = 3;
-const int BDY_TOP_NW = 30;
+const std::string BDY_TOP_NE = "3";
+const std::string BDY_TOP_NW = "30";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../domain.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_TOP_NE, BDY_TOP_NW));
-  bc_types.add_bc_neumann(Hermes::vector<std::string>(BDY_VERTICAL_SE, BDY_VERTICAL_NE, BDY_VERTICAL_NW, BDY_VERTICAL_SW));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_BOTTOM);
+  EssentialBCConstant essential_bc(BDY_BOTTOM, 0.0);
+  EssentialBCs bcs(&essential_bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_vol_SE), HERMES_NONSYM, SOUTH_EAST);
-  wf.add_matrix_form(callback(bilinear_form_vol_NE), HERMES_NONSYM, NORTH_EAST);
-  wf.add_matrix_form(callback(bilinear_form_vol_NW), HERMES_NONSYM, NORTH_WEST);
-  wf.add_matrix_form(callback(bilinear_form_vol_SW), HERMES_NONSYM, SOUTH_WEST);
-
-  wf.add_vector_form(callback(linear_form_vol));
-
-  wf.add_vector_form_surf(callback(linear_form_surf_VERTICAL_SE), BDY_VERTICAL_SE);
-  wf.add_vector_form_surf(callback(linear_form_surf_VERTICAL_NE), BDY_VERTICAL_NE);
-  wf.add_vector_form_surf(callback(linear_form_surf_VERTICAL_NW), BDY_VERTICAL_NW);
-  wf.add_vector_form_surf(callback(linear_form_surf_VERTICAL_SW), BDY_VERTICAL_SW);
-  wf.add_vector_form_surf(callback(linear_form_surf_TOP_NE), BDY_TOP_NE);
-  wf.add_vector_form_surf(callback(linear_form_surf_TOP_NW), BDY_TOP_NW);
+  CustomWeakForm wf(A_SE, A_NE, A_SW, A_NW, RHS);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize views.
+  ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
+  sview.show_mesh(false);
+  OrderView  oview("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu;
@@ -115,8 +115,7 @@ int main(int argc, char* argv[])
   // Adaptivity loop:
   int as = 1;
   bool done = false;
-  do
-  {
+  do {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
@@ -146,6 +145,10 @@ int main(int argc, char* argv[])
     Solution sln;
     info("Projecting reference solution on the coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+
+    // View the coarse mesh solution and polynomial orders.
+    sview.show(&sln);
+    oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");
@@ -190,17 +193,7 @@ int main(int argc, char* argv[])
   while (done == false);
 
   verbose("Total running time: %g s", cpu_time.accumulated());
-  int ndof = Space::get_num_dofs(&space);
 
-  printf("ndof allowed = %d\n", 210);
-  printf("ndof actual = %d\n", ndof);
-  if (ndof < 210) {      // ndofs was 208 at the time this test was created
-    printf("Success!\n");
-    return ERR_SUCCESS;
-  }
-  else {
-    printf("Failure!\n");
-    return ERR_FAILURE;
-  }
-
+  // Wait for all views to be closed.
+  View::wait();
 }

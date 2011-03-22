@@ -2,7 +2,7 @@ if(NOT H2D_REAL)
     return()
 endif(NOT H2D_REAL)
 
-project(P10-30-markers-nontypical)
+project(P10-25-markers)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)

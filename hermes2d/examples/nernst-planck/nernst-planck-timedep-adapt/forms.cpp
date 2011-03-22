@@ -1,14 +1,14 @@
-class WeakFormNernstPlanckEuler : public WeakForm
+class CustomWeakFormNernstPlanckEuler : public WeakForm
 {
 public:
-  WeakFormNernstPlanckEuler(double* tau, scalar C0, double lin_force_coup, double mech_lambda, double mech_mu, double K, double L, double D, Solution* C_prev_time) : WeakForm(2) {
+  CustomWeakFormNernstPlanckEuler(double* tau, scalar C0, double lin_force_coup, double mech_lambda, double mech_mu, double K, double L, double D, Solution* C_prev_time) : WeakForm(2) {
     for(unsigned int i = 0; i < 2; i++) {
-      WeakFormNernstPlanckEuler::VectorFormVol* vector_form = new WeakFormNernstPlanckEuler::VectorFormVol(i, tau, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D);
+      CustomWeakFormNernstPlanckEuler::VectorFormVol* vector_form = new CustomWeakFormNernstPlanckEuler::VectorFormVol(i, tau, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D);
       if(i == 0)
         vector_form->ext.push_back(C_prev_time);
       add_vector_form(vector_form);
       for(unsigned int j = 0; j < 2; j++)
-        add_matrix_form(new WeakFormNernstPlanckEuler::MatrixFormVol(i, j, tau, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D));
+        add_matrix_form(new CustomWeakFormNernstPlanckEuler::MatrixFormVol(i, j, tau, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D));
     }
   };
 

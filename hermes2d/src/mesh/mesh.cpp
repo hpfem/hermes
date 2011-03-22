@@ -1959,6 +1959,9 @@ void Mesh::load_raw(FILE* f)
     else
     {
       input(n->marker, int);
+      std::ostringstream string_stream_bnd;
+      string_stream_bnd << n->marker;
+      this->boundary_markers_conversion.insert_marker(n->marker, string_stream_bnd.str());
       n->elem[0] = n->elem[1] = NULL;
       input(n->elem[0], int);
       input(n->elem[1], int);
@@ -1995,6 +1998,9 @@ void Mesh::load_raw(FILE* f)
     if (e->used)
     {
       input(e->marker, int);
+      std::ostringstream string_stream;
+      string_stream << e->marker;
+      this->element_markers_conversion.insert_marker(e->marker, string_stream.str());
       input(e->userdata, int);
       input(e->iro_cache, int);
 
