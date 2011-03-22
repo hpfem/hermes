@@ -7,10 +7,12 @@ class MyWeakFormHeatRK1 : public WeakForm
 public:
   // Problem parameters.
   MyWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
-                    double time_step, double* current_time_ptr, double temp_init, double t_final, Solution* temp_prev) : WeakForm(1)
+                    double time_step, double* current_time_ptr, double temp_init, double t_final, Solution* prev_time_sln) : WeakForm(1)
   {
     add_matrix_form(new MyMatrixFormVolHeatRK1(0, 0, alpha, lambda, heatcap, rho, time_step));
-    add_vector_form(new MyVectorFormVolHeatRK1(0, alpha, heatcap, rho, time_step, temp_prev));
+    MyVectorFormVolHeatRK1* vec_form_vol = new MyVectorFormVolHeatRK1(0, alpha, heatcap, rho, time_step);
+    vec_form_vol->ext.push_back(prev_time_sln);
+    add_vector_form(vec_form_vol);
 
     add_matrix_form_surf(new MyMatrixFormSurfHeatRK1(0, 0, bdy_air, alpha, lambda));
     add_vector_form_surf(new MyVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
@@ -44,12 +46,13 @@ private:
   class MyVectorFormVolHeatRK1 : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolHeatRK1(int i, double alpha, double heatcap, double rho, double time_step, Solution* temp_prev) 
-      : WeakForm::VectorFormVol(i), alpha(alpha), heatcap(heatcap), rho(rho), time_step(time_step), temp_prev(temp_prev) { }
+    MyVectorFormVolHeatRK1(int i, double alpha, double heatcap, double rho, double time_step) 
+      : WeakForm::VectorFormVol(i), alpha(alpha), heatcap(heatcap), rho(rho), time_step(time_step) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return heatcap * rho * int_u_v<Real, Scalar>(n, wt, (Func<Real>*)temp_prev, v) / time_step;
+      Func<Real>* temp_prev_time = ext->fn[0];
+      return heatcap * rho * int_u_v<Real, Scalar>(n, wt, temp_prev_time, v) / time_step;
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
@@ -62,7 +65,6 @@ private:
 
     // Members.
     double alpha, heatcap, rho, time_step;
-    Solution* temp_prev;
   };
 
   class MyMatrixFormSurfHeatRK1 : public WeakForm::MatrixFormSurf

@@ -31,8 +31,8 @@ using namespace RefinementSelectors;
 
 // Constitutive relations.
 enum CONSTITUTIVE_RELATIONS {
-    CONSTITUTIVE_GENUCHTEN, // Van Genuchten.
-    CONSTITUTIVE_GARDNER // Gardner.
+    CONSTITUTIVE_GENUCHTEN,    // Van Genuchten.
+    CONSTITUTIVE_GARDNER       // Gardner.
 };
 
 CONSTITUTIVE_RELATIONS constitutive_relations = CONSTITUTIVE_GENUCHTEN;
@@ -42,7 +42,7 @@ CONSTITUTIVE_RELATIONS constitutive_relations = CONSTITUTIVE_GENUCHTEN;
 std::string mesh_file = "domain-half.mesh";
 
 // Methods.
-const int ITERATIVE_METHOD = 2;		                // 1 = Newton, 2 = Picard.
+const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.
 const int TIME_INTEGRATION = 1;                   // 1 = implicit Euler, 2 = Crank-Nicolson.
 
 // Adaptive time stepping.
@@ -64,7 +64,7 @@ const int UNREF_METHOD = 3;                       // 1... mesh reset to basemesh
                                                   // 3... one ref. layer shaved off, poly degrees decreased by one. 
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 1;                           // Adaptive strategy:
+const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
                                                   //   all to keep the mesh symmetric.
@@ -163,23 +163,23 @@ double init_cond(double x, double y, double& dx, double& dy) {
 #include "constitutive_relations.cpp"
 
 // Weak forms.
-#include "forms.cpp"
-
-// Initial condition.
-#include "initial_condition.cpp"
-
-// Additional functionality.
-#include "extras.cpp"
+#include "definitions.cpp"
 
 // Main function.
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   ConstitutiveRelations* relations;
   if(constitutive_relations == CONSTITUTIVE_GENUCHTEN)
-    relations = new ConstitutiveGenuchten(LOW_LIMIT, POLYNOMIALS_READY, CONSTITUTIVE_TABLE_METHOD, NUM_OF_INSIDE_PTS, TABLE_LIMIT, ALPHA_vals, N_vals, M_vals, K_S_vals, THETA_R_vals,
-    THETA_S_vals, STORATIVITY_vals, TABLE_PRECISION, MATERIAL_COUNT, POLYNOMIALS_ALLOCATED, NUM_OF_INTERVALS, ITERATIVE_METHOD);
+    relations = new ConstitutiveGenuchten(LOW_LIMIT, POLYNOMIALS_READY, CONSTITUTIVE_TABLE_METHOD, 
+                NUM_OF_INSIDE_PTS, TABLE_LIMIT, ALPHA_vals, N_vals, M_vals, K_S_vals, THETA_R_vals,
+    THETA_S_vals, STORATIVITY_vals, TABLE_PRECISION, MATERIAL_COUNT, POLYNOMIALS_ALLOCATED, 
+                NUM_OF_INTERVALS, ITERATIVE_METHOD);
   else
-    relations = new ConstitutiveGardner(K_S_vals[0], ALPHA_vals[0], THETA_S_vals[0], THETA_R_vals[0], CONSTITUTIVE_TABLE_METHOD);
+    relations = new ConstitutiveGardner(K_S_vals[0], ALPHA_vals[0], THETA_S_vals[0], THETA_R_vals[0], 
+                CONSTITUTIVE_TABLE_METHOD);
 
   // Points to be used for polynomial approximation of K(h).
   double* points = new double[NUM_OF_INSIDE_PTS];
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
   if (CONSTITUTIVE_TABLE_METHOD == 2) {
     relations->constitutive_tables_ready = true ;
     //Assign table limit to global definition.
-     relations->table_limit = INTERVALS_4_APPROX[NUM_OF_INTERVALS-1];
+    relations->table_limit = INTERVALS_4_APPROX[NUM_OF_INTERVALS-1];
   }
 
   // Time measurement.
@@ -214,7 +214,6 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions.
   RichardsEssentialBC bc_essential(BDY_TOP, H_ELEVATION, PULSE_END_TIME, H_INIT, STARTUP_TIME);
   EssentialBCs bcs(&bc_essential);
-
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
@@ -346,7 +345,7 @@ int main(int argc, char* argv[])
 
         bc_essential.set_current_time(current_time);
 
-        while (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        while (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
                              NEWTON_TOL, NEWTON_MAX_ITER, verbose, damping_coeff)) {
           // Restore solution from the beginning of time step.
           for (int i=0; i < ndof; i++) coeff_vec[i] = save_coeff_vec[i];
@@ -389,7 +388,7 @@ int main(int argc, char* argv[])
 
         bc_essential.set_current_time(current_time);
 
-        while(!solve_picard(wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
+        while(!hermes2d.solve_picard(wf, ref_space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
                             PICARD_MAX_ITER, verbose)) {
           // Restore solution from the beginning of time step.
           sln_prev_iter.copy(&sln_prev_time);
