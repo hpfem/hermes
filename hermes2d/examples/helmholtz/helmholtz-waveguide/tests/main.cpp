@@ -47,7 +47,7 @@ const double E0 = 100;                        // Input electric intensity
 const double h = 0.1;                       // Height of waveguide
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -60,10 +60,11 @@ int main(int argc, char* argv[])
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
     // Initialize boundary conditions
-    DirichletConstant bc1(BDY_PERFECT, 0.0);
-    DirichletFunctionBoundaryCondition bc2 (BDY_LEFT);
-    NaturalBoundaryCondition bc3(BDY_IMPEDANCE);
-    BoundaryConditions bcs(Hermes::vector<BoundaryCondition *>(&bc1, &bc2, &bc3));
+    // Initialize boundary conditions
+    EssentialBCConstant bc1(BDY_PERFECT, 0.0);
+    EssentialBCNonConstant bc2(BDY_LEFT);
+    //NaturalBoundaryCondition bc3(BDY_IMPEDANCE);
+    EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc1, &bc2));
 
     // Create an H1 space with default shapeset.
     H1Space e_r_space(&mesh, &bcs, P_INIT);
