@@ -229,6 +229,117 @@ double SuperLUMatrix::get_fill_in() const
   return nnz / (double) (size * size);
 }
 
+void SuperLUMatrix::add_matrix(SuperLUMatrix* mat){
+  _F_
+  add_as_block(0,0,mat);
+}
+
+void SuperLUMatrix::add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat){
+  _F_
+  int ndof = mat->get_size();
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
+    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat);
+  }
+}
+
+void SuperLUMatrix::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat){
+  _F_
+  int idx;
+  for (unsigned int col=0;col<mat->get_size();col++){
+    for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++){
+      idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col+j],mat->Ai[n]+i);
+      if (idx<0)
+        error("Sparse matrix entry not found");
+      idx += Ap[col+j];
+#ifndef HERMES_COMMON_COMPLEX
+      Ax[idx]+=mat->Ax[n];
+#else
+      Ax[idx].r+=mat->Ax[n].r;
+      Ax[idx].i+=mat->Ax[n].i;
+#endif
+    }
+  }
+}
+
+  // Applies the matrix to vector_in and saves result to vector_out.
+void SuperLUMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+  _F_
+  for(unsigned int i=0;i<size;i++){
+    vector_out[i]=0;
+  }
+  scalar a;
+  for (unsigned int c=0;c<size;c++){
+    for (unsigned int i=Ap[c];i<Ap[c+1];i++){
+#ifndef HERMES_COMMON_COMPLEX
+      a=Ax[i];
+#else
+      a=cplx(Ax[i].r,Ax[i].i);
+#endif
+      vector_out[c]+=vector_in[Ai[i]]*a;
+    }
+  }
+}
+  // Multiplies matrix with a scalar.
+void SuperLUMatrix::multiply_with_scalar(scalar value){
+  _F_
+  int n=nnz;
+  scalar a;
+  for(int i=0;i<n;i++){
+#ifndef HERMES_COMMON_COMPLEX
+    Ax[i]=Ax[i]*value;
+#else
+    a=cplx(Ax[i].r,Ax[i].i);
+    a=a*value;
+    Ax[i].r=a.real();
+    Ax[i].i=a.imag();
+#endif
+  }
+}
+  // Creates matrix using size, nnz, and the three arrays.
+void SuperLUMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  _F_
+  this->nnz = nnz;
+  this->size = size;
+  this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
+  this->Ai = new int[nnz];    assert(this->Ai != NULL);
+  this->Ax = new slu_scalar[nnz]; assert(this->Ax != NULL);
+
+  for (unsigned int i = 0; i < size+1; i++){
+    this->Ap[i] = ap[i];
+  }
+  for (unsigned int i = 0; i < nnz; i++) {
+#ifndef HERMES_COMMON_COMPLEX
+    this->Ax[i] = ax[i]; 
+#else
+    this->Ax[i].r=ax[i].real();
+    this->Ax[i].i=ax[i].imag();
+#endif
+    this->Ai[i] = ai[i];
+  } 
+}
+  // Duplicates a matrix (including allocation).
+SuperLUMatrix* SuperLUMatrix::duplicate(){
+  _F_
+  SuperLUMatrix * nmat=new SuperLUMatrix();
+
+  nmat->nnz = nnz;
+  nmat->size = size;
+  nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
+  nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
+  nmat->Ax = new slu_scalar[nnz]; assert(nmat->Ax != NULL);
+  for (unsigned int i = 0;i<nnz;i++){
+    nmat->Ai[i]=Ai[i];
+    nmat->Ax[i]=Ax[i];
+  }
+  for (unsigned int i = 0;i<size+1;i++){
+    nmat->Ap[i]=Ap[i];
+  }
+  return nmat;
+}
+
 // SuperLUVector /////////////////////////////////////////////////////////////////////////////////////
 
 SuperLUVector::SuperLUVector()

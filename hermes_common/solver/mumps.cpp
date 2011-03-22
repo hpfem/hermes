@@ -271,6 +271,119 @@ double MumpsMatrix::get_fill_in() const
   return Ap[size] / (double) (size * size);
 }
 
+void MumpsMatrix::add_matrix(MumpsMatrix* mat){
+  _F_
+  add_as_block(0,0,mat);
+};
+
+void MumpsMatrix::add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat){
+  _F_
+  int ndof = mat->get_size();
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
+    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat);
+  }
+}
+
+void MumpsMatrix::add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat){
+  _F_
+  int idx;
+  for (unsigned int col=0;col<mat->get_size();col++){
+    for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++){
+      idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col],mat->Ai[n]+i);
+      if (idx<0)
+        error("Sparse matrix entry not found");
+#ifndef HERMES_COMMON_COMPLEX
+      Ax[idx]+=mat->Ax[n];
+#else      
+      Ax[idx].r+=mat->Ax[n].r;
+      Ax[idx].i+=mat->Ax[n].i;
+#endif
+    }
+  }
+}
+
+  // Applies the matrix to vector_in and saves result to vector_out.
+void MumpsMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+  for(unsigned int i=0;i<size;i++){
+    vector_out[i]=0;
+  }
+  scalar a;
+  for (unsigned int i=0;i<nnz;i++){
+#ifndef HERMES_COMMON_COMPLEX
+    a=Ax[i];
+#else
+    a=cplx(Ax[i].r,Ax[i].i);
+#endif
+    vector_out[jcn[i]]+=vector_in[irn[i]]*a;
+  }
+}
+  // Multiplies matrix with a scalar.
+void MumpsMatrix::multiply_with_scalar(scalar value){
+  int n=nnz;
+  scalar a;
+  for(int i=0;i<n;i++){
+#ifndef HERMES_COMMON_COMPLEX
+    Ax[i]=Ax[i]*value;
+#else
+    a=cplx(Ax[i].r,Ax[i].i);
+    a=a*value;
+    Ax[i].r=a.real();
+    Ax[i].i=a.imag();
+#endif
+  }
+}
+  // Creates matrix using size, nnz, and the three arrays.
+void MumpsMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  this->nnz = nnz;
+  this->size = size;
+  this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
+  this->Ai = new int[nnz];    assert(this->Ai != NULL);
+  this->Ax = new mumps_scalar[nnz]; assert(this->Ax != NULL);
+  irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
+  jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
+
+  for (unsigned int i = 0; i < size; i++){
+    this->Ap[i] = ap[i];
+    for (int j=ap[i];j<ap[i+1];j++) jcn[j]=i;
+  }
+  this->Ap[size]=ap[size];
+  for (unsigned int i = 0; i < nnz; i++) {
+#ifndef HERMES_COMMON_COMPLEX
+    this->Ax[i] = ax[i]; 
+#else
+    this->Ax[i].r=ax[i].real();
+    this->Ax[i].i=ax[i].imag();
+#endif
+    this->Ai[i] = ai[i];
+    irn[i]=ai[i];
+  } 
+}
+  // Duplicates a matrix (including allocation).
+MumpsMatrix* MumpsMatrix::duplicate(){
+  MumpsMatrix * nmat=new MumpsMatrix();
+
+  nmat->nnz = nnz;
+  nmat->size = size;
+  nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
+  nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
+  nmat->Ax = new mumps_scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
+  nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
+  for (unsigned int i = 0;i<nnz;i++){
+    nmat->Ai[i]=Ai[i];
+    nmat->Ax[i]=Ax[i];
+    nmat->irn[i]=irn[i];
+    nmat->jcn[i]=jcn[i];
+  }
+  for (unsigned int i = 0;i<size+1;i++){
+    nmat->Ap[i]=Ap[i];
+  }
+  return nmat;
+}
+
 // MumpsVector /////////////////////////////////////////////////////////////////////////////////////
 
 MumpsVector::MumpsVector()
