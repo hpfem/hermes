@@ -248,26 +248,30 @@ void PetscMatrix::add_to_diagonal_blocks(int num_stages, PetscMatrix* mat){
 }
 
 void PetscMatrix::add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat){
-        unsigned int block_size=mat->get_size();
-        for (unsigned int r=0;r<block_size;r++){
-                for (unsigned int c=0;c<block_size;c++){
-                        this->add(i+r,j+c,mat->get(i,j));
-                }
-        }
+  _F_
+  unsigned int block_size=mat->get_size();
+  for (unsigned int r=0;r<block_size;r++){
+    for (unsigned int c=0;c<block_size;c++){
+      this->add(i+r,j+c,mat->get(i,j));
+    }
+  }
 }
 
 // Multiplies matrix with a scalar.
 void PetscMatrix::multiply_with_scalar(scalar value){
+  _F_
   MatScale(matrix,value);
 }
 // Creates matrix in PETSC format using size, nnz, and the three arrays.
 void PetscMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+  _F_
   this->size=size;
   this->nnz=nnz;
   MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,ax,&matrix);
 }
 // Duplicates a matrix (including allocation).
 PetscMatrix* PetscMatrix::duplicate(){
+  _F_
   PetscMatrix*ptscmatrix=new PetscMatrix();        
   MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
   ptscmatrix->size=size;
