@@ -1915,7 +1915,7 @@ int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, He
     // Increase due to reference map.
     order = ru->get_inv_ref_order();
     order += o.get_order();
-    limit_order_nowarn(order);
+    limit_order(order);
     
     // Cleanup.
     delete [] oi;
@@ -2174,7 +2174,7 @@ int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv,
     // Increase due to reference map.
     order = rv->get_inv_ref_order();
     order += o.get_order();
-    limit_order_nowarn(order);
+    limit_order(order);
     
     // Cleanup.
     delete [] oi;
@@ -2417,7 +2417,7 @@ int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, 
     // Increase due to reference map.
     order = ru->get_inv_ref_order();
     order += o.get_order();
-    limit_order_nowarn(order);
+    limit_order(order);
 
     // Cleanup.
     delete [] oi;
@@ -2660,7 +2660,7 @@ int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, 
     // Increase due to reference map.
     order = rv->get_inv_ref_order();
     order += o.get_order();
-    limit_order_nowarn(order);
+    limit_order(order);
     
     // Cleanup.
     delete [] oi;
