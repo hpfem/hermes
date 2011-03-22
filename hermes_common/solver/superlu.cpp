@@ -229,6 +229,40 @@ double SuperLUMatrix::get_fill_in() const
   return nnz / (double) (size * size);
 }
 
+void SuperLUMatrix::add_matrix(SuperLUMatrix* mat){
+  _F_
+  add_as_block(0,0,mat);
+}
+
+void SuperLUMatrix::add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat){
+  _F_
+  int ndof = mat->get_size();
+  if (this->get_size() != (unsigned int) num_stages * ndof) 
+    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+
+  for (int i = 0; i < num_stages; i++) {
+    this->add_as_block(ndof*i, ndof*i, mat);
+  }
+}
+
+void SuperLUMatrix::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat){
+  _F_
+  int idx;
+  for (unsigned int col=0;col<mat->get_size();col++){
+    for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++){
+      idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col],mat->Ai[n]+i);
+      if (idx<0)
+        error("Sparse matrix entry not found");
+#ifndef HERMES_COMMON_COMPLEX
+      Ax[idx]+=mat->Ax[n];
+#else
+      Ax[idx].r+=mat->Ax[n].r;
+      Ax[idx].i+=mat->Ax[n].i;
+#endif
+    }
+  }
+}
+
   // Applies the matrix to vector_in and saves result to vector_out.
 void SuperLUMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
   for(unsigned int i=0;i<size;i++){
