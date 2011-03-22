@@ -63,10 +63,12 @@ int main(int argc, char* argv[])
   Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
-  MyWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, &current_time, &tsln);
+  MyWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+                       &current_time, TEMP_INIT, T_FINAL, &tsln);
   
   // Initialize boundary conditions.
-  EssentialBCConstant bc_essential(Hermes::vector<std::string>(BDY_GROUND), TEMP_INIT);
+  //EssentialBCConstant bc_essential(Hermes::vector<std::string>(BDY_GROUND), TEMP_INIT);
+  EssentialBCConstant bc_essential(BDY_GROUND, TEMP_INIT);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -93,7 +95,7 @@ int main(int argc, char* argv[])
   int ts = 1; bool rhs_only = false;
   do 
   {
-    info("---- Time step %d, time %3.5f s, ext_temp %g C", ts, current_time, temp_ext(current_time));
+    info("---- Time step %d, time %3.5f s", ts, current_time);
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
@@ -109,7 +111,7 @@ int main(int argc, char* argv[])
 
     // Visualize the solution.
     char title[100];
-    sprintf(title, "Time %3.2f s, exterior temperature %3.5f C", current_time, temp_ext(current_time));
+    sprintf(title, "Time %3.2f s", current_time);
     Tview.set_title(title);
     Tview.show(&tsln);
 
