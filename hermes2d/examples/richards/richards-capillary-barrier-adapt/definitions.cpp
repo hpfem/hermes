@@ -1,6 +1,23 @@
 // The first part of the file dontains forms for the Newton's
 // method. Forms for Picard are in the second part.
 
+/*** INITIAL CONDITION ***/
+
+class InitialSolutionRichards : public ExactSolutionScalar
+{
+public:
+  InitialSolutionRichards(Mesh* mesh, double value) 
+         : ExactSolutionScalar(mesh), value(value) {};
+
+  // Function representing an exact one-dimension valued solution.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    return value;
+  };
+
+  // Value.
+  double value;
+};
+
 /*** NEWTON ***/
 
 #include "weakform/weakform.h"
@@ -10,7 +27,8 @@
 class WeakFormRichardsNewtonEuler : public WeakForm
 {
 public:
-  WeakFormRichardsNewtonEuler(ConstitutiveRelations* relations, double tau, Solution* prev_time_sln) : WeakForm(1) {
+  WeakFormRichardsNewtonEuler(ConstitutiveRelations* relations, double tau, Solution* prev_time_sln) 
+               : WeakForm(1) {
     JacobianFormNewtonEuler* jac_form = new JacobianFormNewtonEuler(0, 0, relations, tau);
     jac_form->ext.push_back(prev_time_sln);
     add_matrix_form(jac_form);
@@ -24,12 +42,12 @@ private:
   class JacobianFormNewtonEuler : public WeakForm::MatrixFormVol
   {
   public:
-    JacobianFormNewtonEuler(int i, int j, ConstitutiveRelations* relations, double tau) : WeakForm::MatrixFormVol(i, j), tau(tau), relations(relations) {
-      sym = HERMES_NONSYM;
-    }
+    JacobianFormNewtonEuler(int i, int j, ConstitutiveRelations* relations, double tau) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), tau(tau), relations(relations) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       std::string elem_marker = wf->get_element_markers_conversion()->get_user_marker(e->elem_marker);
       double result = 0;
       Func<double>* h_prev_newton = u_ext[0];
@@ -38,22 +56,30 @@ private:
       for (int i = 0; i < n; i++)
         result += wt[i] * (
         relations->C(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->val[i] * v->val[i] / tau
-		             + relations->dCdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->val[i] * h_prev_newton->val[i] * v->val[i] / tau
-		             - relations->dCdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->val[i] * h_prev_time->val[i] * v->val[i] / tau
-			     + relations->K(h_prev_newton->val[i], atoi(elem_marker.c_str())) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
-                             + relations->dKdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->val[i] * 
+		             + relations->dCdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * u->val[i] * h_prev_newton->val[i] * v->val[i] / tau
+		             - relations->dCdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * u->val[i] * h_prev_time->val[i] * v->val[i] / tau
+			     + relations->K(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
+                             + relations->dKdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * u->val[i] * 
                                (h_prev_newton->dx[i]*v->dx[i] + h_prev_newton->dy[i]*v->dy[i])
-                             - relations->dKdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->dy[i] * v->val[i]
-                             - relations->ddKdhh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * u->val[i] * h_prev_newton->dy[i] * v->val[i]
+                             - relations->dKdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * u->dy[i] * v->val[i]
+                             - relations->ddKdhh(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                               * u->val[i] * h_prev_newton->dy[i] * v->val[i]
                           );
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
       return Ord(30);
     }
 
@@ -65,7 +91,8 @@ private:
   class ResidualFormNewtonEuler : public WeakForm::VectorFormVol
   {
   public:
-    ResidualFormNewtonEuler(int i, ConstitutiveRelations* relations, double tau) : WeakForm::VectorFormVol(i), tau(tau), relations(relations) { }
+    ResidualFormNewtonEuler(int i, ConstitutiveRelations* relations, double tau) 
+               : WeakForm::VectorFormVol(i), tau(tau), relations(relations) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -75,8 +102,10 @@ private:
       Func<double>* h_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++) {
         result += wt[i] * (
-		           relations->C(h_prev_newton->val[i], atoi(elem_marker.c_str())) * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / tau
-                           + relations->K(h_prev_newton->val[i], atoi(elem_marker.c_str())) * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
+		           relations->C(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                           * (h_prev_newton->val[i] - h_prev_time->val[i]) * v->val[i] / tau
+                           + relations->K(h_prev_newton->val[i], atoi(elem_marker.c_str())) 
+                           * (h_prev_newton->dx[i] * v->dx[i] + h_prev_newton->dy[i] * v->dy[i])
                            -relations->dKdh(h_prev_newton->val[i], atoi(elem_marker.c_str())) * h_prev_newton->dy[i] * v->val[i]
                           );
       }
@@ -303,3 +332,28 @@ public:
   double h_init;
   double startup_time;
 };
+
+/*** EXTRAS ***/
+
+//Debugging matrix printer.
+bool printmatrix(double** A, int n, int m){
+  for (int i=0; i<n; i++){
+    for (int j=0; j<m; j++){
+      printf(" %lf ", A[i][j]) ;
+    }
+    printf(" \n");
+  }
+  printf("----------------------------------\n");
+  return true;
+}
+
+
+//Debugging vector printer.
+bool printvector(double* vect, int n){
+  for (int i=0; i<n; i++){
+    printf(" %lf ", vect[i]);
+  }
+  printf("\n");
+  printf("----------------------------------\n");
+  return true;
+}

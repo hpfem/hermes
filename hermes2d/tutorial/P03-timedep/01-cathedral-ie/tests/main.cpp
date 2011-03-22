@@ -109,11 +109,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 10.000122) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 9.999985) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(0.0, 2.0) - 10.000029) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(1.0, 2.0) - 9.999985) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(2.0, 2.0) - 10.000122) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 10.342338) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 10.453113) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(0.0, 2.0) - 10.413864) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(1.0, 2.0) - 10.453113) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(2.0, 2.0) - 10.342338) > 1E-6) success = false;
 
   if (success) {
     printf("Success!\n");
