@@ -157,7 +157,7 @@ int main (int argc, char* argv[]) {
   InitialSolutionVoltage phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh);
 
   // The weak form for 2 equations.
-  WeakFormNernstPlanckEuler wf(TAU, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D, &C_prev_time);
+  CustomWeakFormNernstPlanckEuler wf(TAU, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D, &C_prev_time);
   // Add the bilinear and linear forms.
   if (TIME_DISCR == 2)
 	  error("Crank-Nicholson forms are not implemented yet");
