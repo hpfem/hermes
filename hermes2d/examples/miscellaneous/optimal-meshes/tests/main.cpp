@@ -11,20 +11,21 @@ const int P_INIT = 1;                             // Initial polynomial degree.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Initial condition. It will be projected on the FE mesh. 
-scalar init_cond(double x, double y, double& dx, double& dy)
-{
-  dx = (1 - 2*x)*exp(x) + (x - x*x)*exp(x);
-  dy = 0;
-  return (x - x*x) * exp(x);
-}
+// Problem parameters.
+double K = 10.0;
 
 // Boundary markers.
-const int BDY_LEFT_RIGHT = 1;
-const int BDY_TOP_BOTTOM = 2;
+const std::string BDY_LEFT_RIGHT = "1";
+const std::string BDY_TOP_BOTTOM = "2";
+
+// Definitions.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Initialize the library's global functions.
+  Hermes2D hermes2D;
+
   // Read the command-line arguments.
   if (argc != 10) error("You must provide 5 real numbers (mesh vertices) and 4 integers (poly degrees).");
   double x0 = atof(argv[1]);
@@ -76,12 +77,8 @@ int main(int argc, char* argv[])
   Mesh mesh;
   mesh.create(nv, verts, nt, tris, nq, quads, nm, mark);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
-
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, P_INIT);
+  H1Space space(&mesh, P_INIT);
 
   // Set element poly orders.
   space.set_element_order(0, H2D_MAKE_QUAD_ORDER(o0, 1));
@@ -91,19 +88,18 @@ int main(int argc, char* argv[])
 
   // Perform orthogonal projection in the H1 norm.
   Solution sln_approx;
-  ExactSolution sln_exact(&mesh, init_cond);
+  CustomExactSolution sln_exact(&mesh, K);
   OGProjection::project_global(&space, &sln_exact, &sln_approx);
 
   // Calculate the error.
-  double err = calc_abs_error(&sln_approx, &sln_exact, HERMES_H1_NORM);
+  double err = hermes2D.calc_abs_error(&sln_approx, &sln_exact, HERMES_H1_NORM);
   printf("\nMesh: %g, %g, %g, %g, %g\n", x0, x1, x2, x3, x4);
   printf("Poly degrees: %d, %d, %d, %d\n", o0, o1, o2, o3);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
 
   // Mesh: 0, 1, 2, 3, 4
   // Poly degrees: 10, 10, 10, 10
-  // err = 2.11454e-09, err_squared = 4.47128e-18
-  if ((err - 2.11454e-09) < 1E-6) {      // err was 2.11454e-09 at the time this test was created
+  if ((err - 0.04381394) < 1E-6) {
     printf("Success!\n");
     return ERR_SUCCESS;
   }

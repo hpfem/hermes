@@ -55,17 +55,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 double K = 10.0;
 
 // Boundary markers.
-const int BDY_LEFT_RIGHT = 1;
-const int BDY_TOP_BOTTOM = 2;
+const std::string BDY_LEFT_RIGHT = "1";
+const std::string BDY_TOP_BOTTOM = "2";
 
-// Exact solution.
-#include "exact_solution.cpp"
-
-// Weak forms.
-#include "forms.cpp"
+// Definitions.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Initialize the library's global functions.
+  Hermes2D hermes2D;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -74,21 +74,16 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_LEFT_RIGHT, BDY_TOP_BOTTOM));
-
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, P_INIT);
+  H1Space space(&mesh, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
+  // Initialize the right-hand side.
+  CustomRightHandSide rhs_value(K);
+
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_vol));
-  wf.add_vector_form(callback(linear_form_vol));
-  wf.add_vector_form_surf(callback(linear_form_surf_right), 2);
-  wf.add_vector_form_surf(callback(linear_form_surf_left), 2);
+  CustomWeakForm wf(&rhs_value, BDY_LEFT_RIGHT, K);
 
   Solution sln; 
 
@@ -115,9 +110,8 @@ int main(int argc, char* argv[])
   view.show(&sln);
 
   // Calculate error wrt. exact solution.
-  Solution sln_exact;
-  sln_exact.set_exact(&mesh, exact);
-  double err = calc_abs_error(&sln, &sln_exact, HERMES_H1_NORM);
+  CustomExactSolution sln_exact(&mesh, K);
+  double err = hermes2D.calc_abs_error(&sln, &sln_exact, HERMES_H1_NORM);
   printf("err = %g, err_squared = %g\n\n", err, err*err);
  
   // Wait for all views to be closed.
