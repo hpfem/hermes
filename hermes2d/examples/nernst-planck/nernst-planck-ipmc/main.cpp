@@ -71,7 +71,6 @@ const double mech_mu = mech_E / (2 * (1 + mech_nu));
 const double mech_lambda = mech_E * mech_nu / ((1 + mech_nu) * (1 - 2 * mech_nu));
 const double lin_force_coup = 1e5;
 
-
 /* Simulation parameters */
 const double T_FINAL = 1;
 double INIT_TAU = 0.05;
@@ -118,34 +117,19 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Weak forms
 #include "forms.cpp"
 
-
-/*** Boundary types and conditions ***/
+// Initial conditions.
+#include "initial_conditions.cpp"
 
 // Boundary markers.
-const int BDY_SIDE_FIXED = 1;
-const int BDY_SIDE_FREE = 2;
-const int BDY_TOP = 3;
-const int BDY_BOT = 4;
-
-scalar voltage_ic(double x, double y, double &dx, double &dy) {
-  // y^2 function for the domain.
-  //return (y+100e-6) * (y+100e-6) / (40000e-12);
-  return 0.0;
-}
-
-scalar concentration_ic(double x, double y, double &dx, double &dy) {
-  return C0;
-}
-
-scalar u1_ic(double x, double y, double &dx, double &dy) {
-	return 0.0;
-}
-
-scalar u2_ic(double x, double y, double &dx, double &dy) {
-	return 0.0;
-}
+const std::string BDY_SIDE_FIXED = "1";
+const std::string BDY_SIDE_FREE = "2";
+const std::string BDY_TOP = "3";
+const std::string BDY_BOT = "4";
 
 int main (int argc, char* argv[]) {
+
+  // Initialize the library's global functions.
+  Hermes2D hermes2D;
 
   // Load the mesh file.
   Mesh C_mesh, phi_mesh, u1_mesh, u2_mesh, basemesh;
@@ -183,41 +167,22 @@ int main (int argc, char* argv[]) {
   u2_mesh.copy(&basemesh);
 #endif
 
-  // Enter Neumann boundary markers for Nernst-Planck.
-  BCTypes C_bc_types;
-  C_bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SIDE_FIXED, BDY_SIDE_FREE, BDY_TOP, BDY_BOT));
-
   // Enter Dirichlet and Neumann boundary markers for Poisson.
-  BCTypes phi_bc_types;
-  phi_bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SIDE_FIXED, BDY_SIDE_FREE));
-  phi_bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_TOP, BDY_BOT));
+  EssentialBCConstant bc_phi_voltage(BDY_TOP, VOLTAGE);
+  EssentialBCConstant bc_phi_zero(BDY_BOT, 0.0);
+  EssentialBCs bcs_phi(Hermes::vector<EssentialBC*>(&bc_phi_voltage, &bc_phi_zero));
 
-  // Dirichlet and Neumann boundary markers for u1.
-  BCTypes u1_bc_types;
-  u1_bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SIDE_FREE, BDY_TOP, BDY_BOT));
-  u1_bc_types.add_bc_dirichlet(BDY_SIDE_FIXED);
+  EssentialBCConstant bc_u1(BDY_SIDE_FIXED, 0.0);
+  EssentialBCs bcs_u1(&bc_u1);
 
-  // Dirichlet and Neumann boundary markers for u1.
-  BCTypes u2_bc_types;
-  u2_bc_types.add_bc_neumann(Hermes::vector<int>(BDY_SIDE_FREE, BDY_TOP, BDY_BOT));
-  u2_bc_types.add_bc_dirichlet(BDY_SIDE_FIXED);
-
-  // Enter Dirichlet boundary values.
-  BCValues phi_bc_values;
-  phi_bc_values.add_const(BDY_TOP, VOLTAGE);
-  phi_bc_values.add_zero(BDY_BOT);
-
-  BCValues u1_bc_values, u2_bc_values;
-  u1_bc_values.add_const(BDY_SIDE_FIXED, 0.0);
-  u2_bc_values.add_const(BDY_SIDE_FIXED, 0.0);
-
-  BCValues C_bc_values;
+  EssentialBCConstant bc_u2(BDY_SIDE_FIXED, 0.0);
+  EssentialBCs bcs_u2(&bc_u2);
 
   // Spaces for concentration and the voltage.
-  H1Space C_space(&C_mesh, &C_bc_types, &C_bc_values, P_INIT);
-  H1Space phi_space(MULTIMESH ? &phi_mesh : &C_mesh, &phi_bc_types, &phi_bc_values, P_INIT);
-  H1Space u1_space(MULTIMESH ? &u1_mesh : &C_mesh, &u1_bc_types, &u1_bc_values, P_INIT);
-  H1Space u2_space(MULTIMESH ? &u2_mesh : &C_mesh, &u2_bc_types, &u2_bc_values, P_INIT);
+  H1Space C_space(&C_mesh, P_INIT);
+  H1Space phi_space(MULTIMESH ? &phi_mesh : &C_mesh, &bcs_phi, P_INIT);
+  H1Space u1_space(MULTIMESH ? &u1_mesh : &C_mesh, &bcs_u1, P_INIT);
+  H1Space u2_space(MULTIMESH ? &u2_mesh : &C_mesh, &bcs_u2, P_INIT);
 
   int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&C_space, &phi_space, &u1_space, &u2_space));
 
@@ -227,53 +192,16 @@ int main (int argc, char* argv[]) {
   Solution u2_sln, u2_ref_sln;
 
   // Assign initial condition to mesh.
-  Solution C_prev_time(&C_mesh, concentration_ic);
-  Solution phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh, voltage_ic);
-  Solution u1_prev_time(MULTIMESH ? &u1_mesh : &C_mesh, u1_ic);
-  Solution u2_prev_time(MULTIMESH ? &u2_mesh : &C_mesh, u2_ic);
+  InitialSolutionConcentration C_prev_time(&C_mesh, C0);
+  InitialSolutionVoltage phi_prev_time(MULTIMESH ? &phi_mesh : &C_mesh);
+  InitialSolutionU1 u1_prev_time(MULTIMESH ? &u1_mesh : &C_mesh);
+  InitialSolutionU2 u2_prev_time(MULTIMESH ? &u2_mesh : &C_mesh);
 
   // The weak form for 2 equations.
-  WeakForm wf(4);
+  WeakFormNernstPlanckEuler wf(TAU, C0, lin_force_coup, mech_lambda, mech_mu, K, L, D, &C_prev_time);
   // Add the bilinear and linear forms.
-  if (TIME_DISCR == 1) {  // Implicit Euler.
-    // the first row in the 4 x 4 matrix
-    wf.add_matrix_form(0, 0, callback(J_euler_DFcDYc), HERMES_NONSYM);
-    wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM);
-    wf.add_matrix_form(0, 2, callback(J_euler_DFcDYu1), HERMES_NONSYM);
-    wf.add_matrix_form(0, 3, callback(J_euler_DFcDYu2), HERMES_NONSYM);
-    // the second row
-    wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
-    wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
-    wf.add_matrix_form(1, 2, callback(J_euler_DFphiDYu1), HERMES_NONSYM);
-    wf.add_matrix_form(1, 3, callback(J_euler_DFphiDYu2), HERMES_NONSYM);
-    // the third row
-    wf.add_matrix_form(2, 0, callback(J_euler_DFu1DYc), HERMES_NONSYM);
-    wf.add_matrix_form(2, 1, callback(J_euler_DFu1DYphi), HERMES_NONSYM);
-    wf.add_matrix_form(2, 2, callback(J_euler_DFu1DYu1), HERMES_NONSYM);
-    wf.add_matrix_form(2, 3, callback(J_euler_DFu1DYu2), HERMES_NONSYM);
-    // the fourth row
-    wf.add_matrix_form(3, 0, callback(J_euler_DFu2DYc), HERMES_NONSYM);
-    wf.add_matrix_form(3, 1, callback(J_euler_DFu2DYphi), HERMES_NONSYM);
-    wf.add_matrix_form(3, 2, callback(J_euler_DFu2DYu1), HERMES_NONSYM);
-    wf.add_matrix_form(3, 3, callback(J_euler_DFu2DYu2), HERMES_NONSYM);
-    // the vector forms
-
-    wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY,
-                       Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY,
-                       Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(2, callback(Fu1_euler), HERMES_ANY);
-    wf.add_vector_form(3, callback(Fu2_euler), HERMES_ANY);
-  } else {
+  if (TIME_DISCR == 2)
 	  error("Crank-Nicholson forms are not implemented yet");
-    wf.add_matrix_form(0, 0, callback(J_cranic_DFcDYc), HERMES_NONSYM);
-    wf.add_matrix_form(0, 1, callback(J_cranic_DFcDYphi), HERMES_NONSYM);
-    wf.add_matrix_form(1, 0, callback(J_cranic_DFphiDYc), HERMES_NONSYM);
-    wf.add_matrix_form(1, 1, callback(J_cranic_DFphiDYphi), HERMES_NONSYM);
-    wf.add_vector_form(0, callback(Fc_cranic), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
-    wf.add_vector_form(1, callback(Fphi_cranic), HERMES_ANY);
-  }
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -322,13 +250,10 @@ int main (int argc, char* argv[]) {
   u2view.show(&u2_prev_time);
   u2ordview.show(&u2_space);
 
-  //View::wait(HERMES_WAIT_KEYPRESS);
-
-
   // Newton's loop on the coarse mesh.
   info("Solving on coarse mesh:");
   bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+  if (!hermes2D.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
       NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
@@ -339,8 +264,6 @@ int main (int argc, char* argv[]) {
   phiview.show(&phi_sln);
   u1view.show(&u1_sln);
   u2view.show(&u2_sln);
-  //View::wait(HERMES_WAIT_KEYPRESS);
-
 
   // Cleanup after the Newton loop on the coarse mesh.
   delete matrix_coarse;
@@ -356,8 +279,7 @@ int main (int argc, char* argv[]) {
   do {
     pid.begin_step();
     // Periodic global derefinements.
-    if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0)
-    {
+    if (pid.get_timestep_number() > 1 && pid.get_timestep_number() % UNREF_FREQ == 0) {
       info("Global mesh derefinement.");
 
 #ifdef TWO_BASE_MESH
@@ -365,8 +287,7 @@ int main (int argc, char* argv[]) {
 #else
       C_mesh.copy(&basemesh);
 #endif
-      if (MULTIMESH)
-      {
+      if (MULTIMESH) {
 #ifdef TWO_BASE_MESH
         phi_mesh.copy(&basemesh_electrochem);
         u1_mesh.copy(&basemesh_deformation);
@@ -401,7 +322,7 @@ int main (int argc, char* argv[]) {
           Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
 
       scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
-      DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -429,7 +350,7 @@ int main (int argc, char* argv[]) {
 
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
-      if (!solve_newton(coeff_vec, dp, solver, matrix, rhs, 
+      if (!hermes2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 	  	      NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
 
@@ -445,9 +366,9 @@ int main (int argc, char* argv[]) {
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
-      Adapt* adaptivity = new Adapt(Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
+      Adapt adaptivity (Hermes::vector<Space *>(&C_space, &phi_space, &u1_space, &u2_space));
       Hermes::vector<double> err_est_rel;
-      double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&C_sln, &phi_sln, &u1_sln, &u2_sln),
+      double err_est_rel_total = adaptivity.calc_err_est(Hermes::vector<Solution *>(&C_sln, &phi_sln, &u1_sln, &u2_sln),
                                  Hermes::vector<Solution *>(&C_ref_sln, &phi_ref_sln, &u1_ref_sln, &u2_ref_sln),
                                  &err_est_rel) * 100;
 
@@ -472,10 +393,9 @@ int main (int argc, char* argv[]) {
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
-      else 
-      {
+      else {
         info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector),
+        done = adaptivity.adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector),
           THRESHOLD, STRATEGY, MESH_REGULARITY);
         
         info("Adapted...");
@@ -529,24 +449,18 @@ int main (int argc, char* argv[]) {
        u2ordview.set_title(title);
        u2ordview.show(&u2_space);
 
-
-
-      //View::wait(HERMES_WAIT_KEYPRESS);
+       /*
+       info("Von Mises filter");
+       VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u1_prev_time, &u2_prev_time), mech_lambda, mech_mu);
+       deformationview.show_mesh(false);
+       deformationview.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u1_prev_time, &u2_prev_time, 1.5e10);
+       */
 
       // Clean up.
-      info("delete solver");
       delete solver;
-      info("delete matrix");
       delete matrix;
-      info("delete rhs");
       delete rhs;
-      info("delete adaptivity");
-      delete adaptivity;
-      info("delete[] ref_spaces");
       delete ref_spaces;
-      info("delete dp");
-      delete dp;
-      info("delete[] coeff_vec");
       delete[] coeff_vec;
     }
     while (done == false);
@@ -561,12 +475,6 @@ int main (int argc, char* argv[]) {
     phi_prev_time.copy(&phi_ref_sln);
     u1_prev_time.copy(&u1_ref_sln);
     u2_prev_time.copy(&u2_ref_sln);
-
-    info("Von Mises filter");
-    VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u1_prev_time, &u2_prev_time), mech_lambda, mech_mu);
-    deformationview.show_mesh(false);
-    //deformationview.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u1_prev_time, &u2_prev_time, 1.5e5);
-    //deformationview.show(&stress);
 
   } while (pid.has_next());
 

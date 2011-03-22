@@ -3,7 +3,7 @@
 #define PID_DEFAULT_TOLERANCE 0.25
 #define DEFAULT_STEP 0.1
 
-class HERMES_API PidTimestepController {
+class PidTimestepController {
 
 public:
   PidTimestepController(double final_time, bool pid_on = true,
@@ -39,12 +39,15 @@ private:
   bool finished;
 
   // PID parameters
-  const static double kp = 0.075;
-  const static double kl = 0.175;
-  const static double kD = 0.01;
+  const static double kp;
+  const static double kl;
+  const static double kD;
 
 };
 
+const double PidTimestepController::kp = 0.075;
+const double PidTimestepController::kl = 0.175;
+const double PidTimestepController::kD = 0.01;
 
 // Usage: do{ begin_step() calculations .... end_step(..);} while(has_next());
 
@@ -65,6 +68,7 @@ bool PidTimestepController::end_step(Hermes::vector<Solution *> solutions,
     Hermes::vector<Solution *> prev_solutions) {
 
   if (pid) {
+    Hermes2D hermes2d;
 
     unsigned int neq = solutions.size();
     if (neq == 0) {
@@ -79,7 +83,7 @@ bool PidTimestepController::end_step(Hermes::vector<Solution *> solutions,
     double max_rel_error = 0.0;
 
     for (unsigned int i = 0; i < neq; i++) {
-      double rel_error = calc_rel_error(solutions[i], prev_solutions[i], HERMES_H1_NORM);
+      double rel_error = hermes2d.calc_rel_error(solutions[i], prev_solutions[i], HERMES_H1_NORM);
       max_rel_error = (rel_error > max_rel_error) ? rel_error : max_rel_error;
 
       info("Solution[%i]: rel error %g, largest relative error %g",
