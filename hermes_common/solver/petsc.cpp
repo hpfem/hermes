@@ -231,6 +231,7 @@ void PetscMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
     }
   }
 }
+#ifdef WITH_PETSC
 
 void PetscMatrix::add_matrix(PetscMatrix* mat){
         MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
@@ -278,6 +279,7 @@ PetscMatrix* PetscMatrix::duplicate(){
   ptscmatrix->nnz=nnz;
   return ptscmatrix;
 };
+#endif
 
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
