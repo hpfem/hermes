@@ -3,13 +3,12 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform/sample_weak_forms.h"
 
-class MyWeakFormPoisson : public WeakFormLaplace
+class MyWeakFormPoisson : public WeakFormPoisson
 {
 public:
-  MyWeakFormPoisson(double const_f) : WeakFormLaplace() {
-    VectorFormConstant* my_vector_form = new VectorFormConstant(0);
-    my_vector_form->param.push_back(const_f);
-    add_vector_form(my_vector_form);
+  MyWeakFormPoisson(double const_f) : WeakFormPoisson(1) {
+    add_matrix_form(new WeakFormPoisson::MatrixFormVol(0, 0));
+    add_vector_form(new WeakFormPoisson::VectorFormVol(0, const_f));
   };
 };
 

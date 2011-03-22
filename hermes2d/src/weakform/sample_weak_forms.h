@@ -18,30 +18,52 @@
 
 #include "../integrals/integrals_h1.h"
 
-/* Default weak form for the Laplace equation -Laplace u = 0 
-   with Dirichlet and/or zero Neumann BC (just volumetric forms).
+/* Default vector form corresponding to constant right-hand side */
 
-   Nonzero Neumann and Newton boundary conditions can be enabled 
-   by creating a descendant and adding surface forms to it. 
+class VectorFormConstant : public WeakForm::VectorFormVol
+{
+public:
+  VectorFormConstant(int i, double const_f) : WeakForm::VectorFormVol(i), const_f(const_f) { }
+  VectorFormConstant(int i, std::string area, double const_f) : WeakForm::VectorFormVol(i, area), const_f(const_f) { }
+
+  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+               Geom<double> *e, ExtData<scalar> *ext) {
+    return const_f * int_v<scalar, scalar>(n, wt, v);
+  }
+
+  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+          Geom<Ord> *e, ExtData<Ord> *ext) {
+    return v->val[0]; // Make the parser return the polynomial degree of 'v'.
+  }
+
+private:
+  // Constant right hand side.
+  double const_f;
+};
+
+/* Default weak form for the Laplace equation -Laplace u = 0 
+   with constant Dirichlet or Neumann BC
+
+   Nonconstant Neumann and Newton boundary conditions can be enabled
+   by creating a descendant and adding volume and surface forms to it.
 */
 
 class WeakFormLaplace : public WeakForm
 {
 public:
-  WeakFormLaplace() : WeakForm(1) {
-    add_matrix_form(new MatrixFormLaplace(0, 0));
-  };
+  WeakFormLaplace(unsigned int neq = 1) : WeakForm(neq) { }
 
-private:
-  class MatrixFormLaplace : public WeakForm::MatrixFormVol
+  // Constant matrix volume form
+  class MatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormLaplace(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
+    MatrixFormVol(int i, int j, double const_f = 1.0) : WeakForm::MatrixFormVol(i, j, HERMES_SYM), const_f(const_f) { }
+    MatrixFormVol(int i, int j, std::string area, double const_f = 1.0) : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), const_f(const_f) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+      return const_f * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
@@ -53,29 +75,88 @@ private:
             Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
+
+  private:
+    double const_f;
+  };
+
+  // Constant Newton matrix surface form
+  class MatrixFormSurfNewton : public WeakForm::MatrixFormSurf
+  {
+  public:
+    MatrixFormSurfNewton(int i, int j, double const_f) : WeakForm::MatrixFormSurf(i, j), const_f(const_f) { }
+    MatrixFormSurfNewton(int i, int j, std::string area, double const_f) : WeakForm::MatrixFormSurf(i, j, area), const_f(const_f) { }
+
+    template<typename Real, typename Scalar>
+    Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      return const_f * int_u_v<Real, Scalar>(n, wt, u, v);
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    }
+
+  private:
+      double const_f;
+  };
+
+  // Constant Newton vector surface form
+  class VectorFormSurfNewton : public WeakForm::VectorFormSurf
+  {
+  public:
+    VectorFormSurfNewton(int i, double const_f) : WeakForm::VectorFormSurf(i), const_f(const_f) { }
+    VectorFormSurfNewton(int i, std::string area, double const_f) : WeakForm::VectorFormSurf(i, area), const_f(const_f) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      return const_f * int_v<Real, Scalar>(n, wt, v);
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+        return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+
+  private:
+      double const_f;
+  };
+
+  // Constant Neumann vector surface form
+  class VectorFormSurfNeumann : public VectorFormSurfNewton
+  {
+  public:
+    VectorFormSurfNeumann(int i, double const_f) : VectorFormSurfNewton(i, const_f) { }
+    VectorFormSurfNeumann(int i, std::string area, double const_f) : VectorFormSurfNewton(i, area, const_f) { }
   };
 };
 
-/* Default vector form corresponding to constant right-hand side */
+/* Default weak form for the Poisson equation -Laplace u = f
+   with constant Dirichlet and Neumann BC
 
-  class VectorFormConstant : public WeakForm::VectorFormVol
+   Nonconstant Neumann and Newton boundary conditions can be enabled
+   by creating a descendant and adding volume and surface forms to it.
+*/
+
+class WeakFormPoisson : public WeakFormLaplace
+{
+public:
+  WeakFormPoisson(unsigned int neq = 1) : WeakFormLaplace(neq) { }
+
+  // Constant right side
+  class VectorFormVol : public VectorFormConstant
   {
   public:
-    VectorFormConstant(int i, double const_f) : WeakForm::VectorFormVol(i), const_f(const_f) { }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return const_f * int_v<scalar, scalar>(n, wt, v);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
-      return v->val[0]; // Make the parser return the polynomial degree of 'v'.
-    }
-
-    // Constant right hand side.
-    double const_f;
+    VectorFormVol(int i, double const_f) : VectorFormConstant(i, const_f) { }
+    VectorFormVol(int i, std::string area, double const_f) : VectorFormConstant(i, area, const_f)  { }
   };
+};
 
 /* Default (vector-valued) weak form for linear elasticity (Lame equations)  
    with Dirichlet and/or zero Neumann BC (just volumetric forms).
