@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation for the left hand side, i.e., H.
   info("Initializing weak form...");
   WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_left_ord, HERMES_SYM, HERMES_ANY );
-  wf_right.add_matrix_form(callback(bilinear_form_right), HERMES_SYM, HERMES_ANY );
+  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_left_ord, HERMES_SYM, HERMES_ANY_INT);
+  wf_right.add_matrix_form(callback(bilinear_form_right), HERMES_SYM, HERMES_ANY_INT);
 
   // Initialize matrices and matrix solver.
   RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());

@@ -65,7 +65,7 @@ int main(int argc, char **args)
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form1), HERMES_SYM, 1);
   wf.add_matrix_form(callback(bilinear_form2), HERMES_SYM, 2);
-  wf.add_vector_form(callback(linear_form), HERMES_ANY);
+  wf.add_vector_form(callback(linear_form), HERMES_ANY_INT);
 
   // Initialize discrete problem.
   bool is_linear = true;

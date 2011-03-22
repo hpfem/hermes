@@ -20,6 +20,7 @@
 #ifndef __H3D_OGPROJECTION_H
 #define __H3D_OGPROJECTION_H
 
+#include "space/space.h"
 #include "discrete_problem.h"
 
 class HERMES_API OGProjection
@@ -32,7 +33,8 @@ public:
                               MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
                               Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
   static void project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction *> source_meshfns, 
-                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());  
+                              scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+                              Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());  
   static void project_global(Space* space, 
                               Solution* sol_src, Solution* sol_dest, 
                               MatrixSolverType matrix_solver, ProjNormType proj_norm);

@@ -22,11 +22,11 @@
 
 
 #include "h3d_common.h"
+#include "space/space.h"
 #include "discrete_problem.h"
 #include "traverse.h"
 #include "../../hermes_common/error.h"
 #include "../../hermes_common/callstack.h"
-
 
 
 DiscreteProblem::FnCache::~FnCache()
@@ -85,10 +85,37 @@ DiscreteProblem::DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> spaces, b
   have_spaces = true;
 
   // H2D is initializing precalc shapesets here.
-
   // Create global enumeration of dof and fill the ndof variable
   this->ndof = Space::assign_dofs(this->spaces);
 }
+
+DiscreteProblem::DiscreteProblem(WeakForm *wf, Space* space, bool is_linear)
+{
+  _F_
+  this->wf = wf;
+  this->spaces.push_back(space);
+  this->is_linear = is_linear;
+
+  sp_seq = new int[wf->neq];
+  memset(sp_seq, -1, sizeof(int) * wf->neq);
+  wf_seq = -1;
+
+  matrix_buffer = NULL;
+  matrix_buffer_dim = 0;
+
+  values_changed = true;
+  struct_changed = true;
+
+  have_matrix = false;
+
+  this->spaces = Hermes::vector<Space *>();
+  for (int i = 0; i < wf->neq; i++) this->spaces.push_back(space);
+  have_spaces = true;
+
+  // Create global enumeration of dof and fill the ndof variable
+  this->ndof = space->get_num_dofs();
+}
+
 
 DiscreteProblem::~DiscreteProblem()
 {
@@ -264,7 +291,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
   // Sanity checks.
   if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
   if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
-  for (int i=0; i<this->wf->neq; i++)
+  for (int i = 0; i < this->wf->neq; i++)
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
@@ -1110,33 +1137,6 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-
-Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase)
-{
-  _F_
-  Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
-  for (unsigned int i = 0; i < coarse.size(); i++) 
-  {
-    Mesh* ref_mesh = new Mesh;
-    ref_mesh->copy(*coarse[i]->get_mesh());
-    ref_mesh->refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-    ref_spaces->push_back(coarse[i]->dup(ref_mesh));
-    (*ref_spaces)[i]->copy_orders(*coarse[i], order_increase);
-  }
-  return ref_spaces;
-}
-
-// Light version for a single space.
-Space* construct_refined_space(Space* coarse, int order_increase)
-{
-  _F_
-  Mesh* ref_mesh = new Mesh;
-  ref_mesh->copy(*coarse->get_mesh());
-  ref_mesh->refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-  Space* ref_space = coarse->dup(ref_mesh);
-  ref_space->copy_orders(*coarse, order_increase);
-  return ref_space;
-}
 
 // Perform Newton's iteration.
 bool HERMES_RESIDUAL_AS_VECTOR = false;

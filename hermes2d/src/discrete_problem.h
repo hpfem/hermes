@@ -66,7 +66,6 @@ public:
   virtual ~DiscreteProblem();
   void free();
 
-
   /// GET functions.
   /// Get pointer to n-th space.
   Space* get_space(int n) { return this->spaces[n]; }

@@ -41,9 +41,11 @@ struct SurfPos;
 ///
 class HERMES_API DiscreteProblem : public DiscreteProblemInterface {
 public:
-  DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> sp, bool is_linear = false);
-	virtual ~DiscreteProblem();
-	void free();
+  DiscreteProblem(WeakForm *wf, Hermes::vector<Space *> space, bool is_linear = false);
+  DiscreteProblem(WeakForm* wf, Space* space, bool is_linear = false);
+
+  virtual ~DiscreteProblem();
+  void free();
 
   // Get pointer to n-th space.
   Space* get_space(int n) {  return this->spaces[n];  }
@@ -69,9 +71,9 @@ public:
   Hermes::vector<Space *> get_spaces() {return this->spaces;}
 
   // Get the number of unknowns.
-	int get_num_dofs();
+  int get_num_dofs();
 
-	bool is_matrix_free() { return wf->is_matrix_free(); }
+  bool is_matrix_free() { return wf->is_matrix_free(); }
   
   void invalidate_matrix() { have_matrix = false; }
 
@@ -160,9 +162,6 @@ protected:
 	void init_ext_fns(ExtData<scalar> &ud, std::vector<MeshFunction *> &ext, int order,
 	                  RefMap *rm, const int np, const QuadPt3D *pt);
 };
-
-HERMES_API Hermes::vector<Space *> * construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase);
-HERMES_API Space* construct_refined_space(Space* coarse, int order_increase);
 
 HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
            Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,

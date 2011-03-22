@@ -113,8 +113,8 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation for left hand side and right hand side , i.e., H and U.
   info("Initializing weak forms...");
   WeakForm wf_left, wf_right;
-  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_ord, HERMES_SYM, HERMES_ANY,Hermes::vector<MeshFunction*>(&pot_exact));
-  wf_right.add_matrix_form(bilinear_form_right,bilinear_form_ord, HERMES_SYM, HERMES_ANY);   
+  wf_left.add_matrix_form(bilinear_form_left, bilinear_form_ord, HERMES_SYM, HERMES_ANY_INT, Hermes::vector<MeshFunction*>(&pot_exact));
+  wf_right.add_matrix_form(bilinear_form_right,bilinear_form_ord, HERMES_SYM, HERMES_ANY_INT);   
   // Initialize matrices and matrix solver.
   RCP<CSCMatrix>  matrix_right = rcp(new CSCMatrix());
   info("Assembling RHS matrix....");

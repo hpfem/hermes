@@ -146,7 +146,7 @@ int main (int argc, char* argv[]) {
   wf.add_matrix_form(0, 1, callback(J_euler_DFcDYphi), HERMES_NONSYM);
   wf.add_matrix_form(1, 0, callback(J_euler_DFphiDYc), HERMES_NONSYM);
   wf.add_matrix_form(1, 1, callback(J_euler_DFphiDYphi), HERMES_NONSYM);
-  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY,
+  wf.add_vector_form(0, callback(Fc_euler), HERMES_ANY_INT,
                      Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
   wf.add_vector_form(1, callback(Fphi_euler), HERMES_ANY,
                      Hermes::vector<MeshFunction*>(&C_prev_time, &phi_prev_time));
