@@ -1,4 +1,7 @@
-// Exact solution.
+#include "weakform_library/laplace.h"
+
+/* Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
@@ -54,7 +57,8 @@ public:
   double ALPHA;
 };
 
-// Dirichlet boundary conditions (uses the exact solution).
+/* Essential boundary conditions (use the exact solution) */
+
 #include "boundaryconditions/essential_bcs.h"
 class EssentialBCNonConst : public EssentialBC {
 public:

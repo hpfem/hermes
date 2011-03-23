@@ -2,7 +2,8 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-// Exact solution.
+/* Exact solution */
+
 class CustomExactSolutionU : public ExactSolutionScalar
 {
 public:
@@ -386,8 +387,10 @@ public:
   double A, B, C, D, u_F, v_F;
 };
 
-/* WEAK FORMS */
+/* Weak forms */
 
+// We cannot use default Hermes linear elasticity forms since these equations 
+// are different.
 class CustomWeakFormLinearElasticity : public WeakForm
 {
 public:
@@ -396,9 +399,6 @@ public:
     add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_0(E, nu));
     add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_1(E, nu));
     add_matrix_form(new CustomMatrixFormVolLinearElasticity_1_1(E, nu));
-
-    //add_vector_form(new VectorFormVolLinearElasticity_0(exact_solution_u));
-    //add_vector_form(new VectorFormVolLinearElasticity_1(exact_solution_v));
   }
 
 private:
@@ -496,74 +496,6 @@ private:
     // Members.
     double A, B, E, nu;
   };
-
-  /*
-  class VectorFormVolLinearElasticity_0 : public WeakForm::VectorFormVol
-  {
-  public:
-    VectorFormVolLinearElasticity_0(ExactSolutionU* exact_solution) : WeakForm::VectorFormVol(0), 
-    exact_solution(exact_solution) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (rhs_0<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return Ord(30);
-    }
-
-    template<typename Real>
-    Real rhs_0(Real x, Real y)
-    {
-      return exact_solution->A * exact_solution->dudxdudx(x, y) + exact_solution->B * exact_solution->dudydudy(x, y) + exact_solution->C * exact_solution->dvdxdvdy(x, y);
-    }
-
-    // Member.
-    CustomExactSolutionU* exact_solution;
-  };
-  */
-
-  /*
-  class VectorFormVolLinearElasticity_1 : public WeakForm::VectorFormVol
-  {
-  public:
-    VectorFormVolLinearElasticity_1(CustomExactSolutionV* exact_solution) : WeakForm::VectorFormVol(1), 
-    exact_solution(exact_solution) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (rhs_1<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return Ord(30);
-    }
-
-    template<typename Real>
-    Real rhs_1(Real x, Real y)
-    {
-      return exact_solution->B * exact_solution->dvdxdvdx(x, y) + exact_solution->A * exact_solution->dvdydvdy(x, y) + exact_solution->C * exact_solution->dudxdudy(x, y);
-    }
-
-    // Member.
-    CustomExactSolutionV* exact_solution;
-  };
-  */
 };
 
 class EssentialBCNonConstU : public EssentialBC
