@@ -3,7 +3,7 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-/* Exact solution */
+/* Custom function that is used in the exact solution and in right-hand side */
 
 // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
 class CustomExactFunction
@@ -25,30 +25,52 @@ public:
   double K;
 };
 
+/* Exact solution */
+
 // Exact solution to the 2D equation.
-class CustomExactSolution : public ExactSolutionScalar, public CustomExactFunction
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh), CustomExactFunction(K) {};
+  CustomExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh) 
+  {
+    cef = new CustomExactFunction(K);
+  };
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
-    dx = duhat_dx(x) * uhat(y);
-    dy = uhat(x) * duhat_dx(y);
-    return uhat(x) * uhat(y);
+    dx = cef->duhat_dx(x) * cef->uhat(y);
+    dy = cef->uhat(x) * cef->duhat_dx(y);
+    return cef->uhat(x) * cef->uhat(y);
   };
+
+  ~CustomExactSolution() { delete cef;}
+
+  CustomExactFunction* cef;
 };
 
 /* Right-hand side */
 
 // Right-hand side for the 2D equation -Laplace u + K*K*u = 0 with zero Dirichlet BC.
-class CustomRightHandSide : public CustomExactFunction
+
+class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double K) : CustomExactFunction(K) {};
+  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1)
+  {
+    cef = new CustomExactFunction(coeff1);
+  };
 
-  double value(double x, double y) {
-    return -(dduhat_dxx(x)*uhat(y) + uhat(x)*dduhat_dxx(y)) + K*K*uhat(x)*uhat(y);
+  virtual double value(double x, double y) {
+    return -(cef->dduhat_dxx(x)*cef->uhat(y) + cef->uhat(x)*cef->dduhat_dxx(y)) 
+           + coeff1*coeff1*cef->uhat(x)*cef->uhat(y);
   }
+
+  virtual Ord value(Ord x, Ord y) {
+    return Ord(5);
+  }
+
+  ~CustomRightHandSide() { delete cef;}
+
+  CustomExactFunction* cef;
 };
 
 /* Weak forms */
@@ -59,31 +81,7 @@ class CustomWeakFormPerturbedPoisson : public WeakForm
 public:
   CustomWeakFormPerturbedPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
-    add_matrix_form(new DefaultMatrixFormVolMassConst(0, 0, rhs->K*rhs->K));
-    add_vector_form(new CustomVectorFormVolPerturbedPoisson(0, rhs));
-  };
-
-private:
-  class CustomVectorFormVolPerturbedPoisson : public WeakForm::VectorFormVol
-  {
-  public:
-    CustomVectorFormVolPerturbedPoisson(int i, CustomRightHandSide* rhs) 
-          : WeakForm::VectorFormVol(i), rhs(rhs) { }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-            ExtData<Ord> *ext) {
-      return Ord(24);
-    }
-
-    // Member.
-    CustomRightHandSide* rhs;
+    add_matrix_form(new DefaultMatrixFormVolMassConst(0, 0, rhs->coeff1*rhs->coeff1));
+    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 };
