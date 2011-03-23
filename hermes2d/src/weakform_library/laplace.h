@@ -18,22 +18,22 @@
 
 #include "../integrals/integrals_h1.h"
 
-/* Default volumetric matrix form \int_{area} epsilon \nabla u \cdot \nabla v d\bfx 
-   epsilon... constant number
+/* Default volumetric matrix form \int_{area} coeff \nabla u \cdot \nabla v d\bfx 
+   coeff... constant number
 */
 
 class DefaultMatrixFormVolConst : public WeakForm::MatrixFormVol
 {
 public:
-  DefaultMatrixFormVolConst(int i, int j, double epsilon = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM), epsilon(epsilon) { }
-  DefaultMatrixFormVolConst(int i, int j, std::string area, double epsilon = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), epsilon(epsilon) { }
+  DefaultMatrixFormVolConst(int i, int j, double coeff = 1.0) 
+        : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
+  DefaultMatrixFormVolConst(int i, int j, std::string area, double coeff = 1.0) 
+        : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
   Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                      Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-    return epsilon * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+    return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
   }
 
   scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
@@ -47,24 +47,56 @@ public:
   }
 
   private:
-    double epsilon;
+    double coeff;
 };
 
-/* Default volumetric vector form \int_{area} const_f v d\bfx 
-   const_f... constant number
+/* Default volumetric matrix form \int_{area} coeff u v d\bfx 
+   coeff... constant number
+*/
+
+class DefaultMatrixFormVolMassConst : public WeakForm::MatrixFormVol
+{
+public:
+  DefaultMatrixFormVolMassConst(int i, int j, double coeff = 1.0) 
+        : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
+  DefaultMatrixFormVolMassConst(int i, int j, std::string area, double coeff = 1.0) 
+        : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
+
+  template<typename Real, typename Scalar>
+  Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
+  }
+
+  scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+               Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+  }
+
+  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+          Geom<Ord> *e, ExtData<Ord> *ext) {
+    return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+  }
+
+  private:
+    double coeff;
+};
+
+/* Default volumetric vector form \int_{area} coeff v d\bfx 
+   coeff... constant number
 */
 
 class DefaultVectorFormVolConst : public WeakForm::VectorFormVol
 {
 public:
-  DefaultVectorFormVolConst(int i, double const_f) 
-               : WeakForm::VectorFormVol(i), const_f(const_f) { }
-  DefaultVectorFormVolConst(int i, std::string area, double const_f) 
-               : WeakForm::VectorFormVol(i, area), const_f(const_f) { }
+  DefaultVectorFormVolConst(int i, double coeff) 
+               : WeakForm::VectorFormVol(i), coeff(coeff) { }
+  DefaultVectorFormVolConst(int i, std::string area, double coeff) 
+               : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
 
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                        Geom<double> *e, ExtData<scalar> *ext) {
-    return const_f * int_v<scalar, scalar>(n, wt, v);
+    return coeff * int_v<scalar, scalar>(n, wt, v);
   }
 
   Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
@@ -73,7 +105,7 @@ public:
   }
 
 private:
-  double const_f;
+  double coeff;
 };
 
 /* Default surface matrix form \int_{area} coeff u v dS

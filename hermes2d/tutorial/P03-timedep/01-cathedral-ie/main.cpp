@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
-                       &current_time, TEMP_INIT, T_FINAL, &tsln);
+                           &current_time, TEMP_INIT, T_FINAL, &tsln);
   
   // Initialize boundary conditions.
   EssentialBCConst bc_essential(BDY_GROUND, TEMP_INIT);

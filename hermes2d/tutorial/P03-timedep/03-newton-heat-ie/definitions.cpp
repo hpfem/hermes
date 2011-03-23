@@ -2,11 +2,11 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class WeakFormHeatTransferNewtonTimedep : public WeakForm
+class CustomWeakFormHeatTransferNonlinear : public WeakForm
 {
 public:
-  WeakFormHeatTransferNewtonTimedep(double alpha, double tau, Solution* sln_prev_time) : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau));
+  CustomWeakFormHeatTransferNonlinear(double alpha, double tau, Solution* sln_prev_time) : WeakForm(1) {
+    add_matrix_form(new CustomMatrixFormVolHeatTransferNonlinear(0, 0, alpha, tau));
 
     VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha, tau);
     vector_form->ext.push_back(sln_prev_time);
@@ -14,16 +14,16 @@ public:
   };
 
 private:
-  class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolHeatTransferNonlinear : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau) : WeakForm::MatrixFormVol(i, j), alpha(alpha),
-                                                                        tau(tau) {
-      sym = HERMES_NONSYM; 
-    }
+    // This weak form is custom since it contains a nonlinearity in the diffusion term.
+    CustomMatrixFormVolHeatTransferNonlinear(int i, int j, double alpha, double tau) 
+          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), alpha(alpha), tau(tau) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
@@ -33,11 +33,13 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -59,6 +61,7 @@ private:
     double tau;
   };
 
+  // This form (residual) is custom since it contains a nonlinear term.
   class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
   {
   public:
@@ -103,6 +106,8 @@ private:
   };
 };
 
+/* Essential boundary condition */
+
 class EssentialBCNonConst : public EssentialBC {
 public:
   EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
@@ -118,4 +123,19 @@ public:
   {
     return (x+10)*(y+10)/100.;
   }
+};
+
+/* Initial condition */
+
+class CustomInitialCondition : public ExactSolutionScalar
+{
+public:
+  CustomInitialCondition(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  // Exact solution with derivatives.
+  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    dx = (y+10)/10.;
+    dy = (x+10)/10.;
+    return (x+10)*(y+10)/100.;
+  };
 };

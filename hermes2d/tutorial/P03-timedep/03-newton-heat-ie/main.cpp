@@ -37,10 +37,7 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal c
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
-
-// Initial condition.
-#include "initial_condition.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -66,10 +63,10 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Previous time level solution (initialized by the initial condition).
-  InitialSolutionHeatTransfer u_prev_time(&mesh);
+  CustomInitialCondition u_prev_time(&mesh);
 
   // Initialize the weak formulation
-  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &u_prev_time);
+  CustomWeakFormHeatTransferNonlinear wf(ALPHA, time_step, &u_prev_time);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
