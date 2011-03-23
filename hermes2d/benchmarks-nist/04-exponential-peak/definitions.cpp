@@ -36,15 +36,15 @@ class CustomWeakFormPoisson : public WeakFormLaplace
 public:
   CustomWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakFormLaplace()
   {
-    MyVectorFormVolPoisson* wfp = new MyVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
+    CustomVectorFormVolPoisson* wfp = new CustomVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
     add_vector_form(wfp);
   };
 
 private:
-  class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
+  class CustomVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) 
+    CustomVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) 
             : WeakForm::VectorFormVol(i), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
 
     template<typename Real, typename Scalar>

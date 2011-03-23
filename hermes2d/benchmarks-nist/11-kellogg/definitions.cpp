@@ -76,15 +76,15 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(double r) : WeakForm(1)
   {
-    add_matrix_form(new MyMatrixFormVol_I_III(0, 0, r));
-    add_matrix_form(new MyMatrixFormVol_II_IV(0, 0));
+    add_matrix_form(new CustomMatrixFormVol_I_III(0, 0, r));
+    add_matrix_form(new CustomMatrixFormVol_II_IV(0, 0));
   };
 
 private:
-  class MyMatrixFormVol_I_III : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVol_I_III : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVol_I_III(int i, int j, double r) : WeakForm::MatrixFormVol(i, j), r(r) { 
+    CustomMatrixFormVol_I_III(int i, int j, double r) : WeakForm::MatrixFormVol(i, j), r(r) { 
       sym = HERMES_SYM;
       area = "0";
     }
@@ -106,10 +106,10 @@ private:
     double r;
   };
 
-  class MyMatrixFormVol_II_IV : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVol_II_IV : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVol_II_IV(int i, int j) : WeakForm::MatrixFormVol(i, j) {
+    CustomMatrixFormVol_II_IV(int i, int j) : WeakForm::MatrixFormVol(i, j) {
       sym = HERMES_SYM;
       area = "1";
     }

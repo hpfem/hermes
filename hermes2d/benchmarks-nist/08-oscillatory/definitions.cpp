@@ -32,15 +32,15 @@ class CustomWeakForm : public WeakForm
 {
 public:
   CustomWeakForm(double alpha) : WeakForm(1) {
-    add_matrix_form(new MyMatrixFormVol(0, 0, alpha));
-    add_vector_form(new MyVectorFormVol(0, alpha));
+    add_matrix_form(new CustomMatrixFormVol(0, 0, alpha));
+    add_vector_form(new CustomVectorFormVol(0, alpha));
   };
 
 private:
-  class MyMatrixFormVol : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVol(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j, HERMES_SYM), alpha(alpha) { }
+    CustomMatrixFormVol(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j, HERMES_SYM), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -69,10 +69,10 @@ private:
     double alpha;
   };
 
-  class MyVectorFormVol : public WeakForm::VectorFormVol
+  class CustomVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVol(int i, double alpha) : WeakForm::VectorFormVol(i), alpha(alpha) { }
+    CustomVectorFormVol(int i, double alpha) : WeakForm::VectorFormVol(i), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {

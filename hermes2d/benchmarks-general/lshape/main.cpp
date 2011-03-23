@@ -55,9 +55,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Weak forms.
-#include "weakform/sample_weak_forms.h"
-
 // Exact solution, boundary conditions.
 #include "definitions.cpp"
 
@@ -79,7 +76,7 @@ int main(int argc, char* argv[])
   CustomExactSolution exact(&mesh);
 
   // Initialize the weak formulation.
-  WeakFormLaplace wf;
+  DefaultWeakFormLaplace wf;
 
   // Initialize boundary conditions
   EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);

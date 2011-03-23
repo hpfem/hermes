@@ -1,3 +1,7 @@
+#include "weakform_library/laplace.h"
+
+/* Exact solution */
+
 // Exact solution to the L-Shape problem.
 class CustomExactSolution : public ExactSolutionScalar
 {
@@ -20,6 +24,8 @@ public:
     return value(x, y);
   };
 };
+
+/* Essential boundary conditions */
 
 // Dirichlet boundary conditions (uses the exact solution).
 #include "boundaryconditions/essential_bcs.h"
