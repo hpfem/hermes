@@ -393,19 +393,19 @@ class CustomWeakFormLinearElasticity : public WeakForm
 public:
   CustomWeakFormLinearElasticity(double E, double nu, double mu, double lambda) : WeakForm(2)
   {
-    add_matrix_form(new MyMatrixFormVolLinearElasticity_0_0(E, nu));
-    add_matrix_form(new MyMatrixFormVolLinearElasticity_0_1(E, nu));
-    add_matrix_form(new MyMatrixFormVolLinearElasticity_1_1(E, nu));
+    add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_0(E, nu));
+    add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_1(E, nu));
+    add_matrix_form(new CustomMatrixFormVolLinearElasticity_1_1(E, nu));
 
     //add_vector_form(new VectorFormVolLinearElasticity_0(exact_solution_u));
     //add_vector_form(new VectorFormVolLinearElasticity_1(exact_solution_v));
   }
 
 private:
-  class MyMatrixFormVolLinearElasticity_0_0 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolLinearElasticity_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVolLinearElasticity_0_0(double E, double nu) : WeakForm::MatrixFormVol(0, 0), E(E), nu(nu) {
+    CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) : WeakForm::MatrixFormVol(0, 0), E(E), nu(nu) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
       sym = HERMES_SYM;
@@ -434,10 +434,10 @@ private:
     double A, B, E, nu;
   };
 
-  class MyMatrixFormVolLinearElasticity_0_1 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolLinearElasticity_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVolLinearElasticity_0_1(double E, double nu) : WeakForm::MatrixFormVol(0, 1), E(E), nu(nu) { 
+    CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) : WeakForm::MatrixFormVol(0, 1), E(E), nu(nu) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
       sym = HERMES_SYM;
     }
@@ -465,10 +465,10 @@ private:
     double C, E, nu;
   };
 
-  class MyMatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVolLinearElasticity_1_1(double E, double nu) : WeakForm::MatrixFormVol(1, 1), E(E), nu(nu) { 
+    CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) : WeakForm::MatrixFormVol(1, 1), E(E), nu(nu) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
       sym = HERMES_SYM;

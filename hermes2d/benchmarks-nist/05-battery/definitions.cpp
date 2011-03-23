@@ -45,22 +45,22 @@ public:
   g_n_bottom(1.0)
 
   {
-    add_matrix_form(new MyMatrixFormVol(0, 0));
-    add_vector_form(new MyVectorFormVol(0));
-    add_matrix_form_surf(new MyMatrixFormSurf(0, 0, bdy_bottom));
-    add_matrix_form_surf(new MyMatrixFormSurf(0, 0, bdy_right));
-    add_matrix_form_surf(new MyMatrixFormSurf(0, 0, bdy_top));
-    add_vector_form_surf(new MyVectorFormSurf(0, bdy_bottom));
-    add_vector_form_surf(new MyVectorFormSurf(0, bdy_top));
-    add_vector_form_surf(new MyVectorFormSurf(0, bdy_left));
-    add_vector_form_surf(new MyVectorFormSurf(0, bdy_right));
+    add_matrix_form(new CustomMatrixFormVol(0, 0));
+    add_vector_form(new CustomVectorFormVol(0));
+    add_matrix_form_surf(new CustomMatrixFormSurf(0, 0, bdy_bottom));
+    add_matrix_form_surf(new CustomMatrixFormSurf(0, 0, bdy_right));
+    add_matrix_form_surf(new CustomMatrixFormSurf(0, 0, bdy_top));
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_bottom));
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_top));
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_left));
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_right));
   };
 
 private:
-  class MyMatrixFormVol : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
+    CustomMatrixFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -106,10 +106,10 @@ private:
     }
   };
 
-  class MyVectorFormVol : public WeakForm::VectorFormVol
+  class CustomVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVol(int i) : WeakForm::VectorFormVol(i) { }
+    CustomVectorFormVol(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -141,10 +141,10 @@ private:
     }
   };
 
-  class MyMatrixFormSurf : public WeakForm::MatrixFormSurf
+  class CustomMatrixFormSurf : public WeakForm::MatrixFormSurf
   {
   public:
-    MyMatrixFormSurf(int i, int j, std::string marker) : WeakForm::MatrixFormSurf(i, j, marker) {}
+    CustomMatrixFormSurf(int i, int j, std::string marker) : WeakForm::MatrixFormSurf(i, j, marker) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -207,10 +207,10 @@ private:
     }
   };
 
-  class MyVectorFormSurf : public WeakForm::VectorFormSurf
+  class CustomVectorFormSurf : public WeakForm::VectorFormSurf
   {
   public:
-    MyVectorFormSurf(int i, std::string marker) : WeakForm::VectorFormSurf(i, marker) {}
+    CustomVectorFormSurf(int i, std::string marker) : WeakForm::VectorFormSurf(i, marker) {}
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {

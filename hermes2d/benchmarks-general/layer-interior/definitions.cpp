@@ -71,15 +71,15 @@ class CustomWeakFormPoisson : public WeakForm
 {
 public:
   CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
-    add_vector_form(new MyVectorFormVolPoisson(0, rhs));
+    add_matrix_form(new CustomMatrixFormVolPoisson(0, 0));
+    add_vector_form(new CustomVectorFormVolPoisson(0, rhs));
   };
 
 private:
-  class MyMatrixFormVolPoisson : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolPoisson : public WeakForm::MatrixFormVol
   {
   public:
-    MyMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
+    CustomMatrixFormVolPoisson(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -98,10 +98,10 @@ private:
     }
   };
 
-  class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
+  class CustomVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    CustomVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 

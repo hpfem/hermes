@@ -117,14 +117,14 @@ class CustomWeakFormPoisson : public WeakFormLaplace
 public:
   CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakFormLaplace()
   {
-    add_vector_form(new MyVectorFormVolPoisson(0, rhs));
+    add_vector_form(new CustomVectorFormVolPoisson(0, rhs));
   };
 
 private:
-  class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
+  class CustomVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    CustomVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
