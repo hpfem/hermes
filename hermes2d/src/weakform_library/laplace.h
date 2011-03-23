@@ -235,5 +235,16 @@ private:
   double coeff;
 };
 
+/* Default weak form for the Laplace equation -Laplace u = 0
+*/
+
+class DefaultWeakFormLaplace : public WeakForm
+{
+public:
+  DefaultWeakFormLaplace() : WeakForm(1)
+  {
+    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+  };
+};
 
 #endif
