@@ -53,7 +53,7 @@ private:
       double h;
   public:
     CustomVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda, 
-                            double* current_time_ptr, double temp_init, double t_final) 
+                                double* current_time_ptr, double temp_init, double t_final) 
       : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr), 
                                  temp_init(temp_init), t_final(t_final) { }
 
