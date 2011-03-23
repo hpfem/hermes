@@ -19,7 +19,7 @@ public:
            + ALPHA_P * (y - coeff3) * (y - coeff3) - 1);
   }
 
-  virtual Ord value(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) {
     return Ord(5);
   }
 };

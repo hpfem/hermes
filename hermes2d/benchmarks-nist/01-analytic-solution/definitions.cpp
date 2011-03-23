@@ -24,7 +24,7 @@ public:
            + coeff1*a*pow(y, 8.0)*e*f*pow(x, coeff1)*g;
   }
 
-  virtual Ord value(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) {
     return Ord(std::max(8, (int)(coeff1+0.5)));
   }
 };

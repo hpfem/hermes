@@ -1,38 +1,50 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
+#include "weakform_library/laplace.h"
 
-// Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
-class CustomRightHandSide
+/* Right-hand side */
+
+class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double epsilon) : epsilon(epsilon) {};
+  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
 
-  template<typename Real>
-  Real value(Real x, Real y) {
-    return -epsilon*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y)) + 2*M_PI*(1 - exp(-(1 - x)/epsilon))*exp(-(1 - y)/epsilon)*sin(M_PI*(x + y))/epsilon + 2*M_PI*(1 - exp(-(1 - y)/epsilon))*exp(-(1 - x)/epsilon)*sin(M_PI*(x + y))/epsilon - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/pow(epsilon,2) - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/pow(epsilon,2)) - 3*M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) - 2*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
+  virtual double value(double x, double y) {
+    return -coeff1*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/coeff1))*(1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y)) 
+           + 2*M_PI*(1 - exp(-(1 - x)/coeff1))*exp(-(1 - y)/coeff1)*sin(M_PI*(x + y))/coeff1 
+           + 2*M_PI*(1 - exp(-(1 - y)/coeff1))*exp(-(1 - x)/coeff1)*sin(M_PI*(x + y))/coeff1 
+           - (1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - x)/coeff1)/pow(coeff1,2) 
+           - (1 - exp(-(1 - x)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - y)/coeff1)/pow(coeff1,2)) 
+           - 3*M_PI*(1 - exp(-(1 - x)/coeff1))*(1 - exp(-(1 - y)/coeff1))*sin(M_PI*(x + y)) 
+           - 2*(1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - x)/coeff1)/coeff1 
+           - (1 - exp(-(1 - x)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - y)/coeff1)/coeff1;
   }
 
-  // Member.
-  double epsilon;
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(10);
+  }
 };
 
-// Exact solution (needed in the Dirichlet condition).
+/* Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double epsilon) : ExactSolutionScalar(mesh), epsilon(epsilon) {};
+  CustomExactSolution(Mesh* mesh, double epsilon) 
+        : ExactSolutionScalar(mesh), epsilon(epsilon) {};
 
   // Exact solution.
   double value(double x, double y) {
-    return (1 - exp(-(1-x)/epsilon)) * (1 - exp(-(1-y)/epsilon))
-      * cos(M_PI * (x + y)); 
+    return (1 - exp(-(1-x)/epsilon)) * (1 - exp(-(1-y)/epsilon)) * cos(M_PI * (x + y)); 
   };
 
   // Exact solution with derivatives.
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
-    dx = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon;
-    dy = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
+    dx = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) 
+         - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon;
+    dy = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) 
+         - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
     return value(x, y);
   };
 
@@ -40,23 +52,26 @@ public:
   double epsilon;
 };
 
-// Weak forms.
+/* Weak forms */
+
 class CustomWeakForm : public WeakForm
 {
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->epsilon));
-    add_vector_form(new CustomVectorFormVol(0, rhs));
+    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->coeff1));
+    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 
 private:
   class CustomMatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVol(int i, int j, double epsilon) : WeakForm::MatrixFormVol(i, j), epsilon(epsilon) { }
+    CustomMatrixFormVol(int i, int j, double epsilon) 
+          : WeakForm::MatrixFormVol(i, j), epsilon(epsilon) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar val = 0;
       for (int i=0; i < n; i++) {
         val = val + wt[i] * epsilon * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
@@ -66,42 +81,21 @@ private:
       return val;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
     double epsilon;
   };
-
-  class CustomVectorFormVol : public WeakForm::VectorFormVol
-  {
-  public:
-    CustomVectorFormVol(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (rhs->value<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return Ord(30);
-    }
-
-    // Members.
-    CustomRightHandSide* rhs;
-  };
 };
+
+/* Essential boundary conditions */
 
 class EssentialBCNonConst : public EssentialBC
 {
