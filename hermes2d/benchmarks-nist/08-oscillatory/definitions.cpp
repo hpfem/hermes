@@ -3,10 +3,10 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
+  CustomExactSolution(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
 
   // Exact solution.
   double value(double x, double y) {
@@ -111,7 +111,7 @@ private:
 class EssentialBCNonConst : public EssentialBC
 {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -127,5 +127,5 @@ public:
     return exact_solution->value(x, y);
   };
 
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };

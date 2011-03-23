@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
   // Initialize the exact and projected solution.
   Solution sln;
-  MyExactSolution sln_exact(&mesh);
+  CustomExactSolution sln_exact(&mesh);
 
   OGProjection::project_global(&space, &sln_exact, &sln, matrix_solver);
 

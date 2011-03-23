@@ -4,10 +4,10 @@
 #include "weakform/sample_weak_forms.h"
 
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) 
+  CustomExactSolution(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) 
          : ExactSolutionScalar(mesh), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) {};
 
   double fn(double x, double y) {
@@ -85,7 +85,7 @@ private:
 class EssentialBCNonConstExact : public EssentialBC
 {
 public:
-  EssentialBCNonConstExact(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConstExact(std::string marker, CustomExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -101,5 +101,5 @@ public:
     return exact_solution->fn(x, y);
   };
 
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };

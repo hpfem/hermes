@@ -4,10 +4,10 @@
 #include "weakform/sample_weak_forms.h"
 
 // Right-hand side.
-class MyRightHandSide
+class CustomRightHandSide
 {
 public:
-  MyRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
+  CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
     : alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
   template<typename Real>
@@ -29,10 +29,10 @@ public:
 
 
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double alpha, double x_loc, double y_loc, double r_zero) 
+  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double y_loc, double r_zero) 
              : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { }
 
   // Exact solution value.
@@ -62,7 +62,7 @@ public:
 class CustomWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace()
+  CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakFormLaplace()
   {
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };
@@ -71,7 +71,7 @@ private:
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    MyVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -90,7 +90,7 @@ private:
     }
     
     // Members.
-    MyRightHandSide* rhs;
+    CustomRightHandSide* rhs;
   };
 };
 
@@ -98,7 +98,7 @@ private:
 class EssentialBCNonConst : public EssentialBC
 {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -114,5 +114,5 @@ public:
     return exact_solution->value(x, y);
   };
 
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };

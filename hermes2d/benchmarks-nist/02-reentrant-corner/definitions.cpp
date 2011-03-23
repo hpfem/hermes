@@ -1,8 +1,8 @@
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, int param) : ExactSolutionScalar(mesh), param(param) {
+  CustomExactSolution(Mesh* mesh, int param) : ExactSolutionScalar(mesh), param(param) {
     if (param == 0) {
       OMEGA = ((5.0 * M_PI)/ 4.0);
       ALPHA = (M_PI/ OMEGA);
@@ -58,7 +58,7 @@ public:
 #include "boundaryconditions/essential_bcs.h"
 class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution)
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution)
         : EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) {
     markers.push_back(marker);
   }
@@ -72,6 +72,6 @@ public:
   }
 
   // Member.
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };
 

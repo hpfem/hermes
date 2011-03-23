@@ -1,8 +1,8 @@
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
   public:
-  MyExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     return - pow(x, 4) * pow(y, 5); 

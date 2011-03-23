@@ -4,10 +4,10 @@
 #include "weakform/sample_weak_forms.h"
 
 // Exact solution.
-class MyExactFunction
+class CustomExactFunction
 {
 public:
-  MyExactFunction(double k, double alpha) : k(k), alpha(alpha) {};
+  CustomExactFunction(double k, double alpha) : k(k), alpha(alpha) {};
 
   double fn(double x, double y) {
     if (x <= 0) 
@@ -21,10 +21,10 @@ public:
 };
 
 // Right-hand side.
-class MyRightHandSide : public MyExactFunction
+class CustomRightHandSide : public CustomExactFunction
 {
 public:
-  MyRightHandSide(double k, double alpha) : MyExactFunction(k, alpha) {};
+  CustomRightHandSide(double k, double alpha) : CustomExactFunction(k, alpha) {};
 
   double value(double x, double y) {
     if (x < 0)
@@ -35,10 +35,10 @@ public:
 };
 
 // Exact solution.
-class MyExactSolution : public ExactSolutionScalar, public MyExactFunction
+class CustomExactSolution : public ExactSolutionScalar, public CustomExactFunction
 {
 public:
-  MyExactSolution(Mesh* mesh, double k, double alpha) : ExactSolutionScalar(mesh), MyExactFunction(k, alpha) {};
+  CustomExactSolution(Mesh* mesh, double k, double alpha) : ExactSolutionScalar(mesh), CustomExactFunction(k, alpha) {};
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     if (x <= 0) 
@@ -54,7 +54,7 @@ public:
 class CustomWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace()
+  CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakFormLaplace()
   {
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };
@@ -63,7 +63,7 @@ private:
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    MyVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -82,7 +82,7 @@ private:
     }
     
     // Members.
-    MyRightHandSide* rhs;
+    CustomRightHandSide* rhs;
   };
 };
 
@@ -90,7 +90,7 @@ private:
 class EssentialBCNonConst : public EssentialBC
 {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -106,5 +106,5 @@ public:
     return exact_solution->fn(x, y);
   };
 
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };

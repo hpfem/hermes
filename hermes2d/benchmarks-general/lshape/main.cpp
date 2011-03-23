@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   //mesh.refine_towards_vertex(3, 5);
 
   // Set exact solution.
-  MyExactSolution exact(&mesh);
+  CustomExactSolution exact(&mesh);
 
   // Initialize the weak formulation.
   WeakFormLaplace wf;

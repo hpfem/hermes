@@ -108,6 +108,69 @@ private:
   double coeff;
 };
 
+/* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
+   rhs(x, y)... non-constant right-hand side
+*/
+
+// Generic class for non-constant right-hand side. 
+class DefaultNonConstRightHandSide
+{
+public:
+  // If you run out of parameters, add more here.
+  DefaultNonConstRightHandSide(double coeff1) : coeff1(coeff1) {};
+  DefaultNonConstRightHandSide(double coeff1, double coeff2) : coeff1(coeff1), coeff2(coeff2) {};
+  DefaultNonConstRightHandSide(double coeff1, double coeff2, double coeff3) 
+         : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3) {};
+
+  virtual scalar value(double x, double y) = 0;
+  virtual Ord value(Ord x, Ord y) = 0;
+ 
+  // Member.
+  double coeff1, coeff2, coeff3;
+};
+
+class DefaultVectorFormVolNonConst : public WeakForm::VectorFormVol
+{
+public:
+  DefaultVectorFormVolNonConst(int i, DefaultNonConstRightHandSide* rhs) 
+               : WeakForm::VectorFormVol(i), rhs(rhs) { }
+  DefaultVectorFormVolNonConst(int i, std::string area, DefaultNonConstRightHandSide* rhs) 
+               : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
+
+  template<typename Real, typename Scalar>
+  Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                     Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar result = 0;
+    for (int i = 0; i < n; i++)
+      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+    return result;
+  }
+
+  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                       Geom<double> *e, ExtData<scalar> *ext) {
+    scalar result = 0;
+    for (int i = 0; i < n; i++)
+      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+    return result;
+  }
+
+  virtual Ord value(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                       Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord result = 0;
+    for (int i = 0; i < n; i++)
+      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+    return result;
+  }
+
+  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+          Geom<Ord> *e, ExtData<Ord> *ext) {
+    return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+  }
+
+private:
+  DefaultNonConstRightHandSide* rhs;
+};
+
 /* Default surface matrix form \int_{area} coeff u v dS
    coeff... constant number
 */
@@ -131,7 +194,8 @@ public:
     return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
   }
 
-  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+          Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
     return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
   }
 
@@ -153,11 +217,13 @@ public:
          : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
-  Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+  Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
+                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
     return coeff * int_v<Real, Scalar>(n, wt, v);
   }
 
-  scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+  scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+               Geom<double> *e, ExtData<scalar> *ext) {
     return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
   }
 

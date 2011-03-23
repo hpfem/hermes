@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
 
   // Set exact solution.
-  MyExactSolution exact(&mesh, ALPHA);
+  CustomExactSolution exact(&mesh, ALPHA);
 
   // Initialize the weak formulation.
   CustomWeakForm wf(ALPHA);

@@ -3,10 +3,10 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
-class MyRightHandSide
+class CustomRightHandSide
 {
 public:
-  MyRightHandSide(double slope) : slope(slope) {};
+  CustomRightHandSide(double slope) : slope(slope) {};
 
   template<typename Real>
   Real value(Real x, Real y) {
@@ -25,10 +25,10 @@ public:
 };
 
 // Exact solution (needed in the Dirichlet condition).
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double slope) : ExactSolutionScalar(mesh), slope(slope) {};
+  CustomExactSolution(Mesh* mesh, double slope) : ExactSolutionScalar(mesh), slope(slope) {};
 
   // Exact solution.
   double value(double x, double y) {
@@ -50,7 +50,7 @@ public:
 
 class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) : EssentialBC(Hermes::vector<std::string>()),
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : EssentialBC(Hermes::vector<std::string>()),
     exact_solution(exact_solution) {
     markers.push_back(marker);
   }
@@ -64,13 +64,13 @@ public:
   }
 
   // Member.
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };
 
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };
@@ -101,7 +101,7 @@ private:
   class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    MyVectorFormVolPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
@@ -122,7 +122,7 @@ private:
     }
 
     // Member.
-    MyRightHandSide* rhs;
+    CustomRightHandSide* rhs;
   };
 };
 

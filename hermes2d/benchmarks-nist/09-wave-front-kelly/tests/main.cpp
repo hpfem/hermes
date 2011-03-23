@@ -150,10 +150,10 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   // Set exact solution.
-  MyExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
+  CustomExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
   
   // Define right-hand side.
-  MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
+  CustomRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
   
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(&rhs);

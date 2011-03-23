@@ -1,8 +1,8 @@
 // Exact solution to the L-Shape problem.
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   static double value(double x, double y) {
     double r = sqrt(x*x + y*y);
@@ -25,7 +25,7 @@ public:
 #include "boundaryconditions/essential_bcs.h"
 class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution)
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution)
         : EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) {
     markers.push_back(marker);
   }
@@ -39,6 +39,6 @@ public:
   }
 
   // Member.
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };
 

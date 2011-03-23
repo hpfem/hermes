@@ -12,7 +12,7 @@
 //  PDE: -Laplace u = f
 //
 //  Known exact solution; atan(ALPHA * (sqrt(pow(x - X_LOC, 2) + pow(y - Y_LOC, 2)) - R_ZERO));
-//  See the class MyExactSolution.
+//  See the class CustomExactSolution.
 //
 //  Domain: unit square (0, 1) x (0, 1), see the file square.mesh.
 //
@@ -113,10 +113,10 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Set exact solution.
-  MyExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
+  CustomExactSolution exact(&mesh, alpha, x_loc, y_loc, r_zero);
 
   // Define right-hand side.
-  MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
+  CustomRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(&rhs);

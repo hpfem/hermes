@@ -82,10 +82,10 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_REF_NUM_BDY);
 
   // Define exact solution.
-  MyExactSolution exact_sln(&mesh, K);
+  CustomExactSolution exact_sln(&mesh, K);
 
   // Define right-hand side.
-  MyRightHandSide rhs(K);
+  CustomRightHandSide rhs(K);
 
   // Initialize the weak formulation.
   CustomWeakFormPerturbedPoisson wf(&rhs);

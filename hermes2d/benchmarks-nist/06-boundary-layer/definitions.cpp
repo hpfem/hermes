@@ -3,10 +3,10 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
-class MyRightHandSide
+class CustomRightHandSide
 {
 public:
-  MyRightHandSide(double epsilon) : epsilon(epsilon) {};
+  CustomRightHandSide(double epsilon) : epsilon(epsilon) {};
 
   template<typename Real>
   Real value(Real x, Real y) {
@@ -18,10 +18,10 @@ public:
 };
 
 // Exact solution (needed in the Dirichlet condition).
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double epsilon) : ExactSolutionScalar(mesh), epsilon(epsilon) {};
+  CustomExactSolution(Mesh* mesh, double epsilon) : ExactSolutionScalar(mesh), epsilon(epsilon) {};
 
   // Exact solution.
   double value(double x, double y) {
@@ -44,7 +44,7 @@ public:
 class CustomWeakForm : public WeakForm
 {
 public:
-  CustomWeakForm(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVol(0, 0, rhs->epsilon));
     add_vector_form(new MyVectorFormVol(0, rhs));
   };
@@ -80,7 +80,7 @@ private:
   class MyVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVol(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
+    MyVectorFormVol(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -99,14 +99,14 @@ private:
     }
 
     // Members.
-    MyRightHandSide* rhs;
+    CustomRightHandSide* rhs;
   };
 };
 
 class EssentialBCNonConst : public EssentialBC
 {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -122,5 +122,5 @@ public:
     return exact_solution->value(x, y);
   };
 
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };

@@ -3,10 +3,10 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Exact solution.
-class MyExactSolutionU : public ExactSolutionScalar
+class CustomExactSolutionU : public ExactSolutionScalar
 {
 public:
-  MyExactSolutionU(Mesh* mesh, double E, double nu, double lambda, double Q) 
+  CustomExactSolutionU(Mesh* mesh, double E, double nu, double lambda, double Q) 
             : ExactSolutionScalar(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
     k = 3.0 - 4.0 * nu;
     mu = E / (2.0 * (1.0 + nu));
@@ -197,10 +197,10 @@ public:
   double A, B, C, D, u_F, v_F;
 };
 
-class MyExactSolutionV : public ExactSolutionScalar
+class CustomExactSolutionV : public ExactSolutionScalar
 {
 public:
-  MyExactSolutionV(Mesh* mesh, double E, double nu, double lambda, double Q) 
+  CustomExactSolutionV(Mesh* mesh, double E, double nu, double lambda, double Q) 
             : ExactSolutionScalar(mesh), E(E), nu(nu), lambda(lambda), Q(Q) {
     k = 3.0 - 4.0 * nu;
     mu = E / (2.0 * (1.0 + nu));
@@ -527,7 +527,7 @@ private:
     }
 
     // Member.
-    MyExactSolutionU* exact_solution;
+    CustomExactSolutionU* exact_solution;
   };
   */
 
@@ -535,7 +535,7 @@ private:
   class VectorFormVolLinearElasticity_1 : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolLinearElasticity_1(MyExactSolutionV* exact_solution) : WeakForm::VectorFormVol(1), 
+    VectorFormVolLinearElasticity_1(CustomExactSolutionV* exact_solution) : WeakForm::VectorFormVol(1), 
     exact_solution(exact_solution) { }
 
     template<typename Real, typename Scalar>
@@ -561,7 +561,7 @@ private:
     }
 
     // Member.
-    MyExactSolutionV* exact_solution;
+    CustomExactSolutionV* exact_solution;
   };
   */
 };
@@ -569,7 +569,7 @@ private:
 class EssentialBCNonConstU : public EssentialBC
 {
 public:
-  EssentialBCNonConstU(std::string marker, MyExactSolutionU* exact_solution) : 
+  EssentialBCNonConstU(std::string marker, CustomExactSolutionU* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -585,13 +585,13 @@ public:
     return exact_solution->u_fn(x, y);
   }
 
-  MyExactSolutionU* exact_solution;
+  CustomExactSolutionU* exact_solution;
 };
 
 class EssentialBCNonConstV : public EssentialBC
 {
 public:
-  EssentialBCNonConstV(std::string marker, MyExactSolutionV* exact_solution) : 
+  EssentialBCNonConstV(std::string marker, CustomExactSolutionV* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
@@ -607,5 +607,5 @@ public:
     return exact_solution->v_fn(x, y);
   }
 
-  MyExactSolutionV* exact_solution;
+  CustomExactSolutionV* exact_solution;
 };

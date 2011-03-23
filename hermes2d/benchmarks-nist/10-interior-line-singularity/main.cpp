@@ -79,10 +79,10 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  MyExactSolution exact(&mesh, K, ALPHA);
+  CustomExactSolution exact(&mesh, K, ALPHA);
 
   // Define right-hand side.
-  MyRightHandSide rhs(K, ALPHA);
+  CustomRightHandSide rhs(K, ALPHA);
 
   // Initialize boundary conditions
   EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);

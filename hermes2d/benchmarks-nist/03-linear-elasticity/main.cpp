@@ -114,8 +114,8 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) v_mesh.refine_all_elements();
 
   // Set exact solution for each displacement component.
-  MyExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
-  MyExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
+  CustomExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
+  CustomExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize boundary conditions
   EssentialBCNonConstU bc_u(BDY_DIRICHLET, &exact_u);

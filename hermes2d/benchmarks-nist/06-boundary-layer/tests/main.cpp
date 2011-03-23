@@ -83,10 +83,10 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  MyExactSolution exact(&mesh, EPSILON);
+  CustomExactSolution exact(&mesh, EPSILON);
 
   // Define right-hand side.
-  MyRightHandSide rhs(EPSILON);
+  CustomRightHandSide rhs(EPSILON);
 
   // Initialize the weak formulation.
   CustomWeakForm wf(&rhs);

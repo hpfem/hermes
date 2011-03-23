@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Set exact solution.
-  MyExactSolution exact(&mesh);
+  CustomExactSolution exact(&mesh);
 
   // Initialize the weak formulation.
   WeakFormLaplace wf;

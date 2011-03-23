@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  MyExactSolution exact(&mesh, ALPHA);
+  CustomExactSolution exact(&mesh, ALPHA);
 
   // Initialize the weak formulation.
   CustomWeakForm wf(ALPHA);

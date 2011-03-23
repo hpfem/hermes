@@ -1,37 +1,39 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/laplace.h"
+
+/* Right-hand side */
 
 // Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
-class MyRightHandSide
+class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  MyRightHandSide(double poly_deg) : poly_deg(poly_deg) {};
+  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
 
-  template<typename Real>
-  Real value(Real x, Real y) {
-    Real a = pow(2.0, 4.0*poly_deg);
-    Real b = pow(x-1.0, 8.0);
-    Real c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
-    Real d = pow(y-1.0, poly_deg);
-    Real e = pow(y-1.0, 8.0);
-    Real f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
-    Real g = pow(x-1.0, poly_deg);
+  virtual double value(double x, double y) {
+    double a = pow(2.0, 4.0*coeff1);
+    double b = pow(x-1.0, 8.0);
+    double c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
+    double d = pow(y-1.0, coeff1);
+    double e = pow(y-1.0, 8.0);
+    double f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
+    double g = pow(x-1.0, coeff1);
 
-    return poly_deg*a*pow(x, 8.0)*b*c*pow(y, poly_deg)*d 
-           + poly_deg*a*pow(y, 8.0)*e*f*pow(x, poly_deg)*g;
+    return coeff1*a*pow(x, 8.0)*b*c*pow(y, coeff1)*d 
+           + coeff1*a*pow(y, 8.0)*e*f*pow(x, coeff1)*g;
   }
 
-  // Member.
-  double poly_deg;
+  virtual Ord value(Ord x, Ord y) {
+    return Ord(std::max(8, (int)(coeff1+0.5)));
+  }
 };
 
 // Exact solution (needed for the Dirichlet condition).
-class MyExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  MyExactSolution(Mesh* mesh, double poly_deg) 
+  CustomExactSolution(Mesh* mesh, double poly_deg) 
             : ExactSolutionScalar(mesh), poly_deg(poly_deg) {};
 
   // Exact solution.
@@ -59,9 +61,11 @@ public:
   double poly_deg;
 };
 
+/* Essential boundary conditions */
+
 class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution) 
+  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) 
               : EssentialBC(Hermes::vector<std::string>()),
     exact_solution(exact_solution) {
     markers.push_back(marker);
@@ -76,44 +80,17 @@ public:
   }
 
   // Member.
-  MyExactSolution* exact_solution;
+  CustomExactSolution* exact_solution;
 };
 
-class CustomWeakFormPoisson : public WeakFormLaplace
+/* Weak forms */
+
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace() {
-    add_vector_form(new MyVectorFormVolPoisson(0, rhs));
-  };
-
-private:
-  class MyVectorFormVolPoisson : public WeakForm::VectorFormVol
-  {
-  public:
-    MyVectorFormVolPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), 
-          rhs(rhs) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result -= wt[i] * (rhs->value<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-    }
-
-    // Member.
-    MyRightHandSide* rhs;
+  CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
+    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 };
 

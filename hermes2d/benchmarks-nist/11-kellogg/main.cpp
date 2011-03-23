@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  MyExactSolution exact(&mesh, SIGMA, TAU, RHO);
+  CustomExactSolution exact(&mesh, SIGMA, TAU, RHO);
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(R);

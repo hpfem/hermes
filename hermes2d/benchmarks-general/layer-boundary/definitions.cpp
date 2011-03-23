@@ -3,10 +3,10 @@
 #include "boundaryconditions/essential_bcs.h"
 
 // Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
-class MyExactFunction
+class CustomExactFunction
 {
 public:
-  MyExactFunction(double K) : K(K) {};
+  CustomExactFunction(double K) : K(K) {};
 
   double uhat(double x) {
     return 1. - (exp(K*x) + exp(-K*x)) / (exp(K) + exp(-K));
@@ -23,10 +23,10 @@ public:
 };
 
 // Right-hand side for the 2D equation -Laplace u + K*K*u = 0 with zero Dirichlet BC.
-class MyRightHandSide : public MyExactFunction
+class CustomRightHandSide : public CustomExactFunction
 {
 public:
-  MyRightHandSide(double K) : MyExactFunction(K) {};
+  CustomRightHandSide(double K) : CustomExactFunction(K) {};
 
   double value(double x, double y) {
     return -(dduhat_dxx(x)*uhat(y) + uhat(x)*dduhat_dxx(y)) + K*K*uhat(x)*uhat(y);
@@ -34,10 +34,10 @@ public:
 };
 
 // Exact solution to the 2D equation.
-class MyExactSolution : public ExactSolutionScalar, public MyExactFunction
+class CustomExactSolution : public ExactSolutionScalar, public CustomExactFunction
 {
 public:
-  MyExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh), MyExactFunction(K) {};
+  CustomExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh), CustomExactFunction(K) {};
 
   virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
     dx = duhat_dx(x) * uhat(y);
@@ -50,7 +50,7 @@ public:
 class CustomWeakFormPerturbedPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPerturbedPoisson(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakFormPerturbedPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVolPerturbedPoisson(0, 0, rhs->K));
     add_vector_form(new MyVectorFormVolPerturbedPoisson(0, rhs));
   };
@@ -87,7 +87,7 @@ private:
   class MyVectorFormVolPerturbedPoisson : public WeakForm::VectorFormVol
   {
   public:
-    MyVectorFormVolPerturbedPoisson(int i, MyRightHandSide* rhs) : WeakForm::VectorFormVol(i), 
+    MyVectorFormVolPerturbedPoisson(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), 
           rhs(rhs) { }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
@@ -104,6 +104,6 @@ private:
     }
 
     // Member.
-    MyRightHandSide* rhs;
+    CustomRightHandSide* rhs;
   };
 };
