@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
   // Initialize boundary conditions.
-  EssentialBCConstant essential_bc(BDY_GROUND, T_INIT);
+  EssentialBCConst essential_bc(BDY_GROUND, T_INIT);
   EssentialBCs bcs(&essential_bc);
 
   // Initialize an H1 space with default shepeset.

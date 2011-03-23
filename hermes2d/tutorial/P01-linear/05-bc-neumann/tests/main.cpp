@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  EssentialBCConstant bc_essential(BDY_INNER, 0.0);
+  EssentialBCConst bc_essential(BDY_INNER, 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormNeumann wf(CONST_F, CONST_GAMMA_BOTTOM, CONST_GAMMA_OUTER, CONST_GAMMA_LEFT);
+  CustomWeakFormPoissonNeumann wf(CONST_F, CONST_GAMMA_BOTTOM, CONST_GAMMA_OUTER, CONST_GAMMA_LEFT);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10

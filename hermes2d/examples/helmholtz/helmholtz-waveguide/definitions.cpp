@@ -2,14 +2,14 @@
 #include <integrals/integrals_h1.h>
 #include "boundaryconditions/essential_bcs.h"
 
-class EssentialBCNonConstant : public EssentialBC {
+class EssentialBCNonConst : public EssentialBC {
 public:
-    EssentialBCNonConstant(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+    EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
     {
         markers.push_back(marker);
     }
 
-    ~EssentialBCNonConstant() {};
+    ~EssentialBCNonConst() {};
 
     inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 

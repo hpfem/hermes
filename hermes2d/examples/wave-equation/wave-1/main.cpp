@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
   WeakFormWave wf(time_step, C_SQUARED, &u_sln, &v_sln);
   
   // Initialize boundary conditions
-  EssentialBCConstant bc_essential(BDY, 0.0);
+  EssentialBCConst bc_essential(BDY, 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create x- and y- displacement space using the default H1 shapeset.

@@ -106,9 +106,9 @@ int main(int argc, char* argv[])
   MyExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize boundary conditions
-  EssentialBCNonConstantU bc_u(BDY_DIRICHLET, &exact_u);
+  EssentialBCNonConstU bc_u(BDY_DIRICHLET, &exact_u);
   EssentialBCs bcs_u(&bc_u);
-  EssentialBCNonConstantV bc_v(BDY_DIRICHLET, &exact_v);
+  EssentialBCNonConstV bc_v(BDY_DIRICHLET, &exact_v);
   EssentialBCs bcs_v(&bc_v);
 
   // Initialize the weak formulation.

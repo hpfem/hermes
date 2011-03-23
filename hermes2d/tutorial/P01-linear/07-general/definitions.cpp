@@ -2,16 +2,18 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class EssentialBCNonConstant : public EssentialBC {
+class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConstant(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+  EssentialBCNonConst(std::string marker) 
+           : EssentialBC(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
 
-  ~EssentialBCNonConstant() {};
+  ~EssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const 
+         { return EssentialBC::BC_FUNCTION; }
 
   scalar function(double x, double y) const
   {
@@ -19,17 +21,17 @@ public:
   }
 };
 
-class WeakFormGeneral : public WeakForm
+class CustomWeakFormGeneral : public WeakForm
 {
 public:
-  WeakFormGeneral() : WeakForm(1)
+  CustomWeakFormGeneral() : WeakForm(1)
   {
     add_matrix_form(new MatrixFormVolGeneral(0, 0));
     add_vector_form(new VectorFormVolGeneral(0));
     add_vector_form_surf(new VectorFormSurfGeneral(0, BDY_VERTICAL));
   }
 
-  ~WeakFormGeneral() {}
+  ~CustomWeakFormGeneral() {}
 
 private:
 
@@ -47,29 +49,28 @@ private:
   class MatrixFormVolGeneral : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolGeneral(int i, int j) : WeakForm::MatrixFormVol(i, j)
-    {
-      sym = HERMES_SYM;
-    }
+    MatrixFormVolGeneral(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) { }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
       scalar result = 0;
       for (int i=0; i < n; i++) {
         double x = e->x[i];
         double y = e->y[i];
-        result += (static_cast<WeakFormGeneral *>(wf)->a_11(x, y)*u->dx[i]*v->dx[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_12(x, y)*u->dy[i]*v->dx[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_21(x, y)*u->dx[i]*v->dy[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_22(x, y)*u->dy[i]*v->dy[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_1(x, y)*u->dx[i]*v->val[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_2(x, y)*u->dy[i]*v->val[i] +
-                   static_cast<WeakFormGeneral *>(wf)->a_0(x, y)*u->val[i]*v->val[i]) * wt[i];
+        result += (static_cast<CustomWeakFormGeneral *>(wf)->a_11(x, y)*u->dx[i]*v->dx[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_12(x, y)*u->dy[i]*v->dx[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_21(x, y)*u->dx[i]*v->dy[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_22(x, y)*u->dy[i]*v->dy[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_1(x, y)*u->dx[i]*v->val[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_2(x, y)*u->dy[i]*v->val[i] +
+                   static_cast<CustomWeakFormGeneral *>(wf)->a_0(x, y)*u->val[i]*v->val[i]) * wt[i];
       }
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext)
     {
       return u->val[0] * v->val[0] * e->x[0] * e->x[0]; // returning the sum of the degrees of the basis
       // and test function plus two
@@ -85,7 +86,7 @@ private:
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (static_cast<WeakFormGeneral *>(wf)->rhs(e->x[i], e->y[i]) * v->val[i]);
+        result += wt[i] * (static_cast<CustomWeakFormGeneral *>(wf)->rhs(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
@@ -107,7 +108,7 @@ private:
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (static_cast<WeakFormGeneral *>(wf)->g_N(e->x[i], e->y[i]) * v->val[i]);
+        result += wt[i] * (static_cast<CustomWeakFormGeneral *>(wf)->g_N(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 

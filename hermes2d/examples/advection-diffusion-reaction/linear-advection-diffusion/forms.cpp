@@ -67,13 +67,13 @@ private:
   bool shock_capturing_on;
 };
 
-class EssentialBCNonConstant : public EssentialBC {
+class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConstant(std::string marker) : EssentialBC(Hermes::vector<std::string>()) {
+  EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>()) {
     markers.push_back(marker);
   }
 
-  ~EssentialBCNonConstant() { }
+  ~EssentialBCNonConst() { }
 
   inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 

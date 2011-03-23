@@ -129,14 +129,14 @@ int main (int argc, char* argv[]) {
 #endif
 
   // Enter Dirichlet and Neumann boundary markers for Poisson.
-  EssentialBCConstant bc_phi_voltage(BDY_TOP, VOLTAGE);
-  EssentialBCConstant bc_phi_zero(BDY_BOT, 0.0);
+  EssentialBCConst bc_phi_voltage(BDY_TOP, VOLTAGE);
+  EssentialBCConst bc_phi_zero(BDY_BOT, 0.0);
   EssentialBCs bcs_phi(Hermes::vector<EssentialBC*>(&bc_phi_voltage, &bc_phi_zero));
 
-  EssentialBCConstant bc_u1(BDY_SIDE_FIXED, 0.0);
+  EssentialBCConst bc_u1(BDY_SIDE_FIXED, 0.0);
   EssentialBCs bcs_u1(&bc_u1);
 
-  EssentialBCConstant bc_u2(BDY_SIDE_FIXED, 0.0);
+  EssentialBCConst bc_u2(BDY_SIDE_FIXED, 0.0);
   EssentialBCs bcs_u2(&bc_u2);
 
   // Spaces for concentration and the voltage.

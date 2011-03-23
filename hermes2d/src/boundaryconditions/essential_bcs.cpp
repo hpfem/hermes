@@ -47,11 +47,11 @@ double EssentialBC::get_current_time() const {
 }
 
 // Essential BC Constant
-EssentialBCConstant::EssentialBCConstant(Hermes::vector<std::string> markers, scalar value) : EssentialBC(markers) {
+EssentialBCConst::EssentialBCConst(Hermes::vector<std::string> markers, scalar value) : EssentialBC(markers) {
   this->value = value;
 }
 
-EssentialBCConstant::EssentialBCConstant(std::string marker, scalar value) : EssentialBC(Hermes::vector<std::string>()) {
+EssentialBCConst::EssentialBCConst(std::string marker, scalar value) : EssentialBC(Hermes::vector<std::string>()) {
   this->value = value;
   markers.push_back(marker);
 }

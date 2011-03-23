@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   CustomWeakForm wf(&rhs);
   
   // Initialize boundary conditions
-  EssentialBCNonConstant bc_esssential(BDY_DIRICHLET, &exact);
+  EssentialBCNonConst bc_esssential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_esssential);
 
   // Create an H1 space with default shapeset.

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  EssentialBCConstant zero_disp(BDY_1, 0.0);
+  EssentialBCConst zero_disp(BDY_1, 0.0);
   EssentialBCs bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
 
   // Initialize the weak formulation.
-  CustomWeakForm wf(E, nu, rho*g1, BDY_3, f0, f1);
+  CustomWeakFormLinearElasticity wf(E, nu, rho*g1, BDY_3, f0, f1);
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
 
   // Initialize boundary conditions.
-  EssentialBCNonConstant bc_essential(BDY_DIRICHLET);
+  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

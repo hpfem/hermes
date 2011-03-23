@@ -56,14 +56,14 @@ public:
 
 // Dirichlet boundary conditions (uses the exact solution).
 #include "boundaryconditions/essential_bcs.h"
-class EssentialBCNonConstant : public EssentialBC {
+class EssentialBCNonConst : public EssentialBC {
 public:
-  EssentialBCNonConstant(std::string marker, MyExactSolution* exact_solution)
+  EssentialBCNonConst(std::string marker, MyExactSolution* exact_solution)
         : EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) {
     markers.push_back(marker);
   }
 
-  ~EssentialBCNonConstant() { }
+  ~EssentialBCNonConst() { }
 
   inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 

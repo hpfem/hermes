@@ -1,15 +1,15 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/laplace.h"
 
-class CustomWeakFormPoisson : public WeakFormPoisson
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(double const_f) : WeakFormPoisson(1)
+  CustomWeakFormPoisson(double const_f) : WeakForm(1)
   {
-    add_matrix_form(new WeakFormPoisson::MatrixFormVol(0, 0));
-    add_vector_form(new WeakFormPoisson::VectorFormVol(0, const_f));
+    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_vector_form(new DefaultVectorFormVolConst(0, const_f));
   };
 };
 

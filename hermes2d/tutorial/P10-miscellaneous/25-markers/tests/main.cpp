@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Initialize boundary conditions.
-  EssentialBCConstant essential_bc(BDY_BOTTOM, 0.0);
+  EssentialBCConst essential_bc(BDY_BOTTOM, 0.0);
   EssentialBCs bcs(&essential_bc);
 
   // Create an H1 space with default shapeset.

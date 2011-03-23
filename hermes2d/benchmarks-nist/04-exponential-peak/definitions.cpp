@@ -82,16 +82,16 @@ private:
 };
 
 // Boundary conditions (use values provided by exact solution).
-class EssentialBCNonConstantExact : public EssentialBC
+class EssentialBCNonConstExact : public EssentialBC
 {
 public:
-  EssentialBCNonConstantExact(std::string marker, MyExactSolution* exact_solution) : 
+  EssentialBCNonConstExact(std::string marker, MyExactSolution* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   };
   
-  ~EssentialBCNonConstantExact() {};
+  ~EssentialBCNonConstExact() {};
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 

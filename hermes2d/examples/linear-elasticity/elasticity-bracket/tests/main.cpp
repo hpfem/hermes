@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   u2_mesh.copy(&u1_mesh);
 
   // Initialize boundary conditions.
-  EssentialBCConstant zero_disp(BDY_RIGHT, 0.0);
+  EssentialBCConst zero_disp(BDY_RIGHT, 0.0);
   EssentialBCs bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.

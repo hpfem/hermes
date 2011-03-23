@@ -65,11 +65,11 @@ protected:
 };
 
 /// Class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential given by value.
-class HERMES_API EssentialBCConstant : public EssentialBC {
+class HERMES_API EssentialBCConst : public EssentialBC {
 public:
   /// Constructors.
-  EssentialBCConstant(Hermes::vector<std::string> markers, scalar value);
-  EssentialBCConstant(std::string marker, scalar value);
+  EssentialBCConst(Hermes::vector<std::string> markers, scalar value);
+  EssentialBCConst(std::string marker, scalar value);
 
   /// Function giving info that u_Essential is a constant.
   inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_VALUE; }

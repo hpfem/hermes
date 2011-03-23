@@ -566,16 +566,16 @@ private:
   */
 };
 
-class EssentialBCNonConstantU : public EssentialBC
+class EssentialBCNonConstU : public EssentialBC
 {
 public:
-  EssentialBCNonConstantU(std::string marker, MyExactSolutionU* exact_solution) : 
+  EssentialBCNonConstU(std::string marker, MyExactSolutionU* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~EssentialBCNonConstantU() {}
+  ~EssentialBCNonConstU() {}
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
@@ -588,16 +588,16 @@ public:
   MyExactSolutionU* exact_solution;
 };
 
-class EssentialBCNonConstantV : public EssentialBC
+class EssentialBCNonConstV : public EssentialBC
 {
 public:
-  EssentialBCNonConstantV(std::string marker, MyExactSolutionV* exact_solution) : 
+  EssentialBCNonConstV(std::string marker, MyExactSolutionV* exact_solution) : 
         EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
   {
     markers.push_back(marker);
   }
   
-  ~EssentialBCNonConstantV() {}
+  ~EssentialBCNonConstV() {}
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 

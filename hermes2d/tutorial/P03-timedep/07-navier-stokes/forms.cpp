@@ -548,17 +548,17 @@ protected:
   Solution* y_vel_previous_time;
 };
 
-class EssentialBCNonConstant : public EssentialBC
+class EssentialBCNonConst : public EssentialBC
 {
 public:
-  EssentialBCNonConstant(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+  EssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
         EssentialBC(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
-  EssentialBCNonConstant(std::string marker, double vel_inlet, double H, double startup_time) : 
+  EssentialBCNonConst(std::string marker, double vel_inlet, double H, double startup_time) : 
         EssentialBC(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
     markers.push_back(marker);
   };
   
-  ~EssentialBCNonConstant() {};
+  ~EssentialBCNonConst() {};
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 

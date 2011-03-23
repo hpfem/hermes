@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
   WeakFormLinearAdvectionDiffusion wf(STABILIZATION_ON, SHOCK_CAPTURING_ON, B1, B2, EPSILON);
   
   // Initialize boundary conditions
-  EssentialBCConstant bc_rest(BDY_REST, 1.0);
-  EssentialBCNonConstant bc_layer(BDY_LAYER);
+  EssentialBCConst bc_rest(BDY_REST, 1.0);
+  EssentialBCNonConst bc_layer(BDY_LAYER);
 
   EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc_rest, &bc_layer));
 

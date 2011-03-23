@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Initialize boundary conditions
-  EssentialBCNonConstant bc_essential(BDY_HORIZONTAL);
+  EssentialBCNonConst bc_essential(BDY_HORIZONTAL);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormGeneral wf;
+  CustomWeakFormGeneral wf;
 
   // Initialize the FE problem.
   bool is_linear = true;
