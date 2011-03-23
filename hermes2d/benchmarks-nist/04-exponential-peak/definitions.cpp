@@ -1,9 +1,31 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/laplace.h"
 
-// Exact solution.
+/* Right-hand side */
+
+// Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
+class CustomRightHandSide: public DefaultNonConstRightHandSide
+{
+public:
+  CustomRightHandSide(double coeff1, double coeff2, double coeff3) 
+    : DefaultNonConstRightHandSide(coeff1, coeff2, coeff3) {};
+
+  virtual double value(double x, double y) {
+    double a_P = (-coeff1 * pow((x - coeff2), 2) - coeff1 * pow((y - coeff2), 2));
+  
+    return 4 * exp(a_P) * coeff1 * (coeff1 * (x - coeff2) * (x - coeff2) 
+           + ALPHA_P * (y - coeff3) * (y - coeff3) - 1);
+  }
+
+  virtual Ord value(Ord x, Ord y) {
+    return Ord(5);
+  }
+};
+
+/* Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
@@ -30,58 +52,19 @@ public:
   double Y_LOC;
 };
 
-// Weak forms.
-class CustomWeakFormPoisson : public WeakFormLaplace
+/* Weak forms */
+
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakFormLaplace()
-  {
-    CustomVectorFormVolPoisson* wfp = new CustomVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
-    add_vector_form(wfp);
-  };
-
-private:
-  class CustomVectorFormVolPoisson : public WeakForm::VectorFormVol
-  {
-  public:
-    CustomVectorFormVolPoisson(int i, double ALPHA_P, double X_LOC, double Y_LOC) 
-            : WeakForm::VectorFormVol(i), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result -= wt[i] * (rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-            ExtData<Ord> *ext) {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-    }
-
-    template<typename Real>
-    Real rhs(Real x, Real y) {
-      Real a_P = (-ALPHA_P * pow((x - X_LOC), 2) - ALPHA_P * pow((y - Y_LOC), 2));
-  
-      return 4 * exp(a_P) * ALPHA_P * (ALPHA_P * (x - X_LOC) * (x - X_LOC) 
-             + ALPHA_P * (y - Y_LOC) * (y - Y_LOC) - 1);
-    }
-    
-    // Members.
-    double ALPHA_P;
-    double X_LOC;
-    double Y_LOC;
+  CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
+    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 };
 
-// Boundary conditions (use values provided by exact solution).
+/* Essential boundary conditions (use values provided by exact solution) */
+
 class EssentialBCNonConstExact : public EssentialBC
 {
 public:

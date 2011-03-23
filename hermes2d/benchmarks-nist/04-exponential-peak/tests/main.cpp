@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -23,7 +24,7 @@ using namespace RefinementSelectors;
  *
  *
  *  \section s_res Results
- *   - DOFs: 941
+ *   - DOFs: 977
  *   - Adaptivity steps: 11
  */
 
@@ -87,8 +88,11 @@ int main(int argc, char* argv[])
   // Set exact solution.
   CustomExactSolution exact(&mesh, ALPHA_P, X_LOC, Y_LOC);
 
+  // Define right-hand side.
+  CustomRightHandSide rhs(ALPHA_P, X_LOC, Y_LOC);
+
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
+  CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
   EssentialBCNonConstExact bc(BDY_DIRICHLET, &exact);
@@ -197,7 +201,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 950;
+  int n_dof_allowed = 980;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {
