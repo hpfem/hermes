@@ -112,10 +112,10 @@ public:
   double epsilon;
 };
 
-class MyWeakFormPoisson : public WeakFormLaplace
+class CustomWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  MyWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace()
+  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakFormLaplace()
   {
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };

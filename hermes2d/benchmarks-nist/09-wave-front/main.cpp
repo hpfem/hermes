@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
   MyRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(&rhs);
+  CustomWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
   EssentialBCNonConstant bc(BDY_DIRICHLET, &exact);

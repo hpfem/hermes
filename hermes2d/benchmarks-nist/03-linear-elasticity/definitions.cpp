@@ -388,10 +388,10 @@ public:
 
 /* WEAK FORMS */
 
-class MyWeakFormLinearElasticity : public WeakForm
+class CustomWeakFormLinearElasticity : public WeakForm
 {
 public:
-  MyWeakFormLinearElasticity(double E, double nu, double mu, double lambda) : WeakForm(2)
+  CustomWeakFormLinearElasticity(double E, double nu, double mu, double lambda) : WeakForm(2)
   {
     add_matrix_form(new MyMatrixFormVolLinearElasticity_0_0(E, nu));
     add_matrix_form(new MyMatrixFormVolLinearElasticity_0_1(E, nu));

@@ -71,10 +71,10 @@ public:
 };
 
 
-class MyWeakFormPoisson : public WeakForm
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  MyWeakFormPoisson(double r) : WeakForm(1)
+  CustomWeakFormPoisson(double r) : WeakForm(1)
   {
     add_matrix_form(new MyMatrixFormVol_I_III(0, 0, r));
     add_matrix_form(new MyMatrixFormVol_II_IV(0, 0));

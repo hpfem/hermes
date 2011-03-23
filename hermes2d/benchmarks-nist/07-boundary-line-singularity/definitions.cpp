@@ -25,10 +25,10 @@ public:
   double alpha;
 };
 
-class MyWeakFormPoisson : public WeakFormLaplace
+class CustomWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  MyWeakFormPoisson() : WeakFormLaplace() {
+  CustomWeakFormPoisson() : WeakFormLaplace() {
     add_vector_form(new MyVectorFormVol(0));
   };
 

@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
 
   // Initialize the weak formulation.
-  MyWeakForm wf(E, nu, rho*g1, BDY_3, f0, f1);
+  CustomWeakForm wf(E, nu, rho*g1, BDY_3, f0, f1);
 
   // Initialize the FE problem.
   bool is_linear = true;

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   MyRightHandSide rhs(SLOPE);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(&rhs);
+  CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
   EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);

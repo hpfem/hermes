@@ -3,10 +3,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class MyWeakForm : public WeakFormLinearElasticity
+class CustomWeakForm : public WeakFormLinearElasticity
 {
 public:
-  MyWeakForm(double E, double nu, double rho_g, std::string non_zero_neumann_bnd, double f0, double f1) 
+  CustomWeakForm(double E, double nu, double rho_g, std::string non_zero_neumann_bnd, double f0, double f1) 
             : WeakFormLinearElasticity(E, nu, rho_g) {
     double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
     double mu = E / (2*(1 + nu));                        // Second Lame constant.

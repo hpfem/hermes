@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(CONST_F);
+  CustomWeakFormPoisson wf(CONST_F);
 
   // Initialize boundary conditions
   EssentialBCNonConstant bc_essential("Dirichlet", CONST_F);

@@ -47,10 +47,10 @@ public:
 };
 
 // Weak forms for the 2D equation with Dirichlet boundary conditions.
-class MyWeakFormPerturbedPoisson : public WeakForm
+class CustomWeakFormPerturbedPoisson : public WeakForm
 {
 public:
-  MyWeakFormPerturbedPoisson(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakFormPerturbedPoisson(MyRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVolPerturbedPoisson(0, 0, rhs->K));
     add_vector_form(new MyVectorFormVolPerturbedPoisson(0, rhs));
   };

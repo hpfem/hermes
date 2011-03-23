@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
   // NOTE: We pass all four parameters (temporarily) 
   // since in Mitchell's paper (NIST benchmarks) they 
   // are mutually inconsistent.
-  MyWeakFormLinearElasticity wf(E, nu, mu, lambda);
+  CustomWeakFormLinearElasticity wf(E, nu, mu, lambda);
 
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);

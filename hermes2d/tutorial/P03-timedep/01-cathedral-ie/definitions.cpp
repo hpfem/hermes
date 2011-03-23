@@ -2,11 +2,11 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class MyWeakFormHeatRK1 : public WeakForm
+class CustomWeakFormHeatRK1 : public WeakForm
 {
 public:
   // Problem parameters.
-  MyWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
+  CustomWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
                     double time_step, double* current_time_ptr, double temp_init, double t_final, Solution* prev_time_sln) : WeakForm(1)
   {
     add_matrix_form(new MyMatrixFormVolHeatRK1(0, 0, alpha, lambda, heatcap, rho, time_step));

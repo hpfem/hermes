@@ -31,10 +31,10 @@ public:
 };
 
 // Weak forms.
-class MyWeakFormPoisson : public WeakFormLaplace
+class CustomWeakFormPoisson : public WeakFormLaplace
 {
 public:
-  MyWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakFormLaplace()
+  CustomWeakFormPoisson(double ALPHA_P, double X_LOC, double Y_LOC) : WeakFormLaplace()
   {
     MyVectorFormVolPoisson* wfp = new MyVectorFormVolPoisson(0, ALPHA_P, X_LOC, Y_LOC);
     add_vector_form(wfp);

@@ -28,10 +28,10 @@ public:
 };
 
 // Weak forms.
-class MyWeakForm : public WeakForm
+class CustomWeakForm : public WeakForm
 {
 public:
-  MyWeakForm(double alpha) : WeakForm(1) {
+  CustomWeakForm(double alpha) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVol(0, 0, alpha));
     add_vector_form(new MyVectorFormVol(0, alpha));
   };

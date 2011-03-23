@@ -2,10 +2,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class MyWeakFormPoisson : public WeakForm
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  MyWeakFormPoisson(std::string omega_1, std::string omega_2, std::string omega_3, std::string omega_4, std::string omega_5,
+  CustomWeakFormPoisson(std::string omega_1, std::string omega_2, std::string omega_3, std::string omega_4, std::string omega_5,
   std::string bdy_left, std::string bdy_top, std::string bdy_right, std::string bdy_bottom) : WeakForm(1),
   
   omega_1(omega_1), omega_2(omega_2), omega_3(omega_3), 
@@ -70,25 +70,25 @@ private:
       if(e->elem_marker == -9999)
         p = q = 1;
       else {
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_1) {
-            p = static_cast<MyWeakFormPoisson*>(wf)->p_1;
-            q = static_cast<MyWeakFormPoisson*>(wf)->q_1;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_1) {
+            p = static_cast<CustomWeakFormPoisson*>(wf)->p_1;
+            q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_2) {
-            p = static_cast<MyWeakFormPoisson*>(wf)->p_2;
-            q = static_cast<MyWeakFormPoisson*>(wf)->q_2;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_2) {
+            p = static_cast<CustomWeakFormPoisson*>(wf)->p_2;
+            q = static_cast<CustomWeakFormPoisson*>(wf)->q_2;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_3) {
-            p = static_cast<MyWeakFormPoisson*>(wf)->p_3;
-            q = static_cast<MyWeakFormPoisson*>(wf)->q_3;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_3) {
+            p = static_cast<CustomWeakFormPoisson*>(wf)->p_3;
+            q = static_cast<CustomWeakFormPoisson*>(wf)->q_3;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_4) {
-            p = static_cast<MyWeakFormPoisson*>(wf)->p_4;
-            q = static_cast<MyWeakFormPoisson*>(wf)->q_4;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_4) {
+            p = static_cast<CustomWeakFormPoisson*>(wf)->p_4;
+            q = static_cast<CustomWeakFormPoisson*>(wf)->q_4;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_5) {
-            p = static_cast<MyWeakFormPoisson*>(wf)->p_5;
-            q = static_cast<MyWeakFormPoisson*>(wf)->q_5;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_5) {
+            p = static_cast<CustomWeakFormPoisson*>(wf)->p_5;
+            q = static_cast<CustomWeakFormPoisson*>(wf)->q_5;
         }
       }
       Scalar result = 0;
@@ -117,16 +117,16 @@ private:
       if(e->elem_marker == -9999)
         f = 1;
       else {
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_1)
-            f = static_cast<MyWeakFormPoisson*>(wf)->f_1;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_2)
-            f = static_cast<MyWeakFormPoisson*>(wf)->f_2;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_3)
-            f = static_cast<MyWeakFormPoisson*>(wf)->f_3;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_4)
-            f = static_cast<MyWeakFormPoisson*>(wf)->f_4;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<MyWeakFormPoisson*>(wf)->omega_5)
-            f = static_cast<MyWeakFormPoisson*>(wf)->f_5;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_1)
+            f = static_cast<CustomWeakFormPoisson*>(wf)->f_1;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_2)
+            f = static_cast<CustomWeakFormPoisson*>(wf)->f_2;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_3)
+            f = static_cast<CustomWeakFormPoisson*>(wf)->f_3;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_4)
+            f = static_cast<CustomWeakFormPoisson*>(wf)->f_4;
+        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == static_cast<CustomWeakFormPoisson*>(wf)->omega_5)
+            f = static_cast<CustomWeakFormPoisson*>(wf)->f_5;
       }
 
       return f * int_v<Real, Scalar>(n, wt, v);
@@ -155,43 +155,43 @@ private:
         Scalar p = 0.0;
         Scalar q = 0.0;
         Scalar c = 1.0;
-        if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_left) {
+        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
           if (x == 0.0) {
             if ((y >= 0.0 && y <= 0.8)||(y >= 23.2 && y <= 24.0)) {
-              p = static_cast<MyWeakFormPoisson*>(wf)->p_1; 
-              q = static_cast<MyWeakFormPoisson*>(wf)->q_1;
+              p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
+              q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
             }
             if ((y >= 1.6 && y <= 3.6)||(y >= 18.8 && y <= 21.2)) {
-              p = static_cast<MyWeakFormPoisson*>(wf)->p_2; 
-              q = static_cast<MyWeakFormPoisson*>(wf)->q_2;
+              p = static_cast<CustomWeakFormPoisson*>(wf)->p_2; 
+              q = static_cast<CustomWeakFormPoisson*>(wf)->q_2;
             }
             if (y >= 3.6 && y <= 18.8) {
-              p = static_cast<MyWeakFormPoisson*>(wf)->p_3; 
-              q = static_cast<MyWeakFormPoisson*>(wf)->q_3;
+              p = static_cast<CustomWeakFormPoisson*>(wf)->p_3; 
+              q = static_cast<CustomWeakFormPoisson*>(wf)->q_3;
             }
             if ((y >= 0.8 && y <= 1.6)||(y >= 21.2 && y <= 23.2)) {
-              p = static_cast<MyWeakFormPoisson*>(wf)->p_5; 
-              q = static_cast<MyWeakFormPoisson*>(wf)->q_5;
+              p = static_cast<CustomWeakFormPoisson*>(wf)->p_5; 
+              q = static_cast<CustomWeakFormPoisson*>(wf)->q_5;
             }
           }
-          c = static_cast<MyWeakFormPoisson*>(wf)->c_left;
+          c = static_cast<CustomWeakFormPoisson*>(wf)->c_left;
         }
-        if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_right) {
-          p = static_cast<MyWeakFormPoisson*>(wf)->p_1; 
-          q = static_cast<MyWeakFormPoisson*>(wf)->q_1;
-          c = static_cast<MyWeakFormPoisson*>(wf)->c_right;
-        }
-
-        if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_bottom) {
-          p = static_cast<MyWeakFormPoisson*>(wf)->p_1; 
-          q = static_cast<MyWeakFormPoisson*>(wf)->q_1;
-          c = static_cast<MyWeakFormPoisson*>(wf)->c_bottom;
+        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
+          p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
+          q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
+          c = static_cast<CustomWeakFormPoisson*>(wf)->c_right;
         }
 
-        if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_top) {
-          p = static_cast<MyWeakFormPoisson*>(wf)->p_1; 
-          q = static_cast<MyWeakFormPoisson*>(wf)->q_1;
-          c = static_cast<MyWeakFormPoisson*>(wf)->c_top;
+        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
+          p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
+          q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
+          c = static_cast<CustomWeakFormPoisson*>(wf)->c_bottom;
+        }
+
+        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
+          p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
+          q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
+          c = static_cast<CustomWeakFormPoisson*>(wf)->c_top;
         }
         result += wt[i] * (p * u->dx[i] * v->val[i] - q * u->dy[i] * v->val[i] + c * u->val[i] * v->val[i]);
       }
@@ -216,19 +216,19 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Scalar g = 1.0;
-      if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_left) {
-        g = static_cast<MyWeakFormPoisson*>(wf)->g_n_left; 
+      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
+        g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_left; 
       }
-      if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_right) {
-        g = static_cast<MyWeakFormPoisson*>(wf)->g_n_right;
-      }
-
-      if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_bottom) {
-        g = static_cast<MyWeakFormPoisson*>(wf)->g_n_bottom;
+      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
+        g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_right;
       }
 
-      if(this->area == static_cast<MyWeakFormPoisson*>(wf)->bdy_top) {
-        g = static_cast<MyWeakFormPoisson*>(wf)->g_n_top;
+      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
+        g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_bottom;
+      }
+
+      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
+        g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_top;
       }
       return g * int_v<Real, Scalar>(n, wt, v);
     }

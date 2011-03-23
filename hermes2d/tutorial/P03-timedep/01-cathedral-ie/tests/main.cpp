@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
   Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
-  MyWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+  CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
                        &current_time, TEMP_INIT, T_FINAL, &tsln);
   
   // Initialize boundary conditions.

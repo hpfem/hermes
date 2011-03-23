@@ -70,7 +70,7 @@ const std::string BDY_BOTTOM = "4";
 
 // Weak forms.
 // In this example, some parameters are part of the weak formulation, 
-// see the file definitions.cpp, class MyWeakFormPoisson.
+// see the file definitions.cpp, class CustomWeakFormPoisson.
 #include "../definitions.cpp"
 
 int main(int argc, char* argv[])
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, P_INIT);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, 
+  CustomWeakFormPoisson wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, 
                        BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
 
   // Initialize coarse and reference mesh solution.

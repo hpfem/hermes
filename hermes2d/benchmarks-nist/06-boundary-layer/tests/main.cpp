@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   MyRightHandSide rhs(EPSILON);
 
   // Initialize the weak formulation.
-  MyWeakForm wf(&rhs);
+  CustomWeakForm wf(&rhs);
   
   // Initialize boundary conditions
   EssentialBCNonConstant bc_esssential(BDY_DIRICHLET, &exact);

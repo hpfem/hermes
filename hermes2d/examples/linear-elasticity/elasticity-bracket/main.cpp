@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   // NOTE; These weak forms are identical to those in example P01-linear/08-system.
-  MyWeakForm wf(E, nu, rho*g1, BDY_TOP, f0, f1);
+  CustomWeakForm wf(E, nu, rho*g1, BDY_TOP, f0, f1);
 
   // Initialize the FE problem.
   bool is_linear = true;

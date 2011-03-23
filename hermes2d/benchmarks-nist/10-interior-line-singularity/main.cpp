@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(&rhs);
+  CustomWeakFormPoisson wf(&rhs);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

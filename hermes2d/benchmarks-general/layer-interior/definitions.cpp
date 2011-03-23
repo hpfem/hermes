@@ -67,10 +67,10 @@ public:
   MyExactSolution* exact_solution;
 };
 
-class MyWeakFormPoisson : public WeakForm
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  MyWeakFormPoisson(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakFormPoisson(MyRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVolPoisson(0, 0));
     add_vector_form(new MyVectorFormVolPoisson(0, rhs));
   };

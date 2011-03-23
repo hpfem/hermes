@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
   mesh.refine_element_id(0);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf(CONST_F);
+  CustomWeakFormPoisson wf(CONST_F);
   
   // Initialize boundary conditions
   EssentialBCConstant bc_essential("Dirichlet", 0.0);

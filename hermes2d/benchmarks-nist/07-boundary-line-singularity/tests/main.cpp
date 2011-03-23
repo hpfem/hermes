@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   MyExactSolution exact(&mesh, ALPHA);
 
   // Initialize the weak formulation.
-  MyWeakFormPoisson wf;
+  CustomWeakFormPoisson wf;
   
   // Initialize boundary conditions
   EssentialBCNonConstant bc_essential(BDY_DIRICHLET, &exact);

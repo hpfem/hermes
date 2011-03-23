@@ -41,10 +41,10 @@ public:
 };
 
 // Weak forms.
-class MyWeakForm : public WeakForm
+class CustomWeakForm : public WeakForm
 {
 public:
-  MyWeakForm(MyRightHandSide* rhs) : WeakForm(1) {
+  CustomWeakForm(MyRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new MyMatrixFormVol(0, 0, rhs->epsilon));
     add_vector_form(new MyVectorFormVol(0, rhs));
   };
