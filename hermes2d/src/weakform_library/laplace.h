@@ -118,17 +118,21 @@ class DefaultNonConstRightHandSide
 public:
   // If you run out of parameters, add more here.
   DefaultNonConstRightHandSide(double coeff1) 
-         : coeff1(coeff1), coeff2(0), coeff3(0) {};
+    : coeff1(coeff1), coeff2(0), coeff3(0), coeff4(0), coeff5(0) {};
   DefaultNonConstRightHandSide(double coeff1, double coeff2) 
-         : coeff1(coeff1), coeff2(coeff2), coeff3(0) {};
+    : coeff1(coeff1), coeff2(coeff2), coeff3(0), coeff4(0), coeff5(0) {};
   DefaultNonConstRightHandSide(double coeff1, double coeff2, double coeff3) 
-         : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3) {};
+    : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3), coeff4(0), coeff5(0) {};
+  DefaultNonConstRightHandSide(double coeff1, double coeff2, double coeff3, double coeff4) 
+    : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3), coeff4(coeff4), coeff5(0) {};
+ DefaultNonConstRightHandSide(double coeff1, double coeff2, double coeff3, double coeff4, double coeff5) 
+    : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3), coeff4(coeff4), coeff5(coeff5) {};
 
   virtual scalar value(double x, double y) = 0;
   virtual Ord ord(Ord x, Ord y) = 0;
  
   // Member.
-  double coeff1, coeff2, coeff3;
+  double coeff1, coeff2, coeff3, coeff4, coeff5;
 };
 
 class DefaultVectorFormVolNonConst : public WeakForm::VectorFormVol
