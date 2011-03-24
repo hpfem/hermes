@@ -12,20 +12,20 @@ using namespace RefinementSelectors;
  *  \section s_params Parameters
  *   - PROB_PARAM = 3
  *   - INIT_REF_NUM=1
- *   - P_INIT=1
+ *   - P_INIT=2
  *   - THRESHOLD=0.3
  *   - STRATEGY=0
  *   - MESH_REGULARITY=-1
  *   - USE_RESIDUAL_ESTIMATOR = false
- *   - ERR_STOP=1.0
+ *   - ERR_STOP=2.0
  *   - NDOF_STOP=10000
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *
  *  \section s_res Results
- *   - DOFs: 15089
- *   - Adaptivity steps: 14
- *   - Exact error: 4.07387%
+ *   - DOFs: 1441
+ *   - Adaptivity steps: 9
+ *   - Exact error: 8.71412%
  */
 
 int PROB_PARAM = 3;    // PROB_PARAM determines which parameter values you wish to use for the steepness and location of the wave front. 
@@ -35,7 +35,7 @@ int PROB_PARAM = 3;    // PROB_PARAM determines which parameter values you wish 
                        // 2: asymmetric         1000     1.5     0.25   0.92
                        // 3: well               50       0.5     0.5    0.25
 
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -55,7 +55,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
 const bool USE_RESIDUAL_ESTIMATOR = false;        // Add also the norm of the residual to the error estimate of each element.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 2.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 10000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -67,37 +67,6 @@ const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "../definitions.cpp"
-
-// Linear form for the interface error estimator.
-class InterfaceErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
-{
-public:
-  InterfaceErrorForm() : ErrorEstimatorForm(0, H2D_DG_INNER_EDGE) {};
-  
-  template<typename Real, typename Scalar>
-  Scalar interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext)
-  {
-    Scalar result = 0.;
-    for (int i = 0; i < n; i++)
-      result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                             e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
-    return result * e->diam / 24.;
-  }
-
-  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-              Func<scalar> *u, Geom<double> *e,
-              ExtData<scalar> *ext)
-  {
-    return interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
-  }
-  
-  virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
-                    Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
-  {
-    return interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
-  }  
-};
 
 int main(int argc, char* argv[])
 {
@@ -139,8 +108,7 @@ int main(int argc, char* argv[])
   
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
-  
-  
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -159,7 +127,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions.
-  EssentialBCNonConst bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
   
   // Create an H1 space with default shapeset.
@@ -268,8 +236,8 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 15555;
-  double err_exact_rel_allowed = 4.075;
+  int n_dof_allowed = 1450;
+  double err_exact_rel_allowed = 9.0;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   printf("err_exact_rel_actual = %g%%\n", err_exact_rel);

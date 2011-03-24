@@ -28,7 +28,7 @@ int PARAM = 3;         // PARAM determines which parameter values you wish to us
                        // 2: asymmetric 1000     1.5    0.25    0.92
                        // 3: well       50       0.5    0.5     0.25
 
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
