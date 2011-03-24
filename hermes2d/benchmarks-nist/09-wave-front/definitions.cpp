@@ -11,7 +11,7 @@ public:
   CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
     : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
-  virtual double value(double x, double y) {  
+  virtual double value(double x, double y) const {  
     double a = pow(x - x_loc, 2);
     double b = pow(y - y_loc, 2);
     double c = sqrt(a + b);
@@ -26,7 +26,7 @@ public:
            - ((alpha * e * g)/((a + b) * pow(f, 2)))));
   }
 
-  virtual Ord ord (Ord x, Ord y) {
+  virtual Ord ord (Ord x, Ord y) const {
     return Ord(8);  
   }
   double alpha, x_loc, y_loc, r_zero;
@@ -43,7 +43,7 @@ public:
              : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), 
                                    y_loc(y_loc), r_zero(r_zero) { }
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     return atan(alpha * (sqrt(pow(x - x_loc, 2) + pow(y - y_loc, 2)) - r_zero));
   };
 
@@ -59,7 +59,7 @@ public:
     dy = (e/(c * f));
   };
 
-  Ord ord (Ord x, Ord y) {
+  Ord ord (Ord x, Ord y) const {
     return Ord(8);  
   }
 

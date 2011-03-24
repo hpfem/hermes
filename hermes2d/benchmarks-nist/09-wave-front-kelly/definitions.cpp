@@ -12,7 +12,7 @@ public:
   CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
     : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
-  virtual double value(double x, double y) {  
+  virtual double value(double x, double y) const {  
     double a = pow(x - x_loc, 2);
     double b = pow(y - y_loc, 2);
     double c = sqrt(a + b);
@@ -27,7 +27,7 @@ public:
            - ((alpha * e * g)/((a + b) * pow(f, 2)))));
   }
 
-  virtual Ord ord (Ord x, Ord y) {
+  virtual Ord ord (Ord x, Ord y) const {
     return Ord(8);  
   }
   double alpha, x_loc, y_loc, r_zero;
@@ -43,7 +43,7 @@ public:
              : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), 
                                    y_loc(y_loc), r_zero(r_zero) { }
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     return atan(alpha * (sqrt(pow(x - x_loc, 2) + pow(y - y_loc, 2)) - r_zero));
   };
 
@@ -59,7 +59,7 @@ public:
     dy = (e/(c * f));
   };
 
-  Ord ord (Ord x, Ord y) {
+  Ord ord (Ord x, Ord y) const {
     return Ord(8);  
   }
 
@@ -90,14 +90,14 @@ public:
   
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
                         Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
-                        ExtData<scalar> *ext)
+                        ExtData<scalar> *ext) const 
   {
     return this->form->value(n, wt, u_ext, u, v, e, ext);
   }
 
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                   Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
-                  ExtData<Ord> *ext)
+                  ExtData<Ord> *ext) const 
   {
     return this->form->ord(n, wt, u_ext, u, v, e, ext);
   }
@@ -113,7 +113,7 @@ class ResidualErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
 public:
   ResidualErrorForm(CustomRightHandSide* rhs) : ErrorEstimatorForm(0), rhs(rhs) {};
   
-  scalar residual_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Geom<double> *e, ExtData<scalar> *ext)
+  scalar residual_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Geom<double> *e, ExtData<scalar> *ext) const
   {
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     scalar result = 0.;
@@ -127,7 +127,7 @@ public:
 #endif
   }
   
-  Ord residual_estimator(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Geom<Ord> *e, ExtData<Ord> *ext)
+  Ord residual_estimator(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Geom<Ord> *e, ExtData<Ord> *ext) const
   {
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     Ord result = 0.;
@@ -143,14 +143,14 @@ public:
 
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
               Func<scalar> *u, Geom<double> *e,
-              ExtData<scalar> *ext)
+              ExtData<scalar> *ext) const 
   {
     return residual_estimator(n, wt, u_ext, u, e, ext);
   }
   
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
+                    ExtData<Ord> *ext) const 
   {
     return residual_estimator(n, wt, u_ext, u, e, ext);
   }

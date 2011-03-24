@@ -11,7 +11,7 @@ public:
   CustomRightHandSide(double alpha, double x_loc, double y_loc) 
     : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc) {};
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     double a_P = (-alpha * pow((x - x_loc), 2) - alpha * pow((y - y_loc), 2));
   
     return -(4 * exp(a_P) * alpha * (alpha * (x - x_loc) * (x - x_loc) 
@@ -43,7 +43,7 @@ public:
     dy = -exp(a) * (2 * ALPHA_P * (y - Y_LOC));
   };
 
-  virtual Ord ord (Ord x, Ord y) {
+  virtual Ord ord (Ord x, Ord y) const {
     return Ord(8);
   };
 

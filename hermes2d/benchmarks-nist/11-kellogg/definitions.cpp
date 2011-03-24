@@ -12,7 +12,7 @@ public:
           : ExactSolutionScalar(mesh), sigma(sigma), tau(tau), rho(rho) {
   };
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     double theta = atan2(y,x);
     if (theta < 0) theta = theta + 2.*M_PI;
     double r = sqrt(x*x + y*y);

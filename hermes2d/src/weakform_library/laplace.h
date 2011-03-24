@@ -118,8 +118,8 @@ class DefaultNonConstRightHandSide
 public:
   DefaultNonConstRightHandSide() { };
 
-  virtual scalar value(double x, double y) = 0;
-  virtual Ord ord(Ord x, Ord y) = 0;
+  virtual scalar value(double x, double y) const = 0;
+  virtual Ord ord(Ord x, Ord y) const = 0;
 };
 
 class DefaultVectorFormVolNonConst : public WeakForm::VectorFormVol

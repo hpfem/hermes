@@ -11,7 +11,7 @@ class CustomRightHandSide: public DefaultNonConstRightHandSide
 public:
   CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(), coeff1(coeff1) {};
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     double t2 = sqr(y + 0.25) + sqr(x - 1.25);
     double t = sqrt(t2);
     double u = (sqr(M_PI - 3.0*t)*sqr(coeff1) + 9.0);
