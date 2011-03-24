@@ -1,23 +1,30 @@
-#define HERMES_REPORT_ALL
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
 
-//  This example shows that the worst thing you can ever do is to approximate
-//  smooth parts of solutions with uniform low-order meshes. The exact solution
-//  to this Poisson problem is u(x,y) = sin(x)*sin(y), defined in the square
-//  (0, pi)x(0, pi).
-//
-//  PDE: -Laplace u = f.
-//
-//  Known exact solution, see functions fn() and fndd().
-//
-//  Domain: square domain (0, pi)x(0, pi), mesh file square_quad.mesh.
-//
-//  BC:  Dirichlet, given by exact solution.
-//
-//  The following parameters can be changed:
+/** \addtogroup t_bench_sm_iso Benchmarks/Smooth Iso
+ *  \{
+ *  \brief This test makes sure that the benchmark "smooth-iso" works correctly.
+ *
+ *  \section s_params Parameters
+ *  - P_INIT=2
+ *  - THRESHOLD=0.3
+ *  - STRATEGY=0
+ *  - CAND_LIST=HP_ANISO
+ *  - MESH_REGULARITY=-1
+ *  - ERR_STOP=5E-5
+ *  - CONV_EXP=1.0
+ *  - NDOF_STOP=400
+ *
+ *  \section s_res Results
+ *  - DOFs: 49
+ *  - Error estimate: 3.68E-5 %
+ *  - Iterations: 4 (the last iteration at which ERR_STOP is fulfilled)
+ */
 
 int P_INIT = 1;                                   // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
@@ -50,24 +57,11 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Exact solution.
-static double fn(double x, double y)
-{
-  return sin(x)*sin(y);
-}
-
-static double fndd(double x, double y, double& dx, double& dy)
-{
-  dx = cos(x)*sin(y);
-  dy = sin(x)*cos(y);
-  return fn(x, y);
-}
-
 // Boundary markers.
-const int BDY_DIRICHLET = 1;
+const std::string BDY_DIRICHLET = "1";
 
-// Weak forms.
-#include "forms.cpp"
+// Right-hand side, exact solutionm weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -85,28 +79,21 @@ int main(int argc, char* argv[])
     else mesh.refine_element_id(0, 0);
   }
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  if (is_p_aniso(CAND_LIST))
-    space.set_element_order(0, H2D_MAKE_QUAD_ORDER(P_INIT, P_INIT));
+  // Define exact solution.
+  CustomExactSolution exact_sln(&mesh);  
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
+  CustomWeakFormPoisson wf;
+
+  // Initialize boundary conditions.
+  EssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
@@ -167,7 +154,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
