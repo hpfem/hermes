@@ -22,7 +22,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) {
-    return Ord(10);
+    return Ord(8);
   }
 };
 
@@ -34,22 +34,22 @@ public:
   CustomExactSolution(Mesh* mesh, double epsilon) 
         : ExactSolutionScalar(mesh), epsilon(epsilon) {};
 
-  // Exact solution.
-  double value(double x, double y) {
+  virtual scalar value(double x, double y) {
     return (1 - exp(-(1-x)/epsilon)) * (1 - exp(-(1-y)/epsilon)) * cos(M_PI * (x + y)); 
   };
 
-  // Exact solution with derivatives.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     dx = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) 
          - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon;
     dy = -M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) 
          - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
-    return value(x, y);
   };
 
-  // Members.
-  double epsilon;
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(8);
+  }
+
+  scalar epsilon;
 };
 
 /* Weak forms */
@@ -95,26 +95,3 @@ private:
   };
 };
 
-/* Essential boundary conditions */
-
-class EssentialBCNonConst : public EssentialBC
-{
-public:
-  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
-        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  };
-  
-  ~EssentialBCNonConst() {};
-
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  };
-
-  virtual scalar function(double x, double y) const {
-    return exact_solution->value(x, y);
-  };
-
-  CustomExactSolution* exact_solution;
-};

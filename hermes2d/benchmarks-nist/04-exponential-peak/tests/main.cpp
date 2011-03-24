@@ -24,7 +24,7 @@ using namespace RefinementSelectors;
  *
  *
  *  \section s_res Results
- *   - DOFs: 977
+ *   - DOFs: 941
  *   - Adaptivity steps: 11
  */
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
-  EssentialBCNonConstExact bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 980;
+  int n_dof_allowed = 950;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

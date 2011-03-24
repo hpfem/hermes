@@ -235,4 +235,37 @@ public:
   };
 };
 
+/* Default non-constant Dirichlet boundary condition 
+   based on an exact solution
+*/
+
+class DefaultEssentialBCNonConst : public EssentialBC
+{
+public:
+  DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
+                             ExactSolutionScalar* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
+  };
+  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    markers.push_back(marker);
+  };
+  
+  ~DefaultEssentialBCNonConst() {};
+
+  virtual EssentialBCValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar function(double x, double y) const {
+    return exact_solution->value(x, y);
+  };
+
+  ExactSolutionScalar* exact_solution;
+};
+
+
 #endif

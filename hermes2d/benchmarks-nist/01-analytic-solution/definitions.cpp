@@ -5,7 +5,6 @@
 
 /* Right-hand side */
 
-// Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
@@ -29,21 +28,20 @@ public:
   }
 };
 
-// Exact solution (needed for the Dirichlet condition).
+/* Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
   CustomExactSolution(Mesh* mesh, double poly_deg) 
             : ExactSolutionScalar(mesh), poly_deg(poly_deg) {};
 
-  // Exact solution.
   double value(double x, double y) {
     return pow(2, 4 * poly_deg) * pow(x, poly_deg) * pow(1 - x, poly_deg) 
            * pow(y, poly_deg) * pow(1 - y, poly_deg);
   }
 
-  // Exact solution with derivatives.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     double A = pow((1.0-y), poly_deg);
     double B = pow((1.0-x), poly_deg);
     double C = pow(y, poly_deg);
@@ -53,34 +51,13 @@ public:
          + (poly_deg*pow(16.0, poly_deg)*A*C)/x)*B*D;
     dy = ((poly_deg*pow(16.0, poly_deg)*B*D)/(y-1.0)
          + (poly_deg*pow(16.0, poly_deg)*B*D)/y)*A*C;
-
-    return value(x, y);
   };
 
-  // Member.
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(poly_deg);
+  }
+
   double poly_deg;
-};
-
-/* Essential boundary conditions */
-
-class EssentialBCNonConst : public EssentialBC {
-public:
-  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) 
-              : EssentialBC(Hermes::vector<std::string>()),
-    exact_solution(exact_solution) {
-    markers.push_back(marker);
-  }
-
-  ~EssentialBCNonConst() { }
-
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
-
-  scalar function(double x, double y) const {
-    return exact_solution->value(x, y);
-  }
-
-  // Member.
-  CustomExactSolution* exact_solution;
 };
 
 /* Weak forms */
