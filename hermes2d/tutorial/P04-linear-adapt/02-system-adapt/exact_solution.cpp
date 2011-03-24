@@ -4,10 +4,18 @@ public:
   ExactSolutionFitzHughNagumo1(Mesh* mesh, double sigma, double d_u) : ExactSolutionScalar(mesh), sigma(sigma),
                                                                     d_u(d_u) {
   }
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+
+  virtual scalar value (double x, double y) {
+    return U(x)*U(y);
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     dx = dUdt(x)*U(y);
     dy = U(x)*dUdt(y);
-    return U(x)*U(y);
+  }
+
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(20);
   }
 
   double U(double t) {
@@ -31,10 +39,17 @@ class ExactSolutionFitzHughNagumo2 : public ExactSolutionScalar
 public:
   ExactSolutionFitzHughNagumo2(Mesh* mesh, double K, double d_v) : ExactSolutionScalar(mesh), K(K), d_v(d_v) {
   }
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual scalar value (double x, double y) {
+    return V(x)*V(y);
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     dx = dVdt(x)*V(y);
     dy = V(x)*dVdt(y);
-    return V(x)*V(y);
+  }
+
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(20);
   }
 
   double V(double t) {

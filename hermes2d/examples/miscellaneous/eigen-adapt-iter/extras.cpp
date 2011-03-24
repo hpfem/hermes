@@ -309,6 +309,8 @@ bool solve_picard_eigen_ortho(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMF
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
                         double picard_tol, int picard_max_iter, int use_ortho, int use_shift, double** coeff_space_ortho_ref, int index, int dim_space)
 {
+  Hermes2D hermes2D;
+
   int ndof_ref = matrix_M_ref->get_size();
   double picard_err_rel;
   UMFPackVector* vec_lambda_MY = new UMFPackVector(ndof_ref);
@@ -372,7 +374,7 @@ bool solve_picard_eigen_ortho(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMF
     // Calculate relative error of the increment.
     Solution ref_sln_new;
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
-    picard_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+    picard_err_rel = hermes2D.calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
 
     // Updating reference solution.
     ref_sln_prev.copy(&ref_sln_new);

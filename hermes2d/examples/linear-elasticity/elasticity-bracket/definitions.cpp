@@ -1,13 +1,12 @@
-#include "weakform/weakform.h"
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/linear_elasticity.h"
 #include "integrals/integrals_h1.h"
-#include "boundaryconditions/boundaryconditions.h"
+#include "boundaryconditions/essential_bcs.h"
 
-class CustomWeakForm : public WeakFormLinearElasticity
+class CustomWeakForm : public DefaultWeakFormLinearElasticity
 {
 public:
   CustomWeakForm(double E, double nu, double rho_g, std::string non_zero_neumann_bnd, double f0, double f1) 
-            : WeakFormLinearElasticity(E, nu, rho_g) {
+            : DefaultWeakFormLinearElasticity(E, nu, rho_g) {
     double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
     double mu = E / (2*(1 + nu));                        // Second Lame constant.
 
