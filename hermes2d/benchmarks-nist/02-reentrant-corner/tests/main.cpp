@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -102,7 +100,7 @@ int main(int argc, char* argv[])
   DefaultWeakFormLaplace wf;
   
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

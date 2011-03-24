@@ -22,7 +22,7 @@
 #include "../../../hermes_common/matrix.h"
 
 class PrecalcShapeset;
-
+class Ord;
 
 /// \brief Represents a function defined on a mesh.
 ///
@@ -270,10 +270,24 @@ public:
 
   ~ExactSolutionScalar() = 0;
 
+  // For scalar-valued solutions this returns 1.
   virtual unsigned int get_dimension();
 
-  // Function representing an exact scalar-valued solution.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) = 0;
+  // Function returning the value.
+  virtual scalar value (double x, double y) = 0;
+
+  // Function returning the derivatives.
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) = 0;
+
+  // Function returning the value and derivatives.
+  scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+    derivatives (x, y, dx, dy);
+    return value (x, y);
+  };
+
+  // Function returning the integration order that 
+  // should be used when integrating the function.
+  virtual Ord ord(Ord x, Ord y) = 0;
 };
 
 class HERMES_API ExactSolutionVector : public ExactSolution
@@ -283,10 +297,24 @@ public:
 
   ~ExactSolutionVector() = 0;
 
+  // For vector-valued solutions this returns 2.
   virtual unsigned int get_dimension();
 
-  // Function representing an exact vector-valued solution.
-  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) = 0;
+  // Function returning the value.
+  virtual scalar2 value (double x, double y) = 0;
+
+  // Function returning the derivatives.
+  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) =0;
+
+  // Function returning the value and derivatives.
+  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) {
+    derivatives (x, y, dx, dy);
+    return value (x, y);
+  };
+
+  // Function returning the integration order that 
+  // should be used when integrating the function.
+  virtual Ord ord(Ord x, Ord y) = 0;
 };
 
 

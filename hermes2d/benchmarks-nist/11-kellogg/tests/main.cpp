@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -19,7 +20,7 @@ using namespace RefinementSelectors;
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: 1241
+ *   - DOFs: 641
  *   - Adaptivity steps: 17 
  */
 
@@ -87,7 +88,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(R);
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -192,7 +193,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 660;
+  int n_dof_allowed = 650;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

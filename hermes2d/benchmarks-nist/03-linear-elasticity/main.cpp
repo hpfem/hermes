@@ -110,17 +110,19 @@ int main(int argc, char* argv[])
   v_mesh.copy(&u_mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) u_mesh.refine_all_elements();
-  for (int i = 0; i < INIT_REF_NUM; i++) v_mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) {
+    u_mesh.refine_all_elements();
+    v_mesh.refine_all_elements();
+  }
 
   // Set exact solution for each displacement component.
   CustomExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);
   CustomExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize boundary conditions
-  EssentialBCNonConstU bc_u(BDY_DIRICHLET, &exact_u);
+  DefaultEssentialBCNonConst bc_u(BDY_DIRICHLET, &exact_u);
   EssentialBCs bcs_u(&bc_u);
-  EssentialBCNonConstV bc_v(BDY_DIRICHLET, &exact_v);
+  DefaultEssentialBCNonConst bc_v(BDY_DIRICHLET, &exact_v);
   EssentialBCs bcs_v(&bc_v);
 
   // Initialize the weak formulation.
@@ -147,14 +149,7 @@ int main(int argc, char* argv[])
   s_view_v.show_mesh(false);
   OrderView  o_view_v("Mesh for v", new WinGeom(450, 405, 420, 350));
   ScalarView mises_view("Von Mises stress [Pa]", new WinGeom(880, 0, 440, 350));
-
-  /*  
-  ScalarView sview_u_exact("", new WinGeom(550, 0, 500, 400));
-  sview_u_exact.fix_scale_width(50);
-  ScalarView sview_v_exact("", new WinGeom(550, 500, 500, 400));
-  sview_v_exact.fix_scale_width(50);
-  char title[100];
-  */
+  mises_view.fix_scale_width(50);
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
@@ -204,7 +199,7 @@ int main(int argc, char* argv[])
     s_view_v.show(&v_sln); 
     o_view_v.show(&v_space);
     VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u_sln, &v_sln), lambda, mu);
-    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 0.05);
+    mises_view.show(&stress, HERMES_EPS_HIGH, H2D_FN_VAL_0, &u_sln, &v_sln, 0.03);
 
     // Calculate element errors.
     info("Calculating error estimate and exact error."); 

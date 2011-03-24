@@ -21,8 +21,8 @@ using namespace RefinementSelectors;
  *   - matrix_solver = SOLVER_UMFPACK
  *
  *  \section s_res Results
- *   - DOFs: 2228
- *   - Adaptivity steps: 19
+ *   - DOFs: 1816
+ *   - Adaptivity steps: 17
  */
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
   
   // Create an H1 space with default shapeset.
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 2250;
+  int n_dof_allowed = 1820;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

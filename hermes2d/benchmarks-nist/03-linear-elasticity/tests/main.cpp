@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -106,9 +104,9 @@ int main(int argc, char* argv[])
   CustomExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize boundary conditions
-  EssentialBCNonConstU bc_u(BDY_DIRICHLET, &exact_u);
+  DefaultEssentialBCNonConst bc_u(BDY_DIRICHLET, &exact_u);
   EssentialBCs bcs_u(&bc_u);
-  EssentialBCNonConstV bc_v(BDY_DIRICHLET, &exact_v);
+  DefaultEssentialBCNonConst bc_v(BDY_DIRICHLET, &exact_v);
   EssentialBCs bcs_v(&bc_v);
 
   // Initialize the weak formulation.

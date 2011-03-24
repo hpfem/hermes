@@ -1,85 +1,58 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/laplace.h"
 
-// Exact solution.
-class CustomExactSolution : public ExactSolutionScalar
+/* Right-hand side */
+
+class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha) : ExactSolutionScalar(mesh), alpha(alpha) {};
+  CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
 
-  // Exact solution.
-  double value(double x, double y) {
-    return pow(x, alpha);
-  };
+  virtual double value(double x, double y) {
+    return - alpha * (alpha - 1.) * pow(x, alpha - 2.); 
+  }
 
-  // Exact solution with derivatives.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
-    dx = (alpha/(pow(x, 0.4)));
-    dy = 0;
-    return value(x, y);
-  };
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord((int)(alpha + 3.1));
+  }
 
-  // Members.
   double alpha;
 };
 
-class CustomWeakFormPoisson : public WeakFormLaplace
+/* Exact solution */
+
+class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomWeakFormPoisson() : WeakFormLaplace() {
-    add_vector_form(new CustomVectorFormVol(0));
+  CustomExactSolution(Mesh* mesh, double alpha) 
+        : ExactSolutionScalar(mesh), alpha(alpha) {};
+
+  virtual scalar value(double x, double y) {
+    return pow(x, alpha);
   };
 
-private:
-  class CustomVectorFormVol : public WeakForm::VectorFormVol
-  {
-  public:
-    CustomVectorFormVol(int i) : WeakForm::VectorFormVol(i) { }
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+    dx = alpha * pow(x, alpha - 1.);
+    dy = 0;
+  };
 
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result -= wt[i] * (rhs<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord((int)(alpha + 1));
+  }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
+  double alpha;
+};
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-    }
+/* Weak forms */
 
-    template<typename Real>
-    Real rhs(Real x, Real y) {
-      return (-0.24/(pow(x, 1.4)));
-    }
+class CustomWeakFormPoisson : public WeakForm
+{
+public:
+  CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
+    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 };
 
-// Essential boundary conditions.
-class EssentialBCNonConst : public EssentialBC
-{
-public:
-  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
-        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  };
-  
-  ~EssentialBCNonConst() {};
-
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  };
-
-  virtual scalar function(double x, double y) const {
-    return exact_solution->value(x, y);
-  };
-
-  CustomExactSolution* exact_solution;
-};

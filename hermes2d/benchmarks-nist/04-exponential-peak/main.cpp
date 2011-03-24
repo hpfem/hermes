@@ -80,11 +80,14 @@ int main(int argc, char* argv[])
   // Set exact solution.
   CustomExactSolution exact(&mesh, ALPHA_P, X_LOC, Y_LOC);
 
+  // Define right-hand side.
+  CustomRightHandSide rhs(ALPHA_P, X_LOC, Y_LOC);
+
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(ALPHA_P, X_LOC, Y_LOC);
+  CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
-  EssentialBCNonConstExact bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.

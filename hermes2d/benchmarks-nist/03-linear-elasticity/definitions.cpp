@@ -1,4 +1,5 @@
 #include "weakform/weakform.h"
+#include "weakform_library/laplace.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
@@ -177,11 +178,11 @@ public:
   }
 
   // Exact solution u(x,y) and its derivatives.
-  double u_fn(double x, double y) {
+  virtual double value (double x, double y) {
     return D * r(x, y) * u_r(x, y);
   }
 
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     dx = D * drdx(x, y) * (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (u_F * (-1) * lambda * sin(lambda * get_angle(y, x)) * d_theta_dx(x, y)) - 
          D * r(x, y) * (lambda * (-1) * (lambda - 2) * sin((lambda - 2) * get_angle(y, x)) * d_theta_dx(x, y));
@@ -189,11 +190,12 @@ public:
     dy = D * drdy(x, y) * (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (u_F * (-1) * lambda * sin(lambda * get_angle(y, x)) * d_theta_dy(x, y)) - 
          D * r(x, y) * (lambda * (-1) * (lambda - 2) * sin((lambda - 2) * get_angle(y, x)) * d_theta_dy(x, y));
-
-    return u_fn(x, y);
   }
 
-  // Members.
+  virtual Ord ord (Ord x, Ord y) {
+    return Ord(10);
+  }
+
   double E, nu, lambda, Q, k, mu;
   double A, B, C, D, u_F, v_F;
 };
@@ -366,11 +368,11 @@ public:
   }
 
   // Exact solution v(x,y) and its derivatives.
-  double v_fn(double x, double y) {
+  virtual double value (double x, double y) {
     return D * r(x, y) * v_r(x, y);
   }
 
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     dx = D * drdx(x, y) * (v_F * sin(lambda * get_angle(y, x)) + lambda * sin((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (v_F * lambda * cos(lambda * get_angle(y, x)) * d_theta_dx(x, y)) + 
          D * r(x, y) * (lambda * (lambda - 2) * cos((lambda - 2) * get_angle(y, x)) * d_theta_dx(x, y));
@@ -378,11 +380,12 @@ public:
     dy = D * drdy(x, y) * (v_F * sin(lambda * get_angle(y, x)) + lambda * sin((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (v_F * lambda * cos(lambda * get_angle(y, x)) * d_theta_dy(x, y)) + 
          D * r(x, y) * (lambda * (lambda - 2) * cos((lambda - 2) * get_angle(y, x)) * d_theta_dy(x, y));
-
-    return v_fn(x, y);
   }
 
-  // Members.
+  virtual Ord ord (Ord x, Ord y) {
+    return Ord(10);
+  }
+
   double E, nu, lambda, Q, k, mu;
   double A, B, C, D, u_F, v_F;
 };
@@ -405,139 +408,81 @@ private:
   class CustomMatrixFormVolLinearElasticity_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) : WeakForm::MatrixFormVol(0, 0), E(E), nu(nu) {
+    CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) 
+      : WeakForm::MatrixFormVol(0, 0, HERMES_SYM), E(E), nu(nu) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
-      sym = HERMES_SYM;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (A * u->dx[i] * v->dx[i] + B * u->dy[i] * v->dy[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+       return wt[0] * (A * u->dx[0] * v->dx[0] + B * u->dy[0] * v->dy[0]);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
-       return Ord(30);
-    }
-
-    // Members.
     double A, B, E, nu;
   };
 
   class CustomMatrixFormVolLinearElasticity_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) : WeakForm::MatrixFormVol(0, 1), E(E), nu(nu) { 
+    CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) 
+      : WeakForm::MatrixFormVol(0, 1, HERMES_SYM), E(E), nu(nu) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
-      sym = HERMES_SYM;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (C * u->dx[i] * v->dy[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+       return wt[0] * (C * u->dx[0] * v->dy[0]);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
-       return Ord(30);
-    }
-
-    // Members.
     double C, E, nu;
   };
 
   class CustomMatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) : WeakForm::MatrixFormVol(1, 1), E(E), nu(nu) { 
+    CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) 
+      : WeakForm::MatrixFormVol(1, 1, HERMES_SYM), E(E), nu(nu) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
-      sym = HERMES_SYM;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (B * u->dx[i] * v->dx[i] + A * u->dy[i] * v->dy[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
-       return Ord(30);
+       return wt[0] * (B * u->dx[0] * v->dx[0] + A * u->dy[0] * v->dy[0]);
     }
   
-    // Members.
     double A, B, E, nu;
   };
 };
 
-class EssentialBCNonConstU : public EssentialBC
-{
-public:
-  EssentialBCNonConstU(std::string marker, CustomExactSolutionU* exact_solution) : 
-        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  }
-  
-  ~EssentialBCNonConstU() {}
-
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  }
-
-  virtual scalar function(double x, double y) const {
-    return exact_solution->u_fn(x, y);
-  }
-
-  CustomExactSolutionU* exact_solution;
-};
-
-class EssentialBCNonConstV : public EssentialBC
-{
-public:
-  EssentialBCNonConstV(std::string marker, CustomExactSolutionV* exact_solution) : 
-        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  }
-  
-  ~EssentialBCNonConstV() {}
-
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  }
-
-  virtual scalar function(double x, double y) const {
-    return exact_solution->v_fn(x, y);
-  }
-
-  CustomExactSolutionV* exact_solution;
-};

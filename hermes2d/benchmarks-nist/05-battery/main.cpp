@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, 
-                       BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
+                           BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;

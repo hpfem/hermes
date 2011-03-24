@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   CustomRightHandSide rhs(K, ALPHA);
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

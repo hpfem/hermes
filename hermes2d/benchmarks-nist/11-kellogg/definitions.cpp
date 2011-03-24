@@ -1,8 +1,10 @@
 #include "weakform/weakform.h"
+#include "weakform_library/laplace.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-// Exact solution.
+/* Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
@@ -10,7 +12,7 @@ public:
           : ExactSolutionScalar(mesh), sigma(sigma), tau(tau), rho(rho) {
   };
 
-  double fn(double x, double y) {
+  virtual double value(double x, double y) {
     double theta = atan2(y,x);
     if (theta < 0) theta = theta + 2.*M_PI;
     double r = sqrt(x*x + y*y);
@@ -28,8 +30,7 @@ public:
     return pow(r, tau) * mu;
   };
 
-  // Function representing an exact one-dimension valued solution.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
     double theta = atan2(y,x);
     if (theta < 0) theta = theta + 2*M_PI;
     double r = sqrt(x*x + y*y);
@@ -59,17 +60,19 @@ public:
       dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos(sigma*tau) * cos(tau*(-M_PI - rho + theta)) 
           - (tau * pow(r, tau) * cos(sigma*tau) * sin(tau*(-M_PI - rho + theta))*x/(r*r));
     else 
-      dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos((M_PI/2. - rho)*tau) * cos(tau*(-3.*M_PI/2. - sigma + theta)) - (tau * pow(r, tau) * cos((M_PI/2. - rho)*tau) * sin(tau*((-3.*M_PI)/2. - sigma + theta))*x/(r*r));
-    
-    return fn(x,y);
+      dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos((M_PI/2. - rho)*tau) * cos(tau*(-3.*M_PI/2. - sigma + theta)) 
+           - (tau * pow(r, tau) * cos((M_PI/2. - rho)*tau) * sin(tau*((-3.*M_PI)/2. - sigma + theta))*x/(r*r));
+
   };
 
-  // Members.
-  double sigma;
-  double tau;
-  double rho;
+  virtual Ord ord(Ord x, Ord y) {
+    return Ord(6);
+  }
+
+  double sigma, tau, rho;
 };
 
+/* Weak forms */
 
 class CustomWeakFormPoisson : public WeakForm
 {
@@ -84,69 +87,48 @@ private:
   class CustomMatrixFormVol_I_III : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVol_I_III(int i, int j, double r) : WeakForm::MatrixFormVol(i, j), r(r) { 
-      sym = HERMES_SYM;
-      area = "0";
-    }
+    CustomMatrixFormVol_I_III(int i, int j, double r) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_SYM, "0"), r(r) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       return r * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
-    // Member.
     double r;
   };
 
   class CustomMatrixFormVol_II_IV : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVol_II_IV(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_SYM;
-      area = "1";
-    }
+    CustomMatrixFormVol_II_IV(int i, int j) 
+          : WeakForm::MatrixFormVol(i, j, HERMES_SYM, "1") { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
   };
-};
-
-class EssentialBCNonConst : public EssentialBC
-{
-public:
-  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution) : 
-        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  };
-  
-  ~EssentialBCNonConst() {};
-
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  };
-
-  virtual scalar function(double x, double y) const {
-    return exact_solution->fn(x, y);
-  };
-
-  CustomExactSolution* exact_solution;
 };

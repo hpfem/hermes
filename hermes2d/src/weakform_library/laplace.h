@@ -99,7 +99,7 @@ public:
     return coeff * int_v<scalar, scalar>(n, wt, v);
   }
 
-  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
           Geom<Ord> *e, ExtData<Ord> *ext) {
     return int_v<Ord, Ord>(n, wt, v);
   }
@@ -116,17 +116,10 @@ private:
 class DefaultNonConstRightHandSide
 {
 public:
-  // If you run out of parameters, add more here.
-  DefaultNonConstRightHandSide(double coeff1) : coeff1(coeff1) {};
-  DefaultNonConstRightHandSide(double coeff1, double coeff2) : coeff1(coeff1), coeff2(coeff2) {};
-  DefaultNonConstRightHandSide(double coeff1, double coeff2, double coeff3) 
-         : coeff1(coeff1), coeff2(coeff2), coeff3(coeff3) {};
+  DefaultNonConstRightHandSide() { };
 
   virtual scalar value(double x, double y) = 0;
-  virtual Ord value(Ord x, Ord y) = 0;
- 
-  // Member.
-  double coeff1, coeff2, coeff3;
+  virtual Ord ord(Ord x, Ord y) = 0;
 };
 
 class DefaultVectorFormVolNonConst : public WeakForm::VectorFormVol
@@ -137,34 +130,20 @@ public:
   DefaultVectorFormVolNonConst(int i, std::string area, DefaultNonConstRightHandSide* rhs) 
                : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
 
-  template<typename Real, typename Scalar>
-  Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                     Geom<Real> *e, ExtData<Scalar> *ext) {
-    Scalar result = 0;
-    for (int i = 0; i < n; i++)
-      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
-    return result;
-  }
-
-  virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                       Geom<double> *e, ExtData<scalar> *ext) {
+  scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+               Geom<double> *e, ExtData<scalar> *ext) {
     scalar result = 0;
     for (int i = 0; i < n; i++)
-      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
-    return result;
-  }
-
-  virtual Ord value(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                       Geom<Ord> *e, ExtData<Ord> *ext) {
-    Ord result = 0;
-    for (int i = 0; i < n; i++)
-      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+      result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
     return result;
   }
 
   Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
           Geom<Ord> *e, ExtData<Ord> *ext) {
-    return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    Ord result = 0;
+    for (int i = 0; i < n; i++)
+      result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
+    return result;
   }
 
 private:
@@ -246,5 +225,38 @@ public:
     add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
   };
 };
+
+/* Default non-constant Dirichlet boundary condition 
+   based on an exact solution
+*/
+
+class DefaultEssentialBCNonConst : public EssentialBC
+{
+public:
+  DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
+                             ExactSolutionScalar* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
+  };
+  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) : 
+        EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    markers.push_back(marker);
+  };
+  
+  ~DefaultEssentialBCNonConst() {};
+
+  virtual EssentialBCValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar function(double x, double y) const {
+    return exact_solution->value(x, y);
+  };
+
+  ExactSolutionScalar* exact_solution;
+};
+
 
 #endif
