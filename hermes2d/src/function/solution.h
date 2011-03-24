@@ -258,7 +258,7 @@ public:
   ~ExactSolution();
 
   // Dimension of result - either 1 or 2.
-  virtual unsigned int get_dimension() = 0;
+  virtual unsigned int get_dimension() const = 0;
 };
 
 /// These classes are abstract (pure virtual destructor).
@@ -271,23 +271,23 @@ public:
   ~ExactSolutionScalar() = 0;
 
   // For scalar-valued solutions this returns 1.
-  virtual unsigned int get_dimension();
+  virtual unsigned int get_dimension() const;
 
   // Function returning the value.
-  virtual scalar value (double x, double y) = 0;
+  virtual scalar value (double x, double y) const = 0;
 
   // Function returning the derivatives.
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) = 0;
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const = 0;
 
   // Function returning the value and derivatives.
-  scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  scalar exact_function (double x, double y, scalar& dx, scalar& dy) const {
     derivatives (x, y, dx, dy);
     return value (x, y);
   };
 
   // Function returning the integration order that 
   // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) = 0;
+  virtual Ord ord(Ord x, Ord y) const = 0;
 };
 
 class HERMES_API ExactSolutionVector : public ExactSolution
@@ -298,23 +298,23 @@ public:
   ~ExactSolutionVector() = 0;
 
   // For vector-valued solutions this returns 2.
-  virtual unsigned int get_dimension();
+  virtual unsigned int get_dimension() const;
 
   // Function returning the value.
-  virtual scalar2 value (double x, double y) = 0;
+  virtual scalar2 value (double x, double y) const = 0;
 
   // Function returning the derivatives.
-  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) =0;
+  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const = 0;
 
   // Function returning the value and derivatives.
-  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) {
+  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) const {
     derivatives (x, y, dx, dy);
     return value (x, y);
   };
 
   // Function returning the integration order that 
   // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) = 0;
+  virtual Ord ord(Ord x, Ord y) const = 0;
 };
 
 

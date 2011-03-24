@@ -69,7 +69,7 @@ const double rho = 8000;                          // Material density in kg / m^
 const std::string BDY_LEFT = "1";
 
 // Weak forms.
-#include "weakform/sample_weak_forms.h"
+#include "weakform_library/linear_elasticity.h"
 
 int main(int argc, char* argv[])
 {
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   EssentialBCs bcs(&zero_disp);
 
   // Initialize the weak formulation.
-  WeakFormLinearElasticity wf(E, nu, g1*rho);
+  DefaultWeakFormLinearElasticity wf(E, nu, g1*rho);
 
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u1_space(&u1_mesh, &bcs, P_INIT_U1);

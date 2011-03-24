@@ -32,7 +32,7 @@ public:
                 - k * k * pow(x, alpha);
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(20);
   }
 
@@ -56,13 +56,13 @@ public:
     return cef->fn(x, y);
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     if (x <= 0) dx = 0;
     else dx = alpha * pow(x, alpha - 1);
     dy = -sin(k * y) * k;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(20);
   }
 

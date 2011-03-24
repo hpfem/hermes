@@ -6,16 +6,43 @@
 class InitialSolutionRichards : public ExactSolutionScalar
 {
 public:
-  InitialSolutionRichards(Mesh* mesh, double value) 
-         : ExactSolutionScalar(mesh), value(value) {};
+  InitialSolutionRichards(Mesh* mesh, double constant) 
+         : ExactSolutionScalar(mesh), constant(constant) {};
 
-  // Function representing an exact one-dimension valued solution.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
-    return value;
+  virtual scalar value (double x, double y) const {
+    return constant;
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = 0.0;
+    dy = 0.0;
   };
 
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(0);
+  }
+
   // Value.
-  double value;
+  double constant;
+};
+
+class ExactSolutionPoisson : public ExactSolutionScalar
+{
+public:
+  ExactSolutionPoisson(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  virtual scalar value (double x, double y) const {
+    return x*x +y*y;
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = 2*x;
+    dy = 2*y;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return x*x +y*y;
+  }
 };
 
 /*** NEWTON ***/

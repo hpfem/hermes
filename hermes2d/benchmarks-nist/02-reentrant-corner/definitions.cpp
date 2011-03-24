@@ -36,7 +36,7 @@ public:
     return (pow(sqrt(x*x + y*y), ALPHA) * sin(ALPHA * get_angle(y, x)));
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double a = sqrt(x*x + y*y);
     double b = pow(a, (ALPHA - 1.0));
     double c = pow(a, ALPHA);
@@ -48,7 +48,7 @@ public:
          + ((ALPHA* y* sin(ALPHA* get_angle(y, x)) *b)/a));
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
 

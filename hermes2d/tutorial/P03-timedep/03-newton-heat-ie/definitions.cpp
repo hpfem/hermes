@@ -132,10 +132,16 @@ class CustomInitialCondition : public ExactSolutionScalar
 public:
   CustomInitialCondition(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
-  // Exact solution with derivatives.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = (y+10)/10.;
     dy = (x+10)/10.;
-    return (x+10)*(y+10)/100.;
   };
+
+  virtual scalar value (double x, double y) const {
+    return (x+10)*(y+10)/100.;
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return (x+10)*(y+10)/100.;
+  }
 };
