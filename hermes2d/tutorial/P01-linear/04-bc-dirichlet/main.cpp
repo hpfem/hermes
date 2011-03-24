@@ -39,11 +39,14 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+  // Set exact solution.
+  CustomExactSolution exact(&mesh, CONST_F);
+
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(CONST_F);
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential("Dirichlet", CONST_F);
+  DefaultEssentialBCNonConst bc_essential("Dirichlet", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

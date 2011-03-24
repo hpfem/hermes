@@ -3,6 +3,32 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/laplace.h"
 
+/* Exact solution */
+
+class CustomExactSolution : public ExactSolutionScalar
+{
+public:
+  CustomExactSolution(Mesh* mesh, double const_f) 
+            : ExactSolutionScalar(mesh), const_f(const_f) {};
+
+  double value(double x, double y) const {
+    return (-const_f/4.0) * (x*x + y*y);
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = -const_f*x/2.0;
+    dy = -const_f*y/2.0;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(2);
+  }
+
+  double const_f;
+};
+
+/* Weak forms */
+
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
@@ -10,21 +36,4 @@ public:
     add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
     add_vector_form(new DefaultVectorFormVolConst(0, const_f));
   };
-};
-
-class EssentialBCNonConst : public EssentialBC {
-public:
-  EssentialBCNonConst(std::string marker, double const_f) 
-           : EssentialBC(marker), const_f(const_f) { }
-
-  ~EssentialBCNonConst() { }
-
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
-
-  scalar function(double x, double y) const {
-    return (-const_f/4.0)*(x*x + y*y);
-  }
-
-  // Member.
-  double const_f;
 };

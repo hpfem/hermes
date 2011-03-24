@@ -4,10 +4,13 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-double CONST_F = -4.0;                            // constant right-hand side.
 int P_INIT = 2;                                   // Initial polynomial degree in all elements.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Problem parameters.
+double CONST_F = -4.0;                            // constant right-hand side.
 
 // Weak forms.
 #include "../definitions.cpp"
@@ -20,11 +23,17 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
   mesh.refine_all_elements();
 
+  // Perform initial mesh refinements.
+  for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  // Set exact solution.
+  CustomExactSolution exact(&mesh, CONST_F);
+
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(CONST_F);
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential("Dirichlet", CONST_F);
+  DefaultEssentialBCNonConst bc_essential("Dirichlet", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
