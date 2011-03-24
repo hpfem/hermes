@@ -22,7 +22,7 @@ public:
            18.0 * coeff1 / (u * t);
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
 
@@ -39,18 +39,18 @@ public:
         : ExactSolutionScalar(mesh), slope(slope) {};
 
   // Exact solution.
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return atan(slope * (sqrt(sqr(x-1.25) + sqr(y+0.25)) - M_PI/3));
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double t = sqrt(sqr(x - 1.25) + sqr(y + 0.25));
     double u = t * (sqr(slope) * sqr(t - M_PI/3) + 1);
     dx = slope * (x-1.25) / u;
     dy = slope * (y+0.25) / u;
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(20);
   }
 

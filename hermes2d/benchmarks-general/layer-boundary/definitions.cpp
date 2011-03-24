@@ -36,16 +36,16 @@ public:
     cef = new CustomExactFunction(K);
   };
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return cef->uhat(x) * cef->uhat(y);
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = cef->duhat_dx(x) * cef->uhat(y);
     dy = cef->uhat(x) * cef->duhat_dx(y);
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(20);
   };
 
@@ -70,7 +70,7 @@ public:
            + coeff1 * coeff1 * cef->uhat(x) * cef->uhat(y);
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(5);
   }
 

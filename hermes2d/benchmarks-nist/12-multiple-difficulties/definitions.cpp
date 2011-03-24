@@ -33,7 +33,7 @@ public:
 	     + (1.0 / epsilon) * (1.0 / epsilon) * exp(-(1 + y) / epsilon));  
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
 
@@ -66,7 +66,7 @@ public:
            + exp(-(1 + y) / epsilon);
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double a_P = -alpha_p * ( (x - x_p) * (x - x_p) + (y - y_p) * (y - y_p));
 
     double ALPHA_C = (M_PI/ omega_c);
@@ -93,7 +93,7 @@ public:
          + (-1) * (1.0 / epsilon) * exp(-(1 + y) / epsilon); 
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
 

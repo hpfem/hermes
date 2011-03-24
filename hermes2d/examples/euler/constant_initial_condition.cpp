@@ -3,16 +3,16 @@ class InitialSolutionEulerDensity : public ExactSolutionScalar
 public:
   InitialSolutionEulerDensity(Mesh* mesh, double constant) : ExactSolutionScalar(mesh), constant(constant) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return constant; 
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = 0;
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return constant;
   }
 
@@ -25,16 +25,16 @@ class InitialSolutionEulerDensityVelX : public ExactSolutionScalar
 public:
   InitialSolutionEulerDensityVelX(Mesh* mesh, double constant) : ExactSolutionScalar(mesh), constant(constant) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return constant; 
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = 0;
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return constant;
   }
 
@@ -47,16 +47,16 @@ class InitialSolutionEulerDensityVelY : public ExactSolutionScalar
 public:
   InitialSolutionEulerDensityVelY(Mesh* mesh, double constant) : ExactSolutionScalar(mesh), constant(constant) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return constant; 
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = 0;
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return constant;
   }
 
@@ -69,16 +69,16 @@ class InitialSolutionEulerDensityEnergy : public ExactSolutionScalar
 public:
   InitialSolutionEulerDensityEnergy(Mesh* mesh, double constant) : ExactSolutionScalar(mesh), constant(constant) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return constant; 
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = 0;
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return constant;
   }
 
@@ -91,16 +91,16 @@ class InitialSolutionConcentration : public ExactSolutionScalar
 public:
   InitialSolutionConcentration(Mesh* mesh, double constant) : ExactSolutionScalar(mesh), constant(constant) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return constant; 
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = 0;
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return constant;
   }
 

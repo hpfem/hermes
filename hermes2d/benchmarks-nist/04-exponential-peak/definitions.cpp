@@ -18,7 +18,7 @@ public:
 				      + alpha * (y - y_loc) * (y - y_loc) - 1));
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(8);
   }
 
@@ -33,11 +33,11 @@ public:
   CustomExactSolution(Mesh* mesh, double ALPHA_P, double X_LOC, double Y_LOC) 
          : ExactSolutionScalar(mesh), ALPHA_P(ALPHA_P), X_LOC(X_LOC), Y_LOC(Y_LOC) {};
 
-  virtual scalar value (double x, double y) {
+  virtual scalar value (double x, double y) const {
     return exp(-ALPHA_P * (pow((x - X_LOC), 2) + pow((y - Y_LOC), 2)));
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double a = -ALPHA_P * ( (x - X_LOC) * (x - X_LOC) + (y - Y_LOC) * (y - Y_LOC));
     dx = -exp(a) * (2 * ALPHA_P * (x - X_LOC));
     dy = -exp(a) * (2 * ALPHA_P * (y - Y_LOC));
