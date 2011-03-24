@@ -14,7 +14,7 @@ public:
     return - alpha * (alpha - 1.) * pow(x, alpha - 2.); 
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord((int)(alpha + 3.1));
   }
 
@@ -33,12 +33,12 @@ public:
     return pow(x, alpha);
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = alpha * pow(x, alpha - 1.);
     dy = 0;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord((int)(alpha + 1));
   }
 

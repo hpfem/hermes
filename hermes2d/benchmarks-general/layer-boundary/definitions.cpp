@@ -36,10 +36,17 @@ public:
     cef = new CustomExactFunction(K);
   };
 
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
+  virtual scalar value (double x, double y) const {
+    return cef->uhat(x) * cef->uhat(y);
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = cef->duhat_dx(x) * cef->uhat(y);
     dy = cef->uhat(x) * cef->duhat_dx(y);
-    return cef->uhat(x) * cef->uhat(y);
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(20);
   };
 
   ~CustomExactSolution() { delete cef;}
@@ -54,23 +61,23 @@ public:
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1)
-  {
+  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(), coeff1(coeff1) {
     cef = new CustomExactFunction(coeff1);
   };
 
-  virtual double value(double x, double y) {
-    return -(cef->dduhat_dxx(x)*cef->uhat(y) + cef->uhat(x)*cef->dduhat_dxx(y)) 
-           + coeff1*coeff1*cef->uhat(x)*cef->uhat(y);
+  virtual scalar value(double x, double y) {
+    return -(cef->dduhat_dxx(x) * cef->uhat(y) + cef->uhat(x) * cef->dduhat_dxx(y)) 
+           + coeff1 * coeff1 * cef->uhat(x) * cef->uhat(y);
   }
 
-  virtual Ord value(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(5);
   }
 
   ~CustomRightHandSide() { delete cef;}
 
   CustomExactFunction* cef;
+  double coeff1;
 };
 
 /* Weak forms */

@@ -23,7 +23,7 @@ public:
 	     + pol_deg*a*pow(y, 8.0)*e*f*pow(x, pol_deg)*g);
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(std::max(8, (int)(pol_deg+0.51)));
   }
 
@@ -43,7 +43,7 @@ public:
            * pow(y, poly_deg) * pow(1 - y, poly_deg);
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double A = pow((1.0-y), poly_deg);
     double B = pow((1.0-x), poly_deg);
     double C = pow(y, poly_deg);
@@ -55,7 +55,7 @@ public:
          + (poly_deg*pow(16.0, poly_deg)*B*D)/y)*A*C;
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(poly_deg);
   }
 

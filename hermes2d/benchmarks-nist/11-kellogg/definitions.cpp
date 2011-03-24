@@ -30,7 +30,7 @@ public:
     return pow(r, tau) * mu;
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double theta = atan2(y,x);
     if (theta < 0) theta = theta + 2*M_PI;
     double r = sqrt(x*x + y*y);
@@ -65,7 +65,7 @@ public:
 
   };
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(6);
   }
 

@@ -47,7 +47,7 @@ public:
     return atan(alpha * (sqrt(pow(x - x_loc, 2) + pow(y - y_loc, 2)) - r_zero));
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double a = pow(x - x_loc, 2);
     double b = pow(y - y_loc, 2);
     double c = sqrt(a + b);

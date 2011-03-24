@@ -182,7 +182,7 @@ public:
     return D * r(x, y) * u_r(x, y);
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = D * drdx(x, y) * (u_F * cos(lambda * get_angle(y, x)) - lambda * cos((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (u_F * (-1) * lambda * sin(lambda * get_angle(y, x)) * d_theta_dx(x, y)) - 
          D * r(x, y) * (lambda * (-1) * (lambda - 2) * sin((lambda - 2) * get_angle(y, x)) * d_theta_dx(x, y));
@@ -372,7 +372,7 @@ public:
     return D * r(x, y) * v_r(x, y);
   }
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = D * drdx(x, y) * (v_F * sin(lambda * get_angle(y, x)) + lambda * sin((lambda - 2) * get_angle(y, x))) +
          D * r(x, y) * (v_F * lambda * cos(lambda * get_angle(y, x)) * d_theta_dx(x, y)) + 
          D * r(x, y) * (lambda * (lambda - 2) * cos((lambda - 2) * get_angle(y, x)) * d_theta_dx(x, y));

@@ -1491,7 +1491,7 @@ ExactSolutionScalar::ExactSolutionScalar(Mesh* mesh) : ExactSolution(mesh)
 ExactSolutionScalar::~ExactSolutionScalar()
 {}
 
-unsigned int ExactSolutionScalar::get_dimension()
+unsigned int ExactSolutionScalar::get_dimension() const
 {
   return 1;
 }
@@ -1502,7 +1502,7 @@ ExactSolutionVector::ExactSolutionVector(Mesh* mesh) : ExactSolution(mesh)
 ExactSolutionVector::~ExactSolutionVector()
 {}
 
-unsigned int ExactSolutionVector::get_dimension()
+unsigned int ExactSolutionVector::get_dimension() const
 {
   return 2;
 }

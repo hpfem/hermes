@@ -9,9 +9,9 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
+  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(), coeff1(coeff1) {};
 
-  virtual double value(double x, double y) {
+  virtual scalar value(double x, double y) {
     double t2 = sqr(y + 0.25) + sqr(x - 1.25);
     double t = sqrt(t2);
     double u = (sqr(M_PI - 3.0*t)*sqr(coeff1) + 9.0);
@@ -22,9 +22,11 @@ public:
            18.0 * coeff1 / (u * t);
   }
 
-  virtual Ord value(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
+
+  double coeff1;
 };
 
 /* Exact solution */
@@ -37,18 +39,20 @@ public:
         : ExactSolutionScalar(mesh), slope(slope) {};
 
   // Exact solution.
-  double value(double x, double y) {
+  virtual scalar value (double x, double y) const {
     return atan(slope * (sqrt(sqr(x-1.25) + sqr(y+0.25)) - M_PI/3));
   }
 
-  // Exact solution with derivatives.
-  virtual scalar exact_function (double x, double y, scalar& dx, scalar& dy) {
-      double t = sqrt(sqr(x-1.25) + sqr(y+0.25));
-      double u = t * (sqr(slope) * sqr(t - M_PI/3) + 1);
-      dx = slope * (x-1.25) / u;
-      dy = slope * (y+0.25) / u;
-      return value(x, y);
-  };
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    double t = sqrt(sqr(x - 1.25) + sqr(y + 0.25));
+    double u = t * (sqr(slope) * sqr(t - M_PI/3) + 1);
+    dx = slope * (x-1.25) / u;
+    dy = slope * (y+0.25) / u;
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(20);
+  }
 
   // Member.
   double slope;

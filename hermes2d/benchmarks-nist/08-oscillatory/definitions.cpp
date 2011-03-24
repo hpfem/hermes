@@ -29,7 +29,7 @@ public:
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2)));
   }
 
-  virtual Ord ord(Ord x, Ord y) {
+  virtual Ord ord(Ord x, Ord y) const {
     return Ord(10);
   }
 
@@ -49,7 +49,7 @@ public:
     return sin(1/(alpha + r));
   };
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) {
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     double r = sqrt(x*x + y*y);
     double h = 1/(alpha + r);
     dx = -cos(h) * h * h * x / r;

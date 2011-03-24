@@ -73,7 +73,7 @@ public:
   inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
 
   scalar function(double x, double y) const {
-    return exact_solution->fn(x, y);
+    return exact_solution->value(x, y);
   }
 
   // Member.
