@@ -8,22 +8,24 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
+  CustomRightHandSide(double epsilon) : DefaultNonConstRightHandSide(), epsilon(epsilon) {};
 
   virtual double value(double x, double y) {
-    return -coeff1*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/coeff1))*(1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y)) 
-           + 2*M_PI*(1 - exp(-(1 - x)/coeff1))*exp(-(1 - y)/coeff1)*sin(M_PI*(x + y))/coeff1 
-           + 2*M_PI*(1 - exp(-(1 - y)/coeff1))*exp(-(1 - x)/coeff1)*sin(M_PI*(x + y))/coeff1 
-           - (1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - x)/coeff1)/pow(coeff1,2) 
-           - (1 - exp(-(1 - x)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - y)/coeff1)/pow(coeff1,2)) 
-           - 3*M_PI*(1 - exp(-(1 - x)/coeff1))*(1 - exp(-(1 - y)/coeff1))*sin(M_PI*(x + y)) 
-           - 2*(1 - exp(-(1 - y)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - x)/coeff1)/coeff1 
-           - (1 - exp(-(1 - x)/coeff1))*cos(M_PI*(x + y))*exp(-(1 - y)/coeff1)/coeff1;
+    return -epsilon*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y)) 
+           + 2*M_PI*(1 - exp(-(1 - x)/epsilon))*exp(-(1 - y)/epsilon)*sin(M_PI*(x + y))/epsilon 
+           + 2*M_PI*(1 - exp(-(1 - y)/epsilon))*exp(-(1 - x)/epsilon)*sin(M_PI*(x + y))/epsilon 
+           - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/pow(epsilon,2) 
+           - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/pow(epsilon,2)) 
+           - 3*M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y)) 
+           - 2*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon 
+           - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
   }
 
   virtual Ord ord(Ord x, Ord y) {
     return Ord(8);
   }
+
+  double epsilon;
 };
 
 /* Exact solution */
@@ -58,7 +60,7 @@ class CustomWeakForm : public WeakForm
 {
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->coeff1));
+    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->epsilon));
     add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 

@@ -8,30 +8,32 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
+  CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
 
   virtual scalar value(double x, double y) {
-      return -sin(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((coeff1 
+      return -sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4) 
-             + 2*cos(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             + 2*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(1.0/2.0))) 
-             + pow(x,2)*sin(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             + pow(x,2)*sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2))) 
-             + pow(y,2)*sin(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             + pow(y,2)*sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2))) 
-             - pow(x,2)*cos(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             - pow(x,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0))) 
-             - pow(y,2)*cos(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             - pow(y,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0))) 
-             - 2*pow(x,2)*cos(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             - 2*pow(x,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2))) 
-             - 2*pow(y,2)*cos(1.0/(coeff1 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((coeff1 
+             - 2*pow(y,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2)));
   }
 
   virtual Ord ord(Ord x, Ord y) {
     return Ord(10);
   }
+
+  double alpha;
 };
 
 /* Exact solution */
@@ -66,8 +68,8 @@ public:
 class CustomWeakForm : public WeakForm
 {
 public:
-  CustomWeakForm(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->coeff1));
+  CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
+    add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->alpha));
     add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 

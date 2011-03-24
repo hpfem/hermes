@@ -8,24 +8,26 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
+  CustomRightHandSide(double pol_deg) : DefaultNonConstRightHandSide(), pol_deg(pol_deg) {};
 
   virtual double value(double x, double y) {
-    double a = pow(2.0, 4.0*coeff1);
+    double a = pow(2.0, 4.0*pol_deg);
     double b = pow(x-1.0, 8.0);
     double c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
-    double d = pow(y-1.0, coeff1);
+    double d = pow(y-1.0, pol_deg);
     double e = pow(y-1.0, 8.0);
     double f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
-    double g = pow(x-1.0, coeff1);
+    double g = pow(x-1.0, pol_deg);
 
-    return -(coeff1*a*pow(x, 8.0)*b*c*pow(y, coeff1)*d 
-	     + coeff1*a*pow(y, 8.0)*e*f*pow(x, coeff1)*g);
+    return -(pol_deg*a*pow(x, 8.0)*b*c*pow(y, pol_deg)*d 
+	     + pol_deg*a*pow(y, 8.0)*e*f*pow(x, pol_deg)*g);
   }
 
   virtual Ord ord(Ord x, Ord y) {
-    return Ord(std::max(8, (int)(coeff1+0.5)));
+    return Ord(std::max(8, (int)(pol_deg+0.51)));
   }
+
+  double pol_deg;
 };
 
 /* Exact solution */

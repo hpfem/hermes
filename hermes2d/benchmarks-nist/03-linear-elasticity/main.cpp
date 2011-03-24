@@ -110,8 +110,10 @@ int main(int argc, char* argv[])
   v_mesh.copy(&u_mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) u_mesh.refine_all_elements();
-  for (int i = 0; i < INIT_REF_NUM; i++) v_mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) {
+    u_mesh.refine_all_elements();
+    v_mesh.refine_all_elements();
+  }
 
   // Set exact solution for each displacement component.
   CustomExactSolutionU exact_u(&u_mesh, E, nu, lambda, Q);

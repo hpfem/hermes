@@ -8,15 +8,17 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(coeff1) {};
+  CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
 
   virtual double value(double x, double y) {
-    return - coeff1 * (coeff1 - 1.) * pow(x, coeff1 - 2.); 
+    return - alpha * (alpha - 1.) * pow(x, alpha - 2.); 
   }
 
   virtual Ord ord(Ord x, Ord y) {
-    return Ord((int)(coeff1 + 3));
+    return Ord((int)(alpha + 3.1));
   }
+
+  double alpha;
 };
 
 /* Exact solution */

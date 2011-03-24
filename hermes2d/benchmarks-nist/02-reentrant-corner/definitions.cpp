@@ -6,7 +6,7 @@ class CustomExactSolution : public ExactSolutionScalar
 {
 public:
   CustomExactSolution(Mesh* mesh, int param) 
-        : ExactSolutionScalar(mesh), param(param) {
+        : ExactSolutionScalar(mesh) {
     if (param == 0) {
       OMEGA = ((5.0 * M_PI)/ 4.0);
       ALPHA = (M_PI/ OMEGA);
@@ -52,7 +52,6 @@ public:
     return Ord(10);
   }
 
-  int param;
   double OMEGA;
   double ALPHA;
 };

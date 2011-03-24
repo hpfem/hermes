@@ -21,15 +21,15 @@ class CustomRightHandSide : public DefaultNonConstRightHandSide
 {
 public:
   CustomRightHandSide(double k, double alpha) 
-        : DefaultNonConstRightHandSide(k, alpha) {
+    : DefaultNonConstRightHandSide(), k(k), alpha(alpha) {
     cef = new CustomExactFunction(k, alpha);
   };
 
   virtual double value(double x, double y) {
-    if (x < 0) return cef->fn(x, y) * coeff1 * coeff1;
-    else return cef->fn(x, y) * coeff1 * coeff1 
-                - coeff2 *(coeff2 - 1) * pow(x, coeff2 - 2.) 
-                - coeff1 * coeff1 * pow(x, coeff2);
+    if (x < 0) return cef->fn(x, y) * k * k;
+    else return cef->fn(x, y) * k * k 
+                - alpha *(alpha - 1) * pow(x, alpha - 2.) 
+                - k * k * pow(x, alpha);
   }
 
   virtual Ord ord(Ord x, Ord y) {
@@ -39,6 +39,7 @@ public:
   ~CustomRightHandSide() { delete cef; }
 
   CustomExactFunction* cef; 
+  double k, alpha;
 };
 
 /* Exact solution */

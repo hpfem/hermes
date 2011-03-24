@@ -8,19 +8,21 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double coeff1, double coeff2, double coeff3) 
-    : DefaultNonConstRightHandSide(coeff1, coeff2, coeff3) {};
+  CustomRightHandSide(double alpha, double x_loc, double y_loc) 
+    : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc) {};
 
   virtual double value(double x, double y) {
-    double a_P = (-coeff1 * pow((x - coeff2), 2) - coeff1 * pow((y - coeff2), 2));
+    double a_P = (-alpha * pow((x - x_loc), 2) - alpha * pow((y - y_loc), 2));
   
-    return -(4 * exp(a_P) * coeff1 * (coeff1 * (x - coeff2) * (x - coeff2) 
-				      + ALPHA_P * (y - coeff3) * (y - coeff3) - 1));
+    return -(4 * exp(a_P) * alpha * (alpha * (x - x_loc) * (x - x_loc) 
+				      + alpha * (y - y_loc) * (y - y_loc) - 1));
   }
 
   virtual Ord ord(Ord x, Ord y) {
     return Ord(8);
   }
+
+  double alpha, x_loc, y_loc;
 };
 
 /* Exact solution */
