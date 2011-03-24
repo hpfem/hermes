@@ -12,16 +12,16 @@ public:
     {
     };
 
-    virtual void derivatives(double x, double y, scalar& dx, scalar& dy) {
+    virtual void derivatives(double x, double y, scalar& dx, scalar& dy) const {
         dx = cos(x)*sin(y);
         dy = sin(x)*cos(y);
     };
 
-    virtual double value(double x, double y) {
+    virtual double value(double x, double y) const {
         return sin(x)*sin(y);
     }
 
-    virtual Ord ord(Ord x, Ord y) {
+    virtual Ord ord(Ord x, Ord y) const {
         return Ord(15);
     }
 };
