@@ -65,7 +65,7 @@ public:
     cef = new CustomExactFunction(coeff1);
   };
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     return -(cef->dduhat_dxx(x) * cef->uhat(y) + cef->uhat(x) * cef->dduhat_dxx(y)) 
            + coeff1 * coeff1 * cef->uhat(x) * cef->uhat(y);
   }

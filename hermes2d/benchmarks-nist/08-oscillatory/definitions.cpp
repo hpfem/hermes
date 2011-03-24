@@ -10,7 +10,7 @@ class CustomRightHandSide: public DefaultNonConstRightHandSide
 public:
   CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
       return -sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((alpha 
              + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4) 
              + 2*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha 
@@ -44,7 +44,7 @@ public:
   CustomExactSolution(Mesh* mesh, double alpha) 
         : ExactSolutionScalar(mesh), alpha(alpha) {};
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     double r = sqrt(x*x + y*y);
     return sin(1/(alpha + r));
   };
@@ -56,7 +56,7 @@ public:
     dy = -cos(h) * h * h * y / r;
   };
 
-  virtual Ord ord (Ord x, Ord y) {
+  virtual Ord ord (Ord x, Ord y) const {
     return Ord(10);
   };
 

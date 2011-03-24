@@ -25,14 +25,14 @@ public:
     }
   };
 
-  double get_angle(double y, double x) {
+  double get_angle(double y, double x) const {
     double theta = atan2(y, x);
     if (theta < 0)
       theta += 2 * M_PI;
     return theta;
   };
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     return (pow(sqrt(x*x + y*y), ALPHA) * sin(ALPHA * get_angle(y, x)));
   };
 

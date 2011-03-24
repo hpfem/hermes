@@ -14,7 +14,7 @@ public:
       alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w), 
       omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
-  double value(double x, double y) {
+  double value(double x, double y) const {
     //For more elegant form please execute file "generate_rhs.py" 
 
     double a_P = (-alpha_p * pow((x - x_p), 2) - alpha_p * pow((y - y_p), 2));
@@ -50,14 +50,14 @@ public:
     : ExactSolutionScalar(mesh), alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), 
       x_w(x_w), y_w(y_w), omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
-  double get_angle(double y, double x) {
+  double get_angle(double y, double x) const {
     double theta = atan2(y, x);
     if (theta < 0)
       theta += 2 * M_PI;
     return theta;
   }
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     double ALPHA_C = (M_PI/ omega_c);
 
     return exp(-alpha_p * (pow((x - x_p), 2) + pow((y - y_p), 2)))

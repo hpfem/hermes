@@ -25,7 +25,7 @@ public:
     cef = new CustomExactFunction(k, alpha);
   };
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     if (x < 0) return cef->fn(x, y) * k * k;
     else return cef->fn(x, y) * k * k 
                 - alpha *(alpha - 1) * pow(x, alpha - 2.) 
@@ -52,7 +52,7 @@ public:
     cef = new CustomExactFunction(k, alpha);
   };
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     return cef->fn(x, y);
   }
 

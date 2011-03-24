@@ -10,7 +10,7 @@ class CustomRightHandSide: public DefaultNonConstRightHandSide
 public:
   CustomRightHandSide(double epsilon) : DefaultNonConstRightHandSide(), epsilon(epsilon) {};
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const{
     return -epsilon*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y)) 
            + 2*M_PI*(1 - exp(-(1 - x)/epsilon))*exp(-(1 - y)/epsilon)*sin(M_PI*(x + y))/epsilon 
            + 2*M_PI*(1 - exp(-(1 - y)/epsilon))*exp(-(1 - x)/epsilon)*sin(M_PI*(x + y))/epsilon 
@@ -36,7 +36,7 @@ public:
   CustomExactSolution(Mesh* mesh, double epsilon) 
         : ExactSolutionScalar(mesh), epsilon(epsilon) {};
 
-  virtual scalar value(double x, double y) {
+  virtual scalar value(double x, double y) const {
     return (1 - exp(-(1-x)/epsilon)) * (1 - exp(-(1-y)/epsilon)) * cos(M_PI * (x + y)); 
   };
 

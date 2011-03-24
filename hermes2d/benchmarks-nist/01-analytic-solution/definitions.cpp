@@ -10,7 +10,7 @@ class CustomRightHandSide: public DefaultNonConstRightHandSide
 public:
   CustomRightHandSide(double pol_deg) : DefaultNonConstRightHandSide(), pol_deg(pol_deg) {};
 
-  virtual double value(double x, double y) {
+  virtual double value(double x, double y) const {
     double a = pow(2.0, 4.0*pol_deg);
     double b = pow(x-1.0, 8.0);
     double c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
@@ -38,7 +38,7 @@ public:
   CustomExactSolution(Mesh* mesh, double poly_deg) 
             : ExactSolutionScalar(mesh), poly_deg(poly_deg) {};
 
-  double value(double x, double y) {
+  double value(double x, double y) const {
     return pow(2, 4 * poly_deg) * pow(x, poly_deg) * pow(1 - x, poly_deg) 
            * pow(y, poly_deg) * pow(1 - y, poly_deg);
   }
