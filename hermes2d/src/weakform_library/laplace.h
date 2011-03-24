@@ -140,10 +140,10 @@ public:
                : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
 
   scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                       Geom<double> *e, ExtData<scalar> *ext) {
+               Geom<double> *e, ExtData<scalar> *ext) {
     scalar result = 0;
     for (int i = 0; i < n; i++)
-      result -= wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+      result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
     return result;
   }
 
@@ -151,7 +151,7 @@ public:
           Geom<Ord> *e, ExtData<Ord> *ext) {
     Ord result = 0;
     for (int i = 0; i < n; i++)
-      result -= wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
+      result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
     return result;
   }
 

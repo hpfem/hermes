@@ -15,8 +15,8 @@ public:
   virtual double value(double x, double y) {
     double a_P = (-coeff1 * pow((x - coeff2), 2) - coeff1 * pow((y - coeff2), 2));
   
-    return 4 * exp(a_P) * coeff1 * (coeff1 * (x - coeff2) * (x - coeff2) 
-           + ALPHA_P * (y - coeff3) * (y - coeff3) - 1);
+    return -(4 * exp(a_P) * coeff1 * (coeff1 * (x - coeff2) * (x - coeff2) 
+				      + ALPHA_P * (y - coeff3) * (y - coeff3) - 1));
   }
 
   virtual Ord ord(Ord x, Ord y) {

@@ -20,8 +20,8 @@ public:
     double f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
     double g = pow(x-1.0, coeff1);
 
-    return coeff1*a*pow(x, 8.0)*b*c*pow(y, coeff1)*d 
-           + coeff1*a*pow(y, 8.0)*e*f*pow(x, coeff1)*g;
+    return -(coeff1*a*pow(x, 8.0)*b*c*pow(y, coeff1)*d 
+	     + coeff1*a*pow(y, 8.0)*e*f*pow(x, coeff1)*g);
   }
 
   virtual Ord ord(Ord x, Ord y) {
