@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   WeakFormPoisson wf(CONST_F);
   
   // Initialize boundary conditions
-  EssentialBCConst bc_essential(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), 0.0);
+  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

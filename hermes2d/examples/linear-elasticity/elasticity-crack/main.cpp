@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   u2_mesh.copy(&u1_mesh);
 
   // Initialize boundary conditions
-  EssentialBCConst zero_disp(BDY_LEFT, 0.0);
+  DefaultEssentialBCConst zero_disp(BDY_LEFT, 0.0);
   EssentialBCs bcs(&zero_disp);
 
   // Initialize the weak formulation.

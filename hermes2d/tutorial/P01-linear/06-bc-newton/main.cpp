@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  EssentialBCConst bc_essential(BDY_LEFT, T1);
+  DefaultEssentialBCConst bc_essential(BDY_LEFT, T1);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

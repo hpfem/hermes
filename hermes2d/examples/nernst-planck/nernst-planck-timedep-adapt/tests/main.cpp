@@ -105,8 +105,8 @@ int main (int argc, char* argv[]) {
   C_mesh.copy(&basemesh);
   phi_mesh.copy(&basemesh);
 
-  EssentialBCConst bc_phi_voltage(BDY_TOP, VOLTAGE);
-  EssentialBCConst bc_phi_zero(BDY_BOT, 0.0);
+  DefaultEssentialBCConst bc_phi_voltage(BDY_TOP, VOLTAGE);
+  DefaultEssentialBCConst bc_phi_zero(BDY_BOT, 0.0);
   EssentialBCs bcs_phi(Hermes::vector<EssentialBC*>(&bc_phi_voltage, &bc_phi_zero));
 
   // Spaces for concentration and the voltage.

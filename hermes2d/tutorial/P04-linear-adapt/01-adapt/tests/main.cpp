@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
   WeakFormElectrostaticTutorial wf;
   
   // Initialize boundary conditions
-  EssentialBCConst bc_out(OUTER_BDY, 0.0);
-  EssentialBCConst bc_stator(STATOR_BDY, VOLTAGE);
+  DefaultEssentialBCConst bc_out(OUTER_BDY, 0.0);
+  DefaultEssentialBCConst bc_stator(STATOR_BDY, VOLTAGE);
   EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.

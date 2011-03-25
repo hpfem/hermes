@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
                            &current_time, TEMP_INIT, T_FINAL, &tsln);
   
   // Initialize boundary conditions.
-  EssentialBCConst bc_essential(BDY_GROUND, TEMP_INIT);
+  DefaultEssentialBCConst bc_essential(BDY_GROUND, TEMP_INIT);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

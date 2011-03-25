@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPerturbedPoisson wf(&rhs);
   
   // Initialize boundary conditions.
-  EssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
+  DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

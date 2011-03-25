@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
     // Initialize boundary conditions
-    EssentialBCConst bc1(BDY_PERFECT, 0.0);
+    DefaultEssentialBCConst bc1(BDY_PERFECT, 0.0);
     EssentialBCNonConst bc2(BDY_LEFT);
     EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc1, &bc2));
 

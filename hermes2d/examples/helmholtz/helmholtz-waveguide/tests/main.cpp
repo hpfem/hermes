@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
     // Initialize boundary conditions
     // Initialize boundary conditions
-    EssentialBCConst bc1(BDY_PERFECT, 0.0);
+    DefaultEssentialBCConst bc1(BDY_PERFECT, 0.0);
     EssentialBCNonConst bc2(BDY_LEFT);
     //NaturalBoundaryCondition bc3(BDY_IMPEDANCE);
     EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc1, &bc2));
