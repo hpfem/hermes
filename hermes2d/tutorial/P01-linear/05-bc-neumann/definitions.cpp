@@ -17,8 +17,8 @@ public:
     add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
     add_vector_form(new DefaultVectorFormVolConst(0, const_f));
 
-    add_vector_form_surf(new DefaultVectorFormSurfConst(0, bdy_bottom, const_gamma_bottom));
-    add_vector_form_surf(new DefaultVectorFormSurfConst(0, bdy_outer, const_gamma_outer));
-    add_vector_form_surf(new DefaultVectorFormSurfConst(0, bdy_left, const_gamma_left));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_bottom, const_gamma_bottom));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_outer, const_gamma_outer));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_left, const_gamma_left));
   };
 };

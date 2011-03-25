@@ -22,7 +22,7 @@ public:
     add_vector_form(new DefaultVectorFormVolConst(1, rho_g));
 
     // external forces
-    add_vector_form_surf(new DefaultVectorFormSurfConst(0, non_zero_neumann_bnd, f0));
-    add_vector_form_surf(new DefaultVectorFormSurfConst(1, non_zero_neumann_bnd, f1));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, non_zero_neumann_bnd, f0));
+    add_vector_form_surf(new DefaultVectorFormSurf(1, non_zero_neumann_bnd, f1));
   };
 };

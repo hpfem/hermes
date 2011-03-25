@@ -16,7 +16,7 @@ public:
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);
 
-    add_matrix_form_surf(new DefaultMatrixFormSurfConst(0, 0, bdy_air, alpha * lambda));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha * lambda));
     add_vector_form_surf(new CustomVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
   };
 

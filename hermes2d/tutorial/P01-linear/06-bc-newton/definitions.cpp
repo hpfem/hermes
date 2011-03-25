@@ -10,8 +10,8 @@ public:
   CustomWeakFormPoissonNewton(double h, double T0, std::string natural_bc_bnd_part) : WeakForm(1)
   {
     add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-    add_matrix_form_surf(new DefaultMatrixFormSurfConst(0, 0, natural_bc_bnd_part, h));
-    add_vector_form_surf(new DefaultVectorFormSurfConst(0, natural_bc_bnd_part, h * T0));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, natural_bc_bnd_part, h));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, natural_bc_bnd_part, h * T0));
   };
 };
 

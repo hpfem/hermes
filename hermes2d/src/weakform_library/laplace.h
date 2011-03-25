@@ -86,12 +86,12 @@ public:
    coeff1, coeff2... constant number
 */
 
-class DefaultMatrixFormAdvect : public WeakForm::MatrixFormVol
+class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
 {
 public:
- DefaultMatrixFormAdvect(int i, int j, double coeff1, double coeff2) 
+ DefaultMatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
    : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
- DefaultMatrixFormAdvect(int i, int j, std::string area, double coeff1, double coeff2) 
+ DefaultMatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
    : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
 
   template<typename Real, typename Scalar>
@@ -187,12 +187,12 @@ private:
    coeff... constant number
 */
 
-class DefaultMatrixFormSurfConst : public WeakForm::MatrixFormSurf
+class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
 {
 public:
-  DefaultMatrixFormSurfConst(int i, int j, double coeff) 
+  DefaultMatrixFormSurf(int i, int j, double coeff) 
         : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
-  DefaultMatrixFormSurfConst(int i, int j, std::string area, double coeff) 
+  DefaultMatrixFormSurf(int i, int j, std::string area, double coeff) 
         : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
@@ -220,12 +220,12 @@ public:
    coeff... constant number
 */
 
-class DefaultVectorFormSurfConst : public WeakForm::VectorFormSurf
+class DefaultVectorFormSurf : public WeakForm::VectorFormSurf
 {
 public:
-  DefaultVectorFormSurfConst(int i, double coeff) 
+  DefaultVectorFormSurf(int i, double coeff) 
          : WeakForm::VectorFormSurf(i), coeff(coeff) { }
-  DefaultVectorFormSurfConst(int i, std::string area, double coeff) 
+  DefaultVectorFormSurf(int i, std::string area, double coeff) 
          : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
