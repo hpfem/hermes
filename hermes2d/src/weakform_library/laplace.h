@@ -22,12 +22,12 @@
    coeff... constant number
 */
 
-class DefaultMatrixFormVolConst : public WeakForm::MatrixFormVol
+class DefaultMatrixFormStiffness : public WeakForm::MatrixFormVol
 {
 public:
-  DefaultMatrixFormVolConst(int i, int j, double coeff = 1.0) 
+  DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0) 
         : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
-  DefaultMatrixFormVolConst(int i, int j, std::string area, double coeff = 1.0) 
+  DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0) 
         : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
@@ -54,12 +54,12 @@ public:
    coeff... constant number
 */
 
-class DefaultMatrixFormVolMassConst : public WeakForm::MatrixFormVol
+class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
 {
 public:
-  DefaultMatrixFormVolMassConst(int i, int j, double coeff = 1.0) 
+  DefaultMatrixFormMass(int i, int j, double coeff = 1.0) 
         : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
-  DefaultMatrixFormVolMassConst(int i, int j, std::string area, double coeff = 1.0) 
+  DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0) 
         : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
@@ -80,6 +80,39 @@ public:
 
   private:
     double coeff;
+};
+
+/* Default volumetric matrix form \int_{area} (coeff1, coeff2) \cdot \nabla u vd\bfx 
+   coeff1, coeff2... constant number
+*/
+
+class DefaultMatrixFormAdvect : public WeakForm::MatrixFormVol
+{
+public:
+ DefaultMatrixFormAdvect(int i, int j, double coeff1, double coeff2) 
+   : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
+ DefaultMatrixFormAdvect(int i, int j, std::string area, double coeff1, double coeff2) 
+   : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
+
+  template<typename Real, typename Scalar>
+  Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    return   coeff1 * int_dudx_v<Real, Scalar>(n, wt, u, v)
+           + coeff2 * int_dudy_v<Real, Scalar>(n, wt, u, v);
+  }
+
+  scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+               Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+  }
+
+  Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+          Geom<Ord> *e, ExtData<Ord> *ext) {
+    return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+  }
+
+  private:
+  double coeff1, coeff2;
 };
 
 /* Default volumetric vector form \int_{area} coeff v d\bfx 
@@ -222,7 +255,7 @@ class DefaultWeakFormLaplace : public WeakForm
 public:
   DefaultWeakFormLaplace() : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
   };
 };
 

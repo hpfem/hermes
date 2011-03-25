@@ -87,8 +87,8 @@ class CustomWeakFormPerturbedPoisson : public WeakForm
 {
 public:
   CustomWeakFormPerturbedPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
-    add_matrix_form(new DefaultMatrixFormVolMassConst(0, 0, rhs->coeff1*rhs->coeff1));
+    add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
+    add_matrix_form(new DefaultMatrixFormMass(0, 0, rhs->coeff1*rhs->coeff1));
     add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
   };
 };

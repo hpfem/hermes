@@ -14,7 +14,7 @@ public:
                                std::string bdy_left,
                                double const_gamma_left) : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormVolConst(0, 0));
+    add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
     add_vector_form(new DefaultVectorFormVolConst(0, const_f));
 
     add_vector_form_surf(new DefaultVectorFormSurfConst(0, bdy_bottom, const_gamma_bottom));

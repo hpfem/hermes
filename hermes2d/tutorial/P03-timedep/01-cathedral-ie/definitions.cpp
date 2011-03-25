@@ -10,8 +10,8 @@ public:
                         double time_step, double* current_time_ptr, double temp_init, double t_final, 
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormVolMassConst(0, 0, heatcap * rho / time_step));
-    add_matrix_form(new DefaultMatrixFormVolConst(0, 0, lambda));
+    add_matrix_form(new DefaultMatrixFormMass(0, 0, heatcap * rho / time_step));
+    add_matrix_form(new DefaultMatrixFormStiffness(0, 0, lambda));
     CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);

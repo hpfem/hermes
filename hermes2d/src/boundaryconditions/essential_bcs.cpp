@@ -17,6 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#define HERMES_REPORT_WARN
+
 #include "../hermes2d.h"
 
 // Essential BC.
@@ -34,7 +36,7 @@ EssentialBC::EssentialBC(std::string marker) {
 EssentialBC::~EssentialBC() {};
 
 scalar EssentialBC::value(double x, double y) const {
-  error("EssentialBC::Function used either for a constant condition, or not redefined for nonconstant condition.");
+  warn("EssentialBC::Function used either for a constant condition, or not redefined for nonconstant condition.");
   return 0.0;
 };
 
