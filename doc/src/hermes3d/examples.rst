@@ -7,3 +7,4 @@ Examples
     examples/heat-conduction
     examples/singpert-aniso
     examples/elastostatics
+    examples/elasticity-cubit-hex
