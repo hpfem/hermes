@@ -37,17 +37,17 @@ public:
   /// Types of description of boundary values, either a function (callback), or a constant.
   enum EssentialBCValueType {
     BC_FUNCTION,
-    BC_VALUE
+    BC_CONST
   };
 
   /// Pure virtual function giving info whether u_Essential is a constant or a function.
   virtual EssentialBCValueType get_value_type() const = 0;
 
   /// Represents a function prescribed on the boundary.
-  virtual scalar function(double x, double y) const;
+  virtual scalar value(double x, double y) const;
 
   /// Special case of a constant function.
-  scalar value;
+  scalar value_const;
 
   /// Sets the current time for time-dependent boundary conditions.
   void set_current_time(double time);
@@ -65,14 +65,14 @@ protected:
 };
 
 /// Class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential given by value.
-class HERMES_API EssentialBCConst : public EssentialBC {
+class HERMES_API DefaultEssentialBCConst : public EssentialBC {
 public:
   /// Constructors.
-  EssentialBCConst(Hermes::vector<std::string> markers, scalar value);
-  EssentialBCConst(std::string marker, scalar value);
+  DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const);
+  DefaultEssentialBCConst(std::string marker, scalar value_const);
 
   /// Function giving info that u_Essential is a constant.
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_VALUE; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_CONST; }
 };
 
 /// Class encapsulating all boundary conditions of one problem.

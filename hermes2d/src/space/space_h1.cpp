@@ -248,9 +248,9 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
   // If the BC on this part of the boundary is constant.
   EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-  if (bc->get_value_type() == EssentialBC::BC_VALUE)
+  if (bc->get_value_type() == EssentialBC::BC_CONST)
   {
-    proj[0] = proj[1] = bc->value;
+    proj[0] = proj[1] = bc->value_const;
   } // If the BC is not constant.
   else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
   {
@@ -260,12 +260,12 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
     Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
     CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
     // Calculate.
-    proj[0] = bc->function(x, y);
+    proj[0] = bc->value(x, y);
     surf_pos->t = surf_pos->hi;
     // Find out the (x,y) coordinates for the second endpoint.
     CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
     // Calculate.
-    proj[1] = bc->function(x, y);
+    proj[1] = bc->value(x, y);
   }
 
   if (order-- > 1)
@@ -289,9 +289,9 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
         // If the BC on this part of the boundary is constant.
         EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-        if (bc->get_value_type() == EssentialBC::BC_VALUE)
+        if (bc->get_value_type() == EssentialBC::BC_CONST)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-                   * (bc->value - l);
+                   * (bc->value_const - l);
         // If the BC is not constant.
         else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
         {
@@ -301,7 +301,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
           CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
           // Calculate.
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-            * (bc->function(x, y) - l);
+            * (bc->value(x, y) - l);
         }
       }
     }

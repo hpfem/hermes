@@ -22,18 +22,18 @@
 // Essential BC.
 EssentialBC::EssentialBC(Hermes::vector<std::string> markers) : markers(markers) {
   current_time = 0.0;
-  value = 0.0;
+  value_const = 0.0;
 };
 
 EssentialBC::EssentialBC(std::string marker) {
   markers.push_back(marker);
   current_time = 0.0;
-  value = 0.0;
+  value_const = 0.0;
 };
 
 EssentialBC::~EssentialBC() {};
 
-scalar EssentialBC::function(double x, double y) const {
+scalar EssentialBC::value(double x, double y) const {
   error("EssentialBC::Function used either for a constant condition, or not redefined for nonconstant condition.");
   return 0.0;
 };
@@ -47,12 +47,12 @@ double EssentialBC::get_current_time() const {
 }
 
 // Essential BC Constant
-EssentialBCConst::EssentialBCConst(Hermes::vector<std::string> markers, scalar value) : EssentialBC(markers) {
-  this->value = value;
+DefaultEssentialBCConst::DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const) : EssentialBC(markers) {
+  this->value_const = value_const;
 }
 
-EssentialBCConst::EssentialBCConst(std::string marker, scalar value) : EssentialBC(Hermes::vector<std::string>()) {
-  this->value = value;
+DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar value_const) : EssentialBC(Hermes::vector<std::string>()) {
+  this->value_const = value_const;
   markers.push_back(marker);
 }
 
