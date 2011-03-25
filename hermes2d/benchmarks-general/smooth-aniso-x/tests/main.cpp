@@ -1,30 +1,22 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_bench_sm_aniso_x Benchmarks/Smooth Aniso-X
- *  \{
- *  \brief This test makes sure that the benchmark "smooth-aniso-x" works correctly.
- *
- *  \section s_params Parameters
- *  - P_INIT=2
- *  - THERSHOLD=0.3
- *  - STRATEGY=0
- *  - CAND_LIST=HP_ANISO
- *  - MESH_REGULARITY=-1
- *  - ERR_STOP=1E-4
- *  - CONV_EXP=1.0
- *  - NDOF_STOP=400
- *
- *  \section s_res Results
- *  - DOFs: 14
- *  - Error estimate: 3.68E-5 %
- *  - Iterations: 4 (the last iteration at which ERR_STOP is fulfilled)
- */
+//  This example shows that it makes sense to use anisotropic polynomial
+//  degrees in quadrilateral elements. The exact solution to this Poisson
+//  problem is u(x,y) = sin(x), defined in the square (0, pi)x(0, pi).
+//
+//  PDE: -Laplace u = f.
+//
+//  Known exact solution, see functions fn() and fndd().
+//
+//  Domain: square domain (0, pi) x (0, pi), mesh file square_quad.mesh.
+//
+//  BC:  Dirichlet and Neumann, given by exact solution.
+//
+//  The following parameters can be changed:
 
 int P_INIT = 1;                                   // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
@@ -63,7 +55,7 @@ const std::string BDY_RIGHT = "2";
 const std::string BDY_TOP = "3";
 const std::string BDY_LEFT = "4";
 
-// Weak forms.
+// Right-hand side, exact solutionm weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
