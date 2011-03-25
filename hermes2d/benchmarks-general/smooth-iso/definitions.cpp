@@ -3,14 +3,12 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+/*  Exact solution */
 
-// Exact solution to the 2D equation.
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-    CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh)
-    {
-    };
+    CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) { };
 
     virtual void derivatives(double x, double y, scalar& dx, scalar& dy) const {
         dx = cos(x)*sin(y);
@@ -26,13 +24,12 @@ public:
     }
 };
 
+/* Right-hand side */
 
-
-// Right-hand side for the 2D equation -Laplace u  = f
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-    CustomRightHandSide() : DefaultNonConstRightHandSide(){}
+    CustomRightHandSide() : DefaultNonConstRightHandSide() { }
 
     virtual scalar value(double x, double y) const {
         return 2*sin(x)*sin(y);
@@ -43,8 +40,8 @@ public:
     }
 };
 
+/* Weak forms */
 
-// Weak forms for the 2D equation with Dirichlet boundary conditions.
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
