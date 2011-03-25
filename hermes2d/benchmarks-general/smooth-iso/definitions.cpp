@@ -22,30 +22,24 @@ public:
     }
 
     virtual Ord ord(Ord x, Ord y) const {
-        return Ord(15);
+        return Ord(7);
     }
 };
 
 
+
 // Right-hand side for the 2D equation -Laplace u  = f
-class CustomRightHandSide: public WeakForm::VectorFormVol
+class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-    CustomRightHandSide(unsigned i) : WeakForm::VectorFormVol(i) {}
+    CustomRightHandSide() : DefaultNonConstRightHandSide(){}
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                         Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(double x, double y) const {
+        return 2*sin(x)*sin(y);
+    };
 
-        scalar result = 0;
-        for (int i = 0; i < n; i++)
-            result += wt[i] * (2*sin(e->x[i])*sin(e->y[i])*v->val[i]);
-        return result;
-    }
-
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e,
-                    ExtData<Ord> *ext) {
-        return Ord(15);
+    virtual Ord ord(Ord x, Ord y) const {
+        return Ord(7);
     }
 };
 
@@ -54,8 +48,8 @@ public:
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-    CustomWeakFormPoisson() : WeakForm(1) {
+    CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
         add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-        add_vector_form(new CustomRightHandSide(0));
+        add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
     }
 };
