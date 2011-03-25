@@ -284,7 +284,7 @@ public:
     return BC_FUNCTION; 
   };
 
-  virtual scalar function(double x, double y) const {
+  virtual scalar value(double x, double y) const {
     return exact_solution->value(x, y);
   };
 
