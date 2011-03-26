@@ -41,11 +41,11 @@ public:
 
 /* Right-hand side */
 
-class CustomRightHandSide1: public DefaultNonConstRightHandSide
+class CustomRightHandSide1: public Laplace::DefaultRightHandSides::NonConstRightHandSide
 {
 public:
   CustomRightHandSide1(double K, double d_u, double sigma) 
-    : DefaultNonConstRightHandSide(), d_u(d_u), sigma(sigma) {
+    : Laplace::DefaulRightHandSides::NonConstRightHandSide(), d_u(d_u), sigma(sigma) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
@@ -69,11 +69,11 @@ public:
   double d_u, sigma;
 };
 
-class CustomRightHandSide2: public DefaultNonConstRightHandSide
+class CustomRightHandSide2: public Laplace::DefaultRightHandSides::NonConstRightHandSide
 {
 public:
   CustomRightHandSide2(double K, double d_v) 
-    : DefaultNonConstRightHandSide(), d_v(d_v) {
+    : Laplace::DefaulRightHandSides::NonConstRightHandSide(), d_v(d_v) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
@@ -161,15 +161,15 @@ class WeakFormFitzHughNagumo : public WeakForm
 public:
   WeakFormFitzHughNagumo(CustomRightHandSide1* rhs_1, CustomRightHandSide2* rhs_2)
           : WeakForm(2) {
-    add_matrix_form(new DefaultMatrixFormStiffness(0, 0, D_u * D_u));
-    add_matrix_form(new DefaultMatrixFormMass(0, 0, -1.0));
-    add_matrix_form(new DefaultMatrixFormMass(0, 1, rhs_1->sigma, HERMES_NONSYM));
-    add_matrix_form(new DefaultMatrixFormMass(1, 0, -1.0, HERMES_NONSYM));     
-    add_matrix_form(new DefaultMatrixFormStiffness(1, 1, D_v * D_v));
-    add_matrix_form(new DefaultMatrixFormMass(1, 1, 1.0));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormStiffness(0, 0, D_u * D_u));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormMass(0, 0, -1.0));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormMass(0, 1, rhs_1->sigma, HERMES_NONSYM));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormMass(1, 0, -1.0, HERMES_NONSYM));     
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormStiffness(1, 1, D_v * D_v));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormMass(1, 1, 1.0));
     
 
-    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs_1));
-    add_vector_form(new DefaultVectorFormVolNonConst(1, rhs_2));
+    add_vector_form(new Laplace::DefaultVolumetricVectorForms::VectorFormNonConst(0, rhs_1));
+    add_vector_form(new Laplace::DefaultVolumetricVectorForms::VectorFormNonConst(1, rhs_2));
   }
 };
