@@ -4,8 +4,6 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace Laplace;
-
 class CustomWeakFormLinearElasticity : public WeakForm
 {
 public:
@@ -16,15 +14,15 @@ public:
     double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
     double mu = E / (2*(1 + nu));
 
-    add_matrix_form(new MatrixFormVolLinearElasticity_x_x(0, 0, lambda, mu));
-    add_matrix_form(new MatrixFormVolLinearElasticity_x_y(0, 1, lambda, mu));
-    add_matrix_form(new MatrixFormVolLinearElasticity_y_y(1, 1, lambda, mu));
+    add_matrix_form(new Elasticity::DefaultVolumetricMatrixFormLinear_x_x(0, 0, lambda, mu));
+    add_matrix_form(new Elasticity::DefaultVolumetricMatrixFormLinear_x_y(0, 1, lambda, mu));
+    add_matrix_form(new Elasticity::DefaultVolumetricMatrixFormLinear_y_y(1, 1, lambda, mu));
 
     // gravity loading
-    add_vector_form(new VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
+    add_vector_form(new Laplace::VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
 
     // external forces
-    add_vector_form_surf(new SurfaceVectorForms::DefaultSurfaceVectorForm(0, non_zero_neumann_bnd, f0));
-    add_vector_form_surf(new SurfaceVectorForms::DefaultSurfaceVectorForm(1, non_zero_neumann_bnd, f1));
+    add_vector_form_surf(new Laplace::SurfaceVectorForms::DefaultSurfaceVectorForm(0, non_zero_neumann_bnd, f0));
+    add_vector_form_surf(new Laplace::SurfaceVectorForms::DefaultSurfaceVectorForm(1, non_zero_neumann_bnd, f1));
   };
 };
