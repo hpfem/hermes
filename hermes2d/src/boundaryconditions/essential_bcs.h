@@ -22,17 +22,18 @@
 
 #include "vector.h"
 #include "map"
+#include "../function/solution.h"
 
 /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
-class HERMES_API EssentialBC
+class HERMES_API EssentialBoundaryCondition
 {
 public:
   /// Default constructor.
-  EssentialBC(Hermes::vector<std::string> markers);
-  EssentialBC(std::string marker);
+  EssentialBoundaryCondition(Hermes::vector<std::string> markers);
+  EssentialBoundaryCondition(std::string marker);
 
   /// Virtual destructor.
-  virtual ~EssentialBC();
+  virtual ~EssentialBoundaryCondition();
 
   /// Types of description of boundary values, either a function (callback), or a constant.
   enum EssentialBCValueType {
@@ -64,15 +65,45 @@ protected:
   friend class EssentialBCs;
 };
 
-/// Class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential given by value.
-class HERMES_API DefaultEssentialBCConst : public EssentialBC {
+/// Class representing constant essential boundary condition.
+class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition {
 public:
   /// Constructors.
   DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const);
   DefaultEssentialBCConst(std::string marker, scalar value_const);
 
   /// Function giving info that u_Essential is a constant.
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_CONST; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_CONST; }
+};
+
+/// Class representing non-constant essential boundary condition.
+class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition
+{
+public:
+  DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
+                             ExactSolutionScalar* exact_solution) : 
+        EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
+  };
+
+  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) : 
+        EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+  {
+    markers.push_back(marker);
+  };
+ 
+  ~DefaultEssentialBCNonConst() {};
+
+  virtual EssentialBCValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar value(double x, double y) const {
+    return exact_solution->value(x, y);
+  };
+
+  ExactSolutionScalar* exact_solution;
 };
 
 /// Class encapsulating all boundary conditions of one problem.
@@ -84,31 +115,31 @@ public:
 
   /// Constructor with all boundary conditions of a problem.
   EssentialBCs(Hermes::vector<EssentialBC *> essential_bcs);
-  EssentialBCs(EssentialBC * boundary_condition);
+  EssentialBCs(EssentialBoundaryCondition * boundary_condition);
 
   /// Default destructor.
   ~EssentialBCs();
 
   /// Initializes the class, fills the structures.
-  void add_boundary_conditions(Hermes::vector<EssentialBC *> essential_bcs);
-  void add_boundary_condition(EssentialBC * essential_bc);
+  void add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition *> essential_bcs);
+  void add_boundary_condition(EssentialBoundaryCondition * essential_bc);
 
   /// Public iterators for the private data structures.
-  Hermes::vector<EssentialBC *>::const_iterator iterator;
-  Hermes::vector<EssentialBC *>::const_iterator begin() const;
-  Hermes::vector<EssentialBC *>::const_iterator end() const;
+  Hermes::vector<EssentialBoundaryCondition *>::const_iterator iterator;
+  Hermes::vector<EssentialBoundaryCondition *>::const_iterator begin() const;
+  Hermes::vector<EssentialBoundaryCondition *>::const_iterator end() const;
   
-  EssentialBC* get_boundary_condition(std::string marker);
+  EssentialBoundaryCondition* get_boundary_condition(std::string marker);
 
   /// Sets the current time for time-dependent boundary conditions.
   void set_current_time(double time);
 
 private:
   /// All boundary conditions together.
-  Hermes::vector<EssentialBC *> all;
+  Hermes::vector<EssentialBoundaryCondition *> all;
 
   /// Boundary markers cache
-  std::map<std::string, EssentialBC *> markers;
+  std::map<std::string, EssentialBoundaryCondition *> markers;
 
   /// Create boundary markers cache for assembling
   void create_marker_cache();

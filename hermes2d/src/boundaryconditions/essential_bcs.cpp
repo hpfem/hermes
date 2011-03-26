@@ -21,39 +21,39 @@
 
 #include "../hermes2d.h"
 
-// Essential BC.
-EssentialBC::EssentialBC(Hermes::vector<std::string> markers) : markers(markers) {
+// Essential boundary condition.
+EssentialBoundaryCondition::EssentialBoundaryCondition(Hermes::vector<std::string> markers) : markers(markers) {
   current_time = 0.0;
   value_const = 0.0;
 };
 
-EssentialBC::EssentialBC(std::string marker) {
+EssentialBoundaryCondition::EssentialBoundaryCondition(std::string marker) {
   markers.push_back(marker);
   current_time = 0.0;
   value_const = 0.0;
 };
 
-EssentialBC::~EssentialBC() {};
+EssentialBoundaryCondition::~EssentialBoundaryCondition() {};
 
-scalar EssentialBC::value(double x, double y) const {
-  warn("EssentialBC::Function used either for a constant condition, or not redefined for nonconstant condition.");
+scalar EssentialBoundaryCondition::value(double x, double y) const {
+  warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
   return 0.0;
 };
 
-void EssentialBC::set_current_time(double time) {
+void EssentialBoundaryCondition::set_current_time(double time) {
   this->current_time = time;
 }
 
-double EssentialBC::get_current_time() const {
+double EssentialBoundaryCondition::get_current_time() const {
   return current_time;
 }
 
-// Essential BC Constant
-DefaultEssentialBCConst::DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const) : EssentialBC(markers) {
+// Essential BoundaryCondition Constant
+DefaultEssentialBCConst::DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const) : EssentialBoundaryCondition(markers) {
   this->value_const = value_const;
 }
 
-DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar value_const) : EssentialBC(Hermes::vector<std::string>()) {
+DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar value_const) : EssentialBoundaryCondition(Hermes::vector<std::string>()) {
   this->value_const = value_const;
   markers.push_back(marker);
 }
@@ -62,35 +62,35 @@ DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar valu
 EssentialBCs::EssentialBCs() {
 };
 
-EssentialBCs::EssentialBCs(Hermes::vector<EssentialBC *> essential_bcs) {
+EssentialBCs::EssentialBCs(Hermes::vector<EssentialBoundaryCondition *> essential_bcs) {
   add_boundary_conditions(essential_bcs);
 };
 
-EssentialBCs::EssentialBCs(EssentialBC * boundary_condition) {
-  Hermes::vector<EssentialBC *> boundary_conditions;
+EssentialBCs::EssentialBCs(EssentialBoundaryCondition * boundary_condition) {
+  Hermes::vector<EssentialBoundaryCondition *> boundary_conditions;
   boundary_conditions.push_back(boundary_condition);
   add_boundary_conditions(boundary_conditions);
 };
 
-void EssentialBCs::add_boundary_conditions(Hermes::vector<EssentialBC *> boundary_conditions) {
-  for(Hermes::vector<EssentialBC *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
+void EssentialBCs::add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition *> boundary_conditions) {
+  for(Hermes::vector<EssentialBoundaryCondition *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
         all.push_back(*it);
 
   markers.clear();
   create_marker_cache();
 };
 
-void EssentialBCs::add_boundary_condition(EssentialBC * boundary_condition) {
-  Hermes::vector<EssentialBC *> boundary_conditions;
+void EssentialBCs::add_boundary_condition(EssentialBoundaryCondition * boundary_condition) {
+  Hermes::vector<EssentialBoundaryCondition *> boundary_conditions;
   boundary_conditions.push_back(boundary_condition);
   add_boundary_conditions(boundary_conditions);
 };
 
-Hermes::vector<EssentialBC *>::const_iterator EssentialBCs::begin() const {
+Hermes::vector<EssentialBoundaryCondition *>::const_iterator EssentialBCs::begin() const {
   return all.begin();
 }
 
-Hermes::vector<EssentialBC *>::const_iterator EssentialBCs::end() const {
+Hermes::vector<EssentialBoundaryCondition *>::const_iterator EssentialBCs::end() const {
   return all.end();
 }
 
@@ -107,7 +107,7 @@ void EssentialBCs::create_marker_cache() {
 }
 
 
-EssentialBC* EssentialBCs::get_boundary_condition(std::string marker) {
+EssentialBoundaryCondition* EssentialBCs::get_boundary_condition(std::string marker) {
   if(markers.find(marker) == markers.end())
     return NULL;
   else

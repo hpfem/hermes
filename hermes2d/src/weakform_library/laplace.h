@@ -23,13 +23,13 @@
 */
 
 namespace Laplace {
-  namespace DefaultVolumetricMatrixForms {
-    class MatrixFormStiffness : public WeakForm::MatrixFormVol
+  namespace VolumetricMatrixForms {
+    class DefaultMatrixFormStiffness : public WeakForm::MatrixFormVol
     {
     public:
-      MatrixFormStiffness(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      MatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -56,12 +56,12 @@ namespace Laplace {
        coeff... constant number
     */
 
-    class MatrixFormMass : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
     {
     public:
-      MatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      MatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -88,12 +88,12 @@ namespace Laplace {
        coeff1, coeff2... constant number
     */
 
-    class MatrixFormAdvection : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     MatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
+     DefaultMatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
-     MatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
+     DefaultMatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
 
       template<typename Real, typename Scalar>
@@ -118,29 +118,29 @@ namespace Laplace {
     };
   }
 
-  namespace DefaultRightHandSides {
+  namespace RightHandSides {
     // Generic class for non-constant right-hand side. 
-    class NonConstRightHandSide
+    class DefaultNonConstRightHandSide
     {
     public:
-      NonConstRightHandSide() { };
+      DefaultNonConstRightHandSide() { };
 
       virtual scalar value(double x, double y) const = 0;
       virtual Ord ord(Ord x, Ord y) const = 0;
     };
   }
 
-  namespace DefaultVolumetricVectorForms {
+  namespace VolumetricVectorForms {
       /* Default volumetric vector form \int_{area} coeff v d\bfx 
          coeff... constant number
       */
 
-      class VectorFormConst : public WeakForm::VectorFormVol
+      class DefaultVectorFormConst : public WeakForm::VectorFormVol
       {
       public:
-        VectorFormConst(int i, double coeff) 
+        DefaultVectorFormConst(int i, double coeff) 
                      : WeakForm::VectorFormVol(i), coeff(coeff) { }
-        VectorFormConst(int i, std::string area, double coeff) 
+        DefaultVectorFormConst(int i, std::string area, double coeff) 
                      : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
@@ -160,12 +160,12 @@ namespace Laplace {
       /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
          rhs(x, y)... non-constant right-hand side
       */
-      class VectorFormNonConst : public WeakForm::VectorFormVol
+      class DefaultVectorFormNonConst : public WeakForm::VectorFormVol
       {
       public:
-        VectorFormNonConst(int i, DefaultRightHandSides::NonConstRightHandSide* rhs) 
+        DefaultVectorFormNonConst(int i, RightHandSides::DefaultNonConstRightHandSide* rhs) 
                      : WeakForm::VectorFormVol(i), rhs(rhs) { }
-        VectorFormNonConst(int i, std::string area, DefaultRightHandSides::NonConstRightHandSide* rhs) 
+        DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs) 
                      : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
 
         scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
@@ -185,21 +185,21 @@ namespace Laplace {
         }
 
       private:
-        DefaultRightHandSides::NonConstRightHandSide* rhs;
+        RightHandSides::DefaultNonConstRightHandSide* rhs;
       };
   }
 
-  namespace DefaultSurfaceMatrixForms {
+  namespace SurfaceMatrixForms {
     /* Default surface matrix form \int_{area} coeff u v dS
        coeff... constant number
     */
 
-    class MatrixForm : public WeakForm::MatrixFormSurf
+    class DefaultSurfaceMatrixForm : public WeakForm::MatrixFormSurf
     {
     public:
-      MatrixForm(int i, int j, double coeff) 
+      DefaultSurfaceMatrixForm(int i, int j, double coeff) 
             : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
-      MatrixForm(int i, int j, std::string area, double coeff) 
+      DefaultSurfaceMatrixForm(int i, int j, std::string area, double coeff) 
             : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -223,17 +223,17 @@ namespace Laplace {
     };
   }
 
-  namespace DefaultSurfaceVectorForms {
+  namespace SurfaceVectorForms {
     /* Default surface vector form \int_{area} coeff v dS
        coeff... constant number
     */
 
-    class VectorForm : public WeakForm::VectorFormSurf
+    class DefaultSurfaceVectorForm : public WeakForm::VectorFormSurf
     {
     public:
-      VectorForm(int i, double coeff) 
+      DefaultSurfaceVectorForm(int i, double coeff) 
              : WeakForm::VectorFormSurf(i), coeff(coeff) { }
-      VectorForm(int i, std::string area, double coeff) 
+      DefaultSurfaceVectorForm(int i, std::string area, double coeff) 
              : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -256,51 +256,17 @@ namespace Laplace {
     };
   }
 
-  namespace DefaultWeakForms {
+  namespace WeakForms {
     /* Default weak form for the Laplace equation -Laplace u = 0
     */
 
-    class WeakFormLaplace : public WeakForm
+    class DefaultWeakFormLaplace : public WeakForm
     {
     public:
-      WeakFormLaplace() : WeakForm(1)
+      DefaultWeakFormLaplace() : WeakForm(1)
       {
-        add_matrix_form(new DefaultVolumetricMatrixForms::MatrixFormStiffness(0, 0));
+        add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormStiffness(0, 0));
       };
-    };
-  }
-
-  namespace DefaultEssentialBCs {
-    /* Default non-constant Dirichlet boundary condition 
-       based on an exact solution
-    */
-
-    class EssentialBCNonConst : public EssentialBC
-    {
-    public:
-      EssentialBCNonConst(Hermes::vector<std::string> markers_, 
-                                 ExactSolutionScalar* exact_solution) : 
-            EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-      {
-        for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
-      };
-      EssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) : 
-            EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-      {
-        markers.push_back(marker);
-      };
-  
-      ~EssentialBCNonConst() {};
-
-      virtual EssentialBCValueType get_value_type() const { 
-        return BC_FUNCTION; 
-      };
-
-      virtual scalar value(double x, double y) const {
-        return exact_solution->value(x, y);
-      };
-
-      ExactSolutionScalar* exact_solution;
     };
   }
 }
