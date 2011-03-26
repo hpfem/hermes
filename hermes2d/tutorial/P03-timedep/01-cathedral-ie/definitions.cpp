@@ -3,6 +3,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+using namespace Laplace;
+using namespace Laplace::DefaultVolumetricMatrixForms;
+using namespace Laplace::DefaultVolumetricVectorForms;
+
 class CustomWeakFormHeatRK1 : public WeakForm
 {
 public:
@@ -10,13 +14,13 @@ public:
                         double time_step, double* current_time_ptr, double temp_init, double t_final, 
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormMass(0, 0, heatcap * rho / time_step));
-    add_matrix_form(new DefaultMatrixFormStiffness(0, 0, lambda));
+    add_matrix_form(new MatrixFormMass(0, 0, heatcap * rho / time_step));
+    add_matrix_form(new MatrixFormStiffness(0, 0, lambda));
     CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);
 
-    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha * lambda));
+    add_matrix_form_surf(new Laplace::DefaultSurfaceMatrixForms::MatrixForm(0, 0, bdy_air, alpha * lambda));
     add_vector_form_surf(new CustomVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
   };
 

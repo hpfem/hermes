@@ -73,27 +73,27 @@ private:
       if(e->elem_marker == -9999)
         p = q = 1;
       else {
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e)
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_1) {
             p = static_cast<CustomWeakFormPoisson*>(wf)->p_1;
             q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_2) {
             p = static_cast<CustomWeakFormPoisson*>(wf)->p_2;
             q = static_cast<CustomWeakFormPoisson*>(wf)->q_2;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_3) {
             p = static_cast<CustomWeakFormPoisson*>(wf)->p_3;
             q = static_cast<CustomWeakFormPoisson*>(wf)->q_3;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_4) {
             p = static_cast<CustomWeakFormPoisson*>(wf)->p_4;
             q = static_cast<CustomWeakFormPoisson*>(wf)->q_4;
         }
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_5) {
             p = static_cast<CustomWeakFormPoisson*>(wf)->p_5;
             q = static_cast<CustomWeakFormPoisson*>(wf)->q_5;
@@ -128,19 +128,19 @@ private:
       if(e->elem_marker == -9999)
         f = 1;
       else {
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_1)
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_1;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_2)
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_2;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_3)
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_3;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_4)
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_4;
-        if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) 
+        if(get_elem_marker(e) 
            == static_cast<CustomWeakFormPoisson*>(wf)->omega_5)
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_5;
       }
