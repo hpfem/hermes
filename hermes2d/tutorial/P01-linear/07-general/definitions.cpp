@@ -2,10 +2,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class EssentialBCNonConst : public EssentialBC {
+class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
   EssentialBCNonConst(std::string marker) 
-           : EssentialBC(Hermes::vector<std::string>())
+           : EssentialBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
@@ -13,7 +13,7 @@ public:
   ~EssentialBCNonConst() {};
 
   inline EssentialBCValueType get_value_type() const 
-         { return EssentialBC::BC_FUNCTION; }
+         { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   scalar function(double x, double y) const
   {
