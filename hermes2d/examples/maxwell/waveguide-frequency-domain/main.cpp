@@ -83,49 +83,20 @@ const double kappa  = 2 * M_PI * freq * sqrt(e_0 * mu_0);
 const double J = 0.0000033333;
 
 //  Boundary markers.
-const int BDY_DIRICHLET = 2;
-const int BDY_NEUMANN = 1;
+const std::string BDY_PERFECT_CONDUCTOR = "2";
+const std::string BDY_CURRENT = "1";
 
-// Geometry of the load.
-bool in_load(double x, double y)
+/* WEAK FORM FOR ERROR CALCULATION - TO BE USED IN ADAPTIVITY.
+// error calculation
+template<typename Real, typename Scalar>
+Scalar hcurl_form_kappa(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
-  double cx = -0.152994121;
-  double cy =  0.030598824;
-  double r = 0.043273273;
-  if (sqr(cx - x) + sqr(cy - y) < sqr(r)) return true;
-  else return false;
+  return int_curl_e_curl_f<Scalar, Scalar>(n, wt, u, v) + sqr(kappa) * int_e_f<Scalar, Scalar>(n, wt, u, v);
 }
-
-// Gamma as a function of x, y.
-double gam(int marker, double x, double y)
-{
-  if (ALIGN_MESH && marker == 1) return 0.03;
-  if (!ALIGN_MESH && in_load(x,y)) {
-    double cx = -0.152994121;  double cy =  0.030598824;
-    double r = sqrt(sqr(cx - x) + sqr(cy - y));
-    return (0.03 + 1)/2.0 - (0.03 - 1) * atan(10.0*(r -  0.043273273)) / M_PI;
-  }
-  return 0.0;
-}
-double gam(int marker, Ord x, Ord y)
-{  return 0.0; }
-
-// Relative permittivity as a function of x, y.
-double er(int marker, double x, double y)
-{
-  if (ALIGN_MESH && marker == 1) return 7.5;
-  if (!ALIGN_MESH && in_load(x,y)) {
-    double cx = -0.152994121;  double cy =  0.030598824;
-    double r = sqrt(sqr(cx - x) + sqr(cy - y));
-    return (7.5 + 1)/2.0 - (7.5 - 1) * atan(10.0*(r -  0.043273273)) / M_PI;
-  }
-  return 1.0;
-}
-double er(int marker, Ord x, Ord y)
-{  return 1.0; }
+*/
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -138,22 +109,17 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-  bc_types.add_bc_neumann(BDY_NEUMANN);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
-
-  // Create an Hcurl space.
-  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
-
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form_surf(callback(linear_form_surf));
+  CustomWeakForm wf();
+
+  // Initialize boundary conditions
+  DefaultEssentialBCConst bc_essential(BDY_PERFECT_CONDUCTOR, 0.0, 0.0);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an Hcurl space with default shapeset.
+  HcurlSpace space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -182,13 +148,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
