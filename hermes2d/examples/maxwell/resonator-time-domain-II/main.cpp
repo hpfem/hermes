@@ -59,10 +59,7 @@ const std::string BDY = "1";
 const double C_SQUARED = 100;                      // Square of wave speed.                     
 
 // Weak forms.
-#include "forms.cpp"
-
-// Initial condition.
-#include "initial_condition.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -81,11 +78,11 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize solutions.
-  InitialConditionWave E_sln(&mesh);
+  CustomInitialConditionWave E_sln(&mesh);
   Solution F_sln(&mesh, 0.0, 0.0);
 
   // Initialize the weak formulation.
-  WeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
+  CustomWeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY, 0.0);

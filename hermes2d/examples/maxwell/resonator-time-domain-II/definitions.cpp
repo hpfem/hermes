@@ -2,11 +2,35 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class WeakFormWave : public WeakForm
+class CustomInitialConditionWave : public ExactSolutionVector
+{
+public:
+  CustomInitialConditionWave(Mesh* mesh) : ExactSolutionVector(mesh) {};
+
+  virtual scalar2 value (double x, double y) const {
+    return scalar2(-cos(x) * sin(y), sin(x) * cos(y));
+  }
+
+  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const {
+    dx[0] = sin(x) * sin(y);
+    dx[1] = cos(x) * cos(y);
+    dy[0] = -cos(x) * cos(y);
+    dy[1] = -sin(x) * sin(y);
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(20);
+  }
+};
+
+
+/* Weak forms */
+
+class CustomWeakFormWave : public WeakForm
 {
 public:
 
-  WeakFormWave(double tau, double c_squared, Solution* E_prev_sln, Solution* F_prev_sln) : WeakForm(2) {
+  CustomWeakFormWave(double tau, double c_squared, Solution* E_prev_sln, Solution* F_prev_sln) : WeakForm(2) {
     add_matrix_form(new MatrixFormVolWave_0_1);
     add_matrix_form(new MatrixFormVolWave_1_0(c_squared));
 
@@ -26,15 +50,18 @@ private:
     MatrixFormVolWave_0_1() : WeakForm::MatrixFormVol(0, 1) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       return int_e_f<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -46,18 +73,22 @@ private:
   class MatrixFormVolWave_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolWave_1_0(double c_squared) : WeakForm::MatrixFormVol(1, 0), c_squared(c_squared) { }
+    MatrixFormVolWave_1_0(double c_squared) 
+          : WeakForm::MatrixFormVol(1, 0), c_squared(c_squared) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       return - c_squared * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -75,20 +106,24 @@ private:
     VectorFormVolWave_0() : WeakForm::VectorFormVol(0) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
       for (int i = 0; i < n; i++)
-        result += wt[i] * (sln_prev_time->val0[i] * v->val0[i] + sln_prev_time->val1[i] * v->val1[i]);
+        result += wt[i] * (sln_prev_time->val0[i] * v->val0[i] 
+                  + sln_prev_time->val1[i] * v->val1[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+            ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -100,10 +135,12 @@ private:
   class VectorFormVolWave_1 : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolWave_1(double c_squared) : WeakForm::VectorFormVol(1), c_squared(c_squared) { }
+    VectorFormVolWave_1(double c_squared) 
+          : WeakForm::VectorFormVol(1), c_squared(c_squared) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* sln_prev_time = ext->fn[0];
       
@@ -112,7 +149,8 @@ private:
       return - c_squared * result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
@@ -123,8 +161,7 @@ private:
     virtual WeakForm::VectorFormVol* clone() {
       return new VectorFormVolWave_1(*this);
     }
-    
-    // Member.
+
     double c_squared;
   };
 };
