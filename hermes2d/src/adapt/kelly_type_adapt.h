@@ -76,14 +76,14 @@ public:
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
                          Func<scalar> *u, Geom<double> *e,
-                         ExtData<scalar> *ext)
+                         ExtData<scalar> *ext) const
     {
       error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
       return 0.0;
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
+                    ExtData<Ord> *ext) const
     {
       error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overridden.");
       return Ord();
@@ -274,13 +274,13 @@ public:
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
                          Func<scalar> *u, Geom<double> *e,
-                         ExtData<scalar> *ext)
+                         ExtData<scalar> *ext) const
     {
       return original_kelly_interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
+                    ExtData<Ord> *ext) const
     {
       return original_kelly_interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
     }

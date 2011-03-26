@@ -167,7 +167,7 @@ public:
   InterfaceErrorForm() : ErrorEstimatorForm(0, H2D_DG_INNER_EDGE) {};
   
   template<typename Real, typename Scalar>
-  Scalar interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext)
+  Scalar interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext) const
   {
     Scalar result = 0.;
     for (int i = 0; i < n; i++)
@@ -178,14 +178,14 @@ public:
 
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
               Func<scalar> *u, Geom<double> *e,
-              ExtData<scalar> *ext)
+              ExtData<scalar> *ext) const
   {
     return interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
   }
   
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
+                    ExtData<Ord> *ext) const
   {
     return interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
   }  
