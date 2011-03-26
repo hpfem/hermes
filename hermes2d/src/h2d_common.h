@@ -22,6 +22,9 @@
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
 
+// get_elem_marker(e) 
+#define get_elem_marker(e) wf->get_element_markers_conversion()->get_user_marker(e->elem_marker)
+
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
 
 // how many bits the order number takes
