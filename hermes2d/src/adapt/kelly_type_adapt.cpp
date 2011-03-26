@@ -510,12 +510,11 @@ ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext)
 
 // Initialize external functions (obtain values, derivatives,...)
 ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
-                              Hermes::vector<scalar> &param, RefMap *rm, const int order)
+                              RefMap *rm, const int order)
 {
   _F_
   ExtData<scalar>* ext_data = new ExtData<scalar>;
   Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
-  scalar* ext_param = new scalar[param.size()];
   
   for (unsigned i = 0; i < ext.size(); i++) {
     if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
@@ -524,8 +523,6 @@ ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext,
   
   ext_data->nf = ext.size();
   ext_data->fn = ext_fn;
-  ext_data->np = param.size();
-  ext_data->param = ext_param;
 
   return ext_data;
 }
@@ -593,7 +590,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], order);
   
-  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, err_est_form->param, rm, order);
+  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
@@ -651,7 +648,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
   Func<scalar>** ui = new Func<scalar>* [num];
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], eo);
-  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, err_est_form->param, rm, eo);
+  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, rm, eo);
 
   scalar res = boundary_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
@@ -676,10 +673,9 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   Hermes::vector<MeshFunction*> slns;
   for (int i = 0; i < num; i++)
     slns.push_back(this->sln[i]);
-  Hermes::vector<scalar> param = Hermes::vector<scalar>();   // this is unused
   
   // Determine integration order.
-  ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, param, neighbor_searches);
+  ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, neighbor_searches);
   
   // Order of additional external functions.
   // ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, nbs);
