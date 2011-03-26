@@ -236,7 +236,7 @@ public:
 
   /// Refines elements based on results from calc_err_est().
   /** The behavior of adaptivity can be controlled through methods should_ignore_element()
-   *  and can_refine_element() which are inteteded to be overriden if neccessary.
+   *  and can_refine_element() which are inteteded to be overridden if neccessary.
    *  \param[in] refinement_selector A point to a selector which will select a refinement.
    *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
    *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
@@ -393,7 +393,7 @@ protected: //forms and error evaluation
   /// Builds an ordered queue of elements that are be examined.
   /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.
    *  The method assumes that Adapt::errors_squared contains valid values.
-   *  If a special order of elements is requested, this method has to be overriden.
+   *  If a special order of elements is requested, this method has to be overridden.
    *  /param[in] meshes An array of pointers to meshes of a (coarse) solution. An index into the array is an index of a component.
    *  /param[in] meshes An array of pointers to meshes of a reference solution. An index into the array is an index of a component. */
   virtual void fill_regular_queue(Mesh** meshes);

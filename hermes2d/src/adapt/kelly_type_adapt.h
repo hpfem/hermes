@@ -78,14 +78,14 @@ public:
                          Func<scalar> *u, Geom<double> *e,
                          ExtData<scalar> *ext)
     {
-      error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overriden.");
+      error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
       return 0.0;
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
                     ExtData<Ord> *ext)
     {
-      error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overriden.");
+      error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overridden.");
       return Ord();
     }
 

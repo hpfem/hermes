@@ -72,14 +72,8 @@ const double HEATCAP = 1e6;        // Heat capacity.
 const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
-// Time-dependent exterior temperature.
-template<typename Real>
-Real temp_ext(Real t) {
-  return TEMP_INIT + 10. * sin(2*M_PI*t/T_FINAL);
-}
-
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -99,30 +93,23 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
   mesh.refine_towards_boundary(BDY_GROUND, INIT_REF_NUM_BDY);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<std::string>(BDY_GROUND));
-  bc_types.add_bc_newton(BDY_AIR);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_GROUND, TEMP_INIT);
-
-  // Initialize an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
-  info("ndof = %d.", ndof);
- 
   // Previous and next time level solutions.
   Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
   Solution* sln_time_new = new Solution(&mesh);
 
-  // Initialize weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian_vol));
-  wf.add_vector_form(callback(stac_residual_vol), HERMES_ANY, sln_time_prev);
-  wf.add_matrix_form_surf(callback(stac_jacobian_surf), BDY_AIR, sln_time_prev);
-  wf.add_vector_form_surf(callback(stac_residual_surf), BDY_AIR, sln_time_prev);
+  // Initialize the weak formulation.
+  double current_time = 0;
+  CustomWeakFormHeatRK wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO,
+                          &current_time, TEMP_INIT, T_FINAL, sln_time_prev);
+  
+  // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_essential(BDY_GROUND, TEMP_INIT);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -133,23 +120,26 @@ int main(int argc, char* argv[])
   Tview.set_min_max_range(0,20);
   Tview.fix_scale_width(30);
 
+  // Initialize Runge-Kutta time stepping.
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
+
   // Time stepping loop:
-  double current_time = 0; int ts = 1;
+  int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
+    bool jacobian_changed = false;
     bool verbose = true;
-    bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, &dp, matrix_solver,
-		      verbose, is_linear)) {
+    if (!runge_kutta.rk_time_step(current_time, time_step, sln_time_prev, 
+                                  sln_time_new, jacobian_changed, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
     // Show the new time level solution.
     char title[100];
-    sprintf(title, "Time %3.2f s, exterior temperature %3.5f C", current_time, temp_ext(current_time));
+    sprintf(title, "Time %3.2f s", current_time);
     Tview.set_title(title);
     Tview.show(sln_time_new);
 

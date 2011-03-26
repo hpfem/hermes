@@ -80,6 +80,8 @@ int main(int argc, char* argv[])
   // Initialize solutions.
   CustomInitialConditionWave u_sln(&mesh);
   Solution v_sln(&mesh, 0.0);
+  Hermes::vector<Solution*> slns_time_prev(&u_sln, &v_sln);
+  Hermes::vector<Solution*> slns_time_new(&u_sln, &v_sln);
 
   // Initialize the weak formulation.
   CustomWeakFormWave wf(time_step, C_SQUARED, &u_sln, &v_sln);
@@ -108,18 +110,19 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
+
   // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1;
   do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
+    bool jacobian_changed = false;
     bool verbose = true;
-    Hermes::vector<Solution*> slns_time_prev(&u_sln, &v_sln);
-    Hermes::vector<Solution*> slns_time_new(&u_sln, &v_sln);
 
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, false, verbose))
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, 
+                                  slns_time_new, jacobian_changed, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 
     // Visualize the solutions.

@@ -76,7 +76,7 @@ namespace RefinementSelectors {
     bool opt_apply_exp_dof; ///< True if ::H2D_APPLY_CONV_EXP_DOF is set. False by default.
   public:
     /// Enables or disables an option.
-    /** If overriden, the implementation has to call a parent implementation.
+    /** If overridden, the implementation has to call a parent implementation.
      *  \param[in] option An option that is going to be enabled. For possible values, see SelOption.
      *  \param[in] enable True to enable, false to disable. */
     virtual void set_option(const SelOption option, bool enable);
@@ -198,7 +198,7 @@ namespace RefinementSelectors {
      *  it skips this candidate. The selected H-candidate is used to handle a case when a mesh is shared
      *  amond multiple components.
      *
-     *  Override to redefined the algoritm of the selecting. If overriden, the implementation has to select both
+     *  Override to redefined the algoritm of the selecting. If overridden, the implementation has to select both
      *  the best candidate and the best H-candidate.
      *  \param[in] e An element that is being refined.
      *  \param[in] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate.
@@ -230,7 +230,7 @@ namespace RefinementSelectors {
      *  respectively, and \f$c\f$ is a convergence exponent (OptimumSelector::conv_exp).
      *  If the score is zero, the score is invalid.
      *
-     *  If overriden, the higher score the better candidate.
+     *  If overridden, the higher score the better candidate.
      *  \param[in] e An element that is being refined. */
     virtual void evaluate_cands_score(Element* e);
 

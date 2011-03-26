@@ -43,7 +43,7 @@ Ord WeakForm::MatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
 
 WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
 {
-  error("WeakForm::MatrixFormVol::clone() must be overriden.");
+  error("WeakForm::MatrixFormVol::clone() must be overridden.");
   return NULL;
 }
 
@@ -70,7 +70,7 @@ Ord WeakForm::MatrixFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 
 WeakForm::MatrixFormSurf* WeakForm::MatrixFormSurf::clone()
 {
-  error("WeakForm::MatrixFormSurf::clone() must be overriden.");
+  error("WeakForm::MatrixFormSurf::clone() must be overridden.");
   return NULL;
 }
 
@@ -97,7 +97,7 @@ Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord
 
 WeakForm::VectorFormVol* WeakForm::VectorFormVol::clone()
 {
-  error("WeakForm::VectorFormVol::clone() must be overriden.");
+  error("WeakForm::VectorFormVol::clone() must be overridden.");
   return NULL;
 }
 
@@ -131,7 +131,7 @@ Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Or
 
 WeakForm::VectorFormSurf* WeakForm::VectorFormSurf::clone()
 {
-  error("WeakForm::VectorFormSurf::clone() must be overriden.");
+  error("WeakForm::VectorFormSurf::clone() must be overridden.");
   return NULL;
 }
 

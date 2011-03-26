@@ -55,6 +55,21 @@ void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int nu
   }
 }
 
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, 
+                              Solution* error_fn, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
+                              double newton_damping_coeff, double newton_max_allowed_residual_norm)
+{
+  Hermes::vector<Solution*> slns_time_prev = Hermes::vector<Solution*>();
+  slns_time_prev.push_back(sln_time_prev);
+  Hermes::vector<Solution*> slns_time_new  = Hermes::vector<Solution*>();
+  slns_time_new.push_back(sln_time_new);
+  Hermes::vector<Solution*> error_fns      = Hermes::vector<Solution*>();
+  error_fns.push_back(error_fn);
+  return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+                      error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
+                      newton_damping_coeff, newton_max_allowed_residual_norm);
+}
+
 bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new, 
                   Hermes::vector<Solution*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
@@ -220,11 +235,29 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   return true;
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new, bool jacobian_changed,
-                  bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, double newton_max_allowed_residual_norm) 
+bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, 
+                              Hermes::vector<Solution*> slns_time_new, bool jacobian_changed,
+                              bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
+                              double newton_max_allowed_residual_norm) 
 {
-  return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, Hermes::vector<Solution*>(), jacobian_changed, verbose, newton_tol, newton_max_iter,
-                      newton_damping_coeff, newton_max_allowed_residual_norm);
+  return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+         Hermes::vector<Solution*>(), jacobian_changed, verbose, newton_tol, newton_max_iter,
+         newton_damping_coeff, newton_max_allowed_residual_norm);
+}
+
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, 
+                              Solution* sln_time_new, bool jacobian_changed,
+                              bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
+                              double newton_max_allowed_residual_norm) 
+{
+  Hermes::vector<Solution*> slns_time_prev = Hermes::vector<Solution*>();
+  slns_time_prev.push_back(sln_time_prev);
+  Hermes::vector<Solution*> slns_time_new  = Hermes::vector<Solution*>();
+  slns_time_new.push_back(sln_time_new);
+  Hermes::vector<Solution*> error_fns      = Hermes::vector<Solution*>();
+  return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+               error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
+               newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
 void RungeKutta::create_stage_wf(unsigned int size, double current_time, double time_step) 

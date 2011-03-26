@@ -144,7 +144,7 @@ namespace RefinementSelectors {
      *  for all transformations plus an identity transformation. An index of the identity
      *  transformation is ::H2D_TRF_IDENTITY.
      *
-     *  If overriden and if this method orthonormalizes shape functions at the integration points, it is suggested
+     *  If overridden and if this method orthonormalizes shape functions at the integration points, it is suggested
      *  to use the method precalc_shapes() in order to obtain initial values of shape functions at integration points.
      *  \param[in] gip_points Integration points. The first index is an index of an integration point, the second index is an element of the enum ::GIP2DIndices.
      *  \param[in] num_gip_points A number of integration points.
