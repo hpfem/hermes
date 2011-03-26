@@ -22,7 +22,9 @@
 
 #include "vector.h"
 #include "map"
-#include "../function/solution.h"
+
+//#include "../function/solution.h"
+class ExactSolutionScalar;
 
 /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
 class HERMES_API EssentialBoundaryCondition
@@ -81,27 +83,16 @@ class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition
 {
 public:
   DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
-                             ExactSolutionScalar* exact_solution) : 
-        EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
-  };
+                             ExactSolutionScalar* exact_solution); 
 
-  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) : 
-        EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
-  {
-    markers.push_back(marker);
-  };
+  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution); 
  
   ~DefaultEssentialBCNonConst() {};
 
-  virtual EssentialBCValueType get_value_type() const { 
-    return BC_FUNCTION; 
-  };
+  virtual scalar value(double x, double y) const;
 
-  virtual scalar value(double x, double y) const {
-    return exact_solution->value(x, y);
-  };
+  /// Function giving info that u_Essential is a non-constant function.
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   ExactSolutionScalar* exact_solution;
 };
@@ -114,15 +105,15 @@ public:
   EssentialBCs();
 
   /// Constructor with all boundary conditions of a problem.
-  EssentialBCs(Hermes::vector<EssentialBC *> essential_bcs);
-  EssentialBCs(EssentialBoundaryCondition * boundary_condition);
+  EssentialBCs(Hermes::vector<EssentialBoundaryCondition *> essential_bcs);
+  EssentialBCs(EssentialBoundaryCondition* boundary_condition);
 
   /// Default destructor.
   ~EssentialBCs();
 
   /// Initializes the class, fills the structures.
   void add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition *> essential_bcs);
-  void add_boundary_condition(EssentialBoundaryCondition * essential_bc);
+  void add_boundary_condition(EssentialBoundaryCondition* essential_bc);
 
   /// Public iterators for the private data structures.
   Hermes::vector<EssentialBoundaryCondition *>::const_iterator iterator;

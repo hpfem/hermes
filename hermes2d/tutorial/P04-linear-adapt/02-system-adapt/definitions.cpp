@@ -3,11 +3,11 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace Laplace;
+//using namespace Laplace;
 using namespace Laplace::VolumetricMatrixForms;
 using namespace Laplace::VolumetricVectorForms;
-using namespace Laplace::SurfaceMatrixForms;
-using namespace Laplace::SurfaceVectorForms;
+//using namespace Laplace::SurfaceMatrixForms;
+//using namespace Laplace::SurfaceVectorForms;
 using namespace Laplace::RightHandSides;
 
 /* Custom function that is used in the exact solution and in right-hand side */

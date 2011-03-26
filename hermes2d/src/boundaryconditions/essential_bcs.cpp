@@ -48,7 +48,7 @@ double EssentialBoundaryCondition::get_current_time() const {
   return current_time;
 }
 
-// Essential BoundaryCondition Constant
+// Essential BoundaryCondition Constant.
 DefaultEssentialBCConst::DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const) : EssentialBoundaryCondition(markers) {
   this->value_const = value_const;
 }
@@ -57,6 +57,25 @@ DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar valu
   this->value_const = value_const;
   markers.push_back(marker);
 }
+
+// Essential BoundaryCondition NonConstant.
+DefaultEssentialBCNonConst::DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
+                                                       ExactSolutionScalar* exact_solution)  
+       : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+{
+  for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
+};
+
+DefaultEssentialBCNonConst::DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution) 
+       : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution(exact_solution) 
+{
+  markers.push_back(marker);
+};
+
+scalar DefaultEssentialBCNonConst::value(double x, double y) const 
+{
+  return exact_solution->value(x, y);
+};
 
 // EssentialBCs.
 EssentialBCs::EssentialBCs() {

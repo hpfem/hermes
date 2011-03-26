@@ -246,13 +246,13 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-  if (bc->get_value_type() == EssentialBC::BC_CONST)
+  if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
   {
     proj[0] = proj[1] = bc->value_const;
   } // If the BC is not constant.
-  else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
+  else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
   {
     surf_pos->t = surf_pos->lo;
     // Find out the (x,y) coordinates for the first endpoint.
@@ -287,13 +287,13 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBC *bc = static_cast<EssentialBC *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
 
-        if (bc->get_value_type() == EssentialBC::BC_CONST)
+        if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
                    * (bc->value_const - l);
         // If the BC is not constant.
-        else if (bc->get_value_type() == EssentialBC::BC_FUNCTION)
+        else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
         {
           // Find out the (x,y) coordinate.
           double x, y;
