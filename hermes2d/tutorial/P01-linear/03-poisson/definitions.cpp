@@ -8,8 +8,8 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(double const_f) : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-    add_vector_form(new DefaultVectorFormVolConst(0, const_f));
+    add_matrix_form(new Laplace::DefaultVolumetricMatrixForms::MatrixFormStiffness(0, 0));
+    add_vector_form(new Laplace::DefaultVolumetricVectorForms::VectorFormConst(0, const_f));
   };
 };
 
