@@ -85,7 +85,7 @@ const double K = 100;
 const std::string OUTER_BDY = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -106,11 +106,15 @@ int main(int argc, char* argv[])
   if (MULTI == true) v_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
 
   // Set exact solutions.
-  ExactSolutionFitzHughNagumo1 exact_u(&u_mesh, SIGMA, D_u);
-  ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K, D_v);
+  ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
+  ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K);
+
+  // Define right-hand sides.
+  CustomRightHandSide1 rhs_1(K, D_u, SIGMA);
+  CustomRightHandSide2 rhs_2(K, D_v);
 
   // Initialize the weak formulation.
-  WeakFormFitzHughNagumo wf(&exact_u, &exact_v);
+  WeakFormFitzHughNagumo wf(&rhs_1, &rhs_2);
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_u(OUTER_BDY, 0.0);
@@ -148,7 +152,8 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    Hermes::vector<Space *>* ref_spaces = 
+      Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -220,7 +225,8 @@ int main(int argc, char* argv[])
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), err_exact_rel_total);
+    graph_dof_exact.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), 
+                               err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");

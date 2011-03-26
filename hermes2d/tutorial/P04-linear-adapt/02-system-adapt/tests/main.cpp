@@ -58,7 +58,7 @@ const double K = 100;
 const std::string OUTER_BDY = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -75,11 +75,15 @@ int main(int argc, char* argv[])
   if (MULTI == true) v_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
 
   // Set exact solutions.
-  ExactSolutionFitzHughNagumo1 exact_u(&u_mesh, SIGMA, D_u);
-  ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K, D_v);
+  ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
+  ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K);
+
+  // Define right-hand sides.
+  CustomRightHandSide1 rhs_1(K, D_u, SIGMA);
+  CustomRightHandSide2 rhs_2(K, D_v);
 
   // Initialize the weak formulation.
-  WeakFormFitzHughNagumo wf(&exact_u, &exact_v);
+  WeakFormFitzHughNagumo wf(&rhs_1, &rhs_2);
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_u(OUTER_BDY, 0.0);

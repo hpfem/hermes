@@ -25,10 +25,11 @@
 class DefaultMatrixFormStiffness : public WeakForm::MatrixFormVol
 {
 public:
-  DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
-  DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
+  // Here the last parameter is optional. If not used, the form will be symmetric.
+  DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0, SymFlag symmetric = HERMES_SYM) 
+        : WeakForm::MatrixFormVol(i, j, symmetric), coeff(coeff) { }
+  DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0, SymFlag symmetric = HERMES_SYM) 
+        : WeakForm::MatrixFormVol(i, j, symmetric, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
   Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -57,10 +58,11 @@ public:
 class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
 {
 public:
-  DefaultMatrixFormMass(int i, int j, double coeff = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM), coeff(coeff) { }
-  DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0) 
-        : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), coeff(coeff) { }
+  // Here the last parameter is optional. If not used, the form will be symmetric.
+  DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag symmetric = HERMES_SYM) 
+        : WeakForm::MatrixFormVol(i, j, symmetric), coeff(coeff) { }
+  DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag symmetric = HERMES_SYM) 
+        : WeakForm::MatrixFormVol(i, j, symmetric, area), coeff(coeff) { }
 
   template<typename Real, typename Scalar>
   Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
