@@ -15,4 +15,3 @@ public:
     add_vector_form(new DefaultVectorFormConst(0, const_f));
   };
 };
-
