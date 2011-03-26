@@ -33,7 +33,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration.
   bool verbose = true;
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.

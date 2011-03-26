@@ -20,7 +20,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 
   // Perform the Picard's iteration.
   bool verbose = true;
-  hermes2d.solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL, 
-	       PICARD_MAX_ITER, verbose);
+  hermes2d.solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL,
+               PICARD_MAX_ITER, verbose);
 
   ndof = Space::get_num_dofs(&space);
   info("Coordinate (-10, -10) value = %lf", sln_prev_iter.get_pt_value(-10.0, -10.0));
