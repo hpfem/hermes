@@ -53,10 +53,7 @@ const std::string BDY = "1";
 const double C_SQUARED = 100;                      // Square of wave speed.                     
 
 // Weak forms.
-#include "forms.cpp"
-
-// Initial condition.
-#include "initial_condition.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -81,11 +78,11 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY, 1);
   
   // Initialize solutions.
-  InitialConditionWave u_sln(&mesh);
+  CustomInitialConditionWave u_sln(&mesh);
   Solution v_sln(&mesh, 0.0);
 
   // Initialize the weak formulation.
-  WeakFormWave wf(time_step, C_SQUARED, &u_sln, &v_sln);
+  CustomWeakFormWave wf(time_step, C_SQUARED, &u_sln, &v_sln);
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY, 0.0);
@@ -94,7 +91,6 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u_space(&mesh, &bcs, P_INIT);
   H1Space v_space(&mesh, &bcs, P_INIT);
-
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
 
   // Initialize the FE problem.

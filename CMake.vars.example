@@ -76,3 +76,9 @@ SET(NETCDF_ROOT /opt/packages/netcdf)
 # 
 #  set(PYTHON_INSTALL_PATH   USE_SYSTEM_PYTHON_DIRECTORY)
 
+# Uncomment when making install.
+#set(WITH_H1D NO)
+#set(WITH_H3D NO)
+#set(H2D_WITH_TUTORIAL NO)
+#set(H2D_WITH_EXAMPLES NO)
+#set(H2D_WITH_BENCHMARKS NO)
