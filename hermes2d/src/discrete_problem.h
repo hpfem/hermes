@@ -336,19 +336,16 @@ protected:
                                      PrecalcShapeset *fv, RefMap *rv, 
                                      SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v);
 
-  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, 
-                                 Hermes::vector<scalar> &param);
-  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, 
-                                 Hermes::vector<scalar> &param, int edge);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext);
   ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext,
-                                 Hermes::vector<scalar> &param, 
+                                 int edge);
+  ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext,
                                  LightArray<NeighborSearch*>& neighbor_searches);
-  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
-                                Hermes::vector<scalar> &param, 
+  ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext,  
                                 RefMap *rm, const int order);
   ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
-                                Hermes::vector<scalar> &param, 
-                                LightArray<NeighborSearch*>& neighbor_searches, int order);
+                                LightArray<NeighborSearch*>& neighbor_searches,
+                                int order);
 
   Func<double>* get_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
   Func<Ord>* get_fn_ord(const int order);

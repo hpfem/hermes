@@ -84,7 +84,7 @@ public:
     /// Error bilinear form callback function.
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
                          Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
-                         ExtData<scalar> *ext)
+                         ExtData<scalar> *ext) const
     {
       switch (projNormType)
       {
@@ -107,7 +107,7 @@ public:
     /// Error bilinear form to estimate order of a function.
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
-                    ExtData<Ord> *ext)
+                    ExtData<Ord> *ext) const
     {
       switch (projNormType)
       {

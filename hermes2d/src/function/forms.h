@@ -421,15 +421,11 @@ class HERMES_API ExtData
 public:
   int nf;           ///< Number of functions in 'fn' array.
   Func<T>** fn;     ///< Array of pointers to functions.
-  int np;           ///< Number of constants in 'param' array.
-  T* param;       ///< Array of constant parameters.
 
   ExtData()
   {
     nf = 0;
     fn = NULL;
-    np = 0;
-    param = NULL;
   }
 
   void free()
@@ -440,8 +436,6 @@ public:
       delete fn[i];
     }
     delete [] fn;
-
-    delete [] param;
   }
 
   void free_ord()

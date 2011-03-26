@@ -488,66 +488,6 @@ double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMa
   return std::abs(res);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-// COPIED FROM discrete_problem.cpp
-//
-// NOTE: This is not neccessary if we have the DiscreteProblem instance available
-//       (as currently required for the NeighborSearch functionality).
-
-// Initialize integration order for external functions
-ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext)
-{
-  _F_
-  ExtData<Ord>* fake_ext = new ExtData<Ord>;
-  fake_ext->nf = ext.size();
-  Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
-  for (int i = 0; i < fake_ext->nf; i++)
-    fake_ext_fn[i] = init_fn_ord(ext[i]->get_fn_order());
-  fake_ext->fn = fake_ext_fn;
-
-  return fake_ext;
-}
-
-// Initialize external functions (obtain values, derivatives,...)
-ExtData<scalar>* init_ext_fns(Hermes::vector<MeshFunction *> &ext, 
-                              Hermes::vector<scalar> &param, RefMap *rm, const int order)
-{
-  _F_
-  ExtData<scalar>* ext_data = new ExtData<scalar>;
-  Func<scalar>** ext_fn = new Func<scalar>*[ext.size()];
-  scalar* ext_param = new scalar[param.size()];
-  
-  for (unsigned i = 0; i < ext.size(); i++) {
-    if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
-    else ext_fn[i] = NULL;
-  }
-  
-  ext_data->nf = ext.size();
-  ext_data->fn = ext_fn;
-  ext_data->np = param.size();
-  ext_data->param = ext_param;
-
-  return ext_data;
-}
-
-// Initialize integration order on a given edge for external functions
-ExtData<Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction *> &ext, int edge)
-{
-  _F_
-  ExtData<Ord>* fake_ext = new ExtData<Ord>;
-  fake_ext->nf = ext.size();
-  Func<Ord>** fake_ext_fn = new Func<Ord>*[fake_ext->nf];
-  for (int i = 0; i < fake_ext->nf; i++)
-    fake_ext_fn[i] = init_fn_ord(ext[i]->get_edge_fn_order(edge));
-  fake_ext->fn = fake_ext_fn;
-
-  return fake_ext;
-}
-
-
-// END COPIED FROM discrete_problem.cpp
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap *rm)
 {
   // determine the integration order
@@ -558,7 +498,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
     oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
   // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext);
+  ExtData<Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext);
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
@@ -593,7 +533,7 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], order);
   
-  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, err_est_form->param, rm, order);
+  ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
 
   scalar res = volumetric_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
@@ -617,7 +557,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
     oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
   // Order of additional external functions.
-  ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, surf_pos->surf_num);
+  ExtData<Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext, surf_pos->surf_num);
 
   double fake_wt = 1.0;
   Geom<Ord>* fake_e = init_geom_ord();
@@ -651,7 +591,7 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
   Func<scalar>** ui = new Func<scalar>* [num];
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], eo);
-  ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, err_est_form->param, rm, eo);
+  ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
 
   scalar res = boundary_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
@@ -676,13 +616,12 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
   Hermes::vector<MeshFunction*> slns;
   for (int i = 0; i < num; i++)
     slns.push_back(this->sln[i]);
-  Hermes::vector<scalar> param = Hermes::vector<scalar>();   // this is unused
   
   // Determine integration order.
-  ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, param, neighbor_searches);
+  ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, neighbor_searches);
   
   // Order of additional external functions.
-  // ExtData<Ord>* fake_ext = init_ext_fns_ord(err_est_form->ext, nbs);
+  // ExtData<Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext, nbs);
 
   // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
   Geom<Ord>* fake_e = new InterfaceGeom<Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, nbs->neighb_el->get_diameter());
@@ -724,8 +663,8 @@ double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorFo
                                               nbs->neighb_el->get_diameter());
     
   // function values
-  ExtData<scalar>* ui = dp.init_ext_fns(slns, param, neighbor_searches, order);
-  //ExtData<scalar>* ext = init_ext_fns(err_est_form->ext, nbs);
+  ExtData<scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
+  //ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, nbs);
 
   scalar res = interface_scaling_const *
                 err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
