@@ -16,9 +16,9 @@
 #include <typeinfo>
 #include "hermes2d.h"
 
-RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool residual_as_vector) 
+RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector) 
     : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
-    stage_wf_left(dp->get_spaces().size()), residual_as_vector(residual_as_vector) 
+    stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
 {
   // Check for not implemented features.
   if (matrix_solver != SOLVER_UMFPACK)
@@ -108,7 +108,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     }
 
   // Zero utility vectors.
-  memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
+  if(start_from_zero_K_vector || !iteration)
+    memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
   memset(u_ext_vec, 0, num_stages * ndof * sizeof(scalar));
   memset(vector_left, 0, num_stages * ndof * sizeof(scalar));
 
@@ -232,6 +233,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   // Clean up.
   delete [] coeff_vec;
 
+  iteration++;
   return true;
 }
 

@@ -72,7 +72,9 @@ class HERMES_API RungeKutta
 
 public:
   /// Constructor.
-  RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool residual_as_vector = true);
+  /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
+  /// as an initial guess for the Newton's method, instead zero vector will be used.
+  RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool start_from_zero_K_vector = false, bool residual_as_vector = true);
 
   /// Destructor.
   ~RungeKutta();
@@ -153,6 +155,8 @@ protected:
                               // size num_stages*ndof times num_stages*ndof.
   WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
   
+  bool start_from_zero_K_vector;
+
   bool residual_as_vector;
 
   // Vector K_vector of length num_stages * ndof. will represent
@@ -164,6 +168,9 @@ protected:
 
   // Vector for the left part of the residual.
   scalar* vector_left;
+
+  // Number of previous calls to rk_time_step().
+  unsigned int iteration;
 };
 
 
