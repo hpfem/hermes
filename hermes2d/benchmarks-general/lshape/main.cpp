@@ -55,7 +55,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Exact solution, boundary conditions.
+// Right-hand side, exact solutionm weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
@@ -72,14 +72,14 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   //mesh.refine_towards_vertex(3, 5);
 
-  // Set exact solution.
-  CustomExactSolution exact(&mesh);
+  // Define exact solution.
+  CustomExactSolution exact_sln(&mesh);
 
   // Initialize the weak formulation.
-  DefaultWeakFormLaplace wf;
+  CustomWeakFormPoisson wf;
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact_sln);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.
-    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
    
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
