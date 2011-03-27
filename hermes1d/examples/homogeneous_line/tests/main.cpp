@@ -52,7 +52,7 @@ Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 //At the end of the line is an indirect boundary condition U(l) = I(l)*Zl see below
 
 // Weak forms for Jacobi matrix and residual
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main() 
 {

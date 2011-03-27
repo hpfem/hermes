@@ -38,7 +38,7 @@ Hermes::vector<BCSpec *>DIR_BC_LEFT = Hermes::vector<BCSpec *>(new BCSpec(0,M_PI
 Hermes::vector<BCSpec *> DIR_BC_RIGHT = Hermes::vector<BCSpec *>();
 
 // Weak forms for Jacobi matrix and residual.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 
 int main() 

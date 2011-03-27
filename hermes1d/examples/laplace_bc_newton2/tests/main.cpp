@@ -33,7 +33,7 @@ double f(double x) {
 }
 
 // Weak forms for Jacobi matrix and residual.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 
 int main() 

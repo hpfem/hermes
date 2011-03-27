@@ -59,7 +59,7 @@ double alpha_ctrl[N_ctrl] = {0, 0, 0, 0};
 double zeta_ctrl[N_ctrl] = {0, 0, 0, 0};
 
 // Include weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 void compute_trajectory(Space *space, DiscreteProblem *dp) 
 {

@@ -108,7 +108,7 @@ void normalize_to_power(Space* space, double desired_power)
 }
 
 // Weak forms
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main() 
 {
