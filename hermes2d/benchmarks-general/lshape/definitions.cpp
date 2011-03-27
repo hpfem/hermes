@@ -1,12 +1,18 @@
+#include "weakform/weakform.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/laplace.h"
 
-/* Exact solution */
+using namespace Laplace::VolumetricMatrixForms;
+using namespace Laplace::VolumetricVectorForms;
+using namespace Laplace::RightHandSides;
 
-// Exact solution to the L-Shape problem.
+/*  Exact solution */
+
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) { };
 
   virtual scalar value (double x, double y) const {
     double r = sqrt(x*x + y*y);
@@ -29,26 +35,13 @@ public:
   }
 };
 
-/* Essential boundary conditions */
+/* Weak forms */
 
-// Dirichlet boundary conditions (uses the exact solution).
-#include "boundaryconditions/essential_bcs.h"
-class EssentialBCNonConst : public EssentialBC {
+class CustomWeakFormPoisson : public WeakForm
+{
 public:
-  EssentialBCNonConst(std::string marker, CustomExactSolution* exact_solution)
-        : EssentialBC(Hermes::vector<std::string>()), exact_solution(exact_solution) {
-    markers.push_back(marker);
-  }
-
-  ~EssentialBCNonConst() { }
-
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
-
-  scalar function(double x, double y) const {
-    return exact_solution->value(x, y);
-  }
-
-  // Member.
-  CustomExactSolution* exact_solution;
+    CustomWeakFormPoisson() : WeakForm(1) {
+        add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
+        add_vector_form(new DefaultVectorFormConst(0, 0));
+    }
 };
-

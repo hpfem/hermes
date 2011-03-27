@@ -49,28 +49,14 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
-// Exact solution.
-static double fn(double x, double y)
-{
-  return sin(y);
-}
-
-static double fndd(double x, double y, double& dx, double& dy)
-{
-  dx = 0;
-  dy = cos(y);
-  return fn(x, y);
-}
-
 // Boundary markers.
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
+const std::string BDY_BOTTOM = "1";
+const std::string BDY_RIGHT = "2";
+const std::string BDY_TOP = "3";
+const std::string BDY_LEFT = "4";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -82,29 +68,21 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_BOTTOM);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Define exact solution.
+  CustomExactSolution exact_sln(&mesh);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
-  wf.add_vector_form(callback(linear_form));
-  wf.add_vector_form_surf(callback(linear_form_surf), BDY_TOP);
+  CustomWeakFormPoisson wf;
+
+  // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_essential(BDY_BOTTOM, 0.0);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact(&mesh, fndd);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
@@ -165,7 +143,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

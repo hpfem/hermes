@@ -16,12 +16,12 @@ public:
     CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) { };
 
     virtual void derivatives(double x, double y, scalar& dx, scalar& dy) const {
-        dx = cos(x);
-        dy = 0;
+        dx = 0;
+        dy = cos(y);
     };
 
     virtual double value(double x, double y) const {
-        return sin(x);
+        return sin(y);
     }
 
     virtual Ord ord(Ord x, Ord y) const {
@@ -37,7 +37,7 @@ public:
     CustomRightHandSide() : DefaultNonConstRightHandSide() { }
 
     virtual scalar value(double x, double y) const {
-        return sin(x);
+        return sin(y);
     };
 
     virtual Ord ord(Ord x, Ord y) const {
@@ -53,6 +53,6 @@ public:
     CustomWeakFormPoisson() : WeakForm(1) {
         add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
         add_vector_form(new DefaultVectorFormNonConst(0, new CustomRightHandSide));
-        add_vector_form_surf(new DefaultSurfaceVectorForm(0, BDY_RIGHT, -1));
+        add_vector_form_surf(new DefaultSurfaceVectorForm(0, BDY_TOP, -1));
     }
 };
