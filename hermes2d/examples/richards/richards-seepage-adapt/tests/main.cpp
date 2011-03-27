@@ -148,7 +148,7 @@ scalar essential_bc_values(double x, double y, double time)
 }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

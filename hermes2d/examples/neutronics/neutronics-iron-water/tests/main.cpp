@@ -58,7 +58,7 @@ const int WATER_2 = 2;
 const int IRON = 3;
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

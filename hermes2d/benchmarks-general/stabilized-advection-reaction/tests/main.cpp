@@ -148,11 +148,8 @@ Real F(Real x, Real y)
   return 0.0;
 }
 
-// Weak forms.
-#include "../forms.cpp"
-
-// Exact solution.
-#include "exact.h"
+// Exact solution and Weak forms.
+#include "../definitions.cpp"
 
 // Weighting function for the target functional.
 double weight_fn(double x, double y)

@@ -59,7 +59,7 @@ const double K_squared = 1e4;
 const int BDY_DIRICHLET = 1;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

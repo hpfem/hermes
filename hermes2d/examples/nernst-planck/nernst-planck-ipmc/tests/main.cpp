@@ -76,7 +76,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms
-#include "forms.cpp"
+#include "definitions.cpp"
 
 // Initial conditions.
 #include "initial_conditions.cpp"

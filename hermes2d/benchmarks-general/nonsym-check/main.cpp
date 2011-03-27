@@ -70,7 +70,7 @@ const int BDY_TOP = 3;
 const int BDY_LEFT = 4;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

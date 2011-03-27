@@ -74,7 +74,7 @@ double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 const int BDY_NEUMANN = 1;
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

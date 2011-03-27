@@ -139,11 +139,8 @@ Real q(Real x, Real y) {
          (CF*PHIt*x*y*sx*sy*(nu*xsfiss-xsa_ref*(1 + doppler_coeff*(-sqrt(Tref) + sqrt(CT*Tt*sx*sy)))))/(LX*LY);
 }
 
-// Weak forms.
-#include "forms.cpp"
-
-// Exact solutions.
-#include "exact_solution.cpp"
+// Exact solutions and Weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

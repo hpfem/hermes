@@ -85,7 +85,7 @@ const double NEWTON_TOL = 1e-6;       // Stopping criterion for nonadaptive solu
 const int NEWTON_MAX_ITER = 20;       // Maximum allowed number of Newton iterations
 
 // Weak forms
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 /*** Boundary types and conditions ***/
 

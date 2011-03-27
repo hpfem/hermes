@@ -74,7 +74,7 @@ double TOL_PIT_RM = 1e-6;   // Tolerance for eigenvalue convergence when solving
 // Physical data of the problem for the given number of energy groups (N_GROUPS).
 #include "physical_parameters.cpp"
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 // Norms in the axisymmetric coordinate system.
 #include "norms.cpp"
 

@@ -62,7 +62,7 @@ scalar init_cond_phi(double x, double y, scalar& dx, scalar& dy)
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

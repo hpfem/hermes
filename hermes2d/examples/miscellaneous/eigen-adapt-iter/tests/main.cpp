@@ -55,11 +55,8 @@ const int PICARD_MAX_ITER = 50;
 // Boundary markers.
 const std::string BDY_MARKER = "1";
 
-// Weak forms.
-#include "../forms.cpp"
-
-// Extras.
-#include "extras.cpp"
+// Weak forms and Extras.
+#include "../definitions.cpp"
 
 // Main function.
 int main(int argc, char* argv[])

@@ -38,7 +38,7 @@ const int P_INIT_LSET = 1;
 const int BDY_DIRICHLET = 1;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 scalar exactfn(double x, double y, scalar& dx , scalar& dy) { 
 /*  dx=-1; dy=0; //return (y<.48) ? -1 : 1;

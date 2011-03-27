@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 //  Picard's linearization: C(h^k)dh^{k+1}/dt - div(K(h^k)grad(h^{k+1})) - (dK/dh(h^k))*(dh^{k+1}/dy) = 0
 //                          Note: the index 'k' does not refer to time stepping.
-//  Newton's method is more involved, see the file forms.cpp.
+//  Newton's method is more involved, see the file definitions.cpp.
 //
 //  Domain: rectangle (0, 8) x (0, 6.5).
 //  Units: length: cm

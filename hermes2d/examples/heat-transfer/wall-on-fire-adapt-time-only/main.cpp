@@ -74,11 +74,8 @@ const double HEATCAP = 1020;       // Heat capacity.
 const double RHO = 2200;           // Material density.
 const double T_FINAL = 4000;       // Length of time interval in seconds.
 
-// Problem-specific functions.
-#include "extras.cpp"
-
-// Weak forms.
-#include "forms.cpp"
+// Problem-specific functions and Weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

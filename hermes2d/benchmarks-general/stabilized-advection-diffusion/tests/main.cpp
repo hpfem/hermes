@@ -134,7 +134,7 @@ static double exact_sln(double x, double y, double& dx, double& dy)
 }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

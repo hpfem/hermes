@@ -67,7 +67,7 @@ scalar essential_bc_values_yvel(double x, double y, double time) {
   }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 // Custom function to calculate drag coefficient.
 double integrate_over_wall(MeshFunction* meshfn, int marker)

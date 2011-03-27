@@ -174,11 +174,8 @@ Real q(Real x, Real y) {
 // Boundary markers.
 const int BDY_DIRICHLET = 1;
 
-// Weak forms.
-#include "../forms.cpp"
-
-// Exact solutions.
-#include "exact_solution.cpp"
+// Exact solutions and Weak forms.
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

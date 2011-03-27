@@ -1,3 +1,75 @@
+#include "weakform/weakform.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/essential_bcs.h"
+
+/* Weak forms */
+
+class WeakFormS : public WeakForm
+{
+public:
+  WeakFormS() : WeakForm(1) {
+    add_matrix_form(new MatrixFormVolS(0, 0));
+  };
+
+private:
+  class MatrixFormVolS : public WeakForm::MatrixFormVol
+  {
+  public:
+    MatrixFormVolS(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        double x = e->x[i];
+        double y = e->y[i];
+        result += wt[i] * (u->dx[i]*v->dx[i] + u->dy[i]*v->dy[i] 
+                           + V(x, y) * u->val[i] * v->val[i]);
+      }
+      return result;
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return Ord(30);
+    }
+
+    double V(double x, double y) {
+      return 0;
+      //double r = sqrt(x*x + y*y);
+      //return -1./(0.001 + r*r);
+    }
+  };
+};
+
+class WeakFormM : public WeakForm
+{
+public:
+  WeakFormM() : WeakForm(1) {
+    add_matrix_form(new MatrixFormVolM(0, 0));
+  };
+
+private:
+  class MatrixFormVolM : public WeakForm::MatrixFormVol
+  {
+  public:
+    MatrixFormVolM(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
+
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+      return int_u_v<Real, Scalar>(n, wt, u, v);
+    }
+
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    }
+  };
+};
+
+/* Extras */
+
 #define HERMES_REPORT_ALL
 
 // Write the matrix in Matrix Market format.
@@ -57,6 +129,17 @@ double scalar_product(double* vec1, double* vec2, int length)
   return val;
 }
 
+// Calculate inner product u^T*mat*vec.
+double calc_inner_product(UMFPackMatrix* mat, double* u, double* vec, int length)
+{
+  double result = 0;
+  double* product = new double[length];
+  mat->multiply_with_vector(vec, product);
+  for (int i=0; i<length; i++) result += u[i]*product[i];
+  delete [] product;
+  return result;
+}
+
 void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* matrix_M_ref, 
                                     double* coeff_vec_ref, double lambda, UMFPackMatrix* new_matrix, 
                                     UMFPackVector* new_vector)
@@ -74,17 +157,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   double* my_vec = new double[size+1];
   ((UMFPackMatrix*)matrix_M_ref)->multiply_with_vector(coeff_vec_ref, my_vec);
 
-
-  // Debug.
-  //info("coeff_vec_ref:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", coeff_vec_ref[i]);
-  //printf("\n");
-  //info("my_vec:");
-  //for (int i=0; i<ndof_ref; i++) printf("%g ", my_vec[i]);
-  //printf("\n");
-
-
-
   // Construct the augmented matrix for Newton's method.
   int new_size =  size + 1;
   int new_nnz = nnz + 2*size;
@@ -97,18 +169,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
   for (int i=1; i < size+1; i++) new_Ap[i] = ap[i] + i;
   new_Ap[size+1] = new_Ap[size] + size;
 
-
-  // Debug.
-  //info("old Ap:");
-  //for (int i=0; i<size+1; i++) printf("%d ", ap[i]);
-  //printf("\n");
-  //info("new Ap:");
-  //for (int i=0; i<new_size+1; i++) printf("%d ", new_Ap[i]);
-  //printf("\n");
-
-
-
-
   // Fill the new Ai array.
   int count = 0;
   for (int j=0; j < size; j++) {                                // Index of a column.
@@ -118,18 +178,6 @@ void create_augmented_linear_system(SparseMatrix* matrix_S_ref, SparseMatrix* ma
     new_Ai[count++] = size;                                     // Accounting for last item in columns 0, 1, size-1.
   }
   for (int i=0; i < size; i++) new_Ai[count++] = i;             // Accounting for last column.
-
-
-  // Debug.
-  //info("old Ai:");
-  //for (int i=0; i<nnz; i++) printf("%d ", ai[i]);
-  //printf("\n");
-  //info("new Ai:");
-  //for (int i=0; i<new_nnz; i++) printf("%d ", new_Ai[i]);
-  //printf("\n");
-
-
-
 
   // Fill the new Ax array.  
   //double max = 0;
@@ -250,9 +298,12 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   return success;
 }
 
+// This method always converges to the eigenvalue closest to the value of the argument lambda. 
+// This is possible because the spectrum of the problem is shifted in such a way that the sought 
+// eigenvalue comes to be very close to the origin where the method tends to converge.
 bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
                         double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
-                        double picard_tol, int picard_max_iter)
+                        double picard_tol, int picard_max_iter, int use_shift)
 {
   Hermes2D hermes2D;
 
@@ -264,6 +315,19 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   Solution ref_sln_prev;
   Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_prev);
   bool success = true;
+  double shift = 0.0;
+  if (use_shift==1) {
+    shift = lambda;
+    // Construct shifted matrx.
+    double *Sx = ((UMFPackMatrix*)matrix_S_ref)->get_Ax();
+    double *Mx = ((UMFPackMatrix*)matrix_M_ref)->get_Ax();
+    for (unsigned int i=0; i<((UMFPackMatrix*)matrix_S_ref)->get_nnz(); i++) Sx[i] = Sx[i] - shift * Mx[i];
+    // Normalize the eigenvector.
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    // Init the eigenvalue for the shifted problem.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+               / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+  }
   int it = 1;
   do {
     // Check the number of iterations.
@@ -287,6 +351,9 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     // Copy the new eigen vector to coeff_vec_ref.
     for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = new_eigen_vec[i];
 
+    // Normalize the eigenvector.
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
     // Update the eigenvalue.
     lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
              / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
@@ -300,10 +367,98 @@ bool solve_picard_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
     ref_sln_prev.copy(&ref_sln_new);
     
     info("---- Picard iter %d, ndof %d, eigenvalue: %.12f, picard_err_rel %g%%", 
-         it++, ndof_ref, lambda, picard_err_rel);
+         it++, ndof_ref, lambda+shift, picard_err_rel);
   }
   while (picard_err_rel > picard_tol);
-
+  
+  // Unshift lambda
+  lambda = lambda+shift;
   return success;
 
 }
+
+bool solve_picard_eigen_ortho(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
+                        double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
+                        double picard_tol, int picard_max_iter, int use_ortho, int use_shift, double** coeff_space_ortho_ref, int index, int dim_space)
+{
+  Hermes2D hermes2D;
+
+  int ndof_ref = matrix_M_ref->get_size();
+  double picard_err_rel;
+  UMFPackVector* vec_lambda_MY = new UMFPackVector(ndof_ref);
+  Solver* solver = create_linear_solver(matrix_solver, matrix_S_ref, vec_lambda_MY);
+  double* vec_MY = new double[ndof_ref]; 
+  Solution ref_sln_prev;
+  Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_prev);
+  bool success = true;
+  double shift = 0.0;
+  if (use_shift==1) {
+    shift = lambda;
+    // Construct shifted matrx.
+    double *Sx = ((UMFPackMatrix*)matrix_S_ref)->get_Ax();
+    double *Mx = ((UMFPackMatrix*)matrix_M_ref)->get_Ax();
+    for (unsigned int i=0; i<((UMFPackMatrix*)matrix_S_ref)->get_nnz(); i++) Sx[i] = Sx[i] - shift * Mx[i];
+    // Normalize the eigenvector.
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    // Init the eigenvalue for the shifted problem.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+               / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+  }
+  double inner;
+  int it = 1;
+  do {
+    // Check the number of iterations.
+    if (it >= picard_max_iter) {
+      success = false;
+      info("Picard's iteration not successful, returning false.");
+      break;
+    }
+  
+    matrix_M_ref->multiply_with_vector(coeff_vec_ref, vec_MY);
+    for (int i=0; i<ndof_ref; i++) vec_lambda_MY->set(i, lambda*vec_MY[i]);
+
+    // Solve the matrix problem.
+    if(!solver->solve()) {
+      info("Matrix solver failed.\n");
+      success = false;
+      break;
+    }
+    double* new_eigen_vec = solver->get_solution();
+
+    // Copy the new eigen vector to coeff_vec_ref.
+    for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = new_eigen_vec[i];
+
+    // orthogonalize
+    if (use_ortho == 1) {
+      for (int j=0; j<index; j++){
+        inner = calc_inner_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ortho_ref[j], coeff_vec_ref, ndof_ref);
+        for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = coeff_vec_ref[i] - inner * coeff_space_ortho_ref[j][i];
+      }
+    }
+   
+    // Normalize
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
+    // Update the eigenvalue.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
+    // Calculate relative error of the increment.
+    Solution ref_sln_new;
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
+    picard_err_rel = hermes2D.calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+
+    // Updating reference solution.
+    ref_sln_prev.copy(&ref_sln_new);
+    
+    info("---- Picard iter %d, ndof %d, eigenvalue: %.12f, picard_err_rel %g%%", 
+         it++, ndof_ref, lambda+shift, picard_err_rel);
+  }
+  while (picard_err_rel > picard_tol);
+  // Unshift lambda
+  lambda = lambda-shift;
+  return success;
+
+}
+
+

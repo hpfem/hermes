@@ -1,3 +1,116 @@
+#include <hermes2d.h>
+#include <cstdlib>
+
+// Class that represents the semi-analytic solution on the rectangle [0,1]x[0,1].
+// Contains coordinates of the Gauss-Kronrod quadrature nodes and the corresponding
+// function values and quadrature weights, as read from the file supplied to the
+// constructor.
+class SemiAnalyticSolution
+{  
+  std::vector<long double> x; //  x coordinate.
+  std::vector<long double> y; //  y coordinate.
+  std::vector<long double> u; //  u(x,y).
+  std::vector<long double> w; //  Gauss-Kronrod quadrature weights.
+  
+  unsigned long int n;  // Number of quadrature points (size of vectors x,y,u,w).
+  
+  bool NA;  // Indicates that the exact solution could not be read from the input file.
+  
+  public:
+    SemiAnalyticSolution(std::string file);
+    
+    // The following two functions use the quadrature specified by the input file to
+    // calculate integrals over the rectangle [0,1]x[0,1].
+    //
+    // Calculates L2-norm of the exact solution.
+    double get_l2_norm();     
+    //
+    // Calculates L2-norm of the relative difference between
+    // the exact solution and the one computed by Hermes.  
+    double get_l2_rel_err(Solution *approx_sln);  
+};
+
+
+SemiAnalyticSolution::SemiAnalyticSolution(std::string file) : NA(false)
+{
+  std::string exact_solution_not_available;
+  exact_solution_not_available.append("Exact solution could not be read from the supplied file:");
+  exact_solution_not_available.append(file);
+  
+  std::ifstream ifs(file.c_str());
+  
+  if (ifs.fail())
+  {
+    warning(exact_solution_not_available.c_str());
+    NA = true;
+    return;
+  }
+  
+  std::string ns, xs, ys, us, ws;
+  
+  std::getline(ifs, ns);
+  n = strtoul(ns.c_str(), NULL, 0);
+  x.reserve(n);
+  y.reserve(n);
+  u.reserve(n);
+  w.reserve(n);
+  
+  while(!std::getline(ifs, xs, '\t').eof())
+  {
+    x.push_back(strtold(xs.c_str(), NULL));
+    std::getline(ifs, ys, '\t');
+    y.push_back(strtold(ys.c_str(), NULL));
+    std::getline(ifs, us, '\t');
+    u.push_back(strtold(us.c_str(), NULL));
+    std::getline(ifs, ws);
+    w.push_back(strtold(ws.c_str(), NULL));
+  }
+  
+  if (x.size() != n || y.size() != n || u.size() != n || w.size() != n)
+  {
+    warning(exact_solution_not_available.c_str());
+    NA = true;
+  }
+  
+  ifs.close();
+}
+
+double SemiAnalyticSolution::get_l2_norm()
+{
+  if (NA) return -1;
+  
+  long double res = 0.0;
+  
+  for (unsigned int i = 0; i < n; i++)
+    res += w[i] * u[i] * u[i];
+  
+  return sqrt(res);
+}
+
+double SemiAnalyticSolution::get_l2_rel_err(Solution *approx_sln)
+{
+  if (NA) return -1;
+  
+  long double res = 0.0, nrm = 0.0;
+  
+  for (unsigned int i = 0; i < n; i++)
+  {
+    nrm += w[i] * u[i] * u[i];
+    res += w[i] * pow(u[i] - approx_sln->get_pt_value(x[i],y[i]),2);
+  }
+  
+  return sqrt(res/nrm);
+}
+
+
+    
+
+
+
+
+
+
+
 // Inner product between two 2D vectors.
 template<typename Real>
 inline Real dot2(Real x1, Real y1, Real x2, Real y2)

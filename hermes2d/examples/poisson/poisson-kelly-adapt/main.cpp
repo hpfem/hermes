@@ -57,7 +57,7 @@ const double CONST_GAMMA_OUTER = 1.00;    // Heat flux on Gamma_inner.
 const double CONST_F = -1.0;              
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

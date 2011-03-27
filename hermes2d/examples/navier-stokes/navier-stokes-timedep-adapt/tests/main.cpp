@@ -88,7 +88,7 @@ scalar essential_bc_values_xvel(double x, double y, double time) {
   }
 
 // Weak forms
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 void mag(int n, scalar* a, scalar* dadx, scalar* dady,
                 scalar* b, scalar* dbdx, scalar* dbdy,

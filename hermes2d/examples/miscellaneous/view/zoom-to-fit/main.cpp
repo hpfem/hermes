@@ -32,7 +32,7 @@
 // There are three domains prepared - the square, trapezoid and an l-shape with curved part.
 // Functions 2 and 3 don't work with the trapezoid.
 
-#include "test_functions.cpp"
+#include "definitions.cpp"
 
 extern void init_glut();
 

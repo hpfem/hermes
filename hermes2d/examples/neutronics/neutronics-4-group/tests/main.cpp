@@ -41,7 +41,7 @@ const int BDY_SYM = 2;
 // Physical data of the problem for the 4 energy groups.
 #include "physical_parameters.cpp"
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 // Source function.
 void source_fn(int n, Hermes::vector<scalar*> values, scalar* out)
