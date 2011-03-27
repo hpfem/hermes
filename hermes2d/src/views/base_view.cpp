@@ -46,7 +46,7 @@ BaseView::BaseView(char* title, WinGeom* wg)
   basic_title.assign(title);
 }
 
-void BaseView::show(const Space* space, double eps, int item)
+void BaseView::show(const Space<Scalar>* space, double eps, int item)
 {
   free();
   int order_increase = 0;

@@ -63,13 +63,14 @@
  *  Given a reference solution and a coarse solution, it calculates error estimates
  *  and it acts as a container for the calculated errors.
  */
+template<typename Scalar>
 class HERMES_API Adapt
 {
 public:
   /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
   /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-  Adapt(Hermes::vector<Space *> spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-  Adapt(Space* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
+  Adapt(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+  Adapt(Space<Scalar>* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
   virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
   // Matrix forms for error calculation.
@@ -82,22 +83,22 @@ public:
     }
 
     /// Error bilinear form callback function.
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-                         Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
-                         ExtData<scalar> *ext) const
+    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
+                         Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
+                         ExtData<Scalar> *ext) const
     {
       switch (projNormType)
       {
       case HERMES_L2_NORM:
-        return l2_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return l2_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_NORM:
-        return h1_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return h1_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_error_semi_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+            return h1_error_semi_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+            return hcurl_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_error_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+            return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
         return 0.0;
@@ -130,9 +131,9 @@ public:
   private:
     ProjNormType projNormType;
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     static Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                   Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -140,9 +141,9 @@ public:
       return result;
     }
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     static Scalar h1_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                   Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -151,9 +152,9 @@ public:
       return result;
     }
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     static Scalar h1_error_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                        Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                        Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -161,8 +162,8 @@ public:
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename real, typename scalar>
+    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
 
       error("hdiv error form not implemented yet in integrals_hdiv.h.");
@@ -175,8 +176,8 @@ public:
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename real, typename scalar>
+    static Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -193,12 +194,12 @@ public:
    *  \param[in] j The second component index.
    *  \param[in] bi_form A bilinear form which calculates value.
    *  \param[in] bi_ord A bilinear form which calculates order. */
-  void set_error_form(int i, int j, Adapt::MatrixFormVolError* form);
-  void set_error_form(Adapt::MatrixFormVolError* form);   // i = j = 0
+  typename void set_error_form(int i, int j, MatrixFormVolError* form);
+  typename void set_error_form(MatrixFormVolError* form);   // i = j = 0
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-  double calc_err_est(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
+  double calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
                       unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
@@ -209,7 +210,7 @@ public:
   /// as 'num' in the constructor. After that, n coarse solution
   /// pointers are passed, followed by n fine solution pointers.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-  double calc_err_est(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+  double calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
                       Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
                       unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
@@ -218,7 +219,7 @@ public:
 
   /// Type-safe version of calc_err_exact() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-  double calc_err_exact(Solution *sln, Solution *rsln, bool solutions_for_adapt = true,
+  double calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
     if (num != 1) EXIT("Wrong number of solutions.");
@@ -227,7 +228,7 @@ public:
 
   /// Calculates the error of the solution.
   /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-  double calc_err_exact(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+  double calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
                         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
   {
@@ -244,10 +245,10 @@ public:
    *  \param[in] same_order True if all element have to have same orders after all refinements are applied.
    *  \param[in] to_be_processed Error which has to be processed. Used in strategy number 3.
    *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
-  bool adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat = 0,
+  bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors, double thr, int strat = 0,
              int regularize = -1, double to_be_processed = 0.0);
   
-  bool adapt(RefinementSelectors::Selector* refinement_selector, double thr, int strat = 0,
+  bool adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat = 0,
             int regularize = -1, double to_be_processed = 0.0);
 
   /// Unrefines the elements with the smallest error.
@@ -320,7 +321,7 @@ protected: //adaptivity
    *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
    *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
   void fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine, int** idx,
-                                   Hermes::vector<RefinementSelectors::Selector *> refinement_selectors);
+                                   Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
 
   /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.
   /** \param[in] meshes An arrat of meshes of components. */
@@ -328,10 +329,10 @@ protected: //adaptivity
 
 protected: // spaces & solutions
   int num;                              ///< Number of solution components (as in wf->neq).
-  Hermes::vector<Space*> spaces;        ///< Spaces.
+  Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
   int num_act_elems;                    ///< A total number of active elements across all provided meshes.
-  Solution* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
-  Solution* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
+  Solution<Scalar>* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
+  Solution<Scalar>* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
   bool have_errors;                     ///< True if errors of elements were calculated.
   bool have_coarse_solutions;           ///< True if the coarse solutions were set.
   bool have_reference_solutions;        ///< True if the reference solutions were set.
@@ -346,18 +347,18 @@ protected: //forms and error evaluation
   static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
   static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
 
-  Adapt::MatrixFormVolError* error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
+  MatrixFormVolError* error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
 
   /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
   /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-  virtual double calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+  virtual double calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
 
   /// One Space version.
-  virtual double calc_err_internal(Solution* sln, Solution* rsln,
+  virtual double calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags);
 
@@ -375,8 +376,8 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of an absolute error. */
-  virtual double eval_error(Adapt::MatrixFormVolError* form,
-                            MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2);
+  virtual double eval_error(MatrixFormVolError* form,
+                            MeshFunction<Scalar>*sln1, MeshFunction<Scalar>*sln2, MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2);
 
   /// Evaluates the square of a norm of an active element in the reference solution among a given pair of components.
   /** The method uses a bilinear forms to calculate the norm. This is done by supplying a v1 and v2 at integration points to the bilinear form,
@@ -387,8 +388,8 @@ protected: //forms and error evaluation
    *  \param[in] rrv1 A reference map of a reference solution rsln1.
    *  \param[in] rrv2 A reference map of a reference solution rsln2.
    *  \return A square of a norm. */
-  virtual double eval_error_norm(Adapt::MatrixFormVolError* form,
-                                 MeshFunction *rsln1, MeshFunction *rsln2);
+  virtual double eval_error_norm(MatrixFormVolError* form,
+                                 MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2);
 
   /// Builds an ordered queue of elements that are be examined.
   /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.

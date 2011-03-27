@@ -36,7 +36,8 @@ typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
 ///       The finite element method: its basis and fundamentals (Section 13.7.1).
 ///       6th ed. (2005), Elsevier.
 ///
-class HERMES_API KellyTypeAdapt : public Adapt
+template<typename Scalar>
+class HERMES_API KellyTypeAdapt : public Adapt<Scalar>
 {
 public:
   /// Class representing the weak form of an error estimator.
@@ -56,10 +57,10 @@ public:
   ///
   ///   - int n,                 ... number of integration points in the currently processed element
   ///   - double *wt,            ... corresponding integration weights
-  ///   - Func\<scalar\> *u[],   ... all solution components
+  ///   - Func\<Scalar\> *u[],   ... all solution components
   ///   - Func\<double\> *u,     ... currently processed solution component
   ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
-  ///   - ExtData\<scalar\> *ext ... external functions (currently unused).
+  ///   - ExtData\<Scalar\> *ext ... external functions (currently unused).
   ///
   class HERMES_API ErrorEstimatorForm
   {
@@ -67,16 +68,16 @@ public:
     int i;
     std::string area;
     Hermes::vector<MeshFunction *> ext;
-    Hermes::vector<scalar> param;
+    Hermes::vector<Scalar> param;
 
     ErrorEstimatorForm(int i, std::string area = HERMES_ANY, 
                        Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction *>(), 
-                       Hermes::vector<scalar> param = Hermes::vector<scalar>()) :
+                       Hermes::vector<Scalar> param = Hermes::vector<Scalar>()) :
     i(i), area(area), ext(ext), param(param) {}
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-                         Func<scalar> *u, Geom<double> *e,
-                         ExtData<scalar> *ext) const
+    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
+                         Func<Scalar> *u, Geom<double> *e,
+                         ExtData<Scalar> *ext) const
     {
       error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
       return 0.0;
@@ -263,8 +264,8 @@ public:
 ///       Currently, the forms for the Neumann and Newton boundary conditions must be specified by
 ///       the user, see the example \c poisson-kelly-adapt.
 ///
-
-class HERMES_API BasicKellyAdapt : public KellyTypeAdapt
+template<typename Scalar>
+class HERMES_API BasicKellyAdapt : public KellyTypeAdapt<Scalar>
 {
 public:
   class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt::ErrorEstimatorForm
@@ -272,11 +273,11 @@ public:
   public:
     ErrorEstimatorFormKelly(int i) : ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
-                         Func<scalar> *u, Geom<double> *e,
-                         ExtData<scalar> *ext) const
+    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
+                         Func<Scalar> *u, Geom<double> *e,
+                         ExtData<Scalar> *ext) const
     {
-      return original_kelly_interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
+      return original_kelly_interface_estimator<double, Scalar>(n, wt, u_ext, u, e, ext);
     }
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,

@@ -666,7 +666,7 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
   return 0;
 }
 
-NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space *space, AsmList* al)
+NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space<Scalar>*space, AsmList* al)
 {
   _F_
   if (supported_shapes == NULL)
@@ -695,7 +695,7 @@ int NeighborSearch::get_quad_eo(bool on_neighbor)
     return central_quad.eo;
 }
 
-DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction* fu)
+DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction<Scalar>* fu)
 {
   _F_
   Func<scalar>* fn_central = init_fn(fu, get_quad_eo(false));
@@ -750,7 +750,7 @@ int NeighborSearch::get_neighb_edge_orientation(int segment)
 /*** _____________________________________________ EXTENDED SHAPESET _____________________________________________ ***/
 
 
-NeighborSearch::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space* space) :
+NeighborSearch::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space<Scalar>* space) :
   central_al(central_al)
 {
   _F_

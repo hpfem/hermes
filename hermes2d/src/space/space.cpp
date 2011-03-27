@@ -250,7 +250,7 @@ void Space::copy_orders_recurrent(Element* e, int order)
 }
 
 
-void Space::copy_orders(const Space* space, int inc)
+void Space::copy_orders(const Space<Scalar>* space, int inc)
 {
   _F_
   Element* e;
@@ -606,7 +606,7 @@ void Space::free_extra_data()
   extra_data.clear();
 }
 
-int Space::get_num_dofs(Hermes::vector<Space *> spaces)
+int Space::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
 {
   _F_
   int ndof = 0;
@@ -616,14 +616,14 @@ int Space::get_num_dofs(Hermes::vector<Space *> spaces)
   return ndof;
 }
 
-int Space::get_num_dofs(Space* space)
+int Space::get_num_dofs(Space<Scalar>* space)
 {
   _F_
   return space->get_num_dofs();
 }
 
 // This is identical to H3D.
-int Space::assign_dofs(Hermes::vector<Space*> spaces)
+int Space::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
 {
   _F_
   int n = spaces.size();
@@ -637,10 +637,10 @@ int Space::assign_dofs(Hermes::vector<Space*> spaces)
 }
 
 // Performs uniform global refinement of a FE space.
-Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase)
+Hermes::vector<Space<Scalar>*>* Space::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase)
 {
   _F_
-  Hermes::vector<Space *> * ref_spaces = new Hermes::vector<Space *>;
+  Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
   bool same_meshes = true;
   unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
   for (unsigned int i = 0; i < coarse.size(); i++) {
@@ -659,19 +659,19 @@ Hermes::vector<Space *>* Space::construct_refined_spaces(Hermes::vector<Space *>
 }
 
 // Light version for a single space.
-Space* Space::construct_refined_space(Space* coarse, int order_increase)
+Space<Scalar>* Space::construct_refined_space(Space<Scalar>* coarse, int order_increase)
 {
   _F_
   Mesh* ref_mesh = new Mesh;
   ref_mesh->copy(coarse->get_mesh());
   ref_mesh->refine_all_elements();
-  Space* ref_space = coarse->dup(ref_mesh, order_increase);
+  Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
 
   return ref_space;
 }
 
 // updating time-dependent essential BC
-void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double time) {
+void Space::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->get_essential_bcs()->set_current_time(time);
@@ -679,7 +679,7 @@ void Space::update_essential_bc_values(Hermes::vector<Space*> spaces, double tim
   }
 }
 
-void Space::update_essential_bc_values(Space *s, double time) {
+void Space::update_essential_bc_values(Space<Scalar>*s, double time) {
   s->get_essential_bcs()->set_current_time(time);
   s->update_essential_bc_values();
 }

@@ -59,7 +59,8 @@ static int find_position(int *Ai, int Alen, int idx) {
   return mid;
 }
 
-CSCMatrix::CSCMatrix() {
+template<typename Scalar>
+CSCMatrix<Scalar>::CSCMatrix() {
   _F_
   size = 0; nnz = 0;
   Ap = NULL;
@@ -67,18 +68,21 @@ CSCMatrix::CSCMatrix() {
   Ax = NULL;
 }
 
-CSCMatrix::CSCMatrix(unsigned int size) {
+template<typename Scalar>
+CSCMatrix<Scalar>::CSCMatrix(unsigned int size) {
   _F_
   this->size = size;
   this->alloc();
 }
 
-CSCMatrix::~CSCMatrix() {
+template<typename Scalar>
+CSCMatrix<Scalar>::~CSCMatrix() {
   _F_
   free();
 }
 
-void CSCMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out) 
+template<typename Scalar>
+void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) 
 {
   int n = this->size;
   for (int j=0; j<n; j++) vector_out[j] = 0;
@@ -89,12 +93,14 @@ void CSCMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out)
   }
 }
 
-void CSCMatrix::multiply_with_scalar(scalar value) 
+template<typename Scalar>
+void CSCMatrix<Scalar>::multiply_with_Scalar(Scalar value) 
 {
   for (unsigned int i = 0; i < this->nnz; i++) Ax[i] *= value;
 }
 
-void CSCMatrix::alloc() {
+template<typename Scalar>
+void CSCMatrix<Scalar>::alloc() {
   _F_
   assert(pages != NULL);
 
@@ -119,12 +125,13 @@ void CSCMatrix::alloc() {
 
   nnz = Ap[size];
   
-  Ax = new scalar [nnz];
+  Ax = new Scalar [nnz];
   MEM_CHECK(Ax);
-  memset(Ax, 0, sizeof(scalar) * nnz);
+  memset(Ax, 0, sizeof(Scalar) * nnz);
 }
 
-void CSCMatrix::free() {
+template<typename Scalar>
+void CSCMatrix<Scalar>::free() {
   _F_
   nnz = 0;
   if (Ap != NULL) {delete [] Ap; Ap = NULL;}
@@ -132,7 +139,8 @@ void CSCMatrix::free() {
   if (Ax != NULL) {delete [] Ax; Ax = NULL;}
 }
 
-scalar CSCMatrix::get(unsigned int m, unsigned int n)
+template<typename Scalar>
+Scalar CSCMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -144,12 +152,14 @@ scalar CSCMatrix::get(unsigned int m, unsigned int n)
     return Ax[Ap[n] + mid];
 }
 
-void CSCMatrix::zero() {
+template<typename Scalar>
+void CSCMatrix<Scalar>::zero() {
   _F_
-  memset(Ax, 0, sizeof(scalar) * nnz);
+  memset(Ax, 0, sizeof(Scalar) * nnz);
 }
 
-void CSCMatrix::add(unsigned int m, unsigned int n, scalar v) {
+template<typename Scalar>
+void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
   _F_
   if (v != 0.0)   // ignore zero values.
   {
@@ -157,7 +167,7 @@ void CSCMatrix::add(unsigned int m, unsigned int n, scalar v) {
     int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
     // Make sure we are adding to an existing non-zero entry.
     if (pos < 0) {
-      info("CSCMatrix::add(): i = %d, j = %d.", m, n);
+      info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
       error("Sparse matrix entry not found");
     }
 
@@ -166,54 +176,57 @@ void CSCMatrix::add(unsigned int m, unsigned int n, scalar v) {
 }
 
 // NOTE: Corresponding nonzero entries in the matrix "this" must be existing.
-void CSCMatrix::add_to_diagonal_blocks(int num_stages, CSCMatrix* mat_block)
+template<typename Scalar>
+void CSCMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat_block)
 {
   _F_
   int ndof = mat_block->get_size();
   if (this->get_size() != (unsigned int) num_stages * ndof) 
-    error("Incompatible matrix sizes in CSCMatrix::add_to_diagonal_blocks()");
+    error("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
   for (int i = 0; i < num_stages; i++) {
     this->add_as_block(ndof*i, ndof*i, mat_block);
   }
 }
 
-void CSCMatrix::add_as_block(unsigned int offset_i, unsigned int offset_j, CSCMatrix* mat)
+template<typename Scalar>
+void CSCMatrix<Scalar>::add_as_block(unsigned int offset_i, unsigned int offset_j, CSCMatrix<Scalar>* mat)
 {
-  UMFPackIterator mat_it(mat);
-  UMFPackIterator this_it(this);
+  UMFPackIterator<Scalar> mat_it(mat);
+  UMFPackIterator<Scalar> this_it(this);
 
   // Sanity check.
   bool this_not_empty = this_it.init();
-  if (!this_not_empty) error("Empty matrix detected in CSCMatrix::add_as_block().");
+  if (!this_not_empty) error("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
 
   // Iterate through the small matrix column by column and add all nonzeros 
   // to the large one.
   bool mat_not_finished = mat_it.init();
-  if (!mat_not_finished) error("Empty matrix detected in CSCMatrix::add_as_block().");
+  if (!mat_not_finished) error("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
   
   int mat_i, mat_j;
-  scalar mat_val;
+  Scalar mat_val;
   while(mat_not_finished) {
     mat_it.get_current_position(mat_i, mat_j, mat_val);
     bool found = this_it.move_to_position(mat_i + offset_i, mat_j + offset_j);
-    if (!found) error ("Nonzero matrix entry at %d, %d not found in CSCMatrix::add_as_block().", 
+    if (!found) error ("Nonzero matrix entry at %d, %d not found in CSCMatrix<Scalar>::add_as_block().", 
                        mat_i + offset_i, mat_j + offset_j);
     this_it.add_to_current_position(mat_val);
     mat_not_finished = mat_it.move_ptr();
   }
 }
 
-void CSCMatrix::add_matrix(CSCMatrix* mat) {
+template<typename Scalar>
+void CSCMatrix<Scalar>::add_matrix(CSCMatrix<Scalar>* mat) {
   _F_
   assert(this->get_size() == mat->get_size());
   // Create iterators for both matrices. 
-  UMFPackIterator mat_it(mat);
-  UMFPackIterator this_it(this);
+  UMFPackIterator<Scalar> mat_it(mat);
+  UMFPackIterator<Scalar> this_it(this);
   int mat_i, mat_j;
-  scalar mat_val;
+  Scalar mat_val;
   int this_i, this_j;
-  scalar this_val;
+  Scalar this_val;
 
   bool mat_not_finished = mat_it.init();
   bool this_not_finished = this_it.init();
@@ -240,14 +253,17 @@ void CSCMatrix::add_matrix(CSCMatrix* mat) {
 }
 
 /// Add a number to each diagonal entry.
-void CSCMatrix::add_to_diagonal(scalar v) 
+
+template<typename Scalar>
+void CSCMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
   for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void CSCMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) {
+template<typename Scalar>
+void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) {
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
     for (unsigned int j = 0; j < n; j++)     // cols
@@ -257,7 +273,9 @@ void CSCMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int
 
 /// dumping matrix and right-hand side
 ///
-bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+
+template<typename Scalar>
+bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt) 
   {
@@ -273,7 +291,7 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
 
     case DF_MATRIX_MARKET:
     {
-      fprintf(file,"%%%%MatrixMarket matrix coordinate real symmetric\n");
+      fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
       int nnz_sym=0;
       for (int j = 0; j < (int)size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
@@ -292,13 +310,13 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESX\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
     }
 
@@ -311,32 +329,35 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   }
 }
 
-unsigned int CSCMatrix::get_matrix_size() const {
+template<typename Scalar>
+unsigned int CSCMatrix<Scalar>::get_matrix_size() const {
   return size;
 }
 
 /* THIS WAS WRONG
-int UMFPackMatrix::get_matrix_size() const {
+int UMFPackMatrix<Scalar>::get_matrix_size() const {
   _F_
   assert(Ap != NULL);
   //          Ai             Ax                      Ap                     nnz         
-  return (sizeof(int) + sizeof(scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
+  return (sizeof(int) + sizeof(Scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 */
 
-double CSCMatrix::get_fill_in() const {
+template<typename Scalar>
+double CSCMatrix<Scalar>::get_fill_in() const {
   _F_
   return nnz / (double) (size * size);
 }
 
-void CSCMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax) 
+template<typename Scalar>
+void CSCMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax) 
 {
   _F_
   this->nnz = nnz;
   this->size = size;
   this->Ap = new int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
   for (unsigned int i = 0; i < size+1; i++) this->Ap[i] = ap[i];
   for (unsigned int i = 0; i < nnz; i++) {
     this->Ax[i] = ax[i]; 
@@ -344,78 +365,90 @@ void CSCMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, sc
   } 
 }
 
-CSCMatrix* CSCMatrix::duplicate()
+template<typename Scalar>
+CSCMatrix<Scalar>* CSCMatrix<Scalar>::duplicate()
 {
   _F_
-  CSCMatrix* new_matrix = new CSCMatrix();
+  CSCMatrix<Scalar>* new_matrix = new CSCMatrix<Scalar>();
   create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
   return new_matrix;
 }
 
 
-// UMFPackVector ///////
+// UMFPackVector<Scalar> ///////
 
-UMFPackVector::UMFPackVector() {
+template<typename Scalar>
+UMFPackVector<Scalar>::UMFPackVector() {
   _F_
   v = NULL;
   size = 0;
 }
 
-UMFPackVector::UMFPackVector(unsigned int size) {
+template<typename Scalar>
+UMFPackVector<Scalar>::UMFPackVector(unsigned int size) {
   _F_
   v = NULL;
   this->size = size;
   this->alloc(size);
 }
 
-UMFPackVector::~UMFPackVector() {
+template<typename Scalar>
+UMFPackVector<Scalar>::~UMFPackVector() {
   _F_
   free();
 }
 
-void UMFPackVector::alloc(unsigned int n) {
+template<typename Scalar>
+void UMFPackVector<Scalar>::alloc(unsigned int n) {
   _F_
   free();
   this->size = n;
-  v = new scalar [n];
+  v = new Scalar [n];
   MEM_CHECK(v);
   this->zero();
 }
 
-void UMFPackVector::zero() {
+template<typename Scalar>
+void UMFPackVector<Scalar>::zero() {
   _F_
-  memset(v, 0, size * sizeof(scalar));
+  memset(v, 0, size * sizeof(Scalar));
 }
 
-void UMFPackVector::change_sign() {
+template<typename Scalar>
+void UMFPackVector<Scalar>::change_sign() {
   _F_
   for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
 }
 
-void UMFPackVector::free() {
+template<typename Scalar>
+void UMFPackVector<Scalar>::free() {
   _F_
   delete [] v;
   v = NULL;
   size = 0;
 }
 
-void UMFPackVector::set(unsigned int idx, scalar y) {
+template<typename Scalar>
+void UMFPackVector<Scalar>::set(unsigned int idx, Scalar y) {
   _F_
   v[idx] = y;
 }
 
-void UMFPackVector::add(unsigned int idx, scalar y) {
+template<typename Scalar>
+void UMFPackVector<Scalar>::add(unsigned int idx, Scalar y) {
   _F_
   v[idx] += y;
 }
 
-void UMFPackVector::add(unsigned int n, unsigned int *idx, scalar *y) {
+template<typename Scalar>
+void UMFPackVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) {
   _F_
   for (unsigned int i = 0; i < n; i++)
     v[idx[i]] += y[i];
 }
 
-bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+template<typename Scalar>
+bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt) 
   {
@@ -429,10 +462,10 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESR\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(scalar), size, file);
+      hermes_fwrite(v, sizeof(Scalar), size, file);
       return true;
     }
 
@@ -466,8 +499,9 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 #endif
 
 
-UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
-  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
+template<typename Scalar>
+UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
+  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -477,7 +511,8 @@ UMFPackLinearSolver::UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs)
 }
 
 
-UMFPackLinearSolver::~UMFPackLinearSolver() {
+template<typename Scalar>
+UMFPackLinearSolver<Scalar>::~UMFPackLinearSolver() {
   _F_
   free_factorization_data();
 }
@@ -504,7 +539,8 @@ static void check_status(const char *fn_name, int status) {
 
 #endif
 
-bool UMFPackLinearSolver::solve() {
+template<typename Scalar>
+bool UMFPackLinearSolver<Scalar>::solve() {
   _F_
 #ifdef WITH_UMFPACK
   assert(m != NULL);
@@ -524,9 +560,9 @@ bool UMFPackLinearSolver::solve() {
 
   if(sln)
     delete [] sln;
-  sln = new scalar[m->size];
+  sln = new Scalar[m->size];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(scalar));
+  memset(sln, 0, m->size * sizeof(Scalar));
 
   status = umfpack_solve(UMFPACK_A, m->Ap, m->Ai, m->Ax, sln, rhs->v, numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
@@ -543,7 +579,8 @@ bool UMFPackLinearSolver::solve() {
 #endif
 }
 
-bool UMFPackLinearSolver::setup_factorization()
+template<typename Scalar>
+bool UMFPackLinearSolver<Scalar>::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -587,7 +624,8 @@ bool UMFPackLinearSolver::setup_factorization()
 #endif
 }
 
-void UMFPackLinearSolver::free_factorization_data()
+template<typename Scalar>
+void UMFPackLinearSolver<Scalar>::free_factorization_data()
 { 
   _F_
 #ifdef WITH_UMFPACK
@@ -600,7 +638,8 @@ void UMFPackLinearSolver::free_factorization_data()
 
 /*** UMFPack matrix iterator ****/
 
-bool UMFPackIterator::init()
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::init()
 {
   if (this->size == 0 || this->nnz == 0) return false;
   this->Ap_pos = 0;
@@ -608,17 +647,19 @@ bool UMFPackIterator::init()
   return true;
 }
 
-void UMFPackIterator::get_current_position(int& i, int& j, scalar& val)
+template<typename Scalar>
+void UMFPackIterator<Scalar>::get_current_position(int& i, int& j, Scalar& val)
 {
   i = Ai[Ai_pos];
   j = Ap_pos;
   val = Ax[Ai_pos];
 }
 
-bool UMFPackIterator::move_to_position(int i, int j)
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::move_to_position(int i, int j)
 {
   int ii, jj;
-  scalar val;
+  Scalar val;
   get_current_position(ii, jj, val);
   while (!(ii == i && jj == j)) {
     if(!this->move_ptr()) return false;
@@ -627,7 +668,8 @@ bool UMFPackIterator::move_to_position(int i, int j)
   return true;
 }
 
-bool UMFPackIterator::move_ptr()
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::move_ptr()
 {
   if (Ai_pos >= nnz - 1) return false; // It is no longer possible to find next element.
   if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
@@ -637,7 +679,8 @@ bool UMFPackIterator::move_ptr()
   return true;
 }
 
-void UMFPackIterator::add_to_current_position(scalar val)
+template<typename Scalar>
+void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
 {
   this->Ax[this->Ai_pos] += val;
 }

@@ -26,16 +26,16 @@
 
 // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
-
-class HERMES_API VectorBaseView : public VectorView
+template<typename Scalar>
+class HERMES_API VectorBaseView : public VectorView<Scalar>
 {
 public:
 
   VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-		: VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
+		: VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 
 	VectorBaseView(char* title, WinGeom* wg = NULL)
-    : VectorView(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
+    : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 
   void show(Space* space);
 
@@ -49,9 +49,9 @@ public:
 
 protected:
 
-  Space* space;
+  Space<Scalar>* space;
   PrecalcShapeset* pss;
-  Solution* sln;
+  Solution<Scalar>* sln;
 
   int ndof, component;
   int base_index;

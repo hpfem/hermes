@@ -29,13 +29,13 @@ RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType m
 
   // Vector K_vector of length num_stages * ndof. will represent
   // the 'K_i' vectors in the usual R-K notation.
-  K_vector = new scalar[num_stages * dp->get_num_dofs()];
+  K_vector = new Scalar[num_stages * dp->get_num_dofs()];
 
   // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
-  u_ext_vec = new scalar[num_stages * dp->get_num_dofs()];
+  u_ext_vec = new Scalar[num_stages * dp->get_num_dofs()];
 
   // Vector for the left part of the residual.
-  vector_left = new scalar[num_stages*  dp->get_num_dofs()];
+  vector_left = new Scalar[num_stages*  dp->get_num_dofs()];
 }
 
 RungeKutta::~RungeKutta()
@@ -47,7 +47,7 @@ RungeKutta::~RungeKutta()
 }
 
 void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
-                                       scalar* source_vec, scalar* target_vec)
+                                       Scalar* source_vec, Scalar* target_vec)
 {
   int size = matrix->get_size();
   for (int i = 0; i < num_blocks; i++) {
@@ -55,31 +55,31 @@ void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int nu
   }
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new, 
-                              Solution* error_fn, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new, 
+                              Solution<Scalar>* error_fn, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
                               double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
-  Hermes::vector<Solution*> slns_time_prev = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
   slns_time_prev.push_back(sln_time_prev);
-  Hermes::vector<Solution*> slns_time_new  = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
   slns_time_new.push_back(sln_time_new);
-  Hermes::vector<Solution*> error_fns      = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
   error_fns.push_back(error_fn);
   return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
                       error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
                       newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new, 
-                  Hermes::vector<Solution*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
+bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, 
+                  Hermes::vector<Solution<Scalar>*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
   // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-  if(error_fns != Hermes::vector<Solution*>() && bt->is_embedded() == false)
+  if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
     error("rk_time_step(): R-K method must be embedded if temporal error estimate is requested.");
 
   // All Spaces of the problem.
-  Hermes::vector<Space*> stage_spaces_vector;
+  Hermes::vector<Space<Scalar>*> stage_spaces_vector;
   
   // Create spaces for stage solutions K_i. This is necessary
   // to define a num_stages x num_stages block weak formulation.
@@ -98,7 +98,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces_vector);
 
   // Prepare residuals of stage solutions.
-  Hermes::vector<Solution*> residuals_vector;
+  Hermes::vector<Solution<Scalar>*> residuals_vector;
   // A technical workabout.
   Hermes::vector<bool> add_dir_lift;
   for (unsigned int i = 0; i < num_stages; i++)
@@ -109,9 +109,9 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
 
   // Zero utility vectors.
   if(start_from_zero_K_vector || !iteration)
-    memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
-  memset(u_ext_vec, 0, num_stages * ndof * sizeof(scalar));
-  memset(vector_left, 0, num_stages * ndof * sizeof(scalar));
+    memset(K_vector, 0, num_stages * ndof * sizeof(Scalar));
+  memset(u_ext_vec, 0, num_stages * ndof * sizeof(Scalar));
+  memset(vector_left, 0, num_stages * ndof * sizeof(Scalar));
 
   // Assemble the block-diagonal mass matrix M of size ndof times ndof.
   // The corresponding part of the global residual vector is obtained 
@@ -199,7 +199,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   // will be stored in the vector coeff_vec.
   // FIXME - this projection is slow and it is not needed when the 
   //         spaces are the same (if spatial adaptivity does not take place). 
-  scalar* coeff_vec = new scalar[ndof];
+  Scalar* coeff_vec = new Scalar[ndof];
   OGProjection::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
 
   // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
@@ -211,7 +211,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
 
   // If error_fn is not NULL, use the B2-row in the Butcher's
   // table to calculate the temporal error estimate.
-  if (error_fns != Hermes::vector<Solution *>()) {
+  if (error_fns != Hermes::vector<Solution<Scalar>*>()) {
     for (int i = 0; i < ndof; i++) {
       coeff_vec[i] = 0;
       for (unsigned int j = 0; j < num_stages; j++) {
@@ -237,26 +237,26 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   return true;
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, 
-                              Hermes::vector<Solution*> slns_time_new, bool jacobian_changed,
+bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
+                              Hermes::vector<Solution<Scalar>*> slns_time_new, bool jacobian_changed,
                               bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
                               double newton_max_allowed_residual_norm) 
 {
   return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
-         Hermes::vector<Solution*>(), jacobian_changed, verbose, newton_tol, newton_max_iter,
+         Hermes::vector<Solution<Scalar>*>(), jacobian_changed, verbose, newton_tol, newton_max_iter,
          newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* sln_time_prev, 
-                              Solution* sln_time_new, bool jacobian_changed,
+bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
+                              Solution<Scalar>* sln_time_new, bool jacobian_changed,
                               bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
                               double newton_max_allowed_residual_norm) 
 {
-  Hermes::vector<Solution*> slns_time_prev = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
   slns_time_prev.push_back(sln_time_prev);
-  Hermes::vector<Solution*> slns_time_new  = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
   slns_time_new.push_back(sln_time_new);
-  Hermes::vector<Solution*> error_fns      = Hermes::vector<Solution*>();
+  Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
   return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
                error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
                newton_damping_coeff, newton_max_allowed_residual_norm);
@@ -301,7 +301,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
     stage_time_sol = NULL;
   }
 
-  stage_time_sol = new Solution*[num_stages];
+  stage_time_sol = new Solution<Scalar>*[num_stages];
 
   for (int i = 0; i < num_stages; i++) {
     stage_time_sol[i] = new Solution(mesh);
@@ -424,7 +424,7 @@ void RungeKutta::prepare_u_ext_vec(double time_step)
   for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++) {
     for (unsigned int i = 0; i < num_stages; i++)
       for (int idx = 0; idx < dp->get_space(space_i)->get_num_dofs(); idx++) {
-        scalar increment = 0;
+        Scalar increment = 0;
         for (unsigned int j = 0; j < num_stages; j++)
           increment += bt->get_A(i, j) * K_vector[num_stages * running_space_ndofs + j * dp->get_space(space_i)->get_num_dofs() + idx];
         u_ext_vec[num_stages * running_space_ndofs + i * dp->get_space(space_i)->get_num_dofs() + idx] = time_step * increment;

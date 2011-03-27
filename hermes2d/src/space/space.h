@@ -80,16 +80,17 @@
 ///
 class Ord2;
 
+template<typename Scalar>
 class HERMES_API Space
 {
 public:
-  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p_init);
+  Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init);
 
   virtual ~Space();
   virtual void free();
 
   /// Sets the boundary condition.
-  void set_essential_bcs(EssentialBCs* essential_bcs);
+  void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
   /// Sets element polynomial order. Can be called by the user. Should not be called
   /// for many elements at once, since assign_dofs() is called at the end of this function.
   virtual void set_element_order(int id, int order);
@@ -159,7 +160,7 @@ public:
   int ndof;
 
   /// Obtains an boundary conditions
-  inline EssentialBCs* get_essential_bcs() { return essential_bcs; }
+  inline EssentialBCs<Scalar>* get_essential_bcs() { return essential_bcs; }
 
   /// Obtains an assembly list for the given element.
   virtual void get_element_assembly_list(Element* e, AsmList* al);
@@ -186,7 +187,7 @@ protected:
   bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
   // boundary conditions
-  EssentialBCs* essential_bcs;
+  EssentialBCs<Scalar>* essential_bcs;
 
   /// FE mesh
   Mesh* mesh;
@@ -200,7 +201,7 @@ protected:
   struct BaseComponent
   {
     int dof;
-    scalar coef;
+    Scalar coef;
   };
 
   union NodeData
@@ -209,8 +210,8 @@ protected:
     {
       int dof;
       union {
-        scalar* edge_bc_proj;
-        scalar* vertex_bc_coef;
+        Scalar* edge_bc_proj;
+        Scalar* vertex_bc_coef;
       };
       int n; ///< Number of dofs. Temporarily used during assignment
              ///< of DOFs to indicate nodes which were not processed yet.
@@ -269,7 +270,7 @@ protected: //debugging support
 
   void copy_callbacks(const Space* space);
   void precalculate_projection_matrix(int nv, double**& mat, double*& p);
-  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
+  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
   void update_edge_bc(Element* e, SurfPos* surf_pos);
 
   /// Called by Space to update constraining relationships between shape functions due
@@ -302,7 +303,6 @@ public:
   // updating time-dependent essential (Dirichlet) boundary conditions
   static void update_essential_bc_values(Hermes::vector<Space*> spaces, double time);  // multiple spaces
   static void update_essential_bc_values(Space *s, double time);    // one space
-
 };
 
 

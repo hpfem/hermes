@@ -2,7 +2,8 @@
 
 // #ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
 
-KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
+template<typename Scalar>
+KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
                                Hermes::vector< ProjNormType > norms_,
                                bool ignore_visited_segments_,
                                Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
@@ -26,7 +27,8 @@ KellyTypeAdapt::KellyTypeAdapt(Hermes::vector< Space* > spaces_,
   boundary_markers_conversion = spaces_[0]->get_mesh()->boundary_markers_conversion;
 }
 
-KellyTypeAdapt::KellyTypeAdapt(Space* space_, 
+template<typename Scalar>
+KellyTypeAdapt<Scalar>::KellyTypeAdapt(Space<Scalar>* space_, 
                                ProjNormType norm_, 
                                bool ignore_visited_segments_, 
                                interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt(space_, norm_)
@@ -45,7 +47,8 @@ KellyTypeAdapt::KellyTypeAdapt(Space* space_,
   boundary_markers_conversion = space_->get_mesh()->boundary_markers_conversion;
 }
 
-bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_processed)
+template<typename Scalar>
+bool KellyTypeAdapt<Scalar>::adapt(double thr, int strat, int regularize, double to_be_processed)
 {
   Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
   RefinementSelectors::HOnlySelector selector;
@@ -55,7 +58,8 @@ bool KellyTypeAdapt::adapt(double thr, int strat, int regularize, double to_be_p
   return Adapt::adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
 }
 
-void KellyTypeAdapt::add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm* form)
+template<typename Scalar>
+void KellyTypeAdapt<Scalar>::add_error_estimator_vol(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if(form->i < 0 || form->i >= this->num,
            "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
@@ -64,7 +68,8 @@ void KellyTypeAdapt::add_error_estimator_vol(KellyTypeAdapt::ErrorEstimatorForm*
   this->error_estimators_vol.push_back(form);
 }
 
-void KellyTypeAdapt::add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm* form)
+template<typename Scalar>
+void KellyTypeAdapt<Scalar>::add_error_estimator_surf(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if (form->i < 0 || form->i >= this->num,
             "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
@@ -73,7 +78,8 @@ void KellyTypeAdapt::add_error_estimator_surf(KellyTypeAdapt::ErrorEstimatorForm
   this->error_estimators_surf.push_back(form);
 }
 
-double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns,
+template<typename Scalar>
+double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns,
                                          Hermes::vector<double>* component_errors,
                                          unsigned int error_flags)
 {    
@@ -249,7 +255,7 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns,
                   if(num_neighbors == 0)
                     num_neighbors = ns->n_neighbors;
                   if(ns->n_neighbors != num_neighbors)
-                    error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt::calc_err_internal.");
+                    error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt<Scalar>::calc_err_internal.");
                 }
             }
             else
@@ -442,7 +448,8 @@ double KellyTypeAdapt::calc_err_internal(Hermes::vector<Solution *> slns,
   }
 }
 
-double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction* sln)
+template<typename Scalar>
+double KellyTypeAdapt<Scalar>::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction<Scalar>* sln)
 {
   // determine the integration order
   int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -454,7 +461,7 @@ double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMa
   int order = rm->get_inv_ref_order();
   order += o.get_order();
 
-  Solution *sol = static_cast<Solution *>(sln);
+  Solution<Scalar>*sol = static_cast<Solution<Scalar>*>(sln);
   if(sol && sol->get_type() == HERMES_EXACT) {
     limit_order_nowarn(order);
   }
@@ -488,7 +495,8 @@ double KellyTypeAdapt::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMa
   return std::abs(res);
 }
 
-double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap *rm)
+template<typename Scalar>
+double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm)
 {
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
@@ -548,7 +556,8 @@ double KellyTypeAdapt::eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorF
   return std::abs(res);
 }
 
-double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form, RefMap *rm, SurfPos* surf_pos)
+template<typename Scalar>
+double KellyTypeAdapt<Scalar>::eval_boundary_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm, SurfPos* surf_pos)
 {
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
@@ -608,12 +617,13 @@ double KellyTypeAdapt::eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorFor
                               // the weights.
 }
 
-double KellyTypeAdapt::eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+template<typename Scalar>
+double KellyTypeAdapt<Scalar>::eval_interface_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
                                                 RefMap *rm, SurfPos* surf_pos,
                                                 LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index)
 {
   NeighborSearch* nbs = neighbor_searches.get(neighbor_index);
-  Hermes::vector<MeshFunction*> slns;
+  Hermes::vector<MeshFunction<Scalar>*> slns;
   for (int i = 0; i < num; i++)
     slns.push_back(this->sln[i]);
   

@@ -21,7 +21,7 @@
 
 struct Element;
 class HashTable;
-class Space;
+template<typename Scalar> class Space;
 struct MItem;
 
 /// \brief Stores one node of a mesh.
@@ -387,16 +387,6 @@ protected:
   BoundaryMarkersConversion boundary_markers_conversion;
 
   friend class H2DReader;
-  friend class BCTypes;
-  friend class BCValues;
-  friend class WeakForm;
-  friend class Space;
-  friend class H1Space;
-  friend class L2Space;
-  friend class HcurlSpace;
-  friend class HdivSpace;
-  friend class DiscreteProblem;
-  friend class KellyTypeAdapt;
 
 public:
   ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };

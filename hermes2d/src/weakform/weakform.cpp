@@ -20,122 +20,140 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
-WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, Hermes::vector<scalar> param, 
+template<typename Scalar>
+Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param, 
                      double scaling_factor, int u_ext_offset) :
   area(area), ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
   adapt_eval = false;
 }
 
-scalar WeakForm::MatrixFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                                      Geom<double> *e, ExtData<scalar> *ext)
+template<typename Scalar>
+Scalar MatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                                      Geom<double> *e, ExtData<Scalar> *ext)
 {
-  error("WeakForm::MatrixFormVol::value must be overrided.");
+  error("MatrixFormVol<Scalar>::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::MatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+template<typename Scalar>
+Ord MatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                                  Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  error("WeakForm::MatrixFormVol::ord must be overrided.");
+  error("MatrixFormVol<Scalar>::ord must be overrided.");
   return Ord();
 }
 
-WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
+template<typename Scalar>
+MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone()
 {
-  error("WeakForm::MatrixFormVol::clone() must be overridden.");
+  error("MatrixFormVol<Scalar>::clone() must be overridden.");
   return NULL;
 }
 
-WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
-                                       std::string area, Hermes::vector<MeshFunction *> ext, 
-                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+template<typename Scalar>
+MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
+                                       std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, 
+                                       Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
 {
 }
 
-scalar WeakForm::MatrixFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                                       Geom<double> *e, ExtData<scalar> *ext)
+template<typename Scalar>
+Scalar MatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                                       Geom<double> *e, ExtData<Scalar> *ext)
 {
-  error("WeakForm::MatrixFormSurf::value must be overrided.");
+  error("MatrixFormSurf<Scalar>::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::MatrixFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+template<typename Scalar>
+Ord MatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                                   Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  error("WeakForm::MatrixFormSurf::ord must be overrided.");
+  error("MatrixFormSurf<Scalar>::ord must be overrided.");
   return Ord();
 }
 
-WeakForm::MatrixFormSurf* WeakForm::MatrixFormSurf::clone()
+template<typename Scalar>
+MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone()
 {
-  error("WeakForm::MatrixFormSurf::clone() must be overridden.");
+  error("MatrixFormSurf<Scalar>::clone() must be overridden.");
   return NULL;
 }
 
-WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, 
-                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+template<typename Scalar>
+MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
+                                         Hermes::vector<MeshFunction<Scalar>*> ext, 
+                                         Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
 {
 }
 
-scalar WeakForm::VectorFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                                      Geom<double> *e, ExtData<scalar> *ext)
+template<typename Scalar>
+Scalar VectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+                                      Geom<double> *e, ExtData<Scalar> *ext)
 {
-  error("WeakForm::VectorFormVol::value must be overrided.");
+  error("VectorFormVol<Scalar>::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+template<typename Scalar>
+Ord VectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
                                  Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  error("WeakForm::VectorFormVol::ord must be overrided.");
+  error("VectorFormVol<Scalar>::ord must be overrided.");
   return Ord();
 }
 
-WeakForm::VectorFormVol* WeakForm::VectorFormVol::clone()
+template<typename Scalar>
+VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone()
 {
-  error("WeakForm::VectorFormVol::clone() must be overridden.");
+  error("VectorFormVol<Scalar>::clone() must be overridden.");
   return NULL;
 }
 
-WeakForm::VectorFormVol::VectorFormVol(unsigned int i, std::string area,
-                                       Hermes::vector<MeshFunction *> ext, 
-                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+template<typename Scalar>
+VectorFormVol<Scalar>::VectorFormVol(unsigned int i, std::string area,
+                                       Hermes::vector<MeshFunction<Scalar>*> ext, 
+                                       Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
-WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, 
-                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+template<typename Scalar>
+VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, std::string area,
+                                         Hermes::vector<MeshFunction<Scalar>*> ext, 
+                                         Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
-scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                                       Geom<double> *e, ExtData<scalar> *ext)
+template<typename Scalar>
+Scalar VectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+                                       Geom<double> *e, ExtData<Scalar> *ext)
 {
-  error("WeakForm::VectorFormSurf::value must be overrided.");
+  error("VectorFormSurf<Scalar>::value must be overrided.");
   return 0.0;
 }
 
-Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+template<typename Scalar>
+Ord VectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
                                   Geom<Ord> *e, ExtData<Ord> *ext)
 {
-  error("WeakForm::VectorFormSurf::ord must be overrided.");
+  error("VectorFormSurf<Scalar>::ord must be overrided.");
   return Ord();
 }
 
-WeakForm::VectorFormSurf* WeakForm::VectorFormSurf::clone()
+template<typename Scalar>
+VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone()
 {
-  error("WeakForm::VectorFormSurf::clone() must be overridden.");
+  error("VectorFormSurf<Scalar>::clone() must be overridden.");
   return NULL;
 }
 
-WeakForm::WeakForm(unsigned int neq, bool mat_free)
+template<typename Scalar>
+WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
 {
   _F_
 
@@ -144,11 +162,13 @@ WeakForm::WeakForm(unsigned int neq, bool mat_free)
   this->is_matfree = mat_free;
 }
 
-WeakForm::~WeakForm()
+template<typename Scalar>
+WeakForm<Scalar>::~WeakForm()
 {
 }
 
-void WeakForm::add_matrix_form(MatrixFormVol* form)
+template<typename Scalar>
+void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
 {
   _F_
 
@@ -167,7 +187,8 @@ void WeakForm::add_matrix_form(MatrixFormVol* form)
   seq++;
 }
 
-void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
+template<typename Scalar>
+void WeakForm<Scalar>::add_matrix_form_surf(MatrixFormSurf<Scalar>* form)
 {
   _F_
   if (form->i >= neq || form->j >= neq)
@@ -178,7 +199,8 @@ void WeakForm::add_matrix_form_surf(MatrixFormSurf* form)
   seq++;
 }
 
-void WeakForm::add_vector_form(VectorFormVol* form)
+template<typename Scalar>
+void WeakForm<Scalar>::add_vector_form(VectorFormVol<Scalar>* form)
 {
   _F_
   if (form->i >= neq)
@@ -188,7 +210,8 @@ void WeakForm::add_vector_form(VectorFormVol* form)
   seq++;
 }
 
-void WeakForm::add_vector_form_surf(VectorFormSurf* form)
+template<typename Scalar>
+void WeakForm<Scalar>::add_vector_form_surf(VectorFormSurf<Scalar>* form)
 {
   _F_
   if (form->i >= neq)
@@ -199,7 +222,8 @@ void WeakForm::add_vector_form_surf(VectorFormSurf* form)
   seq++;
 }
 
-void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*> ext)
+template<typename Scalar>
+void WeakForm<Scalar>::set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext)
 {
   _F_
   error("Not implemented yet.");
@@ -213,8 +237,9 @@ void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*> ext)
 /// improves the performance of multi-mesh assembling.
 /// This function is identical in H2D and H3D.
 ///
-void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solution *>& u_ext,
-                          std::vector<WeakForm::Stage>& stages, bool rhsonly)
+template<typename Scalar>
+void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
+                          std::vector<Stage<Scalar>>& stages, bool rhsonly)
 {
   _F_
   unsigned int i;
@@ -277,7 +302,7 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
     // Next, append to the existing arrays the external functions (including the solutions
     // from previous Newton iteration) and their meshes. Also fill in a special array with
     // these external functions only.
-    set_for_each(s->ext_set, MeshFunction*)
+    set_for_each(s->ext_set, MeshFunction<Scalar>*)
     {
       s->ext.push_back(*it);
       s->meshes.push_back((*it)->get_mesh());
@@ -295,9 +320,10 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 /// stage can be found, a new one is created and returned.
 /// This function is the same in H2D and H3D.
 ///
-WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int ii, int jj,
+template<typename Scalar>
+Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar>>& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2,
-                                      Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext)
+                                      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext)
 {
   _F_
   // first create a list of meshes the form uses
@@ -352,7 +378,8 @@ WeakForm::Stage* WeakForm::find_stage(std::vector<WeakForm::Stage>& stages, int 
 /// block of weak forms is used, and false otherwise.
 /// This function is the same in H2D and H3D.
 ///
-bool** WeakForm::get_blocks(bool force_diagonal_blocks)
+template<typename Scalar>
+bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks)
 {
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
@@ -375,12 +402,14 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
   return blocks;
 }
 
-void WeakForm::set_current_time(double time)
+template<typename Scalar>
+void WeakForm<Scalar>::set_current_time(double time)
 {
   current_time = time;
 }
 
-double WeakForm::get_current_time()
+template<typename Scalar>
+double WeakForm<Scalar>::get_current_time()
 {
   return current_time;
 }

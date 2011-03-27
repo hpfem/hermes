@@ -24,7 +24,8 @@
 ///
 ///
 ///
-class HERMES_API HdivSpace : public Space
+template<typename Scalar>
+class HERMES_API HdivSpace : public Space<Scalar>
 {
 public:
   HdivSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
@@ -57,7 +58,7 @@ protected:
   static double*  hdiv_chol_p;
   static int      hdiv_proj_ref;
 
-  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
+  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
   struct EdgeInfo
   {

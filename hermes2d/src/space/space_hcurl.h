@@ -24,7 +24,8 @@
 ///
 ///
 ///
-class HERMES_API HcurlSpace : public Space
+template<typename Scalar>
+class HERMES_API HcurlSpace : public Space<Scalar>
 {
 public:
   HcurlSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
@@ -64,7 +65,7 @@ protected:
   static double*  hcurl_chol_p;
   static int      hcurl_proj_ref;
 
-  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
+  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
   struct EdgeInfo
   {

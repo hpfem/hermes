@@ -75,10 +75,10 @@ HdivSpace::~HdivSpace()
 }
 
 
-Space* HdivSpace::dup(Mesh* mesh, int order_increase) const
+Space<Scalar>* HdivSpace::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME
-  // HdivSpace* space = new HdivSpace(mesh, essential_bcs, 0, this->shapeset);
+  // HdivSpace<Scalar>* space = new HdivSpace(mesh, essential_bcs, 0, this->shapeset);
   // space->copy_callbacks(this);
   // space->copy_orders(this, order_increase);
   // return space;

@@ -371,7 +371,7 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::evaluate_cands_dof(Element* e, Solution* rsln) {
+  void OptimumSelector::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln) {
     bool tri = e->is_triangle();
 
     for (unsigned i = 0; i < candidates.size(); i++) {
@@ -441,7 +441,7 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::evaluate_candidates(Element* e, Solution* rsln, double* avg_error, double* dev_error) {
+  void OptimumSelector::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) {
     evaluate_cands_error(e, rsln, avg_error, dev_error);
     evaluate_cands_dof(e, rsln);
     evaluate_cands_score(e);
@@ -509,7 +509,7 @@ namespace RefinementSelectors {
     *selected_h_cand = h_imax;
   }
 
-  bool OptimumSelector::select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement) {
+  bool OptimumSelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     //make an uniform order in a case of a triangle
     int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
     if (element->is_triangle()) {

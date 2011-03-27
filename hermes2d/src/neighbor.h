@@ -7,6 +7,7 @@
 #include "function/solution.h"
 #include "function/forms.h"
 #include "mesh/refmap.h"
+#include "adapt/kelly_type_adapt.h"
 
 /*** Class NeighborSearch. ***/
 
@@ -59,7 +60,7 @@
  * function's order/values on both sides of active edge as in the previous case of external functions.
  *
  */
-
+template<typename Scalar>
 class HERMES_API NeighborSearch
 {
 public:
@@ -130,7 +131,7 @@ public:
   /// \param[in] fu MeshFunction whose values are requested.
   /// \return Pointer to a discontinuous function allowing to access the values from each side of the active edge.
   ///
-  DiscontinuousFunc<scalar>* init_ext_fn(MeshFunction* fu);
+  DiscontinuousFunc<Scalar>* init_ext_fn(MeshFunction<Scalar>* fu);
 
 /*** Methods for working with shape functions. ***/
 
@@ -148,7 +149,7 @@ public:
   /// \param[in]  al    Assembly list for the central element.
   /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
   ///
-  NeighborSearch::ExtendedShapeset* create_extended_asmlist(Space* space, AsmList* al);
+  ExtendedShapeset* create_extended_asmlist(Space<Scalar>* space, AsmList<Scalar>* al);
 
 /*** Methods for working with quadrature on the active edge. ***/
 
@@ -377,7 +378,7 @@ public:
     /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
     /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
     ///
-    ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space *space);
+    ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space *space);
 
     /// Destructor.
     ~ExtendedShapeset() {
@@ -404,8 +405,8 @@ public:
     
     bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
 
-    AsmList* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
-    AsmList* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
+    AsmList<Scalar>* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
+    AsmList<Scalar>* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
 
     friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
   };
@@ -414,8 +415,8 @@ public:
   /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
   bool ignore_errors;
 
-  friend class DiscreteProblem;
-  friend class KellyTypeAdapt;
+  friend class DiscreteProblem<Scalar>;
+  friend class KellyTypeAdapt<Scalar>;
   friend class DiscontinuityDetector;
 };
 

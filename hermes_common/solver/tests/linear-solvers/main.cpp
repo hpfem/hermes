@@ -23,9 +23,9 @@
 // Max row length in input file.
 #define MAX_ROW_LEN	1024
 
-struct MatrixEntry {
-  MatrixEntry() { }
-  MatrixEntry(int m, int n, scalar value) {
+struct Matrix<Scalar>Entry {
+  Matrix<Scalar>Entry() { }
+  Matrix<Scalar>Entry(int m, int n, scalar value) {
   this->m = m;
   this->n = n;
   this->value = value;
@@ -35,8 +35,8 @@ struct MatrixEntry {
   scalar value;
 };
 
-void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp) {
-  std::map<unsigned int, MatrixEntry>::iterator itr;
+void show_mat(const char *msg, std::map<unsigned int, Matrix<Scalar>Entry> mp) {
+  std::map<unsigned int, Matrix<Scalar>Entry>::iterator itr;
 
   std::cout << msg << std::endl;
 
@@ -91,7 +91,7 @@ bool read_n_nums(char *row, int n, double values[]) {
 }
 
 int read_matrix_and_rhs(char *file_name, int &n, 
-                        std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, scalar> &rhs, bool &cplx_2_real) 
+                        std::map<unsigned int, Matrix<Scalar>Entry> &mat, std::map<unsigned int, scalar> &rhs, bool &cplx_2_real) 
 {
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return ERR_FAILURE;
@@ -157,7 +157,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
            
                 if (buffer[0] == k)
                 {
-                   mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], (scalar) buffer[2]));
+                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], (scalar) buffer[2]));
 
                    imgn_value[l] = (scalar) (-1)*buffer[3];
                    imgn_i[l] = (int) buffer[0];
@@ -169,11 +169,11 @@ int read_matrix_and_rhs(char *file_name, int &n,
                    // OK, first finish the previous row with imaginaries.
                    for (int i=0; i < l; i++) 
                    {
-                     mat[mat.size()] = (MatrixEntry(imgn_i[i], imgn_j[i], imgn_value[i]));
+                     mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
                    }
 
                    // Now begin the next row with real
-                   mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], buffer[2]));
 
                    // And remember imaginary part from this row
                    imgn_value[0] = (scalar) (-1)*buffer[3];
@@ -191,7 +191,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
                 if (buffer[0] == k)
                 {
                    // Create next matrix entry
-                   mat[mat.size()] = (MatrixEntry((int) buffer[0] + n/2, (int) buffer[1], (scalar) buffer[3]));
+                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0] + n/2, (int) buffer[1], (scalar) buffer[3]));
 
                    // Save imaginary part for later
                    imgn_value[l] = (scalar) buffer[2];
@@ -205,11 +205,11 @@ int read_matrix_and_rhs(char *file_name, int &n,
                    //OK, first finish the previous row with imaginaries.
                    for (int i=0; i < l; i++) 
                    {
-                     mat[mat.size()] = (MatrixEntry(imgn_i[i], imgn_j[i], imgn_value[i]));
+                     mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
                    }
 
                    // Now begin the next row with real
-                   mat[mat.size()] = (MatrixEntry((int) buffer[0] + n/2, (int) buffer[1], buffer[3]));
+                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0] + n/2, (int) buffer[1], buffer[3]));
 
                    // Save imaginary part for later
                    imgn_value[0] = (scalar) buffer[2];
@@ -234,7 +234,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
                    //OK, first finish the previous row with imaginaries.
                   for (int i=0; i < l; i++) 
                   {
-                    mat[mat.size()] = (MatrixEntry(imgn_i[i], imgn_j[i], imgn_value[i]));
+                    mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
                   }
                 k = 0;
                 l = 0;
@@ -256,7 +256,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
                   //OK, first finish the previous row with imaginaries.
                   for (int i=0; i < l; i++) 
                   {
-                    mat[mat.size()] = (MatrixEntry(imgn_i[i], imgn_j[i], imgn_value[i]));
+                    mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
                   }
                 l = 0;
                 state = STATE_RHS;
@@ -265,7 +265,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
      
         }else{ // if cplx_2_real is false.
            if (read_n_nums(row, 3, buffer)) 
-             mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], buffer[2]));
+             mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], buffer[2]));
 
            else        
            state = STATE_RHS;
@@ -311,7 +311,7 @@ int read_matrix_and_rhs(char *file_name, int &n,
       case STATE_MATRIX:
         if (read_n_nums(row, 4, buffer)) {
             std::complex<double> cmplx_buffer(buffer[2], buffer[3]);
-          mat[mat.size()] = (MatrixEntry((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer));
+          mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], (scalar) cmplx_buffer));
         }
 	else
         state = STATE_RHS;
@@ -345,18 +345,18 @@ int read_matrix_and_rhs(char *file_name, int &n,
   return ERR_SUCCESS;
 }
 
-void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat, 
-                  std::map<unsigned int, scalar> &ar_rhs, SparseMatrix *mat,
-                  Vector *rhs) {
+void build_matrix(int n, std::map<unsigned int, Matrix<Scalar>Entry> &ar_mat, 
+                  std::map<unsigned int, scalar> &ar_rhs, SparseMatrix<Scalar> *mat,
+                  Vector<Scalar> *rhs) {
   mat->prealloc(n);
-  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
-    MatrixEntry &me = it->second;
+  for (std::map<unsigned int, Matrix<Scalar>Entry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    Matrix<Scalar>Entry &me = it->second;
     mat->pre_add_ij(me.m, me.n);
   }
   
   mat->alloc();
-  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
-    MatrixEntry &me = it->second;
+  for (std::map<unsigned int, Matrix<Scalar>Entry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    Matrix<Scalar>Entry &me = it->second;
     mat->add(me.m, me.n, me.value);
   }
   mat->finish();
@@ -368,8 +368,8 @@ void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat,
   rhs->finish();
 }
 
-void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, scalar> &ar_rhs,
-                        SparseMatrix *matrix, Vector *rhs) {
+void build_matrix_block(int n, std::map<unsigned int, Matrix<Scalar>Entry> &ar_mat, std::map<unsigned int, scalar> &ar_rhs,
+                        SparseMatrix<Scalar> *matrix, Vector<Scalar> *rhs) {
   matrix->prealloc(n);
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++)
@@ -383,8 +383,8 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
     cols[i] = i;
     rows[i] = i;
   }
-  for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
-    MatrixEntry &me = it->second;
+  for (std::map<unsigned int, Matrix<Scalar>Entry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
+    Matrix<Scalar>Entry &me = it->second;
     mat[me.m][me.n] = me.value;
   }
   matrix->add(n, n, mat, rows, cols);
@@ -427,7 +427,7 @@ int main(int argc, char *argv[]) {
   int n;
   bool cplx_2_real;
   
-  std::map<unsigned int, MatrixEntry> ar_mat;
+  std::map<unsigned int, Matrix<Scalar>Entry> ar_mat;
   std::map<unsigned int, scalar> ar_rhs;
 
   if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
@@ -444,8 +444,8 @@ int main(int argc, char *argv[]) {
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC
-    PetscMatrix mat;
-    PetscVector rhs;
+    PetscMatrix<Scalar> mat;
+    PetscVector<Scalar> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
     PetscLinearSolver solver(&mat, &rhs);
@@ -454,8 +454,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "petsc-block") == 0) {
 #ifdef WITH_PETSC
-    PetscMatrix mat;
-    PetscVector rhs;
+    PetscMatrix<Scalar> mat;
+    PetscVector<Scalar> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     PetscLinearSolver solver(&mat, &rhs);
@@ -464,8 +464,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "umfpack") == 0) {
 #ifdef WITH_UMFPACK
-    UMFPackMatrix mat;
-    UMFPackVector rhs;
+    UMFPackMatrix<Scalar> mat;
+    UMFPackVector<Scalar> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
     UMFPackLinearSolver solver(&mat, &rhs);
@@ -474,8 +474,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "umfpack-block") == 0) {
 #ifdef WITH_UMFPACK
-    UMFPackMatrix mat;
-    UMFPackVector rhs;
+    UMFPackMatrix<Scalar> mat;
+    UMFPackVector<Scalar> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     UMFPackLinearSolver solver(&mat, &rhs);
@@ -484,8 +484,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
 #ifdef WITH_TRILINOS
-    EpetraMatrix mat;
-    EpetraVector rhs;
+    EpetraMatrix<Scalar> mat;
+    EpetraVector<Scalar> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
     AztecOOSolver solver(&mat, &rhs);
@@ -494,8 +494,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
 #ifdef WITH_TRILINOS
-    EpetraMatrix mat;
-    EpetraVector rhs;
+    EpetraMatrix<Scalar> mat;
+    EpetraVector<Scalar> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     AztecOOSolver solver(&mat, &rhs);
@@ -504,8 +504,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
 #ifdef WITH_TRILINOS
-    EpetraMatrix mat;
-    EpetraVector rhs;
+    EpetraMatrix<Scalar> mat;
+    EpetraVector<Scalar> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
     if (AmesosSolver::is_available("Klu")) {
@@ -516,8 +516,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "amesos-block") == 0) {
 #ifdef WITH_TRILINOS
-    EpetraMatrix mat;
-    EpetraVector rhs;
+    EpetraMatrix<Scalar> mat;
+    EpetraVector<Scalar> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     if (AmesosSolver::is_available("Klu")) {
@@ -528,8 +528,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "mumps") == 0) {
 #ifdef WITH_MUMPS
-    MumpsMatrix mat;
-    MumpsVector rhs;
+    MumpsMatrix<Scalar> mat;
+    MumpsVector<Scalar> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
     MumpsSolver solver(&mat, &rhs);
@@ -538,8 +538,8 @@ int main(int argc, char *argv[]) {
   }
   else if (strcasecmp(argv[1], "mumps-block") == 0) {
 #ifdef WITH_MUMPS
-    MumpsMatrix mat;
-    MumpsVector rhs;
+    MumpsMatrix<Scalar> mat;
+    MumpsVector<Scalar> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
     MumpsSolver solver(&mat, &rhs);

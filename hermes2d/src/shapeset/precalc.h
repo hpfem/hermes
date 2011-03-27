@@ -25,7 +25,7 @@
 /// PrecalcShapeset is a cache of precalculated shape function values.
 ///
 ///
-class HERMES_API PrecalcShapeset : public RealFunction
+class HERMES_API PrecalcShapeset : public Function<double>
 {
 public:
 
@@ -87,7 +87,7 @@ public:
   }
 
   /// Returns the polynomial order of the active shape function on given edge.
-  virtual int get_edge_fn_order(int edge) { return Hermes2D::make_edge_order(mode, edge, shapeset->get_order(index)); }
+  virtual int get_edge_fn_order(int edge) { return Hermes2D<double>::make_edge_order(mode, edge, shapeset->get_order(index)); }
 
   /// See Transformable::push_transform.
   virtual void push_transform(int son);
@@ -129,7 +129,6 @@ protected:
     this->ctm = ctm;
   }
 
-  friend class Solution;
   friend class RefMap;
 };
 

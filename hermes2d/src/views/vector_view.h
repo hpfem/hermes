@@ -31,6 +31,7 @@
 ///
 /// VectorView is a visualization window for all vector-valued PDE solutions.
 ///
+template<typename Scalar>
 class HERMES_API VectorView : public View
 {
 public:
@@ -38,9 +39,9 @@ public:
   VectorView(const char* title = "VectorView", WinGeom* wg = NULL);
   VectorView(char* title, WinGeom* wg = NULL);
 
-  void show(MeshFunction* vsln, double eps = HERMES_EPS_NORMAL);
-  void show(MeshFunction* xsln, MeshFunction* ysln, double eps = HERMES_EPS_NORMAL);
-  void show(MeshFunction* xsln, MeshFunction* ysln, double eps, int xitem, int yitem);
+  void show(MeshFunction<Scalar>* vsln, double eps = HERMES_EPS_NORMAL);
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps = HERMES_EPS_NORMAL);
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem);
 
   void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
 
@@ -68,15 +69,16 @@ protected:
 
 #else // NOGLUT
 
+template<typename Scalar>
 class HERMES_API VectorView : public View
 {
 public:
   VectorView(const char* title = "VectorView", WinGeom* wg = NULL) {}
-  void show(MeshFunction* vsln, double eps = HERMES_EPS_NORMAL)
+  void show(MeshFunction<Scalar>* vsln, double eps = HERMES_EPS_NORMAL)
      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-  void show(MeshFunction* xsln, MeshFunction* ysln, double eps = HERMES_EPS_NORMAL)
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps = HERMES_EPS_NORMAL)
      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-  void show(MeshFunction* xsln, MeshFunction* ysln, double eps, int xitem, int yitem)
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
   void set_grid_type(bool hexa) {}
   void load_data(const char* filename) {}

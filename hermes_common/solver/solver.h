@@ -85,13 +85,14 @@ enum FactorizationScheme
 ///
 /// TODO: Adjust interface to support faster update of matrix and rhs
 ///
+template <typename Scalar>
 class Solver {
 public:
   Solver() { sln = NULL; time = -1.0; }
   virtual ~Solver() { if (sln != NULL) delete [] sln; }
 
   virtual bool solve() = 0;
-  scalar *get_solution() { return sln; }
+  Scalar *get_solution() { return sln; }
 
   int get_error() { return error; }
   double get_time() { return time; }
@@ -102,7 +103,7 @@ public:
   }
 
 protected:
-  scalar *sln;
+  Scalar *sln;
   int error;
   double time;  ///< time spent on solving (in secs)
 };
@@ -110,7 +111,8 @@ protected:
 
 /// Abstract class for defining interface for linear solvers.
 ///
-class LinearSolver : public Solver 
+template <typename Scalar>
+class LinearSolver : public Solver<Scalar>
 {
   public:
     LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
@@ -126,7 +128,9 @@ class LinearSolver : public Solver
 
 /// Abstract class for defining interface for nonlinear solvers.
 ///
-class NonlinearSolver : public Solver {
+template <typename Scalar>
+class NonlinearSolver : public Solver<Scalar> 
+{
   public:
     NonlinearSolver() : Solver() { dp = NULL; }
     NonlinearSolver(DiscreteProblemInterface* dp) : Solver() { this->dp = dp; }
@@ -138,7 +142,8 @@ class NonlinearSolver : public Solver {
 
 /// Abstract class for defining interface for iterative solvers.
 ///
-class IterSolver : public Solver
+template <typename Scalar>
+class IterSolver : public Solver<Scalar>
 {
   public:
     IterSolver() : Solver(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
@@ -155,7 +160,7 @@ class IterSolver : public Solver
     
     virtual void set_precond(const char *name) = 0;
     #ifdef HAVE_TEUCHOS
-      virtual void set_precond(Teuchos::RCP<Precond> &pc) = 0;
+      virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc) = 0;
     #else
       virtual void set_precond(Precond *pc) = 0;
     #endif            

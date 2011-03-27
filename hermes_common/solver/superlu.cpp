@@ -51,7 +51,8 @@ static int find_position(int *Ai, int Alen, int idx)
   return mid;
 }
 
-SuperLUMatrix::SuperLUMatrix()
+template<typename Scalar>
+SuperLUMatrix<Scalar>::SuperLUMatrix()
 {
   _F_
   size = 0; nnz = 0;
@@ -60,13 +61,15 @@ SuperLUMatrix::SuperLUMatrix()
   Ai = NULL;
 }
 
-SuperLUMatrix::~SuperLUMatrix()
+template<typename Scalar>
+SuperLUMatrix<Scalar>::~SuperLUMatrix()
 {
   _F_
   this->free();
 }
 
-void SuperLUMatrix::alloc()
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::alloc()
 {
   _F_
   assert(pages != NULL);
@@ -91,11 +94,12 @@ void SuperLUMatrix::alloc()
   
   nnz = Ap[size];
 
-  Ax = new slu_scalar [nnz];
-  memset(Ax, 0, sizeof(slu_scalar) * nnz);
+  Ax = new slu_Scalar [nnz];
+  memset(Ax, 0, sizeof(slu_Scalar) * nnz);
 }
 
-void SuperLUMatrix::free()
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::free()
 {
   _F_
   nnz = 0;
@@ -104,7 +108,8 @@ void SuperLUMatrix::free()
   delete [] Ax; Ax = NULL;
 }
 
-scalar SuperLUMatrix::get(unsigned int m, unsigned int n)
+template<typename Scalar>
+Scalar SuperLUMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -120,13 +125,15 @@ scalar SuperLUMatrix::get(unsigned int m, unsigned int n)
 #endif
 }
 
-void SuperLUMatrix::zero()
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::zero()
 {
   _F_
-  memset(Ax, 0, sizeof(slu_scalar) * nnz);
+  memset(Ax, 0, sizeof(slu_Scalar) * nnz);
 }
 
-void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar v)
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
 {
   _F_
   if (v != 0.0) // ignore zero values.
@@ -148,15 +155,17 @@ void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar v)
 }
 
 /// Add a number to each diagonal entry.
-void SuperLUMatrix::add_to_diagonal(scalar v) 
+
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
   for (unsigned int i = 0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-
-void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
 {
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
@@ -167,7 +176,9 @@ void SuperLUMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows,
 
 /// Save matrix and right-hand side to a file.
 ///
-bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+
+template<typename Scalar>
+bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   // TODO
@@ -189,13 +200,13 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESX\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(slu_scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(slu_Scalar), nnz, file);
       return true;
     }
     
@@ -204,48 +215,54 @@ bool SuperLUMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
   }
 }
 
-unsigned int SuperLUMatrix::get_matrix_size() const
+template<typename Scalar>
+unsigned int SuperLUMatrix<Scalar>::get_matrix_size() const
 {
   return size;
 }
 
 /* THIS WAS WRONG
-int SuperLUMatrix::get_matrix_size() const
+int SuperLUMatrix<Scalar>::get_matrix_size() const
 {
   _F_
   //           Ax               Ai                 Ap                      nnz
-  return (sizeof(scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1) + sizeof(int);
+  return (sizeof(Scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1) + sizeof(int);
 }
 */
 
-unsigned int SuperLUMatrix::get_nnz() const
+template<typename Scalar>
+unsigned int SuperLUMatrix<Scalar>::get_nnz() const
 {
   return nnz;
 }
 
-double SuperLUMatrix::get_fill_in() const
+template<typename Scalar>
+double SuperLUMatrix<Scalar>::get_fill_in() const
 {
   _F_
   return nnz / (double) (size * size);
 }
 
-void SuperLUMatrix::add_matrix(SuperLUMatrix* mat){
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add_matrix(SuperLUMatrix<Scalar>* mat){
   _F_
   add_as_block(0,0,mat);
 }
 
-void SuperLUMatrix::add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat){
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, SuperLUMatrix<Scalar>* mat){
   _F_
   int ndof = mat->get_size();
   if (this->get_size() != (unsigned int) num_stages * ndof) 
-    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+    error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
   for (int i = 0; i < num_stages; i++) {
     this->add_as_block(ndof*i, ndof*i, mat);
   }
 }
 
-void SuperLUMatrix::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat){
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix<Scalar>* mat){
   _F_
   int idx;
   for (unsigned int col=0;col<mat->get_size();col++){
@@ -264,13 +281,15 @@ void SuperLUMatrix::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* 
   }
 }
 
-  // Applies the matrix to vector_in and saves result to vector_out.
-void SuperLUMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+// Applies the matrix to vector_in and saves result to vector_out.
+
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
   _F_
   for(unsigned int i=0;i<size;i++){
     vector_out[i]=0;
   }
-  scalar a;
+  Scalar a;
   for (unsigned int c=0;c<size;c++){
     for (unsigned int i=Ap[c];i<Ap[c+1];i++){
 #ifndef HERMES_COMMON_COMPLEX
@@ -282,11 +301,14 @@ void SuperLUMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
     }
   }
 }
-  // Multiplies matrix with a scalar.
-void SuperLUMatrix::multiply_with_scalar(scalar value){
+
+// Multiplies matrix with a Scalar.
+
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value){
   _F_
   int n=nnz;
-  scalar a;
+  Scalar a;
   for(int i=0;i<n;i++){
 #ifndef HERMES_COMMON_COMPLEX
     Ax[i]=Ax[i]*value;
@@ -299,13 +321,15 @@ void SuperLUMatrix::multiply_with_scalar(scalar value){
   }
 }
   // Creates matrix using size, nnz, and the three arrays.
-void SuperLUMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+
+template<typename Scalar>
+void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
   _F_
   this->nnz = nnz;
   this->size = size;
   this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new slu_scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new slu_Scalar[nnz]; assert(this->Ax != NULL);
 
   for (unsigned int i = 0; i < size+1; i++){
     this->Ap[i] = ap[i];
@@ -321,15 +345,17 @@ void SuperLUMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai
   } 
 }
   // Duplicates a matrix (including allocation).
-SuperLUMatrix* SuperLUMatrix::duplicate(){
+
+template<typename Scalar>
+SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate(){
   _F_
-  SuperLUMatrix * nmat=new SuperLUMatrix();
+  SuperLUMatrix<Scalar> * nmat=new SuperLUMatrix<Scalar>();
 
   nmat->nnz = nnz;
   nmat->size = size;
   nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new slu_scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new slu_Scalar[nnz]; assert(nmat->Ax != NULL);
   for (unsigned int i = 0;i<nnz;i++){
     nmat->Ai[i]=Ai[i];
     nmat->Ax[i]=Ax[i];
@@ -340,37 +366,42 @@ SuperLUMatrix* SuperLUMatrix::duplicate(){
   return nmat;
 }
 
-// SuperLUVector /////////////////////////////////////////////////////////////////////////////////////
+// SuperLUVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
 
-SuperLUVector::SuperLUVector()
+template<typename Scalar>
+SuperLUVector<Scalar>::SuperLUVector()
 {
   _F_
   v = NULL;
   size = 0;
 }
 
-SuperLUVector::~SuperLUVector()
+template<typename Scalar>
+SuperLUVector<Scalar>::~SuperLUVector()
 {
   _F_
   this->free();
 }
 
-void SuperLUVector::alloc(unsigned int n)
+template<typename Scalar>
+void SuperLUVector<Scalar>::alloc(unsigned int n)
 {
   _F_
   this->free();
   size = n;
-  v = new slu_scalar[n];
+  v = new slu_Scalar[n];
   zero();
 }
 
-void SuperLUVector::zero()
+template<typename Scalar>
+void SuperLUVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(slu_scalar));
+  memset(v, 0, size * sizeof(slu_Scalar));
 }
 
-void SuperLUVector::change_sign()
+template<typename Scalar>
+void SuperLUVector<Scalar>::change_sign()
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -382,7 +413,9 @@ void SuperLUVector::change_sign()
   }
 #endif
 }
-void SuperLUVector::free()
+
+template<typename Scalar>
+void SuperLUVector<Scalar>::free()
 {
   _F_
   delete [] v;
@@ -390,7 +423,8 @@ void SuperLUVector::free()
   size = 0;
 }
 
-void SuperLUVector::set(unsigned int idx, scalar y)
+template<typename Scalar>
+void SuperLUVector<Scalar>::set(unsigned int idx, Scalar y)
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -401,7 +435,8 @@ void SuperLUVector::set(unsigned int idx, scalar y)
 #endif
 }
 
-void SuperLUVector::add(unsigned int idx, scalar y)
+template<typename Scalar>
+void SuperLUVector<Scalar>::add(unsigned int idx, Scalar y)
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -412,7 +447,8 @@ void SuperLUVector::add(unsigned int idx, scalar y)
 #endif
 }
 
-void SuperLUVector::add(unsigned int n, unsigned int *idx, scalar *y)
+template<typename Scalar>
+void SuperLUVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++) {
@@ -425,7 +461,8 @@ void SuperLUVector::add(unsigned int n, unsigned int *idx, scalar *y)
   }
 }
 
-bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+template<typename Scalar>
+bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   switch (fmt) 
@@ -447,10 +484,10 @@ bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESR\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(scalar), size, file);
+      hermes_fwrite(v, sizeof(Scalar), size, file);
       return true;
     }
     
@@ -461,7 +498,8 @@ bool SuperLUVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
 
 // SUPERLU solver ////////////////////////////////////////////////////////////////////////////////////
 
-bool SuperLUSolver::check_status(unsigned int info)
+template<typename Scalar>
+bool SuperLUSolver<Scalar>::check_status(unsigned int info)
 {
   _F_
   if (info == 0)
@@ -490,7 +528,8 @@ bool SuperLUSolver::check_status(unsigned int info)
   return false;
 }
   
-SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs) 
+template<typename Scalar>
+SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
   : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
       local_Ai(NULL), local_Ap(NULL), local_Ax(NULL), local_rhs(NULL)
 {
@@ -550,7 +589,8 @@ SuperLUSolver::SuperLUSolver(SuperLUMatrix *m, SuperLUVector *rhs)
 #endif
 }
 
-SuperLUSolver::~SuperLUSolver()
+template<typename Scalar>
+SuperLUSolver<Scalar>::~SuperLUSolver()
 {
   _F_
   free_factorization_data();
@@ -563,7 +603,8 @@ SuperLUSolver::~SuperLUSolver()
   if (local_rhs) delete [] local_rhs;
 }
 
-bool SuperLUSolver::solve()
+template<typename Scalar>
+bool SuperLUSolver<Scalar>::solve()
 {
   _F_
 #ifdef WITH_SUPERLU
@@ -602,7 +643,7 @@ bool SuperLUSolver::solve()
   
   // If the previous factorization of A is to be fully reused as an input for the solver driver,
   // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it 
-  // from the master SuperLUMatrix pointed to by this->m (this also applies to the case when 
+  // from the master SuperLUMatrix<Scalar> pointed to by this->m (this also applies to the case when 
   // A does not yet exist).
   if (!has_A || factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
   {
@@ -622,8 +663,8 @@ bool SuperLUSolver::solve()
       memcpy(local_Ap, m->Ap, (m->size+1) * sizeof(int));
       
       if (local_Ax) delete [] local_Ax;
-      local_Ax = new slu_scalar [m->nnz];
-      memcpy(local_Ax, m->Ax, m->nnz * sizeof(slu_scalar));
+      local_Ax = new slu_Scalar [m->nnz];
+      memcpy(local_Ax, m->Ax, m->nnz * sizeof(slu_Scalar));
       
       // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
       SLU_CREATE_CSC_MATRIX(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
@@ -636,16 +677,16 @@ bool SuperLUSolver::solve()
   free_rhs();
  
   if (local_rhs) delete [] local_rhs;
-  local_rhs = new slu_scalar [rhs->size];
-  memcpy(local_rhs, rhs->v, rhs->size * sizeof(slu_scalar));
+  local_rhs = new slu_Scalar [rhs->size];
+  memcpy(local_rhs, rhs->v, rhs->size * sizeof(slu_Scalar));
   
   SLU_CREATE_DENSE_MATRIX(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
   
   has_B = true;
   
   // Initialize the solution variable.
-  SuperMatrix X;
-  slu_scalar *x;
+  SuperMatrix<Scalar> X;
+  slu_Scalar *x;
   if ( !(x = SLU_SCALAR_MALLOC(m->size)) ) 
     error("Malloc fails for x[].");
   SLU_CREATE_DENSE_MATRIX(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
@@ -713,9 +754,9 @@ bool SuperLUSolver::solve()
   if (factorized) 
   {
     delete [] sln;
-    sln = new scalar[m->size];
+    sln = new Scalar[m->size];
     
-    slu_scalar *sol = (slu_scalar*) ((DNformat*) X.Store)->nzval; 
+    slu_Scalar *sol = (slu_Scalar*) ((DNformat*) X.Store)->nzval; 
     
     for (unsigned int i = 0; i < rhs->size; i++)
 #ifndef HERMES_COMMON_COMPLEX      
@@ -731,7 +772,7 @@ bool SuperLUSolver::solve()
   // Free temporary local variables.
   StatFree(&stat);
   SUPERLU_FREE (x);
-  Destroy_SuperMatrix_Store(&X);
+  Destroy_SuperMatrix<Scalar>_Store(&X);
   
   tmr.tick();
   time = tmr.accumulated();
@@ -742,7 +783,8 @@ bool SuperLUSolver::solve()
 #endif
 }
 
-bool SuperLUSolver::setup_factorization()
+template<typename Scalar>
+bool SuperLUSolver<Scalar>::setup_factorization()
 {
   _F_
 #ifdef WITH_SUPERLU
@@ -850,31 +892,34 @@ bool SuperLUSolver::setup_factorization()
 #endif
 }
 
-void SuperLUSolver::free_matrix()
+template<typename Scalar>
+void SuperLUSolver<Scalar>::free_matrix()
 {
   _F_
 #ifdef WITH_SUPERLU  
   if (has_A)
   {
-    Destroy_SuperMatrix_Store(&A);
+    Destroy_SuperMatrix<Scalar>_Store(&A);
     has_A = false;
   }
 #endif  
 }
 
-void SuperLUSolver::free_rhs()
+template<typename Scalar>
+void SuperLUSolver<Scalar>::free_rhs()
 {
   _F_
   #ifdef WITH_SUPERLU  
   if (has_B)
   {
-    Destroy_SuperMatrix_Store(&B);
+    Destroy_SuperMatrix<Scalar>_Store(&B);
     has_B = false;
   }
   #endif  
 }
 
-void SuperLUSolver::free_factorization_data()
+template<typename Scalar>
+void SuperLUSolver<Scalar>::free_factorization_data()
 { 
   _F_
 #ifdef WITH_SUPERLU
@@ -905,7 +950,7 @@ void SuperLUSolver::free_factorization_data()
 // The original routines have been changed in view of our applications, i.e. 
 //  * only one right hand side is allowed, 
 //  * some initial parameter checks have been omitted, 
-//  * macros allowing abstraction from the fundamental scalar datatype have been used
+//  * macros allowing abstraction from the fundamental Scalar datatype have been used
 //  * some phases of the calculation may be omitted for speed-up (less information about
 //    the matrix/solution can then be acquired, however),
 //  * deallocation at the end of the routine has been removed (this was neccessary to 
@@ -925,11 +970,11 @@ void SuperLUSolver::free_factorization_data()
 //                          estimates of the computed solution;
 //  * memusage            - memory usage during the factorization/solution will not be queried.
 //
-void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A, 
-                          int *perm_c, int *perm_r, SuperMatrix *AC,
+void slu_mt_solver_driver(slu_options_t *options, SuperMatrix<Scalar> *A, 
+                          int *perm_c, int *perm_r, SuperMatrix<Scalar> *AC,
                           equed_t *equed, double *R, double *C,
-                          SuperMatrix *L, SuperMatrix *U,
-                          SuperMatrix *B, SuperMatrix *X, 
+                          SuperMatrix<Scalar> *L, SuperMatrix<Scalar> *U,
+                          SuperMatrix<Scalar> *B, SuperMatrix<Scalar> *X, 
                           double *recip_pivot_growth, double *rcond, 
                           double *ferr, double *berr, 
                           slu_stat_t *stat, slu_memusage_t *memusage,
@@ -948,8 +993,8 @@ void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A,
   /* Right hand side and solution vectors. */
   DNformat *Bstore = (DNformat*) B->Store;
   DNformat *Xstore = (DNformat*) X->Store;
-  slu_scalar *Bmat = (slu_scalar*) Bstore->nzval;
-  slu_scalar *Xmat = (slu_scalar*) Xstore->nzval;
+  slu_Scalar *Bmat = (slu_Scalar*) Bstore->nzval;
+  slu_Scalar *Xmat = (slu_Scalar*) Xstore->nzval;
     
   *info = 0;
   
@@ -1069,7 +1114,7 @@ void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A,
       Compute the solution matrix X.
       ------------------------------------------------------------*/
     // Save a copy of the right hand side.
-    memcpy(Xmat, Bmat, B->nrow * sizeof(slu_scalar)); 
+    memcpy(Xmat, Bmat, B->nrow * sizeof(slu_Scalar)); 
             
     t0 = SuperLU_timer_();
     SLU_GSTRS(options->trans, L, U, perm_r, perm_c, X, stat, info);

@@ -49,7 +49,7 @@ StreamView::StreamView(char* title, WinGeom* wg)
 }
 
 
-void StreamView::show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps)
+void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps)
 {
   if (xsln == ysln)
     error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
@@ -401,7 +401,7 @@ void StreamView::find_initial_points(int marker, double step, double2*& initial_
 }
 
 
-void StreamView::show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps, int xitem, int yitem)
+void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem)
 {
   vec.process_solution(xsln, xitem, ysln, yitem, eps);
 

@@ -33,22 +33,23 @@
 /// BaseView is a debugging tool for the visualization of the basis functions
 /// of a given space.
 ///
-class HERMES_API BaseView : public ScalarView
+template<typename Scalar>
+class HERMES_API BaseView : public ScalarView<Scalar>
 {
 public:
 
   BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
   BaseView(char* title, WinGeom* wg = NULL);
 
-  void show(const Space* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
+  void show(const Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
   virtual ~BaseView() { free(); }
 
 protected:
 
-  Space* space;
+  Space<Scalar>* space;
   PrecalcShapeset* pss;
-  Solution* sln;
+  Solution<Scalar>* sln;
 
   double eps;
   int ndof, item;

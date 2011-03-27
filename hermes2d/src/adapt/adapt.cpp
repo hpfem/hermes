@@ -31,7 +31,7 @@
 
 using namespace std;
 
-Adapt::Adapt(Hermes::vector<Space *> spaces,
+Adapt::Adapt(Hermes::vector<Space<Scalar>*> spaces,
              Hermes::vector<ProjNormType> proj_norms) :
     spaces(spaces),
     num_act_elems(-1),
@@ -77,8 +77,8 @@ Adapt::Adapt(Hermes::vector<Space *> spaces,
     error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
 }
 
-Adapt::Adapt(Space* space, ProjNormType proj_norm) :
-    spaces(Hermes::vector<Space *>()),
+Adapt::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
+    spaces(Hermes::vector<Space<Scalar>*>()),
     num_act_elems(-1),
     have_errors(false),
     have_coarse_solutions(false),
@@ -407,7 +407,7 @@ void Adapt::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
 }
 
 void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
-  Space* space = this->spaces[elem_ref.comp];
+  Space<Scalar>* space = this->spaces[elem_ref.comp];
   Mesh* mesh = space->get_mesh();
 
   Element* e;
@@ -556,8 +556,8 @@ void Adapt::set_error_form(Adapt::MatrixFormVolError* form)
 }
 
 double Adapt::eval_error(Adapt::MatrixFormVolError* form,
-                         MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1,
-                         MeshFunction *rsln2)
+                         MeshFunction<Scalar>*sln1, MeshFunction<Scalar>*sln2, MeshFunction<Scalar>*rsln1,
+                         MeshFunction<Scalar>*rsln2)
 {
   RefMap *rv1 = sln1->get_refmap();
   RefMap *rv2 = sln2->get_refmap();
@@ -574,9 +574,9 @@ double Adapt::eval_error(Adapt::MatrixFormVolError* form,
   Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
-  if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
+  if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
   {
-    if(static_cast<Solution *>(rsln1)->get_type() == HERMES_EXACT)
+    if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
     { limit_order_nowarn(order); }
     else
       limit_order(order);
@@ -622,7 +622,7 @@ double Adapt::eval_error(Adapt::MatrixFormVolError* form,
 }
 
 double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
-                              MeshFunction *rsln1, MeshFunction *rsln2)
+                              MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
   RefMap *rrv2 = rsln2->get_refmap();
@@ -637,9 +637,9 @@ double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
   Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
   int order = rrv1->get_inv_ref_order();
   order += o.get_order();
-  if(static_cast<Solution *>(rsln1) || static_cast<Solution *>(rsln2))
+  if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
   {
-    if(static_cast<Solution *>(rsln1)->get_type() == HERMES_EXACT)
+    if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
     { limit_order_nowarn(order);  }
     else
       limit_order(order);
@@ -678,7 +678,7 @@ double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<Solution *> rslns,
+double Adapt::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
                                 Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
 {
   _F_
@@ -689,8 +689,8 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
 
   TimePeriod tmr;
 
-  Solution* rslns_original[H2D_MAX_COMPONENTS];
-  Solution* slns_original[H2D_MAX_COMPONENTS];
+  Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
+  Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
 
   for (i = 0; i < n; i++) {
     slns_original[i] = this->sln[i];
@@ -824,13 +824,13 @@ double Adapt::calc_err_internal(Hermes::vector<Solution *> slns, Hermes::vector<
   }
 }
 
-double Adapt::calc_err_internal(Solution* sln, Solution* rsln,
+double Adapt::calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags)
 {
-  Hermes::vector<Solution *> slns;
+  Hermes::vector<Solution<Scalar>*> slns;
   slns.push_back(sln);
-  Hermes::vector<Solution *> rslns;
+  Hermes::vector<Solution<Scalar>*> rslns;
   rslns.push_back(rsln);
   return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
 }

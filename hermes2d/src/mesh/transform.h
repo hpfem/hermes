@@ -145,8 +145,6 @@ protected:
   Trf stack[21];
   /// Stack top.
   unsigned int top;
-
-  friend class NeighborSearch;
 };
 
 

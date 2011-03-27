@@ -76,7 +76,7 @@ static int order_palette[] =
 };
 
 
-void OrderView::show(Space* space)
+void OrderView::show(Space<Scalar>* space)
 {
   if (!space->is_up_to_date())
     error("The space is not up to date.");

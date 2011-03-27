@@ -25,13 +25,14 @@
 /// automatically by the class. The class provides a list of triples (idx, dof, coef).
 /// The triples are flattened to separate arrays of length 'cnt'.
 ///
+template<typename Scalar>
 class HERMES_API AsmList
 {
 public:
 
   int* idx;      ///< array of shape function indices
   int* dof;      ///< array of basis function numbers (DOFs)
-  scalar* coef;  ///< array of coefficients
+  Scalar* coef;  ///< array of coefficients
   unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
   unsigned int cap;       ///< internal
 
@@ -51,7 +52,7 @@ public:
 
   void clear() { cnt = 0; }
 
-  inline void add_triplet(int i, int d, scalar c)
+  inline void add_triplet(int i, int d, Scalar c)
   {
     if (cnt >= cap) enlarge();
     idx[cnt] = i;

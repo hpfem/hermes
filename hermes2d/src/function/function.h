@@ -50,7 +50,7 @@ const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN
 #ifndef NDEBUG
   #define check_params \
     if (component < 0 || component > num_components) \
-      error("Invalid component. You are probably using scalar-valued shapeset for an Hcurl / Hdiv problem."); \
+      error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem."); \
     if (cur_node == NULL) \
       error("Invalid node. Did you call set_quad_order()?");
   #define check_table(n, msg) \
@@ -86,7 +86,7 @@ const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN
 /// Since this class inherits from Transformable, you can obtain function values in integration
 /// points transformed to sub-areas of the current element (see push_transform(), pop_transform()).
 ///
-template<typename TYPE>
+template<typename Scalar>
 class Function : public Transformable
 {
 public:
@@ -134,7 +134,7 @@ public:
   /// \brief Returns function values.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The values of the function at all points of the current integration rule.
-  TYPE* get_fn_values(int component = 0)
+  Scalar* get_fn_values(int component = 0)
   {
     check_params; check_table(0, "Function values");
     return cur_node->values[component][0];
@@ -143,7 +143,7 @@ public:
   /// \brief Returns the x partial derivative.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The x partial derivative of the function at all points of the current integration rule.
-  TYPE* get_dx_values(int component = 0)
+  Scalar* get_dx_values(int component = 0)
   {
     check_params; check_table(1, "DX values");
     return cur_node->values[component][1];
@@ -152,7 +152,7 @@ public:
   /// \brief Returns the y partial derivative.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The y partial derivative of the function at all points of the current integration rule.
-  TYPE* get_dy_values(int component = 0)
+  Scalar* get_dy_values(int component = 0)
   {
     check_params; check_table(2, "DY values");
     return cur_node->values[component][2];
@@ -163,7 +163,7 @@ public:
   /// \param dx [out] Variable which receives the pointer to the first partial derivatives by x
   /// \param dy [out] Variable which receives the pointer to the first partial derivatives by y
   /// \param component [in] The component of the function (0 or 1).
-  void get_dx_dy_values(TYPE*& dx, TYPE*& dy, int component = 0)
+  void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
   {
     check_params; check_table(1, "DX values"); check_table(2, "DY values");
     dx = cur_node->values[component][1];
@@ -173,7 +173,7 @@ public:
   /// \brief Returns the second x partial derivative.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The x second partial derivative of the function at all points of the current integration rule.
-  TYPE* get_dxx_values(int component = 0)
+  Scalar* get_dxx_values(int component = 0)
   {
     check_params; check_table(3, "DXX values");
     return cur_node->values[component][3];
@@ -182,7 +182,7 @@ public:
   /// \brief Returns the second y partial derivative.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The y second partial derivative of the function at all points of the current integration rule.
-  TYPE* get_dyy_values(int component = 0)
+  Scalar* get_dyy_values(int component = 0)
   {
     check_params; check_table(4, "DYY values");
     return cur_node->values[component][4];
@@ -191,14 +191,14 @@ public:
   /// \brief Returns the second mixed derivative.
   /// \param component [in] The component of the function (0 or 1).
   /// \return The second mixed derivative of the function at all points of the current integration rule.
-  TYPE* get_dxy_values(int component = 0)
+  Scalar* get_dxy_values(int component = 0)
   {
     check_params; check_table(5, "DXY values");
     return cur_node->values[component][5];
   }
 
   /// For internal use.
-  TYPE* get_values(int a, int b)
+  Scalar* get_values(int a, int b)
   {
     return cur_node->values[a][b];
   }
@@ -225,14 +225,14 @@ protected:
   int order;          ///< current function polynomial order
   int num_components; ///< number of vector components
 
-# define H2D_Node_HDR_SIZE (sizeof(Node) - sizeof(TYPE)) ///< Size of the header part of the structure Node
+# define H2D_Node_HDR_SIZE (sizeof(Node) - sizeof(Scalar)) ///< Size of the header part of the structure Node
   struct Node
   {
     int mask;           ///< a combination of H2D_FN_XXX: specifies which tables are present
     int size;           ///< size in bytes of this struct (for maintaining total_mem)
-    TYPE* values[2][6]; ///< pointers to 'data'
+    Scalar* values[2][6]; ///< pointers to 'data'
 
-    TYPE data[1];       ///< value tables. The length may vary.
+    Scalar data[1];       ///< value tables. The length may vary.
   private: //operation that are not allowed due to the variable length of the Node structure
     Node(const Node& org) {}; ///< Copy constructor is disabled.
     Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
@@ -298,24 +298,12 @@ protected:
 
 };
 
-
-/// Represents a real function on an element.
-typedef Function<double> RealFunction;
-
-/// Represents a scalar function on an element.
-typedef Function<scalar> ScalarFunction;
-
-
 #undef check_params
 #undef check_table
 
-
-
 //// implementation of non-inline template members /////////////////////////////////////////////////
-
-
-template<typename TYPE>
-Function<TYPE>::Function()
+template<typename Scalar>
+Function<Scalar>::Function()
               : Transformable()
 {
   order = 0;
@@ -328,12 +316,12 @@ Function<TYPE>::Function()
 }
 
 
-template<typename TYPE>
-Function<TYPE>::~Function() {}
+template<typename Scalar>
+Function<Scalar>::~Function() {}
 
 
-template<typename TYPE>
-void Function<TYPE>::set_quad_2d(Quad2D* quad_2d)
+template<typename Scalar>
+void Function<Scalar>::set_quad_2d(Quad2D* quad_2d)
 {
   int i;
 
@@ -355,16 +343,16 @@ void Function<TYPE>::set_quad_2d(Quad2D* quad_2d)
   error("too many quadratures.");
 }
 
-template<typename TYPE>
-int Function<TYPE>::idx2mask[6][2] =
+template<typename Scalar>
+int Function<Scalar>::idx2mask[6][2] =
 {
   { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
   { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
 };
 
 
-template<typename TYPE>
-typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points)
+template<typename Scalar>
+typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_points)
 {
   // get the number of tables
   int nt = 0, m = mask;
@@ -372,12 +360,12 @@ typename Function<TYPE>::Node* Function<TYPE>::new_node(int mask, int num_points
   while (m) { nt += m & 1; m >>= 1; }
 
   // allocate a node including its data part, init table pointers
-  int size = H2D_Node_HDR_SIZE + sizeof(TYPE) * num_points * nt; //Due to impl. reasons, the structure Node has non-zero length of data even though they can be zero.
+  int size = H2D_Node_HDR_SIZE + sizeof(Scalar) * num_points * nt; //Due to impl. reasons, the structure Node has non-zero length of data even though they can be zero.
   Node* node = (Node*) malloc(size);
   node->mask = mask;
   node->size = size;
   memset(node->values, 0, sizeof(node->values));
-  TYPE* data = node->data;
+  Scalar* data = node->data;
   for (int j = 0; j < num_components; j++) {
     for (int i = 0; i < 6; i++)
       if (mask & idx2mask[i][j]) {

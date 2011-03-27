@@ -21,14 +21,15 @@
 #include "../error.h"
 #include "../callstack.h"
 
-// EpetraMatrix ////////////////////////////////////////////////////////////////////////////////////
+// EpetraMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HAVE_EPETRA
   // A communicator for Epetra objects (serial version)
   static Epetra_SerialComm seq_comm;
 #endif
 
-EpetraMatrix::EpetraMatrix()
+template<typename Scalar>
+EpetraMatrix<Scalar>::EpetraMatrix()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -48,7 +49,8 @@ EpetraMatrix::EpetraMatrix()
 }
 
 #ifdef HAVE_EPETRA
-EpetraMatrix::EpetraMatrix(Epetra_RowMatrix &op)
+template<typename Scalar>
+EpetraMatrix<Scalar>::EpetraMatrix(Epetra_RowMatrix &op)
 {
   _F_
   this->mat = dynamic_cast<Epetra_CrsMatrix *>(&op);
@@ -62,7 +64,8 @@ EpetraMatrix::EpetraMatrix(Epetra_RowMatrix &op)
 }
 #endif
 
-EpetraMatrix::~EpetraMatrix()
+template<typename Scalar>
+EpetraMatrix<Scalar>::~EpetraMatrix()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -70,7 +73,8 @@ EpetraMatrix::~EpetraMatrix()
 #endif
 }
 
-void EpetraMatrix::prealloc(unsigned int n)
+template<typename Scalar>
+void EpetraMatrix<Scalar>::prealloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -81,7 +85,8 @@ void EpetraMatrix::prealloc(unsigned int n)
 #endif
 }
 
-void EpetraMatrix::pre_add_ij(unsigned int row, unsigned int col)
+template<typename Scalar>
+void EpetraMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -90,7 +95,8 @@ void EpetraMatrix::pre_add_ij(unsigned int row, unsigned int col)
 #endif
 }
 
-void EpetraMatrix::finish()
+template<typename Scalar>
+void EpetraMatrix<Scalar>::finish()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -101,7 +107,8 @@ void EpetraMatrix::finish()
 #endif
 }
 
-void EpetraMatrix::alloc()
+template<typename Scalar>
+void EpetraMatrix<Scalar>::alloc()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -114,7 +121,8 @@ void EpetraMatrix::alloc()
 #endif
 }
 
-void EpetraMatrix::free()
+template<typename Scalar>
+void EpetraMatrix<Scalar>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -129,7 +137,8 @@ void EpetraMatrix::free()
 #endif
 }
 
-scalar EpetraMatrix::get(unsigned int m, unsigned int n)
+template<typename Scalar>
+Scalar EpetraMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -142,7 +151,8 @@ scalar EpetraMatrix::get(unsigned int m, unsigned int n)
     return 0.0;
 }
 
-int EpetraMatrix::get_num_row_entries(unsigned int row)
+template<typename Scalar>
+int EpetraMatrix<Scalar>::get_num_row_entries(unsigned int row)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -152,7 +162,8 @@ int EpetraMatrix::get_num_row_entries(unsigned int row)
 #endif
 }
 
-void EpetraMatrix::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
+template<typename Scalar>
+void EpetraMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -165,7 +176,8 @@ void EpetraMatrix::extract_row_copy(unsigned int row, unsigned int len, unsigned
 #endif
 }
 
-void EpetraMatrix::zero()
+template<typename Scalar>
+void EpetraMatrix<Scalar>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -176,7 +188,8 @@ void EpetraMatrix::zero()
 #endif
 }
 
-void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
+template<typename Scalar>
+void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -199,14 +212,16 @@ void EpetraMatrix::add(unsigned int m, unsigned int n, scalar v)
 }
 
 /// Add a number to each diagonal entry.
-void EpetraMatrix::add_to_diagonal(scalar v) 
+template<typename Scalar>
+void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
   for (unsigned int i=0; i<size; i++) {
     add(i, i, v);
   }
 };
 
-void EpetraMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
+template<typename Scalar>
+void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -219,13 +234,15 @@ void EpetraMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, 
 
 /// dumping matrix and right-hand side
 ///
-bool EpetraMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+template<typename Scalar>
+bool EpetraMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   return false;
 }
 
-unsigned int EpetraMatrix::get_matrix_size() const
+template<typename Scalar>
+unsigned int EpetraMatrix<Scalar>::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -235,7 +252,8 @@ unsigned int EpetraMatrix::get_matrix_size() const
 #endif
 }
 
-double EpetraMatrix::get_fill_in() const
+template<typename Scalar>
+double EpetraMatrix<Scalar>::get_fill_in() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -245,7 +263,8 @@ double EpetraMatrix::get_fill_in() const
 #endif
 }
 
-unsigned int EpetraMatrix::get_nnz() const
+template<typename Scalar>
+unsigned int EpetraMatrix<Scalar>::get_nnz() const
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -255,9 +274,10 @@ unsigned int EpetraMatrix::get_nnz() const
 #endif
 }
 
-// EpetraVector ////////////////////////////////////////////////////////////////////////////////////
+// EpetraVector<Scalar> ////////////////////////////////////////////////////////////////////////////////////
 
-EpetraVector::EpetraVector()
+template<typename Scalar>
+EpetraVector<Scalar>::EpetraVector()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -272,7 +292,8 @@ EpetraVector::EpetraVector()
 }
 
 #ifdef HAVE_EPETRA
-EpetraVector::EpetraVector(const Epetra_Vector &v)
+template<typename Scalar>
+EpetraVector<Scalar>::EpetraVector(const Epetra_Vector &v)
 {
   _F_
   this->vec = (Epetra_Vector *) &v;
@@ -282,7 +303,8 @@ EpetraVector::EpetraVector(const Epetra_Vector &v)
 }
 #endif
 
-EpetraVector::~EpetraVector()
+template<typename Scalar>
+EpetraVector<Scalar>::~EpetraVector()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -290,7 +312,8 @@ EpetraVector::~EpetraVector()
 #endif
 }
 
-void EpetraVector::alloc(unsigned int n)
+template<typename Scalar>
+void EpetraVector<Scalar>::alloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -305,7 +328,8 @@ void EpetraVector::alloc(unsigned int n)
 #endif
 }
 
-void EpetraVector::zero()
+template<typename Scalar>
+void EpetraVector<Scalar>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -316,7 +340,8 @@ void EpetraVector::zero()
 #endif
 }
 
-void EpetraVector::change_sign()
+template<typename Scalar>
+void EpetraVector<Scalar>::change_sign()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -327,7 +352,8 @@ void EpetraVector::change_sign()
 #endif
 }
 
-void EpetraVector::free()
+template<typename Scalar>
+void EpetraVector<Scalar>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -340,7 +366,8 @@ void EpetraVector::free()
 #endif
 }
 
-void EpetraVector::set(unsigned int idx, scalar y)
+template<typename Scalar>
+void EpetraVector<Scalar>::set(unsigned int idx, Scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -353,7 +380,8 @@ void EpetraVector::set(unsigned int idx, scalar y)
 #endif
 }
 
-void EpetraVector::add(unsigned int idx, scalar y)
+template<typename Scalar>
+void EpetraVector<Scalar>::add(unsigned int idx, Scalar y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -366,7 +394,8 @@ void EpetraVector::add(unsigned int idx, scalar y)
 #endif
 }
 
-void EpetraVector::add(unsigned int n, unsigned int *idx, scalar *y)
+template<typename Scalar>
+void EpetraVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -375,7 +404,8 @@ void EpetraVector::add(unsigned int n, unsigned int *idx, scalar *y)
 #endif
 }
 
-bool EpetraVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+template<typename Scalar>
+bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   return false;

@@ -47,14 +47,14 @@ VectorView::VectorView(char* title, WinGeom* wg)
 }
 
 
-void VectorView::show(MeshFunction* vsln, double eps)
+void VectorView::show(MeshFunction<Scalar>* vsln, double eps)
 {
   if (vsln->get_num_components() < 2)
     error("The single-argument version of show() is only for vector-valued solutions.");
   show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
 }
 
-void VectorView::show(MeshFunction* xsln, MeshFunction* ysln, double eps)
+void VectorView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps)
 {
   if (xsln == ysln)
     error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
@@ -62,7 +62,7 @@ void VectorView::show(MeshFunction* xsln, MeshFunction* ysln, double eps)
 }
 
 
-void VectorView::show(MeshFunction* xsln, MeshFunction* ysln, double eps, int xitem, int yitem)
+void VectorView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
 {
   vec.lock_data();
   vec.process_solution(xsln, xitem, ysln, yitem, eps);

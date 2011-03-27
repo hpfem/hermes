@@ -19,11 +19,12 @@
 #include "space.h"
 
 
-/// L2Space represents a space of scalar functions with discontinuities along
+/// L2Space represents a space of Scalar functions with discontinuities along
 /// mesh edges.
 ///
 ///
-class HERMES_API L2Space : public Space
+template<typename Scalar>
+class HERMES_API L2Space : public Space<Scalar>
 {
 public:
   L2Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
@@ -72,7 +73,7 @@ protected:
   virtual void get_bubble_assembly_list(Element* e, AsmList* al);
 
   // FIXME: This function should probably not be used at all.
-  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
+  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
 };
 

@@ -20,14 +20,15 @@
 #include "../weakform/weakform.h"
 
 //// some l2 integrals ////
-class MatrixFormVolL2 : public WeakForm::MatrixFormVol
+template<typename Scalar>
+class MatrixFormVolL2 : public WeakForm<Scalar>::MatrixFormVol
 {
 public:
     MatrixFormVolL2(int i, int j, SymFlag sym = HERMES_SYM) : MatrixFormVol(i, j, sym) {}
 
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename real, typename scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<real> *u,
+                       Func<real> *v, Geom<real> *e, ExtData<Scalar> *ext)
     {
       Scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -35,10 +36,10 @@ public:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<scalar> *ext)
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<Scalar> *ext)
     {
-        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -47,15 +48,4 @@ public:
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 };
-
-template<typename Real, typename Scalar>
-Scalar l2_residual_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                        Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  Scalar result = 0;
-  Func<Scalar>* u_prev = u_ext[0];
-  for (int i = 0; i < n; i++)
-    result += wt[i] * (u_prev->val[i] * conj(v->val[i]));
-  return result;
-}
 #endif

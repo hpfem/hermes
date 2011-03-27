@@ -158,7 +158,7 @@ namespace RefinementSelectors {
     }
   }
 
-  scalar** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution* rsln, Element* element, int intr_gip_order) {
+  scalar** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order) {
     //set element and integration order
     rsln->set_active_element(element);
     rsln->set_quad_order(intr_gip_order);

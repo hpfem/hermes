@@ -357,7 +357,7 @@ void Vectorizer::find_min_max()
 
 //// process_solution //////////////////////////////////////////////////////////////////////////////
 
-void Vectorizer::process_solution(MeshFunction* xsln, int xitem, MeshFunction* ysln, int yitem, double eps)
+void Vectorizer::process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFunction<Scalar>* ysln, int yitem, double eps)
 {
   // sanity check
   if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");

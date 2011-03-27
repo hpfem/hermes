@@ -19,7 +19,7 @@
 
 
 //// Filter ////////////////////////////////////////////////////////////////////////////////////////
-Filter::Filter(Hermes::vector<MeshFunction*> solutions) : MeshFunction()
+Filter::Filter(Hermes::vector<MeshFunction<Scalar>*> solutions) : MeshFunction()
 {
 	this->num = solutions.size();
 	if(num > 10)
@@ -29,7 +29,7 @@ Filter::Filter(Hermes::vector<MeshFunction*> solutions) : MeshFunction()
   this->init();
 }
 
-void Filter::init(Hermes::vector<MeshFunction*> solutions)
+void Filter::init(Hermes::vector<MeshFunction<Scalar>*> solutions)
 {
 	this->num = solutions.size();
 	if(num > 10)
@@ -189,7 +189,7 @@ void Filter::pop_transform()
 
 //// SimpleFilter //////////////////////////////////////////////////////////////////////////////////
 
-SimpleFilter::SimpleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+SimpleFilter::SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
 {
 	this->num = solutions.size();
 	if(num > 10)
@@ -287,7 +287,7 @@ scalar SimpleFilter::get_pt_value(double x, double y, int it)
 //// DXDYFilter ////////////////////////////////////////////////////////////////////////////////////
 
 
-DXDYFilter::DXDYFilter(Hermes::vector<MeshFunction*> solutions) : Filter(solutions)
+DXDYFilter::DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions) : Filter(solutions)
 {
 	init_components();
 }
@@ -300,7 +300,7 @@ void DXDYFilter::init_components()
       error("Filter: Solutions do not have the same number of components!");
 }
 
-void DXDYFilter::init(Hermes::vector<MeshFunction*> solutions)
+void DXDYFilter::init(Hermes::vector<MeshFunction<Scalar>*> solutions)
 {
   Filter::init(solutions);
   init_components();
@@ -364,12 +364,12 @@ void MagFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result)
 	}
 };
 
-MagFilter::MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items)
+MagFilter::MagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items)
 {
 };
 
-MagFilter::MagFilter(MeshFunction* sln1, int item1)
-         : SimpleFilter(Hermes::vector<MeshFunction*>(sln1, sln1), 
+MagFilter::MagFilter(MeshFunction<Scalar>* sln1, int item1)
+         : SimpleFilter(Hermes::vector<MeshFunction<Scalar>*>(sln1, sln1), 
                         Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
 {
   if (sln1->get_num_components() < 2)
@@ -382,7 +382,7 @@ void DiffFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result
   for (int i = 0; i < n; i++) result[i] = values.at(0)[i] - values.at(1)[i];
 };
 
-DiffFilter::DiffFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items) {}
+DiffFilter::DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items) {}
 
 
 void SumFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result)
@@ -394,7 +394,7 @@ void SumFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result)
   }
 };
 
-SumFilter::SumFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items) {}
+SumFilter::SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter(solutions, items) {}
 
 
 void SquareFilter::filter_fn(int n, Hermes::vector<scalar*> v1, scalar* result)
@@ -408,7 +408,7 @@ void SquareFilter::filter_fn(int n, Hermes::vector<scalar*> v1, scalar* result)
 #endif
 };
 
-SquareFilter::SquareFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+SquareFilter::SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -426,7 +426,7 @@ void RealFilter::filter_fn(int n, Hermes::vector<scalar*> v1, scalar* result)
 #endif
 };
 
-RealFilter::RealFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+RealFilter::RealFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -444,7 +444,7 @@ void ImagFilter::filter_fn(int n, Hermes::vector<scalar*> v1, scalar* result)
 #endif
 };
 
-ImagFilter::ImagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+ImagFilter::ImagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -463,7 +463,7 @@ void AbsFilter::filter_fn(int n,  Hermes::vector<scalar*> v1, scalar* result)
 #endif
 };
 
-AbsFilter::AbsFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+AbsFilter::AbsFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 		if (solutions.size() > 1)
@@ -482,7 +482,7 @@ void AngleFilter::filter_fn(int n, Hermes::vector<scalar*> v1, scalar* result)
 #endif
 };
 
-AngleFilter::AngleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items)
+AngleFilter::AngleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
   : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -538,7 +538,7 @@ void VonMisesFilter::precalculate(int order, int mask)
   cur_node = node;
 }
 
-VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunction*> solutions, double lambda, double mu,
+VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, double lambda, double mu,
                                int cyl, int item1, int item2)
        : Filter(solutions)
 {
@@ -597,13 +597,13 @@ void LinearFilter::precalculate(int order, int mask)
   cur_node = node;
 }
 
-LinearFilter::LinearFilter(MeshFunction* old) // : Filter(old)
+LinearFilter::LinearFilter(MeshFunction<Scalar>* old) // : Filter(old)
  {
    init_components();
  }
 
-LinearFilter::LinearFilter(MeshFunction* older, MeshFunction* old, double tau_frac)
-          : Filter(Hermes::vector<MeshFunction*>(older, old))
+LinearFilter::LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac)
+          : Filter(Hermes::vector<MeshFunction<Scalar>*>(older, old))
  {
    this->tau_frac = tau_frac;
    init_components();

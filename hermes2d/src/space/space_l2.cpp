@@ -60,10 +60,10 @@ L2Space::~L2Space()
 }
 
 
-Space* L2Space::dup(Mesh* mesh, int order_increase) const
+Space<Scalar>* L2Space::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME - not tested
-  L2Space* space = new L2Space(mesh, essential_bcs, 0, shapeset);
+  L2Space<Scalar>* space = new L2Space(mesh, essential_bcs, 0, shapeset);
   space->copy_orders(this, order_increase);
   return space;
 }

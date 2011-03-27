@@ -5,7 +5,7 @@
 
 namespace RefinementSelectors {
 
-  bool HOnlySelector::select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement) {
+  bool HOnlySelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     refinement.split = H2D_REFINEMENT_H;
     refinement.p[0] = refinement.p[1] = refinement.p[2] = refinement.p[3] = quad_order;
     refinement.q[0] = refinement.q[1] = refinement.q[2] = refinement.q[3] = quad_order;
@@ -27,7 +27,7 @@ namespace RefinementSelectors {
     error_if(order_v_inc >= 0, "Vertical increase has to be greater or equal to zero.");
   }
 
-  bool POnlySelector::select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement) {
+  bool POnlySelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     refinement.split = H2D_REFINEMENT_P;
 
     //determin max. order

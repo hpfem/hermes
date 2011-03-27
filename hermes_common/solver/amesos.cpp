@@ -25,12 +25,12 @@
 #endif
 
 #ifdef HAVE_AMESOS
-  Amesos AmesosSolver::factory;
+template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 #endif
 
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
-
-AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs)
+template<typename Scalar>
+AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
   : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
 {
   _F_
@@ -46,7 +46,8 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 #endif
 }
 
-AmesosSolver::~AmesosSolver()
+template<typename Scalar>
+AmesosSolver<Scalar>::~AmesosSolver()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -54,7 +55,8 @@ AmesosSolver::~AmesosSolver()
 #endif
 }
 
-bool AmesosSolver::is_available(const char *name)
+template<typename Scalar>
+bool AmesosSolver<Scalar>::is_available(const char *name)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -64,7 +66,8 @@ bool AmesosSolver::is_available(const char *name)
 #endif
 }
 
-void AmesosSolver::set_use_transpose(bool use_transpose)
+template<typename Scalar>
+void AmesosSolver<Scalar>::set_use_transpose(bool use_transpose)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -72,7 +75,8 @@ void AmesosSolver::set_use_transpose(bool use_transpose)
 #endif
 }
 
-bool AmesosSolver::use_transpose()
+template<typename Scalar>
+bool AmesosSolver<Scalar>::use_transpose()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -82,7 +86,8 @@ bool AmesosSolver::use_transpose()
 #endif
 }
 
-bool AmesosSolver::solve()
+template<typename Scalar>
+bool AmesosSolver<Scalar>::solve()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -94,7 +99,7 @@ bool AmesosSolver::solve()
   TimePeriod tmr;  
 
 #ifdef HERMES_COMMON_COMPLEX
-  error("AmesosSolver::solve() not yet implemented for complex problems");
+  error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 #else
   problem.SetOperator(m->mat);
   problem.SetRHS(rhs->vec);
@@ -119,9 +124,9 @@ bool AmesosSolver::solve()
   time = tmr.accumulated();
 
   delete [] sln;
-  sln = new scalar[m->size]; MEM_CHECK(sln);
+  sln = new Scalar[m->size]; MEM_CHECK(sln);
   // copy the solution into sln vector
-  memset(sln, 0, m->size * sizeof(scalar));
+  memset(sln, 0, m->size * sizeof(Scalar));
   
 #ifdef HERMES_COMMON_COMPLEX
 #else 
@@ -134,7 +139,8 @@ bool AmesosSolver::solve()
 #endif
 }
 
-bool AmesosSolver::setup_factorization()
+template<typename Scalar>
+bool AmesosSolver<Scalar>::setup_factorization()
 {
   _F_
 #ifdef HAVE_AMESOS

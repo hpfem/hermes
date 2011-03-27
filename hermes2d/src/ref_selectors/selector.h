@@ -63,6 +63,7 @@ namespace RefinementSelectors {
    *  The interface of the class provides methods for:
    *  - selecting a refinement based on a reference soution,
    *  - updating orders of a mesh shared among components. */
+  template<typename Scalar>
   class HERMES_API Selector {
   public:
     const int max_order; ///< A maximum allowed order.
@@ -80,7 +81,7 @@ namespace RefinementSelectors {
      *  \param[in] rsln A reference solution which is used to select a refinement.
      *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
      *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-    virtual bool select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement) = 0;
+    virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) = 0;
 
     /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
     /** \param[in] element An element which is about the be refined.
@@ -92,14 +93,15 @@ namespace RefinementSelectors {
   };
 
   /// A selector that selects H-refinements only. \ingroup g_selectors
-  class HERMES_API HOnlySelector : public Selector {
+  template<typename Scalar>
+  class HERMES_API HOnlySelector : public Selector<Scalar> {
   public:
     /// Constructor.
     HOnlySelector() : Selector() {};
 
     /// Selects a refinement.
     /** Selects a H-refienements. For details, see Selector::select_refinement. */
-    virtual bool select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement);
+    virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);
 
     /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
     /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
@@ -108,7 +110,8 @@ namespace RefinementSelectors {
   };
 
   /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
-  class HERMES_API POnlySelector : public Selector {
+  template<typename Scalar>
+  class HERMES_API POnlySelector : public Selector<Scalar> {
     const int order_h_inc; ///< Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
     const int order_v_inc; ///< Increase along the vertical direction in a quadrilateral.
   public:
@@ -120,7 +123,7 @@ namespace RefinementSelectors {
 
     /// Selects a refinement.
     /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
-    virtual bool select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement);
+    virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);
 
     /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
     /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.

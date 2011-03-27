@@ -25,7 +25,8 @@
 /// Preconditioners built on IFPACK
 ///
 /// @ingroup preconds
-class IfpackPrecond: public Precond {
+template <typename Scalar>
+class IfpackPrecond: public Precond<Scalar> {
 public:
   /// Constructor for relaxation methods
   /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]
@@ -47,7 +48,7 @@ public:
   virtual Epetra_Operator *get_obj() { return prec; }
 #endif
 
-  virtual void create(Matrix *mat);
+  virtual void create(Matrix<Scalar> *mat);
   virtual void destroy() { }
   virtual void compute();
 
@@ -64,22 +65,22 @@ public:
 #endif
 
 protected:
-  void create_point_relax(EpetraMatrix *a, const char *name);
-  void create_block_relax(EpetraMatrix *a, const char *name);
-  void create_add_schwartz(EpetraMatrix *a, const char *name, int overlap);
+  void create_point_relax(EpetraMatrix<Scalar> *a, const char *name);
+  void create_block_relax(EpetraMatrix<Scalar> *a, const char *name);
+  void create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap);
   int initialize();
   void apply_params();
 #ifdef HAVE_IFPACK
   Ifpack_Preconditioner *prec;
   Teuchos::ParameterList ilist;
-  EpetraMatrix *mat;
+  EpetraMatrix<Scalar> *mat;
 #endif
   unsigned owner:1;
   const char *cls;			// class of the preconditioner
   const char *type;
   int overlap;
 
-  friend class AztecOOSolver;
+  friend class AztecOOSolver<Scalar>;
 };
 
 #endif /* _PRECOND_IFPACK_H_ */

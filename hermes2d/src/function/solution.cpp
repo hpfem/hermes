@@ -21,7 +21,8 @@
 
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 
-MeshFunction::MeshFunction()
+template<typename Scalar>
+MeshFunction<Scalar>::MeshFunction()
             : ScalarFunction()
 {
   refmap = new RefMap;
@@ -29,7 +30,8 @@ MeshFunction::MeshFunction()
   element = NULL;
 }
 
-MeshFunction::MeshFunction(Mesh *mesh) :
+template<typename Scalar>
+MeshFunction<Scalar>::MeshFunction(Mesh *mesh) :
 	ScalarFunction()
 {
 	this->mesh = mesh;
@@ -38,7 +40,8 @@ MeshFunction::MeshFunction(Mesh *mesh) :
 	this->element = NULL;		// this comes with Transformable
 }
 
-MeshFunction::~MeshFunction()
+template<typename Scalar>
+MeshFunction<Scalar>::~MeshFunction()
 {
   delete refmap;
   if(overflow_nodes != NULL) {
@@ -50,14 +53,16 @@ MeshFunction::~MeshFunction()
 }
 
 
-void MeshFunction::set_quad_2d(Quad2D* quad_2d)
+template<typename Scalar>
+void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
 {
   ScalarFunction::set_quad_2d(quad_2d);
   refmap->set_quad_2d(quad_2d);
 }
 
 
-void MeshFunction::set_active_element(Element* e)
+template<typename Scalar>
+void MeshFunction<Scalar>::set_active_element(Element* e)
 {
   element = e;
   mode = e->get_mode();
@@ -65,7 +70,8 @@ void MeshFunction::set_active_element(Element* e)
   reset_transform();
 }
 
-void MeshFunction::handle_overflow_idx()
+template<typename Scalar>
+void MeshFunction<Scalar>::handle_overflow_idx()
 {
   if(overflow_nodes != NULL) {
     for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
@@ -77,13 +83,15 @@ void MeshFunction::handle_overflow_idx()
   overflow_nodes = nodes;
 }
 
-void MeshFunction::push_transform(int son)
+template<typename Scalar>
+void MeshFunction<Scalar>::push_transform(int son)
 {
   Transformable::push_transform(son);
   update_nodes_ptr();
 }
 
-void MeshFunction::pop_transform()
+template<typename Scalar>
+void MeshFunction<Scalar>::pop_transform()
 {
   Transformable::pop_transform();
   update_nodes_ptr();
@@ -180,7 +188,8 @@ public:
 //   'n' is the polynomial degree.)
 //
 
-void Solution::init()
+template<typename Scalar>
+void Solution<Scalar>::init()
 {
   memset(tables, 0, sizeof(tables));
   memset(elems,  0, sizeof(elems));
@@ -206,14 +215,16 @@ void Solution::init()
   set_quad_2d(&g_quad_2d_std);
 }
 
-Solution::Solution()
+template<typename Scalar>
+Solution<Scalar>::Solution()
         : MeshFunction()
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
 }
 
-Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
+template<typename Scalar>
+Solution<Scalar>::Solution(Mesh *mesh) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -221,7 +232,8 @@ Solution::Solution(Mesh *mesh) : MeshFunction(mesh)
   this->own_mesh = false;
 }
 
-Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
+template<typename Scalar>
+Solution<Scalar>::Solution(Mesh *mesh, Scalar init_const) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -230,7 +242,8 @@ Solution::Solution(Mesh *mesh, scalar init_const) : MeshFunction(mesh)
   this->set_const(mesh, init_const);
 }
 
-Solution::Solution(Mesh *mesh, scalar init_const_0, scalar init_const_1) : MeshFunction(mesh)
+template<typename Scalar>
+Solution<Scalar>::Solution(Mesh *mesh, Scalar init_const_0, Scalar init_const_1) : MeshFunction(mesh)
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -239,25 +252,28 @@ Solution::Solution(Mesh *mesh, scalar init_const_0, scalar init_const_1) : MeshF
   this->set_const(mesh, init_const_0, init_const_1);
 }
 
-Solution::Solution(Space* s, Vector* coeff_vec) : MeshFunction(s->get_mesh())
+template<typename Scalar>
+Solution<Scalar>::Solution(Space<Scalar>* s, Vector<Scalar>* coeff_vec) : MeshFunction(s->get_mesh())
 {
   space_type = s->get_type();
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  Solution::vector_to_solution(coeff_vec, s, this);
+  Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
 }
 
-Solution::Solution(Space* s, scalar* coeff_vec) : MeshFunction(s->get_mesh())
+template<typename Scalar>
+Solution<Scalar>::Solution(Space<Scalar>* s, Scalar* coeff_vec) : MeshFunction(s->get_mesh())
 {
   space_type = s->get_type();
   this->init();
   this->mesh = s->get_mesh();
   this->own_mesh = false;
-  Solution::vector_to_solution(coeff_vec, s, this);
+  Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
 }
 
-void Solution::assign(Solution* sln)
+template<typename Scalar>
+void Solution<Scalar>::assign(Solution<Scalar>* sln)
 {
   if (sln->sln_type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
   if (sln->sln_type != HERMES_SLN) { copy(sln); return; }
@@ -284,8 +300,8 @@ void Solution::assign(Solution* sln)
   memset(sln->tables, 0, sizeof(sln->tables));
 }
 
-
-void Solution::copy(const Solution* sln)
+template<typename Scalar>
+void Solution<Scalar>::copy(const Solution<Scalar>* sln)
 {
   if (sln->sln_type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
 
@@ -306,8 +322,8 @@ void Solution::copy(const Solution* sln)
     num_coefs = sln->num_coefs;
     num_elems = sln->num_elems;
 
-    mono_coefs = new scalar[num_coefs];
-    memcpy(mono_coefs, sln->mono_coefs, sizeof(scalar) * num_coefs);
+    mono_coefs = new Scalar[num_coefs];
+    memcpy(mono_coefs, sln->mono_coefs, sizeof(Scalar) * num_coefs);
 
     for (int l = 0; l < num_components; l++) {
       elem_coefs[l] = new int[num_elems];
@@ -323,14 +339,15 @@ void Solution::copy(const Solution* sln)
   {
     cnst[0] = sln->cnst[0];
     cnst[1] = sln->cnst[1];
-    if((dynamic_cast<ExactSolutionScalar*>(this)) != NULL || (dynamic_cast<ExactSolutionVector*>(this)) != NULL)
+    if((dynamic_cast<ExactSolutionScalar*>(this)) != NULL || (dynamic_cast<ExactSolutionVector<Scalar>*>(this)) != NULL)
       error("ExactSolutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
   }
 
   element = NULL;
 }
 
-void Solution::free_tables()
+template<typename Scalar>
+void Solution<Scalar>::free_tables()
 {
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
@@ -347,8 +364,8 @@ void Solution::free_tables()
       }
 }
 
-
-void Solution::free()
+template<typename Scalar>
+void Solution<Scalar>::free()
 {
   if (mono_coefs  != NULL) { delete [] mono_coefs;   mono_coefs = NULL;  }
   if (elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
@@ -370,8 +387,8 @@ void Solution::free()
   free_tables();
 }
 
-
-Solution::~Solution()
+template<typename Scalar>
+Solution<Scalar>::~Solution()
 {
   free();
   space_type = HERMES_INVALID_SPACE;
@@ -406,7 +423,8 @@ public:
 mono_lu;
 
 
-double** Solution::calc_mono_matrix(int o, int*& perm)
+template<typename Scalar>
+double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
 {
   int i, j, k, l, m, row;
   double x, y, xn, yn;
@@ -433,13 +451,14 @@ double** Solution::calc_mono_matrix(int o, int*& perm)
 }
 
 // using coefficient vector
-void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
+template<typename Scalar>
+void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
     space_type = space->get_type();
-    scalar* coeffs = new scalar [vec->length()];
+    Scalar* coeffs = new Scalar [vec->length()];
     vec->extract(coeffs);
     // debug
     //printf("coeffs:\n");
@@ -450,16 +469,17 @@ void Solution::set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift)
 }
 
 // using coefficient array (no pss)
-void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
+template<typename Scalar>
+void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift)
 {
     // sanity check
     if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
     // initialize precalc shapeset using the space's shapeset
     Shapeset *shapeset = space->get_shapeset();
-    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution::set_coeff_vector().");
+    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
     PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution::set_coeff_vector().");
+    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
 
     set_coeff_vector(space, pss, coeffs, add_dir_lift);
 
@@ -467,15 +487,16 @@ void Solution::set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift)
 }
 
 // using pss and coefficient array
-void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift)
+template<typename Scalar>
+void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift)
 {
   int o;
 
   // some sanity checks
-  if (space == NULL) error("Space == NULL in Solution::set_coeff_vector().");
-  if (space->get_mesh() == NULL) error("Mesh == NULL in Solution::set_coeff_vector().");
-  if (pss == NULL) error("PrecalcShapeset == NULL in Solution::set_coeff_vector().");
-  if (coeffs == NULL) error("Coefficient vector == NULL in Solution::set_coeff_vector().");
+  if (space == NULL) error("Space == NULL in Solution<Scalar>::set_coeff_vector().");
+  if (space->get_mesh() == NULL) error("Mesh == NULL in Solution<Scalar>::set_coeff_vector().");
+  if (pss == NULL) error("PrecalcShapeset == NULL in Solution<Scalar>::set_coeff_vector().");
+  if (coeffs == NULL) error("Coefficient vector == NULL in Solution<Scalar>::set_coeff_vector().");
   if (!space->is_up_to_date())
     error("Provided 'space' is not up to date.");
   if (space->get_shapeset() != pss->get_shapeset())
@@ -527,12 +548,12 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   num_coefs *= num_components;
   if(mono_coefs != NULL)
     delete [] mono_coefs;
-  mono_coefs = new scalar[num_coefs];
+  mono_coefs = new Scalar[num_coefs];
 
   // express the solution on elements as a linear combination of monomials
   Quad2D* quad = &g_quad_2d_cheb;
   pss->set_quad_2d(quad);
-  scalar* mono = mono_coefs;
+  Scalar* mono = mono_coefs;
   for_all_active_elements(e, mesh)
   {
     mode = e->get_mode();
@@ -547,16 +568,16 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
     for (int l = 0; l < num_components; l++)
     {
       // obtain solution values for the current element
-      scalar* val = mono;
+      Scalar* val = mono;
       elem_coefs[l][e->id] = (int) (mono - mono_coefs);
-      memset(val, 0, sizeof(scalar)*np);
+      memset(val, 0, sizeof(Scalar)*np);
       for (unsigned int k = 0; k < al.cnt; k++)
       {
         pss->set_active_shape(al.idx[k]);
         pss->set_quad_order(o, H2D_FN_VAL);
         int dof = al.dof[k];
         double dir_lift_coeff = add_dir_lift ? 1.0 : 0.0;
-        scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof] : dir_lift_coeff);
+        Scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof] : dir_lift_coeff);
         double* shape = pss->get_fn_values(l);
         for (int i = 0; i < np; i++)
           val[i] += shape[i] * coef;
@@ -575,7 +596,8 @@ void Solution::set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coef
   element = NULL;
 }
 
-void Solution::set_const(Mesh* mesh, scalar c)
+template<typename Scalar>
+void Solution<Scalar>::set_const(Mesh* mesh, Scalar c)
 {
   free();
 
@@ -587,8 +609,8 @@ void Solution::set_const(Mesh* mesh, scalar c)
   num_dofs = -1;
 }
 
-
-void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
+template<typename Scalar>
+void Solution<Scalar>::set_const(Mesh* mesh, Scalar c0, Scalar c1)
 {
   free();
 
@@ -600,21 +622,22 @@ void Solution::set_const(Mesh* mesh, scalar c0, scalar c1)
   num_dofs = -1;
 }
 
-
-void Solution::set_zero(Mesh* mesh)
+template<typename Scalar>
+void Solution<Scalar>::set_zero(Mesh* mesh)
 {
   set_const(mesh, 0.0);
 }
 
-
-void Solution::set_zero_2(Mesh* mesh)
+template<typename Scalar>
+void Solution<Scalar>::set_zero_2(Mesh* mesh)
 {
   set_const(mesh, 0.0, 0.0);
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector,
-                                   Hermes::vector<Space*> spaces,
-                                   Hermes::vector<Solution*> solutions,
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
+                                   Hermes::vector<Space<Scalar>*> spaces,
+                                   Hermes::vector<Solution<Scalar>*> solutions,
                                    Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
@@ -627,23 +650,25 @@ void Solution::vector_to_solutions(scalar* solution_vector,
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space,
-                                  Solution* solution, bool add_dir_lift)
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space,
+                                  Solution<Scalar>* solution, bool add_dir_lift)
 {
-  Hermes::vector<Space *> spaces_to_pass;
+  Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
 
-  Hermes::vector<Solution*> solutions_to_pass;
+  Hermes::vector<Solution<Scalar>*> solutions_to_pass;
   solutions_to_pass.push_back(solution);
 
   Hermes::vector<bool> add_dir_lift_to_pass;
   add_dir_lift_to_pass.push_back(add_dir_lift);
 
-  Solution::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, add_dir_lift_to_pass);
+  Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, add_dir_lift_to_pass);
 }
 
-void Solution::vector_to_solutions(Vector* solution_vector, Hermes::vector<Space*> spaces,
-                                   Hermes::vector<Solution*> solutions,
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+                                   Hermes::vector<Solution<Scalar>*> solutions,
                                    Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
@@ -656,23 +681,25 @@ void Solution::vector_to_solutions(Vector* solution_vector, Hermes::vector<Space
   return;
 }
 
-void Solution::vector_to_solution(Vector* solution_vector, Space* space,
-                                  Solution* solution, bool add_dir_lift)
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solution(Vector<Scalar>* solution_vector, Space<Scalar>* space,
+                                  Solution<Scalar>* solution, bool add_dir_lift)
 {
-  Hermes::vector<Space *> spaces_to_pass;
+  Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
 
-  Hermes::vector<Solution*> solutions_to_pass;
+  Hermes::vector<Solution<Scalar>*> solutions_to_pass;
   solutions_to_pass.push_back(solution);
 
   Hermes::vector<bool> add_dir_lift_to_pass;
   add_dir_lift_to_pass.push_back(add_dir_lift);
 
-  Solution::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, add_dir_lift_to_pass);
+  Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, add_dir_lift_to_pass);
 }
 
-void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space*> spaces,
-                                   Hermes::vector<Solution*> solutions,
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+                                   Hermes::vector<Solution<Scalar>*> solutions,
                                    Hermes::vector<PrecalcShapeset *> pss,
                                    Hermes::vector<bool> add_dir_lift)
 {
@@ -686,13 +713,14 @@ void Solution::vector_to_solutions(scalar* solution_vector, Hermes::vector<Space
   return;
 }
 
-void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
+template<typename Scalar>
+void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
                                   PrecalcShapeset* pss, bool add_dir_lift)
 {
-  Hermes::vector<Space *> spaces_to_pass;
+  Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
 
-  Hermes::vector<Solution*> solutions_to_pass;
+  Hermes::vector<Solution<Scalar>*> solutions_to_pass;
   solutions_to_pass.push_back(solution);
 
   Hermes::vector<PrecalcShapeset*> pss_to_pass;
@@ -701,28 +729,29 @@ void Solution::vector_to_solution(scalar* solution_vector, Space* space, Solutio
   Hermes::vector<bool> add_dir_lift_to_pass;
   add_dir_lift_to_pass.push_back(add_dir_lift);
 
-  Solution::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, pss_to_pass, add_dir_lift_to_pass);
+  Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, pss_to_pass, add_dir_lift_to_pass);
 }
 
-
-void Solution::set_dirichlet_lift(Space* space, PrecalcShapeset* pss)
+template<typename Scalar>
+void Solution<Scalar>::set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss)
 {
   space_type = space->get_type();
   int ndof = space->get_num_dofs();
-  scalar *temp = new scalar[ndof];
-  memset(temp, 0, sizeof(scalar)*ndof);
+  Scalar *temp = new Scalar[ndof];
+  memset(temp, 0, sizeof(Scalar)*ndof);
   this->set_coeff_vector(space, pss, temp, true);
   delete [] temp;
 }
 
-void Solution::enable_transform(bool enable)
+template<typename Scalar>
+void Solution<Scalar>::enable_transform(bool enable)
 {
   if (transform != enable) free_tables();
   transform = enable;
 }
 
-
-void Solution::multiply(scalar coef)
+template<typename Scalar>
+void Solution<Scalar>::multiply(Scalar coef)
 {
   if (sln_type == HERMES_SLN)
   {
@@ -746,20 +775,22 @@ void Solution::multiply(scalar coef)
 //// set_active_element ////////////////////////////////////////////////////////////////////////////
 
 // differentiates the mono coefs by x
-static void make_dx_coefs(int mode, int o, scalar* mono, scalar* result)
+template<typename Scalar>
+static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
   int i, j, k;
   for (i = 0; i <= o; i++) {
     *result++ = 0.0;
     k = mode ? o : i;
     for (j = 0; j < k; j++)
-      *result++ = (scalar) (k-j) * mono[j];
+      *result++ = (Scalar) (k-j) * mono[j];
     mono += k+1;
   }
 }
 
 // differentiates the mono coefs by y
-static void make_dy_coefs(int mode, int o, scalar* mono, scalar* result)
+template<typename Scalar>
+static void make_dy_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
   int i, j;
   if (mode) {
@@ -767,32 +798,34 @@ static void make_dy_coefs(int mode, int o, scalar* mono, scalar* result)
       *result++ = 0.0;
     for (i = 0; i < o; i++)
       for (j = 0; j <= o; j++)
-        *result++ = (scalar) (o-i) * (*mono++);
+        *result++ = (Scalar) (o-i) * (*mono++);
   }
   else {
     for (i = 0; i <= o; i++) {
       *result++ = 0.0;
       for (j = 0; j < i; j++)
-        *result++ = (scalar) (o+1-i) * (*mono++);
+        *result++ = (Scalar) (o+1-i) * (*mono++);
     }
   }
 }
 
-void Solution::init_dxdy_buffer()
+template<typename Scalar>
+void Solution<Scalar>::init_dxdy_buffer()
 {
   if (dxdy_buffer != NULL) {
     delete [] dxdy_buffer;
     dxdy_buffer = NULL;
   }
-  dxdy_buffer = new scalar[num_components * 5 * sqr(11)];
+  dxdy_buffer = new Scalar[num_components * 5 * sqr(11)];
 }
 
 
-void Solution::set_active_element(Element* e)
+template<typename Scalar>
+void Solution<Scalar>::set_active_element(Element* e)
 {
   // if (e == element) return; // FIXME
   if (!e->active) error("Cannot select inactive element. Wrong mesh?");
-  MeshFunction::set_active_element(e);
+  MeshFunction<Scalar>::set_active_element(e);
 
   // try finding an existing table for e
   for (cur_elem = 0; cur_elem < 4; cur_elem++)
@@ -830,7 +863,7 @@ void Solution::set_active_element(Element* e)
 
     for (int i = 0, m = 0; i < num_components; i++)
     {
-      scalar* mono = mono_coefs + elem_coefs[i][e->id];
+      Scalar* mono = mono_coefs + elem_coefs[i][e->id];
       dxdy_coefs[i][0] = mono;
 
       make_dx_coefs(mode, o, mono, dxdy_coefs[i][1] = dxdy_buffer+m);  m += n;
@@ -860,21 +893,24 @@ void Solution::set_active_element(Element* e)
 //// precalculate //////////////////////////////////////////////////////////////////////////////////
 
 // sets all elements of y[] to num
-static inline void set_vec_num(int n, scalar* y, scalar num)
+template<typename Scalar>
+static inline void set_vec_num(int n, Scalar* y, Scalar num)
 {
   for (int i = 0; i < n; i++)
     y[i] = num;
 }
 
 // y = y .* x + num
-static inline void vec_x_vec_p_num(int n, scalar* y, scalar* x, scalar num)
+template<typename Scalar>
+static inline void vec_x_vec_p_num(int n, Scalar* y, Scalar* x, Scalar num)
 {
   for (int i = 0; i < n; i++)
     y[i] = y[i]*x[i] + num;
 }
 
 // y = y .* x + z
-static inline void vec_x_vec_p_vec(int n, scalar* y, scalar* x, scalar* z)
+template<typename Scalar>
+static inline void vec_x_vec_p_vec(int n, Scalar* y, Scalar* x, Scalar* z)
 {
   for (int i = 0; i < n; i++)
     y[i] = y[i]*x[i] + z[i];
@@ -886,7 +922,8 @@ static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
 static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
 
 
-void Solution::transform_values(int order, Node* node, int newmask, int oldmask, int np)
+template<typename Scalar>
+void Solution<Scalar>::transform_values(int order, Node* node, int newmask, int oldmask, int np)
 {
   double2x2 *mat, *m;
   double3x2 *mat2, *mm;
@@ -903,11 +940,11 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
       mat2 = refmap->get_second_ref_map(order);
       for (i = 0, m = mat, mm = mat2; i < np; i++, m++, mm++)
       {
-        scalar vx = node->values[0][1][i];
-        scalar vy = node->values[0][2][i];
-        scalar vxx = node->values[0][3][i];
-        scalar vyy = node->values[0][4][i];
-        scalar vxy = node->values[0][5][i];
+        Scalar vx = node->values[0][1][i];
+        Scalar vy = node->values[0][2][i];
+        Scalar vxx = node->values[0][3][i];
+        Scalar vyy = node->values[0][4][i];
+        Scalar vxy = node->values[0][5][i];
 
         node->values[0][3][i] = sqr((*m)[0][0])*vxx + 2*(*m)[0][1]*(*m)[0][0]*vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0]*vx + (*mm)[0][1]*vy;   // dxx
         node->values[0][4][i] = sqr((*m)[1][0])*vxx + 2*(*m)[1][1]*(*m)[1][0]*vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0]*vx + (*mm)[2][1]*vy;   // dyy
@@ -923,8 +960,8 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
 
       for (i = 0, m = mat; i < np; i++, m += mstep)
       {
-        scalar vx = node->values[0][1][i];
-        scalar vy = node->values[0][2][i];
+        Scalar vx = node->values[0][1][i];
+        Scalar vy = node->values[0][2][i];
         node->values[0][1][i] = (*m)[0][0]*vx + (*m)[0][1]*vy;
         node->values[0][2][i] = (*m)[1][0]*vx + (*m)[1][1]*vy;
       }
@@ -948,15 +985,15 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
       {
         if (trans_val)
         {
-          scalar vx = node->values[0][0][i];
-          scalar vy = node->values[1][0][i];
+          Scalar vx = node->values[0][0][i];
+          Scalar vy = node->values[1][0][i];
           node->values[0][0][i] = (*m)[0][0]*vx + (*m)[0][1]*vy;
           node->values[1][0][i] = (*m)[1][0]*vx + (*m)[1][1]*vy;
         }
         if (trans_curl)
         {
-          scalar e0x = node->values[0][1][i], e0y = node->values[0][2][i];
-          scalar e1x = node->values[1][1][i], e1y = node->values[1][2][i];
+          Scalar e0x = node->values[0][1][i], e0y = node->values[0][2][i];
+          Scalar e1x = node->values[1][1][i], e1y = node->values[1][2][i];
           node->values[1][1][i] = (*m)[0][0]*((*m)[1][0]*e0x + (*m)[1][1]*e1x) + (*m)[0][1]*((*m)[1][0]*e0y + (*m)[1][1]*e1y);
           node->values[0][2][i] = (*m)[1][0]*((*m)[0][0]*e0x + (*m)[0][1]*e1x) + (*m)[1][1]*((*m)[0][0]*e0y + (*m)[0][1]*e1y);
         }
@@ -975,8 +1012,8 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
 
       for (i = 0, m = mat; i < np; i++, m += mstep)
       {
-        scalar vx = node->values[0][0][i];
-        scalar vy = node->values[1][0][i];
+        Scalar vx = node->values[0][0][i];
+        Scalar vy = node->values[1][0][i];
         node->values[0][0][i] =   (*m)[1][1]*vx - (*m)[1][0]*vy;
         node->values[1][0][i] = - (*m)[0][1]*vx + (*m)[0][0]*vy;
       }
@@ -984,7 +1021,8 @@ void Solution::transform_values(int order, Node* node, int newmask, int oldmask,
   }
 }
 
-int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
+template<typename Scalar>
+int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element* e)
 {
   if (e == NULL) e = element;
 
@@ -996,7 +1034,8 @@ int Solution::get_edge_fn_order(int edge, Space* space, Element* e)
 }
 
 
-void Solution::precalculate(int order, int mask)
+template<typename Scalar>
+void Solution<Scalar>::precalculate(int order, int mask)
 {
   int i, j, k, l;
   Node* node = NULL;
@@ -1030,9 +1069,9 @@ void Solution::precalculate(int order, int mask)
     node = new_node(newmask, np);
 
     // transform integration points by the current matrix
-    scalar* x = new scalar[np];
-    scalar* y = new scalar[np];
-    scalar* tx = new scalar[np];
+    Scalar* x = new Scalar[np];
+    Scalar* y = new Scalar[np];
+    Scalar* tx = new Scalar[np];
     double3* pt = quad->get_points(order);
     for (i = 0; i < np; i++)
     {
@@ -1048,23 +1087,23 @@ void Solution::precalculate(int order, int mask)
       {
         if (newmask & idx2mask[k][l])
         {
-          scalar* result = node->values[l][k];
+          Scalar* result = node->values[l][k];
           if (oldmask & idx2mask[k][l])
           {
             // copy the old table if we have it already
-            memcpy(result, cur_node->values[l][k], np * sizeof(scalar));
+            memcpy(result, cur_node->values[l][k], np * sizeof(Scalar));
           }
           else
           {
             // calculate the solution values using Horner's scheme
-            scalar* mono = dxdy_coefs[l][k];
+            Scalar* mono = dxdy_coefs[l][k];
             for (i = 0; i <= o; i++)
             {
               set_vec_num(np, tx, *mono++);
               for (j = 1; j <= (mode ? o : i); j++)
                 vec_x_vec_p_num(np, tx, x, *mono++);
 
-              if (!i) memcpy(result, tx, sizeof(scalar)*np);
+              if (!i) memcpy(result, tx, sizeof(Scalar)*np);
                  else vec_x_vec_p_vec(np, result, y, tx);
             }
           }
@@ -1104,7 +1143,7 @@ void Solution::precalculate(int order, int mask)
         for (i = 0, m = mat; i < np; i++, m += mstep)
         {
           double jac = (*m)[0][0] *  (*m)[1][1] - (*m)[1][0] *  (*m)[0][1];
-          scalar val, dx = 0.0, dy = 0.0;
+          Scalar val, dx = 0.0, dy = 0.0;
           val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = (  (*m)[1][1]*dx - (*m)[0][1]*dy) / jac * exact_mult;
@@ -1115,7 +1154,7 @@ void Solution::precalculate(int order, int mask)
       {
         for (i = 0; i < np; i++)
         {
-          scalar val, dx = 0.0, dy = 0.0;
+          Scalar val, dx = 0.0, dy = 0.0;
           val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = dx * exact_mult;
@@ -1127,8 +1166,8 @@ void Solution::precalculate(int order, int mask)
     {
       for (i = 0; i < np; i++)
       {
-        scalar2 dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
-        scalar2 val = (static_cast<ExactSolutionVector*>(this))->exact_function(x[i], y[i], dx, dy);
+        Scalar2 dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
+        Scalar2 val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
         for (j = 0; j < 2; j++) {
           node->values[j][0][i] = val[j] * exact_mult;
           node->values[j][1][i] = dx[j] * exact_mult;
@@ -1169,7 +1208,8 @@ void Solution::precalculate(int order, int mask)
 
 //// save & load ///////////////////////////////////////////////////////////////////////////////////
 
-void Solution::save(const char* filename, bool compress)
+template<typename Scalar>
+void Solution<Scalar>::save(const char* filename, bool compress)
 {
   int i;
 
@@ -1194,14 +1234,14 @@ void Solution::save(const char* filename, bool compress)
 
   // write header
   hermes_fwrite("H2DS\001\000\000\000", 1, 8, f);
-  int ssize = sizeof(scalar);
+  int ssize = sizeof(Scalar);
   hermes_fwrite(&ssize, sizeof(int), 1, f);
   hermes_fwrite(&num_components, sizeof(int), 1, f);
   hermes_fwrite(&num_elems, sizeof(int), 1, f);
   hermes_fwrite(&num_coefs, sizeof(int), 1, f);
 
   // write monomial coefficients
-  hermes_fwrite(mono_coefs, sizeof(scalar), num_coefs, f);
+  hermes_fwrite(mono_coefs, sizeof(Scalar), num_coefs, f);
 
   // write element orders
   char* temp_orders = new char[num_elems];
@@ -1222,7 +1262,8 @@ void Solution::save(const char* filename, bool compress)
 }
 
 
-void Solution::load(const char* filename)
+template<typename Scalar>
+void Solution<Scalar>::load(const char* filename)
 {
   int i;
 
@@ -1268,7 +1309,7 @@ void Solution::load(const char* filename)
     #ifndef H2D_COMPLEX
       mono_coefs = temp;
     #else
-      mono_coefs = new scalar[num_coefs];
+      mono_coefs = new Scalar[num_coefs];
       for (i = 0; i < num_coefs; i++)
         mono_coefs[i] = temp[i];
       delete [] temp;
@@ -1278,16 +1319,16 @@ void Solution::load(const char* filename)
   {
     #ifndef H2D_COMPLEX
       warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
-      scalar* temp = new double[num_coefs*2];
-      hermes_fread(temp, sizeof(scalar), num_coefs*2, f);
+      Scalar* temp = new double[num_coefs*2];
+      hermes_fread(temp, sizeof(Scalar), num_coefs*2, f);
       mono_coefs = new double[num_coefs];
       for (i = 0; i < num_coefs; i++)
         mono_coefs[i] = temp[2*i];
       delete [] temp;
 
     #else
-      mono_coefs = new scalar[num_coefs];;
-      hermes_fread(mono_coefs, sizeof(scalar), num_coefs, f);
+      mono_coefs = new Scalar[num_coefs];;
+      hermes_fread(mono_coefs, sizeof(Scalar), num_coefs, f);
     #endif
   }
   else
@@ -1324,17 +1365,18 @@ void Solution::load(const char* filename)
 
 //// getting solution values in arbitrary points ///////////////////////////////////////////////////////////////
 
-scalar Solution::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
+template<typename Scalar>
+Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
 {
   set_active_element(e);
 
   int o = elem_orders[e->id];
-  scalar* mono = dxdy_coefs[component][item];
-  scalar result = 0.0;
+  Scalar* mono = dxdy_coefs[component][item];
+  Scalar result = 0.0;
   int k = 0;
   for (int i = 0; i <= o; i++)
   {
-    scalar row = mono[k++];
+    Scalar row = mono[k++];
     for (int j = 0; j < (mode ? o : i); j++)
       row = row * xi1 + mono[k++];
     result = result * xi2 + row;
@@ -1353,7 +1395,8 @@ static inline bool is_in_ref_domain(Element* e, double xi1, double xi2)
 }
 
 
-scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
+template<typename Scalar>
+Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
 {
 
   if (num_components == 1)
@@ -1365,8 +1408,8 @@ scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, i
       double2x2 m;
       double xx, yy;
       refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
-      scalar dx = get_ref_value(e_last = e, xi1, xi2, a, 1);
-      scalar dy = get_ref_value(e, xi1, xi2, a, 2);
+      Scalar dx = get_ref_value(e_last = e, xi1, xi2, a, 1);
+      Scalar dy = get_ref_value(e, xi1, xi2, a, 2);
       if (b == 1) return m[0][0]*dx + m[0][1]*dy; // H2D_FN_DX
       if (b == 2) return m[1][0]*dx + m[1][1]*dy; // H2D_FN_DY
     }
@@ -1380,8 +1423,8 @@ scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, i
       double2x2 m;
       double xx, yy;
       refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
-      scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
-      scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
+      Scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
+      Scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
       if (a == 0) return m[0][0]*vx + m[0][1]*vy; // H2D_FN_VAL_0
       if (a == 1) return m[1][0]*vx + m[1][1]*vy; // H2D_FN_VAL_1
     }
@@ -1392,7 +1435,8 @@ scalar Solution::get_ref_value_transformed(Element* e, double xi1, double xi2, i
   return 0;
 }
 
-scalar Solution::get_pt_value(double x, double y, int item)
+template<typename Scalar>
+Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
 {
   double xi1, xi2;
 
@@ -1406,7 +1450,7 @@ scalar Solution::get_pt_value(double x, double y, int item)
   {
     if (num_components == 1)
     {
-      scalar val, dx = 0.0, dy = 0.0;
+      Scalar val, dx = 0.0, dy = 0.0;
       val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val;
       if (b == 1) return dx;
@@ -1414,8 +1458,8 @@ scalar Solution::get_pt_value(double x, double y, int item)
     }
     else
     {
-      scalar2 dx(0.0, 0.0), dy(0.0, 0.0);
-      scalar2 val = (static_cast<ExactSolutionVector*>(this))->exact_function(x, y, dx, dy);
+      Scalar2 dx(0.0, 0.0), dy(0.0, 0.0);
+      Scalar2 val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val[a];
       if (b == 1) return dx[a];
       if (b == 2) return dy[a];
@@ -1474,7 +1518,8 @@ scalar Solution::get_pt_value(double x, double y, int item)
 
 
 // Exact solution.
-ExactSolution::ExactSolution(Mesh* mesh) : Solution(mesh)
+template<typename Scalar>
+ExactSolution<Scalar>::ExactSolution(Mesh* mesh) : Solution(mesh)
 {
   sln_type = HERMES_EXACT;
   num_components = 1;
@@ -1482,27 +1527,34 @@ ExactSolution::ExactSolution(Mesh* mesh) : Solution(mesh)
   num_dofs = -1;
 }
 
-ExactSolution::~ExactSolution()
+template<typename Scalar>
+ExactSolution<Scalar>::~ExactSolution()
 {}
 
-ExactSolutionScalar::ExactSolutionScalar(Mesh* mesh) : ExactSolution(mesh)
+template<typename Scalar>
+ExactSolutionScalar<Scalar>::ExactSolutionScalar(Mesh* mesh) : ExactSolution(mesh)
 {}
 
-ExactSolutionScalar::~ExactSolutionScalar()
+template<typename Scalar>
+ExactSolutionScalar<Scalar>::~ExactSolutionScalar()
 {}
 
-unsigned int ExactSolutionScalar::get_dimension() const
+template<typename Scalar>
+unsigned int ExactSolutionScalar<Scalar>::get_dimension() const
 {
   return 1;
 }
  
-ExactSolutionVector::ExactSolutionVector(Mesh* mesh) : ExactSolution(mesh)
+template<typename Scalar>
+ExactSolutionVector<Scalar>::ExactSolutionVector(Mesh* mesh) : ExactSolution(mesh)
 {}
 
-ExactSolutionVector::~ExactSolutionVector()
+template<typename Scalar>
+ExactSolutionVector<Scalar>::~ExactSolutionVector()
 {}
 
-unsigned int ExactSolutionVector::get_dimension() const
+template<typename Scalar>
+unsigned int ExactSolutionVector<Scalar>::get_dimension() const
 {
   return 2;
 }

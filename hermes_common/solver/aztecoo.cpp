@@ -25,8 +25,9 @@
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
-AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
-  : IterSolver(), m(m), rhs(rhs)
+template<typename Scalar>
+AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
+  : IterSolver<Scalar>(), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -39,7 +40,8 @@ AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
 }
 
 
-AztecOOSolver::~AztecOOSolver()
+template<typename Scalar>
+AztecOOSolver<Scalar>::~AztecOOSolver()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -48,7 +50,8 @@ AztecOOSolver::~AztecOOSolver()
 #endif
 }
 
-void AztecOOSolver::set_solver(const char *name)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_solver(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -64,7 +67,8 @@ void AztecOOSolver::set_solver(const char *name)
 #endif
 }
 
-void AztecOOSolver::set_precond(const char *name)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_precond(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -80,7 +84,8 @@ void AztecOOSolver::set_precond(const char *name)
 #endif
 }
 
-void AztecOOSolver::set_option(int option, int value)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_option(int option, int value)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -88,7 +93,8 @@ void AztecOOSolver::set_option(int option, int value)
 #endif
 }
 
-void AztecOOSolver::set_param(int param, double value)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_param(int param, double value)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -96,7 +102,8 @@ void AztecOOSolver::set_param(int param, double value)
 #endif
 }
 
-bool AztecOOSolver::solve()
+template<typename Scalar>
+bool AztecOOSolver<Scalar>::solve()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -134,9 +141,9 @@ bool AztecOOSolver::solve()
   time = tmr.accumulated();
 
   delete [] sln;
-  sln = new scalar[m->size];
+  sln = new Scalar[m->size];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(scalar));
+  memset(sln, 0, m->size * sizeof(Scalar));
 
   // copy the solution into sln vector
   for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
@@ -157,12 +164,12 @@ bool AztecOOSolver::solve()
   kp.ExtractSolution(xr, xi);
 
   delete [] sln;
-  sln = new scalar[m->size];
+  sln = new Scalar[m->size];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(scalar));
+  memset(sln, 0, m->size * sizeof(Scalar));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = scalar(xr[i], xi[i]);
+  for (unsigned int i = 0; i < m->size; i++) sln[i] = Scalar(xr[i], xi[i]);
 #endif
   return true;
 #else
@@ -170,7 +177,8 @@ bool AztecOOSolver::solve()
 #endif
 }
 
-int AztecOOSolver::get_num_iters()
+template<typename Scalar>
+int AztecOOSolver<Scalar>::get_num_iters()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -180,7 +188,8 @@ int AztecOOSolver::get_num_iters()
 #endif
 }
 
-double AztecOOSolver::get_residual()
+template<typename Scalar>
+double AztecOOSolver<Scalar>::get_residual()
 {
   _F_
 #ifdef HAVE_AZTECOO

@@ -31,6 +31,7 @@
 ///
 /// StreamView is a visualization window for all vector-valued PDE solutions (especially for flow problems).
 ///
+template<typename Scalar>
 class HERMES_API StreamView : public View
 {
 public:
@@ -41,8 +42,8 @@ public:
 
   /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
   /// and the distance between starting points is "step"
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps, int xitem, int yitem);
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem);
 
   /// Creates additional streamline with strarting point (x,y)
   /// Note: Can be called only after StreamView::show
@@ -98,6 +99,7 @@ protected:
 #else // NOGLUT
 
 /* Empty dummy implementation in a case GLUT is not used */
+template<typename Scalar>
 class HERMES_API StreamView : public View
 {
 public:
@@ -105,8 +107,8 @@ public:
  StreamView(const char* title = "StreamView", WinGeom* wg = NULL) : View(title, wg->x, wg->y, wg->width, wg->height) {};
   virtual ~StreamView() {};
 
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
-  void show(MeshFunction* xsln, MeshFunction* ysln, int marker, double step, double eps, int xitem, int yitem) {};
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
+  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem) {};
 
   void add_streamline(double x, double y) {};
 };

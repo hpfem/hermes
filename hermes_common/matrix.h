@@ -191,8 +191,9 @@ void lubksb(double **a, int n, int *indx, T *b)
 /// Simple dot product.
 double HERMES_API vec_dot(double *r, double *s, int ndof);
 
-class Vector;
-double HERMES_API vec_dot(Vector *r, Vector *s, int ndof);
+template<typename Scalar> class Vector;
+template<typename Scalar>
+double HERMES_API vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int ndof);
 
 /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not
@@ -238,6 +239,7 @@ enum EMatrixDumpFormat {
 	DF_MATRIX_MARKET // Matrix Market which can be read by pysparse library
 };
 
+template<typename Scalar>
 class HERMES_API Matrix {
 public:
   unsigned int get_size() { return this->size;};
@@ -258,20 +260,20 @@ public:
   /// @return the value from the specified position
   /// @param[in] m - the number of row
   /// @param[in] n - the number of column
-  virtual scalar get(unsigned int m, unsigned int n) = 0;
+  virtual Scalar get(unsigned int m, unsigned int n) = 0;
 
   /// Zero the matrix.
   virtual void zero() = 0;
 
   /// Add a number to each diagonal entry.
-  virtual void add_to_diagonal(scalar v) = 0;
+  virtual void add_to_diagonal(Scalar v) = 0;
 
   /// update the stiffness matrix
   ///
   /// @param[in] m    - the row where to update
   /// @param[in] n    - the column where to update
   /// @param[in] v    - value
-  virtual void add(unsigned int m, unsigned int n, scalar v) = 0;
+  virtual void add(unsigned int m, unsigned int n, Scalar v) = 0;
 
   /// update the stiffness matrix
   ///
@@ -280,7 +282,7 @@ public:
   /// @param[in] matrix    - block of values
   /// @param[in] rows      - array with row indexes
   /// @param[in] cols      - array with column indexes
-  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols) = 0;
+  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) = 0;
 
   /// dumping matrix and right-hand side
   ///
@@ -293,7 +295,8 @@ protected:
   unsigned int size;  // matrix size
 };
 
-class HERMES_API SparseMatrix : public Matrix {
+template<typename Scalar>
+class HERMES_API SparseMatrix : public Matrix<Scalar> {
 public:
   SparseMatrix();
   SparseMatrix(unsigned int size);
@@ -354,10 +357,10 @@ public:
                                 unsigned int *idxs) { }
 
   /// Multiply with a vector.
-  virtual void multiply_with_vector(scalar* vector_in, scalar* vector_out) { };
+  virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) { };
 	
-  /// Multiply with a scalar.
-  virtual void multiply_with_scalar(scalar value) { };
+  /// Multiply with a Scalar.
+  virtual void multiply_with_Scalar(Scalar value) { };
 
   /// Duplicate sparse matrix (including allocation).
   virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
@@ -386,6 +389,7 @@ protected:
   int mem_size;
 };
 
+template<typename Scalar>
 class HERMES_API Vector {
 public:
   virtual ~Vector() { }
@@ -402,11 +406,11 @@ public:
   /// Get the value from a position
   /// @return the value form the specified index
   /// @param[in] idx - index which to obtain the value from
-  virtual scalar get(unsigned int idx) = 0;
+  virtual Scalar get(unsigned int idx) = 0;
 
   /// Extract vector values into user-provided array.
   /// @param[out] v - array which will contain extracted values
-  virtual void extract(scalar *v) const = 0;
+  virtual void extract(Scalar *v) const = 0;
 
   /// Zero the vector
   virtual void zero() = 0;
@@ -418,24 +422,24 @@ public:
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void set(unsigned int idx, scalar y) = 0;
+  virtual void set(unsigned int idx, Scalar y) = 0;
 
   /// update element on the specified position
   ///
   /// @param[in] idx - indices where to update
   /// @param[in] y   - value
-  virtual void add(unsigned int idx, scalar y) = 0;
+  virtual void add(unsigned int idx, Scalar y) = 0;
 
   /// Add a vector.
   virtual void add_vector(Vector* vec) = 0;
-  virtual void add_vector(scalar* vec) = 0;
+  virtual void add_vector(Scalar* vec) = 0;
 
   /// update subset of the elements
   ///
   /// @param[in] n   - number of positions to update
   /// @param[in] idx - indices where to update
   /// @param[in] y   - values
-  virtual void add(unsigned int n, unsigned int *idx, scalar *y) = 0;
+  virtual void add(unsigned int n, unsigned int *idx, Scalar *y) = 0;
 
   /// Get vector length.
   unsigned int length() {return this->size;}
@@ -448,11 +452,14 @@ protected:
   unsigned int size;
 };
 
-HERMES_API Vector* create_vector(MatrixSolverType matrix_solver);
-HERMES_API SparseMatrix*  create_matrix(MatrixSolverType matrix_solver);
+template<typename Scalar>
+HERMES_API Vector<Scalar>* create_vector(MatrixSolverType matrix_solver);
+template<typename Scalar>
+HERMES_API SparseMatrix<Scalar>*  create_matrix(MatrixSolverType matrix_solver);
 
-class Solver;
-HERMES_API Solver*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix* matrix, Vector* rhs = NULL);
+template<typename Scalar> class Solver;
+template<typename Scalar>
+HERMES_API Solver<Scalar>*  create_linear_solver(MatrixSolverType matrix_solver, 
+                                         Matrix<Scalar>* matrix, Vector<Scalar>* rhs = NULL);
 
 #endif

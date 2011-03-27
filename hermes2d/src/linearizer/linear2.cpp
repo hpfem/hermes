@@ -84,7 +84,7 @@ Orderizer::Orderizer()
 }
 
 
-void Orderizer::process_space(Space* space)
+void Orderizer::process_space(Space<Scalar>* space)
 {
   // sanity check
   if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
@@ -273,7 +273,7 @@ void Orderizer::load_data(const char* filename)
   fclose(f);
 }
 
-void Orderizer::save_orders_vtk(Space* space, const char* file_name)
+void Orderizer::save_orders_vtk(Space<Scalar>* space, const char* file_name)
 {
   // Create an Orderizer. This class creates a triangular mesh 
   // with "solution values" that represent the polynomial 

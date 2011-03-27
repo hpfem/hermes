@@ -19,11 +19,12 @@
 #include "space.h"
 
 
-/// H1Space represents a space of continuous scalar functions over a domain (mesh).
+/// H1Space represents a space of continuous Scalar functions over a domain (mesh).
 ///
 ///
 ///
-class HERMES_API H1Space : public Space
+template<typename Scalar>
+class HERMES_API H1Space : public Space<Scalar>
 {
 public:
   H1Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
@@ -45,7 +46,7 @@ public:
   /// It is intended for fixing the solution of a system which would otherwise be singular
   /// and for some reason a standard Dirichlet condition (with non-zero measure on the
   /// boundary) is not suitable.
-  void fix_vertex(int id, scalar value = 0.0);
+  void fix_vertex(int id, Scalar value = 0.0);
 
   virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
 
@@ -64,7 +65,7 @@ protected:
   static double*  h1_chol_p;
   static int      h1_proj_ref;
 
-  virtual scalar* get_bc_projection(SurfPos* surf_pos, int order);
+  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
   struct EdgeInfo
   {
@@ -86,7 +87,7 @@ protected:
   struct FixedVertex
   {
     int id;
-    scalar value;
+    Scalar value;
   };
 
   std::vector<FixedVertex> fixed_vertices;

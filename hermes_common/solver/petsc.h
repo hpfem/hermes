@@ -32,7 +32,11 @@
 
 /// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
 ///
-class PetscMatrix : public SparseMatrix {
+
+template <typename Scalar> class PetscLinearSolver;
+
+template <typename Scalar>
+class PetscMatrix : public SparseMatrix<Scalar> {
 public:
   PetscMatrix();
   virtual ~PetscMatrix();
@@ -40,11 +44,11 @@ public:
   virtual void alloc();
   virtual void free();
   virtual void finish();
-  virtual scalar get(unsigned int m, unsigned int n);
+  virtual Scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(unsigned int m, unsigned int n, scalar v);
-  virtual void add_to_diagonal(scalar v);
-  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, Scalar v);
+  virtual void add_to_diagonal(Scalar v);
+  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
@@ -56,13 +60,13 @@ public:
 #endif
 
   // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
+  void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
 
 #ifdef WITH_PETSC
-  // Multiplies matrix with a scalar.
-  void multiply_with_scalar(scalar value);
+  // Multiplies matrix with a Scalar.
+  void multiply_with_Scalar(Scalar value);
   // Creates matrix in PETSC format using size, nnz, and the three arrays.
-  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
   PetscMatrix* duplicate();
 #endif
@@ -73,12 +77,13 @@ protected:
   unsigned int nnz;
   bool inited;
 
-  friend class PetscLinearSolver;
+  friend class PetscLinearSolver<Scalar>;
 };
 
 /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
 ///
-class PetscVector : public Vector {
+template <typename Scalar>
+class PetscVector : public Vector<Scalar> {
 public:
   PetscVector();
   virtual ~PetscVector();
@@ -86,18 +91,18 @@ public:
   virtual void alloc(unsigned int ndofs);
   virtual void free();
   virtual void finish();
-  virtual scalar get(unsigned int idx);
-  virtual void extract(scalar *v) const;
+  virtual Scalar get(unsigned int idx);
+  virtual void extract(Scalar *v) const;
   virtual void zero();
   virtual void change_sign();
-  virtual void set(unsigned int idx, scalar y);
-  virtual void add(unsigned int idx, scalar y);
-  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
+  virtual void set(unsigned int idx, Scalar y);
+  virtual void add(unsigned int idx, Scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
   virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
-  virtual void add_vector(scalar* vec) {
+  virtual void add_vector(Scalar* vec) {
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
@@ -108,22 +113,23 @@ protected:
 #endif
   bool inited;
 
-  friend class PetscLinearSolver;
+  friend class PetscLinearSolver<Scalar>;
 };
 
 /// Encapsulation of PETSc linear solver
 ///
 /// @ingroup solvers
-class HERMES_API PetscLinearSolver : public LinearSolver {
+template <typename Scalar>
+class HERMES_API PetscLinearSolver : public LinearSolver<Scalar> {
 public:
-  PetscLinearSolver(PetscMatrix *mat, PetscVector *rhs);
+  PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
   virtual ~PetscLinearSolver();
 
   virtual bool solve();
 
 protected:
-  PetscMatrix *m;
-  PetscVector *rhs;
+  PetscMatrix<Scalar> *m;
+  PetscVector<Scalar> *rhs;
 };
 
 #endif

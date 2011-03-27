@@ -211,8 +211,8 @@ void ScalarView::create_setup_bar()
 #endif
 }
 
-void ScalarView::show(MeshFunction* sln, double eps, int item,
-                      MeshFunction* xdisp, MeshFunction* ydisp, double dmult)
+void ScalarView::show(MeshFunction<Scalar>* sln, double eps, int item,
+                      MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
 {
   // For preservation of the sln's active element. Will be set back after the visualization.
   Element* active_element = sln->get_active_element();
@@ -244,7 +244,7 @@ void ScalarView::show(MeshFunction* sln, double eps, int item,
   
   // Now we reset the active element if it was set before the MeshFunction sln entered this method.
   // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
-  if(dynamic_cast<Solution *>(sln) != NULL)
+  if(dynamic_cast<Solution<Scalar>*>(sln) != NULL)
     if(active_element != NULL)
       // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
       // there is nothing to restore to.

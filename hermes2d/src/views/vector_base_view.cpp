@@ -25,7 +25,7 @@
 #include "../h2d_common.h"
 #include "vector_base_view.h"
 
-void VectorBaseView::show(Space* space)
+void VectorBaseView::show(Space<Scalar>* space)
 {
   free();
   pss = new PrecalcShapeset(space->get_shapeset());

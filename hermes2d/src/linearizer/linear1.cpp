@@ -656,8 +656,8 @@ void Linearizer::find_min_max()
 
 //// process_solution //////////////////////////////////////////////////////////////////////////////
 
-void Linearizer::process_solution(MeshFunction* sln, int item, double eps, double max_abs,
-                                  MeshFunction* xdisp, MeshFunction* ydisp, double dmult)
+void Linearizer::process_solution(MeshFunction<Scalar>* sln, int item, double eps, double max_abs,
+                                  MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
 {
   // sanity check
   if (sln == NULL) error("Solution is NULL in Linearizer:process_solution().");
@@ -916,9 +916,9 @@ void Linearizer::save_data(const char* filename)
   fclose(f);
 }
 
-void Linearizer::save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char *quantity_name,
+void Linearizer::save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char *quantity_name,
                                    bool mode_3D, int item, double eps, double max_abs,
-                                   MeshFunction* xdisp, MeshFunction* ydisp,
+                                   MeshFunction<double>* xdisp, MeshFunction<double>* ydisp,
                                    double dmult)
 {
   // Create a linearizer. This class uses automatic adaptivity 

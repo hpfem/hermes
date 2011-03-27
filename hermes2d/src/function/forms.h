@@ -22,8 +22,9 @@
 #include "../function/function.h"
 #include "../function/solution.h"
 #include "../mesh/refmap.h"
+#include <complex>
 
-#define callback(a)	a<double, scalar>, a<Ord, Ord>
+#define callback(a)	a<double, Scalar>, a<Ord, Ord>
 
 /// Base type for orders of functions.
 ///
@@ -68,10 +69,14 @@ protected:
 
 };
 
-inline Ord operator/(const scalar &a, const Ord &b) { return Ord(b.get_max_order()); }
-inline Ord operator*(const scalar &a, const Ord &b) { return b; }
-inline Ord operator+(const scalar &a, const Ord &b) { return b; }
-inline Ord operator-(const scalar &a, const Ord &b) { return b; }
+inline Ord operator/(const double &a, const Ord &b) { return Ord(b.get_max_order()); }
+inline Ord operator*(const double &a, const Ord &b) { return b; }
+inline Ord operator+(const double &a, const Ord &b) { return b; }
+inline Ord operator-(const double &a, const Ord &b) { return b; }
+inline Ord operator/(const std::complex<double> &a, const Ord &b) { return Ord(b.get_max_order()); }
+inline Ord operator*(const std::complex<double> &a, const Ord &b) { return b; }
+inline Ord operator+(const std::complex<double> &a, const Ord &b) { return b; }
+inline Ord operator-(const std::complex<double> &a, const Ord &b) { return b; }
 inline Ord operator-(const Ord &a) { return a; }
 
 inline Ord pow(const Ord &a, const double &b) { return Ord((int) ceil(fabs(b)) * a.get_order()); }
@@ -282,7 +287,7 @@ public:
   }
 
   // Default destructor may be used. Deallocation is done using the following functions.
-  // FIXME: This is not safe since it allows calling free_ord in a Func<scalar> object. Template-specialized
+  // FIXME: This is not safe since it allows calling free_ord in a Func<Scalar> object. Template-specialized
   //  destructors should be used instead (also in Func).
   virtual void free_fn() {
     if (fn_central != NULL) {
@@ -408,9 +413,11 @@ HERMES_API Func<Ord>* init_fn_ord(const int order);
 /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
 HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
 /// Init the mesh-function for the evaluation of the volumetric/surface integral.
-HERMES_API Func<scalar>* init_fn(MeshFunction *fu, const int order);
+template<typename Scalar>
+HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order);
 /// Init the solution for the evaluation of the volumetric/surface integral.
-HERMES_API Func<scalar>* init_fn(Solution *fu, const int order);
+template<typename Scalar>
+HERMES_API Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
 
 /// User defined data that can go to the bilinear and linear forms.
 /// It also holds arbitraty number of functions, that user can use.

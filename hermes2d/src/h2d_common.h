@@ -45,55 +45,56 @@ const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
    tests in Traverse:begin(). */
 //#define H2D_DISABLE_MULTIMESH_TESTS
 
-class MeshFunction;
-class Solution;
+template<typename Scalar> class MeshFunction;
+template<typename Scalar> class Solution;
 enum ProjNormType;
 class RefMap;
-class DiscreteProblem;
-class Space;
-class WeakForm;
+template<typename Scalar> class DiscreteProblem;
+template<typename Scalar> class Space;
+template<typename Scalar> class WeakForm;
 
 // Class for all global functions.
+template<typename Scalar>
 class HERMES_API Hermes2D {
 public:
   // Error calculation in Hermes, useful for non-adaptive computations.
-  double calc_rel_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type) const; // Note: coarse mesh sln has to be first, then
+  double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const; // Note: coarse mesh sln has to be first, then
                                                                                                   // ref_sln (because the abs. error is divided
                                                                                                   // by the norm of the latter).
-  double calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type) const;
-  double calc_norm(MeshFunction* sln, int norm_type) const;
-  double calc_norms(Hermes::vector<Solution*> slns) const;         // Norms are determined from space_type in each Solution.
+  double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const;
+  double calc_norm(MeshFunction<Scalar>* sln, int norm_type) const;
+  double calc_norms(Hermes::vector<Solution<Scalar>*> slns) const;         // Norms are determined from space_type in each Solution.
 
   // Function calculating errors between solutions in right and left vectors, returning all necessary parameters.
   // returns correct parameters only if the return value is true.
   // coarse mesh sln has to be first, then ref_sln.
-  bool calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right,
+  bool calc_errors(Hermes::vector<Solution<Scalar>* > left, Hermes::vector<Solution<Scalar>*> right,
                               Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
                               double & err_abs_total, double & norm_total, double & err_rel_total,
                               Hermes::vector<ProjNormType> norms = Hermes::vector<ProjNormType>()) const;
 
   // Helper function.
   /// DEPRECATED.
-  double calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
-                                          MeshFunction* sln1, MeshFunction* sln2) const;
+  double calc_abs_error(double (*fn)(MeshFunction<Scalar>*, MeshFunction<Scalar>*, RefMap*, RefMap*),
+                                          MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2) const;
   // Helper function.
   /// DEPRECATED.
-  double calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* sln) const;
+  double calc_norm(double (*fn)(MeshFunction<Scalar>*, RefMap*), MeshFunction<Scalar>* sln) const;
   
-  double error_fn_l2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const;
-  double norm_fn_l2(MeshFunction* sln, RefMap* ru) const;
+  double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
+  double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru) const;
 
-  double error_fn_h1(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const;
-  double norm_fn_h1(MeshFunction* sln, RefMap* ru) const;
+  double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
+  double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru) const;
 
-  double error_fn_hc(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const;
-  double norm_fn_hc(MeshFunction* sln, RefMap* ru) const;
+  double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
+  double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru) const;
 
-  double error_fn_hcl2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const;
-  double norm_fn_hcl2(MeshFunction* sln, RefMap* ru) const;
+  double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
+  double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru) const;
 
-  double error_fn_hdiv(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const;
-  double norm_fn_hdiv(MeshFunction* sln, RefMap* ru) const;
+  double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
+  double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru) const;
 
   ///< Returns string representation of the quad order: used for debugging purposses.
   static const std::string get_quad_order_str(const int quad_order);
@@ -102,18 +103,18 @@ public:
   
 
 
-  double get_l2_norm(Vector* vec) const;
+  double get_l2_norm(Vector<Scalar>* vec) const;
 
   /// New interface, still in developement
-  /// HERMES_API bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-  ///		               Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
+  /// HERMES_API bool solve_newton(Scalar* coeff_vec, DiscreteProblem* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
+  ///		               Vector<Scalar>* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
   ///                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
-  bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-			       Vector* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
+  bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
+			       Vector<Scalar>* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
                                bool residual_as_function = false,
                                double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
 
-  bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter, MatrixSolverType matrix_solver, double picard_tol, 
+  bool solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter, MatrixSolverType matrix_solver, double picard_tol, 
        int picard_max_iter, bool verbose) const;
 };
 

@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-void OGProjection::project_internal(Hermes::vector<Space *> spaces, WeakForm* wf,
+void OGProjection::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm* wf,
                                     scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
@@ -40,7 +40,7 @@ void OGProjection::project_internal(Hermes::vector<Space *> spaces, WeakForm* wf
   //delete wf;
 }
 
-void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<MeshFunction*> source_meshfns,
+void OGProjection::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
                    scalar* target_vec, MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
 {
   _F_
@@ -83,22 +83,22 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
 
-void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution*> source_sols,
+void OGProjection::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
                    scalar* target_vec, MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
 {
-  Hermes::vector<MeshFunction *> mesh_fns;
+  Hermes::vector<MeshFunction<Scalar>*> mesh_fns;
   for(unsigned int i = 0; i < source_sols.size(); i++)
     mesh_fns.push_back(source_sols[i]);
   project_global(spaces, mesh_fns, target_vec, matrix_solver, proj_norms);
 }
 
-void OGProjection::project_global(Space* space, MeshFunction* source_meshfn,
+void OGProjection::project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
                              scalar* target_vec, MatrixSolverType matrix_solver,
                              ProjNormType proj_norm)
 {
-  Hermes::vector<Space *> spaces;
+  Hermes::vector<Space<Scalar>*> spaces;
   spaces.push_back(space);
-  Hermes::vector<MeshFunction *> source_meshfns;
+  Hermes::vector<MeshFunction<Scalar>*> source_meshfns;
   source_meshfns.push_back(source_meshfn);
   Hermes::vector<ProjNormType> proj_norms;
   proj_norms.push_back(proj_norm);
@@ -106,16 +106,16 @@ void OGProjection::project_global(Space* space, MeshFunction* source_meshfn,
 }
 
 
-void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution *> sols_src,
-                                  Hermes::vector<Solution *> sols_dest, MatrixSolverType matrix_solver,
+void OGProjection::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
+                                  Hermes::vector<Solution<Scalar>*> sols_dest, MatrixSolverType matrix_solver,
                                   Hermes::vector<ProjNormType> proj_norms)
 {
   _F_
 
   scalar* target_vec = new scalar[Space::get_num_dofs(spaces)];
-  Hermes::vector<MeshFunction *> ref_slns_mf;
+  Hermes::vector<MeshFunction<Scalar>*> ref_slns_mf;
   for (unsigned int i = 0; i < sols_src.size(); i++)
-    ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
+    ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
 
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
 
@@ -124,16 +124,16 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   delete [] target_vec;
 }
 
-void OGProjection::project_global(Space * space,
-                             Solution* sol_src, Solution* sol_dest,
+void OGProjection::project_global(Space<Scalar>* space,
+                             Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
                              MatrixSolverType matrix_solver,
                              ProjNormType proj_norm)
 {
-  Hermes::vector<Space *> spaces;
+  Hermes::vector<Space<Scalar>*> spaces;
   spaces.push_back(space);
-  Hermes::vector<Solution *> sols_src;
+  Hermes::vector<Solution<Scalar>*> sols_src;
   sols_src.push_back(sol_src);
-  Hermes::vector<Solution *> sols_dest;
+  Hermes::vector<Solution<Scalar>*> sols_dest;
   sols_dest.push_back(sol_dest);
   Hermes::vector<ProjNormType> proj_norms;
   if(proj_norm != HERMES_UNSET_NORM)
@@ -142,10 +142,10 @@ void OGProjection::project_global(Space * space,
   project_global(spaces, sols_src, sols_dest, matrix_solver, proj_norms);
 }
 
-void OGProjection::project_global(Hermes::vector<Space *> spaces,
+void OGProjection::project_global(Hermes::vector<Space<Scalar>*> spaces,
                                   Hermes::vector<WeakForm::MatrixFormVol *> mfvol,
                                   Hermes::vector<WeakForm::VectorFormVol *> vfvol,
-                                  Hermes::vector<MeshFunction*> source_meshfns,
+                                  Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
                                   scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_

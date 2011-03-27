@@ -33,7 +33,8 @@ class Ord;
 ///
 /// (This is an abstract class and cannot be instantiated.)
 ///
-class HERMES_API MeshFunction : public ScalarFunction
+template<typename Scalar>
+class HERMES_API MeshFunction : public Function<Scalar>
 {
 public:
 
@@ -52,7 +53,7 @@ public:
   Mesh*   get_mesh() const { return mesh; }
   RefMap* get_refmap() { update_refmap(); return refmap; }
 
-  virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
+  virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 
   /// Virtual function handling overflows. Has to be virtual, because
   /// the necessary iterators in the templated class do not work with GCC.
@@ -72,7 +73,7 @@ protected:
 public:
 
   /// For internal use only.
-  void force_transform(MeshFunction* mf)
+  void force_transform(MeshFunction<Scalar>* mf)
     { ScalarFunction::force_transform(mf->get_transform(), mf->get_ctm()); }
   void update_refmap()
     { refmap->force_transform(sub_idx, ctm); }
@@ -92,37 +93,38 @@ public:
 ///
 /// TODO: write how to obtain solution values, maybe include inherited methods from Function as comments.
 ///
-class HERMES_API Solution : public MeshFunction
+template<typename Scalar>
+class HERMES_API Solution : public MeshFunction<Scalar>
 {
 public:
 
   void init();
   Solution();
   Solution(Mesh *mesh);
-  Solution(Mesh *mesh, scalar init_const);
-  Solution(Mesh *mesh, scalar init_const_0, scalar init_const_1);
-  Solution (Space* s, Vector* coeff_vec);
-  Solution (Space* s, scalar* coeff_vec);
+  Solution(Mesh *mesh, Scalar init_const);
+  Solution(Mesh *mesh, Scalar init_const_0, Scalar init_const_1);
+  Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
+  Solution (Space<Scalar>* s, Scalar* coeff_vec);
   virtual ~Solution();
   virtual void free();
 
-  void assign(Solution* sln);
+  void assign(Solution<Scalar>* sln);
   Solution& operator = (Solution& sln) { assign(&sln); return *this; }
-  void copy(const Solution* sln);
+  void copy(const Solution<Scalar>* sln);
 
   int* get_element_orders() { return this->elem_orders;}
 
-  void set_const(Mesh* mesh, scalar c);
-  void set_const(Mesh* mesh, scalar c0, scalar c1); // two-component (Hcurl) const
+  void set_const(Mesh* mesh, Scalar c);
+  void set_const(Mesh* mesh, Scalar c0, Scalar c1); // two-component (Hcurl) const
 
   void set_zero(Mesh* mesh);
   void set_zero_2(Mesh* mesh); // two-component (Hcurl) zero
 
   virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
-  int get_edge_fn_order(int edge, Space* space, Element* e = NULL);
+  int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
   /// Sets solution equal to Dirichlet lift only, solution vector = 0
-  void set_dirichlet_lift(Space* space, PrecalcShapeset* pss = NULL);
+  void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
 
   /// Enables or disables transformation of the solution derivatives (H1 case)
   /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
@@ -144,28 +146,28 @@ public:
   /// 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy, 3 = dxx, 4 = dyy, 5 = dxy.
   /// NOTE: This function should be used for postprocessing only, it is not effective
   /// enough for calculations.
-  scalar get_ref_value(Element* e, double xi1, double xi2, int component = 0, int item = 0);
+  Scalar get_ref_value(Element* e, double xi1, double xi2, int component = 0, int item = 0);
 
   /// Returns solution value or derivatives (correctly transformed) at element e, in its reference
   /// domain point (xi1, xi2). 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy,
   /// 3 = dxx, 4 = dyy, 5 = dxy.
   /// NOTE: This function should be used for postprocessing only, it is not effective
   /// enough for calculations.
-  scalar get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b);
+  Scalar get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b);
 
   /// Returns solution value or derivatives at the physical domain point (x, y).
   /// 'item' controls the returned value: H2D_FN_VAL_0, H2D_FN_VAL_1, H2D_FN_DX_0, H2D_FN_DX_1, H2D_FN_DY_0,....
   /// NOTE: This function should be used for postprocessing only, it is not effective
   /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
   /// slow. Prefer Solution::get_ref_value if possible.
-  virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
+  virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
   /// Returns the number of degrees of freedom of the solution.
   /// Returns -1 for exact or constant solutions.
   int get_num_dofs() const { return num_dofs; };
 
   /// Multiplies the function represented by this class by the given coefficient.
-  void multiply(scalar coef);
+  void multiply(Scalar coef);
 
   /// Returns solution type.
   ESolutionType get_type() const { return sln_type; };
@@ -178,29 +180,29 @@ public:
   virtual void set_active_element(Element* e);
 
   /// Passes solution components calculated from solution vector as Solutions.
-  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces,
-                                  Hermes::vector<Solution *> solutions,
+  static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+                                  Hermes::vector<Solution<Scalar>*> solutions,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
+  static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(Vector* vec, Hermes::vector<Space *> spaces,
-                                  Hermes::vector<Solution*> solutions,
+  static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar>*> spaces,
+                                  Hermes::vector<Solution<Scalar>*> solutions,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(Vector* vec, Space* space, Solution* solution,
+  static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
                                  bool add_dir_lift = true);
-  static void vector_to_solutions(scalar* solution_vector, Hermes::vector<Space *> spaces,
-                                  Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss,
+  static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+                                  Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
                                   Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-  static void vector_to_solution(scalar* solution_vector, Space* space, Solution* solution,
+  static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
                                  PrecalcShapeset* pss, bool add_dir_lift = true);
 
   bool own_mesh;
 protected:
 
   /// Converts a coefficient vector into a Solution.
-  virtual void set_coeff_vector(Space* space, Vector* vec, bool add_dir_lift);
-  virtual void set_coeff_vector(Space* space, PrecalcShapeset* pss, scalar* coeffs, bool add_dir_lift);
-  virtual void set_coeff_vector(Space* space, scalar* coeffs, bool add_dir_lift);
+  virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
+  virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
+  virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift);
 
   ESolutionType sln_type;
 
@@ -219,7 +221,7 @@ protected:
   Element* elems[4][4];
   int cur_elem, oldest[4];
 
-  scalar* mono_coefs;  ///< monomial coefficient array
+  Scalar* mono_coefs;  ///< monomial coefficient array
   int* elem_coefs[2];  ///< array of pointers into mono_coefs
   int* elem_orders;    ///< stored element orders
   int num_coefs, num_elems;
@@ -228,13 +230,13 @@ protected:
   ESpaceType space_type;
   void transform_values(int order, Node* node, int newmask, int oldmask, int np);
 
-  scalar   cnst[2];
-  scalar   exact_mult;
+  Scalar   cnst[2];
+  Scalar   exact_mult;
 
   virtual void precalculate(int order, int mask);
 
-  scalar* dxdy_coefs[2][6];
-  scalar* dxdy_buffer;
+  Scalar* dxdy_coefs[2][6];
+  Scalar* dxdy_buffer;
 
   double** calc_mono_matrix(int o, int*& perm);
   void init_dxdy_buffer();
@@ -250,7 +252,8 @@ protected:
 /// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
 /// typically an exact solution to a PDE. This can be used to compare an approximate solution
 /// with an exact solution (see DiffFilter).
-class HERMES_API ExactSolution : public Solution
+template<typename Scalar>
+class HERMES_API ExactSolution : public Solution<Scalar>
 {
 public:
   ExactSolution(Mesh* mesh);
@@ -263,24 +266,25 @@ public:
 
 /// These classes are abstract (pure virtual destructor).
 /// The user is supposed to subclass them (see e.g. NIST benchmarks).
-class HERMES_API ExactSolutionScalar : public ExactSolution
+template<typename Scalar>
+class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
 {
 public:
   ExactSolutionScalar(Mesh* mesh);
 
   ~ExactSolutionScalar() = 0;
 
-  // For scalar-valued solutions this returns 1.
+  // For Scalar-valued solutions this returns 1.
   virtual unsigned int get_dimension() const;
 
   // Function returning the value.
-  virtual scalar value (double x, double y) const = 0;
+  virtual Scalar value (double x, double y) const = 0;
 
   // Function returning the derivatives.
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const = 0;
+  virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const = 0;
 
   // Function returning the value and derivatives.
-  scalar exact_function (double x, double y, scalar& dx, scalar& dy) const {
+  Scalar exact_function (double x, double y, Scalar& dx, Scalar& dy) const {
     derivatives (x, y, dx, dy);
     return value (x, y);
   };
@@ -290,7 +294,8 @@ public:
   virtual Ord ord(Ord x, Ord y) const = 0;
 };
 
-class HERMES_API ExactSolutionVector : public ExactSolution
+template<typename Scalar>
+class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
 {
 public:
   ExactSolutionVector(Mesh* mesh);
@@ -301,13 +306,13 @@ public:
   virtual unsigned int get_dimension() const;
 
   // Function returning the value.
-  virtual scalar2 value (double x, double y) const = 0;
+  virtual Scalar2<Scalar> value (double x, double y) const = 0;
 
   // Function returning the derivatives.
-  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const = 0;
+  virtual void derivatives (double x, double y, Scalar2& dx, Scalar2& dy) const = 0;
 
   // Function returning the value and derivatives.
-  virtual scalar2 exact_function(double x, double y, scalar2& dx, scalar2& dy) const {
+  virtual Scalar2 exact_function(double x, double y, Scalar2& dx, Scalar2& dy) const {
     derivatives (x, y, dx, dy);
     return value (x, y);
   };

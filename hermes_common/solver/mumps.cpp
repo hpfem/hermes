@@ -67,7 +67,8 @@ static int find_position(int *Ai, int Alen, int idx) {
   return mid;
 }
 
-MumpsMatrix::MumpsMatrix()
+template<typename Scalar>
+MumpsMatrix<Scalar>::MumpsMatrix()
 {
   _F_
   nnz = 0;
@@ -79,13 +80,15 @@ MumpsMatrix::MumpsMatrix()
   Ai = NULL;
 }
 
-MumpsMatrix::~MumpsMatrix()
+template<typename Scalar>
+MumpsMatrix<Scalar>::~MumpsMatrix()
 {
   _F_
   free();
 }
 
-void MumpsMatrix::alloc()
+template<typename Scalar>
+void MumpsMatrix<Scalar>::alloc()
 {
   _F_
   assert(pages != NULL);
@@ -110,8 +113,8 @@ void MumpsMatrix::alloc()
 
   nnz = Ap[size];
 
-  Ax = new mumps_scalar[nnz];
-  memset(Ax, 0, sizeof(mumps_scalar) * nnz);
+  Ax = new mumps_Scalar[nnz];
+  memset(Ax, 0, sizeof(mumps_Scalar) * nnz);
 
   irn = new int[nnz];
   jcn = new int[nnz];
@@ -122,7 +125,8 @@ void MumpsMatrix::alloc()
   }  
 }
 
-void MumpsMatrix::free()
+template<typename Scalar>
+void MumpsMatrix<Scalar>::free()
 {
   _F_
   nnz = 0;
@@ -133,7 +137,8 @@ void MumpsMatrix::free()
   delete[] jcn; jcn = NULL;
 }
 
-scalar MumpsMatrix::get(unsigned int m, unsigned int n)
+template<typename Scalar>
+Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
   // Find m-th row in the n-th column.
@@ -149,16 +154,18 @@ scalar MumpsMatrix::get(unsigned int m, unsigned int n)
 #endif
 }
 
-void MumpsMatrix::zero()
+template<typename Scalar>
+void MumpsMatrix<Scalar>::zero()
 {
   _F_
-  memset(Ax, 0, sizeof(mumps_scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(mumps_Scalar) * Ap[size]);
 }
 
-void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
 {
   _F_
-  // WARNING: The additional condition v != 0.0 used in (Umfpack)Matrix
+  // WARNING: The additional condition v != 0.0 used in (Umfpack)Matrix<Scalar>
   //          produced an error in neutronics-2-group-adapt (although tutorial-07
   //          ran well).
   // Find m-th row in the n-th column.
@@ -178,7 +185,8 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar v)
   jcn[pos] = n + 1;
 }
 
-void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols)
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
 {
   _F_
   for (unsigned int i = 0; i < m; i++)       // rows
@@ -188,7 +196,9 @@ void MumpsMatrix::add(unsigned int m, unsigned int n, scalar **mat, int *rows, i
 }
 
 /// Add a number to each diagonal entry.
-void MumpsMatrix::add_to_diagonal(scalar v) 
+
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
   for (unsigned int i = 0; i < size; i++) {
     add(i, i, v);
@@ -197,7 +207,8 @@ void MumpsMatrix::add_to_diagonal(scalar v)
 
 /// dumping matrix and right-hand side
 ///
-bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+template<typename Scalar>
+bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   // TODO
@@ -227,13 +238,13 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESX\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(mumps_scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(mumps_Scalar), nnz, file);
       return true;
     }
 
@@ -242,52 +253,58 @@ bool MumpsMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
   }
 }
 
-unsigned int MumpsMatrix::get_matrix_size() const
+template<typename Scalar>
+unsigned int MumpsMatrix<Scalar>::get_matrix_size() const
 {
   _F_
   return size;
 }
 
-unsigned int MumpsMatrix::get_nnz() const
+template<typename Scalar>
+unsigned int MumpsMatrix<Scalar>::get_nnz() const
 {
   _F_
   return nnz;
 }
 
 /* THIS WAS WRONG
-int MumpsMatrix::get_matrix_size() const
+int MumpsMatrix<Scalar>::get_matrix_size() const
 {
   _F_
   //           Ax               Ai                 Ap                 
-  return (sizeof(scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1)
+  return (sizeof(Scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1)
           + 2 * sizeof(int) * nnz + sizeof(int);
   //          irn, jcn                  nnz                             
 }
 */
 
-double MumpsMatrix::get_fill_in() const
+template<typename Scalar>
+double MumpsMatrix<Scalar>::get_fill_in() const
 {
   _F_
   return Ap[size] / (double) (size * size);
 }
 
-void MumpsMatrix::add_matrix(MumpsMatrix* mat){
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add_matrix(MumpsMatrix<Scalar>* mat){
   _F_
   add_as_block(0,0,mat);
 };
 
-void MumpsMatrix::add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat){
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, MumpsMatrix<Scalar>* mat){
   _F_
   int ndof = mat->get_size();
   if (this->get_size() != (unsigned int) num_stages * ndof) 
-    error("Incompatible matrix sizes in PetscMatrix::add_to_diagonal_blocks()");
+    error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
   for (int i = 0; i < num_stages; i++) {
     this->add_as_block(ndof*i, ndof*i, mat);
   }
 }
 
-void MumpsMatrix::add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat){
+template<typename Scalar>
+void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatrix<Scalar>* mat){
   _F_
   int idx;
   for (unsigned int col=0;col<mat->get_size();col++){
@@ -306,11 +323,12 @@ void MumpsMatrix::add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat)
 }
 
   // Applies the matrix to vector_in and saves result to vector_out.
-void MumpsMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
+template<typename Scalar>
+void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
   for(unsigned int i=0;i<size;i++){
     vector_out[i]=0;
   }
-  scalar a;
+  Scalar a;
   for (unsigned int i=0;i<nnz;i++){
 #ifndef HERMES_COMMON_COMPLEX
     a=Ax[i];
@@ -320,10 +338,11 @@ void MumpsMatrix::multiply_with_vector(scalar* vector_in, scalar* vector_out){
     vector_out[jcn[i]]+=vector_in[irn[i]]*a;
   }
 }
-  // Multiplies matrix with a scalar.
-void MumpsMatrix::multiply_with_scalar(scalar value){
+  // Multiplies matrix with a Scalar.
+template<typename Scalar>
+void MumpsMatrix<Scalar>::multiply_with_Scalar(Scalar value){
   int n=nnz;
-  scalar a;
+  Scalar a;
   for(int i=0;i<n;i++){
 #ifndef HERMES_COMMON_COMPLEX
     Ax[i]=Ax[i]*value;
@@ -336,12 +355,13 @@ void MumpsMatrix::multiply_with_scalar(scalar value){
   }
 }
   // Creates matrix using size, nnz, and the three arrays.
-void MumpsMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax){
+template<typename Scalar>
+void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
   this->nnz = nnz;
   this->size = size;
   this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new mumps_scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new mumps_Scalar[nnz]; assert(this->Ax != NULL);
   irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
   jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
 
@@ -362,14 +382,15 @@ void MumpsMatrix::create(unsigned int size, unsigned int nnz, int* ap, int* ai, 
   } 
 }
   // Duplicates a matrix (including allocation).
-MumpsMatrix* MumpsMatrix::duplicate(){
-  MumpsMatrix * nmat=new MumpsMatrix();
+template<typename Scalar>
+MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
+  MumpsMatrix<Scalar> * nmat=new MumpsMatrix<Scalar>();
 
   nmat->nnz = nnz;
   nmat->size = size;
   nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new mumps_scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new mumps_Scalar[nnz]; assert(nmat->Ax != NULL);
   nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
   nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
   for (unsigned int i = 0;i<nnz;i++){
@@ -384,31 +405,35 @@ MumpsMatrix* MumpsMatrix::duplicate(){
   return nmat;
 }
 
-// MumpsVector /////////////////////////////////////////////////////////////////////////////////////
+// MumpsVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
 
-MumpsVector::MumpsVector()
+template<typename Scalar>
+MumpsVector<Scalar>::MumpsVector<Scalar>()
 {
   _F_
   v = NULL;
   size = 0;
 }
 
-MumpsVector::~MumpsVector()
+template<typename Scalar>
+MumpsVector<Scalar>::~MumpsVector<Scalar>()
 {
   _F_
   free();
 }
 
-void MumpsVector::alloc(unsigned int n)
+template<typename Scalar>
+void MumpsVector<Scalar>::alloc(unsigned int n)
 {
   _F_
   free();
   size = n;
-  v = new mumps_scalar[n];
+  v = new mumps_Scalar[n];
   zero();
 }
 
-void MumpsVector::change_sign()
+template<typename Scalar>
+void MumpsVector<Scalar>::change_sign()
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -421,13 +446,15 @@ void MumpsVector::change_sign()
 #endif
 }
 
-void MumpsVector::zero()
+template<typename Scalar>
+void MumpsVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(mumps_scalar));
+  memset(v, 0, size * sizeof(mumps_Scalar));
 }
 
-void MumpsVector::free()
+template<typename Scalar>
+void MumpsVector<Scalar>::free()
 {
   _F_
   delete [] v;
@@ -435,7 +462,8 @@ void MumpsVector::free()
   size = 0;
 }
 
-void MumpsVector::set(unsigned int idx, scalar y)
+template<typename Scalar>
+void MumpsVector<Scalar>::set(unsigned int idx, Scalar y)
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -446,7 +474,8 @@ void MumpsVector::set(unsigned int idx, scalar y)
 #endif
 }
 
-void MumpsVector::add(unsigned int idx, scalar y)
+template<typename Scalar>
+void MumpsVector<Scalar>::add(unsigned int idx, Scalar y)
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
@@ -457,7 +486,8 @@ void MumpsVector::add(unsigned int idx, scalar y)
 #endif
 }
 
-void MumpsVector::add(unsigned int n, unsigned int *idx, scalar *y)
+template<typename Scalar>
+void MumpsVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++) {
@@ -470,7 +500,8 @@ void MumpsVector::add(unsigned int n, unsigned int *idx, scalar *y)
   }
 }
 
-bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+template<typename Scalar>
+bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
   switch (fmt) 
@@ -492,10 +523,10 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     case DF_HERMES_BIN: 
     {
       hermes_fwrite("HERMESR\001", 1, 8, file);
-      int ssize = sizeof(scalar);
+      int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
       hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(scalar), size, file);
+      hermes_fwrite(v, sizeof(Scalar), size, file);
       return true;
     }
 
@@ -520,7 +551,8 @@ bool MumpsVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 #define JOB_FACTORIZE_SOLVE          5
 #define JOB_SOLVE                    3
 
-bool MumpsSolver::check_status()
+template<typename Scalar>
+bool MumpsSolver<Scalar>::check_status()
 {
   _F_
   switch (param.INFOG(1)) {
@@ -532,7 +564,8 @@ bool MumpsSolver::check_status()
   return false;
 }
 
-bool MumpsSolver::reinit()
+template<typename Scalar>
+bool MumpsSolver<Scalar>::reinit()
 {
   _F_
   if (inited)
@@ -575,7 +608,8 @@ bool MumpsSolver::reinit()
 
 #endif
 
-MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
+template<typename Scalar>
+MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
   LinearSolver(), m(m), rhs(rhs)
 {
   _F_
@@ -591,8 +625,9 @@ MumpsSolver::MumpsSolver(MumpsMatrix *m, MumpsVector *rhs) :
   error(MUMPS_NOT_COMPILED);
 #endif
 }
-
-MumpsSolver::~MumpsSolver()
+  
+template<typename Scalar>
+MumpsSolver<Scalar>::~MumpsSolver()
 {
   _F_
 #ifdef WITH_MUMPS
@@ -607,7 +642,8 @@ MumpsSolver::~MumpsSolver()
 #endif
 }
 
-bool MumpsSolver::solve()
+template<typename Scalar>
+bool MumpsSolver<Scalar>::solve()
 {
   _F_
 #ifdef WITH_MUMPS
@@ -627,8 +663,8 @@ bool MumpsSolver::solve()
   }
   
   // Specify the right-hand side (will be replaced by the solution).
-  param.rhs = new mumps_scalar[m->size];
-  memcpy(param.rhs, rhs->v, m->size * sizeof(mumps_scalar));
+  param.rhs = new mumps_Scalar[m->size];
+  memcpy(param.rhs, rhs->v, m->size * sizeof(mumps_Scalar));
   
   // Do the jobs specified in setup_factorization().
   MUMPS(&param);
@@ -638,7 +674,7 @@ bool MumpsSolver::solve()
   if (ret) 
   {
     delete [] sln;
-    sln = new scalar[m->size];
+    sln = new Scalar[m->size];
 #ifndef HERMES_COMMON_COMPLEX
     for (unsigned int i = 0; i < rhs->size; i++)
       sln[i] = param.rhs[i];
@@ -660,7 +696,8 @@ bool MumpsSolver::solve()
 #endif
 }
 
-bool MumpsSolver::setup_factorization()
+template<typename Scalar>
+bool MumpsSolver<Scalar>::setup_factorization()
 {
   _F_
 #ifdef WITH_MUMPS

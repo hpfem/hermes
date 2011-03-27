@@ -23,7 +23,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Hermes2D::calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm_type) const
+double Hermes2D::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const
 {
   // sanity checks
   if (sln1 == NULL) error("sln1 is NULL in calc_abs_error().");
@@ -66,7 +66,7 @@ double Hermes2D::calc_abs_error(MeshFunction* sln1, MeshFunction* sln2, int norm
   return sqrt(error);
 }
 
-double Hermes2D::calc_norm(MeshFunction* sln, int norm_type) const
+double Hermes2D::calc_norm(MeshFunction<Scalar>* sln, int norm_type) const
 {
   Quad2D* quad = &g_quad_2d_std;
   sln->set_quad_2d(quad);
@@ -104,7 +104,7 @@ double Hermes2D::calc_norm(MeshFunction* sln, int norm_type) const
 
 // Calculate norm of a (possibly vector-valued) solution.
 // Take norm from spaces where these solutions belong.
-double Hermes2D::calc_norms(Hermes::vector<Solution*> slns) const
+double Hermes2D::calc_norms(Hermes::vector<Solution<Scalar>*> slns) const
 {
   // Calculate norms for all solutions.
   Hermes::vector<double> norms;
@@ -125,7 +125,7 @@ double Hermes2D::calc_norms(Hermes::vector<Solution*> slns) const
 }
 
 
-bool Hermes2D::calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solution *> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
+bool Hermes2D::calc_errors(Hermes::vector<Solution<Scalar>* > left, Hermes::vector<Solution<Scalar>*> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
                  double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::vector<ProjNormType> norms) const
 {
   bool default_norms = false;
@@ -168,8 +168,8 @@ bool Hermes2D::calc_errors(Hermes::vector<Solution* > left, Hermes::vector<Solut
 
 
 /// Calculates the absolute error between sln1 and sln2 using function fn
-double Hermes2D::calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*), MeshFunction* sln1,
-                      MeshFunction* sln2) const
+double Hermes2D::calc_abs_error(double (*fn)(MeshFunction<Scalar>*, MeshFunction<Scalar>*, RefMap*, RefMap*), MeshFunction<Scalar>* sln1,
+                      MeshFunction<Scalar>* sln2) const
 {
   // sanity checks
   if (fn == NULL) error("error norm function is NULL in calc_abs_error().");
@@ -202,7 +202,7 @@ double Hermes2D::calc_abs_error(double (*fn)(MeshFunction*, MeshFunction*, RefMa
 
 
 /// Calculates the norm of sln using function fn
-double Hermes2D::calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* sln) const
+double Hermes2D::calc_norm(double (*fn)(MeshFunction<Scalar>*, RefMap*), MeshFunction<Scalar>* sln) const
 {
   Quad2D* quad = &g_quad_2d_std;
   sln->set_quad_2d(quad);
@@ -224,7 +224,7 @@ double Hermes2D::calc_norm(double (*fn)(MeshFunction*, RefMap*), MeshFunction* s
   return sqrt(norm);
 }
 
-double Hermes2D::calc_rel_error(MeshFunction* sln, MeshFunction* ref_sln, int norm_type) const
+double Hermes2D::calc_rel_error(MeshFunction<Scalar>* sln, MeshFunction<Scalar>* ref_sln, int norm_type) const
 {
   double error = calc_abs_error(sln, ref_sln, norm_type);
   double norm = calc_norm(ref_sln, norm_type);
@@ -234,7 +234,7 @@ double Hermes2D::calc_rel_error(MeshFunction* sln, MeshFunction* ref_sln, int no
 
 //// H1 space //////////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in H1 norm
-double Hermes2D::error_fn_h1(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const
+double Hermes2D::error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -257,7 +257,7 @@ double Hermes2D::error_fn_h1(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru,
 }
 
 // function used to calculate H1 norm of the solution
-double Hermes2D::norm_fn_h1(MeshFunction* sln, RefMap* ru) const
+double Hermes2D::norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -277,7 +277,7 @@ double Hermes2D::norm_fn_h1(MeshFunction* sln, RefMap* ru) const
 
 //// L2 space //////////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in L2 norm
-double Hermes2D::error_fn_l2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const
+double Hermes2D::error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -297,7 +297,7 @@ double Hermes2D::error_fn_l2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru,
 }
 
 // function used to calculate L2 norm of the solution
-double Hermes2D::norm_fn_l2(MeshFunction* sln, RefMap* ru) const
+double Hermes2D::norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -315,7 +315,7 @@ double Hermes2D::norm_fn_l2(MeshFunction* sln, RefMap* ru) const
 
 //// Hcurl space ///////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in Hcurl norm
-double Hermes2D::error_fn_hc(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const
+double Hermes2D::error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -338,7 +338,7 @@ double Hermes2D::error_fn_hc(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru,
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D::norm_fn_hc(MeshFunction* sln, RefMap* ru) const
+double Hermes2D::norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -356,7 +356,7 @@ double Hermes2D::norm_fn_hc(MeshFunction* sln, RefMap* ru) const
 }
 
 // function used to calculate error in Hcurl norm
-double Hermes2D::error_fn_hcl2(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const
+double Hermes2D::error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -376,7 +376,7 @@ double Hermes2D::error_fn_hcl2(MeshFunction* sln1, MeshFunction* sln2, RefMap* r
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D::norm_fn_hcl2(MeshFunction* sln, RefMap* ru) const
+double Hermes2D::norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -395,7 +395,7 @@ double Hermes2D::norm_fn_hcl2(MeshFunction* sln, RefMap* ru) const
 
 //// Hdiv space ///////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in Hcurl norm
-double Hermes2D::error_fn_hdiv(MeshFunction* sln1, MeshFunction* sln2, RefMap* ru, RefMap* rv) const
+double Hermes2D::error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   error("error_fn_hdiv() not implemented yet.");
 
@@ -421,7 +421,7 @@ double Hermes2D::error_fn_hdiv(MeshFunction* sln1, MeshFunction* sln2, RefMap* r
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D::norm_fn_hdiv(MeshFunction* sln, RefMap* ru) const
+double Hermes2D::norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   error("norm_fn_hdiv() not implemented yet.");
 

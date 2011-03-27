@@ -145,7 +145,7 @@ enum ProjNormType
 
   typedef std::complex<double> cplx;
   typedef cplx complex2[2];
-  typedef cplx scalar;
+  typedef cplx Scalar;
 
   #define CONJ(a)       (std::conj(a))
   #define REAL(a)       (std::real(a))
@@ -183,7 +183,7 @@ enum ProjNormType
 
 #else
 
-  typedef double scalar;
+  // typedef double Scalar;
   
   #define CONJ(a)       (a)
   #define REAL(a)       (a)
@@ -264,9 +264,9 @@ inline Point3D normalize(const Point3D &pt) {
 	return res;
 }
 
-
-struct Vector3D {
-	scalar x, y, z;		// coordinates of a point
+template<typename Scalar>
+class Vector3D {
+	Scalar x, y, z;		// coordinates of a point
 
 	Vector3D() {
 		x = y = z = 0;
@@ -284,8 +284,8 @@ struct Vector3D {
 		this->z = z;
 	}
 
-	scalar dot_product(Vector3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
-	scalar dot_product(Point3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	Scalar dot_product(Vector3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	Scalar dot_product(Point3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
 	double norm() { return sqrt(REAL(dot_product(*this)));};
 	void cross_product(Vector3D a, Vector3D b) {
 		x = a.y * b.z - a.z * b.y;
@@ -359,34 +359,35 @@ typedef double double2x2[2][2];
 typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 
-struct scalar2 
+template<typename Scalar>
+struct Scalar2 
 { 
-  scalar val[2]; 
+  Scalar val[2]; 
 
  public:
-  scalar2(scalar v1, scalar v2) 
+  Scalar2(Scalar v1, Scalar v2) 
   { 
     val[0] = v1; val[1] = v2; 
   }
 
-  scalar& operator[] (int idx) 
+  Scalar& operator[] (int idx) 
   { 
     assert(idx >= 0 && idx < 2);
     return val[idx];
   }
 };
-
-struct scalar3
+template<typename Scalar>
+struct Scalar3
 { 
-  scalar val[3]; 
+  Scalar val[3]; 
 
  public:
-  scalar3(scalar v1, scalar v2, scalar v3) 
+  Scalar3(Scalar v1, Scalar v2, Scalar v3) 
   { 
     val[0] = v1; val[1] = v2, val[2] = v3; 
   }
 
-  scalar& operator[] (int idx) 
+  Scalar& operator[] (int idx) 
   { 
     assert(idx >= 0 && idx < 3);
     return val[idx];
