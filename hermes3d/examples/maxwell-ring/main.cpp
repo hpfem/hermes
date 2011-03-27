@@ -58,7 +58,7 @@ const double J[3] = {1e+7 *  1 / sqrt((double)2), 0, 1e+7 *   1/ sqrt((double)2)
 
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 // Boundary condition types. 
 BCType bc_types(int marker)

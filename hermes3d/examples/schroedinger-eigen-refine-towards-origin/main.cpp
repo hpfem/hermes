@@ -39,7 +39,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 // potential and weight function for respective molecule
  double TARGET_VALUE = 3.0;
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int P_INIT = P;
 int P_INIT_X = P_INIT;                                   // Uniform polynomial degree of mesh elements.

@@ -2,7 +2,6 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
 #include "config.h"
-//#include <getopt.h>
 #include <hermes3d.h>
 
 // With large K, this is a singularly perturbed problem that exhibits an extremely
@@ -47,9 +46,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double K = 1e2;
 
-// Exact solution.
-#include "exact_solution.cpp"
-
 // Boundary condition types.
 BCType bc_types(int marker)
 {
@@ -62,8 +58,8 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
   return 0;
 }
 
-// Weak forms. 
-#include "forms.cpp"
+// Exact solution and Weak forms. 
+#include "definitions.cpp"
 
 int main(int argc, char **args) 
 {

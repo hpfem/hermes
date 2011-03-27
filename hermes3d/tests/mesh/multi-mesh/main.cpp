@@ -53,7 +53,7 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 
 
 // Weak forms. 
-#include "forms.cpp"
+#include "definitions.cpp"
 
 // main ///////////////////////////////////////////////////////////////////////////////////////////
 

@@ -47,8 +47,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Exact solution
-#include "exact_solution.cpp"
+// Exact solution and Weak forms.
+#include "definitions.cpp"
 
 // Boundary condition types.
 BCType bc_types(int marker) 
@@ -61,9 +61,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
   return fn(x, y, z);
 }
-
-// Weak forms.
-#include "forms.cpp"
 
 int main(int argc, char **args) 
 {

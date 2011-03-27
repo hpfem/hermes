@@ -59,7 +59,7 @@ double V( double x, double y, double z){
 }
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

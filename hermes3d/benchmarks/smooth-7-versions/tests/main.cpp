@@ -35,7 +35,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 #define ANISO_Y	   2
 #define ANISO_Z	   4
 int ANISO_TYPE;
-#include "../exact_solution.cpp"
+
+// Exact solution and Weak forms.
+#include "../definitions.cpp"
 
 // Boundary condition types. We also assign directional polynomial degrees here. 
 BCType bc_types(int marker)
@@ -104,9 +106,6 @@ int parse_aniso_type(char *str)
   if (strchr(str, 'z') != NULL) type |= ANISO_Z;
   return type;
 }
-
-// Weak forms.
-#include "forms.cpp"
 
 int main(int argc, char **args)
 {

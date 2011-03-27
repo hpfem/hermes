@@ -43,7 +43,7 @@ scalar essential_bc_values_poisson(int ess_bdy_marker, double x, double y, doubl
 double TARGET_VALUE = E0;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int P_INIT = P;
 int P_INIT_X = P_INIT;                                   // Uniform polynomial degree of mesh elements (x-direction).

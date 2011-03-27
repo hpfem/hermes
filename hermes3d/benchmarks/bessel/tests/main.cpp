@@ -45,7 +45,7 @@ const double kappa  = 1.0;
 const double lambda = 1.0;
 
 // Bessel functions, exact solution, and weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 // Boundary condition types. 
 BCType bc_types(int marker)

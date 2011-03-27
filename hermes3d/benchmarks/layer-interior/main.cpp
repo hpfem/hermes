@@ -2,7 +2,6 @@
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_VERBOSE
 #include "config.h"
-//#include <getopt.h>
 #include <hermes3d.h>
 
 //  This benchmark solves the Poisson equation and it comes with an exact solution that 
@@ -50,8 +49,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 double SLOPE = 200.0;                             // Slope of the layer.
 
 
-// Exact solution
-#include "exact_solution.cpp"
+// Exact solution and Weak forms.
+#include "definitions.cpp"
 
 // Boundary condition types.
 BCType bc_types(int marker)
@@ -64,9 +63,6 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
   return fn(x, y, z);
 }
-
-// Weak forms.
-#include "forms.cpp"
 
 int main(int argc, char **args) 
 {

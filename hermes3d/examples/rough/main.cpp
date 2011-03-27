@@ -3,7 +3,7 @@
 #define HERMES_REPORT_VERBOSE
 #include "config.h"
 #include <hermes3d.h>
-#include "rough.h"
+#include "definitions.cpp"
 
 
 double thresh = 10.e-12;

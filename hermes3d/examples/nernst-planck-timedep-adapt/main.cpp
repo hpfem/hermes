@@ -3,9 +3,6 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include "timestep_controller.h"
-//#include "timestep_controller.h"
-
 //using namespace RefinementSelectors;
 
 
@@ -73,8 +70,8 @@ const double ERR_STOP = 0.1;                      // Stopping criterion for adap
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 */
-// Weak forms
-#include "forms.cpp"
+// Weak forms and timestep controller
+#include "definitions.cpp"
 
 
 /*** Boundary types and conditions ***/
