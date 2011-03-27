@@ -34,12 +34,9 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal o
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
-// Initial condition.
-#include "initial_condition.cpp"
-
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
@@ -83,7 +80,7 @@ int main(int argc, char* argv[])
   scalar* coeff_vec1 = new scalar[ndof];
   scalar* coeff_vec2 = new scalar[ndof];
   OGProjection::project_global(&space, &u_prev_time, coeff_vec1, matrix_solver);
-  for (int i = 0; i < ndof; i++) 
+  for (int i = 0; i < ndof; i++)
     coeff_vec2[i] = coeff_vec1[i];
 
   // Initialize the weak formulation and the FE problem.
@@ -101,19 +98,19 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration for sdirk_stage_sol.
     bool verbose = true;
     if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix,
-			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's iteration did not converge."); 
+                        rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+        error("Newton's iteration did not converge.");
 
       // Convert the vector coeff_vec1 into a Solution.
       Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
 
     if (!hermes2d.solve_newton(coeff_vec2, &dp2, solver, matrix,
-			rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's iteration did not converge."); 
+                        rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+        error("Newton's iteration did not converge.");
 
       // Translate Y2 into a Solution.
       Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
-  
+
     // Update time.
     current_time += time_step;
 

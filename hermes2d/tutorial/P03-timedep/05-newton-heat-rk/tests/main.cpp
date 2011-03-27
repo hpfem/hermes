@@ -39,10 +39,7 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal c
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
-
-// Initial condition.
-#include "initial_condition.cpp"
+#include "../definitions.cpp"
 
 // Main function.
 int main(int argc, char* argv[])

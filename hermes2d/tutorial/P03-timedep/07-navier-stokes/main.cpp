@@ -69,7 +69,7 @@ const std::string BDY_OBSTACLE = "5";
 double current_time = 0;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions.
   EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   DefaultEssentialBCConst bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBC *>(&bc_left_vel_x, &bc_other_vel_x));
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_left_vel_x, &bc_other_vel_x));
   DefaultEssentialBCConst bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
   EssentialBCs bcs_vel_y(&bc_vel_y);
   EssentialBCs bcs_pressure;

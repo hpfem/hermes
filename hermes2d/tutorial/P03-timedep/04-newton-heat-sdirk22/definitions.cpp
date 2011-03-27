@@ -252,19 +252,39 @@ private:
 
 
 
-class EssentialBCNonConst : public EssentialBC {
+class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+  EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
 
   ~EssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   scalar function(double x, double y) const
   {
+    return (x+10)*(y+10)/100.;
+  }
+};
+
+class InitialSolutionHeatTransfer : public ExactSolutionScalar
+{
+public:
+  InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  // Function representing an exact one-dimension valued solution.
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = (y+10)/10.;
+    dy = (x+10)/10.;
+  };
+
+  virtual scalar value (double x, double y) const {
+    return (x+10)*(y+10)/100.;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
     return (x+10)*(y+10)/100.;
   }
 };

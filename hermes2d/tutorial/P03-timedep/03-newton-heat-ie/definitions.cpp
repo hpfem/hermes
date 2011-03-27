@@ -108,16 +108,16 @@ private:
 
 /* Essential boundary condition */
 
-class EssentialBCNonConst : public EssentialBC {
+class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+  EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
 
   ~EssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   scalar function(double x, double y) const
   {
