@@ -231,6 +231,11 @@ struct HERMES_API Point3D {
 	double x, y, z;		// coordinates of a point
 };
 
+struct HERMES_API SplineCoeff {
+  double a, b, c, d;		// four coefficients of a cubic spline.
+};
+
+
 inline double dot_product(const Point3D &a, const Point3D &b) { return a.x * b.x + a.y * b.y + a.z * b.z;}
 
 inline Point3D cross_product(Point3D a, Point3D b) {
