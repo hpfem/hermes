@@ -58,7 +58,7 @@ void exact_sol(double x, double u[MAX_EQN_NUM], double dudx[MAX_EQN_NUM])
 }
 
 // Weak forms for Jacobi matrix and residual.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main() 
 {

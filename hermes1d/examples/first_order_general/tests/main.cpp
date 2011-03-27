@@ -34,7 +34,7 @@ double dfdy(double y, double x) {
 }
 
 // Weak forms for the Jacobi matrix and residual.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main() 
 {
