@@ -1,7 +1,11 @@
 #include "weakform/weakform.h"
-#include "weakform_library/laplace.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
+#include "weakform_library/laplace.h"
+
+using namespace Laplace::VolumetricMatrixForms;
+using namespace Laplace::VolumetricVectorForms;
+using namespace Laplace::RightHandSides;
 
 /*  Exact solution */
 
@@ -47,6 +51,6 @@ class CustomWeakFormPoisson : public WeakForm
 public:
     CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
         add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-        add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
+        add_vector_form(new DefaultVectorFormNonConst(0, rhs));
     }
 };

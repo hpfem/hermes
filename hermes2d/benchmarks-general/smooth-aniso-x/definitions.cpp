@@ -3,6 +3,11 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+using namespace Laplace::VolumetricMatrixForms;
+using namespace Laplace::VolumetricVectorForms;
+using namespace Laplace::SurfaceVectorForms;
+using namespace Laplace::RightHandSides;
+
 /* Exact solution */
 
 class CustomExactSolution : public ExactSolutionScalar
@@ -45,9 +50,9 @@ public:
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-    CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
+    CustomWeakFormPoisson() : WeakForm(1) {
         add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-        add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
-        add_vector_form_surf(new DefaultVectorFormSurf(0, BDY_RIGHT, -1));
+        add_vector_form(new DefaultVectorFormNonConst(0, new CustomRightHandSide));
+        add_vector_form_surf(new DefaultSurfaceVectorForm(0, BDY_RIGHT, -1));
     }
 };
