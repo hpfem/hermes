@@ -27,7 +27,11 @@ public:
               bool first_der_left = true, bool first_der_right = true);
 
   /// Destructor.
-  ~CubicSpline() { };
+  ~CubicSpline() { 
+    delete coeffs;
+    points.clear();
+    values.clear();
+  };
 
   /// Calculate the value at a given point. Return true if point is
   /// in range, otherwise return false.
@@ -38,6 +42,9 @@ public:
   bool get_derivative(double x_in, double& der_out);
 
 protected:
+  /// Calculates coefficients.
+  bool calculate_coeffs();
+
   /// Uses a bisection method to locale interval where a given point lies.
   /// Returns false if point lies outside.
   bool find_interval(double x_in, int& m);
@@ -68,7 +75,7 @@ protected:
   bool first_der_left, first_der_right;
 
   /// A set of four coefficients a, b, c, d for an elementary cubic spline.
-  std::vector<SplineCoeff> coeffs;
+  SplineCoeff* coeffs;
 };
 
 #endif
