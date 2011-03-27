@@ -548,13 +548,13 @@ protected:
   Solution* y_vel_previous_time;
 };
 
-class EssentialBCNonConst : public EssentialBC
+class EssentialBCNonConst : public EssentialBoundaryCondition
 {
 public:
   EssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
-        EssentialBC(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
+        EssentialBoundaryCondition(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
   EssentialBCNonConst(std::string marker, double vel_inlet, double H, double startup_time) : 
-        EssentialBC(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
+        EssentialBoundaryCondition(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
     markers.push_back(marker);
   };
   
@@ -578,5 +578,3 @@ protected:
   double vel_inlet;
   double H;
 };
-
-
