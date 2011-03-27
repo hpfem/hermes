@@ -60,6 +60,10 @@
  * function's order/values on both sides of active edge as in the previous case of external functions.
  *
  */
+
+template<typename Scalar> class KellyTypeAdapt;
+
+
 template<typename Scalar>
 class HERMES_API NeighborSearch
 {

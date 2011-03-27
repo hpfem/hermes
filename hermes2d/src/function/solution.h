@@ -48,7 +48,7 @@ public:
   virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
 
-  virtual int get_edge_fn_order(int edge) { return ScalarFunction::get_edge_fn_order(edge); }
+  virtual int get_edge_fn_order(int edge) { return get_edge_fn_order(edge); }
 
   Mesh*   get_mesh() const { return mesh; }
   RefMap* get_refmap() { update_refmap(); return refmap; }
@@ -74,7 +74,7 @@ public:
 
   /// For internal use only.
   void force_transform(MeshFunction<Scalar>* mf)
-    { ScalarFunction::force_transform(mf->get_transform(), mf->get_ctm()); }
+    { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
   void update_refmap()
     { refmap->force_transform(sub_idx, ctm); }
   void force_transform(uint64_t sub_idx, Trf* ctm)

@@ -63,7 +63,7 @@ template<typename Scalar>
 class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>
 {
 
-friend class KellyTypeAdapt;
+friend class KellyTypeAdapt<Scalar>;
 
 public:
   /// Constructors.

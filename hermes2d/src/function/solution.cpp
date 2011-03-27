@@ -22,8 +22,7 @@
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-MeshFunction<Scalar>::MeshFunction()
-            : ScalarFunction()
+MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
 {
   refmap = new RefMap;
   mesh = NULL;
@@ -31,8 +30,7 @@ MeshFunction<Scalar>::MeshFunction()
 }
 
 template<typename Scalar>
-MeshFunction<Scalar>::MeshFunction(Mesh *mesh) :
-	ScalarFunction()
+MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>
 {
 	this->mesh = mesh;
 	this->refmap = new RefMap;

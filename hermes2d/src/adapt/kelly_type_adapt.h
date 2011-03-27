@@ -67,11 +67,11 @@ public:
   public:
     int i;
     std::string area;
-    Hermes::vector<MeshFunction *> ext;
+    Hermes::vector<MeshFunction<Scalar>*> ext;
     Hermes::vector<Scalar> param;
 
     ErrorEstimatorForm(int i, std::string area = HERMES_ANY, 
-                       Hermes::vector<MeshFunction *> ext = Hermes::vector<MeshFunction *>(), 
+                       Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(), 
                        Hermes::vector<Scalar> param = Hermes::vector<Scalar>()) :
     i(i), area(area), ext(ext), param(param) {}
 
@@ -100,25 +100,25 @@ public:
     ///
     /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
     ///
-    double eval_volumetric_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+    double eval_volumetric_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                     RefMap* rm);
-    double eval_boundary_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+    double eval_boundary_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                    RefMap* rm,
                                    SurfPos* surf_pos);
-    double eval_interface_estimator(KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
+    double eval_interface_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
                                     RefMap *rm,
                                     SurfPos* surf_pos,
                                     LightArray<NeighborSearch*>& neighbor_searches,
                                     int neighbor_index);
-    double eval_solution_norm(Adapt::MatrixFormVolError* form,
+    double eval_solution_norm(typename Adapt::MatrixFormVolError* form,
                               RefMap* rm,
-                              MeshFunction* sln);
+                              MeshFunction<Scalar>* sln);
 
     ///
     /// Linear forms used to calculate the error estimator value for each component.
     ///
-    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_vol;
-    Hermes::vector<KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_surf;
+    Hermes::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_vol;
+    Hermes::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_surf;
 
     Mesh::ElementMarkersConversion element_markers_conversion;
     Mesh::BoundaryMarkersConversion boundary_markers_conversion;

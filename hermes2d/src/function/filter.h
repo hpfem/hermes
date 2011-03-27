@@ -17,6 +17,7 @@
 #define __H2D_FILTER_H
 
 #include "solution.h"
+#include <complex>
 
 struct UniData;
 
@@ -115,23 +116,23 @@ protected:
 /// return also the DX and DY values.
 ///
 template<typename Scalar>
-class HERMES_API DXDYFilter : public Filter
+class HERMES_API DXDYFilter : public Filter<Scalar>
 {
 public:
   // one result (rslt), all inputs and result including derivatives
 	DXDYFilter() {};
-  DXDYFilter(Hermes::vector<MeshFunction*> solutions);
+  DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions);
 
-  void init(Hermes::vector<MeshFunction*> solutions);
+  void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
 
-	virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) { 
+	virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) { 
     error("Not implemented yet"); 
     return 0; 
   }
 
 protected:
 
-  virtual void filter_fn (int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, scalar* rslt, scalar* rslt_dx, scalar* rslt_dy) = 0;
+  virtual void filter_fn (int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
   void init_components();
   virtual void precalculate(int order, int mask);
@@ -142,47 +143,47 @@ protected:
 /// calculates the vector magnitude, sqrt(x^2 + y^2).
 /// \brief Calculates the magnitude of a vector function.
 template<typename Scalar>
-class HERMES_API MagFilter : public SimpleFilter
+class HERMES_API MagFilter : public SimpleFilter<Scalar>
 {
 public:
 	MagFilter() {};
-  MagFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
-	MagFilter(MeshFunction* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1
+  MagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+	MagFilter(MeshFunction<Scalar>* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1
 protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
+  virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
 
 /// Calculates the difference of two functions.
 template<typename Scalar>
-class HERMES_API DiffFilter : public SimpleFilter
+class HERMES_API DiffFilter : public SimpleFilter<Scalar>
 {
 public: 
-  DiffFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
+  virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
 
 /// Calculates the sum of two functions.
 template<typename Scalar>
-class HERMES_API SumFilter : public SimpleFilter
+class HERMES_API SumFilter : public SimpleFilter<Scalar>
 {
 public: 
-  SumFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
+  virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
 
 /// Calculates the square of a function.
 template<typename Scalar>
-class HERMES_API SquareFilter : public SimpleFilter
+class HERMES_API SquareFilter : public SimpleFilter<Scalar>
 {
 public: 
-  SquareFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
+  virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
 
@@ -192,7 +193,7 @@ class HERMES_API RealFilter : public SimpleFilter<std::complex<double>>
 public:
   RealFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, std::complex<double>* result);
+  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 
@@ -203,7 +204,7 @@ class HERMES_API ImagFilter : public SimpleFilter<std::complex<double>>
 public:
   ImagFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, std::complex<double>* result);
+  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 
@@ -213,7 +214,7 @@ class HERMES_API AbsFilter : public SimpleFilter<std::complex<double>>
 public: 
   AbsFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, std::complex<double>* result);
+  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 /// Computes the angle of a complex solution.
@@ -222,7 +223,7 @@ class HERMES_API AngleFilter : public SimpleFilter<std::complex<double>>
 public:
   AngleFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, std::complex<double>* result);
+  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 
