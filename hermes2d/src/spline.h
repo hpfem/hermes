@@ -38,14 +38,20 @@ public:
 
   /// Get the value at a given point. Return true if point is
   /// in range, otherwise return false.
-  bool get_value(double x_in, double& val_out);
+  double get_value(double x_in, bool& success);
+
+  /// For order calculation in Hermes.
+  Ord get_value(Ord x_in, Ord success) {return Ord(3);};
 
   /// Gets value at a point that lies in interval 'm'.
   double get_value_from_interval(double x_in, int m);
 
   /// Get first derivative at a given point. Return true if point is
   /// in range, otherwise return false.
-  bool get_derivative(double x_in, double& der_out);
+  double get_derivative(double x_in, bool& success);
+
+  /// For order calculation in Hermes.
+  Ord get_derivative(Ord x_in, Ord success) {return Ord(2);};
 
   /// Gets derivative at a point that lies in interval 'm'.
   double get_derivative_from_interval(double x_in, int m);

@@ -7,30 +7,33 @@
 class CustomWeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  CustomWeakFormHeatTransferNewton() : WeakForm(1) {
+  CustomWeakFormHeatTransferNewton(CubicSpline* cspline) : WeakForm(1) {
     // Jacobian.
-    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0));
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, cspline));
     // Residual.
-    add_vector_form(new VectorFormVolHeatTransfer(0));
+    add_vector_form(new VectorFormVolHeatTransfer(0, cspline));
   };
 
 private:
   class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j) 
-          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+    MatrixFormVolHeatTransfer(int i, int j, CubicSpline* cspline) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), cspline(cspline) { }
+
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                 Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (dlam_du<Real>(u_prev->val[i]) * u->val[i] * 
+      bool success;
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * (cspline->get_derivative(u_prev->val[i], success) * u->val[i] * 
                            (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
-                           + lam<Real>(u_prev->val[i]) * (u->dx[i] * v->dx[i] 
+                           + cspline->get_value(u_prev->val[i], success) * (u->dx[i] * v->dx[i] 
                            + u->dy[i] * v->dy[i]));
+      }
       return result;
     }
 
@@ -41,35 +44,27 @@ private:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) {
-      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      return Ord(10); //matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
-    // Thermal conductivity (temperature-dependent)
-    // Note: for any u, this function has to be positive.
-    template<typename Real>
-    Real lam(Real u) { 
-      return 1 + pow(u, 4); 
-    }
-
-    // Derivative of the thermal conductivity with respect to 'u'.
-    template<typename Real>
-    Real dlam_du(Real u) { 
-      return 4*pow(u, 3); 
-    }
+    // Spline representing temperature-dependent thermal conductivity.
+    CubicSpline* cspline;
   };
 
   class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolHeatTransfer(int i) : WeakForm::VectorFormVol(i) { }
+    VectorFormVolHeatTransfer(int i, CubicSpline* cspline) 
+          : WeakForm::VectorFormVol(i), cspline(cspline) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
+      bool success;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] 
+        result += wt[i] * (cspline->get_value(u_prev->val[i], success) * (u_prev->dx[i] 
                            * v->dx[i] + u_prev->dy[i] * v->dy[i])
 		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
@@ -82,7 +77,7 @@ private:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      return Ord(10); //vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
     // Heat sources (can be a general function of 'x' and 'y').
@@ -91,12 +86,8 @@ private:
       return 1.0;
     }
 
-    // Thermal conductivity (temperature-dependent)
-    // For any u, this function has to be positive.
-    template<typename Real>
-    Real lam(Real u)  { 
-      return 1 + pow(u, 4); 
-    }
+    // Spline representing temperature-dependent thermal conductivity.
+    CubicSpline* cspline;
   };
 };
 

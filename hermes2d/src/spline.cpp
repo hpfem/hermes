@@ -22,14 +22,17 @@ CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
   : points(points), values(values), bc_left(bc_left), bc_right(bc_right), 
     first_der_left(first_der_left), first_der_right(first_der_right) { }
 
-bool CubicSpline::get_value(double x_in, double& val_out) 
+double CubicSpline::get_value(double x_in, bool& success) 
 {  
   int m = -1;
-  if (!this->find_interval(x_in, m)) return false;
+  if (!this->find_interval(x_in, m)) {
+    success = false;
+    return 0.0;
+  }
 
-  val_out = get_value_from_interval(x_in, m); 
+  success = true;
 
-  return true;
+  return get_value_from_interval(x_in, m); 
 }
 
 double CubicSpline::get_value_from_interval(double x_in, int m) 
@@ -40,14 +43,17 @@ double CubicSpline::get_value_from_interval(double x_in, int m)
          + this->coeffs[m].d * x3;
 }
 
-bool CubicSpline::get_derivative(double x_in, double& der_out) 
+double CubicSpline::get_derivative(double x_in, bool& success) 
 {
   int m = -1;
-  if (!this->find_interval(x_in, m)) return false;
+  if (!this->find_interval(x_in, m)) {
+    success = false;
+    return 0.0;
+  }
 
-  der_out = get_derivative_from_interval(x_in, m); 
+  success = true;
 
-  return true;
+  return get_derivative_from_interval(x_in, m); 
 };
 
 double CubicSpline::get_derivative_from_interval(double x_in, int m) 

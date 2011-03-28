@@ -27,6 +27,26 @@ int main(int argc, char* argv[])
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
 
+  // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
+  // Here lambda(u) = 1 + u^4.
+  #define lambda(x) (1 + pow(x, 4))
+  Hermes::vector<double> lambda_pts(-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0);
+  Hermes::vector<double> lambda_val;
+  for (unsigned int i = 0; i < lambda_pts.size(); i++) {
+    lambda_val.push_back(lambda(lambda_pts[i]));
+  }
+
+  // Create the cubic spline (and plot it for visual control). 
+  double second_der_left = 0.0;
+  double second_der_right = 0.0;
+  bool first_der_left = false;
+  bool first_der_right = false;
+  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right);
+  bool success0 = cs.calculate_coeffs(); 
+  if (!success0) error("There was a problem constructing a cubic spline.");
+  info("Saving cubic spline into a Pylab file spline.dat.");
+  cs.plot("spline.dat");
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -45,7 +65,7 @@ int main(int argc, char* argv[])
   int ndof = space.get_num_dofs();
 
   // Initialize the weak formulation
-  CustomWeakFormHeatTransferNewton wf;
+  CustomWeakFormHeatTransferNewton wf(&cs);
 
   // Initialize the FE problem.
   bool is_linear = false;
