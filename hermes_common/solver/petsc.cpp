@@ -280,7 +280,7 @@ void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatr
 // Multiplies matrix with a Scalar.
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::multiply_with_Scalar(Scalar value){
+void PetscMatrix<Scalar>::multiply_with_scalar(Scalar value){
   _F_
   MatScale(matrix,value);
 }

@@ -113,8 +113,8 @@ void MumpsMatrix<Scalar>::alloc()
 
   nnz = Ap[size];
 
-  Ax = new mumps_Scalar[nnz];
-  memset(Ax, 0, sizeof(mumps_Scalar) * nnz);
+  Ax = new Scalar[nnz];
+  memset(Ax, 0, sizeof(Scalar) * nnz);
 
   irn = new int[nnz];
   jcn = new int[nnz];
@@ -158,7 +158,7 @@ template<typename Scalar>
 void MumpsMatrix<Scalar>::zero()
 {
   _F_
-  memset(Ax, 0, sizeof(mumps_Scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(Scalar) * Ap[size]);
 }
 
 template<typename Scalar>
@@ -219,7 +219,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
       for (unsigned int i = 0; i < nnz; i++)
-        fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], MUMPS_SCALAR(Ax[i]));
+        fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], Scalar(Ax[i]));
       return true;
 
     case DF_MATLAB_SPARSE:
@@ -227,9 +227,9 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       for (unsigned int j = 0; j < size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
 #ifndef HERMES_COMMON_COMPLEX          
-          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
+          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, Scalar(Ax[i]));
 #else          
-          fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, MUMPS_SCALAR(Ax[i]));
+          fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, Scalar(Ax[i]));
 #endif          
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
@@ -244,7 +244,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(mumps_Scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
     }
 
@@ -340,7 +340,7 @@ void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector
 }
   // Multiplies matrix with a Scalar.
 template<typename Scalar>
-void MumpsMatrix<Scalar>::multiply_with_Scalar(Scalar value){
+void MumpsMatrix<Scalar>::multiply_with_scalar(Scalar value){
   int n=nnz;
   Scalar a;
   for(int i=0;i<n;i++){
@@ -361,7 +361,7 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   this->size = size;
   this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new mumps_Scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
   irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
   jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
 
@@ -390,7 +390,7 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
   nmat->size = size;
   nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new mumps_Scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
   nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
   nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
   for (unsigned int i = 0;i<nnz;i++){
@@ -428,7 +428,7 @@ void MumpsVector<Scalar>::alloc(unsigned int n)
   _F_
   free();
   size = n;
-  v = new mumps_Scalar[n];
+  v = new Scalar[n];
   zero();
 }
 
@@ -450,7 +450,7 @@ template<typename Scalar>
 void MumpsVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(mumps_Scalar));
+  memset(v, 0, size * sizeof(Scalar));
 }
 
 template<typename Scalar>
@@ -509,14 +509,14 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
       for (unsigned int i = 0; i < size; i++)
-        fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
+        fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
 
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (unsigned int i = 0; i < size; i++)
-        fprintf(file, SCALAR_FMT "\n", MUMPS_SCALAR(v[i]));
+        fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
       fprintf(file, " ];\n");
       return true;
 
@@ -663,8 +663,8 @@ bool MumpsSolver<Scalar>::solve()
   }
   
   // Specify the right-hand side (will be replaced by the solution).
-  param.rhs = new mumps_Scalar[m->size];
-  memcpy(param.rhs, rhs->v, m->size * sizeof(mumps_Scalar));
+  param.rhs = new Scalar[m->size];
+  memcpy(param.rhs, rhs->v, m->size * sizeof(Scalar));
   
   // Do the jobs specified in setup_factorization().
   MUMPS(&param);

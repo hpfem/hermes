@@ -260,4 +260,7 @@ public:
 
 #endif // NOGLUT
 
+template class HERMES_API ScalarView<double>;
+template class HERMES_API ScalarView<std::complex<double>>;
+
 #endif

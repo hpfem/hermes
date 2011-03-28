@@ -64,7 +64,7 @@ public:
 
 #ifdef WITH_PETSC
   // Multiplies matrix with a Scalar.
-  void multiply_with_Scalar(Scalar value);
+  void multiply_with_scalar(Scalar value);
   // Creates matrix in PETSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
@@ -132,4 +132,10 @@ protected:
   PetscVector<Scalar> *rhs;
 };
 
+template class HERMES_API PetscMatrix<double>;
+template class HERMES_API PetscMatrix<std::complex<double>>;
+template class HERMES_API PetscVector<double>;
+template class HERMES_API PetscVector<std::complex<double>>;
+template class HERMES_API PetscLinearSolver<double>;
+template class HERMES_API PetscLinearSolver<std::complex<double>>;
 #endif

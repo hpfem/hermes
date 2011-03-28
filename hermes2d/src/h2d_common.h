@@ -118,6 +118,8 @@ public:
        int picard_max_iter, bool verbose) const;
 };
 
+template class HERMES_API Hermes2D<double>;
+template class HERMES_API Hermes2D<std::complex<double>>;
 
 #endif
 

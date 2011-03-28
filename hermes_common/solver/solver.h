@@ -133,10 +133,10 @@ class NonlinearSolver : public Solver<Scalar>
 {
   public:
     NonlinearSolver() : Solver() { dp = NULL; }
-    NonlinearSolver(DiscreteProblemInterface* dp) : Solver() { this->dp = dp; }
+    NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver() { this->dp = dp; }
     
   protected:
-    DiscreteProblemInterface* dp; // FE problem being solved (not NULL in case of using
+    DiscreteProblemInterface<Scalar>* dp; // FE problem being solved (not NULL in case of using
                                   // NonlinearProblem(DiscreteProblemInterface *) ctor
 };
 
@@ -170,6 +170,16 @@ class IterSolver : public Solver<Scalar>
     double tolerance;       ///< Convergence tolerance.
     bool precond_yes;
 };
+
+template class HERMES_API Solver<double>;
+template class HERMES_API Solver<std::complex<double>>;
+template class HERMES_API LinearSolver<double>;
+template class HERMES_API LinearSolver<std::complex<double>>;
+template class HERMES_API NonlinearSolver<double>;
+template class HERMES_API NonlinearSolver<std::complex<double>>;
+template class HERMES_API IterSolver<double>;
+template class HERMES_API IterSolver<std::complex<double>>;
+
 
 /*@}*/ // End of documentation group Solvers.
 

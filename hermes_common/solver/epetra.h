@@ -68,9 +68,7 @@ protected:
   Epetra_BlockMap *std_map;
   Epetra_CrsGraph *grph;
   Epetra_CrsMatrix *mat;
-  #ifdef HERMES_COMMON_COMPLEX
-    Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
-  #endif
+  Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
   bool owner;
 #endif
 
@@ -94,11 +92,7 @@ public:
   virtual void free();
 #ifdef HAVE_EPETRA
   virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
-#ifndef HERMES_COMMON_COMPLEX
-  virtual void extract(double *v) const { vec->ExtractCopy(v); }
-#else
-  virtual void extract(Scalar *v) const { }
-#endif
+  virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); }
 #else
   virtual Scalar get(unsigned int idx) { return 0.0; }
   virtual void extract(Scalar *v) const { }
@@ -121,9 +115,7 @@ protected:
 #ifdef HAVE_EPETRA
   Epetra_BlockMap *std_map;
   Epetra_Vector *vec;
-  #ifdef HERMES_COMMON_COMPLEX
-    Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
-  #endif
+  Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
   bool owner;
 #endif
 
@@ -131,5 +123,8 @@ protected:
   friend class AztecOOSolver<Scalar>;
   friend class NoxSolver<Scalar>;
 };
-
+template class HERMES_API EpetraMatrix<double>;
+template class HERMES_API EpetraMatrix<std::complex<double>>;
+template class HERMES_API EpetraVector<double>;
+template class HERMES_API EpetraVector<std::complex<double>>;
 #endif

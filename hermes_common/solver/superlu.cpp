@@ -94,8 +94,8 @@ void SuperLUMatrix<Scalar>::alloc()
   
   nnz = Ap[size];
 
-  Ax = new slu_Scalar [nnz];
-  memset(Ax, 0, sizeof(slu_Scalar) * nnz);
+  Ax = new Scalar [nnz];
+  memset(Ax, 0, sizeof(Scalar) * nnz);
 }
 
 template<typename Scalar>
@@ -129,7 +129,7 @@ template<typename Scalar>
 void SuperLUMatrix<Scalar>::zero()
 {
   _F_
-  memset(Ax, 0, sizeof(slu_Scalar) * nnz);
+  memset(Ax, 0, sizeof(Scalar) * nnz);
 }
 
 template<typename Scalar>
@@ -188,11 +188,12 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
       for (unsigned int j = 0; j < size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
+          /*
 #ifndef HERMES_COMMON_COMPLEX          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));
 #else          
         fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));
-#endif          
+#endif      */    
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
       
       return true;
@@ -206,7 +207,7 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       hermes_fwrite(&nnz, sizeof(int), 1, file);
       hermes_fwrite(Ap, sizeof(int), size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
-      hermes_fwrite(Ax, sizeof(slu_Scalar), nnz, file);
+      hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
     }
     
@@ -305,7 +306,7 @@ void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vect
 // Multiplies matrix with a Scalar.
 
 template<typename Scalar>
-void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value){
+void SuperLUMatrix<Scalar>::multiply_with_scalar(Scalar value){
   _F_
   int n=nnz;
   Scalar a;
@@ -329,7 +330,7 @@ void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap,
   this->size = size;
   this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new slu_Scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
 
   for (unsigned int i = 0; i < size+1; i++){
     this->Ap[i] = ap[i];
@@ -355,7 +356,7 @@ SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate(){
   nmat->size = size;
   nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new slu_Scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
   for (unsigned int i = 0;i<nnz;i++){
     nmat->Ai[i]=Ai[i];
     nmat->Ax[i]=Ax[i];
@@ -389,7 +390,7 @@ void SuperLUVector<Scalar>::alloc(unsigned int n)
   _F_
   this->free();
   size = n;
-  v = new slu_Scalar[n];
+  v = new Scalar[n];
   zero();
 }
 
@@ -397,7 +398,7 @@ template<typename Scalar>
 void SuperLUVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(slu_Scalar));
+  memset(v, 0, size * sizeof(Scalar));
 }
 
 template<typename Scalar>
@@ -470,14 +471,14 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
       for (unsigned int i = 0; i < size; i++)
-        fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
+        //fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       
       return true;
       
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
       for (unsigned int i = 0; i < size; i++)
-        fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
+       // fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;
       
@@ -663,8 +664,8 @@ bool SuperLUSolver<Scalar>::solve()
       memcpy(local_Ap, m->Ap, (m->size+1) * sizeof(int));
       
       if (local_Ax) delete [] local_Ax;
-      local_Ax = new slu_Scalar [m->nnz];
-      memcpy(local_Ax, m->Ax, m->nnz * sizeof(slu_Scalar));
+      local_Ax = new Scalar [m->nnz];
+      memcpy(local_Ax, m->Ax, m->nnz * sizeof(Scalar));
       
       // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
       SLU_CREATE_CSC_MATRIX(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
@@ -677,8 +678,8 @@ bool SuperLUSolver<Scalar>::solve()
   free_rhs();
  
   if (local_rhs) delete [] local_rhs;
-  local_rhs = new slu_Scalar [rhs->size];
-  memcpy(local_rhs, rhs->v, rhs->size * sizeof(slu_Scalar));
+  local_rhs = new Scalar [rhs->size];
+  memcpy(local_rhs, rhs->v, rhs->size * sizeof(Scalar));
   
   SLU_CREATE_DENSE_MATRIX(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
   
@@ -686,8 +687,8 @@ bool SuperLUSolver<Scalar>::solve()
   
   // Initialize the solution variable.
   SuperMatrix<Scalar> X;
-  slu_Scalar *x;
-  if ( !(x = SLU_SCALAR_MALLOC(m->size)) ) 
+  Scalar *x;
+  if ( !(x = Scalar_MALLOC(m->size)) ) 
     error("Malloc fails for x[].");
   SLU_CREATE_DENSE_MATRIX(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
     
@@ -756,7 +757,7 @@ bool SuperLUSolver<Scalar>::solve()
     delete [] sln;
     sln = new Scalar[m->size];
     
-    slu_Scalar *sol = (slu_Scalar*) ((DNformat*) X.Store)->nzval; 
+    Scalar *sol = (Scalar*) ((DNformat*) X.Store)->nzval; 
     
     for (unsigned int i = 0; i < rhs->size; i++)
 #ifndef HERMES_COMMON_COMPLEX      
@@ -993,8 +994,8 @@ void slu_mt_solver_driver(slu_options_t *options, SuperMatrix<Scalar> *A,
   /* Right hand side and solution vectors. */
   DNformat *Bstore = (DNformat*) B->Store;
   DNformat *Xstore = (DNformat*) X->Store;
-  slu_Scalar *Bmat = (slu_Scalar*) Bstore->nzval;
-  slu_Scalar *Xmat = (slu_Scalar*) Xstore->nzval;
+  Scalar *Bmat = (Scalar*) Bstore->nzval;
+  Scalar *Xmat = (Scalar*) Xstore->nzval;
     
   *info = 0;
   
@@ -1114,7 +1115,7 @@ void slu_mt_solver_driver(slu_options_t *options, SuperMatrix<Scalar> *A,
       Compute the solution matrix X.
       ------------------------------------------------------------*/
     // Save a copy of the right hand side.
-    memcpy(Xmat, Bmat, B->nrow * sizeof(slu_Scalar)); 
+    memcpy(Xmat, Bmat, B->nrow * sizeof(Scalar)); 
             
     t0 = SuperLU_timer_();
     SLU_GSTRS(options->trans, L, U, perm_r, perm_c, X, stat, info);

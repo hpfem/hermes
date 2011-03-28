@@ -22,6 +22,8 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+template class Hermes2D<double>;
+template class Hermes2D<std::complex<double>>;
 
 template<typename Scalar>
 double Hermes2D<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const
@@ -326,7 +328,8 @@ double Hermes2D<Scalar>::norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru) const
 
 //// Hcurl space ///////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in Hcurl norm
-double Hermes2D<std::complex<double>>::error_fn_hc(MeshFunction<std::complex<double>>* sln1, MeshFunction<std::complex<double>>* sln2, RefMap* ru, RefMap* rv) const
+template<typename Scalar>
+double Hermes2D<Scalar>::error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -337,10 +340,10 @@ double Hermes2D<std::complex<double>>::error_fn_hc(MeshFunction<std::complex<dou
   sln2->set_quad_order(o);
 
 
-  std::complex<double> *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
-  std::complex<double> *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
-  std::complex<double> *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
-  std::complex<double> *vdx1  = sln2->get_dx_values(1), *vdy0  = sln2->get_dy_values(0);
+  Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
+  Scalar *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
+  Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
+  Scalar *vdx1  = sln2->get_dx_values(1), *vdy0  = sln2->get_dy_values(0);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i] - vval0[i]) + sqr(uval1[i] - vval1[i]) +
@@ -349,7 +352,8 @@ double Hermes2D<std::complex<double>>::error_fn_hc(MeshFunction<std::complex<dou
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D<std::complex<double>>::norm_fn_hc(MeshFunction<std::complex<double>>* sln, RefMap* ru) const
+template<typename Scalar>
+double Hermes2D<Scalar>::norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -358,8 +362,8 @@ double Hermes2D<std::complex<double>>::norm_fn_hc(MeshFunction<std::complex<doub
 
   sln->set_quad_order(o);
 
-  std::complex<double> *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
-  std::complex<double> *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
+  Scalar *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
+  Scalar *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i]) + sqr(uval1[i]) + sqr(udx1[i] - udy0[i]));
@@ -367,7 +371,8 @@ double Hermes2D<std::complex<double>>::norm_fn_hc(MeshFunction<std::complex<doub
 }
 
 // function used to calculate error in Hcurl norm
-double Hermes2D<std::complex<double>>::error_fn_hcl2(MeshFunction<std::complex<double>>* sln1, MeshFunction<std::complex<double>>* sln2, RefMap* ru, RefMap* rv) const
+template<typename Scalar>
+double Hermes2D<Scalar>::error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   Quad2D* quad = sln1->get_quad_2d();
 
@@ -378,8 +383,8 @@ double Hermes2D<std::complex<double>>::error_fn_hcl2(MeshFunction<std::complex<d
   sln2->set_quad_order(o);
 
 
-  std::complex<double> *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
-  std::complex<double> *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
+  Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
+  Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i] - vval0[i]) + sqr(uval1[i] - vval1[i]));
@@ -387,7 +392,8 @@ double Hermes2D<std::complex<double>>::error_fn_hcl2(MeshFunction<std::complex<d
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D<std::complex<double>>::norm_fn_hcl2(MeshFunction<std::complex<double>>* sln, RefMap* ru) const
+template<typename Scalar>
+double Hermes2D<Scalar>::norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   Quad2D* quad = sln->get_quad_2d();
 
@@ -396,8 +402,8 @@ double Hermes2D<std::complex<double>>::norm_fn_hcl2(MeshFunction<std::complex<do
 
   sln->set_quad_order(o);
 
-  std::complex<double> *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
-  std::complex<double> *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
+  Scalar *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
+  Scalar *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i]) + sqr(uval1[i]));
@@ -406,7 +412,8 @@ double Hermes2D<std::complex<double>>::norm_fn_hcl2(MeshFunction<std::complex<do
 
 //// Hdiv space ///////////////////////////////////////////////////////////////////////////////////
 // function used to calculate error in Hcurl norm
-double Hermes2D<std::complex<double>>::error_fn_hdiv(MeshFunction<std::complex<double>>* sln1, MeshFunction<std::complex<double>>* sln2, RefMap* ru, RefMap* rv) const
+template<typename Scalar>
+double Hermes2D<Scalar>::error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const
 {
   error("error_fn_hdiv() not implemented yet.");
 
@@ -420,10 +427,10 @@ double Hermes2D<std::complex<double>>::error_fn_hdiv(MeshFunction<std::complex<d
   sln2->set_quad_order(o);
 
 
-  std::complex<double> *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
-  std::complex<double> *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
-  std::complex<double> *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
-  std::complex<double> *vdx1  = sln2->get_dx_values(1), *vdy0  = sln2->get_dy_values(0);
+  Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
+  Scalar *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
+  Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
+  Scalar *vdx1  = sln2->get_dx_values(1), *vdy0  = sln2->get_dy_values(0);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i] - vval0[i]) + sqr(uval1[i] - vval1[i]) +
@@ -432,7 +439,8 @@ double Hermes2D<std::complex<double>>::error_fn_hdiv(MeshFunction<std::complex<d
 }
 
 // function used to calculate Hcurl norm
-double Hermes2D<std::complex<double>>::norm_fn_hdiv(MeshFunction<std::complex<double>>* sln, RefMap* ru) const
+template<typename Scalar>
+double Hermes2D<Scalar>::norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru) const
 {
   error("norm_fn_hdiv() not implemented yet.");
 
@@ -444,8 +452,8 @@ double Hermes2D<std::complex<double>>::norm_fn_hdiv(MeshFunction<std::complex<do
 
   sln->set_quad_order(o);
 
-  std::complex<double> *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
-  std::complex<double> *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
+  Scalar *uval0 = sln->get_fn_values(0), *uval1 = sln->get_fn_values(1);
+  Scalar *udx1  = sln->get_dx_values(1), *udy0  = sln->get_dy_values(0);
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i]) + sqr(uval1[i]) + sqr(udx1[i] - udy0[i]));

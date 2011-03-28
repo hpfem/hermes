@@ -57,7 +57,7 @@ public:
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
   // Multiplies matrix with a Scalar.
-  void multiply_with_Scalar(Scalar value);
+  void multiply_with_scalar(Scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).

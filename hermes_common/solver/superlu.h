@@ -162,7 +162,7 @@ public:
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
   // Multiplies matrix with a Scalar.
-  void multiply_with_Scalar(Scalar value);
+  void multiply_with_scalar(Scalar value);
   // Creates matrix using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
@@ -265,5 +265,12 @@ protected:
   #endif  
 #endif 
 };
+
+template class HERMES_API SuperLUMatrix<double>;
+template class HERMES_API SuperLUMatrix<std::complex<double>>;
+template class HERMES_API SuperLUVector<double>;
+template class HERMES_API SuperLUVector<std::complex<double>>;
+template class HERMES_API SuperLUSolver<double>;
+template class HERMES_API SuperLUSolver<std::complex<double>>;
 
 #endif

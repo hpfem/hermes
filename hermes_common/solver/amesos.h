@@ -57,4 +57,6 @@ protected:
   bool setup_factorization();
 };
 
+template class HERMES_API AmesosSolver<double>;
+template class HERMES_API AmesosSolver<std::complex<double>>;
 #endif

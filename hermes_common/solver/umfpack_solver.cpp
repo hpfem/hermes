@@ -94,7 +94,7 @@ void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_o
 }
 
 template<typename Scalar>
-void CSCMatrix<Scalar>::multiply_with_Scalar(Scalar value) 
+void CSCMatrix<Scalar>::multiply_with_scalar(Scalar value) 
 {
   for (unsigned int i = 0; i < this->nnz; i++) Ax[i] *= value;
 }
@@ -539,8 +539,8 @@ static void check_status(const char *fn_name, int status) {
 
 #endif
 
-template<typename Scalar>
-bool UMFPackLinearSolver<Scalar>::solve() {
+template<>
+bool UMFPackLinearSolver<double>::solve() {
   _F_
 #ifdef WITH_UMFPACK
   assert(m != NULL);
@@ -560,11 +560,10 @@ bool UMFPackLinearSolver<Scalar>::solve() {
 
   if(sln)
     delete [] sln;
-  sln = new Scalar[m->size];
+  sln = new double[m->size];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(Scalar));
-
-  status = umfpack_solve(UMFPACK_A, m->Ap, m->Ai, m->Ax, sln, rhs->v, numeric, NULL, NULL);
+  memset(sln, 0, m->size * sizeof(double));
+  status = umfpack_di_solve(UMFPACK_A, m->Ap, m->Ai, m->Ax, sln, rhs->v, numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
     check_status("umfpack_di_solve", status);
     return false;
@@ -579,8 +578,47 @@ bool UMFPackLinearSolver<Scalar>::solve() {
 #endif
 }
 
-template<typename Scalar>
-bool UMFPackLinearSolver<Scalar>::setup_factorization()
+template<>
+bool UMFPackLinearSolver<std::complex<double>>::solve() {
+  _F_
+#ifdef WITH_UMFPACK
+  assert(m != NULL);
+  assert(rhs != NULL);
+
+  assert(m->size == rhs->size);
+
+  TimePeriod tmr;
+
+  int status;
+
+  if ( !setup_factorization() )
+  {
+    warning("LU factorization could not be completed.");
+    return false;
+  }
+
+  if(sln)
+    delete [] sln;
+  sln = new std::complex<double>[m->size];
+  MEM_CHECK(sln);
+  memset(sln, 0, m->size * sizeof(std::complex<double>));
+  status = umfpack_zi_solve(UMFPACK_A, m->Ap, m->Ai, (double *)m->Ax, NULL, (double*) sln, NULL, (double *)rhs->v, NULL, numeric, NULL, NULL);
+  if (status != UMFPACK_OK) {
+    check_status("umfpack_di_solve", status);
+    return false;
+  }
+
+  tmr.tick();
+  time = tmr.accumulated();
+  
+  return true;
+#else
+  return false;
+#endif
+}
+
+template<>
+bool UMFPackLinearSolver<double>::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -598,7 +636,7 @@ bool UMFPackLinearSolver<Scalar>::setup_factorization()
       if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
       
       //debug_log("Factorizing symbolically.");
-      status = umfpack_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
+      status = umfpack_di_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_symbolic", status);
         return false;
@@ -610,7 +648,52 @@ bool UMFPackLinearSolver<Scalar>::setup_factorization()
       if (numeric != NULL) umfpack_free_numeric(&numeric);
       
       //debug_log("Factorizing numerically.");
-      status = umfpack_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+      status = umfpack_di_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_numeric", status);
+        return false;
+      }
+      if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+  }
+  
+  return true;
+#else
+  return false;
+#endif
+}
+
+template<>
+bool UMFPackLinearSolver<std::complex<double>>::setup_factorization()
+{
+  _F_
+#ifdef WITH_UMFPACK
+  // Perform both factorization phases for the first time.
+  int eff_fact_scheme;
+  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
+    eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+  else
+    eff_fact_scheme = factorization_scheme;
+  
+  int status;
+  switch(eff_fact_scheme)
+  {
+    case HERMES_FACTORIZE_FROM_SCRATCH:
+      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      
+      //debug_log("Factorizing symbolically.");
+      status = umfpack_zi_symbolic(m->size, m->size, m->Ap, m->Ai, (double *)m->Ax, NULL, &symbolic, NULL, NULL);
+      if (status != UMFPACK_OK) {
+        check_status("umfpack_di_symbolic", status);
+        return false;
+      }
+      if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
+      
+    case HERMES_REUSE_MATRIX_REORDERING:
+    case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
+      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      
+      //debug_log("Factorizing numerically.");
+      status = umfpack_zi_numeric(m->Ap, m->Ai, (double *) m->Ax, NULL, symbolic, &numeric, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_numeric", status);
         return false;
