@@ -655,3 +655,16 @@ void LinearFilter<Scalar>::set_active_element(Element* e)
     if (o > order) order = o;
   }
 }
+
+template class HERMES_API SimpleFilter<double>;
+template class HERMES_API SimpleFilter<std::complex<double>>;
+template class HERMES_API DXDYFilter<double>;
+template class HERMES_API DXDYFilter<std::complex<double>>;
+template class HERMES_API MagFilter<double>;
+template class HERMES_API MagFilter<std::complex<double>>;
+template class HERMES_API DiffFilter<double>;
+template class HERMES_API DiffFilter<std::complex<double>>;
+template class HERMES_API SumFilter<double>;
+template class HERMES_API SumFilter<std::complex<double>>;
+template class HERMES_API SquareFilter<double>;
+template class HERMES_API SquareFilter<std::complex<double>>;

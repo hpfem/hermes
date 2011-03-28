@@ -178,15 +178,4 @@ protected:
   int Ai_pos;
   int Ap_pos;
 };
-template class HERMES_API CSCMatrix<double>;
-template class HERMES_API CSCMatrix<std::complex<double>>;
-template class HERMES_API UMFPackMatrix<double>;
-template class HERMES_API UMFPackMatrix<std::complex<double>>;
-template class HERMES_API UMFPackVector<double>;
-template class HERMES_API UMFPackVector<std::complex<double>>;
-template class HERMES_API UMFPackLinearSolver<double>;
-template class HERMES_API UMFPackLinearSolver<std::complex<double>>;
-
-
-
 #endif

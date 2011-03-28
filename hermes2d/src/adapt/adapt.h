@@ -416,6 +416,4 @@ private:
   };
 };
 
-template HERMES_API class Adapt<double>;
-template HERMES_API class Adapt<std::complex<double>>;
 #endif

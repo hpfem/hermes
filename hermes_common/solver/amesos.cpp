@@ -179,3 +179,6 @@ bool AmesosSolver<Scalar>::setup_factorization()
   return false;
 #endif
 }
+
+template class HERMES_API AmesosSolver<double>;
+template class HERMES_API AmesosSolver<std::complex<double>>;

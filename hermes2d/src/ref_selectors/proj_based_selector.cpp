@@ -8,8 +8,6 @@
 #include "proj_based_selector.h"
 
 namespace RefinementSelectors {
-  template class ProjBasedSelector<double>;
-  template class ProjBasedSelector<std::complex<double>>;
 
   template<typename Scalar>
   ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
@@ -385,4 +383,6 @@ namespace RefinementSelectors {
     delete[] d;
   }
 
+  template class HERMES_API ProjBasedSelector<double>;
+  template class HERMES_API ProjBasedSelector<std::complex<double>>;
 }

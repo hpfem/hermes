@@ -85,6 +85,4 @@ public:
 
 
 #endif // NOGLUT
-  template class HERMES_API OrderView<double>;
-  template class HERMES_API OrderView<std::complex<double>>;
 #endif

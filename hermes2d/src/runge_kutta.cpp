@@ -441,3 +441,5 @@ void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
     running_space_ndofs += dp->get_space(space_i)->get_num_dofs();
   }
 }
+template class HERMES_API RungeKutta<double>;
+template class HERMES_API RungeKutta<std::complex<double>>;

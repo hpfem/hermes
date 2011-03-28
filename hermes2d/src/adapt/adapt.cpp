@@ -31,9 +31,6 @@
 
 using namespace std;
 
-template class Adapt<double>;
-template class Adapt<std::complex<double>>;
-
 template<typename Scalar>
 Adapt<Scalar>::Adapt(Hermes::vector<Space<Scalar>*> spaces,
              Hermes::vector<ProjNormType> proj_norms) :
@@ -878,3 +875,6 @@ void Adapt<Scalar>::fill_regular_queue(Mesh** meshes) {
   //sort
   std::sort(regular_queue.begin(), regular_queue.end(), CompareElements(errors));
 }
+
+template HERMES_API class Adapt<double>;
+template HERMES_API class Adapt<std::complex<double>>;

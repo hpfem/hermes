@@ -296,19 +296,4 @@ public:
   std::set<unsigned> seq_set;
   std::set<MeshFunction<Scalar>*> ext_set;
 };
-
-template class HERMES_API WeakForm<double>;
-template class HERMES_API WeakForm<std::complex<double>>;
-template class HERMES_API Form<double>;
-template class HERMES_API Form<std::complex<double>>;
-template class HERMES_API MatrixFormVol<double>;
-template class HERMES_API MatrixFormVol<std::complex<double>>;
-template class HERMES_API MatrixFormSurf<double>;
-template class HERMES_API MatrixFormSurf<std::complex<double>>;
-template class HERMES_API VectorFormVol<double>;
-template class HERMES_API VectorFormVol<std::complex<double>>;
-template class HERMES_API VectorFormSurf<double>;
-template class HERMES_API VectorFormSurf<std::complex<double>>;
-template class HERMES_API Stage<double>;
-template class HERMES_API Stage<std::complex<double>>;
 #endif

@@ -7,8 +7,6 @@
 
 namespace RefinementSelectors {
 
-  template class H1ProjBasedSelector<double>;
-  template class H1ProjBasedSelector<std::complex<double>>;
 
   template<typename Scalar>
   H1Shapeset H1ProjBasedSelector<Scalar>::default_shapeset;
@@ -296,5 +294,8 @@ namespace RefinementSelectors {
     }
     return total_error_squared;
   }
+  
+  template class HERMES_API H1ProjBasedSelector<double>;
+  template class HERMES_API H1ProjBasedSelector<std::complex<double>>;
 }
 

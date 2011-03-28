@@ -186,19 +186,6 @@ protected:
   virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
-template class HERMES_API SimpleFilter<double>;
-template class HERMES_API SimpleFilter<std::complex<double>>;
-template class HERMES_API DXDYFilter<double>;
-template class HERMES_API DXDYFilter<std::complex<double>>;
-template class HERMES_API MagFilter<double>;
-template class HERMES_API MagFilter<std::complex<double>>;
-template class HERMES_API DiffFilter<double>;
-template class HERMES_API DiffFilter<std::complex<double>>;
-template class HERMES_API SumFilter<double>;
-template class HERMES_API SumFilter<std::complex<double>>;
-template class HERMES_API SquareFilter<double>;
-template class HERMES_API SquareFilter<std::complex<double>>;
-
 /// Removes the imaginary part from a function.
 class HERMES_API RealFilter : public SimpleFilter<std::complex<double>>
 {

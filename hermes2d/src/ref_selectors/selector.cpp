@@ -66,4 +66,11 @@ namespace RefinementSelectors {
       tgt_quad_orders[i] = 0;
 #endif
   }
+  
+  template class HERMES_API Selector<double>;
+  template class HERMES_API Selector<std::complex<double>>;
+  template class HERMES_API HOnlySelector<double>;
+  template class HERMES_API HOnlySelector<std::complex<double>>;
+  template class HERMES_API POnlySelector<double>;
+  template class HERMES_API POnlySelector<std::complex<double>>;
 }

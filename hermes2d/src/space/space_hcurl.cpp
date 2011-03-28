@@ -20,9 +20,6 @@
 #include "../shapeset/shapeset_hc_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-template class HcurlSpace<double>;
-template class HcurlSpace<std::complex<double>>;
-
 template<typename Scalar>
 double** HcurlSpace<Scalar>::hcurl_proj_mat = NULL;
 template<typename Scalar>
@@ -391,3 +388,6 @@ void HcurlSpace<Scalar>::update_constraints()
   for_all_base_elements(e, mesh)
     update_constrained_nodes(e, NULL, NULL, NULL, NULL);
 }
+
+template class HERMES_API HcurlSpace<double>;
+template class HERMES_API HcurlSpace<std::complex<double>>;

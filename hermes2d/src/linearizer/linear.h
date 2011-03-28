@@ -213,6 +213,7 @@ public:
   ~Vectorizer();
 
   void process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps);
+  void process_solution(MeshFunction<std::complex<double>>* xsln, int xitem, MeshFunction<std::complex<double>>* ysln, int yitem, double eps) { error("Not implemented yet.");}
 
 public: //accessors
   double4* get_vertices() const { return verts; }

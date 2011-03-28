@@ -179,3 +179,5 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
 
   project_internal(spaces, proj_wf, target_vec, matrix_solver);
 }
+template class HERMES_API OGProjection<double>;
+template class HERMES_API OGProjection<std::complex<double>>;

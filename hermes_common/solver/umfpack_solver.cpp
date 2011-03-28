@@ -32,6 +32,8 @@
 #include "../utils.h"
 #include "../callstack.h"
 
+
+
 static int find_position(int *Ai, int Alen, int idx) {
   _F_
   assert (Ai != NULL);
@@ -760,17 +762,11 @@ void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
 {
   this->Ax[this->Ai_pos] += val;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+template class HERMES_API CSCMatrix<double>;
+template class HERMES_API CSCMatrix<std::complex<double>>;
+template class HERMES_API UMFPackMatrix<double>;
+template class HERMES_API UMFPackMatrix<std::complex<double>>;
+template class HERMES_API UMFPackVector<double>;
+template class HERMES_API UMFPackVector<std::complex<double>>;
+template class HERMES_API UMFPackLinearSolver<double>;
+template class HERMES_API UMFPackLinearSolver<std::complex<double>>;

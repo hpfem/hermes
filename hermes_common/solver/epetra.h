@@ -123,8 +123,5 @@ protected:
   friend class AztecOOSolver<Scalar>;
   friend class NoxSolver<Scalar>;
 };
-template class HERMES_API EpetraMatrix<double>;
-template class HERMES_API EpetraMatrix<std::complex<double>>;
-template class HERMES_API EpetraVector<double>;
-template class HERMES_API EpetraVector<std::complex<double>>;
+
 #endif

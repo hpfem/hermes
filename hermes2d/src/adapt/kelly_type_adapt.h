@@ -94,7 +94,7 @@ public:
   };
 
   protected:  
-    DiscreteProblem dp; // Only needed for gaining access to NeighborSearch methods.
+    DiscreteProblem<Scalar> dp; // Only needed for gaining access to NeighborSearch methods.
 
     ///
     /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
@@ -287,10 +287,10 @@ public:
 
   private:
     template<typename real, typename scalar>
-    static Scalar original_kelly_interface_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
+    static scalar original_kelly_interface_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
                                                      Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0.;
+      scalar result = 0.;
       for (int i = 0; i < n; i++)
         result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
                                e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );

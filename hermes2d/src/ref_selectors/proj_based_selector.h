@@ -346,8 +346,6 @@ namespace RefinementSelectors {
     virtual double evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) = 0;
   };
 
-  template class HERMES_API ProjBasedSelector<double>;
-  template class HERMES_API ProjBasedSelector<std::complex<double>>;
 }
 
 #endif

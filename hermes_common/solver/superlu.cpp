@@ -1160,3 +1160,10 @@ void slu_mt_solver_driver(slu_options_t *options, SuperMatrix<Scalar> *A,
     SLU_QUERY_SPACE(options->nprocs, L, U, options->panel_size, memusage);
 }
 #endif
+
+template class HERMES_API SuperLUMatrix<double>;
+template class HERMES_API SuperLUMatrix<std::complex<double>>;
+template class HERMES_API SuperLUVector<double>;
+template class HERMES_API SuperLUVector<std::complex<double>>;
+template class HERMES_API SuperLUSolver<double>;
+template class HERMES_API SuperLUSolver<std::complex<double>>;

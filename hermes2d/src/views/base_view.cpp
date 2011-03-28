@@ -55,7 +55,7 @@ void BaseView<Scalar>::show(const Space<Scalar>* space, double eps, int item)
   int order_increase = 0;
   this->space = space->dup(space->get_mesh(), order_increase);
   pss = new PrecalcShapeset(this->space->get_shapeset());
-  sln = new Solution();
+  sln = new Solution<Scalar>();
   ndof = this->space->get_num_dofs();
   base_index = 0;
   this->eps = eps;
@@ -74,19 +74,19 @@ void BaseView<Scalar>::free()
 template<typename Scalar>
 void BaseView<Scalar>::update_solution()
 {
-  scalar* coeffs = new scalar[ndof];
-  memset(coeffs, 0, sizeof(scalar) * ndof);
+  Scalar* coeffs = new Scalar[ndof];
+  memset(coeffs, 0, sizeof(Scalar) * ndof);
   if (base_index >= 0)
   {
     if (base_index < ndof) coeffs[base_index] = 1.0;
-    Solution::vector_to_solution(coeffs, space, sln, pss, false);
+    Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss, false);
   }
   else
   {
-    Solution::vector_to_solution(coeffs, space, sln, pss, true);
+    Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss, true);
   }
 
-  ScalarView::show(sln, eps, item);
+  ScalarView<Scalar>::show(sln, eps, item);
   update_title();
 
   delete [] coeffs;
@@ -151,3 +151,6 @@ const char* BaseView<Scalar>::get_help_text() const
 }
 
 #endif // NOGLUT
+
+template class HERMES_API BaseView<double>;
+template class HERMES_API BaseView<std::complex<double>>;

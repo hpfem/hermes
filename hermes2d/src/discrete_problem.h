@@ -598,9 +598,8 @@ protected:
     LightArray<Func<Ord>*> cache_fn_ord;
   };
   AssemblingCaches assembling_caches;
-};
 
-template class HERMES_API DiscreteProblem<double>;
-template class HERMES_API DiscreteProblem<std::complex<double>>;
+  friend class KellyTypeAdapt<Scalar>;
+};
 
 #endif

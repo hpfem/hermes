@@ -141,14 +141,5 @@ private:
   void create_marker_cache();
 };
 
-template HERMES_API class EssentialBoundaryCondition<double>;
-template HERMES_API class EssentialBoundaryCondition<std::complex<double>>;
-template HERMES_API class DefaultEssentialBCConst<double>;
-template HERMES_API class DefaultEssentialBCConst<std::complex<double>>;
-template HERMES_API class DefaultEssentialBCNonConst<double>;
-template HERMES_API class DefaultEssentialBCNonConst<std::complex<double>>;
-template HERMES_API class EssentialBCs<double>;
-template HERMES_API class EssentialBCs<std::complex<double>>;
-
 #endif
 

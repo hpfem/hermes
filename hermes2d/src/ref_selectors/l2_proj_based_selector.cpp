@@ -6,8 +6,6 @@
 #include "l2_proj_based_selector.h"
 
 namespace RefinementSelectors {
-  template class L2ProjBasedSelector<double>;
-  template class L2ProjBasedSelector<std::complex<double>>;
 
   template<typename Scalar>
   L2Shapeset L2ProjBasedSelector<Scalar>::default_shapeset;
@@ -246,5 +244,6 @@ namespace RefinementSelectors {
     }
     return total_error_squared;
   }
+  template class HERMES_API L2ProjBasedSelector<double>;
+  template class HERMES_API L2ProjBasedSelector<std::complex<double>>;
 }
-

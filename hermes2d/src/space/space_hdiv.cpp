@@ -20,9 +20,6 @@
 #include "../shapeset/shapeset_hd_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-template class HdivSpace<double>;
-template class HdivSpace<std::complex<double>>;
-
 template<typename Scalar>
 double** HdivSpace<Scalar>::hdiv_proj_mat = NULL;
 template<typename Scalar>
@@ -389,3 +386,6 @@ void HdivSpace<Scalar>::update_constraints()
   for_all_base_elements(e, mesh)
     update_constrained_nodes(e, NULL, NULL, NULL, NULL);
 }
+
+template HERMES_API class HdivSpace<double>;
+template HERMES_API class HdivSpace<std::complex<double>>;

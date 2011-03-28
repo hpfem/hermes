@@ -301,9 +301,6 @@ protected:
 #undef check_params
 #undef check_table
 
-template class Function<double>;
-template class Function<std::complex<double>>;
-
 //// implementation of non-inline template members /////////////////////////////////////////////////
 template<typename Scalar>
 Function<Scalar>::Function()
@@ -388,5 +385,8 @@ typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_po
 
 
 #undef H2D_Node_HRD_SIZE
+
+template class HERMES_API Function<double>;
+template class HERMES_API Function<std::complex<double>>;
 
 #endif

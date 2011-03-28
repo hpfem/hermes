@@ -72,9 +72,4 @@ protected:
   virtual void update_constraints();
 
 };
-
-template class HERMES_API HdivSpace<double>;
-template class HERMES_API HdivSpace<std::complex<double>>;
-
-
 #endif

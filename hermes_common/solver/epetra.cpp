@@ -22,7 +22,6 @@
 #include "../callstack.h"
 
 // EpetraMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
-
 #ifdef HAVE_EPETRA
   // A communicator for Epetra objects (serial version)
   static Epetra_SerialComm seq_comm;
@@ -409,3 +408,7 @@ bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFor
   _F_
   return false;
 }
+template class HERMES_API EpetraMatrix<double>;
+template class HERMES_API EpetraMatrix<std::complex<double>>;
+template class HERMES_API EpetraVector<double>;
+template class HERMES_API EpetraVector<std::complex<double>>;

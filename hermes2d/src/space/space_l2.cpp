@@ -20,9 +20,6 @@
 #include "../shapeset/shapeset_l2_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-template class L2Space<double>;
-template class L2Space<std::complex<double>>;
-
 template<typename Scalar>
 void L2Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 {
@@ -235,3 +232,6 @@ Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 
   return proj;
 }
+
+template HERMES_API class L2Space<double>;
+template HERMES_API class L2Space<std::complex<double>>;

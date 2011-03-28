@@ -85,7 +85,5 @@ protected:
 #endif
 };
 
-template class HERMES_API AztecOOSolver<double>;
-template class HERMES_API AztecOOSolver<std::complex<double>>;
 
 #endif

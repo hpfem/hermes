@@ -20,17 +20,11 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-template class H1Space<double>;
-template class H1Space<std::complex<double>>;
 
-template<typename Scalar>
-double** H1Space<Scalar>::h1_proj_mat = NULL;
-template<typename Scalar>
-double*  H1Space<Scalar>::h1_chol_p   = NULL;
-template<typename Scalar>
-int      H1Space<Scalar>::h1_proj_ref = 0;
-
-template<typename Scalar>
+template<typename Scalar> double** H1Space<Scalar>::h1_proj_mat = NULL;
+template<typename Scalar> double*  H1Space<Scalar>::h1_chol_p   = NULL;
+template<typename Scalar> int      H1Space<Scalar>::h1_proj_ref = 0;
+template<typename Scalar> 
 void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
@@ -638,3 +632,5 @@ void H1Space<Scalar>::post_assign()
   }
 }
 
+template HERMES_API class H1Space<double>;
+template HERMES_API class H1Space<std::complex<double>>;

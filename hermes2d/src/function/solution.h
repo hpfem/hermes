@@ -321,14 +321,4 @@ public:
   // should be used when integrating the function.
   virtual Ord ord(Ord x, Ord y) const = 0;
 };
-
-template class HERMES_API MeshFunction<double>;
-template class HERMES_API MeshFunction<std::complex<double>>;
-template class HERMES_API Solution<double>;
-template class HERMES_API Solution<std::complex<double>>;
-template class HERMES_API ExactSolutionScalar<double>;
-template class HERMES_API ExactSolutionScalar<std::complex<double>>;
-template class HERMES_API ExactSolutionVector<double>;
-template class HERMES_API ExactSolutionVector<std::complex<double>>;
-
 #endif

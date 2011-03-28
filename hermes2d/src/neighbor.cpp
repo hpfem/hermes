@@ -1,6 +1,4 @@
 #include "hermes2d.h"
-template class NeighborSearch<double>;
-template class NeighborSearch<std::complex<double>>;
 
 template<typename Scalar>
 NeighborSearch<Scalar>::NeighborSearch(Element* el, Mesh* mesh) :
@@ -793,3 +791,6 @@ void NeighborSearch<Scalar>::ExtendedShapeset::combine_assembly_lists()
   memcpy(dof, central_al->dof, sizeof(int)*central_al->cnt);
   memcpy(dof + central_al->cnt, neighbor_al->dof, sizeof(int)*neighbor_al->cnt);
 }
+
+template class HERMES_API NeighborSearch<double>;
+template class HERMES_API NeighborSearch<std::complex<double>>;

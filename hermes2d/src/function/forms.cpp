@@ -310,9 +310,6 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 }
 
 /// Preparation of mesh functions.
-template Func<double>* init_fn(MeshFunction<double>*fu, const int order);
-template Func<std::complex<double>>* init_fn(MeshFunction<std::complex<double>>*fu, const int order);
-
 template<typename Scalar>
 Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
 {
@@ -354,9 +351,6 @@ Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
   }
   return u;
 }
-
-template Func<double>* init_fn(Solution<double>*fu, const int order);
-template Func<std::complex<double>>* init_fn(Solution<std::complex<double>>*fu, const int order);
 
 /// Preparation of solutions.
 template<typename Scalar>
@@ -426,3 +420,8 @@ Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order)
   return u;
 }
 
+template Func<double>* init_fn(MeshFunction<double>*fu, const int order);
+template Func<std::complex<double>>* init_fn(MeshFunction<std::complex<double>>*fu, const int order);
+
+template HERMES_API Func<double>* init_fn(Solution<double>*fu, const int order);
+template HERMES_API Func<std::complex<double>>* init_fn(Solution<std::complex<double>>*fu, const int order);

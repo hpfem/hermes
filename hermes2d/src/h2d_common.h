@@ -52,7 +52,9 @@ class RefMap;
 template<typename Scalar> class DiscreteProblem;
 template<typename Scalar> class Space;
 template<typename Scalar> class WeakForm;
-
+class Quad2D;
+class Quad1DStd;
+class Quad2DStd;
 // Class for all global functions.
 template<typename Scalar>
 class HERMES_API Hermes2D {
@@ -118,8 +120,6 @@ public:
        int picard_max_iter, bool verbose) const;
 };
 
-template class HERMES_API Hermes2D<double>;
-template class HERMES_API Hermes2D<std::complex<double>>;
 
 #endif
 

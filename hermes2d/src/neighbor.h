@@ -416,9 +416,7 @@ public:
   bool ignore_errors;
 
   friend class DiscreteProblem<Scalar>;
+  friend class KellyTypeAdapt<Scalar>;
   friend class DiscontinuityDetector;
 };
-
-template class HERMES_API NeighborSearch<double>;
-template class HERMES_API NeighborSearch<std::complex<double>>;
 #endif /* NEIGHBOR_H_ */

@@ -756,3 +756,10 @@ bool MumpsSolver<Scalar>::setup_factorization()
   return false;
 #endif
 }
+
+template class HERMES_API MumpsMatrix<double>;
+template class HERMES_API MumpsMatrix<std::complex<double>>;
+template class HERMES_API MumpsVector<double>;
+template class HERMES_API MumpsVector<std::complex<double>>;
+template class HERMES_API MumpsSolver<double>;
+template class HERMES_API MumpsSolver<std::complex<double>>;

@@ -158,3 +158,12 @@ void EssentialBCs<Scalar>::set_current_time(double time) {
   for(iterator = begin(); iterator != end(); iterator++)
     (*iterator)->set_current_time(time);
 };
+
+template HERMES_API class EssentialBoundaryCondition<double>;
+template HERMES_API class EssentialBoundaryCondition<std::complex<double>>;
+template HERMES_API class DefaultEssentialBCConst<double>;
+template HERMES_API class DefaultEssentialBCConst<std::complex<double>>;
+template HERMES_API class DefaultEssentialBCNonConst<double>;
+template HERMES_API class DefaultEssentialBCNonConst<std::complex<double>>;
+template HERMES_API class EssentialBCs<double>;
+template HERMES_API class EssentialBCs<std::complex<double>>;

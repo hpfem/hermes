@@ -173,7 +173,5 @@ protected:
   // Number of previous calls to rk_time_step().
   unsigned int iteration;
 };
-template class HERMES_API RungeKutta<double>;
-template class HERMES_API RungeKutta<std::complex<double>>;
 
 #endif

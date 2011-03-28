@@ -268,7 +268,6 @@ protected: //debugging support
   double** proj_mat;
   double*  chol_p;
 
-  void copy_callbacks(const Space<Scalar>* space);
   void precalculate_projection_matrix(int nv, double**& mat, double*& p);
   virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
   void update_edge_bc(Element* e, SurfPos* surf_pos);
@@ -304,9 +303,6 @@ public:
   static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);  // multiple spaces
   static void update_essential_bc_values(Space<Scalar>*s, double time);    // one space
 };
-
-template class HERMES_API Space<double>;
-template class HERMES_API Space<std::complex<double>>;
 
 class Ord2
 {

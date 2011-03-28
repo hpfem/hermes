@@ -504,3 +504,10 @@ bool PetscLinearSolver<Scalar>::solve() {
   return false;
 #endif
 }
+
+template class HERMES_API PetscMatrix<double>;
+template class HERMES_API PetscMatrix<std::complex<double>>;
+template class HERMES_API PetscVector<double>;
+template class HERMES_API PetscVector<std::complex<double>>;
+template class HERMES_API PetscLinearSolver<double>;
+template class HERMES_API PetscLinearSolver<std::complex<double>>;

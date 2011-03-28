@@ -1838,6 +1838,7 @@ const char* ScalarView<Scalar>::get_help_text() const
   "  * - increase Z scale\n"
   "  / - decrease Z scale";
 }
-
+template class HERMES_API ScalarView<double>;
+template class HERMES_API ScalarView<std::complex<double>>;
 
 #endif // NOGLUT

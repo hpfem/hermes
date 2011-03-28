@@ -80,7 +80,4 @@ protected:
 
 };
 
-template class HERMES_API HcurlSpace<double>;
-template class HERMES_API HcurlSpace<std::complex<double>>;
-
 #endif

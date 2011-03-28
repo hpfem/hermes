@@ -77,7 +77,4 @@ protected:
 
 };
 
-template class HERMES_API L2Space<double>;
-template class HERMES_API L2Space<std::complex<double>>;
-
 #endif

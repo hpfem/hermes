@@ -99,7 +99,4 @@ protected:
 
 };
 
-template class HERMES_API H1Space<double>;
-template class HERMES_API H1Space<std::complex<double>>;
-
 #endif

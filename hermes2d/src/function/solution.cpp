@@ -21,8 +21,6 @@
 
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 
-template class MeshFunction<double>;
-template class MeshFunction<std::complex<double>>;
 
 template<typename Scalar>
 MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
@@ -188,8 +186,6 @@ public:
 //  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
 //   'n' is the polynomial degree.)
 //
-template class Solution<double>;
-template class Solution<std::complex<double>>;
 
 template<typename Scalar>
 void Solution<Scalar>::init()
@@ -1561,3 +1557,12 @@ unsigned int ExactSolutionVector<Scalar>::get_dimension() const
 {
   return 2;
 }
+
+template HERMES_API class MeshFunction<double>;
+template HERMES_API class MeshFunction<std::complex<double>>;
+template HERMES_API class Solution<double>;
+template HERMES_API class Solution<std::complex<double>>;
+template HERMES_API class ExactSolutionScalar<double>;
+template HERMES_API class ExactSolutionScalar<std::complex<double>>;
+template HERMES_API class ExactSolutionVector<double>;
+template HERMES_API class ExactSolutionVector<std::complex<double>>;

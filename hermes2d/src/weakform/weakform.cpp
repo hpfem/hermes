@@ -19,21 +19,6 @@
 #include "../function/forms.h"
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
-template class WeakForm<double>;
-template class WeakForm<std::complex<double>>;
-template class Form<double>;
-template class Form<std::complex<double>>;
-template class MatrixFormVol<double>;
-template class MatrixFormVol<std::complex<double>>;
-template class VectorFormVol<double>;
-template class VectorFormVol<std::complex<double>>;
-template class MatrixFormSurf<double>;
-template class MatrixFormSurf<std::complex<double>>;
-template class VectorFormSurf<double>;
-template class VectorFormSurf<std::complex<double>>;
-template class Stage<double>;
-template class Stage<std::complex<double>>;
-
 template<typename Scalar>
 Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param, 
                      double scaling_factor, int u_ext_offset) :
@@ -427,3 +412,18 @@ double WeakForm<Scalar>::get_current_time()
 {
   return current_time;
 }
+
+template class HERMES_API WeakForm<double>;
+template class HERMES_API WeakForm<std::complex<double>>;
+template class HERMES_API Form<double>;
+template class HERMES_API Form<std::complex<double>>;
+template class HERMES_API MatrixFormVol<double>;
+template class HERMES_API MatrixFormVol<std::complex<double>>;
+template class HERMES_API MatrixFormSurf<double>;
+template class HERMES_API MatrixFormSurf<std::complex<double>>;
+template class HERMES_API VectorFormVol<double>;
+template class HERMES_API VectorFormVol<std::complex<double>>;
+template class HERMES_API VectorFormSurf<double>;
+template class HERMES_API VectorFormSurf<std::complex<double>>;
+template class HERMES_API Stage<double>;
+template class HERMES_API Stage<std::complex<double>>;

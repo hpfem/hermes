@@ -199,3 +199,5 @@ double AztecOOSolver<Scalar>::get_residual()
 #endif
 }
 
+template class HERMES_API AztecOOSolver<double>;
+template class HERMES_API AztecOOSolver<std::complex<double>>;

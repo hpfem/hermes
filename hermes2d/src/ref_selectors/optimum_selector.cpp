@@ -51,9 +51,6 @@ namespace RefinementSelectors {
     }
   }
 
-  template class OptimumSelector<double>;
-  template class OptimumSelector<std::complex<double>>;
-
   template<typename Scalar>
   OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
@@ -626,4 +623,6 @@ namespace RefinementSelectors {
     }
   }
 
+  template class HERMES_API OptimumSelector<double>;
+  template class HERMES_API OptimumSelector<std::complex<double>>;
 }

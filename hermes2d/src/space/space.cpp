@@ -18,9 +18,6 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-template class Space<double>;
-template class Space<std::complex<double>>;
-
 template<typename Scalar>
 Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
@@ -726,3 +723,5 @@ void Space<Scalar>::update_essential_bc_values(Space<Scalar>*s, double time) {
   s->update_essential_bc_values();
 }
 
+template HERMES_API class Space<double>;
+template HERMES_API class Space<std::complex<double>>;

@@ -19,9 +19,11 @@
 #include "../h2d_common.h"
 #include "curved.h"
 
+
 struct Element;
 class HashTable;
 template<typename Scalar> class Space;
+template<typename Scalar> class KellyTypeAdapt;
 struct MItem;
 
 /// \brief Stores one node of a mesh.
@@ -393,6 +395,8 @@ protected:
   friend class WeakForm<std::complex<double>>;
   friend class Space<double>;
   friend class Space<std::complex<double>>;
+  friend class KellyTypeAdapt<double>;
+  friend class KellyTypeAdapt<std::complex<double>>;
 
 public:
   ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };

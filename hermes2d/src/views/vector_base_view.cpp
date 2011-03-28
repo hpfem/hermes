@@ -30,7 +30,7 @@ void VectorBaseView<Scalar>::show(Space<Scalar>* space)
 {
   free();
   pss = new PrecalcShapeset(space->get_shapeset());
-  sln = new Solution();
+  sln = new Solution<Scalar>();
   this->space = space;
   ndof = space->get_num_dofs();
   base_index = 0;
@@ -49,11 +49,11 @@ void VectorBaseView<Scalar>::free()
 template<typename Scalar>
 void VectorBaseView<Scalar>::update_solution()
 {
-  scalar* coeffs = new scalar[ndof + 1];
-  memset(coeffs, 0, sizeof(scalar) * (ndof + 1));
+  Scalar* coeffs = new Scalar[ndof + 1];
+  memset(coeffs, 0, sizeof(Scalar) * (ndof + 1));
   if (base_index >= -1 && base_index < ndof)
     coeffs[base_index + 1] = 1.0;
-  Solution::vector_to_solution(coeffs, space, sln, pss);
+  Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss);
 
   VectorView::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
   update_title();
@@ -116,3 +116,6 @@ const char* VectorBaseView<Scalar>::get_help_text() const
 }
 
 #endif // NOGLUT
+
+template class HERMES_API VectorBaseView<double>;
+template class HERMES_API VectorBaseView<std::complex<double>>;

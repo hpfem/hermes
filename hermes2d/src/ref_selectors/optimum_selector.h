@@ -337,9 +337,6 @@ namespace RefinementSelectors {
     /** Overriden function. For details, see Selector::generate_shared_mesh_orders(). */
     virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders); ///< Updates orders of a refinement in another multimesh component which shares a mesh.
   };
-
-  template class HERMES_API OptimumSelector<double>;
-  template class HERMES_API OptimumSelector<std::complex<double>>;
 }
 
 

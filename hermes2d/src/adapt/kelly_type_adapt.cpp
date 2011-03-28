@@ -50,8 +50,8 @@ KellyTypeAdapt<Scalar>::KellyTypeAdapt(Space<Scalar>* space_,
 template<typename Scalar>
 bool KellyTypeAdapt<Scalar>::adapt(double thr, int strat, int regularize, double to_be_processed)
 {
-  Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
-  RefinementSelectors::HOnlySelector selector;
+  Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
+  RefinementSelectors::HOnlySelector<Scalar> selector;
   for (int i = 0; i < this->num; i++)
     refinement_selectors.push_back(&selector);
 
@@ -97,7 +97,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
 
   have_coarse_solutions = true;
   
-  WeakForm::Stage stage;
+  Stage<Scalar> stage;
 
   num_act_elems = 0;
   for (int i = 0; i < num; i++)
@@ -221,9 +221,9 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
             
             // 5 is for bits per page in the array.
-            LightArray<NeighborSearch*> neighbor_searches(5);
+            LightArray<NeighborSearch<Scalar>*> neighbor_searches(5);
             unsigned int num_neighbors = 0;
-            DiscreteProblem::NeighborNode* root;
+            NeighborNode* root;
             int ns_index;
             
             dp.min_dg_mesh_seq = 0;
@@ -240,7 +240,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
               dp.init_neighbors(neighbor_searches, stage, isurf);
               
               // Create a multimesh tree;
-              root = new DiscreteProblem::NeighborNode(NULL, 0);
+              root = new NeighborNode(NULL, 0);
               dp.build_multimesh_tree(root, neighbor_searches);
               
               // Update all NeighborSearches according to the multimesh tree.
@@ -250,7 +250,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
               // Also check that every NeighborSearch has the same number of neighbor elements.
               for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
                 if(neighbor_searches.present(j)) {
-                  NeighborSearch* ns = neighbor_searches.get(j);
+                  NeighborSearch<Scalar>* ns = neighbor_searches.get(j);
                   dp.update_neighbor_search(ns, root);
                   if(num_neighbors == 0)
                     num_neighbors = ns->n_neighbors;
@@ -260,7 +260,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
             }
             else
             {
-              NeighborSearch *ns = new NeighborSearch(ee[i], stage.meshes[i]);
+              NeighborSearch<Scalar> *ns = new NeighborSearch<Scalar>(ee[i], stage.meshes[i]);
               ns->original_central_el_transform = stage.fns[i]->get_transform();
               ns->set_active_edge(isurf);
               ns->clear_initial_sub_idx();
@@ -485,8 +485,8 @@ double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt::MatrixFormVolE
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* u = init_fn(sln, order);
-  scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
+  Func<Scalar>* u = init_fn(sln, order);
+  Scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -536,14 +536,14 @@ double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>** ui = new Func<scalar>* [num];
+  Func<Scalar>** ui = new Func<Scalar>* [num];
   
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], order);
   
-  ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
+  ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
 
-  scalar res = volumetric_scaling_const *
+  Scalar res = volumetric_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
@@ -597,12 +597,12 @@ double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<S
     jwt[i] = pt[i][2] * tan[i][2];
 
   // function values
-  Func<scalar>** ui = new Func<scalar>* [num];
+  Func<Scalar>** ui = new Func<Scalar>* [num];
   for (int i = 0; i < num; i++)
     ui[i] = init_fn(this->sln[i], eo);
-  ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
+  ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
 
-  scalar res = boundary_scaling_const *
+  Scalar res = boundary_scaling_const *
                 err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
   for (int i = 0; i < this->num; i++)
@@ -622,7 +622,7 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
                                                 RefMap *rm, SurfPos* surf_pos,
                                                 LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index)
 {
-  NeighborSearch* nbs = neighbor_searches.get(neighbor_index);
+  NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
   Hermes::vector<MeshFunction<Scalar>*> slns;
   for (int i = 0; i < num; i++)
     slns.push_back(this->sln[i]);
@@ -673,10 +673,10 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
                                               nbs->neighb_el->get_diameter());
     
   // function values
-  ExtData<scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
-  //ExtData<scalar>* ext = dp.init_ext_fns(err_est_form->ext, nbs);
+  ExtData<Scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
+  //ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, nbs);
 
-  scalar res = interface_scaling_const *
+  Scalar res = interface_scaling_const *
                 err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
   if (ui != NULL) { ui->free(); delete ui; }
@@ -690,3 +690,7 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
 }
 
 // #endif
+template class HERMES_API KellyTypeAdapt<double>;
+template class HERMES_API KellyTypeAdapt<std::complex<double>>;
+template class HERMES_API BasicKellyAdapt<double>;
+template class HERMES_API BasicKellyAdapt<std::complex<double>>;
