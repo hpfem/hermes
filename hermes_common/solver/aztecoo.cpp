@@ -27,7 +27,7 @@
 
 template<typename Scalar>
 AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-  : IterSolver<Scalar>(), m(m), rhs(rhs)
+  : IterSolver(), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AZTECOO

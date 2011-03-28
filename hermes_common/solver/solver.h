@@ -116,7 +116,7 @@ class LinearSolver : public Solver<Scalar>
 {
   public:
     LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
-      : Solver(), factorization_scheme(factorization_scheme) {};
+      : Solver<Scalar>(), factorization_scheme(factorization_scheme) {};
     
   protected:
     virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { 
@@ -132,8 +132,8 @@ template <typename Scalar>
 class NonlinearSolver : public Solver<Scalar> 
 {
   public:
-    NonlinearSolver() : Solver() { dp = NULL; }
-    NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver() { this->dp = dp; }
+    NonlinearSolver() : Solver<Scalar>() { dp = NULL; }
+    NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver<Scalar>() { this->dp = dp; }
     
   protected:
     DiscreteProblemInterface<Scalar>* dp; // FE problem being solved (not NULL in case of using
@@ -146,7 +146,7 @@ template <typename Scalar>
 class IterSolver : public Solver<Scalar>
 {
   public:
-    IterSolver() : Solver(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
+    IterSolver() : Solver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
     
     virtual int get_num_iters() = 0;
     virtual double get_residual() = 0;
@@ -162,7 +162,7 @@ class IterSolver : public Solver<Scalar>
     #ifdef HAVE_TEUCHOS
       virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc) = 0;
     #else
-      virtual void set_precond(Precond *pc) = 0;
+      virtual void set_precond(Precond<Scalar> *pc) = 0;
     #endif            
       
   protected:    

@@ -451,25 +451,4 @@ public:
 protected:
   unsigned int size;
 };
-
-template<typename Scalar> class Solver;
-
-template<typename Scalar>
-HERMES_API Vector<Scalar>* create_vector(MatrixSolverType matrix_solver);
-template<typename Scalar>
-HERMES_API SparseMatrix<Scalar>*  create_matrix(MatrixSolverType matrix_solver);
-template<typename Scalar>
-HERMES_API Solver<Scalar>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<Scalar>* matrix, Vector<Scalar>* rhs = NULL);
-
-template HERMES_API Vector<double>* create_vector(MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<double>*  create_matrix(MatrixSolverType matrix_solver);
-template HERMES_API Solver<double>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<double>* matrix, Vector<double>* rhs);
-
-template HERMES_API Vector<std::complex<double>>* create_vector(MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<std::complex<double>>*  create_matrix(MatrixSolverType matrix_solver);
-template HERMES_API Solver<std::complex<double>>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<std::complex<double>>* matrix, Vector<std::complex<double>>* rhs);
-
 #endif
