@@ -6,20 +6,24 @@
 
 using namespace RefinementSelectors;
 
-//  This is a standard benchmark for adaptive FEM algorithms. The exact solution is a harmonic
-//  function in an L-shaped domain and it contains singular gradient at the re-entrant corner.
-//
-//  PDE: -Laplace u = 0.
-//
-//  Known exact solution, see functions fn() and fndd().
-//
-//  Domain: L-shape domain. Classical version is in the file "lshape-standard.mesh", version
-//          with a circular edge in "lshape-round.mesh". Choose the one you like to use
-//          and copy it into "domain.mesh". This is the mesh file that is loaded into Hermes.
-//
-//  BC:  Dirichlet, given by exact solution.
-//
-//  The following parameters can be changed:
+/** \addtogroup t_bench_lshape Benchmarks/LShape
+ *  \{
+ *  \brief This test makes sure that the benchmark "lshape" works correctly.
+ *
+ *  \section s_params Parameters
+ *  - P_INIT=1
+ *  - THERSHOLD=0.3
+ *  - STRATEGY=0
+ *  - CAND_LIST=HP_ANISO
+ *  - MESH_REGULARITY=-1
+ *  - ERR_STOP=0.1
+ *  - CONV_EXP=1.0
+ *  - NDOF_STOP=40000
+ *  - ERROR_WEIGHTS=(H: 1; P: 1; ANISO: 1)
+ *
+ *  \section s_res Results
+ *  - DOFs: 1786
+ */
 
 const int P_INIT = 4;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial mesh refinements.

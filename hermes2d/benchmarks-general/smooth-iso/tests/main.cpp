@@ -58,7 +58,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
-// Right-hand side, exact solutionm weak forms.
+// Right-hand side, exact solution weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])

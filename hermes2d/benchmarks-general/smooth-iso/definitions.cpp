@@ -12,7 +12,7 @@ using namespace Laplace::RightHandSides;
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-    CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) { };
+    CustomExactSolution(Mesh* mesh) : ExactSolutionScalar(mesh) { }
 
     virtual void derivatives(double x, double y, scalar& dx, scalar& dy) const {
         dx = cos(x)*sin(y);
