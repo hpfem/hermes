@@ -38,6 +38,7 @@ Thank you in advance for helping us improve Hermes!
     src/web-access
     src/citing-hermes
     src/first_pull_request
+    src/how_to/how_to_apps
 
 2. Installation
 ---------------
