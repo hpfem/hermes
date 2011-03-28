@@ -16,9 +16,8 @@
 #ifndef __H2D_REFINEMENT_SELECTORS_HCURL_PROJ_BASED_SELECTOR_H
 #define __H2D_REFINEMENT_SELECTORS_HCURL_PROJ_BASED_SELECTOR_H
 
-#ifdef H2D_COMPLEX
-
 #include "proj_based_selector.h"
+#include <complex>
 
 namespace RefinementSelectors {
 
@@ -27,7 +26,7 @@ namespace RefinementSelectors {
    *  Since an initialization of the class may take a long time,
    *  it is suggested to create the instance outside the adaptivity
    *  loop. */
-  class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector {
+  class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector<std::complex<double>> {
   public: //API
     /// Constructor.
     /** \param[in] cand_list A predefined list of candidates.
@@ -48,8 +47,8 @@ namespace RefinementSelectors {
       H2D_HCFE_NUM = 3 ///< A total considered function expansion.
     };
 
-    scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_HCFE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
-    scalar** precalc_rvals_curl; ///< Pre-calculated values of curls for every subdomain. Allocated using new_matrix.
+    std::complex<double>* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_HCFE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
+    std::complex<double>** precalc_rvals_curl; ///< Pre-calculated values of curls for every subdomain. Allocated using new_matrix.
 
     static const int H2DRS_MAX_HCURL_ORDER; ///< A maximum used order in this Hcurl-space selector. \todo Replace the numerical constant after a symbolic constant is added to Hcurl shapeset which would declare the maximum supported order.
 
@@ -60,7 +59,7 @@ namespace RefinementSelectors {
 
     /// Returns an array of values of the reference solution at integration points.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
-    virtual scalar** precalc_ref_solution(int inx_son, Solution* rsln, Element* element, int intr_gip_order);
+    virtual std::complex<double>** precalc_ref_solution(int inx_son, Solution<std::complex<double>>* rsln, Element* element, int intr_gip_order);
 
     /// Calculates values of shape function at GIP for all transformations.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
@@ -76,7 +75,7 @@ namespace RefinementSelectors {
 
     /// Evaluates a value of the right-hande side in a subdomain.
     /**  Overriden function. For details, see ProjBasedSelector::evaluate_rhs_subdomain(). */
-    virtual scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape);
+    virtual std::complex<double> evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape);
 
     /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
     /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
@@ -86,7 +85,5 @@ namespace RefinementSelectors {
     static HcurlShapeset default_shapeset; ///< A default shapeset.
   };
 }
-
-#endif
 
 #endif

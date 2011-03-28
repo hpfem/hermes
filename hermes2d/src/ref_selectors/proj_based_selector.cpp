@@ -8,8 +8,11 @@
 #include "proj_based_selector.h"
 
 namespace RefinementSelectors {
+  template class ProjBasedSelector<double>;
+  template class ProjBasedSelector<std::complex<double>>;
 
-  ProjBasedSelector::ProjBasedSelector(CandList cand_list, double conv_exp, int
+  template<typename Scalar>
+  ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
           Range<int>& edge_bubble_order) :
       OptimumSelector(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
@@ -35,7 +38,8 @@ namespace RefinementSelectors {
     ortho_rhs_cache.resize(max_inx + 1);
   }
 
-  ProjBasedSelector::~ProjBasedSelector() {
+  template<typename Scalar>
+  ProjBasedSelector<Scalar>::~ProjBasedSelector() {
     //delete matrix cache
     for(int m = 0; m < H2D_NUM_MODES; m++)
       for(int i = 0; i < H2DRS_MAX_ORDER+1; i++)
@@ -45,13 +49,15 @@ namespace RefinementSelectors {
         }
   }
 
-  void ProjBasedSelector::set_error_weights(double weight_h, double weight_p, double weight_aniso) {
+  template<typename Scalar>
+  void ProjBasedSelector<Scalar>::set_error_weights(double weight_h, double weight_p, double weight_aniso) {
     error_weight_h = weight_h;
     error_weight_p = weight_p;
     error_weight_aniso = weight_aniso;
   }
 
-  void ProjBasedSelector::evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) {
+  template<typename Scalar>
+  void ProjBasedSelector<Scalar>::evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) {
     bool tri = e->is_triangle();
 
     // find range of orders
@@ -149,7 +155,8 @@ namespace RefinementSelectors {
     *dev_error = sqrt(sum_sqr_err/num_processed - sqr(*avg_error)); // deviation is square root of variance
   }
 
-  void ProjBasedSelector::calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]) {
+  template<typename Scalar>
+  void ProjBasedSelector<Scalar>::calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]) {
     assert_msg(info_h.is_empty() || (H2D_GET_H_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of H-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_h.max_quad_order), H2D_GET_V_ORDER(info_h.max_quad_order));
     assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
     assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
@@ -167,11 +174,11 @@ namespace RefinementSelectors {
     rsln->enable_transform(false);
 
     // obtain reference solution values on all four refined sons
-    scalar** rval[H2D_MAX_ELEMENT_SONS];
+    Scalar** rval[H2D_MAX_ELEMENT_SONS];
     Element* base_element = rsln->get_mesh()->get_element(e->id);
     if(base_element->active) {
       info("Have you calculated element errors twice with solutions_for_adaptivity == true?");
-      error("Program is aborting based on a failed assertion in ProjBasedSelector::calc_projection_errors().");
+      error("Program is aborting based on a failed assertion in ProjBasedSelector<Scalar>::calc_projection_errors().");
     };
     for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
     {
@@ -219,7 +226,7 @@ namespace RefinementSelectors {
       std::vector<TrfShapeExp>* p_trf_svals[1] = { &svals[H2D_TRF_IDENTITY] };
       std::vector<TrfShapeExp>* p_trf_ortho_svals[1] = { &ortho_svals[H2D_TRF_IDENTITY] };
       for(int son = 0; son < H2D_MAX_ELEMENT_SONS; son++) {
-        scalar **sub_rval[1] = { rval[son] };
+        Scalar **sub_rval[1] = { rval[son] };
         calc_error_cand_element(mode, gip_points, num_gip_points
           , 1, &base_element->sons[son], p_trf_identity, sub_rval
           , p_trf_svals, p_trf_ortho_svals
@@ -234,7 +241,7 @@ namespace RefinementSelectors {
       for(int version = 0; version < 4; version++) { // 2 elements for vertical split, 2 elements for horizontal split
         Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
         Element* sub_domains[2] = { base_element->sons[sons[version][0]], base_element->sons[sons[version][1]] };
-        scalar **sub_rval[2] = { rval[sons[version][0]], rval[sons[version][1]] };
+        Scalar **sub_rval[2] = { rval[sons[version][0]], rval[sons[version][1]] };
         std::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
         std::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
         calc_error_cand_element(mode, gip_points, num_gip_points
@@ -247,7 +254,7 @@ namespace RefinementSelectors {
     //P-candidates
     if (!info_p.is_empty()) {
       Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
-      scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
+      Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
       std::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
       std::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
 
@@ -258,16 +265,17 @@ namespace RefinementSelectors {
     }
   }
 
-  void ProjBasedSelector::calc_error_cand_element(const int mode
+  template<typename Scalar>
+  void ProjBasedSelector<Scalar>::calc_error_cand_element(const int mode
     , double3* gip_points, int num_gip_points
-    , const int num_sub, Element** sub_domains, Trf** sub_trfs, scalar*** sub_rvals
+    , const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals
     , std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals
     , const CandsInfo& info
     , CandElemProjError errors_squared
     ) {
     //allocate space
     int max_num_shapes = next_order_shape[mode][current_max_order];
-    scalar* right_side = new scalar[max_num_shapes];
+    Scalar* right_side = new Scalar[max_num_shapes];
     int* shape_inxs = new int[max_num_shapes];
     int* indx = new int[max_num_shapes]; //solver data
     double* d = new double[max_num_shapes]; //solver data
@@ -282,8 +290,8 @@ namespace RefinementSelectors {
 
     //clenup of the cache
     for(int i = 0; i <= max_shape_inx[mode]; i++) {
-      nonortho_rhs_cache[i] = ValueCacheItem<scalar>();
-      ortho_rhs_cache[i] = ValueCacheItem<scalar>();
+      nonortho_rhs_cache[i] = ValueCacheItem<Scalar>();
+      ortho_rhs_cache[i] = ValueCacheItem<Scalar>();
     }
 
     //calculate for all orders
@@ -312,7 +320,7 @@ namespace RefinementSelectors {
         //error_if(!use_ortho, "Non-ortho"); //DEBUG
 
         //select a cache
-        std::vector< ValueCacheItem<scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
+        std::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
         std::vector<TrfShapeExp>** sub_svals = use_ortho ? sub_ortho_svals : sub_nonortho_svals;
 
         //calculate projection matrix iff no ortho is used
@@ -332,7 +340,7 @@ namespace RefinementSelectors {
 
           for(int k = 0; k < num_shapes; k++) {
             int shape_inx = shape_inxs[k];
-            ValueCacheItem<scalar>& shape_rhs_cache = rhs_cache[shape_inx];
+            ValueCacheItem<Scalar>& shape_rhs_cache = rhs_cache[shape_inx];
             if (!shape_rhs_cache.is_valid()) {
               TrfShapeExp empty_sub_vals;
               ElemSubShapeFunc this_sub_shape = { shape_inx, this_sub_svals.empty() ? empty_sub_vals : this_sub_svals[shape_inx] };
@@ -343,7 +351,7 @@ namespace RefinementSelectors {
 
         //copy values from cache and apply area correction coefficient
         for(int k = 0; k < num_shapes; k++) {
-          ValueCacheItem<scalar>& rhs_cache_value = rhs_cache[shape_inxs[k]];
+          ValueCacheItem<Scalar>& rhs_cache_value = rhs_cache[shape_inxs[k]];
           right_side[k] = sub_area_corr_coef * rhs_cache_value.get();
           rhs_cache_value.mark();
         }
@@ -352,7 +360,7 @@ namespace RefinementSelectors {
         if (!use_ortho) {
           //error_if(!use_ortho, "Non-ortho"); //DEBUG
           ludcmp(proj_matrix, num_shapes, indx, d);
-          lubksb<scalar>(proj_matrix, num_shapes, indx, right_side);
+          lubksb<Scalar>(proj_matrix, num_shapes, indx, right_side);
         }
 
         //calculate error

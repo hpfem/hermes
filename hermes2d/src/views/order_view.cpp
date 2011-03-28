@@ -26,7 +26,8 @@
 #include "../h2d_common.h"
 #include "order_view.h"
 
-OrderView::OrderView(const char* title, WinGeom* wg)
+template<typename Scalar>
+OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
          : View(title, wg)
 {
   b_scale = true;
@@ -38,7 +39,7 @@ OrderView::OrderView(const char* title, WinGeom* wg)
 
 /*
 #ifndef _MSC_VER
-OrderView::OrderView(const char* title, WinGeom* wg)
+OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
          : View(title, wg)
 {
   b_scale = true;
@@ -50,7 +51,8 @@ OrderView::OrderView(const char* title, WinGeom* wg)
 #endif
 */
 
-OrderView::OrderView(char* title, WinGeom* wg)
+template<typename Scalar>
+OrderView<Scalar>::OrderView(char* title, WinGeom* wg)
          : View(title, wg)
 {
   b_scale = true;
@@ -76,7 +78,8 @@ static int order_palette[] =
 };
 
 
-void OrderView::show(Space<Scalar>* space)
+template<typename Scalar>
+void OrderView<Scalar>::show(Space<Scalar>* space)
 {
   if (!space->is_up_to_date())
     error("The space is not up to date.");
@@ -94,7 +97,8 @@ void OrderView::show(Space<Scalar>* space)
   wait_for_draw();
 }
 
-void OrderView::init_order_palette(double3* vert) {
+template<typename Scalar>
+void OrderView<Scalar>::init_order_palette(double3* vert) {
   int min = 1, max = (int) vert[0][2];
   for (int i = 0; i < ord.get_num_vertices(); i++)
   {
@@ -126,7 +130,8 @@ void OrderView::init_order_palette(double3* vert) {
 }
 
 
-void OrderView::on_display()
+template<typename Scalar>
+void OrderView<Scalar>::on_display()
 {
   set_ortho_projection();
   glDisable(GL_TEXTURE_1D);
@@ -201,18 +206,21 @@ void OrderView::on_display()
 }
 
 
-int OrderView::measure_scale_labels()
+template<typename Scalar>
+int OrderView<Scalar>::measure_scale_labels()
 {
   return 0;
 }
 
-void OrderView::scale_dispatch()
+template<typename Scalar>
+void OrderView<Scalar>::scale_dispatch()
 {
   draw_discrete_scale(num_boxes, box_names, order_colors + order_min);
 }
 
 
-void OrderView::on_key_down(unsigned char key, int x, int y)
+template<typename Scalar>
+void OrderView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
@@ -250,7 +258,8 @@ void OrderView::on_key_down(unsigned char key, int x, int y)
 }
 
 
-void OrderView::load_data(const char* filename)
+template<typename Scalar>
+void OrderView<Scalar>::load_data(const char* filename)
 {
   ord.load_data(filename);
   ord.lock_data();
@@ -266,7 +275,8 @@ void OrderView::load_data(const char* filename)
 }
 
 
-void OrderView::save_data(const char* filename)
+template<typename Scalar>
+void OrderView<Scalar>::save_data(const char* filename)
 {
   if (ord.get_num_triangles() <= 0)
     error("No data to save.");
@@ -274,7 +284,8 @@ void OrderView::save_data(const char* filename)
 }
 
 
-void OrderView::save_numbered(const char* format, int number)
+template<typename Scalar>
+void OrderView<Scalar>::save_numbered(const char* format, int number)
 {
   char buffer[1000];
   sprintf(buffer, format, number);
@@ -282,7 +293,8 @@ void OrderView::save_numbered(const char* format, int number)
 }
 
 
-const char* OrderView::get_help_text() const
+template<typename Scalar>
+const char* OrderView<Scalar>::get_help_text() const
 {
   return
   "OrderView\n\n"

@@ -21,6 +21,9 @@
 
 //// MeshFunction //////////////////////////////////////////////////////////////////////////////////
 
+template class MeshFunction<double>;
+template class MeshFunction<std::complex<double>>;
+
 template<typename Scalar>
 MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
 {
@@ -30,7 +33,7 @@ MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
 }
 
 template<typename Scalar>
-MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>
+MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>()
 {
 	this->mesh = mesh;
 	this->refmap = new RefMap;
@@ -54,7 +57,7 @@ MeshFunction<Scalar>::~MeshFunction()
 template<typename Scalar>
 void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
 {
-  ScalarFunction::set_quad_2d(quad_2d);
+  Function<Scalar>::set_quad_2d(quad_2d);
   refmap->set_quad_2d(quad_2d);
 }
 
@@ -185,6 +188,8 @@ public:
 //  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
 //   'n' is the polynomial degree.)
 //
+template class Solution<double>;
+template class Solution<std::complex<double>>;
 
 template<typename Scalar>
 void Solution<Scalar>::init()
@@ -337,7 +342,7 @@ void Solution<Scalar>::copy(const Solution<Scalar>* sln)
   {
     cnst[0] = sln->cnst[0];
     cnst[1] = sln->cnst[1];
-    if((dynamic_cast<ExactSolutionScalar*>(this)) != NULL || (dynamic_cast<ExactSolutionVector<Scalar>*>(this)) != NULL)
+    if((dynamic_cast<ExactSolutionScalar<Scalar>*>(this)) != NULL || (dynamic_cast<ExactSolutionVector<Scalar>*>(this)) != NULL)
       error("ExactSolutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
   }
 
@@ -559,7 +564,7 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* p
     o = elem_orders[e->id];
     int np = quad->get_num_points(o);
 
-    AsmList al;
+    AsmList<Scalar> al;
     space->get_element_assembly_list(e, &al);
     pss->set_active_element(e);
 
@@ -1027,7 +1032,7 @@ int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element*
   if (sln_type == HERMES_SLN && space != NULL) {
     return space->get_edge_order(e, edge);
   } else {
-    return ScalarFunction::get_edge_fn_order(edge);
+    return Function<Scalar>::get_edge_fn_order(edge);
   }
 }
 
@@ -1142,7 +1147,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
         {
           double jac = (*m)[0][0] *  (*m)[1][1] - (*m)[1][0] *  (*m)[0][1];
           Scalar val, dx = 0.0, dy = 0.0;
-          val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x[i], y[i], dx, dy);
+          val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = (  (*m)[1][1]*dx - (*m)[0][1]*dy) / jac * exact_mult;
           node->values[0][2][i] = (- (*m)[1][0]*dx + (*m)[0][0]*dy) / jac * exact_mult;
@@ -1153,7 +1158,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
         for (i = 0; i < np; i++)
         {
           Scalar val, dx = 0.0, dy = 0.0;
-          val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x[i], y[i], dx, dy);
+          val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
           node->values[0][0][i] = val * exact_mult;
           node->values[0][1][i] = dx * exact_mult;
           node->values[0][2][i] = dy * exact_mult;
@@ -1164,8 +1169,8 @@ void Solution<Scalar>::precalculate(int order, int mask)
     {
       for (i = 0; i < np; i++)
       {
-        Scalar2 dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
-        Scalar2 val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
+        Scalar2<Scalar> dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
+        Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
         for (j = 0; j < 2; j++) {
           node->values[j][0][i] = val[j] * exact_mult;
           node->values[j][1][i] = dx[j] * exact_mult;
@@ -1304,20 +1309,20 @@ void Solution<Scalar>::load(const char* filename)
     double* temp = new double[num_coefs];
     hermes_fread(temp, sizeof(double), num_coefs, f);
 
-    #ifndef H2D_COMPLEX
-      mono_coefs = temp;
-    #else
-      mono_coefs = new Scalar[num_coefs];
-      for (i = 0; i < num_coefs; i++)
-        mono_coefs[i] = temp[i];
-      delete [] temp;
-    #endif
+    mono_coefs = new Scalar[num_coefs];
+    for (i = 0; i < num_coefs; i++)
+      mono_coefs[i] = temp[i];
+    delete [] temp;
   }
   else if (hdr.ss == 2*sizeof(double))
   {
+    /*
     #ifndef H2D_COMPLEX
       warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
-      Scalar* temp = new double[num_coefs*2];
+      Scalar* temp = new Scalar[num_coefs*2];
+      for (int temp_i = 0; temp_i < num_coefs*2; temp_i++)
+        temp[temp_i] = (Scalar)0.0;
+
       hermes_fread(temp, sizeof(Scalar), num_coefs*2, f);
       mono_coefs = new double[num_coefs];
       for (i = 0; i < num_coefs; i++)
@@ -1325,9 +1330,9 @@ void Solution<Scalar>::load(const char* filename)
       delete [] temp;
 
     #else
-      mono_coefs = new Scalar[num_coefs];;
-      hermes_fread(mono_coefs, sizeof(Scalar), num_coefs, f);
-    #endif
+    */
+    mono_coefs = new Scalar[num_coefs];;
+    hermes_fread(mono_coefs, sizeof(Scalar), num_coefs, f);
   }
   else
     error("Corrupt solution file.");
@@ -1449,15 +1454,15 @@ Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
     if (num_components == 1)
     {
       Scalar val, dx = 0.0, dy = 0.0;
-      val = (static_cast<ExactSolutionScalar*>(this))->exact_function(x, y, dx, dy);
+      val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val;
       if (b == 1) return dx;
       if (b == 2) return dy;
     }
     else
     {
-      Scalar2 dx(0.0, 0.0), dy(0.0, 0.0);
-      Scalar2 val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x, y, dx, dy);
+      Scalar2<Scalar> dx(0.0, 0.0), dy(0.0, 0.0);
+      Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x, y, dx, dy);
       if (b == 0) return val[a];
       if (b == 1) return dx[a];
       if (b == 2) return dy[a];

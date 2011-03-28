@@ -14,14 +14,12 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "forms.h"
+  #include <complex>
 
 // Explicit template specializations are needed here, general template<T> T DiscontinuousFunc<T>::zero = T(0) doesn't work.
 template<> Ord DiscontinuousFunc<Ord>::zero = Ord(0);
 template<> double DiscontinuousFunc<double>::zero = 0.0;
-#if defined(H3D_COMPLEX) || defined(H2D_COMPLEX)
-  #include <complex>
-  template<> std::complex<double> DiscontinuousFunc<std::complex<double> >::zero = std::complex<double>(0);
-#endif
+template<> std::complex<double> DiscontinuousFunc<std::complex<double> >::zero = std::complex<double>(0);
 
 /// Integration order for coordinates, normals and tangents is one.
 Geom<Ord>* init_geom_ord()
@@ -312,10 +310,14 @@ Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 }
 
 /// Preparation of mesh functions.
-Func<scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
+template Func<double>* init_fn(MeshFunction<double>*fu, const int order);
+template Func<std::complex<double>>* init_fn(MeshFunction<std::complex<double>>*fu, const int order);
+
+template<typename Scalar>
+Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
 {
   // Sanity checks.
-  if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
+  if (fu == NULL) error("NULL MeshFunction in Func<Scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
 
   int nc = fu->get_num_components();
@@ -323,41 +325,45 @@ Func<scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
   fu->set_quad_order(order);
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
-  Func<scalar>* u = new Func<scalar>(np, nc);
+  Func<Scalar>* u = new Func<Scalar>(np, nc);
 
   if (u->nc == 1) {
-    u->val = new scalar [np];
-    u->dx  = new scalar [np];
-    u->dy  = new scalar [np];
-    memcpy(u->val, fu->get_fn_values(), np * sizeof(scalar));
-    memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
-    memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
+    u->val = new Scalar [np];
+    u->dx  = new Scalar [np];
+    u->dy  = new Scalar [np];
+    memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
+    memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
+    memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
   }
   else if (u->nc == 2) {
-    u->val0 = new scalar [np];
-    u->val1 = new scalar [np];
-    u->curl = new scalar [np];
-    u->div = new scalar [np];
+    u->val0 = new Scalar [np];
+    u->val1 = new Scalar [np];
+    u->curl = new Scalar [np];
+    u->div = new Scalar [np];
 
-    memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
-    memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
+    memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
+    memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
 
-    scalar *dx1 = fu->get_dx_values(1);
-    scalar *dy0 = fu->get_dy_values(0);
+    Scalar *dx1 = fu->get_dx_values(1);
+    Scalar *dy0 = fu->get_dy_values(0);
     for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
     
-    scalar *dx0 = fu->get_dx_values(0);
-    scalar *dy1 = fu->get_dy_values(1);
+    Scalar *dx0 = fu->get_dx_values(0);
+    Scalar *dy1 = fu->get_dy_values(1);
     for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
   }
   return u;
 }
 
+template Func<double>* init_fn(Solution<double>*fu, const int order);
+template Func<std::complex<double>>* init_fn(Solution<std::complex<double>>*fu, const int order);
+
 /// Preparation of solutions.
-Func<scalar>* init_fn(Solution<Scalar>*fu, const int order)
+template<typename Scalar>
+Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order)
 {
   // Sanity checks.
-  if (fu == NULL) error("NULL MeshFunction in Func<scalar>*::init_fn().");
+  if (fu == NULL) error("NULL MeshFunction in Func<Scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
 
   ESpaceType space_type = fu->get_space_type();
@@ -374,47 +380,47 @@ Func<scalar>* init_fn(Solution<Scalar>*fu, const int order)
 
   double3* pt = quad->get_points(order);
   int np = quad->get_num_points(order);
-  Func<scalar>* u = new Func<scalar>(np, nc);
+  Func<Scalar>* u = new Func<Scalar>(np, nc);
 
   if (u->nc == 1) {
-    u->val = new scalar [np];
-    u->dx  = new scalar [np];
-    u->dy  = new scalar [np];
+    u->val = new Scalar [np];
+    u->dx  = new Scalar [np];
+    u->dy  = new Scalar [np];
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     if (space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
-      u->laplace = new scalar [np];
+      u->laplace = new Scalar [np];
 #endif
-    memcpy(u->val, fu->get_fn_values(), np * sizeof(scalar));
-    memcpy(u->dx, fu->get_dx_values(), np * sizeof(scalar));
-    memcpy(u->dy, fu->get_dy_values(), np * sizeof(scalar));
+    memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
+    memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
+    memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     if (space_type == HERMES_H1_SPACE) {
       if(sln_type == HERMES_SLN) {
-        scalar *dxx = fu->get_dxx_values();
-        scalar *dyy = fu->get_dyy_values();
+        Scalar *dxx = fu->get_dxx_values();
+        Scalar *dyy = fu->get_dyy_values();
         for (int i = 0; i < np; i++)
           u->laplace[i] = dxx[i] + dyy[i];
       }
       else if (sln_type == HERMES_CONST)
-        memset(u->laplace, 0, np * sizeof(scalar));
+        memset(u->laplace, 0, np * sizeof(Scalar));
     }
 #endif
   }
   else if (u->nc == 2) {
-    u->val0 = new scalar [np];
-    u->val1 = new scalar [np];
-    u->curl = new scalar [np];
-    u->div = new scalar [np];
+    u->val0 = new Scalar [np];
+    u->val1 = new Scalar [np];
+    u->curl = new Scalar [np];
+    u->div = new Scalar [np];
 
-    memcpy(u->val0, fu->get_fn_values(0), np * sizeof(scalar));
-    memcpy(u->val1, fu->get_fn_values(1), np * sizeof(scalar));
+    memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
+    memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
 
-    scalar *dx1 = fu->get_dx_values(1);
-    scalar *dy0 = fu->get_dy_values(0);
+    Scalar *dx1 = fu->get_dx_values(1);
+    Scalar *dy0 = fu->get_dy_values(0);
     for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
     
-    scalar *dx0 = fu->get_dx_values(0);
-    scalar *dy1 = fu->get_dy_values(1);
+    Scalar *dx0 = fu->get_dx_values(0);
+    Scalar *dy1 = fu->get_dy_values(1);
     for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
   }
   return u;

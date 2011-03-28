@@ -21,8 +21,8 @@
 
 
 //// VectorView /////////////////////////////////////////////////////////////////////////////////////
-
-VectorView::VectorView(const char* title, WinGeom* wg)
+template<typename Scalar>
+VectorView<Scalar>::VectorView(const char* title, WinGeom* wg)
           : View(title, wg)
 {
   gx = gy = 0.0;
@@ -34,7 +34,8 @@ VectorView::VectorView(const char* title, WinGeom* wg)
   length_coef = 1.0;
 }
 
-VectorView::VectorView(char* title, WinGeom* wg)
+template<typename Scalar>
+VectorView<Scalar>::VectorView(char* title, WinGeom* wg)
           : View(title, wg)
 {
   gx = gy = 0.0;
@@ -47,14 +48,16 @@ VectorView::VectorView(char* title, WinGeom* wg)
 }
 
 
-void VectorView::show(MeshFunction<Scalar>* vsln, double eps)
+template<typename Scalar>
+void VectorView<Scalar>::show(MeshFunction<Scalar>* vsln, double eps)
 {
   if (vsln->get_num_components() < 2)
     error("The single-argument version of show() is only for vector-valued solutions.");
   show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
 }
 
-void VectorView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps)
+template<typename Scalar>
+void VectorView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps)
 {
   if (xsln == ysln)
     error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
@@ -62,7 +65,8 @@ void VectorView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, do
 }
 
 
-void VectorView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
+template<typename Scalar>
+void VectorView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
 {
   vec.lock_data();
   vec.process_solution(xsln, xitem, ysln, yitem, eps);
@@ -85,7 +89,8 @@ inline int n_vert(int i) { return (i+1) % 3; }
 inline int p_vert(int i) { return (i+2) % 3; }
 
 
-void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
+template<typename Scalar>
+void VectorView<Scalar>::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
 {
   if (mode == 1)
     glColor3f(0.0f,0.0f,0.0f);
@@ -173,7 +178,8 @@ void VectorView::plot_arrow(double x, double y, double xval, double yval, double
 }
 
 
-void VectorView::on_display()
+template<typename Scalar>
+void VectorView<Scalar>::on_display()
 {
   set_ortho_projection();
   glDisable(GL_LIGHTING);
@@ -380,7 +386,8 @@ void VectorView::on_display()
 }
 
 
-void VectorView::on_mouse_move(int x, int y)
+template<typename Scalar>
+void VectorView<Scalar>::on_mouse_move(int x, int y)
 {
   if (dragging)
   {
@@ -391,7 +398,8 @@ void VectorView::on_mouse_move(int x, int y)
 }
 
 
-void VectorView::on_key_down(unsigned char key, int x, int y)
+template<typename Scalar>
+void VectorView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
@@ -439,7 +447,8 @@ void VectorView::on_key_down(unsigned char key, int x, int y)
 
 //// load & save ///////////////////////////////////////////////////////////////////////////////////
 
-void VectorView::load_data(const char* filename)
+template<typename Scalar>
+void VectorView<Scalar>::load_data(const char* filename)
 {
   //get data
   vec.load_data(filename);
@@ -461,7 +470,8 @@ void VectorView::load_data(const char* filename)
 }
 
 
-void VectorView::save_data(const char* filename)
+template<typename Scalar>
+void VectorView<Scalar>::save_data(const char* filename)
 {
   vec.lock_data();
   if (vec.get_num_triangles() <= 0)
@@ -471,7 +481,8 @@ void VectorView::save_data(const char* filename)
 }
 
 
-void VectorView::save_numbered(const char* format, int number)
+template<typename Scalar>
+void VectorView<Scalar>::save_numbered(const char* format, int number)
 {
   char buffer[1000];
   sprintf(buffer, format, number);
@@ -479,7 +490,8 @@ void VectorView::save_numbered(const char* format, int number)
 }
 
 
-const char* VectorView::get_help_text() const
+template<typename Scalar>
+const char* VectorView<Scalar>::get_help_text() const
 {
   return
   "VectorView\n\n"

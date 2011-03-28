@@ -27,7 +27,7 @@ template<typename Scalar>
 class HERMES_API H1Space : public Space<Scalar>
 {
 public:
-  H1Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
+  H1Space(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   H1Space(Mesh* mesh, int p_init = 1,
@@ -48,7 +48,7 @@ public:
   /// boundary) is not suitable.
   void fix_vertex(int id, Scalar value = 0.0);
 
-  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
+  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual ESpaceType get_type() const { return HERMES_H1_SPACE; }
 
@@ -58,8 +58,8 @@ protected:
   virtual void assign_edge_dofs() {};
   virtual void assign_bubble_dofs() {};
 
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al);
-  virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList* al);
+  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al);
+  virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList<Scalar>* al);
 
   static double** h1_proj_mat;
   static double*  h1_chol_p;
@@ -99,5 +99,7 @@ protected:
 
 };
 
+template class HERMES_API H1Space<double>;
+template class HERMES_API H1Space<std::complex<double>>;
 
 #endif

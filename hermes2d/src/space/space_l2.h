@@ -27,7 +27,7 @@ template<typename Scalar>
 class HERMES_API L2Space : public Space<Scalar>
 {
 public:
-  L2Space(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
+  L2Space(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   L2Space(Mesh* mesh, int p_init = 1,
@@ -38,18 +38,18 @@ public:
 
   virtual ~L2Space();
 
-  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
+  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual int get_edge_order(Element* e, int edge) {
     // There are no continuity constraints on shape functions in L2.
-    return Hermes2D::make_edge_order( e->get_mode(), edge, edata[e->id].order );
+    return Hermes2D<Scalar>::make_edge_order( e->get_mode(), edge, edata[e->id].order );
   }
 
   virtual void set_shapeset(Shapeset* shapeset);
 
   virtual ESpaceType get_type() const { return HERMES_L2_SPACE; }
 
-  virtual void get_element_assembly_list(Element* e, AsmList* al);
+  virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
 
 protected:
 
@@ -68,15 +68,16 @@ protected:
   virtual void assign_edge_dofs() {}
   virtual void assign_bubble_dofs();
 
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) {}
-  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
-  virtual void get_bubble_assembly_list(Element* e, AsmList* al);
+  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
+  virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
 
   // FIXME: This function should probably not be used at all.
   virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
 };
 
-
+template class HERMES_API L2Space<double>;
+template class HERMES_API L2Space<std::complex<double>>;
 
 #endif

@@ -34,7 +34,7 @@ namespace Elasticity {
     DefaultVolumetricMatrixFormLinear_x_x(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
           : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
@@ -63,7 +63,7 @@ namespace Elasticity {
     DefaultVolumetricMatrixFormLinear_x_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
           : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
@@ -95,7 +95,7 @@ namespace Elasticity {
     DefaultVolumetricMatrixFormLinear_y_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
           : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
 
-    template<typename Real, typename Scalar>
+    template<typename real, typename scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {

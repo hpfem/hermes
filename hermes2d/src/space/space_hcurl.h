@@ -28,7 +28,7 @@ template<typename Scalar>
 class HERMES_API HcurlSpace : public Space<Scalar>
 {
 public:
-  HcurlSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
+  HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
           Shapeset* shapeset = NULL);
 
   HcurlSpace(Mesh* mesh, int p_init = 1,
@@ -39,7 +39,7 @@ public:
 
   virtual ~HcurlSpace();
 
-  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
+  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual ESpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
@@ -58,8 +58,8 @@ protected:
   virtual void assign_edge_dofs();
   virtual void assign_bubble_dofs();
 
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) {}
-  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
+  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
 
   static double** hcurl_proj_mat;
   static double*  hcurl_chol_p;
@@ -80,6 +80,7 @@ protected:
 
 };
 
-
+template class HERMES_API HcurlSpace<double>;
+template class HERMES_API HcurlSpace<std::complex<double>>;
 
 #endif

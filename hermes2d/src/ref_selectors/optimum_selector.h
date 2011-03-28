@@ -70,7 +70,8 @@ namespace RefinementSelectors {
   /// A selector that chooses an optimal candidates based on a score. \ingroup g_selectors
   /** This is a base class for all selectors that chooses an candidate based on some
    *  evaluated criteria. Currently, the criteria is based on an error change per DOF. */
-  class HERMES_API OptimumSelector : public Selector {
+  template<typename Scalar>
+  class HERMES_API OptimumSelector : public Selector<Scalar> {
   protected: //options
     bool opt_symmetric_mesh; ///< True if ::H2D_PREFER_SYMMETRIC_MESH is set. True by default.
     bool opt_apply_exp_dof; ///< True if ::H2D_APPLY_CONV_EXP_DOF is set. False by default.
@@ -190,7 +191,7 @@ namespace RefinementSelectors {
      *  \param[in] rsln A reference solution which is used to calculate the error.
      *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
      *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-    void evaluate_candidates(Element* e, Solution* rsln, double* avg_error, double* dev_error);
+    void evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error);
 
     /// Sorts and selects the best candidate and the best H-candidate according to the score.
     /** Any two candidates with the same score are skipped since it is not possible to decide between them.
@@ -214,14 +215,14 @@ namespace RefinementSelectors {
      *  \param[in] rsln A reference solution which is used to calculate the error.
      *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
      *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-    virtual void evaluate_cands_error(Element* e, Solution* rsln, double* avg_error, double* dev_error) = 0;
+    virtual void evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) = 0;
 
     /// Calculates DOF of candidates.
     /** It uses a list of shape indices (OptimumSelector::shape_indices) to
      *  count a number of DOFs. No number of DOFs cannot be zero.
      *  \param[in] e An element that is being refined.
      *  \param[in] rsln A reference solution which is used to calculate the error. */
-    virtual void evaluate_cands_dof(Element* e, Solution* rsln);
+    virtual void evaluate_cands_dof(Element* e, Solution<Scalar>* rsln);
 
     /// Evalutes score of candidates.
     /** It calculates score \f$s\f$ of a candidate as \f[s = \frac{\log_{10} e_0 - \log_{10} e}{(d - d_0)^c},\f]
@@ -330,15 +331,16 @@ namespace RefinementSelectors {
 
     /// Selects a refinement.
     /** Overriden function. For details, see Selector::select_refinement(). */
-    virtual bool select_refinement(Element* element, int quad_order, Solution* rsln, ElementToRefine& refinement); ///< Selects refinement.
+    virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.
 
     /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
     /** Overriden function. For details, see Selector::generate_shared_mesh_orders(). */
     virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders); ///< Updates orders of a refinement in another multimesh component which shares a mesh.
   };
 
-  /// Operator. Flushes contents of a candidate to a string stream. Useful for debug messages. \ingroup g_selectors
-  extern HERMES_API std::ostream& operator<<(std::ostream& stream, const OptimumSelector::Cand& cand);
+  template class HERMES_API OptimumSelector<double>;
+  template class HERMES_API OptimumSelector<std::complex<double>>;
 }
+
 
 #endif

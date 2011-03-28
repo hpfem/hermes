@@ -19,6 +19,20 @@
 #include "../function/forms.h"
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
+template class WeakForm<double>;
+template class WeakForm<std::complex<double>>;
+template class Form<double>;
+template class Form<std::complex<double>>;
+template class MatrixFormVol<double>;
+template class MatrixFormVol<std::complex<double>>;
+template class VectorFormVol<double>;
+template class VectorFormVol<std::complex<double>>;
+template class MatrixFormSurf<double>;
+template class MatrixFormSurf<std::complex<double>>;
+template class VectorFormSurf<double>;
+template class VectorFormSurf<std::complex<double>>;
+template class Stage<double>;
+template class Stage<std::complex<double>>;
 
 template<typename Scalar>
 Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param, 
@@ -251,7 +265,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext);
+    Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext);
     s->mfvol.push_back(mfvol[i]);
   }
 
@@ -261,7 +275,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
     Mesh* m1 = spaces[ii]->get_mesh();
     Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext);
+    Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext);
     s->mfsurf.push_back(mfsurf[i]);
   }
 
@@ -269,7 +283,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
   for (unsigned i = 0; i < vfvol.size(); i++) {
     unsigned int ii = vfvol[i]->i;
     Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
+    Stage<Scalar> *s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
     s->vfvol.push_back(vfvol[i]);
   }
 
@@ -277,7 +291,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
   for (unsigned i = 0; i < vfsurf.size(); i++) {
     unsigned int ii = vfsurf[i]->i;
     Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
+    Stage<Scalar> *s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
     s->vfsurf.push_back(vfsurf[i]);
   }
 
@@ -288,7 +302,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
   // initialize the arrays meshes and fns needed by Traverse for each stage
   for (i = 0; i < stages.size(); i++)
   {
-    Stage* s = &stages[i];
+    Stage<Scalar>* s = &stages[i];
 
     // First, initialize arrays for the test functions. A pointer to the PrecalcShapeset
     // corresponding to each space will be assigned to s->fns later during assembling.
@@ -345,7 +359,7 @@ Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar>>& stages, 
   }
 
   // find a suitable existing stage for the form
-  Stage* s = NULL;
+  Stage<Scalar>* s = NULL;
   for (unsigned i = 0; i < stages.size(); i++)
     if (seq.size() == stages[i].seq_set.size() &&
         equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
@@ -355,7 +369,7 @@ Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar>>& stages, 
   // create a new stage if not found
   if (s == NULL)
   {
-    Stage newstage;
+    Stage<Scalar> newstage;
     stages.push_back(newstage);
     s = &stages.back();
     s->seq_set = seq;

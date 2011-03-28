@@ -18,7 +18,11 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p_init)
+template class Space<double>;
+template class Space<std::complex<double>>;
+
+template<typename Scalar>
+Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
         : shapeset(shapeset), mesh(mesh)
 {
   _F_
@@ -39,13 +43,15 @@ Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p
   own_shapeset = (shapeset == NULL);
 }
 
-Space::~Space()
+template<typename Scalar>
+Space<Scalar>::~Space()
 {
   _F_
   free();
 }
 
-void Space::free()
+template<typename Scalar>
+void Space<Scalar>::free()
 {
   _F_
   free_extra_data();
@@ -55,7 +61,8 @@ void Space::free()
 
 //// element orders ///////////////////////////////////////////////////////////////////////////////
 
-void Space::resize_tables()
+template<typename Scalar>
+void Space<Scalar>::resize_tables()
 {
   _F_
   if ((nsize < mesh->get_max_node_id()) || (ndata == NULL))
@@ -87,7 +94,8 @@ void Space::resize_tables()
 }
 
 
-void Space::H2D_CHECK_ORDER(int order)
+template<typename Scalar>
+void Space<Scalar>::H2D_CHECK_ORDER(int order)
 {
   _F_
   if (H2D_GET_H_ORDER(order) < 0 || H2D_GET_V_ORDER(order) < 0)
@@ -98,7 +106,8 @@ void Space::H2D_CHECK_ORDER(int order)
 
 // if the user calls this, then the enumeration of dof
 // is updated
-void Space::set_element_order(int id, int order)
+template<typename Scalar>
+void Space<Scalar>::set_element_order(int id, int order)
 {
   _F_
   set_element_order_internal(id, order);
@@ -108,7 +117,8 @@ void Space::set_element_order(int id, int order)
 }
 
 // just sets the element order without enumerating dof
-void Space::set_element_order_internal(int id, int order)
+template<typename Scalar>
+void Space<Scalar>::set_element_order_internal(int id, int order)
 {
   _F_
   //NOTE: We need to take into account that L2 and Hcurl may use zero orders. The latter has its own version of this method, however.
@@ -126,21 +136,23 @@ void Space::set_element_order_internal(int id, int order)
 }
 
 
-int Space::get_element_order(int id) const
+template<typename Scalar>
+int Space<Scalar>::get_element_order(int id) const
 {
   _F_
   // sanity checks (for internal purposes)
-  if (this->mesh == NULL) error("NULL Mesh pointer detected in Space::get_element_order().");
-  if(edata == NULL) error("NULL edata detected in Space::get_element_order().");
+  if (this->mesh == NULL) error("NULL Mesh pointer detected in Space<Scalar>::get_element_order().");
+  if(edata == NULL) error("NULL edata detected in Space<Scalar>::get_element_order().");
   if (id >= esize) {
-    warn("Element index %d in Space::get_element_order() while maximum is %d.", id, esize);
-    error("Wring element index in Space::get_element_order().");
+    warn("Element index %d in Space<Scalar>::get_element_order() while maximum is %d.", id, esize);
+    error("Wring element index in Space<Scalar>::get_element_order().");
   }
   return edata[id].order;
 }
 
 
-void Space::set_uniform_order(int order, std::string marker)
+template<typename Scalar>
+void Space<Scalar>::set_uniform_order(int order, std::string marker)
 {
   _F_
   if(marker == HERMES_ANY)
@@ -152,7 +164,8 @@ void Space::set_uniform_order(int order, std::string marker)
   this->assign_dofs();
 }
 
-void Space::set_uniform_order_internal(Ord2 order, int marker)
+template<typename Scalar>
+void Space<Scalar>::set_uniform_order_internal(Ord2 order, int marker)
 {
   _F_
   resize_tables();
@@ -180,7 +193,8 @@ void Space::set_uniform_order_internal(Ord2 order, int marker)
   seq++;
 }
 
-void Space::set_element_orders(int* elem_orders_)
+template<typename Scalar>
+void Space<Scalar>::set_element_orders(int* elem_orders_)
 {
   _F_
   resize_tables();
@@ -199,7 +213,8 @@ void Space::set_element_orders(int* elem_orders_)
   }
 }
 
-void Space::set_default_order(int tri_order, int quad_order)
+template<typename Scalar>
+void Space<Scalar>::set_default_order(int tri_order, int quad_order)
 {
   _F_
   if (quad_order == -1) quad_order = H2D_MAKE_QUAD_ORDER(tri_order, tri_order);
@@ -207,7 +222,8 @@ void Space::set_default_order(int tri_order, int quad_order)
   default_quad_order = quad_order;
 }
 
-void Space::adjust_element_order(int order_change, unsigned int min_order)
+template<typename Scalar>
+void Space<Scalar>::adjust_element_order(int order_change, unsigned int min_order)
 {
   _F_
   Element* e;
@@ -221,13 +237,14 @@ void Space::adjust_element_order(int order_change, unsigned int min_order)
   assign_dofs();
 }
 
-void Space::adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order)
+template<typename Scalar>
+void Space<Scalar>::adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order)
 {
   _F_
   Element* e;
   for_all_active_elements(e, this->get_mesh()) {
     if(e->is_triangle()) {
-      warn("Using quad version of Space::adjust_element_order(), only horizontal orders will be used.");
+      warn("Using quad version of Space<Scalar>::adjust_element_order(), only horizontal orders will be used.");
       set_element_order_internal(e->id, std::max<int>(horizontal_min_order, get_element_order(e->id) + horizontal_order_change));
     }
     else
@@ -238,7 +255,8 @@ void Space::adjust_element_order(int horizontal_order_change, int vertical_order
   assign_dofs();
 }
 
-void Space::copy_orders_recurrent(Element* e, int order)
+template<typename Scalar>
+void Space<Scalar>::copy_orders_recurrent(Element* e, int order)
 {
   _F_
   if (e->active)
@@ -250,7 +268,8 @@ void Space::copy_orders_recurrent(Element* e, int order)
 }
 
 
-void Space::copy_orders(const Space<Scalar>* space, int inc)
+template<typename Scalar>
+void Space<Scalar>::copy_orders(const Space<Scalar>* space, int inc)
 {
   _F_
   Element* e;
@@ -276,7 +295,8 @@ void Space::copy_orders(const Space<Scalar>* space, int inc)
 }
 
 
-int Space::get_edge_order(Element* e, int edge)
+template<typename Scalar>
+int Space<Scalar>::get_edge_order(Element* e, int edge)
 {
   _F_
   Node* en = e->en[edge];
@@ -289,7 +309,8 @@ int Space::get_edge_order(Element* e, int edge)
 }
 
 
-int Space::get_edge_order_internal(Node* en)
+template<typename Scalar>
+int Space<Scalar>::get_edge_order_internal(Node* en)
 {
   _F_
   assert(en->type == HERMES_TYPE_EDGE);
@@ -319,7 +340,8 @@ int Space::get_edge_order_internal(Node* en)
 }
 
 
-void Space::set_mesh(Mesh* mesh)
+template<typename Scalar>
+void Space<Scalar>::set_mesh(Mesh* mesh)
 {
   _F_
   if (this->mesh == mesh) return;
@@ -332,7 +354,8 @@ void Space::set_mesh(Mesh* mesh)
 }
 
 
-void Space::propagate_zero_orders(Element* e)
+template<typename Scalar>
+void Space<Scalar>::propagate_zero_orders(Element* e)
 {
   _F_
   warn_if(get_element_order(e->id) != 0, "zeroing order of an element ID:%d, original order (H:%d; V:%d)", e->id, H2D_GET_H_ORDER(get_element_order(e->id)), H2D_GET_V_ORDER(get_element_order(e->id)));
@@ -344,7 +367,8 @@ void Space::propagate_zero_orders(Element* e)
 }
 
 
-void Space::distribute_orders(Mesh* mesh, int* parents)
+template<typename Scalar>
+void Space<Scalar>::distribute_orders(Mesh* mesh, int* parents)
 {
   _F_
   int num = mesh->get_max_element_id();
@@ -365,7 +389,8 @@ void Space::distribute_orders(Mesh* mesh, int* parents)
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 
-int Space::assign_dofs(int first_dof, int stride)
+template<typename Scalar>
+int Space<Scalar>::assign_dofs(int first_dof, int stride)
 {
   _F_
   if (first_dof < 0) error("Invalid first_dof.");
@@ -411,7 +436,8 @@ int Space::assign_dofs(int first_dof, int stride)
   return this->ndof;
 }
 
-void Space::reset_dof_assignment()
+template<typename Scalar>
+void Space<Scalar>::reset_dof_assignment()
 {
   _F_
   // First assume that all vertex nodes are part of a natural BC. the member NodeData::n
@@ -444,16 +470,18 @@ void Space::reset_dof_assignment()
 
 //// assembly lists ///////////////////////////////////////////////////////////////////////////////
 
-void AsmList::enlarge()
+template<typename Scalar>
+void AsmList<Scalar>::enlarge()
 {
   cap = !cap ? 256 : cap * 2;
   idx = (int*) realloc(idx, sizeof(int) * cap);
   dof = (int*) realloc(dof, sizeof(int) * cap);
-  coef = (scalar*) realloc(coef, sizeof(scalar) * cap);
+  coef = (Scalar*) realloc(coef, sizeof(Scalar) * cap);
 }
 
 
-void Space::get_element_assembly_list(Element* e, AsmList* al)
+template<typename Scalar>
+void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
 {
   _F_
   // some checks
@@ -474,7 +502,8 @@ void Space::get_element_assembly_list(Element* e, AsmList* al)
 }
 
 
-void Space::get_boundary_assembly_list(Element* e, int surf_num, AsmList* al)
+template<typename Scalar>
+void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al)
 {
   _F_
   al->clear();
@@ -485,7 +514,8 @@ void Space::get_boundary_assembly_list(Element* e, int surf_num, AsmList* al)
 }
 
 
-void Space::get_bubble_assembly_list(Element* e, AsmList* al)
+template<typename Scalar>
+void Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
 {
   _F_
   ElementData* ed = &edata[e->id];
@@ -498,7 +528,8 @@ void Space::get_bubble_assembly_list(Element* e, AsmList* al)
 }
 
 //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
-void Space::set_essential_bcs(EssentialBCs* essential_bcs)
+template<typename Scalar>
+void Space<Scalar>::set_essential_bcs(EssentialBCs<Scalar>* essential_bcs)
 {
   _F_
   this->essential_bcs = essential_bcs;
@@ -507,7 +538,8 @@ void Space::set_essential_bcs(EssentialBCs* essential_bcs)
   this->assign_dofs();
 }
 
-void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
+template<typename Scalar>
+void Space<Scalar>::precalculate_projection_matrix(int nv, double**& mat, double*& p)
 {
   _F_
   int n = shapeset->get_max_order() + 1 - nv;
@@ -540,7 +572,8 @@ void Space::precalculate_projection_matrix(int nv, double**& mat, double*& p)
 }
 
 
-void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
+template<typename Scalar>
+void Space<Scalar>::update_edge_bc(Element* e, SurfPos* surf_pos)
 {
   _F_
   if (e->active)
@@ -579,7 +612,8 @@ void Space::update_edge_bc(Element* e, SurfPos* surf_pos)
 }
 
 
-void Space::update_essential_bc_values()
+template<typename Scalar>
+void Space<Scalar>::update_essential_bc_values()
 {
   _F_
   Element* e;
@@ -590,7 +624,7 @@ void Space::update_essential_bc_values()
       int j = e->next_vert(i);
       if (e->vn[i]->bnd && e->vn[j]->bnd)
       {
-        SurfPos surf_pos = {0, i, e, this, NULL, NULL, e->vn[i]->id, e->vn[j]->id, 0.0, 0.0, 1.0};
+        SurfPos surf_pos = {0, i, e, e->vn[i]->id, e->vn[j]->id, 0.0, 0.0, 1.0};
         update_edge_bc(e, &surf_pos);
       }
     }
@@ -598,15 +632,17 @@ void Space::update_essential_bc_values()
 }
 
 
-void Space::free_extra_data()
+template<typename Scalar>
+void Space<Scalar>::free_extra_data()
 {
   _F_
   for (unsigned int i = 0; i < extra_data.size(); i++)
-    delete [] (scalar*) extra_data[i];
+    delete [] (Scalar*) extra_data[i];
   extra_data.clear();
 }
 
-int Space::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
+template<typename Scalar>
+int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
 {
   _F_
   int ndof = 0;
@@ -616,14 +652,16 @@ int Space::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
   return ndof;
 }
 
-int Space::get_num_dofs(Space<Scalar>* space)
+template<typename Scalar>
+int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
 {
   _F_
   return space->get_num_dofs();
 }
 
 // This is identical to H3D.
-int Space::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
+template<typename Scalar>
+int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
 {
   _F_
   int n = spaces.size();
@@ -637,7 +675,8 @@ int Space::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
 }
 
 // Performs uniform global refinement of a FE space.
-Hermes::vector<Space<Scalar>*>* Space::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase)
+template<typename Scalar>
+Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase)
 {
   _F_
   Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
@@ -659,7 +698,8 @@ Hermes::vector<Space<Scalar>*>* Space::construct_refined_spaces(Hermes::vector<S
 }
 
 // Light version for a single space.
-Space<Scalar>* Space::construct_refined_space(Space<Scalar>* coarse, int order_increase)
+template<typename Scalar>
+Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase)
 {
   _F_
   Mesh* ref_mesh = new Mesh;
@@ -671,7 +711,8 @@ Space<Scalar>* Space::construct_refined_space(Space<Scalar>* coarse, int order_i
 }
 
 // updating time-dependent essential BC
-void Space::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
+template<typename Scalar>
+void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
   int n = spaces.size();
   for (int i = 0; i < n; i++) {
     spaces[i]->get_essential_bcs()->set_current_time(time);
@@ -679,7 +720,8 @@ void Space::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, do
   }
 }
 
-void Space::update_essential_bc_values(Space<Scalar>*s, double time) {
+template<typename Scalar>
+void Space<Scalar>::update_essential_bc_values(Space<Scalar>*s, double time) {
   s->get_essential_bcs()->set_current_time(time);
   s->update_essential_bc_values();
 }

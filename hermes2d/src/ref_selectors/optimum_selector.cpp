@@ -9,22 +9,6 @@
 
 namespace RefinementSelectors {
 
-  HERMES_API std::ostream &operator<<(std::ostream &stream, const OptimumSelector::Cand& cand) {
-    stream.precision(2);
-    stream << "split:" << get_refin_str(cand.split);
-    stream << " err:" << std::scientific << cand.error << " dofs:" << cand.dofs << " ";
-
-    int num_sons = cand.get_num_elems();
-    stream << "[";
-    for(int i = 0; i < num_sons; i++) {
-      if (i > 0)
-        stream << " ";
-      stream << Hermes2D::get_quad_order_str(cand.p[i]);
-    }
-    stream << "]";
-    return stream;
-  }
-
   HERMES_API const char* get_cand_list_str(const CandList cand_list) {
     switch(cand_list) {
       case H2D_P_ISO: return "P_ISO";
@@ -67,7 +51,11 @@ namespace RefinementSelectors {
     }
   }
 
-  OptimumSelector::OptimumSelector(CandList cand_list, double conv_exp, int
+  template class OptimumSelector<double>;
+  template class OptimumSelector<std::complex<double>>;
+
+  template<typename Scalar>
+  OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
           Range<int>& edge_bubble_order) :
       Selector(max_order),
@@ -83,7 +71,8 @@ namespace RefinementSelectors {
     build_shape_indices(HERMES_MODE_QUAD, vertex_order, edge_bubble_order);
   }
 
-  void OptimumSelector::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices) {
     int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
     const int num_bubbles = shapeset->get_num_bubbles(quad_order);
     int* bubble_inxs = shapeset->get_bubble_indices(quad_order);
@@ -96,7 +85,8 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order) {
     std::vector<ShapeInx> &indices = shape_indices[mode];
     int* next_order = this->next_order_shape[mode];
     int& max_shape_inx = this->max_shape_inx[mode];
@@ -202,7 +192,8 @@ namespace RefinementSelectors {
     }
   }
 
-  int OptimumSelector::calc_num_shapes(int mode, int order_h, int order_v, int allowed_type_mask) {
+  template<typename Scalar>
+  int OptimumSelector<Scalar>::calc_num_shapes(int mode, int order_h, int order_v, int allowed_type_mask) {
     //test whether the evaluation is necessary
     bool full_eval = false;
     if ((allowed_type_mask & H2DST_VERTEX) != 0)
@@ -230,7 +221,8 @@ namespace RefinementSelectors {
       return 0;
   }
 
-  void OptimumSelector::append_candidates_split(const int start_quad_order, const int last_quad_order, const int split, bool iso_p) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::append_candidates_split(const int start_quad_order, const int last_quad_order, const int split, bool iso_p) {
     //check whether end orders are not lower than start orders
     if (last_quad_order < 0 || start_quad_order < 0)
       return;
@@ -271,7 +263,8 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order) {
     int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
     int max_p_order_h = H2D_GET_H_ORDER(max_p_quad_order), max_p_order_v = H2D_GET_V_ORDER(max_p_quad_order);
     int max_ha_order_h = H2D_GET_H_ORDER(max_ha_quad_order), max_ha_order_v = H2D_GET_V_ORDER(max_ha_quad_order);
@@ -343,7 +336,8 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const {
     std::vector<Cand>::const_iterator cand = candidates.begin();
     while (cand != candidates.end()) {
       CandsInfo* info = NULL;
@@ -371,7 +365,8 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln) {
     bool tri = e->is_triangle();
 
     for (unsigned i = 0; i < candidates.size(); i++) {
@@ -441,13 +436,15 @@ namespace RefinementSelectors {
     }
   }
 
-  void OptimumSelector::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) {
     evaluate_cands_error(e, rsln, avg_error, dev_error);
     evaluate_cands_dof(e, rsln);
     evaluate_cands_score(e);
   }
 
-  void OptimumSelector::evaluate_cands_score(Element* e) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::evaluate_cands_score(Element* e) {
     //calculate score of candidates
     Cand& unrefined = candidates[0];
     const int num_cands = (int)candidates.size();
@@ -466,11 +463,13 @@ namespace RefinementSelectors {
     }
   }
 
-  bool OptimumSelector::compare_cand_score(const Cand& a, const Cand& b) {
+  template<typename Scalar>
+  bool OptimumSelector<Scalar>::compare_cand_score(const Cand& a, const Cand& b) {
     return a.score > b.score;
   }
 
-  void OptimumSelector::select_best_candidate(Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::select_best_candidate(Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand) {
     // select an above-average candidate with the steepest error decrease
 
     //sort according to the score
@@ -509,7 +508,8 @@ namespace RefinementSelectors {
     *selected_h_cand = h_imax;
   }
 
-  bool OptimumSelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
+  template<typename Scalar>
+  bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     //make an uniform order in a case of a triangle
     int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
     if (element->is_triangle()) {
@@ -578,7 +578,8 @@ namespace RefinementSelectors {
       return true;
   }
 
-  void OptimumSelector::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
     assert_msg(refinement != H2D_REFINEMENT_P, "P-candidate not supported for updating shared orders");
     const int num_sons = get_refin_sons(refinement);
     if (suggested_quad_orders != NULL) {
@@ -616,7 +617,8 @@ namespace RefinementSelectors {
 #endif
   }
 
-  void OptimumSelector::set_option(const SelOption option, bool enable) {
+  template<typename Scalar>
+  void OptimumSelector<Scalar>::set_option(const SelOption option, bool enable) {
     switch(option) {
     case H2D_PREFER_SYMMETRIC_MESH: opt_symmetric_mesh = enable; break;
     case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;

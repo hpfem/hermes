@@ -19,8 +19,7 @@
 
 
 
-PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset)
-               : RealFunction()
+PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>()
 {
   assert_msg(shapeset != NULL, "Shapeset cannot be NULL.");
   this->shapeset = shapeset;
@@ -32,8 +31,7 @@ PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset)
 }
 
 
-PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss)
-               : RealFunction()
+PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss) : Function<double>()
 {
   while (pss->is_slave())
     pss = pss->master_pss;
@@ -55,7 +53,7 @@ void PrecalcShapeset::update_max_index()
 
 void PrecalcShapeset::set_quad_2d(Quad2D* quad_2d)
 {
-  RealFunction::set_quad_2d(quad_2d);
+  Function<double>::set_quad_2d(quad_2d);
 }
 
 void PrecalcShapeset::handle_overflow_idx()

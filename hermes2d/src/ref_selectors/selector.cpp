@@ -5,14 +5,16 @@
 
 namespace RefinementSelectors {
 
-  bool HOnlySelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
+  template<typename Scalar>
+  bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     refinement.split = H2D_REFINEMENT_H;
     refinement.p[0] = refinement.p[1] = refinement.p[2] = refinement.p[3] = quad_order;
     refinement.q[0] = refinement.q[1] = refinement.q[2] = refinement.q[3] = quad_order;
     return true;
   }
 
-  void HOnlySelector::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
+  template<typename Scalar>
+  void HOnlySelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
     if (suggested_quad_orders != NULL)
       for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
         tgt_quad_orders[i] = suggested_quad_orders[i];
@@ -21,13 +23,15 @@ namespace RefinementSelectors {
         tgt_quad_orders[i] = orig_quad_order;
   }
 
-  POnlySelector::POnlySelector(int max_order, int order_h_inc, int order_v_inc)
+  template<typename Scalar>
+  POnlySelector<Scalar>::POnlySelector(int max_order, int order_h_inc, int order_v_inc)
   : Selector(max_order), order_h_inc(order_h_inc), order_v_inc(order_v_inc) {
     error_if(order_h_inc >= 0, "Horizontal increase has to be greater or equal to zero.");
     error_if(order_v_inc >= 0, "Vertical increase has to be greater or equal to zero.");
   }
 
-  bool POnlySelector::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
+  template<typename Scalar>
+  bool POnlySelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) {
     refinement.split = H2D_REFINEMENT_P;
 
     //determin max. order
@@ -51,7 +55,8 @@ namespace RefinementSelectors {
       return false;
   }
 
-  void POnlySelector::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
+  template<typename Scalar>
+  void POnlySelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) {
     if (suggested_quad_orders != NULL)
       tgt_quad_orders[0] = suggested_quad_orders[0];
     else

@@ -239,7 +239,7 @@ public:
 };
 
 template<typename Scalar>
-class HERMES_API VectorFormVol : public Form<Scalar>
+class VectorFormVol : public Form<Scalar>
 {
 public:
   VectorFormVol(unsigned int i, std::string area = HERMES_ANY, 
@@ -258,7 +258,7 @@ public:
 };
 
 template<typename Scalar>
-class HERMES_API VectorFormSurf : public Form<Scalar>
+class VectorFormSurf : public Form<Scalar>
 {
 public:
   VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, 
@@ -277,8 +277,10 @@ public:
 };
 
 template<typename Scalar>
-class Stage
+class HERMES_API Stage
 {
+public:
+  Stage() {};
   Hermes::vector<int> idx;
   Hermes::vector<Mesh*> meshes;
   Hermes::vector<Transformable*> fns;
@@ -295,5 +297,18 @@ class Stage
   std::set<MeshFunction<Scalar>*> ext_set;
 };
 
-
+template class HERMES_API WeakForm<double>;
+template class HERMES_API WeakForm<std::complex<double>>;
+template class HERMES_API Form<double>;
+template class HERMES_API Form<std::complex<double>>;
+template class HERMES_API MatrixFormVol<double>;
+template class HERMES_API MatrixFormVol<std::complex<double>>;
+template class HERMES_API MatrixFormSurf<double>;
+template class HERMES_API MatrixFormSurf<std::complex<double>>;
+template class HERMES_API VectorFormVol<double>;
+template class HERMES_API VectorFormVol<std::complex<double>>;
+template class HERMES_API VectorFormSurf<double>;
+template class HERMES_API VectorFormSurf<std::complex<double>>;
+template class HERMES_API Stage<double>;
+template class HERMES_API Stage<std::complex<double>>;
 #endif

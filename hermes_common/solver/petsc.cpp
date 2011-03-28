@@ -309,7 +309,7 @@ PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate(){
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-PetscVector<Scalar>::PetscVector<Scalar>() {
+PetscVector<Scalar>::PetscVector() {
   _F_
 #ifdef WITH_PETSC
   inited = false;
@@ -320,7 +320,7 @@ PetscVector<Scalar>::PetscVector<Scalar>() {
 }
 
 template<typename Scalar>
-PetscVector<Scalar>::~PetscVector<Scalar>() {
+PetscVector<Scalar>::~PetscVector() {
   _F_
   free();
   remove_petsc_object();

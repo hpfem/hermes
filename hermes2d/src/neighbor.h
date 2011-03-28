@@ -7,7 +7,6 @@
 #include "function/solution.h"
 #include "function/forms.h"
 #include "mesh/refmap.h"
-#include "adapt/kelly_type_adapt.h"
 
 /*** Class NeighborSearch. ***/
 
@@ -60,9 +59,6 @@
  * function's order/values on both sides of active edge as in the previous case of external functions.
  *
  */
-
-template<typename Scalar> class KellyTypeAdapt;
-
 
 template<typename Scalar>
 class HERMES_API NeighborSearch
@@ -382,7 +378,7 @@ public:
     /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
     /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
     ///
-    ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space *space);
+    ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
 
     /// Destructor.
     ~ExtendedShapeset() {
@@ -397,7 +393,7 @@ public:
     /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
     /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
     ///
-    void update(NeighborSearch* neighborhood, Space* space) {
+    void update(NeighborSearch* neighborhood, Space<Scalar>* space) {
       delete [] this->dof;
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
       combine_assembly_lists();
@@ -420,8 +416,9 @@ public:
   bool ignore_errors;
 
   friend class DiscreteProblem<Scalar>;
-  friend class KellyTypeAdapt<Scalar>;
   friend class DiscontinuityDetector;
 };
 
+template class HERMES_API NeighborSearch<double>;
+template class HERMES_API NeighborSearch<std::complex<double>>;
 #endif /* NEIGHBOR_H_ */

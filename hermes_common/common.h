@@ -27,6 +27,7 @@
 # undef _XOPEN_SOURCE	// typeinfo defines it
 #endif
 #include <typeinfo>
+#include <complex>
 
 #include <stdexcept>
 #include <cstdarg>
@@ -322,6 +323,7 @@ const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
 inline int sqr(int x) { return x*x; }
 inline double sqr(double x) { return x*x; }
+inline double sqr(std::complex<double> x)   { return std::norm(x); }
 inline double magn(double x) { return fabs(x); }
 inline double conj(double a) {  return a; }
 
@@ -360,7 +362,7 @@ typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 
 template<typename Scalar>
-struct Scalar2 
+class Scalar2 
 { 
   Scalar val[2]; 
 
@@ -377,7 +379,7 @@ struct Scalar2
   }
 };
 template<typename Scalar>
-struct Scalar3
+class Scalar3
 { 
   Scalar val[3]; 
 

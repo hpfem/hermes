@@ -48,15 +48,9 @@ MeshView::MeshView(char* title, WinGeom* wg)
   b_elem_mrk = false;
 }
 
-
-
-
-
-
-
 void MeshView::show(Mesh* mesh)
 {
-  Solution sln;
+  Solution<double> sln;
   if (mesh == NULL) error("mesh == NULL in MeshView::show().");
   if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
   sln.set_zero(mesh);

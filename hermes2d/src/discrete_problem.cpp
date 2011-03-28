@@ -30,6 +30,10 @@
 #include "views/base_view.h"
 #include "boundaryconditions/essential_bcs.h"
 
+
+template class DiscreteProblem<double>;
+template class DiscreteProblem<std::complex<double>>;
+
 template<typename Scalar>
 DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces, 
          bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
@@ -84,7 +88,7 @@ void DiscreteProblem<Scalar>::init()
   }
 
   // Create global enumeration of dof and fill the ndof variable.
-  ndof = Space::assign_dofs(spaces);
+  ndof = Space<Scalar>::assign_dofs(spaces);
 
   // Update the weak formulation with the user-supplied string markers
   // according to the conversion table contained in the mesh.
@@ -214,7 +218,7 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
     mat->free();
     mat->prealloc(ndof);
 
-    AsmList<Scalar>* al = new AsmList[wf->get_neq()];
+    AsmList<Scalar>* al = new AsmList<Scalar>[wf->get_neq()];
     Mesh** meshes = new Mesh*[wf->get_neq()];
     bool **blocks = wf->get_blocks(force_diagonal_blocks);
 
@@ -249,7 +253,7 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
 
         // Get the neighbors.
         for(unsigned int el = 0; el < wf->get_neq(); el++) {
-          NeighborSearch ns(e[el], meshes[el]);
+          NeighborSearch<Scalar> ns(e[el], meshes[el]);
 
           // Ignoring errors (and doing nothing) in case the edge is a boundary one.
           ns.set_ignore_errors(true);
@@ -282,7 +286,7 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
               for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++) {
                 if ((blocks[m][el] || blocks[el][m]) && e[m] != NULL)  {
                   AsmList<Scalar>*am = &(al[m]);
-                  AsmList<Scalar>*an = new AsmList;
+                  AsmList<Scalar>*an = new AsmList<Scalar>;
                   spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
 
                   // pretend assembling of the element stiffness matrix
@@ -410,8 +414,8 @@ void DiscreteProblem<Scalar>::convert_coeff_vec(Scalar* coeff_vec, Hermes::vecto
   _F_
   if (coeff_vec != NULL) {
     for (unsigned int i = 0; i < wf->get_neq(); i++) {
-      Solution<Scalar>* external_solution_i = new Solution(spaces[i]->get_mesh());
-      Solution::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift);
+      Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
+      Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift);
       u_ext.push_back(external_solution_i);
     }
   }
@@ -629,7 +633,7 @@ void DiscreteProblem<Scalar>::assemble_one_state(Stage<Scalar>& stage,
   // Assembly list vector.
   Hermes::vector<AsmList<Scalar>*> al;
   for(unsigned int i = 0; i < wf->get_neq(); i++) 
-    al.push_back(new AsmList);
+    al.push_back(new AsmList<Scalar>);
   
   // Natural boundary condition flag.
   Hermes::vector<bool> nat;
@@ -1082,7 +1086,7 @@ void DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>
   // Initialize the NeighborSearches.
   for(unsigned int i = 0; i < stage.meshes.size(); i++) {
     if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq)) {
-      NeighborSearch<Scalar>* ns = new NeighborSearch(stage.fns[i]->get_active_element(), stage.meshes[i]);
+      NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(stage.fns[i]->get_active_element(), stage.meshes[i]);
       ns->original_central_el_transform = stage.fns[i]->get_transform();
       neighbor_searches.add(ns, stage.meshes[i]->get_seq() - min_dg_mesh_seq);
     }
@@ -1262,7 +1266,7 @@ unsigned int DiscreteProblem<Scalar>::update_ns_subtree(NeighborSearch<Scalar>* 
   // Key part.
   // Begin with storing the info about the current neighbor.
   Element* neighbor = ns->neighbors[ith_neighbor];
-  NeighborSearch::NeighborEdgeInfo edge_info = ns->neighbor_edges[ith_neighbor];
+  typename NeighborSearch<Scalar>::NeighborEdgeInfo edge_info = ns->neighbor_edges[ith_neighbor];
 
   // Initialize the vector for central transformations->
   Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
@@ -1432,8 +1436,6 @@ void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage
     }
 
     surf_pos.base = trav_base;
-    surf_pos.space_v = spaces[m];
-    surf_pos.space_u = spaces[n];
 
     Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
@@ -1492,7 +1494,6 @@ void DiscreteProblem<Scalar>::assemble_surface_vector_forms(Stage<Scalar>& stage
     if (vfs->area == HERMES_ANY && !nat[m]) continue;
 
     surf_pos.base = trav_base;
-    surf_pos.space_v = spaces[m];
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
@@ -1529,12 +1530,10 @@ void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
 
     surf_pos.base = trav_base;
-    surf_pos.space_v = spaces[m];
-    surf_pos.space_u = spaces[n];
             
     // Create the extended shapeset on the union of the central element and its current neighbor.
-    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
-    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
+    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -3245,7 +3244,7 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
   Hermes::vector<Solution<Scalar>*> solutions;
   Hermes::vector<bool> dir_lift_false;
   for (int i=0; i < num_spaces; i++) {
-    if (residual_as_function) solutions.push_back(new Solution());
+    if (residual_as_function) solutions.push_back(new Solution<Scalar>());
     dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
   }
 
@@ -3272,7 +3271,7 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
       // since in the FE space not all components in the residual vector have the same weight.
       // On the other hand, this is slower as it requires global norm calculation, and thus
       // numerical integration over the entire domain. Therefore this option is off by default.
-      Solution::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
+      Solution<Scalar>::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
       residual_norm = calc_norms(solutions);
     }
     else {
@@ -3326,13 +3325,13 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
                   int picard_max_iter, bool verbose) const
 {
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix<Scalar>* matrix = create_matrix(matrix_solver);
-  Vector<Scalar>* rhs = create_vector(matrix_solver);
-  Solver<Scalar>* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  SparseMatrix<Scalar>* matrix = create_matrix<Scalar>(matrix_solver);
+  Vector<Scalar>* rhs = create_vector<Scalar>(matrix_solver);
+  Solver<Scalar>* solver = create_linear_solver<Scalar>(matrix_solver, matrix, rhs);
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(wf, space, is_linear);
+  DiscreteProblem<Scalar> dp(wf, space, is_linear);
 
   int iter_count = 0;
   while (true) {
@@ -3340,8 +3339,8 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
     dp.assemble(matrix, rhs);
 
     // Solve the linear system and if successful, obtain the solution.
-    Solution sln_new;
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), space, &sln_new);
+    Solution<Scalar> sln_new;
+    if(solver->solve()) Solution<Scalar>::vector_to_solution(solver->get_solution(), space, &sln_new);
     else error ("Matrix<Scalar> solver failed.\n");
 
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
@@ -3372,3 +3371,6 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
     iter_count++;
   }
 }
+
+template class DiscreteProblem<double>;
+template class DiscreteProblem<std::complex<double>>;

@@ -6,14 +6,21 @@
 #include "l2_proj_based_selector.h"
 
 namespace RefinementSelectors {
-  L2Shapeset L2ProjBasedSelector::default_shapeset;
+  template class L2ProjBasedSelector<double>;
+  template class L2ProjBasedSelector<std::complex<double>>;
 
-  const int L2ProjBasedSelector::H2DRS_MAX_L2_ORDER = H2DRS_MAX_ORDER;
+  template<typename Scalar>
+  L2Shapeset L2ProjBasedSelector<Scalar>::default_shapeset;
 
-  L2ProjBasedSelector::L2ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, L2Shapeset* user_shapeset)
+  template<typename Scalar>
+  const int L2ProjBasedSelector<Scalar>::H2DRS_MAX_L2_ORDER = H2DRS_MAX_ORDER;
+
+  template<typename Scalar>
+  L2ProjBasedSelector<Scalar>::L2ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, L2Shapeset* user_shapeset)
     : ProjBasedSelector(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(0, H2DRS_MAX_L2_ORDER)) {}
 
-  void L2ProjBasedSelector::set_current_order_range(Element* element) {
+  template<typename Scalar>
+  void L2ProjBasedSelector<Scalar>::set_current_order_range(Element* element) {
     current_max_order = this->max_order;
     if (current_max_order == H2DRS_DEFAULT_ORDER)
       current_max_order = (20 - element->iro_cache)/2 - 2; // default
@@ -22,7 +29,8 @@ namespace RefinementSelectors {
     current_min_order = 1;
   }
 
-  void L2ProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
+  template<typename Scalar>
+  void L2ProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
     //for all transformations
     bool done = false;
     int inx_trf = 0;
@@ -66,7 +74,8 @@ namespace RefinementSelectors {
     error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
   }
 
-  void L2ProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
+  template<typename Scalar>
+  void L2ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
     //calculate values
     precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals);
 
@@ -141,19 +150,21 @@ namespace RefinementSelectors {
     }
   }
 
-  scalar** L2ProjBasedSelector::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order) {
+  template<typename Scalar>
+  Scalar** L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order) {
     //set element and integration order
     rsln->set_active_element(element);
     rsln->set_quad_order(intr_gip_order);
 
     //fill with values
-    scalar** rvals_son = precalc_rvals[inx_son];
+    Scalar** rvals_son = precalc_rvals[inx_son];
     rvals_son[H2D_L2FE_VALUE] = rsln->get_fn_values(0);
 
     return rvals_son;
   }
 
-  double** L2ProjBasedSelector::build_projection_matrix(double3* gip_points, int num_gip_points,
+  template<typename Scalar>
+  double** L2ProjBasedSelector<Scalar>::build_projection_matrix(double3* gip_points, int num_gip_points,
     const int* shape_inx, const int num_shapes) {
     //allocate
     double** matrix = new_matrix<double>(num_shapes, num_shapes);
@@ -182,8 +193,9 @@ namespace RefinementSelectors {
     return matrix;
   }
 
-  scalar L2ProjBasedSelector::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) {
-    scalar total_value = 0;
+  template<typename Scalar>
+  Scalar L2ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) {
+    Scalar total_value = 0;
     for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) {
       //get location and transform it
       double3 &gip_pt = sub_gip.gip_points[gip_inx];
@@ -199,32 +211,33 @@ namespace RefinementSelectors {
       ////DEBUG-END
 
       //get value of ref. solution
-      scalar ref_value;
+      Scalar ref_value;
       ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];
 
       //evaluate a right-hand value
-      scalar value = (shape_value * ref_value);
+      Scalar value = (shape_value * ref_value);
 
       total_value += gip_pt[H2D_GIP2D_W] * value;
     }
     return total_value;
   }
 
-  double L2ProjBasedSelector::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) {
+  template<typename Scalar>
+  double L2ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) {
     double total_error_squared = 0;
     for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) {
       //get location and transform it
       double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
       //calculate value of projected solution
-      scalar proj_value = 0;
+      Scalar proj_value = 0;
       for(int i = 0; i < elem_proj.num_shapes; i++) {
         int shape_inx = elem_proj.shape_inxs[i];
         proj_value += elem_proj.shape_coefs[i] * elem_proj.svals[shape_inx][H2D_L2FE_VALUE][gip_inx];
       }
 
       //get value of ref. solution
-      scalar ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];
+      Scalar ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];
 
       //evaluate error
       double error_squared = sqr(proj_value - ref_value);

@@ -337,7 +337,7 @@ void DXDYFilter<Scalar>::precalculate(int order, int mask)
   for (int j = 0; j < num_components; j++)
   {
     // obtain solution tables
-    scalar *val[10], *dx[10], *dy[10];
+    Scalar *val[10], *dx[10], *dy[10];
     for (int i = 0; i < num; i++)
     {
       val[i] = sln[i]->get_fn_values(j);
@@ -345,9 +345,9 @@ void DXDYFilter<Scalar>::precalculate(int order, int mask)
       dy[i]  = sln[i]->get_dy_values(j);
     }
 
-    Hermes::vector<scalar *> values_vector;
-    Hermes::vector<scalar *> dx_vector;
-    Hermes::vector<scalar *> dy_vector;
+    Hermes::vector<Scalar *> values_vector;
+    Hermes::vector<Scalar *> dx_vector;
+    Hermes::vector<Scalar *> dy_vector;
 
 		for(int i = 0; i < this->num; i++)
 		{

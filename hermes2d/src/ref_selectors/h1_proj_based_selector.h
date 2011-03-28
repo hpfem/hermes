@@ -25,7 +25,8 @@ namespace RefinementSelectors {
    *  Since an initialization of the class may take a long time,
    *  it is suggested to create the instance outside the adaptivity
    *  loop. */
-  class HERMES_API H1ProjBasedSelector : public ProjBasedSelector {
+  template<typename Scalar>
+  class HERMES_API H1ProjBasedSelector : public ProjBasedSelector<Scalar> {
   public: //API
     /// Constructor.
     /** \param[in] cand_list A predefined list of candidates.
@@ -44,7 +45,7 @@ namespace RefinementSelectors {
 
     static const int H2DRS_MAX_H1_ORDER; ///< A maximum used order in this H1-space selector.
 
-    scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_H1FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
+    Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_H1FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
     /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
     /** The default order range is [1, 9]. If curved, the upper boundary of the range becomes lower.
@@ -54,7 +55,7 @@ namespace RefinementSelectors {
 
     /// Returns an array of values of the reference solution at integration points.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
-    virtual scalar** precalc_ref_solution(int inx_son, Solution* rsln, Element* element, int intr_gip_order);
+    virtual Scalar** precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order);
 
     /// Calculates values of shape function at GIP for all transformations.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
@@ -70,7 +71,7 @@ namespace RefinementSelectors {
 
     /// Evaluates a value of the right-hande side in a subdomain.
     /**  Overriden function. For details, see ProjBasedSelector::evaluate_rhs_subdomain(). */
-    virtual scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape);
+    virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape);
 
     /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
     /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */

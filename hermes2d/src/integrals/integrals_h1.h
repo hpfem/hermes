@@ -22,119 +22,119 @@
 
 //// the following integrals can be used in both volume and surface forms ////
 
-template<typename Real, typename Scalar>
-Scalar int_v(int n, double *wt, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_v(int n, double *wt, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (v->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_u_v(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_F_v(int n, double *wt, Real (*F)(Real x, Real y), Func<Real> *v, Geom<Real> *e)
+template<typename real, typename scalar>
+scalar int_F_v(int n, double *wt, real (*F)(real x, real y), Func<real> *v, Geom<real> *e)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * ((*F)(e->x[i], e->y[i]) * v->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_grad_u_grad_v(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudx_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudx_v(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dx[i] * v->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudy_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudy_v(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dy[i] * v->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_u_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_u_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (v->dx[i] * u->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_u_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (v->dy[i] * u->val[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudx_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudx_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dx[i] * v->dx[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudy_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudy_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dy[i] * v->dy[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudx_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudx_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dx[i] * v->dy[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_dudy_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_dudy_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (v->dx[i] * u->dy[i]);
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2,
-                       Func<Real> *u, Func<Real> *v)
+template<typename real, typename scalar>
+scalar int_w_nabla_u_v(int n, double *wt, Func<real> *w1, Func<real> *w2,
+                       Func<real> *u, Func<real> *v)
 {
-  Scalar result = 0;
+  scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (w1->val[i] * u->dx[i] + w2->val[i] * u->dy[i]) * v->val[i];
   return result;
@@ -161,8 +161,8 @@ Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-inline double int_h1_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
+template<typename Scalar>
+inline double int_h1_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
   Quad2D* quad = fu->get_quad_2d();
   assert(quad == fv->get_quad_2d());
@@ -172,10 +172,10 @@ inline double int_h1_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   fu->set_quad_order(o);
   fv->set_quad_order(o);
 
-  scalar* fnu = fu->get_fn_values();
-  scalar* fnv = fv->get_fn_values();
+  Scalar* fnu = fu->get_fn_values();
+  Scalar* fnv = fv->get_fn_values();
 
-  scalar *dudx, *dudy, *dvdx, *dvdy;
+  Scalar *dudx, *dudy, *dvdx, *dvdy;
   fu->get_dx_dy_values(dudx, dudy);
   fv->get_dx_dy_values(dvdx, dvdy);
 
@@ -185,8 +185,8 @@ inline double int_h1_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
 }
 
 
-template<typename T>
-inline double int_h1_semi_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
+template<typename Scalar>
+inline double int_h1_semi_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
   Quad2D* quad = fu->get_quad_2d();
   assert(quad == fv->get_quad_2d());
@@ -196,10 +196,10 @@ inline double int_h1_semi_error(Function<T>* fu, Function<T>* fv, RefMap* ru, Re
   fu->set_quad_order(o);
   fv->set_quad_order(o);
 
-  scalar* fnu = fu->get_fn_values();
-  scalar* fnv = fv->get_fn_values();
+  Scalar* fnu = fu->get_fn_values();
+  Scalar* fnv = fv->get_fn_values();
 
-  scalar *dudx, *dudy, *dvdx, *dvdy;
+  Scalar *dudx, *dudy, *dvdx, *dvdy;
   fu->get_dx_dy_values(dudx, dudy);
   fv->get_dx_dy_values(dvdx, dvdy);
 
@@ -209,8 +209,8 @@ inline double int_h1_semi_error(Function<T>* fu, Function<T>* fv, RefMap* ru, Re
 }
 
 
-template<typename T>
-inline double int_l2_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
+template<typename Scalar>
+inline double int_l2_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
   Quad2D* quad = fu->get_quad_2d();
   assert(quad == fv->get_quad_2d());
@@ -220,8 +220,8 @@ inline double int_l2_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   fu->set_quad_order(o, H2D_FN_VAL);
   fv->set_quad_order(o, H2D_FN_VAL);
 
-  scalar* fnu = fu->get_fn_values();
-  scalar* fnv = fv->get_fn_values();
+  Scalar* fnu = fu->get_fn_values();
+  Scalar* fnv = fv->get_fn_values();
 
   double result = 0.0;
   h1_integrate_expression(sqr(fnu[i] - fnv[i]));
@@ -229,8 +229,8 @@ inline double int_l2_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
 }
 
 
-template<typename T>
-inline double int_dx_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
+template<typename Scalar>
+inline double int_dx_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
   Quad2D* quad = fu->get_quad_2d();
   assert(quad == fv->get_quad_2d());
@@ -240,7 +240,7 @@ inline double int_dx_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   fu->set_quad_order(o);
   fv->set_quad_order(o);
 
-  scalar *dudx, *dudy, *dvdx, *dvdy;
+  Scalar *dudx, *dudy, *dvdx, *dvdy;
   fu->get_dx_dy_values(dudx, dudy);
   fv->get_dx_dy_values(dvdx, dvdy);
 
@@ -250,8 +250,8 @@ inline double int_dx_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
 }
 
 
-template<typename T>
-inline double int_dy_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
+template<typename Scalar>
+inline double int_dy_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
   Quad2D* quad = fu->get_quad_2d();
   assert(quad == fv->get_quad_2d());
@@ -261,7 +261,7 @@ inline double int_dy_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   fu->set_quad_order(o);
   fv->set_quad_order(o);
 
-  scalar *dudx, *dudy, *dvdx, *dvdy;
+  Scalar *dudx, *dudy, *dvdx, *dvdy;
   fu->get_dx_dy_values(dudx, dudy);
   fv->get_dx_dy_values(dvdx, dvdy);
 
@@ -271,8 +271,8 @@ inline double int_dy_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
 }
 
 
-template<typename T>
-inline double int_h1_norm(Function<T>* fu, RefMap* ru)
+template<typename Scalar>
+inline double int_h1_norm(Function<Scalar>* fu, RefMap* ru)
 {
   Quad2D* quad = fu->get_quad_2d();
 
@@ -280,8 +280,8 @@ inline double int_h1_norm(Function<T>* fu, RefMap* ru)
   limit_order(o);
   fu->set_quad_order(o);
 
-  scalar* fnu = fu->get_fn_values();
-  scalar *dudx, *dudy;
+  Scalar* fnu = fu->get_fn_values();
+  Scalar *dudx, *dudy;
   fu->get_dx_dy_values(dudx, dudy);
 
   double result = 0.0;
@@ -290,8 +290,8 @@ inline double int_h1_norm(Function<T>* fu, RefMap* ru)
 }
 
 
-template<typename T>
-inline double int_h1_seminorm(Function<T>* fu, RefMap* ru)
+template<typename Scalar>
+inline double int_h1_seminorm(Function<Scalar>* fu, RefMap* ru)
 {
   Quad2D* quad = fu->get_quad_2d();
 
@@ -299,8 +299,8 @@ inline double int_h1_seminorm(Function<T>* fu, RefMap* ru)
   limit_order(o);
   fu->set_quad_order(o);
 
-  scalar* fnu = fu->get_fn_values();
-  scalar *dudx, *dudy;
+  Scalar* fnu = fu->get_fn_values();
+  Scalar *dudx, *dudy;
   fu->get_dx_dy_values(dudx, dudy);
 
   double result = 0.0;
@@ -309,8 +309,8 @@ inline double int_h1_seminorm(Function<T>* fu, RefMap* ru)
 }
 
 
-template<typename T>
-inline double int_l2_norm(Function<T>* fu, RefMap* ru)
+template<typename Scalar>
+inline double int_l2_norm(Function<Scalar>* fu, RefMap* ru)
 {
   Quad2D* quad = fu->get_quad_2d();
 
@@ -318,7 +318,7 @@ inline double int_l2_norm(Function<T>* fu, RefMap* ru)
   limit_order(o);
   fu->set_quad_order(o, H2D_FN_VAL);
 
-  scalar* fnu = fu->get_fn_values();
+  Scalar* fnu = fu->get_fn_values();
 
   double result = 0.0;
   h1_integrate_expression(sqr(fnu[i]));

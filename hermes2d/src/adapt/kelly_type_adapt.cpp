@@ -59,7 +59,7 @@ bool KellyTypeAdapt<Scalar>::adapt(double thr, int strat, int regularize, double
 }
 
 template<typename Scalar>
-void KellyTypeAdapt<Scalar>::add_error_estimator_vol(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
+void KellyTypeAdapt<Scalar>::add_error_estimator_vol(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if(form->i < 0 || form->i >= this->num,
            "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
@@ -69,7 +69,7 @@ void KellyTypeAdapt<Scalar>::add_error_estimator_vol(KellyTypeAdapt<Scalar>::Err
 }
 
 template<typename Scalar>
-void KellyTypeAdapt<Scalar>::add_error_estimator_surf(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
+void KellyTypeAdapt<Scalar>::add_error_estimator_surf(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if (form->i < 0 || form->i >= this->num,
             "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
@@ -449,7 +449,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
 }
 
 template<typename Scalar>
-double KellyTypeAdapt<Scalar>::eval_solution_norm(Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction<Scalar>* sln)
+double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction<Scalar>* sln)
 {
   // determine the integration order
   int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -496,7 +496,7 @@ double KellyTypeAdapt<Scalar>::eval_solution_norm(Adapt::MatrixFormVolError* for
 }
 
 template<typename Scalar>
-double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm)
+double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm)
 {
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
@@ -557,7 +557,7 @@ double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(KellyTypeAdapt<Scalar>:
 }
 
 template<typename Scalar>
-double KellyTypeAdapt<Scalar>::eval_boundary_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm, SurfPos* surf_pos)
+double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form, RefMap *rm, SurfPos* surf_pos)
 {
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
@@ -618,9 +618,9 @@ double KellyTypeAdapt<Scalar>::eval_boundary_estimator(KellyTypeAdapt<Scalar>::E
 }
 
 template<typename Scalar>
-double KellyTypeAdapt<Scalar>::eval_interface_estimator(KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
+double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
                                                 RefMap *rm, SurfPos* surf_pos,
-                                                LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index)
+                                                LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index)
 {
   NeighborSearch* nbs = neighbor_searches.get(neighbor_index);
   Hermes::vector<MeshFunction<Scalar>*> slns;

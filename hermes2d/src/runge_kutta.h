@@ -67,6 +67,7 @@
 // (9) If the problem is linear, then the Jacobian is constant. If Space 
 //     does not change between time steps, we should keep it. 
 
+template<typename Scalar>
 class HERMES_API RungeKutta
 {
 
@@ -74,7 +75,7 @@ public:
   /// Constructor.
   /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
   /// as an initial guess for the Newton's method, instead zero vector will be used.
-  RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool start_from_zero_K_vector = false, bool residual_as_vector = true);
+  RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool start_from_zero_K_vector = false, bool residual_as_vector = true);
 
   /// Destructor.
   ~RungeKutta();
@@ -85,8 +86,8 @@ public:
   /// which has length num_stages*ndof. The result is saved in vector_left which also
   /// has length num_stages*ndof.
   /// TODO: enable this for other types of matrices.
-  void multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix_left, int num_stages,
-                                         scalar* stage_coeff_vec, scalar* vector_left);
+  void multiply_as_diagonal_block_matrix(UMFPackMatrix<Scalar>* matrix_left, int num_stages,
+                                         Scalar* stage_coeff_vec, Scalar* vector_left);
 
   // Perform one explicit or implicit time step using the Runge-Kutta method
   // corresponding to a given Butcher's table. If err_vec != NULL then it will be 
@@ -95,21 +96,21 @@ public:
   // values for newton_tol and newton_max_iter are for linear problems.
   // Many improvements are needed, a todo list is presented at the beginning of
   // the corresponding .cpp file.
-  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new,
-                    Hermes::vector<Solution*> error_fns, bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
+  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new,
+                    Hermes::vector<Solution<Scalar>*> error_fns, bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
                     int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                     double newton_max_allowed_residual_norm = 1e6);
-  bool rk_time_step(double current_time, double time_step, Solution* slns_time_prev, Solution* slns_time_new,
-                    Solution* error_fn, bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
+  bool rk_time_step(double current_time, double time_step, Solution<Scalar>* slns_time_prev, Solution<Scalar>* slns_time_new,
+                    Solution<Scalar>* error_fn, bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
                     int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                     double newton_max_allowed_residual_norm = 1e6);
 
   // This is a wrapper for the previous function if error_fn is not provided
   // (adaptive time stepping is not wanted). 
-  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new,
+  bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new,
                     bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                     double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
-  bool rk_time_step(double current_time, double time_step, Solution* sln_time_prev, Solution* sln_time_new,
+  bool rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new,
                     bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                     double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
@@ -128,20 +129,20 @@ protected:
 
   /// Members.
   /// Global function class.
-  Hermes2D hermes2d;
+  Hermes2D<Scalar> hermes2d;
 
   /// Matrix for the time derivative part of the equation (left-hand side).
-  UMFPackMatrix matrix_left;
+  UMFPackMatrix<Scalar> matrix_left;
 
   /// Matrix and vector for the rest (right-hand side).
-  UMFPackMatrix matrix_right;
-  UMFPackVector vector_right;
+  UMFPackMatrix<Scalar> matrix_right;
+  UMFPackVector<Scalar> vector_right;
 
   /// Matrix solver.
-  Solver* solver;
+  Solver<Scalar>* solver;
 
   /// DiscreteProblem.
-  DiscreteProblem* dp;
+  DiscreteProblem<Scalar>* dp;
   bool is_linear;
 
   /// ButcherTable.
@@ -151,9 +152,9 @@ protected:
   unsigned int num_stages;
   
   /// Multistage weak formulation.
-  WeakForm stage_wf_right;    // For the main part equation (written on the right),
+  WeakForm<Scalar> stage_wf_right;    // For the main part equation (written on the right),
                               // size num_stages*ndof times num_stages*ndof.
-  WeakForm stage_wf_left;     // For the matrix M (size ndof times ndof).
+  WeakForm<Scalar> stage_wf_left;     // For the matrix M (size ndof times ndof).
   
   bool start_from_zero_K_vector;
 
@@ -161,17 +162,18 @@ protected:
 
   // Vector K_vector of length num_stages * ndof. will represent
   // the 'K_i' vectors in the usual R-K notation.
-  scalar* K_vector;
+  Scalar* K_vector;
 
   // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
-  scalar* u_ext_vec;
+  Scalar* u_ext_vec;
 
   // Vector for the left part of the residual.
-  scalar* vector_left;
+  Scalar* vector_left;
 
   // Number of previous calls to rk_time_step().
   unsigned int iteration;
 };
-
+template class HERMES_API RungeKutta<double>;
+template class HERMES_API RungeKutta<std::complex<double>>;
 
 #endif

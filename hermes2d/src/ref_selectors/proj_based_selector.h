@@ -45,7 +45,8 @@ namespace RefinementSelectors {
    *  - evaluate_rhs_subdomain()
    *  - evaluate_error_squared_subdomain()
    */
-  class HERMES_API ProjBasedSelector : public OptimumSelector {
+  template<typename Scalar>
+  class HERMES_API ProjBasedSelector : public OptimumSelector<Scalar> {
   public: //API
     /// Destructor
     virtual ~ProjBasedSelector();
@@ -227,8 +228,8 @@ namespace RefinementSelectors {
      *  Contents of the array is valid in the method calc_error_cand_element().
      *  The array is allocated in the constructor, the size of the array is equal to the maximum index of a shape function + 1.
      *  \note It is kept here in order to avoid frequent reallocating. */
-    std::vector< ValueCacheItem<scalar> > nonortho_rhs_cache;
-    std::vector< ValueCacheItem<scalar> > ortho_rhs_cache;
+    std::vector< ValueCacheItem<Scalar> > nonortho_rhs_cache;
+    std::vector< ValueCacheItem<Scalar> > ortho_rhs_cache;
 
     double error_weight_h; ///< A coefficient that multiplies error of H-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_H.
     double error_weight_p; ///< A coefficient that multiplies error of P-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_P.
@@ -236,7 +237,7 @@ namespace RefinementSelectors {
 
     /// Calculates error of candidates.
     /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
-    virtual void evaluate_cands_error(Element* e, Solution* rsln, double* avg_error, double* dev_error);
+    virtual void evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error);
 
     /// Calculates projection errors of an elements of candidates for all permitations of orders.
     /** Errors are not normalized and they are squared.
@@ -252,7 +253,7 @@ namespace RefinementSelectors {
      *  \param[out] herr An error of elements of H-candidates of various permutation of orders.
      *  \param[out] perr An error of elements of P-candidates of various permutation of orders.
      *  \param[out] anisoerr An error of elements of ANISO-candidates of various permutation of orders. */
-    virtual void calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]);
+    virtual void calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]);
 
     /// Calculate projection errors of an element of an candidate considering multiple orders.
     /** An element of a candidate may span over multiple sub-domains. All integration uses the reference domain.
@@ -269,7 +270,7 @@ namespace RefinementSelectors {
      *  \param[in] sub_ortho_svals
      *  \param[in] info Information about candidates: range of orders, etc.
      *  \param[out] errors_squared Calculated squared errors for all orders specified through \a info. */
-    void calc_error_cand_element(const int mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, scalar*** sub_rvals, std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals, const CandsInfo& info, CandElemProjError errors_squared);
+    void calc_error_cand_element(const int mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals, std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals, const CandsInfo& info, CandElemProjError errors_squared);
 
   protected: //projection
     /// Projection of an element of a candidate.
@@ -277,7 +278,7 @@ namespace RefinementSelectors {
       int* shape_inxs; ///< Used shape indices
       int num_shapes; ///< A number of used shape indices.
       std::vector<TrfShapeExp>& svals; ///< A precalculated shape-function values. Empty is not defined.
-      scalar* shape_coefs; ///< Coefficients of shape indices of a projection.
+      Scalar* shape_coefs; ///< Coefficients of shape indices of a projection.
       int max_quad_order; ///< An encoded maximum order of the projection. If triangle, the vertical order is equal to the horizontal order.
     };
 
@@ -286,7 +287,7 @@ namespace RefinementSelectors {
     struct ElemGIP {
       double3* gip_points; ///< Integration points and weights. The first index is an index of an integration point, the second index is defined through the enum GIP2DIndices.
       int num_gip_points; ///< A number of integration points.
-      scalar** rvals; ///< Values of a reference solution at the integration points. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. The meaning of the second index is defined through the method precalc_ref_solution().
+      Scalar** rvals; ///< Values of a reference solution at the integration points. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. The meaning of the second index is defined through the method precalc_ref_solution().
     };
 
     /// A transformation from a reference domain of a subdomain to a reference domain of an element of a candidate.
@@ -315,7 +316,7 @@ namespace RefinementSelectors {
      *  \param[in] element An element of the coarse solution. An element of both the same geometry and the same ID have to be present in the mesh of the reference solution.
      *  \param[in] intr_gip_order An order of quadrature integration. The number of quadrature points should be retrieved through a quadrature stored in the paremeter \a rsln.
      *  \return A pointer to 2D array. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. */
-    virtual scalar** precalc_ref_solution(int inx_son, Solution* rsln, Element* element, int intr_gip_order) = 0;
+    virtual Scalar** precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order) = 0;
 
     /// Builds projection matrix using a given set of shapes.
     /** Override to calculate a projection matrix.
@@ -333,7 +334,7 @@ namespace RefinementSelectors {
      *  \param[in] sub_trf A transformation from a reference domain of a subdomain to the reference domain of an element of a candidate.
      *  \param[in] sub_shape Information about a shape function: shape index and calculated expansions at integration points, if any.
      *  \return A value of the righ-hand size of a given shape function. */
-    virtual scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) = 0;
+    virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) = 0;
 
     /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
     /** Override to calculate an error using a provided projection and subdomains.
@@ -344,6 +345,9 @@ namespace RefinementSelectors {
      *  \return A squared error of an element of a candidate. */
     virtual double evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) = 0;
   };
+
+  template class HERMES_API ProjBasedSelector<double>;
+  template class HERMES_API ProjBasedSelector<std::complex<double>>;
 }
 
 #endif

@@ -16,7 +16,8 @@
 #include <typeinfo>
 #include "hermes2d.h"
 
-RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector) 
+template<typename Scalar>
+RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector) 
     : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
     stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
 {
@@ -38,7 +39,8 @@ RungeKutta::RungeKutta(DiscreteProblem* dp, ButcherTable* bt, MatrixSolverType m
   vector_left = new Scalar[num_stages*  dp->get_num_dofs()];
 }
 
-RungeKutta::~RungeKutta()
+template<typename Scalar>
+RungeKutta<Scalar>::~RungeKutta()
 {
   delete solver;
   delete [] K_vector;
@@ -46,7 +48,8 @@ RungeKutta::~RungeKutta()
   delete [] vector_left;
 }
 
-void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int num_blocks,
+template<typename Scalar>
+void RungeKutta<Scalar>::multiply_as_diagonal_block_matrix(UMFPackMatrix<Scalar>* matrix, int num_blocks,
                                        Scalar* source_vec, Scalar* target_vec)
 {
   int size = matrix->get_size();
@@ -55,7 +58,8 @@ void RungeKutta::multiply_as_diagonal_block_matrix(UMFPackMatrix* matrix, int nu
   }
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new, 
+template<typename Scalar>
+bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new, 
                               Solution<Scalar>* error_fn, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
                               double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
@@ -70,7 +74,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Sc
                       newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, 
+template<typename Scalar>
+bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, 
                   Hermes::vector<Solution<Scalar>*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
                   double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
@@ -94,8 +99,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   
   // Initialize discrete problems for the assembling of the
   // matrix M and the stage Jacobian matrix and residual.
-  DiscreteProblem stage_dp_left(&stage_wf_left, dp->get_spaces());
-  DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces_vector);
+  DiscreteProblem<Scalar> stage_dp_left(&stage_wf_left, dp->get_spaces());
+  DiscreteProblem<Scalar> stage_dp_right(&stage_wf_right, stage_spaces_vector);
 
   // Prepare residuals of stage solutions.
   Hermes::vector<Solution<Scalar>*> residuals_vector;
@@ -103,7 +108,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   Hermes::vector<bool> add_dir_lift;
   for (unsigned int i = 0; i < num_stages; i++)
     for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++) {
-      residuals_vector.push_back(new Solution(dp->get_space(sln_i)->get_mesh()));
+      residuals_vector.push_back(new Solution<Scalar>(dp->get_space(sln_i)->get_mesh()));
       add_dir_lift.push_back(false);
     }
 
@@ -146,7 +151,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
       residual_norm = hermes2d.get_l2_norm(&vector_right);
     else {
       // Translate residual vector into residual functions.
-      Solution::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift);
+      Solution<Scalar>::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift);
       residual_norm = hermes2d.calc_norms(residuals_vector);
     }
 
@@ -200,14 +205,14 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   // FIXME - this projection is slow and it is not needed when the 
   //         spaces are the same (if spatial adaptivity does not take place). 
   Scalar* coeff_vec = new Scalar[ndof];
-  OGProjection::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+  OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
 
   // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
   for (int i = 0; i < ndof; i++)
     for (unsigned int j = 0; j < num_stages; j++)
       coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];
 
-  Solution::vector_to_solutions(coeff_vec, dp->get_spaces(), slns_time_new);
+  Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), slns_time_new);
 
   // If error_fn is not NULL, use the B2-row in the Butcher's
   // table to calculate the temporal error estimate.
@@ -219,7 +224,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
       }
       coeff_vec[i] *= time_step;
     }
-    Solution::vector_to_solutions(coeff_vec, dp->get_spaces(), error_fns, add_dir_lift);
+    Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), error_fns, add_dir_lift);
   }
 
   // Delete stage spaces.
@@ -237,7 +242,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   return true;
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
+template<typename Scalar>
+bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
                               Hermes::vector<Solution<Scalar>*> slns_time_new, bool jacobian_changed,
                               bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
                               double newton_max_allowed_residual_norm) 
@@ -247,7 +253,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
          newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
+template<typename Scalar>
+bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
                               Solution<Scalar>* sln_time_new, bool jacobian_changed,
                               bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
                               double newton_max_allowed_residual_norm) 
@@ -262,7 +269,8 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Solution<Sc
                newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-void RungeKutta::create_stage_wf(unsigned int size, double current_time, double time_step) 
+template<typename Scalar>
+void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step) 
 {
   // Clear the WeakForms.
   stage_wf_left.delete_all();
@@ -270,7 +278,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
 
   // First let's do the mass matrix (only one block ndof times ndof).
   for(unsigned int component_i = 0; component_i < size; component_i++) {
-    MatrixFormVolL2* proj_form = new MatrixFormVolL2(component_i, component_i);
+    MatrixFormVolL2<Scalar>* proj_form = new MatrixFormVolL2<Scalar>(component_i, component_i);
     proj_form->area = HERMES_ANY;
     proj_form->scaling_factor = 1.0;
     proj_form->u_ext_offset = 0;
@@ -286,7 +294,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   // vector of length num_stages*ndof.
 
   // Original weak formulation.
-  WeakForm* wf = dp->get_weak_formulation();
+  WeakForm<Scalar>* wf = dp->get_weak_formulation();
 
   // Create constant Solutions to represent the stage times,
   // stage_time = current_time + c_i*time_step.
@@ -311,10 +319,10 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
 
   // Extracting volume and surface matrix and vector forms from the
   // original weak formulation.
-  Hermes::vector<WeakForm::MatrixFormVol *> mfvol_base = wf->get_mfvol();
-  Hermes::vector<WeakForm::MatrixFormSurf *> mfsurf_base = wf->get_mfsurf();
-  Hermes::vector<WeakForm::VectorFormVol *> vfvol_base = wf->get_vfvol();
-  Hermes::vector<WeakForm::VectorFormSurf *> vfsurf_base = wf->get_vfsurf();
+  Hermes::vector<MatrixFormVol<Scalar> *> mfvol_base = wf->get_mfvol();
+  Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf_base = wf->get_mfsurf();
+  Hermes::vector<VectorFormVol<Scalar> *> vfvol_base = wf->get_vfvol();
+  Hermes::vector<VectorFormSurf<Scalar> *> vfsurf_base = wf->get_vfsurf();
 
   // Duplicate matrix volume forms, scale them according
   // to the Butcher's table, enhance them with additional
@@ -323,7 +331,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   for (unsigned int m = 0; m < mfvol_base.size(); m++) {
     for (unsigned int i = 0; i < num_stages; i++) {
       for (unsigned int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormVol* mfv_ij = mfvol_base[m]->clone();
+        MatrixFormVol<Scalar>* mfv_ij = mfvol_base[m]->clone();
        
         mfv_ij->i = mfv_ij->i + i * dp->get_spaces().size();
         mfv_ij->j = mfv_ij->j + j * dp->get_spaces().size();
@@ -350,7 +358,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   for (unsigned int m = 0; m < mfsurf_base.size(); m++) {
     for (unsigned int i = 0; i < num_stages; i++) {
       for (unsigned int j = 0; j < num_stages; j++) {
-        WeakForm::MatrixFormSurf* mfs_ij = mfsurf_base[m]->clone();
+        MatrixFormSurf<Scalar>* mfs_ij = mfsurf_base[m]->clone();
        
         mfs_ij->i = mfs_ij->i + i * dp->get_spaces().size();
         mfs_ij->j = mfs_ij->j + j * dp->get_spaces().size();
@@ -376,7 +384,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   // blocks of the stage residual.
   for (unsigned int m = 0; m < vfvol_base.size(); m++) {
     for (unsigned int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormVol* vfv_i = vfvol_base[m]->clone();
+      VectorFormVol<Scalar>* vfv_i = vfvol_base[m]->clone();
        
       vfv_i->i = vfv_i->i + i * dp->get_spaces().size();
       
@@ -399,7 +407,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   // blocks of the stage residual.
   for (unsigned int m = 0; m < vfsurf_base.size(); m++) {
     for (unsigned int i = 0; i < num_stages; i++) {
-      WeakForm::VectorFormSurf* vfs_i = vfsurf_base[m]->clone();
+      VectorFormSurf<Scalar>* vfs_i = vfsurf_base[m]->clone();
        
       vfs_i->i = vfs_i->i + i * dp->get_spaces().size();
 
@@ -418,7 +426,8 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   }
 }
 
-void RungeKutta::prepare_u_ext_vec(double time_step)
+template<typename Scalar>
+void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
 {
   unsigned int running_space_ndofs = 0;
   for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++) {

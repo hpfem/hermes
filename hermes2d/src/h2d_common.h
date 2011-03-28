@@ -118,5 +118,6 @@ public:
        int picard_max_iter, bool verbose) const;
 };
 
+
 #endif
 

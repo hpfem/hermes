@@ -20,11 +20,18 @@
 #include "../../../hermes_common/matrix.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-double** H1Space::h1_proj_mat = NULL;
-double*  H1Space::h1_chol_p   = NULL;
-int      H1Space::h1_proj_ref = 0;
+template class H1Space<double>;
+template class H1Space<std::complex<double>>;
 
-void H1Space::init(Shapeset* shapeset, Ord2 p_init)
+template<typename Scalar>
+double** H1Space<Scalar>::h1_proj_mat = NULL;
+template<typename Scalar>
+double*  H1Space<Scalar>::h1_chol_p   = NULL;
+template<typename Scalar>
+int      H1Space<Scalar>::h1_proj_ref = 0;
+
+template<typename Scalar>
+void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -46,21 +53,24 @@ void H1Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-H1Space::H1Space(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-H1Space::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-H1Space::~H1Space()
+template<typename Scalar>
+H1Space<Scalar>::~H1Space()
 {
   _F_
   if (!--h1_proj_ref)
@@ -72,7 +82,8 @@ H1Space::~H1Space()
     delete this->shapeset;
 }
 
-void H1Space::set_shapeset(Shapeset *shapeset)
+template<typename Scalar>
+void H1Space<Scalar>::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 10)
   {
@@ -80,10 +91,11 @@ void H1Space::set_shapeset(Shapeset *shapeset)
     own_shapeset = false;
   }
   else
-    error("Wrong shapeset type in H1Space::set_shapeset()");
+    error("Wrong shapeset type in H1Space<Scalar>::set_shapeset()");
 }
 
-Space<Scalar>* H1Space::dup(Mesh* mesh, int order_increase) const
+template<typename Scalar>
+Space<Scalar>* H1Space<Scalar>::dup(Mesh* mesh, int order_increase) const
 {
   _F_
   H1Space<Scalar>* space = new H1Space(mesh, essential_bcs, 1, shapeset);
@@ -94,7 +106,8 @@ Space<Scalar>* H1Space::dup(Mesh* mesh, int order_increase) const
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 
-void H1Space::assign_vertex_dofs()
+template<typename Scalar>
+void H1Space<Scalar>::assign_vertex_dofs()
 {
   _F_
   // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of
@@ -144,7 +157,7 @@ void H1Space::assign_vertex_dofs()
 
             if (en->bnd)
               if(essential_bcs != NULL)
-                if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
+                if(essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker)) != NULL)
                   nd->dof = H2D_CONSTRAINED_DOF;
                 else {
                   nd->dof = next_dof;
@@ -176,7 +189,8 @@ void H1Space::assign_vertex_dofs()
 
 //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
-void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
+template<typename Scalar>
+void H1Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al)
 {
   _F_
   Node* vn = e->vn[iv];
@@ -192,7 +206,7 @@ void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
   {
     //debug_log("! B cause of the triplet\n");
     for (int j = 0; j < nd->ncomponents; j++)
-      if (nd->baselist[j].coef != (scalar) 0)
+      if (nd->baselist[j].coef != (Scalar) 0)
       {
         al->add_triplet(index, nd->baselist[j].dof, nd->baselist[j].coef);
       }
@@ -200,7 +214,8 @@ void H1Space::get_vertex_assembly_list(Element* e, int iv, AsmList* al)
 }
 
 
-void H1Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
+template<typename Scalar>
+void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
 {
   _F_
   Node* en = e->en[surf_num];
@@ -238,21 +253,22 @@ void H1Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmL
 
 //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
-scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
+template<typename Scalar>
+Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 {
   _F_
   assert(order >= 1);
-  scalar* proj = new scalar[order + 1];
+  Scalar* proj = new Scalar[order + 1];
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
-  if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
+  if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
   {
     proj[0] = proj[1] = bc->value_const;
   } // If the BC is not constant.
-  else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
+  else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
   {
     surf_pos->t = surf_pos->lo;
     // Find out the (x,y) coordinates for the first endpoint.
@@ -271,7 +287,7 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
   if (order-- > 1)
   {
     Quad1DStd quad1d;
-    scalar* rhs = proj + 2;
+    Scalar* rhs = proj + 2;
     int mo = quad1d.get_max_order();
     double2* pt = quad1d.get_points(mo);
 
@@ -283,17 +299,17 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
       for (int j = 0; j < quad1d.get_num_points(mo); j++)
       {
         double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
-        scalar l = proj[0] * s + proj[1] * t;
+        Scalar l = proj[0] * s + proj[1] * t;
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
-        if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
+        if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
                    * (bc->value_const - l);
         // If the BC is not constant.
-        else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
+        else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
         {
           // Find out the (x,y) coordinate.
           double x, y;
@@ -316,7 +332,8 @@ scalar* H1Space::get_bc_projection(SurfPos* surf_pos, int order)
 
 //// hanging nodes /////////////////////////////////////////////////////////////////////////////////
 
-inline void H1Space::output_component(BaseComponent*& current, BaseComponent*& last, BaseComponent* min,
+template<typename Scalar>
+inline void H1Space<Scalar>::output_component(BaseComponent*& current, BaseComponent*& last, BaseComponent* min,
                                       Node*& edge, BaseComponent*& edge_dofs)
 {
   _F_
@@ -349,7 +366,8 @@ inline void H1Space::output_component(BaseComponent*& current, BaseComponent*& l
 /// This is a documentation for sadfs
 ///
 ///
-Space::BaseComponent* H1Space::merge_baselists(BaseComponent* l1, int n1, BaseComponent* l2, int n2,
+template<typename Scalar>
+typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(BaseComponent* l1, int n1, BaseComponent* l2, int n2,
                                                Node* edge, BaseComponent*& edge_dofs, int& ncomponents)
 {
   _F_
@@ -409,7 +427,8 @@ static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
 }
 
 
-void H1Space::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
+template<typename Scalar>
+void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
 {
   _F_
   int j, k;
@@ -562,7 +581,8 @@ void H1Space::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1,
 }
 
 
-void H1Space::update_constraints()
+template<typename Scalar>
+void H1Space<Scalar>::update_constraints()
 {
   _F_
   Element* e;
@@ -571,7 +591,7 @@ void H1Space::update_constraints()
 }
 
 
-/*void H1Space::dump_baselist(NodeData& nd)
+/*void H1Space<Scalar>::dump_baselist(NodeData& nd)
 {
   printf("  { ");
   for (int i = 0; i < nd.ncomponents; i++)
@@ -582,7 +602,8 @@ void H1Space::update_constraints()
 
 //// vertex fixing /////////////////////////////////////////////////////////////////////////////////
 
-void H1Space::fix_vertex(int id, scalar value)
+template<typename Scalar>
+void H1Space<Scalar>::fix_vertex(int id, Scalar value)
 {
   _F_
   FixedVertex fv = { id, value };
@@ -590,7 +611,8 @@ void H1Space::fix_vertex(int id, scalar value)
 }
 
 
-bool H1Space::is_fixed_vertex(int id) const
+template<typename Scalar>
+bool H1Space<Scalar>::is_fixed_vertex(int id) const
 {
   _F_
   for (unsigned int i = 0; i < fixed_vertices.size(); i++)
@@ -601,13 +623,14 @@ bool H1Space::is_fixed_vertex(int id) const
 }
 
 
-void H1Space::post_assign()
+template<typename Scalar>
+void H1Space<Scalar>::post_assign()
 {
   _F_
   // process fixed vertices -- put their values into nd->vertex_bc_coef
   for (unsigned int i = 0; i < fixed_vertices.size(); i++)
   {
-    scalar* fixv = new scalar[1];
+    Scalar* fixv = new Scalar[1];
     *fixv = fixed_vertices[i].value;
     NodeData* nd = &ndata[fixed_vertices[i].id];
     nd->vertex_bc_coef = fixv;

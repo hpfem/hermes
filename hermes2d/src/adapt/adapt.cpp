@@ -31,7 +31,11 @@
 
 using namespace std;
 
-Adapt::Adapt(Hermes::vector<Space<Scalar>*> spaces,
+template class Adapt<double>;
+template class Adapt<std::complex<double>>;
+
+template<typename Scalar>
+Adapt<Scalar>::Adapt(Hermes::vector<Space<Scalar>*> spaces,
              Hermes::vector<ProjNormType> proj_norms) :
     spaces(spaces),
     num_act_elems(-1),
@@ -41,7 +45,7 @@ Adapt::Adapt(Hermes::vector<Space<Scalar>*> spaces,
 {
   // sanity check
   if (proj_norms.size() > 0 && spaces.size() != proj_norms.size())
-    error("Mismatched numbers of spaces and projection types in Adapt::Adapt().");
+    error("Mismatched numbers of spaces and projection types in Adapt<Scalar>::Adapt().");
 
   this->num = spaces.size();
 
@@ -63,7 +67,7 @@ Adapt::Adapt(Hermes::vector<Space<Scalar>*> spaces,
         case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
         case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
         case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
-        default: error("Unknown space type in Adapt::Adapt().");
+        default: error("Unknown space type in Adapt<Scalar>::Adapt().");
       }
     }
   }
@@ -77,7 +81,8 @@ Adapt::Adapt(Hermes::vector<Space<Scalar>*> spaces,
     error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
 }
 
-Adapt::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
+template<typename Scalar>
+Adapt<Scalar>::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
     spaces(Hermes::vector<Space<Scalar>*>()),
     num_act_elems(-1),
     have_errors(false),
@@ -101,7 +106,7 @@ Adapt::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: error("Unknown space type in Adapt::Adapt().");
+        default: error("Unknown space type in Adapt<Scalar>::Adapt().");
       }
     }
 
@@ -109,7 +114,8 @@ Adapt::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
   error_form[0][0] = new MatrixFormVolError(proj_norm);
 }
 
-Adapt::~Adapt()
+template<typename Scalar>
+Adapt<Scalar>::~Adapt()
 {
   for (int i = 0; i < this->num; i++)
     delete [] errors[i];
@@ -122,11 +128,12 @@ Adapt::~Adapt()
 
 //// adapt /////////////////////////////////////////////////////////////////////////////////////////
 
-bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_selectors, double thr, int strat,
+template<typename Scalar>
+bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double thr, int strat,
             int regularize, double to_be_processed)
 {
-  error_if(!have_errors, "element errors have to be calculated first, call Adapt::calc_err_est().");
-  error_if(refinement_selectors == Hermes::vector<RefinementSelectors::Selector *>(), "selector not provided");
+  error_if(!have_errors, "element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
+  error_if(refinement_selectors == Hermes::vector<RefinementSelectors::Selector<Scalar> *>(), "selector not provided");
   if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
   TimePeriod cpu_time;
 
@@ -296,21 +303,23 @@ bool Adapt::adapt(Hermes::vector<RefinementSelectors::Selector *> refinement_sel
     have_errors = true; // space without changes
 
   // since space changed, assign dofs:
-  Space::assign_dofs(this->spaces);
+  Space<Scalar>::assign_dofs(this->spaces);
 
   return done;
 }
 
-bool Adapt::adapt(RefinementSelectors::Selector* refinement_selector, double thr, int strat,
+template<typename Scalar>
+bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
             int regularize, double to_be_processed)
 {
-  Hermes::vector<RefinementSelectors::Selector *> refinement_selectors;
+  Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
   refinement_selectors.push_back(refinement_selector);
   return adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
 }
 
-void Adapt::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine,
-                                        int** idx, Hermes::vector<RefinementSelectors::Selector *> refinement_selectors) {
+template<typename Scalar>
+void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine,
+                                        int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors) {
   int num_elem_to_proc = elems_to_refine.size();
   for(int inx = 0; inx < num_elem_to_proc; inx++) {
     ElementToRefine& elem_ref = elems_to_refine[inx];
@@ -374,7 +383,8 @@ void Adapt::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToR
   }
 }
 
-void Adapt::homogenize_shared_mesh_orders(Mesh** meshes) {
+template<typename Scalar>
+void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes) {
   Element* e;
   for (int i = 0; i < this->num; i++) {
     for_all_active_elements(e, meshes[i]) {
@@ -394,11 +404,13 @@ void Adapt::homogenize_shared_mesh_orders(Mesh** meshes) {
   }
 }
 
-const std::vector<ElementToRefine>& Adapt::get_last_refinements() const {
+template<typename Scalar>
+const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const {
   return last_refinements;
 }
 
-void Adapt::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
+template<typename Scalar>
+void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
 {
   for (vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
        elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
@@ -406,7 +418,8 @@ void Adapt::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
   }
 }
 
-void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
+template<typename Scalar>
+void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref) {
   Space<Scalar>* space = this->spaces[elem_ref.comp];
   Mesh* mesh = space->get_mesh();
 
@@ -431,10 +444,11 @@ void Adapt::apply_refinement(const ElementToRefine& elem_ref) {
 
 ///// Unrefinements /////////////////////////////////////////////////////////////////////////////////
 
-void Adapt::unrefine(double thr)
+template<typename Scalar>
+void Adapt<Scalar>::unrefine(double thr)
 {
   if (!have_errors)
-    error("Element errors have to be calculated first, see Adapt::calc_err_est().");
+    error("Element errors have to be calculated first, see Adapt<Scalar>::calc_err_est().");
   if (this->num > 2) error("Unrefine implemented for two spaces only.");
 
   Mesh* mesh[2];
@@ -541,7 +555,8 @@ void Adapt::unrefine(double thr)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Adapt::set_error_form(int i, int j, Adapt::MatrixFormVolError* form)
+template<typename Scalar>
+void Adapt<Scalar>::set_error_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
 {
   error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
            "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
@@ -550,12 +565,14 @@ void Adapt::set_error_form(int i, int j, Adapt::MatrixFormVolError* form)
 }
 
 // case i = j = 0
-void Adapt::set_error_form(Adapt::MatrixFormVolError* form)
+template<typename Scalar>
+void Adapt<Scalar>::set_error_form(typename Adapt<Scalar>::MatrixFormVolError* form)
 {
   set_error_form(0, 0, form);
 }
 
-double Adapt::eval_error(Adapt::MatrixFormVolError* form,
+template<typename Scalar>
+double Adapt<Scalar>::eval_error(typename Adapt<Scalar>::MatrixFormVolError* form,
                          MeshFunction<Scalar>*sln1, MeshFunction<Scalar>*sln2, MeshFunction<Scalar>*rsln1,
                          MeshFunction<Scalar>*rsln2)
 {
@@ -601,15 +618,15 @@ double Adapt::eval_error(Adapt::MatrixFormVolError* form,
     jwt[i] = pt[i][2] * jac[i];
 
   // function values and values of external functions
-  Func<scalar>* err1 = init_fn(sln1, order);
-  Func<scalar>* err2 = init_fn(sln2, order);
-  Func<scalar>* v1 = init_fn(rsln1, order);
-  Func<scalar>* v2 = init_fn(rsln2, order);
+  Func<Scalar>* err1 = init_fn(sln1, order);
+  Func<Scalar>* err2 = init_fn(sln2, order);
+  Func<Scalar>* v1 = init_fn(rsln1, order);
+  Func<Scalar>* v2 = init_fn(rsln2, order);
 
   err1->subtract(*v1);
   err2->subtract(*v2);
 
-  scalar res = form->value(np, jwt, NULL, err1, err2, e, NULL);
+  Scalar res = form->value(np, jwt, NULL, err1, err2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -621,7 +638,8 @@ double Adapt::eval_error(Adapt::MatrixFormVolError* form,
   return std::abs(res);
 }
 
-double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
+template<typename Scalar>
+double Adapt<Scalar>::eval_error_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
                               MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2)
 {
   RefMap *rrv1 = rsln1->get_refmap();
@@ -664,10 +682,10 @@ double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* v1 = init_fn(rsln1, order);
-  Func<scalar>* v2 = init_fn(rsln2, order);
+  Func<Scalar>* v1 = init_fn(rsln1, order);
+  Func<Scalar>* v2 = init_fn(rsln2, order);
 
-  scalar res = form->value(np, jwt, NULL, v1, v2, e, NULL);
+  Scalar res = form->value(np, jwt, NULL, v1, v2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -678,7 +696,8 @@ double Adapt::eval_error_norm(Adapt::MatrixFormVolError* form,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double Adapt::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+template<typename Scalar>
+double Adapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
                                 Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
 {
   _F_
@@ -824,7 +843,8 @@ double Adapt::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::
   }
 }
 
-double Adapt::calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
+template<typename Scalar>
+double Adapt<Scalar>::calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
                                    Hermes::vector<double>* component_errors, bool solutions_for_adapt,
                                    unsigned int error_flags)
 {
@@ -836,7 +856,8 @@ double Adapt::calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
 }
 
 
-void Adapt::fill_regular_queue(Mesh** meshes) {
+template<typename Scalar>
+void Adapt<Scalar>::fill_regular_queue(Mesh** meshes) {
   assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);
 
   //prepare space for queue (it is assumed that it will only grow since we can just split)

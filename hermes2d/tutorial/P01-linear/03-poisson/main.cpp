@@ -42,25 +42,25 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(CONST_F);
   
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential("Dirichlet", 0.0);
-  EssentialBCs bcs(&bc_essential);
+  DefaultEssentialBCConst<double> bc_essential("Dirichlet", 0.0);
+  EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem<double> dp(&wf, &space, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
+  Vector<double>* rhs = create_vector<double>(matrix_solver);
+  Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
-  Solution sln;
+  Solution<double> sln;
 
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
-  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+  if(solver->solve()) Solution<double>::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
   // VTK output.
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
   // Visualize the solution.
   if (HERMES_VISUALIZATION) {
-    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+    ScalarView<double> view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
     View::wait();
   }

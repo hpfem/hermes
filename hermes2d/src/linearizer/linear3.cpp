@@ -31,14 +31,12 @@ extern Quad2DLin quad_lin;
 
 //// vertices and triangles ////////////////////////////////////////////////////////////////////////
 
-Vectorizer::Vectorizer()
-          : Linearizer()
+Vectorizer::Vectorizer() : Linearizer()
 {
   verts = NULL;
   dashes = NULL;
   cd = 0;
 }
-
 
 int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)
 {
@@ -49,7 +47,6 @@ int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)
   verts[i][3] = yvalue;
   return i;
 }
-
 
 int Vectorizer::get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue)
 {
@@ -95,9 +92,8 @@ int Vectorizer::get_vertex(int p1, int p2, double x, double y, double xvalue, do
 #define midmag(i) (sqrt(sqr(midval[2][i]) + sqr(midval[3][i])))
 #define magvert(i) (sqr(verts[i][2]) + sqr(verts[i][3]))
 
-
 void Vectorizer::process_triangle(int iv0, int iv1, int iv2, int level,
-                                  scalar* xval, scalar* yval, double* phx, double* phy, int* idx)
+                                  double* xval, double* yval, double* phx, double* phy, int* idx)
 {
   if (level < LIN_MAX_LEVEL)
   {
@@ -197,7 +193,7 @@ void Vectorizer::process_triangle(int iv0, int iv1, int iv2, int level,
 
 
 void Vectorizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                              scalar* xval, scalar* yval, double* phx, double* phy, int* idx)
+                              double* xval, double* yval, double* phx, double* phy, int* idx)
 {
   // try not to split through the vertex with the largest value
   int a = (magvert(iv0) > magvert(iv1)) ? iv0 : iv1;
@@ -357,7 +353,7 @@ void Vectorizer::find_min_max()
 
 //// process_solution //////////////////////////////////////////////////////////////////////////////
 
-void Vectorizer::process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFunction<Scalar>* ysln, int yitem, double eps)
+void Vectorizer::process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps)
 {
   // sanity check
   if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -429,8 +425,8 @@ void Vectorizer::process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFun
   {
     xsln->set_quad_order(0, xitem);
     ysln->set_quad_order(0, yitem);
-    scalar* xval = xsln->get_values(xia, xib);
-    scalar* yval = ysln->get_values(yia, yib);
+    double* xval = xsln->get_values(xia, xib);
+    double* yval = ysln->get_values(yia, yib);
 
     for (unsigned int i = 0; i < e[0]->nvert; i++)
     {
@@ -447,8 +443,8 @@ void Vectorizer::process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFun
   {
     xsln->set_quad_order(0, xitem);
     ysln->set_quad_order(0, yitem);
-    scalar* xval = xsln->get_values(xia, xib);
-    scalar* yval = ysln->get_values(yia, yib);
+    double* xval = xsln->get_values(xia, xib);
+    double* yval = ysln->get_values(yia, yib);
 
     double* x = xsln->get_refmap()->get_phys_x(0);
     double* y = ysln->get_refmap()->get_phys_y(0);
@@ -523,7 +519,6 @@ void Vectorizer::process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFun
 
 
 //// save & load ///////////////////////////////////////////////////////////////////////////////////
-
 void Vectorizer::save_data(const char* filename)
 {
   FILE* f = fopen(filename, "wb");
@@ -546,7 +541,6 @@ void Vectorizer::save_data(const char* filename)
   unlock_data();
   fclose(f);
 }
-
 
 void Vectorizer::load_data(const char* filename)
 {

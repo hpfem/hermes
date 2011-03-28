@@ -76,13 +76,15 @@ class HERMES_API OrderView : public View
 {
 public:
   OrderView(const char* title = "OrderView", WinGeom* wg = NULL) {}
-  void show(Space* space)
+  void show(Space<Scalar>* space)
      { verbose("OrderView: Hermes2D compiled without OpenGL support, skipping visualization."); }
   void load_data(const char* filename) {}
   void save_data(const char* filename) {}
   void save_numbered(const char* format, int number) {}
 };
 
-#endif // NOGLUT
 
+#endif // NOGLUT
+  template class HERMES_API OrderView<double>;
+  template class HERMES_API OrderView<std::complex<double>>;
 #endif

@@ -253,7 +253,7 @@ protected:
 /// typically an exact solution to a PDE. This can be used to compare an approximate solution
 /// with an exact solution (see DiffFilter).
 template<typename Scalar>
-class HERMES_API ExactSolution : public Solution<Scalar>
+class ExactSolution : public Solution<Scalar>
 {
 public:
   ExactSolution(Mesh* mesh);
@@ -309,10 +309,10 @@ public:
   virtual Scalar2<Scalar> value (double x, double y) const = 0;
 
   // Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar2& dx, Scalar2& dy) const = 0;
+  virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
 
   // Function returning the value and derivatives.
-  virtual Scalar2 exact_function(double x, double y, Scalar2& dx, Scalar2& dy) const {
+  virtual Scalar2<Scalar> exact_function(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
     derivatives (x, y, dx, dy);
     return value (x, y);
   };
@@ -322,5 +322,13 @@ public:
   virtual Ord ord(Ord x, Ord y) const = 0;
 };
 
+template class HERMES_API MeshFunction<double>;
+template class HERMES_API MeshFunction<std::complex<double>>;
+template class HERMES_API Solution<double>;
+template class HERMES_API Solution<std::complex<double>>;
+template class HERMES_API ExactSolutionScalar<double>;
+template class HERMES_API ExactSolutionScalar<std::complex<double>>;
+template class HERMES_API ExactSolutionVector<double>;
+template class HERMES_API ExactSolutionVector<std::complex<double>>;
 
 #endif

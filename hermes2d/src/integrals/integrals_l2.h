@@ -21,16 +21,16 @@
 
 //// some l2 integrals ////
 template<typename Scalar>
-class MatrixFormVolL2 : public WeakForm<Scalar>::MatrixFormVol
+class MatrixFormVolL2 : public MatrixFormVol<Scalar>
 {
 public:
-    MatrixFormVolL2(int i, int j, SymFlag sym = HERMES_SYM) : MatrixFormVol(i, j, sym) {}
+    MatrixFormVolL2(int i, int j, SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, sym) {}
 
     template<typename real, typename scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<real> *u,
-                       Func<real> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u,
+                       Func<real> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;

@@ -6,10 +6,10 @@
 using namespace Laplace::VolumetricMatrixForms;
 using namespace Laplace::VolumetricVectorForms;
 
-class CustomWeakFormPoisson : public WeakForm
+class CustomWeakFormPoisson : public WeakForm<double>
 {
 public:
-  CustomWeakFormPoisson(double const_f) : WeakForm(1)
+  CustomWeakFormPoisson(double const_f) : WeakForm<double>(1)
   {
     add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
     add_vector_form(new DefaultVectorFormConst(0, const_f));

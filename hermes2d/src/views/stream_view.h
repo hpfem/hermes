@@ -113,6 +113,9 @@ public:
   void add_streamline(double x, double y) {};
 };
 
+template class HERMES_API StreamView<double>;
+template class HERMES_API StreamView<std::complex<double>>;
+
 #endif // NOGLUT
 
 #endif

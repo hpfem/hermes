@@ -32,7 +32,6 @@ const double HERMES_EPS_VERYHIGH = 0.000002;
 /// solution (e.g., gradients or in Hcurl) by inserting double vertices where necessary.
 /// Linearizer also serves as a container for the resulting linearized mesh.
 ///
-template<typename Scalar>
 class HERMES_API Linearizer // (implemented in linear1.cpp)
 {
 public:
@@ -40,7 +39,7 @@ public:
   Linearizer();
   ~Linearizer();
 
-  void process_solution(MeshFunction<Scalar>* sln, int item = H2D_FN_VAL_0,
+  void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0,
                         double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                         MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
                         double dmult = 1.0);
@@ -67,7 +66,7 @@ public:
   // Loads data in a binary format.
   virtual void load_data(const char* filename);
   // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char* quantity_name,
+  virtual void save_solution_vtk(MeshFunction<double>* meshfn, const char* file_name, const char* quantity_name,
                                  bool mode_3D = true, int item = H2D_FN_VAL_0, 
                                  double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
                                  MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
@@ -80,7 +79,7 @@ public:
 
 protected:
 
-  MeshFunction<Scalar>* sln;
+  MeshFunction<double>* sln;
   int item, ia, ib;
 
   double eps, max, cmax;
@@ -144,10 +143,10 @@ protected:
   }
 
   void process_triangle(int iv0, int iv1, int iv2, int level,
-                        Scalar* val, double* phx, double* phy, int* indices);
+                        double* val, double* phx, double* phy, int* indices);
 
   void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    Scalar* val, double* phx, double* phy, int* indices);
+                    double* val, double* phx, double* phy, int* indices);
 
   void process_edge(int iv1, int iv2, int marker);
   void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
@@ -163,15 +162,15 @@ protected:
 /// Like the Linearizer, but generates a triangular mesh showing polynomial
 /// orders in a space, hence the funky name.
 ///
-template<typename Scalar>
-class HERMES_API Orderizer : public Linearizer<Scalar> // (implemented in linear2.cpp)
+class HERMES_API Orderizer : public Linearizer // (implemented in linear2.cpp)
 {
 public:
 
   Orderizer();
   ~Orderizer();
 
-  void process_space(Space<Scalar>* space);
+  void process_space(Space<double>* space);
+  void process_space(Space<std::complex<double>>* space);
 
   int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
         { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
@@ -179,7 +178,7 @@ public:
   virtual void save_data(const char* filename);
   virtual void load_data(const char* filename);
   // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_orders_vtk(Space<Scalar>* space, const char* file_name);
+  virtual void save_orders_vtk(Space<double>* space, const char* file_name);
   // This function is used by save_solution_vtk().
   virtual void save_data_vtk(const char* file_name);
 
@@ -201,15 +200,14 @@ protected:
 /// resulting mesh is not attempted. The class can handle different meshes in
 /// both X and Y components.
 ///
-template<typename Scalar>
-class HERMES_API Vectorizer : public Linearizer<Scalar> // (implemented in linear3.cpp)
+class HERMES_API Vectorizer : public Linearizer // (implemented in linear3.cpp)
 {
 public:
 
   Vectorizer();
   ~Vectorizer();
 
-  void process_solution(MeshFunction<Scalar>* xsln, int xitem, MeshFunction<Scalar>* ysln, int yitem, double eps);
+  void process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps);
 
 public: //accessors
   double4* get_vertices() const { return verts; }
@@ -229,7 +227,7 @@ public: //accessors
 
 protected:
 
-  MeshFunction<Scalar>*xsln, *ysln;
+  MeshFunction<double>*xsln, *ysln;
   int xitem, yitem;
   int xia, xib, yia, yib;
   double4* verts;  ///< vertices: (x, y, xvalue, yvalue) quadruples
@@ -272,10 +270,10 @@ protected:
   }
 
   void process_triangle(int iv0, int iv1, int iv2, int level,
-                        Scalar* xval, Scalar* yval, double* phx, double* phy, int* indices);
+                        double* xval, double* yval, double* phx, double* phy, int* indices);
 
   void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    Scalar* xval, Scalar* yval, double* phx, double* phy, int* indices);
+                    double* xval, double* yval, double* phx, double* phy, int* indices);
 
   void find_min_max();
 

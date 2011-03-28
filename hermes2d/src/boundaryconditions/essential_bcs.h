@@ -87,9 +87,9 @@ class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<
 {
 public:
   DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
-                             ExactSolutionScalar* exact_solution); 
+                             ExactSolutionScalar<Scalar>* exact_solution); 
 
-  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution); 
+  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution); 
  
   ~DefaultEssentialBCNonConst() {};
 
@@ -98,7 +98,7 @@ public:
   /// Function giving info that u_Essential is a non-constant function.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  ExactSolutionScalar* exact_solution;
+  ExactSolutionScalar<Scalar>* exact_solution;
 };
 
 /// Class encapsulating all boundary conditions of one problem.
@@ -125,7 +125,7 @@ public:
   typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
   typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
   
-  EssentialBoundaryCondition* get_boundary_condition(std::string marker);
+  EssentialBoundaryCondition<Scalar>* get_boundary_condition(std::string marker);
 
   /// Sets the current time for time-dependent boundary conditions.
   void set_current_time(double time);
@@ -140,6 +140,15 @@ private:
   /// Create boundary markers cache for assembling
   void create_marker_cache();
 };
+
+template HERMES_API class EssentialBoundaryCondition<double>;
+template HERMES_API class EssentialBoundaryCondition<std::complex<double>>;
+template HERMES_API class DefaultEssentialBCConst<double>;
+template HERMES_API class DefaultEssentialBCConst<std::complex<double>>;
+template HERMES_API class DefaultEssentialBCNonConst<double>;
+template HERMES_API class DefaultEssentialBCNonConst<std::complex<double>>;
+template HERMES_API class EssentialBCs<double>;
+template HERMES_API class EssentialBCs<std::complex<double>>;
 
 #endif
 

@@ -15,13 +15,18 @@
 
 #include "h2d_common.h"
 
-const std::string Hermes2D::get_quad_order_str(const int quad_order) {
+template class Hermes2D<double>;
+template class Hermes2D<std::complex<double>>;
+
+template<typename Scalar>
+const std::string Hermes2D<Scalar>::get_quad_order_str(const int quad_order) {
   std::stringstream str;
   str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
   return str.str();
 }
 
-int Hermes2D::make_edge_order(int mode, int edge, int encoded_order)
+template<typename Scalar>
+int Hermes2D<Scalar>::make_edge_order(int mode, int edge, int encoded_order)
 {
   assert(edge < 4);
 

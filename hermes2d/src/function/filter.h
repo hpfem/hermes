@@ -35,10 +35,10 @@ public:
 
   Filter() {};
 
-  Filter(Hermes::vector<MeshFunction*> solutions);
+  Filter(Hermes::vector<MeshFunction<Scalar>*> solutions);
   virtual ~Filter();
 
-  void init(Hermes::vector<MeshFunction*> solutions);
+  void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
 
 	virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
@@ -53,7 +53,7 @@ public:
 protected:
 
   int num;
-  MeshFunction* sln[10];
+  MeshFunction<Scalar>* sln[10];
   uint64_t sln_sub[10];
 
   /// There is a 2-layer structure of the precalculated tables.
@@ -186,6 +186,18 @@ protected:
   virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
 };
 
+template class HERMES_API SimpleFilter<double>;
+template class HERMES_API SimpleFilter<std::complex<double>>;
+template class HERMES_API DXDYFilter<double>;
+template class HERMES_API DXDYFilter<std::complex<double>>;
+template class HERMES_API MagFilter<double>;
+template class HERMES_API MagFilter<std::complex<double>>;
+template class HERMES_API DiffFilter<double>;
+template class HERMES_API DiffFilter<std::complex<double>>;
+template class HERMES_API SumFilter<double>;
+template class HERMES_API SumFilter<std::complex<double>>;
+template class HERMES_API SquareFilter<double>;
+template class HERMES_API SquareFilter<std::complex<double>>;
 
 /// Removes the imaginary part from a function.
 class HERMES_API RealFilter : public SimpleFilter<std::complex<double>>

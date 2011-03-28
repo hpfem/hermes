@@ -131,6 +131,9 @@ double vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int n_dof)
 
 void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
 
+template class SparseMatrix<double>;
+template class SparseMatrix<std::complex<double>>;
+
 template<typename Scalar>
 SparseMatrix<Scalar>::SparseMatrix()
 {

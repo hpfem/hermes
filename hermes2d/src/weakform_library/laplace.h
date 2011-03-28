@@ -24,23 +24,23 @@
 
 namespace Laplace {
   namespace VolumetricMatrixForms {
-    class DefaultMatrixFormStiffness : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormStiffness : public MatrixFormVol<double>
     {
     public:
       DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+            : MatrixFormVol<double>(i, j, sym), coeff(coeff) { }
       DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+            : MatrixFormVol<double>(i, j, sym, area), coeff(coeff) { }
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-        return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+      template<typename real, typename scalar>
+      scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, 
+                         Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) {
+        return coeff * int_grad_u_grad_v<real, scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+        return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
       }
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
@@ -56,23 +56,23 @@ namespace Laplace {
        coeff... constant number
     */
 
-    class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormMass : public MatrixFormVol<double>
     {
     public:
       DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+            : MatrixFormVol<double>(i, j, sym), coeff(coeff) { }
       DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+            : MatrixFormVol<double>(i, j, sym, area), coeff(coeff) { }
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-        return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
+      template<typename real, typename scalar>
+      scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, 
+                         Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) {
+        return coeff * int_u_v<real, scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+        return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
       }
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
@@ -88,24 +88,24 @@ namespace Laplace {
        coeff1, coeff2... constant number
     */
 
-    class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormAdvection : public MatrixFormVol<double>
     {
     public:
      DefaultMatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
-       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
+       : MatrixFormVol<double>(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
      DefaultMatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
-       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
+       : MatrixFormVol<double>(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-        return   coeff1 * int_dudx_v<Real, Scalar>(n, wt, u, v)
-               + coeff2 * int_dudy_v<Real, Scalar>(n, wt, u, v);
+      template<typename real, typename scalar>
+      scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, 
+                         Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) {
+        return   coeff1 * int_dudx_v<real, scalar>(n, wt, u, v)
+               + coeff2 * int_dudy_v<real, scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+        return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
       }
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
@@ -125,7 +125,7 @@ namespace Laplace {
     public:
       DefaultNonConstRightHandSide() { };
 
-      virtual scalar value(double x, double y) const = 0;
+      virtual double value(double x, double y) const = 0;
       virtual Ord ord(Ord x, Ord y) const = 0;
     };
   }
@@ -135,17 +135,17 @@ namespace Laplace {
          coeff... constant number
       */
 
-      class DefaultVectorFormConst : public WeakForm::VectorFormVol
+      class DefaultVectorFormConst : public VectorFormVol<double>
       {
       public:
         DefaultVectorFormConst(int i, double coeff) 
-                     : WeakForm::VectorFormVol(i), coeff(coeff) { }
+                     : VectorFormVol<double>(i), coeff(coeff) { }
         DefaultVectorFormConst(int i, std::string area, double coeff) 
-                     : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+                     : VectorFormVol<double>(i, area), coeff(coeff) { }
 
-        virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                             Geom<double> *e, ExtData<scalar> *ext) {
-          return coeff * int_v<scalar, scalar>(n, wt, v);
+        virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
+                             Geom<double> *e, ExtData<double> *ext) {
+          return coeff * int_v<double, double>(n, wt, v);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
@@ -160,17 +160,17 @@ namespace Laplace {
       /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
          rhs(x, y)... non-constant right-hand side
       */
-      class DefaultVectorFormNonConst : public WeakForm::VectorFormVol
+      class DefaultVectorFormNonConst : public VectorFormVol<double>
       {
       public:
         DefaultVectorFormNonConst(int i, RightHandSides::DefaultNonConstRightHandSide* rhs) 
-                     : WeakForm::VectorFormVol(i), rhs(rhs) { }
+                     : VectorFormVol<double>(i), rhs(rhs) { }
         DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs) 
-                     : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
+                     : VectorFormVol<double>(i, area), rhs(rhs) { }
 
-        scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                     Geom<double> *e, ExtData<scalar> *ext) {
-          scalar result = 0;
+        double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
+                     Geom<double> *e, ExtData<double> *ext) {
+          double result = 0;
           for (int i = 0; i < n; i++)
             result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
           return result;
@@ -194,23 +194,23 @@ namespace Laplace {
        coeff... constant number
     */
 
-    class DefaultSurfaceMatrixForm : public WeakForm::MatrixFormSurf
+    class DefaultSurfaceMatrixForm : public MatrixFormSurf<double>
     {
     public:
       DefaultSurfaceMatrixForm(int i, int j, double coeff) 
-            : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
+            : MatrixFormSurf<double>(i, j), coeff(coeff) { }
       DefaultSurfaceMatrixForm(int i, int j, std::string area, double coeff) 
-            : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
+            : MatrixFormSurf<double>(i, j, area), coeff(coeff) { }
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-        return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
+      template<typename real, typename scalar>
+      scalar matrix_form_surf(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u, 
+                              Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) {
+        return coeff * int_u_v<real, scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
-        return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, 
+                   Geom<double> *e, ExtData<double> *ext) {
+        return matrix_form_surf<double, double>(n, wt, u_ext, u, v, e, ext);
       }
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
@@ -228,23 +228,23 @@ namespace Laplace {
        coeff... constant number
     */
 
-    class DefaultSurfaceVectorForm : public WeakForm::VectorFormSurf
+    class DefaultSurfaceVectorForm : public VectorFormSurf<double>
     {
     public:
       DefaultSurfaceVectorForm(int i, double coeff) 
-             : WeakForm::VectorFormSurf(i), coeff(coeff) { }
+             : VectorFormSurf<double>(i), coeff(coeff) { }
       DefaultSurfaceVectorForm(int i, std::string area, double coeff) 
-             : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
+             : VectorFormSurf<double>(i, area), coeff(coeff) { }
 
-      template<typename Real, typename Scalar>
-      Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-        return coeff * int_v<Real, Scalar>(n, wt, v);
+      template<typename real, typename scalar>
+      scalar vector_form_surf(int n, double *wt, Func<scalar> *u_ext[], 
+                              Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) {
+        return coeff * int_v<real, scalar>(n, wt, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
-        return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
+                   Geom<double> *e, ExtData<double> *ext) {
+        return vector_form_surf<double, double>(n, wt, u_ext, v, e, ext);
       }
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
@@ -260,10 +260,10 @@ namespace Laplace {
     /* Default weak form for the Laplace equation -Laplace u = 0
     */
 
-    class DefaultWeakFormLaplace : public WeakForm
+    class DefaultWeakFormLaplace : public WeakForm<double>
     {
     public:
-      DefaultWeakFormLaplace() : WeakForm(1)
+      DefaultWeakFormLaplace() : WeakForm<double>(1)
       {
         add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormStiffness(0, 0));
       };

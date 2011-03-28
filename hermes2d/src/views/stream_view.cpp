@@ -21,8 +21,8 @@
 
 
 //// StreamView /////////////////////////////////////////////////////////////////////////////////////
-
-StreamView::StreamView(const char* title, WinGeom* wg)
+template<typename Scalar>
+StreamView<Scalar>::StreamView(const char* title, WinGeom* wg)
           : View(title, wg)
 {
   lines = false;
@@ -35,7 +35,8 @@ StreamView::StreamView(const char* title, WinGeom* wg)
   root = NULL;
 }
 
-StreamView::StreamView(char* title, WinGeom* wg)
+template<typename Scalar>
+StreamView<Scalar>::StreamView(char* title, WinGeom* wg)
           : View(title, wg)
 {
   lines = false;
@@ -49,7 +50,8 @@ StreamView::StreamView(char* title, WinGeom* wg)
 }
 
 
-void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps)
+template<typename Scalar>
+void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps)
 {
   if (xsln == ysln)
     error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
@@ -59,7 +61,8 @@ void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, in
 
 // Tests whether given point (x,y) lies in given triangle
 // using barycentric coordinates (returned as side efect)
-bool StreamView::is_in_triangle(int idx, double x, double y, double3& bar)
+template<typename Scalar>
+bool StreamView<Scalar>::is_in_triangle(int idx, double x, double y, double3& bar)
 {
   double4* vert = vec.get_vertices();
   int3* xtris = vec.get_triangles();
@@ -82,7 +85,8 @@ bool StreamView::is_in_triangle(int idx, double x, double y, double3& bar)
 // Adds triangle to the kD-tree
 // If father Node has more than 100 elements
 // it splits computation domain into 2 parts (vertically or horizontally)
-void StreamView::add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max)
+template<typename Scalar>
+void StreamView<Scalar>::add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max)
 {
   double4* vert = vec.get_vertices();
   int3* xtris = vec.get_triangles();
@@ -127,7 +131,8 @@ void StreamView::add_element_to_tree(Node* father, int e_idx, double x_min, doub
 
 
 // Builds kD-tree
-void StreamView::build_tree()
+template<typename Scalar>
+void StreamView<Scalar>::build_tree()
 {
   root->leaf = true;
   root->level = 0;
@@ -141,7 +146,8 @@ void StreamView::build_tree()
 
 // Recurent function that finds linearized triangle which contain point (x,y)
 // As side effect it returns bacycentric coordinates of point (x,y) in that triangle
-int StreamView::find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar)
+template<typename Scalar>
+int StreamView<Scalar>::find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar)
 {
   if (father->leaf == true)
   {
@@ -173,7 +179,8 @@ int StreamView::find_triangle_in_tree(double x, double y, Node* father, double x
 
 
 // Gets values of velocities at given point using built kD-tree
-bool StreamView::get_solution_values(double x, double y, double& xval, double& yval)
+template<typename Scalar>
+bool StreamView<Scalar>::get_solution_values(double x, double y, double& xval, double& yval)
 {
   double4* vert = vec.get_vertices();
   int3* xtris = vec.get_triangles();
@@ -187,7 +194,8 @@ bool StreamView::get_solution_values(double x, double y, double& xval, double& y
 }
 
 
-void StreamView::delete_tree(Node* father)
+template<typename Scalar>
+void StreamView<Scalar>::delete_tree(Node* father)
 {
   if (father->leaf == false)
   {
@@ -200,7 +208,8 @@ void StreamView::delete_tree(Node* father)
 
 // Starts from initial point (x_start, y_start)
 // and using adaptive RK method finds streamline with "idx"
-int StreamView::create_streamline(double x_start, double y_start, int idx)
+template<typename Scalar>
+int StreamView<Scalar>::create_streamline(double x_start, double y_start, int idx)
 {
   double ODE_EPS = 1e-5;
   double tau = initial_tau;
@@ -309,7 +318,8 @@ static int compare(const void* p1, const void* p2)
 
 // Finds initial boundary edge
 // (one whose first vertex is not second vertex for any other edge)
-int StreamView::find_initial_edge(int num_edges, int3* edges)
+template<typename Scalar>
+int StreamView<Scalar>::find_initial_edge(int num_edges, int3* edges)
 {
   int i, j;
   double4* vert = vec.get_vertices();
@@ -342,7 +352,8 @@ int find_next_edge(int num_edges, int3* edges, int b_idx)
 
 // Finds initial points for all steamlines along boundary with given marker
 // with "step" distance between each other
-void StreamView::find_initial_points(int marker, double step, double2*& initial_points)
+template<typename Scalar>
+void StreamView<Scalar>::find_initial_points(int marker, double step, double2*& initial_points)
 {
   int k = 0;
   int ne = vec.get_num_edges();
@@ -401,7 +412,8 @@ void StreamView::find_initial_points(int marker, double step, double2*& initial_
 }
 
 
-void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem)
+template<typename Scalar>
+void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem)
 {
   vec.process_solution(xsln, xitem, ysln, yitem, eps);
 
@@ -454,10 +466,11 @@ void StreamView::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, in
 }
 
 
-void StreamView::add_streamline(double x, double y)
+template<typename Scalar>
+void StreamView<Scalar>::add_streamline(double x, double y)
 {
   if (root == NULL)
-    error("Function add_streamline must be called after StreamView::show().");
+    error("Function add_streamline must be called after StreamView<Scalar>::show().");
   TimePeriod cpu_time;
   streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
   streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
@@ -472,7 +485,8 @@ inline int n_vert(int i) { return (i+1) % 3; }
 inline int p_vert(int i) { return (i+2) % 3; }
 
 
-void StreamView::on_display()
+template<typename Scalar>
+void StreamView<Scalar>::on_display()
 {
   set_ortho_projection();
   glDisable(GL_LIGHTING);
@@ -558,13 +572,15 @@ void StreamView::on_display()
 }
 
 
-void StreamView::on_mouse_move(int x, int y)
+template<typename Scalar>
+void StreamView<Scalar>::on_mouse_move(int x, int y)
 {
   View::on_mouse_move(x, y);
 }
 
 
-void StreamView::on_key_down(unsigned char key, int x, int y)
+template<typename Scalar>
+void StreamView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
@@ -604,7 +620,8 @@ void StreamView::on_key_down(unsigned char key, int x, int y)
 }
 
 
-void StreamView::on_left_mouse_down(int x, int y)
+template<typename Scalar>
+void StreamView<Scalar>::on_left_mouse_down(int x, int y)
 {
   View::on_left_mouse_down(x, y);
 
@@ -622,7 +639,8 @@ void StreamView::on_left_mouse_down(int x, int y)
 }
 
 
-const char* StreamView::get_help_text() const
+template<typename Scalar>
+const char* StreamView<Scalar>::get_help_text() const
 {
   return
   "StreamView\n\n"
@@ -642,7 +660,8 @@ const char* StreamView::get_help_text() const
 }
 
 
-StreamView::~StreamView()
+template<typename Scalar>
+StreamView<Scalar>::~StreamView()
 {
   delete_tree(root);
   for (int i = 0; i < num_stream; i++)

@@ -25,7 +25,8 @@
 #include "../h2d_common.h"
 #include "vector_base_view.h"
 
-void VectorBaseView::show(Space<Scalar>* space)
+template<typename Scalar>
+void VectorBaseView<Scalar>::show(Space<Scalar>* space)
 {
   free();
   pss = new PrecalcShapeset(space->get_shapeset());
@@ -37,14 +38,16 @@ void VectorBaseView::show(Space<Scalar>* space)
 }
 
 
-void VectorBaseView::free()
+template<typename Scalar>
+void VectorBaseView<Scalar>::free()
 {
   if (pss != NULL) { delete pss; pss = NULL; }
   if (sln != NULL) { delete sln; sln = NULL; }
 }
 
 
-void VectorBaseView::update_solution()
+template<typename Scalar>
+void VectorBaseView<Scalar>::update_solution()
 {
   scalar* coeffs = new scalar[ndof + 1];
   memset(coeffs, 0, sizeof(scalar) * (ndof + 1));
@@ -59,7 +62,8 @@ void VectorBaseView::update_solution()
 }
 
 
-void VectorBaseView::update_title()
+template<typename Scalar>
+void VectorBaseView<Scalar>::update_title()
 {
   std::stringstream str;
   str << basic_title << " - dof = " << base_index;
@@ -69,7 +73,8 @@ void VectorBaseView::update_title()
 }
 
 
-void VectorBaseView::on_special_key(int key, int x, int y)
+template<typename Scalar>
+void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
 {
   switch (key)
   {
@@ -89,7 +94,8 @@ void VectorBaseView::on_special_key(int key, int x, int y)
 }
 
 
-const char* VectorBaseView::get_help_text() const
+template<typename Scalar>
+const char* VectorBaseView<Scalar>::get_help_text() const
 {
   return
   "VectorBaseView\n\n"

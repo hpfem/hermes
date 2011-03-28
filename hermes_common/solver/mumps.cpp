@@ -408,7 +408,7 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
 // MumpsVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-MumpsVector<Scalar>::MumpsVector<Scalar>()
+MumpsVector<Scalar>::MumpsVector()
 {
   _F_
   v = NULL;
@@ -416,7 +416,7 @@ MumpsVector<Scalar>::MumpsVector<Scalar>()
 }
 
 template<typename Scalar>
-MumpsVector<Scalar>::~MumpsVector<Scalar>()
+MumpsVector<Scalar>::~MumpsVector()
 {
   _F_
   free();

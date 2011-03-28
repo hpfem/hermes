@@ -130,6 +130,13 @@ namespace RefinementSelectors {
      *  For details, see Selector::generate_shared_mesh_orders. */
     virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
   };
+
+  template class HERMES_API Selector<double>;
+  template class HERMES_API Selector<std::complex<double>>;
+  template class HERMES_API HOnlySelector<double>;
+  template class HERMES_API HOnlySelector<std::complex<double>>;
+  template class HERMES_API POnlySelector<double>;
+  template class HERMES_API POnlySelector<std::complex<double>>;
 }
 
 #endif

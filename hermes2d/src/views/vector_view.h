@@ -86,6 +86,9 @@ public:
   void save_numbered(const char* format, int number) {}
 };
 
+template class HERMES_API VectorView<double>;
+template class HERMES_API VectorView<std::complex<double>>;
+
 #endif // NOGLUT
 
 #endif

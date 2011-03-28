@@ -37,7 +37,7 @@ public:
 	VectorBaseView(char* title, WinGeom* wg = NULL)
     : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
 
-  void show(Space* space);
+  void show(Space<Scalar>* space);
 
   virtual void set_title(const char* t) {
     if (basic_title.length() == 0)
@@ -74,7 +74,7 @@ class HERMES_API VectorBaseView : public VectorView
 public:
   VectorBaseView(char* title = "BaseView", WinGeom* wg = NULL) {}
   virtual ~VectorBaseView() {}
-  void show(Space* space)
+  void show(Space<Scalar>* space)
      { verbose("VectorBaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
 };
 

@@ -31,6 +31,7 @@
 #include "function/function.h"
 #include "neighbor.h"
 #include "ref_selectors/selector.h"
+#include "adapt/kelly_type_adapt.h"
 #include <map>
 
 class PrecalcShapeset;
@@ -62,9 +63,6 @@ private:
 template<typename Scalar>
 class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>
 {
-
-friend class KellyTypeAdapt<Scalar>;
-
 public:
   /// Constructors.
   DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces, bool is_linear = false);
@@ -602,6 +600,7 @@ protected:
   AssemblingCaches assembling_caches;
 };
 
-
+template class HERMES_API DiscreteProblem<double>;
+template class HERMES_API DiscreteProblem<std::complex<double>>;
 
 #endif

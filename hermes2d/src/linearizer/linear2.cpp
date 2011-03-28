@@ -58,7 +58,6 @@ public:
 
 
 //// Orderizer /////////////////////////////////////////////////////////////////////////////////////
-
 Orderizer::Orderizer()
          : Linearizer()
 {
@@ -83,8 +82,7 @@ Orderizer::Orderizer()
   }
 }
 
-
-void Orderizer::process_space(Space<Scalar>* space)
+void Orderizer::process_space(Space<double>* space)
 {
   // sanity check
   if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
@@ -182,6 +180,103 @@ void Orderizer::process_space(Space<Scalar>* space)
   refmap.set_quad_2d(&g_quad_2d_std);
 }
 
+void Orderizer::process_space(Space<std::complex<double>>* space)
+{
+  // sanity check
+  if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
+
+  if (!space->is_up_to_date())
+    error("The space is not up to date.");
+
+  int type = 1;
+
+  nv = nt = ne = nl = 0;
+  del_slot = -1;
+
+  // estimate the required number of vertices and triangles
+  Mesh* mesh = space->get_mesh();
+  if (mesh == NULL) {
+    error("Mesh is NULL in Orderizer:process_solution().");
+  }
+  int nn = mesh->get_num_active_elements();
+  int ev = 77 * nn, et = 64 * nn, ee = 16 * nn, el = nn + 10;
+
+  // reuse or allocate vertex, triangle and edge arrays
+  lin_init_array(verts, double3, cv, ev);
+  lin_init_array(tris, int3, ct, et);
+  lin_init_array(edges, int3, ce, ee);
+  lin_init_array(lvert, int, cl1, el);
+  lin_init_array(ltext, char*, cl2, el);
+  lin_init_array(lbox, double2, cl3, el);
+  info = NULL;
+
+  int oo, o[6];
+
+  RefMap refmap;
+  refmap.set_quad_2d(&quad_ord);
+
+  // make a mesh illustrating the distribution of polynomial orders over the space
+  Element* e;
+  for_all_active_elements(e, mesh)
+  {
+    oo = o[4] = o[5] = space->get_element_order(e->id);
+    for (unsigned int k = 0; k < e->nvert; k++)
+      o[k] = space->get_edge_order(e, k);
+
+    refmap.set_active_element(e);
+    double* x = refmap.get_phys_x(type);
+    double* y = refmap.get_phys_y(type);
+
+    double3* pt = quad_ord.get_points(type);
+    int np = quad_ord.get_num_points(type);
+    int id[80];
+    assert(np <= 80);
+
+    #define make_vert(index, x, y, val) \
+      { (index) = add_vertex(); \
+      verts[index][0] = (x); \
+      verts[index][1] = (y); \
+      verts[index][2] = (val); }
+
+    int mode = e->get_mode();
+    if (e->is_quad())
+    {
+      o[4] = H2D_GET_H_ORDER(oo);
+      o[5] = H2D_GET_V_ORDER(oo);
+    }
+    make_vert(lvert[nl], x[0], y[0], o[4]);
+
+    for (int i = 1; i < np; i++)
+      make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
+
+    for (int i = 0; i < num_elem[mode][type]; i++)
+      add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]]);
+
+    for (int i = 0; i < num_edge[mode][type]; i++)
+    {
+      if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
+          ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
+           (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
+      {
+        add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
+      }
+    }
+
+    double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
+    for (unsigned int k = 0; k < e->nvert; k++)
+    {
+      if (e->vn[k]->x < xmin) xmin = e->vn[k]->x;
+      if (e->vn[k]->x > xmax) xmax = e->vn[k]->x;
+      if (e->vn[k]->y < ymin) ymin = e->vn[k]->y;
+      if (e->vn[k]->y > ymax) ymax = e->vn[k]->y;
+    }
+    lbox[nl][0] = xmax - xmin;
+    lbox[nl][1] = ymax - ymin;
+    ltext[nl++] = labels[o[4]][o[5]];
+  }
+
+  refmap.set_quad_2d(&g_quad_2d_std);
+}
 
 Orderizer::~Orderizer()
 {
@@ -192,7 +287,6 @@ Orderizer::~Orderizer()
 
 
 //// save & load ///////////////////////////////////////////////////////////////////////////////////
-
 void Orderizer::save_data(const char* filename)
 {
   FILE* f = fopen(filename, "wb");
@@ -273,7 +367,7 @@ void Orderizer::load_data(const char* filename)
   fclose(f);
 }
 
-void Orderizer::save_orders_vtk(Space<Scalar>* space, const char* file_name)
+void Orderizer::save_orders_vtk(Space<double>* space, const char* file_name)
 {
   // Create an Orderizer. This class creates a triangular mesh 
   // with "solution values" that represent the polynomial 
@@ -317,11 +411,11 @@ void Orderizer::save_data_vtk(const char* file_name)
     fprintf(f, "5\n");    // The "5" means triangle in VTK.
   }
 
-  // This outputs scalar solution values. Look into hermes3d/src/output/vtk.cpp 
+  // This outputs double solution values. Look into hermes3d/src/output/vtk.cpp 
   // for how it is done for vectors.
   fprintf(f, "\n");
   fprintf(f, "POINT_DATA %d\n", this->nv);
-  fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
+  fprintf(f, "doubleS %s %s %d\n", "Mesh", "float", 1);
   fprintf(f, "LOOKUP_TABLE %s\n", "default");
   for (int i=0; i < this->nv; i++) {
     fprintf(f, "%g\n", this->verts[i][2]);

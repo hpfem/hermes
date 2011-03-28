@@ -38,11 +38,15 @@ using namespace std;
 
 //// ScalarView ////////////////////////////////////////////////////////////////////////////////////
 
-const int ScalarView::fovy = 50;
-const double ScalarView::znear = 0.05;
-const double ScalarView::zfar = 10;
+template<typename Scalar>
+const int ScalarView<Scalar>::fovy = 50;
+template<typename Scalar>
+const double ScalarView<Scalar>::znear = 0.05;
+template<typename Scalar>
+const double ScalarView<Scalar>::zfar = 10;
 
-void ScalarView::init()
+template<typename Scalar>
+void ScalarView<Scalar>::init()
 {
   pmode = mode3d = false;
   normals = NULL;
@@ -66,7 +70,7 @@ void ScalarView::init()
 }
 
 #ifndef _MSC_VER
-ScalarView::ScalarView(const char* title, WinGeom* wg) :
+ScalarView<Scalar>::ScalarView(const char* title, WinGeom* wg) :
     View(title, wg),
     vertex_nodes(0),
     pointed_vertex_node(NULL),
@@ -85,7 +89,8 @@ ScalarView::ScalarView(const char* title, WinGeom* wg) :
 }
 #endif
 
-ScalarView::ScalarView(char* title, WinGeom* wg) :
+template<typename Scalar>
+ScalarView<Scalar>::ScalarView(char* title, WinGeom* wg) :
     View(title, wg),
     vertex_nodes(0),
     pointed_vertex_node(NULL),
@@ -103,7 +108,8 @@ ScalarView::ScalarView(char* title, WinGeom* wg) :
   init();
 }
 
-ScalarView::~ScalarView()
+template<typename Scalar>
+ScalarView<Scalar>::~ScalarView()
 {
   delete[] normals;
   vertex_nodes.clear();
@@ -118,7 +124,8 @@ ScalarView::~ScalarView()
 # endif
 }
 
-void ScalarView::on_create(int output_id)
+template<typename Scalar>
+void ScalarView<Scalar>::on_create(int output_id)
 {
   View::on_create(output_id);
 
@@ -138,7 +145,8 @@ void ScalarView::on_create(int output_id)
 # endif
 }
 
-void ScalarView::on_close()
+template<typename Scalar>
+void ScalarView<Scalar>::on_close()
 {
   //GUI cleanup
 # ifdef ENABLE_VIEWER_GUI
@@ -179,7 +187,8 @@ void ScalarView::on_close()
   View::on_close();
 }
 
-void ScalarView::create_setup_bar()
+template<typename Scalar>
+void ScalarView<Scalar>::create_setup_bar()
 {
 #ifdef ENABLE_VIEWER_GUI
   char buffer[1024];
@@ -211,8 +220,9 @@ void ScalarView::create_setup_bar()
 #endif
 }
 
-void ScalarView::show(MeshFunction<Scalar>* sln, double eps, int item,
-                      MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
+template<typename Scalar>
+void ScalarView<Scalar>::show(MeshFunction<Scalar>* sln, double eps, int item,
+                      MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
 {
   // For preservation of the sln's active element. Will be set back after the visualization.
   Element* active_element = sln->get_active_element();
@@ -252,7 +262,8 @@ void ScalarView::show(MeshFunction<Scalar>* sln, double eps, int item,
         sln->set_active_element(active_element);
 }
 
-void ScalarView::show_linearizer_data(double eps, int item)
+template<typename Scalar>
+void ScalarView<Scalar>::show_linearizer_data(double eps, int item)
 {
   double max_abs = range_auto ? -1.0 : std::max(fabs(range_min), fabs(range_max));
 
@@ -271,7 +282,8 @@ void ScalarView::show_linearizer_data(double eps, int item)
   verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
 }
 
-void ScalarView::update_mesh_info() {
+template<typename Scalar>
+void ScalarView<Scalar>::update_mesh_info() {
   // Calculate normals if necessary.
   if (mode3d)
     calculate_normals(lin.get_vertices(), lin.get_num_vertices(), lin.get_triangles(), lin.get_num_triangles());
@@ -319,12 +331,14 @@ void ScalarView::update_mesh_info() {
   lin_updated = true;
 }
 
-bool ScalarView::compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b)
+template<typename Scalar>
+bool ScalarView<Scalar>::compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b)
 {
   return a.x < b.x;
 }
 
-void ScalarView::init_vertex_nodes(Mesh* mesh)
+template<typename Scalar>
+void ScalarView<Scalar>::init_vertex_nodes(Mesh* mesh)
 {
   //clear all selections
   pointed_vertex_node = NULL;
@@ -369,7 +383,8 @@ void ScalarView::init_vertex_nodes(Mesh* mesh)
   std::sort(vertex_nodes.begin(), vertex_nodes.end(), compare_vertex_nodes_x);
 }
 
-ScalarView::VertexNodeInfo* ScalarView::find_nearest_node_in_range(float x, float y, float radius)
+template<typename Scalar>
+typename ScalarView<Scalar>::VertexNodeInfo* ScalarView<Scalar>::find_nearest_node_in_range(float x, float y, float radius)
 {
   VertexNodeInfo node_info(-1, x - radius, y); //right side of the widget
   std::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
@@ -395,7 +410,8 @@ ScalarView::VertexNodeInfo* ScalarView::find_nearest_node_in_range(float x, floa
     return NULL;
 }
 
-void ScalarView::draw_single_vertex_node(const VertexNodeInfo& node)
+template<typename Scalar>
+void ScalarView<Scalar>::draw_single_vertex_node(const VertexNodeInfo& node)
 {
   //prepare environment
   glPushMatrix();
@@ -431,7 +447,8 @@ void ScalarView::draw_single_vertex_node(const VertexNodeInfo& node)
   glPopMatrix();
 }
 
-void ScalarView::draw_vertex_nodes()
+template<typename Scalar>
+void ScalarView<Scalar>::draw_vertex_nodes()
 {
   //create widgets
   create_nodes_widgets();
@@ -465,7 +482,8 @@ void ScalarView::draw_vertex_nodes()
   }
 }
 
-void ScalarView::create_nodes_widgets()
+template<typename Scalar>
+void ScalarView<Scalar>::create_nodes_widgets()
 {
   //pointed node
   if (pointed_node_widget == 0)
@@ -533,7 +551,8 @@ void ScalarView::create_nodes_widgets()
   }
 }
 
-void ScalarView::init_element_info(Mesh* mesh)
+template<typename Scalar>
+void ScalarView<Scalar>::init_element_info(Mesh* mesh)
 {
   //cleanup
   element_infos.clear();
@@ -569,7 +588,8 @@ void ScalarView::init_element_info(Mesh* mesh)
   }
 }
 
-void ScalarView::draw_element_infos_2d()
+template<typename Scalar>
+void ScalarView<Scalar>::draw_element_infos_2d()
 {
   //create widgets
   create_element_info_widgets();
@@ -621,7 +641,8 @@ void ScalarView::draw_element_infos_2d()
   }
 }
 
-void ScalarView::create_element_info_widgets()
+template<typename Scalar>
+void ScalarView<Scalar>::create_element_info_widgets()
 {
   if (element_id_widget == 0)
   {
@@ -652,7 +673,8 @@ void ScalarView::create_element_info_widgets()
   }
 }
 
-void ScalarView::show_contours(double step, double orig)
+template<typename Scalar>
+void ScalarView<Scalar>::show_contours(double step, double orig)
 {
   if (step == 0.0) error("'step' cannot be zero.");
   contours = true;
@@ -671,7 +693,8 @@ static double my_ceil(double x)
 }
 
 
-void ScalarView::draw_tri_contours(double3* vert, int3* tri)
+template<typename Scalar>
+void ScalarView<Scalar>::draw_tri_contours(double3* vert, int3* tri)
 {
   // sort the vertices by their value, keep track of the permutation sign
   int i, idx[3], perm = 0;
@@ -715,7 +738,8 @@ void ScalarView::draw_tri_contours(double3* vert, int3* tri)
   }
 }
 
-void ScalarView::prepare_gl_geometry()
+template<typename Scalar>
+void ScalarView<Scalar>::prepare_gl_geometry()
 {
   if (lin_updated)
   {
@@ -815,7 +839,8 @@ void ScalarView::prepare_gl_geometry()
   }
 }
 
-void ScalarView::draw_values_2d()
+template<typename Scalar>
+void ScalarView<Scalar>::draw_values_2d()
 {
   assert_msg(gl_pallete_tex_id != 0, "Palette GL texture ID is zero, palette not set");
 
@@ -887,7 +912,8 @@ void ScalarView::draw_values_2d()
   glMatrixMode(GL_MODELVIEW);
 }
 
-void ScalarView::draw_edges_2d() {
+template<typename Scalar>
+void ScalarView<Scalar>::draw_edges_2d() {
   glColor3fv(edges_color);
   bool displayed = false;
   if (gl_edge_inx_buffer != 0) {//VBO
@@ -948,7 +974,8 @@ void ScalarView::draw_edges_2d() {
   }
 }
 
-void ScalarView::draw_normals_3d() {
+template<typename Scalar>
+void ScalarView<Scalar>::draw_normals_3d() {
     double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
     glPushAttrib(GL_ENABLE_BIT);
@@ -975,14 +1002,16 @@ void ScalarView::draw_normals_3d() {
     glPopAttrib();
 }
 
-void ScalarView::draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
+template<typename Scalar>
+void ScalarView<Scalar>::draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
 {
   double3* verts = viewer->lin.get_vertices();
   glVertex2d(verts[inx_vert_a][0], verts[inx_vert_a][1]);
   glVertex2d(verts[inx_vert_b][0], verts[inx_vert_b][1]);
 }
 
-void ScalarView::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only)
+template<typename Scalar>
+void ScalarView<Scalar>::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only)
 {
   int3* edges = lin.get_edges();
   int edge_cnt = lin.get_num_edges();
@@ -1003,7 +1032,8 @@ void ScalarView::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param
 #define V5    vertices_max_x - xctr, range_max - yctr, -(vertices_min_y - zctr)
 #define V6    vertices_max_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
 #define V7    vertices_min_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
-void ScalarView::draw_aabb()
+template<typename Scalar>
+void ScalarView<Scalar>::draw_aabb()
 {
   // Axis-aligned bounding box of the model.
   GLdouble aabb[] =
@@ -1040,7 +1070,8 @@ void ScalarView::draw_aabb()
   glPopMatrix();
 }
 
-void ScalarView::on_display()
+template<typename Scalar>
+void ScalarView<Scalar>::on_display()
 {
   int i, j;
 
@@ -1217,7 +1248,8 @@ static inline void normalize(double& x, double& y, double& z)
 }
 
 
-void ScalarView::calculate_normals(double3* vert, int num_verts, int3* tris, int num_tris)
+template<typename Scalar>
+void ScalarView<Scalar>::calculate_normals(double3* vert, int num_verts, int3* tris, int num_tris)
 {
   if (normals != NULL)
     delete [] normals;
@@ -1251,7 +1283,8 @@ void ScalarView::calculate_normals(double3* vert, int num_verts, int3* tris, int
     normalize(normals[i][0], normals[i][1], normals[i][2]);
 }
 
-void ScalarView::update_layout() {
+template<typename Scalar>
+void ScalarView<Scalar>::update_layout() {
   View::update_layout();
   // (x,y,-z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
   // and vertically at the position of the average value of all vertices. This point will be the origin for all
@@ -1261,7 +1294,8 @@ void ScalarView::update_layout() {
   zctr = (vertices_max_y + vertices_min_y) / 2.0;
 }
 
-void ScalarView::reset_view(bool force_reset) {
+template<typename Scalar>
+void ScalarView<Scalar>::reset_view(bool force_reset) {
   if (force_reset || view_not_reset) { // Reset 3d view.
     xrot = 40.0; yrot = 0.0;
     xtrans = ytrans = ztrans = 0.0;
@@ -1310,7 +1344,8 @@ void ScalarView::reset_view(bool force_reset) {
 //  3. Compute the distance (along z-axis) from the origin to the center of perspective projection of the point with the
 //      biggest horizontal (x-axis) distance from the origin.
 //  4. Take the bigger of the two distances and reverse sign (since we will translate the model, not the camera)
-double ScalarView::calculate_ztrans_to_fit_view()
+template<typename Scalar>
+double ScalarView<Scalar>::calculate_ztrans_to_fit_view()
 {
   // Axis-aligned bounding box of the model (homogeneous coordinates in the model space), divided into the bottom and top base.
   GLdouble aabb[2][16] =
@@ -1377,7 +1412,8 @@ double ScalarView::calculate_ztrans_to_fit_view()
   return -optimal_viewpoint_pos;
 }
 
-void ScalarView::set_vertical_scaling(double sc)
+template<typename Scalar>
+void ScalarView<Scalar>::set_vertical_scaling(double sc)
 {
   if (mode3d)
     yscale *= sc;
@@ -1386,7 +1422,8 @@ void ScalarView::set_vertical_scaling(double sc)
   refresh();
 }
 
-void ScalarView::set_min_max_range(double min, double max)
+template<typename Scalar>
+void ScalarView<Scalar>::set_min_max_range(double min, double max)
 {
   // TODO: allow settin min = max, in which case draw the corresponding contour.
   if (fabs(max-min) < 1e-8) {
@@ -1396,7 +1433,8 @@ void ScalarView::set_min_max_range(double min, double max)
   View::set_min_max_range(min, max);
 }
 
-void ScalarView::init_lighting()
+template<typename Scalar>
+void ScalarView<Scalar>::init_lighting()
 {
   float light_specular[] = {  1.0f, 1.0f, 1.0f, 1.0f };
   float light_ambient[]  = {  0.1f, 0.1f, 0.1f, 1.0f };
@@ -1427,7 +1465,8 @@ void ScalarView::init_lighting()
 }
 
 
-void ScalarView::on_key_down(unsigned char key, int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventKeyboardGLUT(key, x, y))
@@ -1513,7 +1552,8 @@ void ScalarView::on_key_down(unsigned char key, int x, int y)
   }
 }
 
-void ScalarView::on_special_key(int key, int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_special_key(int key, int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventSpecialGLUT(key, x, y))
@@ -1523,7 +1563,8 @@ void ScalarView::on_special_key(int key, int x, int y)
 }
 
 
-void ScalarView::on_mouse_move(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_mouse_move(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   if (mode3d && (dragging || scaling || panning)) {
@@ -1569,7 +1610,8 @@ void ScalarView::on_mouse_move(int x, int y)
   }
 }
 
-void ScalarView::on_left_mouse_down(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_left_mouse_down(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_DOWN, x, y))
@@ -1578,7 +1620,8 @@ void ScalarView::on_left_mouse_down(int x, int y)
   }
 }
 
-void ScalarView::on_left_mouse_up(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_left_mouse_up(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_UP, x, y))
@@ -1587,7 +1630,8 @@ void ScalarView::on_left_mouse_up(int x, int y)
   }
 }
 
-void ScalarView::on_right_mouse_down(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_right_mouse_down(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_DOWN, x, y))
@@ -1626,7 +1670,8 @@ void ScalarView::on_right_mouse_down(int x, int y)
   }
 }
 
-void ScalarView::on_right_mouse_up(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_right_mouse_up(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_UP, x, y))
@@ -1635,7 +1680,8 @@ void ScalarView::on_right_mouse_up(int x, int y)
   }
 }
 
-void ScalarView::on_middle_mouse_down(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_middle_mouse_down(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_DOWN, x, y))
@@ -1646,7 +1692,8 @@ void ScalarView::on_middle_mouse_down(int x, int y)
   }
 }
 
-void ScalarView::on_middle_mouse_up(int x, int y)
+template<typename Scalar>
+void ScalarView<Scalar>::on_middle_mouse_up(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_UP, x, y))
@@ -1655,7 +1702,8 @@ void ScalarView::on_middle_mouse_up(int x, int y)
   }
 }
 
-void ScalarView::on_reshape(int width, int height)
+template<typename Scalar>
+void ScalarView<Scalar>::on_reshape(int width, int height)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
   VIEWER_GUI(TwWindowSize(width, height));
@@ -1666,7 +1714,8 @@ void ScalarView::on_reshape(int width, int height)
 
 //// load & save ///////////////////////////////////////////////////////////////////////////////////
 
-void ScalarView::load_data(const char* filename)
+template<typename Scalar>
+void ScalarView<Scalar>::load_data(const char* filename)
 {
   lin.lock_data();
   lin.load_data(filename);
@@ -1681,7 +1730,8 @@ void ScalarView::load_data(const char* filename)
 }
 
 
-void ScalarView::save_data(const char* filename)
+template<typename Scalar>
+void ScalarView<Scalar>::save_data(const char* filename)
 {
   int num_tris;
   lin.load_data(filename);
@@ -1693,14 +1743,16 @@ void ScalarView::save_data(const char* filename)
 }
 
 
-void ScalarView::save_numbered(const char* format, int number)
+template<typename Scalar>
+void ScalarView<Scalar>::save_numbered(const char* format, int number)
 {
   char buffer[1000];
   sprintf(buffer, format, number);
   save_data(buffer);
 }
 
-void ScalarView::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
+template<typename Scalar>
+void ScalarView<Scalar>::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
 {
   assert_msg(param != NULL, "Param parameter equals to NULL");
 
@@ -1720,7 +1772,8 @@ void ScalarView::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewe
   fprintf(pars->fout, "<path d=\"M %g %g L %g %g\"/>\n", vert_a[0], vert_a[1], vert_b[0], vert_b[1]);
 }
 
-void ScalarView::export_mesh_edges_svg(const char* filename, float width_mm)
+template<typename Scalar>
+void ScalarView<Scalar>::export_mesh_edges_svg(const char* filename, float width_mm)
 {
   lin.lock_data();
 
@@ -1756,7 +1809,8 @@ void ScalarView::export_mesh_edges_svg(const char* filename, float width_mm)
 }
 
 
-const char* ScalarView::get_help_text() const
+template<typename Scalar>
+const char* ScalarView<Scalar>::get_help_text() const
 {
   return
   "ScalarView\n\n"

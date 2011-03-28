@@ -26,7 +26,8 @@
 #include "../h2d_common.h"
 #include "base_view.h"
 
-BaseView::BaseView(const char* title, WinGeom* wg)
+template<typename Scalar>
+BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
         : ScalarView((char*) title, wg)
 {
   pss = NULL;
@@ -36,7 +37,8 @@ BaseView::BaseView(const char* title, WinGeom* wg)
   basic_title.assign(title);
 }
 
-BaseView::BaseView(char* title, WinGeom* wg)
+template<typename Scalar>
+BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
         : ScalarView(title, wg)
 {
   pss = NULL;
@@ -46,7 +48,8 @@ BaseView::BaseView(char* title, WinGeom* wg)
   basic_title.assign(title);
 }
 
-void BaseView::show(const Space<Scalar>* space, double eps, int item)
+template<typename Scalar>
+void BaseView<Scalar>::show(const Space<Scalar>* space, double eps, int item)
 {
   free();
   int order_increase = 0;
@@ -60,14 +63,16 @@ void BaseView::show(const Space<Scalar>* space, double eps, int item)
   update_solution();
 }
 
-void BaseView::free()
+template<typename Scalar>
+void BaseView<Scalar>::free()
 {
   if (pss != NULL) { delete pss; pss = NULL; }
   if (sln != NULL) { delete sln; sln = NULL; }
   if (space != NULL) { delete space; space = NULL; }
 }
 
-void BaseView::update_solution()
+template<typename Scalar>
+void BaseView<Scalar>::update_solution()
 {
   scalar* coeffs = new scalar[ndof];
   memset(coeffs, 0, sizeof(scalar) * ndof);
@@ -87,7 +92,8 @@ void BaseView::update_solution()
   delete [] coeffs;
 }
 
-void BaseView::update_title()
+template<typename Scalar>
+void BaseView<Scalar>::update_title()
 {
   std::stringstream str;
   str << basic_title << " - dof = " << base_index;
@@ -96,7 +102,8 @@ void BaseView::update_title()
   View::set_title(str.str().c_str());
 }
 
-void BaseView::on_special_key(int key, int x, int y)
+template<typename Scalar>
+void BaseView<Scalar>::on_special_key(int key, int x, int y)
 {
   switch (key)
   {
@@ -116,7 +123,8 @@ void BaseView::on_special_key(int key, int x, int y)
 }
 
 
-const char* BaseView::get_help_text() const
+template<typename Scalar>
+const char* BaseView<Scalar>::get_help_text() const
 {
   return
   "BaseView\n\n"

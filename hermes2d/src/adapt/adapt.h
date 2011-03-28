@@ -132,20 +132,20 @@ public:
     ProjNormType projNormType;
 
     template<typename real, typename scalar>
-    static Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    static scalar l2_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
+                   Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;
     }
 
     template<typename real, typename scalar>
-    static Scalar h1_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    static scalar h1_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
+                   Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
                            + u->dy[i] * conj(v->dy[i]));
@@ -153,23 +153,23 @@ public:
     }
 
     template<typename real, typename scalar>
-    static Scalar h1_error_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                        Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    static scalar h1_error_semi_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
+                        Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
       return result;
     }
 
     template<typename real, typename scalar>
-    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    static scalar hdiv_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
 
       error("hdiv error form not implemented yet in integrals_hdiv.h.");
 
       // this is Hcurl code:
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -177,9 +177,9 @@ public:
     }
 
     template<typename real, typename scalar>
-    static Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<real> *e, ExtData<Scalar> *ext)
+    static scalar hcurl_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
-      Scalar result = 0;
+      scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -415,4 +415,7 @@ private:
     };
   };
 };
+
+template HERMES_API class Adapt<double>;
+template HERMES_API class Adapt<std::complex<double>>;
 #endif

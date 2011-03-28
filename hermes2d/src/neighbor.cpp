@@ -1,6 +1,9 @@
 #include "hermes2d.h"
+template class NeighborSearch<double>;
+template class NeighborSearch<std::complex<double>>;
 
-NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
+template<typename Scalar>
+NeighborSearch<Scalar>::NeighborSearch(Element* el, Mesh* mesh) :
   supported_shapes(NULL),
   mesh(mesh),
   central_el(el),
@@ -23,7 +26,8 @@ NeighborSearch::NeighborSearch(Element* el, Mesh* mesh) :
   original_central_el_transform = 0;
 }
 
-NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
+template<typename Scalar>
+NeighborSearch<Scalar>::NeighborSearch(const NeighborSearch& ns) :
   supported_shapes(NULL),
   mesh(ns.mesh),
   central_el(ns.central_el),
@@ -70,7 +74,8 @@ NeighborSearch::NeighborSearch(const NeighborSearch& ns) :
   active_edge = ns.active_edge;
 }
 
-NeighborSearch::~NeighborSearch()
+template<typename Scalar>
+NeighborSearch<Scalar>::~NeighborSearch()
 {
   _F_
   neighbor_edges.clear();
@@ -78,7 +83,8 @@ NeighborSearch::~NeighborSearch()
   clear_supported_shapes();
 }
 
-void NeighborSearch::reset_neighb_info()
+template<typename Scalar>
+void NeighborSearch<Scalar>::reset_neighb_info()
 {
   _F_
   // Reset information about the neighborhood's active state.
@@ -100,7 +106,8 @@ void NeighborSearch::reset_neighb_info()
   neighborhood_type = H2D_DG_NOT_INITIALIZED;
 }
 
-void NeighborSearch::set_active_edge(int edge)
+template<typename Scalar>
+void NeighborSearch<Scalar>::set_active_edge(int edge)
 {
   _F_
   reset_neighb_info();
@@ -188,7 +195,8 @@ void NeighborSearch::set_active_edge(int edge)
       error("The given edge isn't inner");
 }
 
-void NeighborSearch::set_active_edge_multimesh(const int& edge)
+template<typename Scalar>
+void NeighborSearch<Scalar>::set_active_edge_multimesh(const int& edge)
 {
   _F_
   Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
@@ -219,7 +227,8 @@ void NeighborSearch::set_active_edge_multimesh(const int& edge)
   return;
 }
 
-Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
+template<typename Scalar>
+Hermes::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx)
 {
   _F_
   Hermes::vector<unsigned int> transformations_backwards;
@@ -234,7 +243,8 @@ Hermes::vector<unsigned int> NeighborSearch::get_transforms(uint64_t sub_idx)
   return transformations;
 }
 
-bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations)
+template<typename Scalar>
+bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations)
 {
   _F_
   // No subelements => of course this edge is an inter-element one.
@@ -260,7 +270,8 @@ bool NeighborSearch::is_inter_edge(const int& edge, const Hermes::vector<unsigne
   return true;
 }
 
-void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
+template<typename Scalar>
+void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
 {
   _F_
   if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) {
@@ -289,7 +300,8 @@ void NeighborSearch::update_according_to_sub_idx(const Hermes::vector<unsigned i
   else handle_sub_idx_way_down(transformations);
 }
 
-void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
+template<typename Scalar>
+void NeighborSearch<Scalar>::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
 {
   _F_
   Hermes::vector<unsigned int> neighbors_to_be_deleted;
@@ -362,7 +374,8 @@ void NeighborSearch::handle_sub_idx_way_down(const Hermes::vector<unsigned int>&
       delete_neighbor(neighbors_to_be_deleted[neighbors_to_be_deleted_i - 1]);
 }
 
-bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, int edge)
+template<typename Scalar>
+bool NeighborSearch<Scalar>::compatible_transformations(unsigned int a, unsigned int b, int edge)
 {
   _F_
   if(a == b)
@@ -398,7 +411,8 @@ bool NeighborSearch::compatible_transformations(unsigned int a, unsigned int b, 
   return false;
 }
 
-void NeighborSearch::clear_initial_sub_idx()
+template<typename Scalar>
+void NeighborSearch<Scalar>::clear_initial_sub_idx()
 {
   _F_
   if(neighborhood_type != H2D_DG_GO_DOWN)
@@ -433,7 +447,8 @@ void NeighborSearch::clear_initial_sub_idx()
   }
 }
 
-void NeighborSearch::delete_neighbor(unsigned int position)
+template<typename Scalar>
+void NeighborSearch<Scalar>::delete_neighbor(unsigned int position)
 {
   _F_
   for(unsigned int i = position; i < n_neighbors - 1; i++)
@@ -460,7 +475,8 @@ void NeighborSearch::delete_neighbor(unsigned int position)
 }
 
 
-void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
+template<typename Scalar>
+void NeighborSearch<Scalar>::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
 {
   _F_
   Node* edge = NULL;
@@ -487,7 +503,7 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
       par_mid_vertices[n_parents++] = vertex;
     else
       if (n_parents == max_n_trans - 1)
-        error("Maximum number of intermediate parents exceeded in NeighborSearch::finding_act_elem_up");
+        error("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
       else
         if(par_mid_vertices[n_parents - 1]->id != vertex->id)
           par_mid_vertices[n_parents++] = vertex;
@@ -570,7 +586,8 @@ void NeighborSearch::find_act_elem_up( Element* elem, int* orig_vertex_id, Node*
 }
 
 
-void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
+template<typename Scalar>
+void NeighborSearch<Scalar>::find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
 {
   _F_
   int mid_vert = vertex->id; // ID of vertex in between vertices from par_vertex_id.
@@ -648,7 +665,8 @@ void NeighborSearch::find_act_elem_down( Node* vertex, int* bounding_verts_id, i
   }
 }
 
-int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment)
+template<typename Scalar>
+int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment)
 {
   _F_
   if (segment == 0)
@@ -666,7 +684,8 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
   return 0;
 }
 
-NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space<Scalar>*space, AsmList* al)
+template<typename Scalar>
+typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(Space<Scalar>*space, AsmList<Scalar>* al)
 {
   _F_
   if (supported_shapes == NULL)
@@ -677,7 +696,8 @@ NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space<
   return supported_shapes;
 }
 
-void NeighborSearch::set_quad_order(int order)
+template<typename Scalar>
+void NeighborSearch<Scalar>::set_quad_order(int order)
 {
   _F_
   quad->set_mode(neighbors[active_segment]->get_mode());
@@ -686,7 +706,8 @@ void NeighborSearch::set_quad_order(int order)
   central_quad.init(quad, quad->get_edge_points(active_edge, order));
 }
 
-int NeighborSearch::get_quad_eo(bool on_neighbor)
+template<typename Scalar>
+int NeighborSearch<Scalar>::get_quad_eo(bool on_neighbor)
 {
   _F_
   if (on_neighbor)
@@ -695,10 +716,11 @@ int NeighborSearch::get_quad_eo(bool on_neighbor)
     return central_quad.eo;
 }
 
-DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction<Scalar>* fu)
+template<typename Scalar>
+DiscontinuousFunc<Scalar>* NeighborSearch<Scalar>::init_ext_fn(MeshFunction<Scalar>* fu)
 {
   _F_
-  Func<scalar>* fn_central = init_fn(fu, get_quad_eo(false));
+  Func<Scalar>* fn_central = init_fn(fu, get_quad_eo(false));
 
   uint64_t original_transform = fu->get_transform();
 
@@ -708,18 +730,18 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction<Scalar>* fu)
   for(unsigned int i = 0; i < neighbor_n_trans[active_segment]; i++)
     fu->push_transform(neighbor_transformations[active_segment][i]);
 
-  Func<scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
+  Func<Scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
 
   // Restore the original function.
   fu->set_active_element(central_el);
   fu->set_transform(original_transform);
 
-  return new DiscontinuousFunc<scalar>(fn_central, fn_neighbor, (neighbor_edge.orientation == 1));
+  return new DiscontinuousFunc<Scalar>(fn_central, fn_neighbor, (neighbor_edge.orientation == 1));
 
   //NOTE: This function is not very efficient, since it sets the active elements and possibly pushes transformations
   // for each mesh function in each cycle of the innermost assembly loop. This is neccessary because only in
   // this innermost cycle (in function DiscreteProblem::eval_form), we know the quadrature order (dependent on
-  // the actual basis and test function), which is needed for creating the Func<scalar> objects via init_fn.
+  // the actual basis and test function), which is needed for creating the Func<Scalar> objects via init_fn.
   // The reason for storing the central and neighbor values of any given function in these objects is that otherwise
   // we would have to have one independent copy of the function for each of the neighboring elements. However, it
   // could unify the way PrecalcShapesets and MeshFunctions are treated in NeighborSearch and maybe these additional
@@ -727,7 +749,8 @@ DiscontinuousFunc<scalar>* NeighborSearch::init_ext_fn(MeshFunction<Scalar>* fu)
   // test functions), would be actually more efficient than this. This would require implementing copy for Filters.
 }
 
-int NeighborSearch::get_neighb_edge_number(int segment)
+template<typename Scalar>
+int NeighborSearch<Scalar>::get_neighb_edge_number(int segment)
 {
   if( (unsigned) segment >= neighbor_edges.size())
     error("given number is bigger than actual number of neighbors ");
@@ -736,7 +759,8 @@ int NeighborSearch::get_neighb_edge_number(int segment)
   return 0;
 }
 
-int NeighborSearch::get_neighb_edge_orientation(int segment)
+template<typename Scalar>
+int NeighborSearch<Scalar>::get_neighb_edge_orientation(int segment)
 {
   if( (unsigned) segment >= neighbor_edges.size())
     error("given number is bigger than actual number of neighbors ");
@@ -750,16 +774,18 @@ int NeighborSearch::get_neighb_edge_orientation(int segment)
 /*** _____________________________________________ EXTENDED SHAPESET _____________________________________________ ***/
 
 
-NeighborSearch::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space<Scalar>* space) :
+template<typename Scalar>
+NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>* space) :
   central_al(central_al)
 {
   _F_
-  neighbor_al = new AsmList();
+  neighbor_al = new AsmList<Scalar>();
   space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
   combine_assembly_lists();
 }
 
-void NeighborSearch::ExtendedShapeset::combine_assembly_lists()
+template<typename Scalar>
+void NeighborSearch<Scalar>::ExtendedShapeset::combine_assembly_lists()
 {
   assert(central_al != NULL && neighbor_al != NULL);
   cnt = central_al->cnt + neighbor_al->cnt;

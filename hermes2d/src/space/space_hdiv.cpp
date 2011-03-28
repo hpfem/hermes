@@ -20,11 +20,18 @@
 #include "../shapeset/shapeset_hd_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-double** HdivSpace::hdiv_proj_mat = NULL;
-double*  HdivSpace::hdiv_chol_p   = NULL;
-int      HdivSpace::hdiv_proj_ref = 0;
+template class HdivSpace<double>;
+template class HdivSpace<std::complex<double>>;
 
-void HdivSpace::init(Shapeset* shapeset, Ord2 p_init)
+template<typename Scalar>
+double** HdivSpace<Scalar>::hdiv_proj_mat = NULL;
+template<typename Scalar>
+double*  HdivSpace<Scalar>::hdiv_chol_p   = NULL;
+template<typename Scalar>
+int      HdivSpace<Scalar>::hdiv_proj_ref = 0;
+
+template<typename Scalar>
+void HdivSpace<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -49,21 +56,24 @@ void HdivSpace::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-HdivSpace::HdivSpace(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+HdivSpace<Scalar>::HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-HdivSpace::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+HdivSpace<Scalar>::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-HdivSpace::~HdivSpace()
+template<typename Scalar>
+HdivSpace<Scalar>::~HdivSpace()
 {
   if (!--hdiv_proj_ref)
   {
@@ -75,7 +85,8 @@ HdivSpace::~HdivSpace()
 }
 
 
-Space<Scalar>* HdivSpace::dup(Mesh* mesh, int order_increase) const
+template<typename Scalar>
+Space<Scalar>* HdivSpace<Scalar>::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME
   // HdivSpace<Scalar>* space = new HdivSpace(mesh, essential_bcs, 0, this->shapeset);
@@ -85,7 +96,8 @@ Space<Scalar>* HdivSpace::dup(Mesh* mesh, int order_increase) const
   return NULL;
 }
 
-void HdivSpace::set_shapeset(Shapeset *shapeset)
+template<typename Scalar>
+void HdivSpace<Scalar>::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 30 && shapeset->get_id() > 19)
   {
@@ -93,12 +105,13 @@ void HdivSpace::set_shapeset(Shapeset *shapeset)
     own_shapeset = false;
   }
   else
-    error("Wrong shapeset type in HdivSpace::set_shapeset()");
+    error("Wrong shapeset type in HdivSpace<Scalar>::set_shapeset()");
 }
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 
-void HdivSpace::assign_edge_dofs()
+template<typename Scalar>
+void HdivSpace<Scalar>::assign_edge_dofs()
 {
   Node* en;
   for_all_edge_nodes(en, mesh)
@@ -110,7 +123,7 @@ void HdivSpace::assign_edge_dofs()
 
       if (en->bnd)
         if(essential_bcs != NULL)
-          if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL)
+          if(essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(en->marker)) != NULL)
             ndata[en->id].dof = H2D_CONSTRAINED_DOF;
           else {
             ndata[en->id].dof = next_dof;
@@ -133,7 +146,8 @@ void HdivSpace::assign_edge_dofs()
 }
 
 
-void HdivSpace::assign_bubble_dofs()
+template<typename Scalar>
+void HdivSpace<Scalar>::assign_bubble_dofs()
 {
   Element* e;
   for_all_active_elements(e, mesh)
@@ -150,7 +164,8 @@ void HdivSpace::assign_bubble_dofs()
 
 //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
-void HdivSpace::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
+template<typename Scalar>
+void HdivSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
 {
   Node* en = e->en[surf_num];
   NodeData* nd = &ndata[en->id];
@@ -182,7 +197,8 @@ void HdivSpace::get_boundary_assembly_list_internal(Element* e, int surf_num, As
 }
 
 
-void HdivSpace::get_bubble_assembly_list(Element* e, AsmList* al)
+template<typename Scalar>
+void HdivSpace<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
 {
   ElementData* ed = &edata[e->id];
   if (!ed->n) return;
@@ -195,13 +211,14 @@ void HdivSpace::get_bubble_assembly_list(Element* e, AsmList* al)
 
 //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
-scalar* HdivSpace::get_bc_projection(SurfPos* surf_pos, int order)
+template<typename Scalar>
+Scalar* HdivSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 {
   assert(order >= 0);
-  scalar* proj = new scalar[order + 1];
+  Scalar* proj = new Scalar[order + 1];
 
   Quad1DStd quad1d;
-  scalar* rhs = proj;
+  Scalar* rhs = proj;
   int mo = quad1d.get_max_order();
   double2* pt = quad1d.get_points(mo);
 
@@ -221,15 +238,15 @@ scalar* HdivSpace::get_bc_projection(SurfPos* surf_pos, int order)
       surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
       // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+      EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
-      if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
+      if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
         rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
         * bc->value_const * el;
       }
       // If the BC is not constant.
-      else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
+      else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
       {
         // Find out the (x,y) coordinate.
         double x, y;
@@ -263,7 +280,8 @@ static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
   else return e->sons[i]->vn[j];
 }
 
-void HdivSpace::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
+template<typename Scalar>
+void HdivSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
 {
   int j;
   EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
@@ -364,7 +382,8 @@ void HdivSpace::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei
 }
 
 
-void HdivSpace::update_constraints()
+template<typename Scalar>
+void HdivSpace<Scalar>::update_constraints()
 {
   Element* e;
   for_all_base_elements(e, mesh)

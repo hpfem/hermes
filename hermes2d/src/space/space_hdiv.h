@@ -28,7 +28,7 @@ template<typename Scalar>
 class HERMES_API HdivSpace : public Space<Scalar>
 {
 public:
-  HdivSpace(Mesh* mesh, EssentialBCs* boundary_conditions, int p_init = 1,
+  HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
           Shapeset* shapeset = NULL);
   
   HdivSpace(Mesh* mesh, int p_init = 1,
@@ -38,7 +38,7 @@ public:
 
   virtual ~HdivSpace();
 
-  virtual Space* dup(Mesh* mesh, int order_increase = 0) const;
+  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
   virtual void set_shapeset(Shapeset* shapeset);
 
@@ -50,9 +50,9 @@ protected:
   virtual void assign_edge_dofs();
   virtual void assign_bubble_dofs();
 
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) {}
-  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al);
-  virtual void get_bubble_assembly_list(Element* e, AsmList* al);
+  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
+  virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
 
   static double** hdiv_proj_mat;
   static double*  hdiv_chol_p;
@@ -73,6 +73,8 @@ protected:
 
 };
 
+template class HERMES_API HdivSpace<double>;
+template class HERMES_API HdivSpace<std::complex<double>>;
 
 
 #endif

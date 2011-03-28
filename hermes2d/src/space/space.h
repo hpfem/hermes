@@ -121,7 +121,7 @@ public:
   /// Copies element orders from another space. 'inc' is an optional order
   /// increase. If the source space has a coarser mesh, the orders are distributed
   /// recursively. This is useful for reference solution spaces.
-  void copy_orders(const Space* space, int inc = 0);
+  void copy_orders(const Space<Scalar>* space, int inc = 0);
   /// Internal. Obtains the order of an edge, according to the minimum rule.
   virtual int get_edge_order(Element* e, int edge);
 
@@ -144,7 +144,7 @@ public:
 
   /// Creates a copy of the space, increases order of all elements by
   /// "order_increase".
-  virtual Space* dup(Mesh* mesh, int order_increase = 0) const = 0;
+  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const = 0;
 
   /// Returns true if the space is ready for computation, false otherwise.
   bool is_up_to_date() const {
@@ -163,21 +163,21 @@ public:
   inline EssentialBCs<Scalar>* get_essential_bcs() { return essential_bcs; }
 
   /// Obtains an assembly list for the given element.
-  virtual void get_element_assembly_list(Element* e, AsmList* al);
+  virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
 
   /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
-  void get_boundary_assembly_list(Element* e, int surf_num, AsmList* al);
+  void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al);
 
   /// Updates essential BC values. Typically used for time-dependent
   /// essnetial boundary conditions.
   void update_essential_bc_values();
 
   /// \brief Returns the number of basis functions contained in the spaces.
-  static int get_num_dofs(Hermes::vector<Space *> spaces);
-  static int get_num_dofs(Space* space);
+  static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
+  static int get_num_dofs(Space<Scalar>* space);
 
   /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-  static int assign_dofs(Hermes::vector<Space*> spaces);
+  static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
@@ -261,14 +261,14 @@ protected: //debugging support
   virtual void assign_edge_dofs() = 0;
   virtual void assign_bubble_dofs() = 0;
 
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList* al) = 0;
-  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al) = 0;
-  virtual void get_bubble_assembly_list(Element* e, AsmList* al);
+  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) = 0;
+  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) = 0;
+  virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
 
   double** proj_mat;
   double*  chol_p;
 
-  void copy_callbacks(const Space* space);
+  void copy_callbacks(const Space<Scalar>* space);
   void precalculate_projection_matrix(int nv, double**& mat, double*& p);
   virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
   void update_edge_bc(Element* e, SurfPos* surf_pos);
@@ -297,14 +297,16 @@ public:
   virtual ESpaceType get_type() const = 0;
 
   /// Create globally refined space.
-  static Hermes::vector<Space *>* construct_refined_spaces(Hermes::vector<Space *> coarse, int order_increase = 1);
-  static Space* construct_refined_space(Space* coarse, int order_increase = 1);
+  static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1);
+  static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1);
 
   // updating time-dependent essential (Dirichlet) boundary conditions
-  static void update_essential_bc_values(Hermes::vector<Space*> spaces, double time);  // multiple spaces
-  static void update_essential_bc_values(Space *s, double time);    // one space
+  static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);  // multiple spaces
+  static void update_essential_bc_values(Space<Scalar>*s, double time);    // one space
 };
 
+template class HERMES_API Space<double>;
+template class HERMES_API Space<std::complex<double>>;
 
 class Ord2
 {

@@ -20,7 +20,11 @@
 #include "../shapeset/shapeset_l2_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 
-void L2Space::init(Shapeset* shapeset, Ord2 p_init)
+template class L2Space<double>;
+template class L2Space<std::complex<double>>;
+
+template<typename Scalar>
+void L2Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 {
   if (shapeset == NULL)
   {
@@ -38,21 +42,24 @@ void L2Space::init(Shapeset* shapeset, Ord2 p_init)
   this->assign_dofs();
 }
 
-L2Space::L2Space(Mesh* mesh, EssentialBCs* essential_bcs, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+L2Space<Scalar>::L2Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-L2Space::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+template<typename Scalar>
+L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
     : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
 }
 
-L2Space::~L2Space()
+template<typename Scalar>
+L2Space<Scalar>::~L2Space()
 {
   ::free(ldata);
   if (own_shapeset)
@@ -60,7 +67,8 @@ L2Space::~L2Space()
 }
 
 
-Space<Scalar>* L2Space::dup(Mesh* mesh, int order_increase) const
+template<typename Scalar>
+Space<Scalar>* L2Space<Scalar>::dup(Mesh* mesh, int order_increase) const
 {
   // FIXME - not tested
   L2Space<Scalar>* space = new L2Space(mesh, essential_bcs, 0, shapeset);
@@ -68,7 +76,8 @@ Space<Scalar>* L2Space::dup(Mesh* mesh, int order_increase) const
   return space;
 }
 
-void L2Space::set_shapeset(Shapeset *shapeset)
+template<typename Scalar>
+void L2Space<Scalar>::set_shapeset(Shapeset *shapeset)
 {
   if(shapeset->get_id() < 40 && shapeset->get_id() > 29)
   {
@@ -76,12 +85,13 @@ void L2Space::set_shapeset(Shapeset *shapeset)
     own_shapeset = false;
   }
   else
-    error("Wrong shapeset type in L2Space::set_shapeset()");
+    error("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
 }
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
 
-void L2Space::resize_tables()
+template<typename Scalar>
+void L2Space<Scalar>::resize_tables()
 {
   if (lsize < mesh->get_max_element_id())
   {
@@ -93,7 +103,8 @@ void L2Space::resize_tables()
 }
 
 
-void L2Space::assign_bubble_dofs()
+template<typename Scalar>
+void L2Space<Scalar>::assign_bubble_dofs()
 {
   Element* e;
   for_all_active_elements(e, mesh)
@@ -109,7 +120,8 @@ void L2Space::assign_bubble_dofs()
 
 //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
-void L2Space::get_element_assembly_list(Element* e, AsmList* al)
+template<typename Scalar>
+void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
 {
   // some checks
   if (e->id >= esize || edata[e->id].order < 0)
@@ -124,7 +136,8 @@ void L2Space::get_element_assembly_list(Element* e, AsmList* al)
   get_bubble_assembly_list(e, al);
 }
 
-void L2Space::get_bubble_assembly_list(Element* e, AsmList* al)
+template<typename Scalar>
+void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
 {
   ElementData* ed = &edata[e->id];
   if (!ed->n) return;
@@ -138,25 +151,28 @@ void L2Space::get_bubble_assembly_list(Element* e, AsmList* al)
 
 // FIXME: this should only return bubble functions which are nonzero on the
 // given element surface
-void L2Space::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList* al)
+template<typename Scalar>
+void L2Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
 {
     this->get_bubble_assembly_list(e, al);
 }
 
-scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
+template<typename Scalar>
+Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 {
   _F_
   assert(order >= 1);
-  scalar* proj = new scalar[order + 1];
+  Scalar* proj = new Scalar[order + 1];
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+  EssentialBoundaryCondition<Scalar> *bc = static_cast<EssentialBoundaryCondition<Scalar> *>
+    (essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker)));
 
-  if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
+  if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
     proj[0] = proj[1] = bc->value_const;
   // If the BC is not constant.
-  else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
+  else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
   {
     surf_pos->t = surf_pos->lo;
     // Find out the (x,y) coordinates for the first endpoint.
@@ -175,7 +191,7 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
   if (order-- > 1)
   {
     Quad1DStd quad1d;
-    scalar* rhs = proj + 2;
+    Scalar* rhs = proj + 2;
     int mo = quad1d.get_max_order();
     double2* pt = quad1d.get_points(mo);
 
@@ -187,19 +203,20 @@ scalar* L2Space::get_bc_projection(SurfPos* surf_pos, int order)
       for (int j = 0; j < quad1d.get_num_points(mo); j++)
       {
         double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
-        scalar l = proj[0] * s + proj[1] * t;
+        Scalar l = proj[0] * s + proj[1] * t;
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBoundaryCondition *bc = static_cast<EssentialBoundaryCondition *>(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker)));
+        EssentialBoundaryCondition<Scalar> *bc = static_cast<EssentialBoundaryCondition<Scalar> *>
+          (essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker)));
 
-        if (bc->get_value_type() == EssentialBoundaryCondition::BC_CONST)
+        if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
         {
           rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
           * (bc->value_const - l);
         }
         // If the BC is not constant.
-        else if (bc->get_value_type() == EssentialBoundaryCondition::BC_FUNCTION)
+        else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
         {
           // Find out the (x,y) coordinate.
           double x, y;
