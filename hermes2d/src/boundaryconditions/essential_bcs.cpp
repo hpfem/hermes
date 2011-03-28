@@ -35,11 +35,6 @@ EssentialBoundaryCondition::EssentialBoundaryCondition(std::string marker) {
 
 EssentialBoundaryCondition::~EssentialBoundaryCondition() {};
 
-scalar EssentialBoundaryCondition::value(double x, double y) const {
-  warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
-  return 0.0;
-};
-
 void EssentialBoundaryCondition::set_current_time(double time) {
   this->current_time = time;
 }
@@ -57,6 +52,11 @@ DefaultEssentialBCConst::DefaultEssentialBCConst(std::string marker, scalar valu
   this->value_const = value_const;
   markers.push_back(marker);
 }
+
+scalar DefaultEssentialBCConst::value(double x, double y) const {
+  warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
+  return 0.0;
+};
 
 // Essential BoundaryCondition NonConstant.
 DefaultEssentialBCNonConst::DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 

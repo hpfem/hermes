@@ -47,7 +47,7 @@ public:
   virtual EssentialBCValueType get_value_type() const = 0;
 
   /// Represents a function prescribed on the boundary.
-  virtual scalar value(double x, double y) const;
+  virtual scalar value(double x, double y) const = 0;
 
   /// Special case of a constant function.
   scalar value_const;
@@ -76,6 +76,7 @@ public:
 
   /// Function giving info that u_Essential is a constant.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_CONST; }
+  virtual scalar value(double x, double y) const;
 };
 
 /// Class representing non-constant essential boundary condition.
