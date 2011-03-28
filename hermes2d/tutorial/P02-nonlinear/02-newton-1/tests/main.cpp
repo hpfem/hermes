@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize the weak formulation.
-  WeakFormHeatTransferNewton wf;
+  CustomWeakFormHeatTransferNewton wf;
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);

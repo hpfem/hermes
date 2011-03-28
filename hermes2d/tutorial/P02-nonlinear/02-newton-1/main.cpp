@@ -5,11 +5,10 @@
 
 using namespace RefinementSelectors;
 
-//  This example shows an introductory application of the Newton's
-//  method to a nonlinear elliptic problem. We use zero Dirichlet boundary
-//  conditions and a constant initial guess for the Newton's method.
-//  The treatment of nonzero Dirichlet BC and a more general initial guess
-//  will be shown in the next example newton-elliptic-2.
+//  This example is similar to P02-nonlinear/01-picard but it uses the 
+//  Newton's method to solve the nonlinearity. The treatment of nonzero 
+//  Dirichlet BC and a more general initial guess will be shown in the 
+//  next example.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
 //  conductivity, - div[lambda(u)grad u] = 0
@@ -50,7 +49,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize the weak formulation.
-  WeakFormHeatTransferNewton wf;
+  CustomWeakFormHeatTransferNewton wf;
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);

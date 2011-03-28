@@ -2,10 +2,12 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class WeakFormHeatTransferNewton : public WeakForm
+/* Weak forms */
+
+class CustomWeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  WeakFormHeatTransferNewton() : WeakForm(1) {
+  CustomWeakFormHeatTransferNewton() : WeakForm(1) {
     add_matrix_form(new MatrixFormVolHeatTransfer(0, 0));
 
     add_vector_form(new VectorFormVolHeatTransfer(0));
@@ -15,30 +17,34 @@ private:
   class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_NONSYM; 
-    }
+    MatrixFormVolHeatTransfer(int i, int j) 
+          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (dlam_du<Real>(u_prev->val[i]) * u->val[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
-                           + lam<Real>(u_prev->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+        result += wt[i] * (dlam_du<Real>(u_prev->val[i]) * u->val[i] 
+                           * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
+                           + lam<Real>(u_prev->val[i]) * (u->dx[i] * v->dx[i] 
+                           + u->dy[i] * v->dy[i]));
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
     // Thermal conductivity (temperature-dependent)
-    // Note: for any u, this function has to be positive.
+    // For any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u) { 
       return 1 + pow(u, 4); 
@@ -57,20 +63,24 @@ private:
     VectorFormVolHeatTransfer(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
+        result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] 
+                           + u_prev->dy[i] * v->dy[i])
 		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+            ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -80,8 +90,8 @@ private:
       return 1.0;
     }
 
-    // Thermal conductivity (temperature-dependent)
-    // Note: for any u, this function has to be positive.
+    // Thermal conductivity (temperature-dependent).
+    // For any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u)  { 
       return 1 + pow(u, 4); 
