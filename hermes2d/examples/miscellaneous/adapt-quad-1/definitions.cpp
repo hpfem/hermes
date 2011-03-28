@@ -8,9 +8,18 @@ public:
   // Problem parameters.
   double const_f;
 
-  WeakFormPoisson(double const_f) : WeakForm(1), const_f(const_f) {
-    add_matrix_form(new MatrixFormVolPoisson(0, 0));
-    add_vector_form(new VectorFormVolPoisson(0));
+  WeakFormPoisson(double const_f, bool adapt_eval, int adapt_order_increase, double adapt_rel_error_tol)
+    : WeakForm(1), const_f(const_f) {
+    MatrixFormVolPoisson* matrix_form = new MatrixFormVolPoisson(0, 0);
+    VectorFormVolPoisson* vector_form = new VectorFormVolPoisson(0);
+    if(adapt_eval) {
+      matrix_form->adapt_order_increase = adapt_order_increase;
+      vector_form->adapt_order_increase = adapt_order_increase;
+      matrix_form->adapt_rel_error_tol = adapt_rel_error_tol;
+      vector_form->adapt_rel_error_tol = adapt_rel_error_tol;
+    }
+    add_matrix_form(matrix_form);
+    add_vector_form(vector_form);
   };
 
 private:

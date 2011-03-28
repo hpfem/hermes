@@ -34,9 +34,6 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   //mesh.refine_all_elements();
 
-  // Initialize the weak formulation.
-  WeakFormPoisson wf(CONST_F);
-  
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), 0.0);
   EssentialBCs bcs(&bc_essential);
@@ -56,16 +53,10 @@ int main(int argc, char* argv[])
   // applied recursively to all four subelements. 
   int adapt_order_increase = 1;
   double adapt_rel_error_tol = 1e1;
-  if (ADAPTIVE_QUADRATURE) {
+  WeakFormPoisson wf(CONST_F, ADAPTIVE_QUADRATURE, adapt_order_increase, adapt_rel_error_tol);
+  
+  if (ADAPTIVE_QUADRATURE)
     info("Adaptive quadrature ON.");    
-    wf.mfvol[0]->adapt_eval = true;
-    wf.mfvol[0]->adapt_order_increase = adapt_order_increase;
-    wf.mfvol[0]->adapt_rel_error_tol = adapt_rel_error_tol;
-    
-    wf.vfvol[0]->adapt_eval = true;
-    wf.vfvol[0]->adapt_order_increase = adapt_order_increase;
-    wf.vfvol[0]->adapt_rel_error_tol = adapt_rel_error_tol;
-  }
   else
     info("Adaptive quadrature OFF.");    
 
