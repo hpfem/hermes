@@ -16,6 +16,9 @@ const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+// Problem parameters.
+double HEAT_SRC = 1.0;
+
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
@@ -48,7 +51,7 @@ int main(int argc, char* argv[])
   Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
-  WeakFormHeatTransfer wf(&sln_prev_iter);
+  CustomWeakFormHeatTransferPicard wf(&sln_prev_iter, HEAT_SRC);
 
   // Perform the Picard's iteration.
   bool verbose = true;

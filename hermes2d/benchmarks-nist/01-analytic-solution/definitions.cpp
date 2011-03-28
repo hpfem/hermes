@@ -8,7 +8,8 @@
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double pol_deg) : DefaultNonConstRightHandSide(), pol_deg(pol_deg) {};
+  CustomRightHandSide(double pol_deg) 
+    : DefaultNonConstRightHandSide(), pol_deg(pol_deg) {};
 
   virtual double value(double x, double y) const {
     double a = pow(2.0, 4.0*pol_deg);

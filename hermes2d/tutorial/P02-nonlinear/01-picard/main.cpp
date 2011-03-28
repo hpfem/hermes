@@ -8,9 +8,12 @@ using namespace RefinementSelectors;
 //  This example uses the Picard's method to solve a nonlinear problem.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, -div[lambda(u)grad u] = rhs
+//  conductivity, -div[lambda(u)grad u] = heat_src
 //
-//  Picard's linearization: -div[lambda(u^n)grad u^{n+1}] = rhs
+//  Picard's linearization: -div[lambda(u^n)grad u^{n+1}] = heat_src
+//
+//  lambda(u)... nonlinear function, see file definitions.cpp,
+//  heat_src... constant.
 //
 //  Domain: unit square (-10,10)^2
 //
@@ -26,6 +29,9 @@ const int PICARD_MAX_ITER = 100;                  // Maximum allowed number of P
 const double INIT_COND_CONST = 3.0;               // Constant initial condition.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Problem parameters.
+double HEAT_SRC = 1.0;
 
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
@@ -59,7 +65,7 @@ int main(int argc, char* argv[])
   Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
-  WeakFormHeatTransfer wf(&sln_prev_iter);
+  CustomWeakFormHeatTransferPicard wf(&sln_prev_iter, HEAT_SRC);
 
   // Perform the Picard's iteration.
   bool verbose = true;
