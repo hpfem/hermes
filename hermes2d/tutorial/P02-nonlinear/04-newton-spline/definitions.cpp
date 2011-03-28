@@ -27,11 +27,10 @@ private:
                  Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
-      bool success;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * (cspline->get_derivative(u_prev->val[i], success) * u->val[i] * 
+        result += wt[i] * (cspline->get_derivative(u_prev->val[i]) * u->val[i] * 
                            (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
-                           + cspline->get_value(u_prev->val[i], success) * (u->dx[i] * v->dx[i] 
+                           + cspline->get_value(u_prev->val[i]) * (u->dx[i] * v->dx[i] 
                            + u->dy[i] * v->dy[i]));
       }
       return result;
@@ -62,9 +61,8 @@ private:
                        Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
-      bool success;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (cspline->get_value(u_prev->val[i], success) * (u_prev->dx[i] 
+        result += wt[i] * (cspline->get_value(u_prev->val[i]) * (u_prev->dx[i] 
                            * v->dx[i] + u_prev->dy[i] * v->dy[i])
 		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;

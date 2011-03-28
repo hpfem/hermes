@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
   // Here lambda(u) = 1 + u^4.
   #define lambda(x) (1 + pow(x, 4))
-  Hermes::vector<double> lambda_pts(-3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0);
+  Hermes::vector<double> lambda_pts(-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0);
   Hermes::vector<double> lambda_val;
   for (unsigned int i = 0; i < lambda_pts.size(); i++) {
     lambda_val.push_back(lambda(lambda_pts[i]));

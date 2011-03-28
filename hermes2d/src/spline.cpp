@@ -22,15 +22,13 @@ CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
   : points(points), values(values), bc_left(bc_left), bc_right(bc_right), 
     first_der_left(first_der_left), first_der_right(first_der_right) { }
 
-double CubicSpline::get_value(double x_in, bool& success) 
+double CubicSpline::get_value(double x_in) 
 {  
   int m = -1;
   if (!this->find_interval(x_in, m)) {
-    success = false;
-    return 0.0;
+    printf("x = %g\n", x_in);
+    error("CubicSpline: access out of interval of definition.");
   }
-
-  success = true;
 
   return get_value_from_interval(x_in, m); 
 }
@@ -43,15 +41,13 @@ double CubicSpline::get_value_from_interval(double x_in, int m)
          + this->coeffs[m].d * x3;
 }
 
-double CubicSpline::get_derivative(double x_in, bool& success) 
+double CubicSpline::get_derivative(double x_in) 
 {
   int m = -1;
   if (!this->find_interval(x_in, m)) {
-    success = false;
-    return 0.0;
+    printf("x = %g\n", x_in);
+    error("CubicSpline: access out of interval of definition.");
   }
-
-  success = true;
 
   return get_derivative_from_interval(x_in, m); 
 };
