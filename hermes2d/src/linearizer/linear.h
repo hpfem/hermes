@@ -44,6 +44,11 @@ public:
                         MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
                         double dmult = 1.0);
 
+  void process_solution(MeshFunction<std::complex<double>>* sln, int item = H2D_FN_VAL_0,
+                        double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
+                        MeshFunction<std::complex<double>>* xdisp = NULL, MeshFunction<std::complex<double>>* ydisp = NULL,
+                        double dmult = 1.0) { error("Not implemented yet."); return; }
+
   void lock_data() const { pthread_mutex_lock(&data_mutex); }
   void unlock_data() const { pthread_mutex_unlock(&data_mutex); }
 

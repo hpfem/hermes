@@ -58,7 +58,7 @@ public:
   virtual ~ScalarView();
 
   void show(MeshFunction<Scalar>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-            MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0);
+            MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL, double dmult = 1.0);
 
   void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
@@ -247,7 +247,7 @@ public:
   ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) {}
   virtual ~ScalarView() {}
   void show(MeshFunction<Scalar>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-            MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0)
+            MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL, double dmult = 1.0)
      { verbose("ScalarView: Hermes2D compiled without OpenGL support, skipping visualization."); }
   void show_mesh(bool show = true) {}
   void show_contours(double step, double orig = 0.0) {}

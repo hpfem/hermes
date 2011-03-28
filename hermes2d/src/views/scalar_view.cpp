@@ -222,7 +222,7 @@ void ScalarView<Scalar>::create_setup_bar()
 
 template<typename Scalar>
 void ScalarView<Scalar>::show(MeshFunction<Scalar>* sln, double eps, int item,
-                      MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+                      MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
 {
   // For preservation of the sln's active element. Will be set back after the visualization.
   Element* active_element = sln->get_active_element();

@@ -835,7 +835,6 @@ void Linearizer::process_solution(MeshFunction<double>* sln, int item, double ep
   ::free(info);
 }
 
-
 void Linearizer::free()
 {
   lin_free_array(verts, nv, cv);

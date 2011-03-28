@@ -480,25 +480,6 @@ bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
 
 // UMFPack solver //////
 
-#ifndef HERMES_COMMON_COMPLEX
-  // real case
-  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_di_symbolic(m, n, Ap, Ai, Ax, S, C, I)
-  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_di_numeric(Ap, Ai, Ax, S, N, C, I)
-  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_di_solve(sys, Ap, Ai, Ax, X, B, N, C, I)
-  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
-  #define umfpack_free_numeric                          umfpack_di_free_numeric
-  #define umfpack_defaults                              umfpack_di_defaults
-#else
-  // macros for calling complex UMFPACK in packed-complex mode
-  #define umfpack_symbolic(m, n, Ap, Ai, Ax, S, C, I)   umfpack_zi_symbolic(m, n, Ap, Ai, (double *) (Ax), NULL, S, C, I)
-  #define umfpack_numeric(Ap, Ai, Ax, S, N, C, I)       umfpack_zi_numeric(Ap, Ai, (double *) (Ax), NULL, S, N, C, I)
-  #define umfpack_solve(sys, Ap, Ai, Ax, X, B, N, C, I) umfpack_zi_solve(sys, Ap, Ai, (double *) (Ax), NULL, (double *) (X), NULL, (double *) (B), NULL, N, C, I)
-  #define umfpack_free_symbolic                         umfpack_di_free_symbolic
-  #define umfpack_free_numeric                          umfpack_zi_free_numeric
-  #define umfpack_defaults                              umfpack_zi_defaults
-#endif
-
-
 template<typename Scalar>
 UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
@@ -633,7 +614,7 @@ bool UMFPackLinearSolver<double>::setup_factorization()
   switch(eff_fact_scheme)
   {
     case HERMES_FACTORIZE_FROM_SCRATCH:
-      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
       
       //debug_log("Factorizing symbolically.");
       status = umfpack_di_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
@@ -645,7 +626,7 @@ bool UMFPackLinearSolver<double>::setup_factorization()
       
     case HERMES_REUSE_MATRIX_REORDERING:
     case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      if (numeric != NULL) umfpack_di_free_numeric(&numeric);
       
       //debug_log("Factorizing numerically.");
       status = umfpack_di_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
@@ -678,7 +659,7 @@ bool UMFPackLinearSolver<std::complex<double>>::setup_factorization()
   switch(eff_fact_scheme)
   {
     case HERMES_FACTORIZE_FROM_SCRATCH:
-      if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+      if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
       
       //debug_log("Factorizing symbolically.");
       status = umfpack_zi_symbolic(m->size, m->size, m->Ap, m->Ai, (double *)m->Ax, NULL, &symbolic, NULL, NULL);
@@ -690,7 +671,7 @@ bool UMFPackLinearSolver<std::complex<double>>::setup_factorization()
       
     case HERMES_REUSE_MATRIX_REORDERING:
     case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-      if (numeric != NULL) umfpack_free_numeric(&numeric);
+      if (numeric != NULL) umfpack_zi_free_numeric(&numeric);
       
       //debug_log("Factorizing numerically.");
       status = umfpack_zi_numeric(m->Ap, m->Ai, (double *) m->Ax, NULL, symbolic, &numeric, NULL, NULL);
@@ -707,14 +688,26 @@ bool UMFPackLinearSolver<std::complex<double>>::setup_factorization()
 #endif
 }
 
-template<typename Scalar>
-void UMFPackLinearSolver<Scalar>::free_factorization_data()
+template<>
+void UMFPackLinearSolver<double>::free_factorization_data()
 { 
   _F_
 #ifdef WITH_UMFPACK
-  if (symbolic != NULL) umfpack_free_symbolic(&symbolic);
+  if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
   symbolic = NULL;
-  if (numeric != NULL) umfpack_free_numeric(&numeric);
+  if (numeric != NULL) umfpack_di_free_numeric(&numeric);
+  numeric = NULL;
+#endif
+}
+
+template<>
+void UMFPackLinearSolver<std::complex<double>>::free_factorization_data()
+{ 
+  _F_
+#ifdef WITH_UMFPACK
+  if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
+  symbolic = NULL;
+  if (numeric != NULL) umfpack_zi_free_numeric(&numeric);
   numeric = NULL;
 #endif
 }
