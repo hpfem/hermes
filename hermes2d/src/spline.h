@@ -33,24 +33,19 @@ public:
     values.clear();
   };
 
-  /// Calculate the value at a given point. Return true if point is
-  /// in range, otherwise return false.
-  bool get_value(double x_in, double& val_out);
-
-  /// Calculate first derivative at a given point. Return true if point is
-  /// in range, otherwise return false.
-  bool get_derivative(double x_in, double& der_out);
-
-protected:
   /// Calculates coefficients.
   bool calculate_coeffs();
 
-  /// Uses a bisection method to locale interval where a given point lies.
-  /// Returns false if point lies outside.
-  bool find_interval(double x_in, int& m);
+  /// Get the value at a given point. Return true if point is
+  /// in range, otherwise return false.
+  bool get_value(double x_in, double& val_out);
 
   /// Gets value at a point that lies in interval 'm'.
   double get_value_from_interval(double x_in, int m);
+
+  /// Get first derivative at a given point. Return true if point is
+  /// in range, otherwise return false.
+  bool get_derivative(double x_in, double& der_out);
 
   /// Gets derivative at a point that lies in interval 'm'.
   double get_derivative_from_interval(double x_in, int m);
@@ -58,6 +53,11 @@ protected:
   /// Plots the spline in format for Pylab (just pairs 
   /// x-coordinate and value per line).
   void plot(const char* filename, int subdiv = 20);
+
+protected:
+  /// Uses a bisection method to locale interval where a given point lies.
+  /// Returns false if point lies outside.
+  bool find_interval(double x_in, int& m);
 
   /// Grid points, ordered.
   std::vector<double> points;

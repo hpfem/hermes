@@ -20,16 +20,7 @@ CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
                          double bc_left, double bc_right, 
                          bool first_der_left, bool first_der_right) 
   : points(points), values(values), bc_left(bc_left), bc_right(bc_right), 
-    first_der_left(first_der_left), first_der_right(first_der_right)
-{
-  // Sanity check.
-  if (points.empty() || values.empty()) error("Supply both points and values when initializing a spline.");
-  if (points.size() != values.size()) error("Mismatched number of spline points and values.");
-
-  // Initializing coefficient array.
-  int nelem = points.size() - 1;
-  coeffs = new SplineCoeff[nelem];
-}
+    first_der_left(first_der_left), first_der_right(first_der_right) { }
 
 bool CubicSpline::get_value(double x_in, double& val_out) 
 {  
@@ -98,7 +89,7 @@ void CubicSpline::plot(const char* filename, int subdiv)
     }
   }
   double x_last = points[points.size() - 1];
-  double val_last = get_value_from_interval(x_last, points.size() - 1);
+  double val_last = get_value_from_interval(x_last, points.size() - 2);
   fprintf(f, "%g %g\n", x_last, val_last);
   fclose(f);
 }
@@ -106,11 +97,47 @@ void CubicSpline::plot(const char* filename, int subdiv)
 bool CubicSpline::calculate_coeffs() 
 {
   int nelem = points.size() - 1;
+
+  // Basic sanity checks.
+  if (points.empty() || values.empty()) {
+    warn("Empty points or values vector in CubicSpline, returning false.");
+    return false;
+  }
+  if (points.size() < 2 || values.size() < 2) {
+    warn("At least two points and values required in CubicSpline, returning false.");
+    return false;
+  }
+  if (points.size() != values.size()) {
+    warn("Mismatched number fo points and values in CubicSpline, returning false.");
+    return false;
+  }
+  
+  // Check for improperly ordered or duplicated points.
+  double eps = 1e-8;
+  for (int i = 0; i < nelem; i++) {
+    if (points[i+1] < points[i] + eps) {
+      warn("Duplicated or improperly ordered points in CubicSpline detected, returning false.");
+      return false;
+    }
+  }
+
+  /* START COMPUTATION */
+
+  // Initializing coefficient array.
+  coeffs = new SplineCoeff[nelem];
+
+  // Allocate matrix and rhs.
   const int n = 4 * nelem;
   double** matrix = new_matrix<double>(n, n);
-  memset(matrix, 0, n*n*sizeof(double));
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] = 0;
+    }
+  } 
   double* rhs = new double[n];
-  memset(rhs, 0, n*sizeof(double));
+  for (int j = 0; j < n; j++) {
+    rhs[j] = 0;
+  }
 
   // Fill the rhs vector.
   for (int i=0; i < nelem; i++) {
@@ -129,6 +156,8 @@ bool CubicSpline::calculate_coeffs()
     matrix[2*i][4*i + 2] = xx2;
     matrix[2*i][4*i + 3] = xx3;
     xx = points[i+1];
+    xx2 = xx*xx;
+    xx3 = xx2 * xx;
     matrix[2*i + 1][4*i + 0] = 1.0;
     matrix[2*i + 1][4*i + 1] = xx;
     matrix[2*i + 1][4*i + 2] = xx2;
@@ -181,7 +210,7 @@ bool CubicSpline::calculate_coeffs()
     matrix[offset + 0][3] = 3*xx*xx;
     rhs[n-2] = bc_left; // Value of the first derivative.
   }
-  xx = points[n-1]; // Right end-point.
+  xx = points[nelem]; // Right end-point.
   if (first_der_right == false) { 
     matrix[offset + 1][n-2] = 2;
     matrix[offset + 1][n-1] = 6*xx;

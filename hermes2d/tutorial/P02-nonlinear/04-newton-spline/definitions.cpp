@@ -7,11 +7,11 @@
 class CustomWeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  CustomWeakFormHeatTransferNewton(double heat_src) : WeakForm(1) {
+  CustomWeakFormHeatTransferNewton() : WeakForm(1) {
     // Jacobian.
     add_matrix_form(new MatrixFormVolHeatTransfer(0, 0));
     // Residual.
-    add_vector_form(new VectorFormVolHeatTransfer(0, heat_src));
+    add_vector_form(new VectorFormVolHeatTransfer(0));
   };
 
 private:
@@ -27,8 +27,8 @@ private:
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (dlam_du<Real>(u_prev->val[i]) * u->val[i] 
-                           * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
+        result += wt[i] * (dlam_du<Real>(u_prev->val[i]) * u->val[i] * 
+                           (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i])
                            + lam<Real>(u_prev->val[i]) * (u->dx[i] * v->dx[i] 
                            + u->dy[i] * v->dy[i]));
       return result;
@@ -45,7 +45,7 @@ private:
     }
 
     // Thermal conductivity (temperature-dependent)
-    // For any u, this function has to be positive.
+    // Note: for any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u) { 
       return 1 + pow(u, 4); 
@@ -61,8 +61,7 @@ private:
   class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolHeatTransfer(int i, double heat_src) 
-      : WeakForm::VectorFormVol(i), heat_src(heat_src) { }
+    VectorFormVolHeatTransfer(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
@@ -70,9 +69,9 @@ private:
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] * v->dx[i] 
-                           + u_prev->dy[i] * v->dy[i])
-		           - heat_src * v->val[i]);
+        result += wt[i] * (lam<Real>(u_prev->val[i]) * (u_prev->dx[i] 
+                           * v->dx[i] + u_prev->dy[i] * v->dy[i])
+		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
@@ -81,18 +80,67 @@ private:
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-            ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
-    // Thermal conductivity (temperature-dependent).
+    // Heat sources (can be a general function of 'x' and 'y').
+    template<typename Real>
+    Real heat_src(Real x, Real y) {
+      return 1.0;
+    }
+
+    // Thermal conductivity (temperature-dependent)
     // For any u, this function has to be positive.
     template<typename Real>
     Real lam(Real u)  { 
       return 1 + pow(u, 4); 
     }
-
-    double heat_src;
   };
 };
+
+/* Initial consition for the Newton's method */
+
+class CustomInitialSolutionHeatTransfer : public ExactSolutionScalar
+{
+public:
+  CustomInitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = (y+10)/100.;
+    dy = (x+10)/100.;
+  };
+
+  virtual scalar value (double x, double y) const {
+    return (x+10)*(y+10)/100. + 2;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return x*y;
+  }
+};
+
+/* Essential boundary conditions */
+
+class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
+public:
+  CustomEssentialBCNonConst(std::string marker) 
+           : EssentialBoundaryCondition(Hermes::vector<std::string>())
+  {
+    markers.push_back(marker);
+  }
+
+  ~CustomEssentialBCNonConst() {};
+
+  inline EssentialBCValueType get_value_type() const { 
+    return EssentialBoundaryCondition::BC_FUNCTION; 
+  }
+
+  scalar value(double x, double y) const
+  {
+    return (x+10)*(y+10)/100.;
+  }
+};
+
+
