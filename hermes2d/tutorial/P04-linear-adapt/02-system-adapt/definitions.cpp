@@ -168,11 +168,11 @@ class WeakFormFitzHughNagumo : public WeakForm
 public:
   WeakFormFitzHughNagumo(CustomRightHandSide1* rhs_1, CustomRightHandSide2* rhs_2)
           : WeakForm(2) {
-    add_matrix_form(new DefaultMatrixFormStiffness(0, 0, D_u * D_u));
+    add_matrix_form(new DefaultMatrixFormGradGrad(0, 0, D_u * D_u));
     add_matrix_form(new DefaultMatrixFormMass(0, 0, -1.0));
     add_matrix_form(new DefaultMatrixFormMass(0, 1, rhs_1->sigma, HERMES_NONSYM));
     add_matrix_form(new DefaultMatrixFormMass(1, 0, -1.0, HERMES_NONSYM));     
-    add_matrix_form(new DefaultMatrixFormStiffness(1, 1, D_v * D_v));
+    add_matrix_form(new DefaultMatrixFormGradGrad(1, 1, D_v * D_v));
     add_matrix_form(new DefaultMatrixFormMass(1, 1, 1.0));
     
 

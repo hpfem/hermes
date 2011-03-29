@@ -51,7 +51,7 @@ class CustomWeakFormPoisson : public WeakForm
 {
 public:
     CustomWeakFormPoisson() : WeakForm(1) {
-        add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
+        add_matrix_form(new DefaultMatrixFormGradGrad(0, 0));
         add_vector_form(new DefaultVectorFormNonConst(0, new CustomRightHandSide));
         add_vector_form_surf(new DefaultSurfaceVectorForm(0, BDY_RIGHT, -1));
     }

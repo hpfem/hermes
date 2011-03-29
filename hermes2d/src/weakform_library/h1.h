@@ -24,12 +24,13 @@
 
 namespace WeakFormsH1 {
   namespace VolumetricMatrixForms {
-    class DefaultMatrixFormStiffness : public WeakForm::MatrixFormVol
+    class DefaultMatrixFormGradGrad : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormStiffness(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormGradGrad(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormStiffness(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultMatrixFormGradGrad(int i, int j, std::string area, 
+                                 double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -265,7 +266,7 @@ namespace WeakFormsH1 {
     public:
       DefaultWeakFormLaplace() : WeakForm(1)
       {
-        add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormStiffness(0, 0));
+        add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormGradGrad(0, 0));
       };
     };
   }
