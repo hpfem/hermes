@@ -3,6 +3,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+using namespace WeakFormsH1;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::SurfaceMatrixForms;
+
 /* Weak forms */
 
 class CustomWeakFormHeatRK : public WeakForm
@@ -141,7 +145,7 @@ private:
 
     // Time-dependent exterior temperature.
     template<typename Real>
-    Real temp_ext(Real t) {
+    Real temp_ext(Real t) const {
       return temp_init + 10. * sin(2*M_PI*t/t_final);
     }
 

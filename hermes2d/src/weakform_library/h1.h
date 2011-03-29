@@ -430,12 +430,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultSurfaceMatrixForm : public WeakForm::MatrixFormSurf
+    class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultSurfaceMatrixForm(int i, int j, double coeff) 
+      DefaultMatrixFormSurf(int i, int j, double coeff) 
             : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
-      DefaultSurfaceMatrixForm(int i, int j, std::string area, double coeff) 
+      DefaultMatrixFormSurf(int i, int j, std::string area, double coeff) 
             : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -462,12 +462,12 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by a spline
     */
 
-    class DefaultSurfaceMatrixFormSpline : public WeakForm::MatrixFormSurf
+    class DefaultMatrixFormSurfSpline : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultSurfaceMatrixFormSpline(int i, int j, CubicSpline* spline_coeff) 
+      DefaultMatrixFormSurfSpline(int i, int j, CubicSpline* spline_coeff) 
             : WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff) { }
-      DefaultSurfaceMatrixFormSpline(int i, int j, std::string area, CubicSpline* spline_coeff) 
+      DefaultMatrixFormSurfSpline(int i, int j, std::string area, CubicSpline* spline_coeff) 
             : WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -501,12 +501,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultSurfaceVectorForm : public WeakForm::VectorFormSurf
+    class DefaultVectorFormSurf : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultSurfaceVectorForm(int i, double coeff) 
+      DefaultVectorFormSurf(int i, double coeff) 
              : WeakForm::VectorFormSurf(i), coeff(coeff) { }
-      DefaultSurfaceVectorForm(int i, std::string area, double coeff) 
+      DefaultVectorFormSurf(int i, std::string area, double coeff) 
              : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -532,12 +532,12 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by cubic spline
     */
 
-    class DefaultSurfaceVectorFormSpline : public WeakForm::VectorFormSurf
+    class DefaultVectorFormSurfSpline : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultSurfaceVectorFormSpline(int i, CubicSpline* spline_coeff) 
+      DefaultVectorFormSurfSpline(int i, CubicSpline* spline_coeff) 
              : WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff) { }
-      DefaultSurfaceVectorFormSpline(int i, std::string area, CubicSpline* spline_coeff) 
+      DefaultVectorFormSurfSpline(int i, std::string area, CubicSpline* spline_coeff) 
              : WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
