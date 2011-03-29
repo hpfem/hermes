@@ -1477,7 +1477,6 @@ scalar Solution::get_pt_value(double x, double y, int item)
 ExactSolution::ExactSolution(Mesh* mesh) : Solution(mesh)
 {
   sln_type = HERMES_EXACT;
-  num_components = 1;
   exact_mult = 1.0;
   num_dofs = -1;
 }
@@ -1486,7 +1485,9 @@ ExactSolution::~ExactSolution()
 {}
 
 ExactSolutionScalar::ExactSolutionScalar(Mesh* mesh) : ExactSolution(mesh)
-{}
+{
+  num_components = 1;
+}
 
 ExactSolutionScalar::~ExactSolutionScalar()
 {}
@@ -1497,7 +1498,9 @@ unsigned int ExactSolutionScalar::get_dimension() const
 }
  
 ExactSolutionVector::ExactSolutionVector(Mesh* mesh) : ExactSolution(mesh)
-{}
+{
+  num_components = 2;
+}
 
 ExactSolutionVector::~ExactSolutionVector()
 {}
