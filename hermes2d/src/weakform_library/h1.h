@@ -60,12 +60,12 @@ namespace WeakFormsH1 {
        coeff_spline... nonconstant parameter given by cubic spline
     */
 
-    class DefaultMatrixFormGradGradNewton : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormGradGradNewton(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
-      DefaultMatrixFormGradGradNewton(int i, int j, std::string area, 
+      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, 
                                       CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
@@ -88,7 +88,7 @@ namespace WeakFormsH1 {
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) {
-        return Ord(20);//matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
       private:
@@ -327,98 +327,101 @@ namespace WeakFormsH1 {
 
   namespace VolumetricVectorForms {
 
-      /* Default volumetric vector form \int_{area} coeff v d\bfx 
-         coeff... constant number
-      */
+    /* Default volumetric vector form \int_{area} coeff v d\bfx 
+       coeff... constant number
+    */
 
-      class DefaultVectorFormConst : public WeakForm::VectorFormVol
-      {
-      public:
-        DefaultVectorFormConst(int i, double coeff) 
-                     : WeakForm::VectorFormVol(i), coeff(coeff) { }
-        DefaultVectorFormConst(int i, std::string area, double coeff) 
-                     : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+    class DefaultVectorFormConst : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultVectorFormConst(int i, double coeff) 
+                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
+      DefaultVectorFormConst(int i, std::string area, double coeff) 
+                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
 
-        virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                             Geom<double> *e, ExtData<scalar> *ext) {
-          return coeff * int_v<scalar, scalar>(n, wt, v);
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) {
+        return coeff * int_v<scalar, scalar>(n, wt, v);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return int_v<Ord, Ord>(n, wt, v);
+      }
+
+    private:
+      double coeff;
+    };
+
+    /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
+       \nabla u_ext[0] \cdot \nabla v d\bfx 
+       spline_coeff... non-constant parameter given by a cubic spline
+    */
+
+    class DefaultResidualNonlinearDiffusion : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff) 
+                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
+      DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff) 
+                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (spline_coeff->get_value(u_prev->val[i]) * 
+                             (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]));
         }
+        return result;
+      }
 
-        virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                Geom<Ord> *e, ExtData<Ord> *ext) {
-          return int_v<Ord, Ord>(n, wt, v);
-        }
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
 
-      private:
-        double coeff;
-      };
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
 
-      /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) v d\bfx 
-         spline_coeff... non-constant parameter given by a cubic spline
-      */
+    private:
+      CubicSpline* spline_coeff;
+    };
 
-      class DefaultVectorFormSpline : public WeakForm::VectorFormVol
-      {
-      public:
-        DefaultVectorFormSpline(int i, CubicSpline* spline_coeff) 
-                     : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
-        DefaultVectorFormSpline(int i, std::string area, CubicSpline* spline_coeff) 
-                     : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+    /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
+       rhs(x, y)... non-constant right-hand side
+    */
+    class DefaultVectorFormNonConst : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultVectorFormNonConst(int i, RightHandSides::DefaultNonConstRightHandSide* rhs) 
+                   : WeakForm::VectorFormVol(i), rhs(rhs) { }
+      DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs) 
+                   : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
 
-        template<typename Real, typename Scalar>
-        Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], 
-                           Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-          Scalar result = 0;
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
-          }
-          return result;
-        }
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                   Geom<double> *e, ExtData<scalar> *ext) {
+        scalar result = 0;
+        for (int i = 0; i < n; i++)
+          result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
+        return result;
+      }
 
-        virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                             Geom<double> *e, ExtData<scalar> *ext) {
-          return matrix_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-        }
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        Ord result = 0;
+        for (int i = 0; i < n; i++)
+          result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
+        return result;
+      }
 
-        virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                Geom<Ord> *e, ExtData<Ord> *ext) {
-          return matrix_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-        }
-
-      private:
-        CubicSpline* spline_coeff;
-      };
-
-      /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
-         rhs(x, y)... non-constant right-hand side
-      */
-      class DefaultVectorFormNonConst : public WeakForm::VectorFormVol
-      {
-      public:
-        DefaultVectorFormNonConst(int i, RightHandSides::DefaultNonConstRightHandSide* rhs) 
-                     : WeakForm::VectorFormVol(i), rhs(rhs) { }
-        DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs) 
-                     : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
-
-        scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                     Geom<double> *e, ExtData<scalar> *ext) {
-          scalar result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
-          return result;
-        }
-
-        Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                Geom<Ord> *e, ExtData<Ord> *ext) {
-          Ord result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
-          return result;
-        }
-
-      private:
-        RightHandSides::DefaultNonConstRightHandSide* rhs;
-      };
+    private:
+      RightHandSides::DefaultNonConstRightHandSide* rhs;
+    };
   }
 
   namespace SurfaceMatrixForms {

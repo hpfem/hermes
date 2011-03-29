@@ -5,60 +5,24 @@
 
 using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::VolumetricVectorForms;
 
 /* Weak forms */
 
 class CustomWeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  CustomWeakFormHeatTransferNewton(CubicSpline* cspline) : WeakForm(1) {
+  CustomWeakFormHeatTransferNewton(CubicSpline* cspline, double heat_src) 
+        : WeakForm(1) {
     // Jacobian.
-    add_matrix_form(new DefaultMatrixFormGradGradNewton(0, 0, cspline));
+    add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0, cspline));
     // Residual.
-    add_vector_form(new VectorFormVolHeatTransfer(0, cspline));
-  };
-
-private:
-  class VectorFormVolHeatTransfer : public WeakForm::VectorFormVol
-  {
-  public:
-    VectorFormVolHeatTransfer(int i, CubicSpline* cspline) 
-          : WeakForm::VectorFormVol(i), cspline(cspline) { }
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
-      Scalar result = 0;
-      Func<Scalar>* u_prev = u_ext[0];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (cspline->get_value(u_prev->val[i]) * (u_prev->dx[i] 
-                           * v->dx[i] + u_prev->dy[i] * v->dy[i])
-		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
-      return result;
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
-      return Ord(10); //vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-    }
-
-    // Heat sources (can be a general function of 'x' and 'y').
-    template<typename Real>
-    Real heat_src(Real x, Real y) {
-      return 1.0;
-    }
-
-    // Spline representing temperature-dependent thermal conductivity.
-    CubicSpline* cspline;
+    add_vector_form(new DefaultResidualNonlinearDiffusion(0, cspline));
+    add_vector_form(new DefaultVectorFormConst(0, heat_src));
   };
 };
 
-/* Initial consition for the Newton's method */
+/* Initial condition for the Newton's method */
 
 class CustomInitialSolutionHeatTransfer : public ExactSolutionScalar
 {
