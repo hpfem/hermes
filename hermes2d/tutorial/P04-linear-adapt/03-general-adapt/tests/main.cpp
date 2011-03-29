@@ -62,7 +62,7 @@ scalar essential_bc_values(double x, double y)
 }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -79,6 +79,9 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_essential(BDY_HORIZONTAL, 0.0);
+  EssentialBCs bcs(&bc_essential);
+/*
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
   bc_types.add_bc_neumann(BDY_VERTICAL);
@@ -86,15 +89,19 @@ int main(int argc, char* argv[])
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
+*/
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
+  CustomWeakFormGeneral wf;
+/*
   WeakForm wf;
   wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
   wf.add_vector_form(linear_form, linear_form_ord);
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
+*/
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
