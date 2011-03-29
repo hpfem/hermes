@@ -8,11 +8,11 @@ using namespace RefinementSelectors;
 //  equation with non-constant coefficients.
 //
 //  PDE: -d/dx(a_11(x,y)du/dx) - d/dx(a_12(x,y)du/dy) - d/dy(a_21(x,y)du/dx) - d/dy(a_22(x,y)du/dy)
-//       + a_1(x,y)du/dx + a_21(x,y)du/dy + a_0(x,y)u = rhs(x,y).
+//       + a_1(x,y)du/dx + a_2(x,y)du/dy + a_0(x,y)u = rhs(x,y).
 //
 //  Domain: arbitrary.
 //
-//  BC:  Dirichlet for boundary marker 1: u = g_D(x,y)
+//  BC:  Dirichlet for boundary marker "Boundary horizontal": u = g_D(x,y)
 //       Natural for any other boundary marker:   (a_11(x,y)*nu_1 + a_21(x,y)*nu_2) * dudx
 //                                              + (a_12(x,y)*nu_1 + s_22(x,y)*nu_2) * dudy = g_N(x,y).
 //
@@ -58,14 +58,6 @@ double g_N(double x, double y) { return 0;}
 const std::string BDY_HORIZONTAL = "Boundary horizontal";
 const std::string BDY_VERTICAL = "Boundary vertical";
 
-/*
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  return g_D(x, y);
-}
-*/
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -84,18 +76,8 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential(BDY_HORIZONTAL, 0.0);
+  CustomEssentialBCNonConst bc_essential(BDY_HORIZONTAL);
   EssentialBCs bcs(&bc_essential);
-
-/*
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
-  bc_types.add_bc_neumann(BDY_VERTICAL);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
-*/
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
@@ -104,12 +86,6 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormGeneral wf;
-/*
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
-*/
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
