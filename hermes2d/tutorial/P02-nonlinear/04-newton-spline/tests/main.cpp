@@ -41,7 +41,10 @@ int main(int argc, char* argv[])
   double second_der_right = 0.0;
   bool first_der_left = false;
   bool first_der_right = false;
-  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right);
+  bool extrapolate_der_left = true;
+  bool extrapolate_der_right = true;
+  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
+                 extrapolate_der_left, extrapolate_der_right);
   bool success0 = cs.calculate_coeffs(); 
   if (!success0) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
