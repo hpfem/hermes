@@ -18,12 +18,14 @@
 
 #include "../integrals/integrals_h1.h"
 
-/* Default volumetric matrix form \int_{area} coeff \nabla u \cdot \nabla v d\bfx 
-   coeff... constant number
-*/
-
 namespace WeakFormsH1 {
+
   namespace VolumetricMatrixForms {
+
+    /* Default volumetric matrix form \int_{area} coeff \nabla u \cdot \nabla v d\bfx 
+       coeff... constant number
+    */
+
     class DefaultMatrixFormGradGrad : public WeakForm::MatrixFormVol
     {
     public:
@@ -51,6 +53,121 @@ namespace WeakFormsH1 {
 
       private:
         double coeff;
+    };
+
+    /* Default volumetric matrix form \int_{area} coeff_spline'(u_ext[0]) u \nabla u_ext[0] \cdot \nabla v 
+       + spline_coeff(u_ext[0]) * \nabla u \cdot \nabla v d\bfx 
+       coeff_spline... nonconstant parameter given by cubic spline
+    */
+
+    class DefaultMatrixFormGradGradNewton : public WeakForm::MatrixFormVol
+    {
+    public:
+      DefaultMatrixFormGradGradNewton(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+      DefaultMatrixFormGradGradNewton(int i, int j, std::string area, 
+                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+	  result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
+			     (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
+			     + spline_coeff->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return Ord(20);//matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        CubicSpline* spline_coeff;
+    };
+
+    /* Default volumetric matrix form \int_{area} coeff \curl u \cdot \curl v d\bfx 
+       coeff... constant number
+    */
+
+    class DefaultMatrixFormCurlCurl : public WeakForm::MatrixFormVol
+    {
+    public:
+      DefaultMatrixFormCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+      DefaultMatrixFormCurlCurl(int i, int j, std::string area, 
+                                 double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        // This is not a mistake, the inner product of two curls of scalar
+        // functions is the same as the product of gradients.
+        return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        double coeff;
+    };
+
+    /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx 
+       spline_coeff... nonconstant parameter given by cubic spline
+    */
+
+    class DefaultMatrixFormCurlCurlSpline : public WeakForm::MatrixFormVol
+    {
+    public:
+      DefaultMatrixFormCurlCurlSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+      DefaultMatrixFormCurlCurlSpline(int i, int j, std::string area, 
+                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          // This is not a mistake, the inner product of two curls of scalar
+          // functions is the same as the product of gradients.
+          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * 
+			     (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        CubicSpline* spline_coeff;
     };
 
     /* Default volumetric matrix form \int_{area} coeff u v d\bfx 
@@ -85,8 +202,44 @@ namespace WeakFormsH1 {
         double coeff;
     };
 
+    /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) u v d\bfx 
+       spline_coeff... non-constant parameter given by a cubic spline
+    */
+
+    class DefaultMatrixFormMassSpline : public WeakForm::MatrixFormVol
+    {
+    public:
+      DefaultMatrixFormMassSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+      DefaultMatrixFormMassSpline(int i, int j, std::string area, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        CubicSpline* spline_coeff;
+    };
+
     /* Default volumetric matrix form \int_{area} (coeff1, coeff2) \cdot \nabla u vd\bfx 
-       coeff1, coeff2... constant number
+       coeff1, coeff2... constant numbers
     */
 
     class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
@@ -117,6 +270,47 @@ namespace WeakFormsH1 {
       private:
       double coeff1, coeff2;
     };
+
+    /* Default volumetric matrix form 
+       \int_{area} (spline_coeff1(u_ext[0]), spline_coeff2(u_ext[0])) \cdot \nabla u vd\bfx 
+       spline_coeff1, spline_coeff2... non-constant parameters given by cubic splines
+    */
+
+    class DefaultMatrixFormAdvectionSpline : public WeakForm::MatrixFormVol
+    {
+    public:
+     DefaultMatrixFormAdvectionSpline(int i, int j, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
+       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
+                                 spline_coeff2(spline_coeff2) { }
+     DefaultMatrixFormAdvectionSpline(int i, int j, std::string area, 
+                                CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
+       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
+                                 spline_coeff2(spline_coeff2) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (spline_coeff1->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->val[i])
+			     + spline_coeff2->get_value(u_ext[0]->val[i]) * (u->dy[i] * v->val[i]));
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+      CubicSpline* spline_coeff1, *spline_coeff2;
+    };
   }
 
   namespace RightHandSides {
@@ -132,6 +326,7 @@ namespace WeakFormsH1 {
   }
 
   namespace VolumetricVectorForms {
+
       /* Default volumetric vector form \int_{area} coeff v d\bfx 
          coeff... constant number
       */
@@ -156,6 +351,42 @@ namespace WeakFormsH1 {
 
       private:
         double coeff;
+      };
+
+      /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) v d\bfx 
+         spline_coeff... non-constant parameter given by a cubic spline
+      */
+
+      class DefaultVectorFormSpline : public WeakForm::VectorFormVol
+      {
+      public:
+        DefaultVectorFormSpline(int i, CubicSpline* spline_coeff) 
+                     : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
+        DefaultVectorFormSpline(int i, std::string area, CubicSpline* spline_coeff) 
+                     : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+
+        template<typename Real, typename Scalar>
+        Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                           Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+          Scalar result = 0;
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
+          }
+          return result;
+        }
+
+        virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                             Geom<double> *e, ExtData<scalar> *ext) {
+          return matrix_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+        }
+
+        virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                Geom<Ord> *e, ExtData<Ord> *ext) {
+          return matrix_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+        }
+
+      private:
+        CubicSpline* spline_coeff;
       };
 
       /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
@@ -191,6 +422,7 @@ namespace WeakFormsH1 {
   }
 
   namespace SurfaceMatrixForms {
+
     /* Default surface matrix form \int_{area} coeff u v dS
        coeff... constant number
     */
@@ -222,9 +454,46 @@ namespace WeakFormsH1 {
       private:
         double coeff;
     };
+
+    /* Default surface matrix form \int_{area} spline_coeff(u_ext[0]) u v dS
+       spline_coeff... non-constant parameter given by a spline
+    */
+
+    class DefaultSurfaceMatrixFormSpline : public WeakForm::MatrixFormSurf
+    {
+    public:
+      DefaultSurfaceMatrixFormSpline(int i, int j, CubicSpline* spline_coeff) 
+            : WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff) { }
+      DefaultSurfaceMatrixFormSpline(int i, int j, std::string area, CubicSpline* spline_coeff) 
+            : WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) {
+        return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+        return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        CubicSpline* spline_coeff;
+    };
   }
 
   namespace SurfaceVectorForms {
+
     /* Default surface vector form \int_{area} coeff v dS
        coeff... constant number
     */
@@ -254,6 +523,41 @@ namespace WeakFormsH1 {
 
     private:
       double coeff;
+    };
+
+    /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
+       spline_coeff... non-constant parameter given by cubic spline
+    */
+
+    class DefaultSurfaceVectorFormSpline : public WeakForm::VectorFormSurf
+    {
+    public:
+      DefaultSurfaceVectorFormSpline(int i, CubicSpline* spline_coeff) 
+             : WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff) { }
+      DefaultSurfaceVectorFormSpline(int i, std::string area, CubicSpline* spline_coeff) 
+             : WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
+        }
+        return result;
+      }
+
+      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) {
+        return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+        return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      CubicSpline* spline_coeff;
     };
   }
 
