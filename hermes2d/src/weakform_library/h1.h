@@ -74,9 +74,9 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-	  result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
-			     (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
-			     + spline_coeff->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+	        result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
+			           (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
+			           + spline_coeff->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
         }
         return result;
       }
