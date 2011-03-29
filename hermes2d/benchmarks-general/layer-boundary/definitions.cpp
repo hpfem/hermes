@@ -3,9 +3,12 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-/* Custom function that is used in the exact solution and in right-hand side */
+using namespace Laplace::VolumetricMatrixForms;
+using namespace Laplace::VolumetricVectorForms;
+using namespace Laplace::RightHandSides;
 
-// Exact solution to the 1D problem -u'' + K*K*u = K*K in (-1,1) with zero Dirichlet BC.
+/* Exact solution */
+
 class CustomExactFunction
 {
 public:
@@ -25,13 +28,10 @@ public:
   double K;
 };
 
-/* Exact solution */
-
-// Exact solution to the 2D equation.
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh) 
+  CustomExactSolution(Mesh* mesh, double K) : ExactSolutionScalar(mesh)
   {
     cef = new CustomExactFunction(K);
   };
@@ -56,8 +56,6 @@ public:
 
 /* Right-hand side */
 
-// Right-hand side for the 2D equation -Laplace u + K*K*u = 0 with zero Dirichlet BC.
-
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
@@ -66,7 +64,7 @@ public:
   };
 
   virtual scalar value(double x, double y) const {
-    return -(cef->dduhat_dxx(x) * cef->uhat(y) + cef->uhat(x) * cef->dduhat_dxx(y)) 
+    return -(cef->dduhat_dxx(x) * cef->uhat(y) + cef->uhat(x) * cef->dduhat_dxx(y))
            + coeff1 * coeff1 * cef->uhat(x) * cef->uhat(y);
   }
 
@@ -82,13 +80,12 @@ public:
 
 /* Weak forms */
 
-// Weak forms for the 2D equation with Dirichlet boundary conditions.
 class CustomWeakFormPerturbedPoisson : public WeakForm
 {
 public:
   CustomWeakFormPerturbedPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
     add_matrix_form(new DefaultMatrixFormMass(0, 0, rhs->coeff1*rhs->coeff1));
-    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
   };
 };

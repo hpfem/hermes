@@ -78,11 +78,11 @@ int main(int argc, char* argv[])
   // Define exact solution.
   CustomExactSolution exact_sln(&mesh, K);
 
-  // Define right-hand side.
-  CustomRightHandSide rhs(K);
+  // Define right side vector.
+  CustomRightHandSide rsv(K);
 
   // Initialize the weak formulation.
-  CustomWeakFormPerturbedPoisson wf(&rhs);
+  CustomWeakFormPerturbedPoisson wf(&rsv);
   
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
