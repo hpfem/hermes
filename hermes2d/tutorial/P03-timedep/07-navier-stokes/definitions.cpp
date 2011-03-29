@@ -49,14 +49,14 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
@@ -79,7 +79,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_time = ext->fn[0];
@@ -89,7 +89,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_time = ext->fn[0];
@@ -112,11 +112,11 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdx<double, scalar>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -130,11 +130,11 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdy<double, scalar>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -147,7 +147,7 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -156,7 +156,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -223,15 +223,14 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<Ord, Ord>(n, wt, u, v) / time_step;
@@ -253,7 +252,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -265,7 +264,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -290,7 +289,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -300,7 +299,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -323,7 +322,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* yvel_prev_newton = u_ext[0];
@@ -333,7 +332,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* yvel_prev_newton = u_ext[0];
@@ -356,7 +355,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -368,7 +367,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -393,11 +392,11 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdx<double, scalar>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -411,11 +410,11 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdy<double, scalar>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -428,7 +427,7 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -444,7 +443,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -473,7 +472,7 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -489,7 +488,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -518,7 +517,7 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_newton = u_ext[0];  
       Func<scalar>* yvel_prev_newton = u_ext[1];  
@@ -528,7 +527,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_newton = u_ext[0];  
       Func<Ord>* yvel_prev_newton = u_ext[1];  
@@ -564,7 +563,7 @@ public:
     return BC_FUNCTION; 
   };
 
-  virtual scalar function(double x, double y) const {
+  virtual scalar value(double x, double y) const {
     double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     if (current_time <= startup_time) 
       return val_y * current_time/startup_time;

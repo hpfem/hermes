@@ -65,7 +65,7 @@ public:
     dy = (e/(c * f));
   };
 
-  Ord ord (Ord x, Ord y) const {
+  virtual Ord ord (Ord x, Ord y) const {
     return Ord(8);  
   }
 

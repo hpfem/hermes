@@ -59,7 +59,7 @@ public:
     return EssentialBoundaryCondition::BC_FUNCTION; 
   }
 
-  scalar value(double x, double y) const
+  virtual scalar value(double x, double y) const
   {
     return (x+10)*(y+10)/100.;
   }

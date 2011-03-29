@@ -62,7 +62,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
       Func<Real>* K_sln = u_ext[0];
       Func<Real>* sln_prev_time = ext->fn[0];
       Scalar result = 0;
@@ -75,12 +75,12 @@ private:
       return lambda / (heatcap * rho) * result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) const {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -105,7 +105,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                            Geom<Real> *e, ExtData<Scalar> *ext) {
+                            Geom<Real> *e, ExtData<Scalar> *ext) const {
       Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
@@ -126,12 +126,12 @@ private:
       return lambda * alpha / (rho * heatcap) * (result1 - result2);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
-                 ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                 ExtData<scalar> *ext) const {
         return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 

@@ -37,17 +37,17 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -71,7 +71,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
 	  result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
@@ -81,13 +81,13 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -110,19 +110,19 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         // This is not a mistake, the inner product of two curls of scalar
         // functions is the same as the product of gradients.
         return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -145,7 +145,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
           // This is not a mistake, the inner product of two curls of scalar
@@ -156,13 +156,13 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -184,17 +184,17 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -216,7 +216,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
           result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
@@ -224,13 +224,13 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -252,18 +252,18 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         return   coeff1 * int_dudx_v<Real, Scalar>(n, wt, u, v)
                + coeff2 * int_dudy_v<Real, Scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -289,7 +289,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
           result += wt[i] * (spline_coeff1->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->val[i])
@@ -298,13 +298,13 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -340,12 +340,12 @@ namespace WeakFormsH1 {
                    : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                           Geom<double> *e, ExtData<scalar> *ext) {
+                           Geom<double> *e, ExtData<scalar> *ext) const {
         return coeff * int_v<scalar, scalar>(n, wt, v);
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return int_v<Ord, Ord>(n, wt, v);
       }
 
@@ -368,7 +368,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         Func<Scalar>* u_prev = u_ext[0];
         for (int i = 0; i < n; i++) {
@@ -379,12 +379,12 @@ namespace WeakFormsH1 {
       }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                           Geom<double> *e, ExtData<scalar> *ext) {
+                           Geom<double> *e, ExtData<scalar> *ext) const {
         return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
@@ -403,16 +403,16 @@ namespace WeakFormsH1 {
       DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs) 
                    : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                   Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                   Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         for (int i = 0; i < n; i++)
           result += wt[i] * (rhs->value(e->x[i], e->y[i]) * v->val[i]);
         return result;
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         for (int i = 0; i < n; i++)
           result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
@@ -440,17 +440,17 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -472,7 +472,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
           result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
@@ -480,13 +480,13 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -511,16 +511,16 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         return coeff * int_v<Real, Scalar>(n, wt, v);
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) const {
         return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
@@ -542,7 +542,7 @@ namespace WeakFormsH1 {
 
       template<typename Real, typename Scalar>
       Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
           result += wt[i] * spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
@@ -550,12 +550,12 @@ namespace WeakFormsH1 {
         return result;
       }
 
-      scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                   Geom<double> *e, ExtData<scalar> *ext) {
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) const {
         return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
       }
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
