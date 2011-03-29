@@ -52,7 +52,9 @@ int main(int argc, char* argv[])
   bool success0 = cs.calculate_coeffs(); 
   if (!success0) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
-  cs.plot("spline.dat");
+  double interval_extension = 1.0; // The interval of definition of the spline will be 
+                                   // extended by "interval_extension" on both sides.
+  cs.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;

@@ -117,11 +117,24 @@ bool CubicSpline::find_interval(double x_in, int &m)
   return true;
 };
 
-void CubicSpline::plot(const char* filename, int subdiv) 
+void CubicSpline::plot(const char* filename, double extension, int subdiv) 
 {
   FILE *f = fopen(filename, "wb");
   if (f == NULL) error("Could not open a spline file for writing."); 
   
+  // Plotting on the left of the area of definition.
+  double x_left = point_left - extension;
+  double h = extension / subdiv;
+  for (int j = 0; j < subdiv; j++) {
+    double x = x_left + j * h;
+    double val = get_value(x); 
+    fprintf(f, "%g %g\n", x, val);
+  }
+  double x_last = point_left;
+  double val_last = get_value(x_last);
+  fprintf(f, "%g %g\n", x_last, val_last);
+
+  // Plotting inside the interval of definition.
   for (unsigned int i = 0; i < points.size() - 1; i++) {
     double h = (points[i+1] - points[i]) / subdiv;
     for (int j = 0; j < subdiv; j++) {
@@ -130,9 +143,22 @@ void CubicSpline::plot(const char* filename, int subdiv)
       fprintf(f, "%g %g\n", x, val);
     }
   }
-  double x_last = points[points.size() - 1];
-  double val_last = get_value_from_interval(x_last, points.size() - 2);
+  x_last = points[points.size() - 1];
+  val_last = get_value_from_interval(x_last, points.size() - 2);
   fprintf(f, "%g %g\n", x_last, val_last);
+
+  // Plotting on the right of the area of definition.
+  double x_right = point_right + extension;
+  h = extension / subdiv;
+  for (int j = 0; j < subdiv; j++) {
+    double x = point_right + j * h;
+    double val = get_value(x); 
+    fprintf(f, "%g %g\n", x, val);
+  }
+  x_last = x_right;
+  val_last = get_value(x_last);
+  fprintf(f, "%g %g\n", x_last, val_last);
+
   fclose(f);
 }
 
