@@ -48,7 +48,7 @@ private:
 
     // Thermal conductivity (temperature-dependent)
     // For any u, this function has to be positive.
-    template<typename Real>
+    template<typename Real> 
     Real lam(Real u) { 
       return 1 + pow(u, 4); 
     }

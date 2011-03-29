@@ -26,12 +26,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormGradGrad : public WeakForm::MatrixFormVol
+    class DefaultLinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormGradGrad(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearDiffusion(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormGradGrad(int i, int j, std::string area, 
+      DefaultLinearDiffusion(int i, int j, std::string area, 
                                  double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
@@ -99,12 +99,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormCurlCurl : public WeakForm::MatrixFormVol
+    class DefaultLinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMagnetostatics(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormCurlCurl(int i, int j, std::string area, 
+      DefaultLinearMagnetostatics(int i, int j, std::string area, 
                                  double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
@@ -134,12 +134,12 @@ namespace WeakFormsH1 {
        spline_coeff... nonconstant parameter given by cubic spline
     */
 
-    class DefaultMatrixFormCurlCurlSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormCurlCurlSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
-      DefaultMatrixFormCurlCurlSpline(int i, int j, std::string area, 
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
                                       CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
@@ -174,12 +174,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
+    class DefaultLinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -206,12 +206,12 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by a cubic spline
     */
 
-    class DefaultMatrixFormMassSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormMassSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
-      DefaultMatrixFormMassSpline(int i, int j, std::string area, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMass(int i, int j, std::string area, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -242,12 +242,12 @@ namespace WeakFormsH1 {
        coeff1, coeff2... constant numbers
     */
 
-    class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
+    class DefaultLinearAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     DefaultMatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
+     DefaultLinearAdvection(int i, int j, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
-     DefaultMatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
+     DefaultLinearAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
 
       template<typename Real, typename Scalar>
@@ -276,13 +276,13 @@ namespace WeakFormsH1 {
        spline_coeff1, spline_coeff2... non-constant parameters given by cubic splines
     */
 
-    class DefaultMatrixFormAdvectionSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     DefaultMatrixFormAdvectionSpline(int i, int j, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
+     DefaultJacobianNonlinearAdvection(int i, int j, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
                                  spline_coeff2(spline_coeff2) { }
-     DefaultMatrixFormAdvectionSpline(int i, int j, std::string area, 
+     DefaultJacobianNonlinearAdvection(int i, int j, std::string area, 
                                 CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
                                  spline_coeff2(spline_coeff2) { }
@@ -573,7 +573,7 @@ namespace WeakFormsH1 {
     public:
       DefaultWeakFormLaplace() : WeakForm(1)
       {
-        add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormGradGrad(0, 0));
+        add_matrix_form(new VolumetricMatrixForms::DefaultLinearDiffusion(0, 0));
       };
     };
   }

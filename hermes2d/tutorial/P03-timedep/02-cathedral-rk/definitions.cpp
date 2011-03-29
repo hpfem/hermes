@@ -29,12 +29,12 @@ public:
   };
 
 private:
-  // Overriding method clone() in class DefaultMatrixFormGradGrad.
-  class CustomFormJacobianVol : public DefaultMatrixFormGradGrad
+  // Overriding method clone() in class DefaultLinearDiffusion.
+  class CustomFormJacobianVol : public DefaultLinearDiffusion
   {
   public:
     CustomFormJacobianVol(int i, int j, double coeff) 
-      : DefaultMatrixFormGradGrad(i, j, coeff) { }
+      : DefaultLinearDiffusion(i, j, coeff) { }
 
       virtual WeakForm::MatrixFormVol* clone() {
         return new CustomFormJacobianVol(*this);
