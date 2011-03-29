@@ -23,17 +23,17 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       return a * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 

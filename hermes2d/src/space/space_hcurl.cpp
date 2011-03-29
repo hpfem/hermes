@@ -77,11 +77,9 @@ HcurlSpace::~HcurlSpace()
 
 Space* HcurlSpace::dup(Mesh* mesh, int order_increase) const
 {
-  // FIXME
-  // HcurlSpace* space = new HcurlSpace(mesh, essential_bcs, 0, this->shapeset);
-  // space->copy_orders(this, order_increase);
-  // return space;
-  return NULL;
+  HcurlSpace* space = new HcurlSpace(mesh, essential_bcs, 0, this->shapeset);
+  space->copy_orders(this, order_increase);
+  return space;
 }
 
 void HcurlSpace::set_shapeset(Shapeset *shapeset)

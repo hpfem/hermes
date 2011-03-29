@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 //  Newton's method, and nonzero Dirichlet boundary conditions.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] = 0.
+//  conductivity, - div[lambda(u)grad u] = heat_src.
 //
 //  Domain: unit square (-10,10)^2.
 //
@@ -24,6 +24,10 @@ const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform m
 const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
+// Problem parameters.
+double HEAT_SRC = 1.0;
+
 // Boundary markers.
 const std::string BDY_DIRICHLET = "1";
 
@@ -49,7 +53,10 @@ int main(int argc, char* argv[])
   double second_der_right = 0.0;
   bool first_der_left = false;
   bool first_der_right = false;
-  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right);
+  bool extrapolate_der_left = true;
+  bool extrapolate_der_right = true;
+  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
+                 extrapolate_der_left, extrapolate_der_right);
   bool success = cs.calculate_coeffs(); 
   if (!success) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
@@ -72,7 +79,7 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation
-  CustomWeakFormHeatTransferNewton wf(&cs);
+  CustomWeakFormHeatTransferNewton wf(&cs, HEAT_SRC);
 
   // Initialize the FE problem.
   bool is_linear = false;

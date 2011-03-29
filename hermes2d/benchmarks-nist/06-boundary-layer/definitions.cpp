@@ -1,7 +1,13 @@
 #include "weakform/weakform.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
-#include "weakform_library/laplace.h"
+#include "weakform_library/h1.h"
+
+using namespace WeakFormsH1;
+using namespace WeakFormsH1::RightHandSides;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
@@ -61,7 +67,7 @@ class CustomWeakForm : public WeakForm
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->epsilon));
-    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
   };
 
 private:
@@ -73,7 +79,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar val = 0;
       for (int i=0; i < n; i++) {
         val = val + wt[i] * epsilon * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
@@ -83,13 +89,13 @@ private:
       return val;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 

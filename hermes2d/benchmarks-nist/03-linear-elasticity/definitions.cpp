@@ -1,5 +1,5 @@
 #include "weakform/weakform.h"
-#include "weakform_library/laplace.h"
+#include "weakform_library/h1.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
@@ -414,7 +414,7 @@ private:
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
@@ -423,7 +423,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
             Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return wt[0] * (A * u->dx[0] * v->dx[0] + B * u->dy[0] * v->dy[0]);
@@ -440,7 +440,7 @@ private:
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
@@ -449,7 +449,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
             Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return wt[0] * (C * u->dx[0] * v->dy[0]);
@@ -467,7 +467,7 @@ private:
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
@@ -476,7 +476,7 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return wt[0] * (B * u->dx[0] * v->dx[0] + A * u->dy[0] * v->dy[0]);

@@ -1,3 +1,5 @@
+#define HERMES_REPORT_ALL
+#define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -77,19 +79,16 @@ int main(int argc, char* argv[])
   // mloader.load("../square_tri.mesh", &mesh);   // triangles
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Set exact solution.
-  CustomExactSolution exact(&mesh, SLOPE);
-  
-  // Define right-hand side.
-  CustomRightHandSide rhs(SLOPE);
+// Define exact solution.
+  CustomExactSolution exact_sln(&mesh, SLOPE);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(&rhs);
-  
-  // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  CustomWeakFormPoisson wf(SLOPE);
+
+  // Initialize boundary conditions.
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact_sln);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -146,7 +145,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.
-    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));

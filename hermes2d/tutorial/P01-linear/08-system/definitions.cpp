@@ -1,5 +1,5 @@
 #include "weakform/weakform.h"
-#include "weakform_library/laplace.h"
+#include "weakform_library/h1.h"
 #include "weakform_library/linear_elasticity.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
@@ -19,10 +19,10 @@ public:
     add_matrix_form(new Elasticity::DefaultVolumetricMatrixFormLinear_y_y(1, 1, lambda, mu));
 
     // gravity loading
-    add_vector_form(new Laplace::VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
+    add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
 
     // external forces
-    add_vector_form_surf(new Laplace::SurfaceVectorForms::DefaultSurfaceVectorForm(0, non_zero_neumann_bnd, f0));
-    add_vector_form_surf(new Laplace::SurfaceVectorForms::DefaultSurfaceVectorForm(1, non_zero_neumann_bnd, f1));
+    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultSurfaceVectorForm(0, non_zero_neumann_bnd, f0));
+    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultSurfaceVectorForm(1, non_zero_neumann_bnd, f1));
   };
 };

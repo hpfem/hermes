@@ -15,8 +15,7 @@ public:
   inline EssentialBCValueType get_value_type() const 
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  scalar function(double x, double y) const
-  {
+  virtual scalar value(double x, double y) const {
     return -cos(M_PI*x);
   }
 };
@@ -39,9 +38,8 @@ private:
   public:
     MatrixFormVolGeneral(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) { }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       for (int i=0; i < n; i++) {
         double x = e->x[i];
@@ -57,21 +55,20 @@ private:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return u->val[0] * v->val[0] * e->x[0] * e->x[0]; // returning the sum of the degrees of the basis
       // and test function plus two
     }
   private:
     // Problem parameters.
-    double a_11(double x, double y) { if (y > 0) return 1 + x*x + y*y; else return 1;}
-    double a_22(double x, double y) { if (y > 0) return 1; else return 1 + x*x + y*y;}
-    double a_12(double x, double y) { return 1; }
-    double a_21(double x, double y) { return 1;}
-    double a_1(double x, double y) { return 0.0;}
-    double a_2(double x, double y) { return 0.0;}
-    double a_0(double x, double y) { return 0.0;}
+    double a_11(double x, double y) const { if (y > 0) return 1 + x*x + y*y; else return 1;}
+    double a_22(double x, double y) const { if (y > 0) return 1; else return 1 + x*x + y*y;}
+    double a_12(double x, double y) const { return 1; }
+    double a_21(double x, double y) const { return 1;}
+    double a_1(double x, double y) const { return 0.0;}
+    double a_2(double x, double y) const { return 0.0;}
+    double a_0(double x, double y) const { return 0.0;}
   };
 
   class VectorFormVolGeneral : public WeakForm::VectorFormVol
@@ -79,43 +76,38 @@ private:
   public:
     VectorFormVolGeneral(int i) : WeakForm::VectorFormVol(i) {}
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (rhs(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
   private:
-    double rhs(double x, double y) { return 1 + x*x + y*y;}
+    double rhs(double x, double y) const { return 1 + x*x + y*y;}
   };
 
   class VectorFormSurfGeneral : public WeakForm::VectorFormSurf
   {
   public:
-    VectorFormSurfGeneral(int i, std::string area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area)
-    {
+    VectorFormSurfGeneral(int i, std::string area = HERMES_ANY) : WeakForm::VectorFormSurf(i, area) {
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
-    {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (g_N(e->x[i], e->y[i]) * v->val[i]);
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
-    {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return v->val[0] * e->x[0] * e->x[0];  // returning the polynomial degree of the test function plus two
     }
   private:
-    double g_N(double x, double y) { return 0;}
+    double g_N(double x, double y) const { return 0;}
   };
 };

@@ -117,9 +117,9 @@ public:
     int sym;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                         Geom<double> *e, ExtData<scalar> *ext);
+                         Geom<double> *e, ExtData<scalar> *ext) const;
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext);
+                    Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
   class HERMES_API MatrixFormSurf : public Form
@@ -135,9 +135,9 @@ public:
     unsigned int i, j;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                         Geom<double> *e, ExtData<scalar> *ext);
+                         Geom<double> *e, ExtData<scalar> *ext) const;
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext);
+                    Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
   class HERMES_API VectorFormVol : public Form
@@ -153,9 +153,9 @@ public:
     unsigned int i;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<scalar> *ext);
+                         Geom<double> *e, ExtData<scalar> *ext) const;
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-                    ExtData<Ord> *ext);
+                    ExtData<Ord> *ext) const;
   };
 
   class HERMES_API VectorFormSurf : public Form
@@ -171,9 +171,9 @@ public:
     unsigned int i;
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<scalar> *ext);
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                      Geom<Ord> *e, ExtData<Ord> *ext);
+                         Geom<double> *e, ExtData<scalar> *ext) const;
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                      Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
   // General case.

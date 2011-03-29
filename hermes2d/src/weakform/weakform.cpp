@@ -28,16 +28,16 @@ WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, Herme
 }
 
 scalar WeakForm::MatrixFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                                      Geom<double> *e, ExtData<scalar> *ext)
+                                      Geom<double> *e, ExtData<scalar> *ext) const
 {
-  error("WeakForm::MatrixFormVol::value must be overrided.");
+  error("WeakForm::MatrixFormVol::value must be overridden.");
   return 0.0;
 }
 
 Ord WeakForm::MatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                 Geom<Ord> *e, ExtData<Ord> *ext)
+                                 Geom<Ord> *e, ExtData<Ord> *ext) const
 {
-  error("WeakForm::MatrixFormVol::ord must be overrided.");
+  error("WeakForm::MatrixFormVol::ord must be overridden.");
   return Ord();
 }
 
@@ -55,16 +55,16 @@ WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag s
 }
 
 scalar WeakForm::MatrixFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                                       Geom<double> *e, ExtData<scalar> *ext)
+                                       Geom<double> *e, ExtData<scalar> *ext) const
 {
-  error("WeakForm::MatrixFormSurf::value must be overrided.");
+  error("WeakForm::MatrixFormSurf::value must be overridden.");
   return 0.0;
 }
 
 Ord WeakForm::MatrixFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                  Geom<Ord> *e, ExtData<Ord> *ext)
+                                  Geom<Ord> *e, ExtData<Ord> *ext) const
 {
-  error("WeakForm::MatrixFormSurf::ord must be overrided.");
+  error("WeakForm::MatrixFormSurf::ord must be overridden.");
   return Ord();
 }
 
@@ -82,16 +82,16 @@ WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::st
 }
 
 scalar WeakForm::VectorFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                                      Geom<double> *e, ExtData<scalar> *ext)
+                                      Geom<double> *e, ExtData<scalar> *ext) const
 {
-  error("WeakForm::VectorFormVol::value must be overrided.");
+  error("WeakForm::VectorFormVol::value must be overridden.");
   return 0.0;
 }
 
 Ord WeakForm::VectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                                 Geom<Ord> *e, ExtData<Ord> *ext)
+                                 Geom<Ord> *e, ExtData<Ord> *ext) const
 {
-  error("WeakForm::VectorFormVol::ord must be overrided.");
+  error("WeakForm::VectorFormVol::ord must be overridden.");
   return Ord();
 }
 
@@ -116,16 +116,16 @@ WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, std::string area,
 }
 
 scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                                       Geom<double> *e, ExtData<scalar> *ext)
+                                       Geom<double> *e, ExtData<scalar> *ext) const
 {
-  error("WeakForm::VectorFormSurf::value must be overrided.");
+  error("WeakForm::VectorFormSurf::value must be overridden.");
   return 0.0;
 }
 
 Ord WeakForm::VectorFormSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                                  Geom<Ord> *e, ExtData<Ord> *ext)
+                                  Geom<Ord> *e, ExtData<Ord> *ext) const
 {
-  error("WeakForm::VectorFormSurf::ord must be overrided.");
+  error("WeakForm::VectorFormSurf::ord must be overridden.");
   return Ord();
 }
 

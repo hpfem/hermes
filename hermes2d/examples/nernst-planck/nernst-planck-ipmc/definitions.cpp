@@ -21,7 +21,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
 	    Func<Scalar>* prev_newton;
       switch(i * 10 + j) {
@@ -111,13 +111,13 @@ private:
       }
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -141,7 +141,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
-                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* C_prev_time;
 	    Func<Scalar>* C_prev_newton;
@@ -194,13 +194,13 @@ private:
       }
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -220,7 +220,7 @@ private:
 // Cranck-Nicholson forms
 // TODO: finish this & use it.
 template<class Real, class Scalar>
-Scalar Fc_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar Fc_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
   Scalar result = 0;
   Func<Scalar>* C_prev_time = ext->fn[0];
   Func<Scalar>* phi_prev_time = ext->fn[1];
@@ -237,7 +237,7 @@ Scalar Fc_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<R
 }
 
 template<class Real, class Scalar>
-Scalar Fphi_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar Fphi_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
     Scalar result = 0;
     Func<Scalar>* C_prev_newton = u_ext[0];
     Func<Scalar>* phi_prev_newton = u_ext[1];
@@ -250,7 +250,7 @@ Scalar Fphi_cranic(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom
 
 
 template<class Real, class Scalar>
-Scalar J_cranic_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar J_cranic_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
   Scalar result = 0;
   Func<Scalar>* phi_prev_newton = u_ext[1];
   for (int i = 0; i < n; i++) {
@@ -262,7 +262,7 @@ Scalar J_cranic_DFcDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
 }
 
 template<class Real, class Scalar>
-Scalar J_cranic_DFcDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar J_cranic_DFcDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
   Scalar result = 0;
   Func<Scalar>* C_prev_newton = u_ext[0];
 	for (int i = 0; i < n; i++) {
@@ -272,7 +272,7 @@ Scalar J_cranic_DFcDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 }
 
 template<class Real, class Scalar>
-Scalar J_cranic_DFphiDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar J_cranic_DFphiDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
     result += wt[i] * ( -this->L * u->val[i] * v->val[i]);
@@ -281,7 +281,7 @@ Scalar J_cranic_DFphiDYc(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u
 }
 
 template<class Real, class Scalar>
-Scalar J_cranic_DFphiDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+Scalar J_cranic_DFphiDYphi(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
   Scalar result = 0;
   for (int i = 0; i < n; i++) {
     result += wt[i] * ( u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);

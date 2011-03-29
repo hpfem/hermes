@@ -270,14 +270,26 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
 
   // First let's do the mass matrix (only one block ndof times ndof).
   for(unsigned int component_i = 0; component_i < size; component_i++) {
-    MatrixFormVolL2* proj_form = new MatrixFormVolL2(component_i, component_i);
-    proj_form->area = HERMES_ANY;
-    proj_form->scaling_factor = 1.0;
-    proj_form->u_ext_offset = 0;
-    proj_form->adapt_eval = false;
-    proj_form->adapt_order_increase = -1;
-    proj_form->adapt_rel_error_tol = -1;
-    stage_wf_left.add_matrix_form(proj_form);
+    if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE) {
+      MatrixFormVolL2* proj_form = new MatrixFormVolL2(component_i, component_i);
+      proj_form->area = HERMES_ANY;
+      proj_form->scaling_factor = 1.0;
+      proj_form->u_ext_offset = 0;
+      proj_form->adapt_eval = false;
+      proj_form->adapt_order_increase = -1;
+      proj_form->adapt_rel_error_tol = -1;
+      stage_wf_left.add_matrix_form(proj_form);
+    }
+    if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE) {
+      MatrixFormVolHCurl* proj_form = new MatrixFormVolHCurl(component_i, component_i);
+      proj_form->area = HERMES_ANY;
+      proj_form->scaling_factor = 1.0;
+      proj_form->u_ext_offset = 0;
+      proj_form->adapt_eval = false;
+      proj_form->adapt_order_increase = -1;
+      proj_form->adapt_rel_error_tol = -1;
+      stage_wf_left.add_matrix_form(proj_form);
+    }
   }
 
   // In the rest we will take the stationary jacobian and residual forms 
