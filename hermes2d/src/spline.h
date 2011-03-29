@@ -24,11 +24,12 @@ public:
   /// Constructor.
   CubicSpline(std::vector<double> points, std::vector<double> values, 
               double bc_left, double bc_right, 
-              bool first_der_left = true, bool first_der_right = true);
+              bool first_der_left = true, bool first_der_right = true,
+              bool extend_der_left = true, bool extend_der_right = true);
 
   /// Destructor.
   ~CubicSpline() { 
-    delete coeffs;
+    delete [] coeffs;
     points.clear();
     values.clear();
   };
@@ -63,6 +64,9 @@ protected:
   /// Returns false if point lies outside.
   bool find_interval(double x_in, int& m);
 
+  /// Extrapolate the value of the spline outside of its interval of definition.
+  double extrapolate_value(double point_end, double value_end, double derivative_end, double x_in);
+
   /// Grid points, ordered.
   std::vector<double> points;
 
@@ -77,6 +81,17 @@ protected:
   /// first_der_left == false means that the left BC is the second derivative.
   /// (same on the right)
   bool first_der_left, first_der_right;
+
+  /// If extend_der_left == true then the spline is extended to the left of the 
+  /// interval of definition as a linear function whose slope matches the derivative 
+  /// at the left-most point. Otherwise the spline is extended as a constant value
+  /// that matches the spline value at the left-most point. Analogously for the 
+  /// flag extend_der_right.
+  bool extrapolate_der_left, extrapolate_der_right;
+
+  /// Values and derivatives at end points for extrapolation purposes.
+  double point_left, value_left, derivative_left;
+  double point_right, value_right, derivative_right;
 
   /// A set of four coefficients a, b, c, d for an elementary cubic spline.
   SplineCoeff* coeffs;
