@@ -728,6 +728,11 @@ void Mesh::refine_all_elements(int refinement, bool mark_as_initial)
     ninitial = this->get_max_element_id();
 }
 
+static int rtb_marker;
+static bool rtb_aniso;
+static bool rtb_tria_to_quad;
+static char* rtb_vert;
+
 void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
 {
   Element* e;
@@ -738,6 +743,29 @@ void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
     }
   }
   elements.set_append_only(false);
+
+  // FIXME:
+  if (rtb_tria_to_quad)
+  {
+    Mesh tmp;
+    tmp.copy_converted(this);
+    for (int i = 0; i < tmp.ntopvert; i++)
+    {
+      if (tmp.nodes[i].type == 1)
+      {
+       tmp.nodes[i].y = 0.0;
+      }
+    }
+    char* mesh_tmp = NULL;
+    mesh_tmp = tmpnam(NULL);
+    tmp.save(mesh_tmp);
+    Mesh mesh_tmp_for_convert;
+    H2DReader loader_mesh_tmp_for_convert;
+    loader_mesh_tmp_for_convert.load(mesh_tmp, &tmp);
+    remove(mesh_tmp);
+    copy(&tmp);
+  }
+
 }
 
 static int rtv_id;
@@ -755,11 +783,6 @@ void Mesh::refine_towards_vertex(int vertex_id, int depth)
   rtv_id = vertex_id;
   refine_by_criterion(rtv_criterion, depth);
 }
-
-static int rtb_marker;
-static bool rtb_aniso;
-static bool rtb_tria_to_quad;
-static char* rtb_vert;
 
 static int rtb_criterion(Element* e)
 {
@@ -1200,7 +1223,6 @@ void Mesh::free()
 
 void Mesh::copy_converted(Mesh* mesh)
 {
-  //printf("Calling Mesh::free() in Mesh::copy_converted().\n");
   free();
   HashTable::copy(mesh);
   // clear reference for all nodes
@@ -1363,15 +1385,101 @@ void Mesh::refine_triangle_to_quads(Element* e)
   mid->x = (nodes[x0->id].x + nodes[x1->id].x + nodes[x2->id].x)/3;
   mid->y = (nodes[x0->id].y + nodes[x1->id].y + nodes[x2->id].y)/3;
 
+  // get the son's edge angle.
+  double refinement_angle[3] = {0.0, 0.0, 0.0};
+  if (e->is_curved())
+  {
+	// for base element.
+    if (e->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->cm->nurbs[n]->angle;
+        }
+      }
+    }
+    else
+    // one level refinement.
+    if (e->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
+        }
+      }
+    }
+    else
+    // two level refinements.
+    if (e->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
+        }
+      }
+    }
+    else
+    // three level refinements.
+    if (e->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->parent->cm->nurbs[n] != NULL)
+        {
+	      //info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
+        }
+      }
+    }
+    else
+    // four level refinements.
+    if (e->parent->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
+        }
+      }
+    }
+  }
+
+  // check if element e is a internal element.
+  bool e_inter = true;
+  for (int n = 0; n < e->nvert; n++)
+  {  
+    if (bnd[n] == 1)
+      e_inter = false;
+  }
+
   // adjust mid-edge and gravity coordinates if this is a curved element
   if (e->is_curved())
   {
-    double2 pt[4] = { { 0.0,-1.0 }, { 0.0, 0.0 },{ -1.0, 0.0 }, { -0.33333333, -0.33333333 } };
-    e->cm->get_mid_edge_points(e, pt, 4);
-    x0->x = pt[0][0]; x0->y = pt[0][1];
-    x1->x = pt[1][0]; x1->y = pt[1][1];
-    x2->x = pt[2][0]; x2->y = pt[2][1];
-    mid->x = pt[3][0]; mid->y = pt[3][1];
+    if (!e_inter)
+    {
+      double2 pt[4] = { { 0.0,-1.0 }, { 0.0, 0.0 },{ -1.0, 0.0 }, { -0.33333333, -0.33333333 } };
+      e->cm->get_mid_edge_points(e, pt, 4);
+      x0->x = pt[0][0]; x0->y = pt[0][1];
+      x1->x = pt[1][0]; x1->y = pt[1][1];
+      x2->x = pt[2][0]; x2->y = pt[2][1];
+      mid->x = pt[3][0]; mid->y = pt[3][1];
+	}
    }
 
   double angle2;
@@ -1380,7 +1488,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
   memset(cm, 0, sizeof(cm));
 
   // create CurvMaps for sons if this is a curved element
-  if (e->is_curved())
+  if ((e->is_curved()) && (!e_inter))
   {
     for (idx = 0; idx < 2; idx++)
     {
@@ -1396,7 +1504,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
     idx=0;
     if (e->cm->nurbs[idx] != NULL)
     {
-      angle2 = e->cm->nurbs[idx]->angle/2;
+      angle2 = refinement_angle[0] / 2;
       Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
 
       for (int k = 0; k < 2; k++)
@@ -1474,8 +1582,8 @@ void Mesh::refine_triangle_to_quads(Element* e)
 
     idx = 1;
     if (e->cm->nurbs[idx] != NULL)
-    {
-      angle2 = e->cm->nurbs[idx]->angle/2;
+    { 
+	  angle2 = refinement_angle[1] / 2;
       Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
       for (int k = 0; k < 2; k++)
       {
@@ -1596,7 +1704,7 @@ void Mesh::refine_element_to_quads_id(int id)
   if (e->is_triangle())
     refine_triangle_to_quads(e);
   else
-    return;
+    return;//refine_quad(this, e, 0);
 
   seq = g_mesh_seq++;
 }
@@ -1815,14 +1923,14 @@ void Mesh::save(const char* filename)
 	warn("Deprecated function used. Please update your code to use MeshLoader classes.");
 
 	H2DReader loader;
-  loader.save(filename, this);
+    loader.save(filename, this);
 }
 
 //// save_raw, load_raw ////////////////////////////////////////////////////////////////////////////
 
 void Mesh::save_raw(FILE* f)
 {
-  int i, nn, mm;
+  int nn, mm;
   int null = -1;
 
   assert(sizeof(int) == 4);
