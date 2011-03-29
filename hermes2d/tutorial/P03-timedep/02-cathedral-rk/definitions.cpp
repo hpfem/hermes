@@ -1,5 +1,5 @@
 #include "weakform/weakform.h"
-#include "weakform_library/laplace.h"
+#include "weakform_library/h1.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 

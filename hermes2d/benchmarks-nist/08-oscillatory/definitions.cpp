@@ -1,7 +1,12 @@
 #include "weakform/weakform.h"
-#include "weakform_library/laplace.h"
+#include "weakform_library/h1.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
+
+using namespace WeakFormsH1;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
@@ -70,7 +75,7 @@ class CustomWeakForm : public WeakForm
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->alpha));
-    add_vector_form(new DefaultVectorFormVolNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
   };
 
 private:
