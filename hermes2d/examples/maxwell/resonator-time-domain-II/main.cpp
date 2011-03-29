@@ -80,6 +80,8 @@ int main(int argc, char* argv[])
   // Initialize solutions.
   CustomInitialConditionWave E_sln(&mesh);
   Solution F_sln(&mesh, 0.0, 0.0);
+  Hermes::vector<Solution*> slns_time_prev(&E_sln, &F_sln);
+  Hermes::vector<Solution*> slns_time_new(&E_sln, &F_sln);
 
   // Initialize the weak formulation.
   CustomWeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
@@ -117,9 +119,6 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    Hermes::vector<Solution*> slns_time_prev(&E_sln, &F_sln);
-    Hermes::vector<Solution*> slns_time_new(&E_sln, &F_sln);
-
     if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, false, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 

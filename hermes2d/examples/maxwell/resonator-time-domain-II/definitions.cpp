@@ -2,27 +2,28 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+/* Initial condition for E */
+
 class CustomInitialConditionWave : public ExactSolutionVector
 {
 public:
   CustomInitialConditionWave(Mesh* mesh) : ExactSolutionVector(mesh) {};
 
   virtual scalar2 value (double x, double y) const {
-    return scalar2(-cos(x) * sin(y), sin(x) * cos(y));
+    return scalar2(sin(x) * cos(y), -cos(x) * sin(y));
   }
 
   virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const {
-    dx[0] = sin(x) * sin(y);
-    dx[1] = cos(x) * cos(y);
-    dy[0] = -cos(x) * cos(y);
-    dy[1] = -sin(x) * sin(y);
+    dx[0] = cos(x) * cos(y);
+    dx[1] = sin(x) * sin(y);
+    dy[0] = -sin(x) * sin(y);
+    dy[1] = -cos(x) * cos(y);
   }
 
   virtual Ord ord(Ord x, Ord y) const {
     return Ord(20);
   }
 };
-
 
 /* Weak forms */
 
@@ -79,7 +80,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
-      return - c_squared * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
+      return c_squared * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
@@ -109,11 +110,14 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
+      Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (sln_prev_time->val0[i] * v->val0[i] 
-                  + sln_prev_time->val1[i] * v->val1[i]);
+      for (int i = 0; i < n; i++) {
+        Scalar sln_val0_i = sln_prev_time->val0[i] + K_sln->val0[i];
+        Scalar sln_val1_i = sln_prev_time->val1[i] + K_sln->val1[i];
+        result += wt[i] * (sln_val0_i * v->val0[i] + sln_val1_i * v->val1[i]);
+      }
       return result;
     }
 
@@ -142,10 +146,13 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) {
       Scalar result = 0;
+      Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
       
-      for (int i = 0; i < n; i++)
-        result += wt[i] * sln_prev_time->curl[i] * v->curl[i];
+      for (int i = 0; i < n; i++) {
+        Scalar sln_curl_i = sln_prev_time->curl[i] + K_sln->curl[i];
+        result += wt[i] * sln_curl_i * v->curl[i];
+      }
       return - c_squared * result;
     }
 
