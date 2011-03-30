@@ -261,7 +261,7 @@ double EpetraMatrix<Scalar>::get_fill_in() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros() / ((double)size*size);
+  return mat->NumGlobalNonzeros() / ((double)size*this->size);
 #else
   return -1;
 #endif

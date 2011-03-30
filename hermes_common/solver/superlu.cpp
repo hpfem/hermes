@@ -531,7 +531,7 @@ bool SuperLUSolver<Scalar>::check_status(unsigned int info)
   
 template<typename Scalar>
 SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
-  : LinearSolver<Solver>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
+  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
       local_Ai(NULL), local_Ap(NULL), local_Ax(NULL), local_rhs(NULL)
 {
   _F_

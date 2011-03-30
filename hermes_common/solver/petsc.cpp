@@ -233,16 +233,15 @@ unsigned int PetscMatrix<Scalar>::get_nnz() const {
 template<typename Scalar>
 double PetscMatrix<Scalar>::get_fill_in() const {
   _F_
-  return (double) nnz / ((double)size*size);
+  return (double) nnz / ((double)this->size*this->size);
 }
 
 
 template<typename Scalar>
 void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
-  int n=size;
-  for (int i=0;i<n;i++){
+  for (int i=0;i<this->size;i++){
     vector_out[i]=0;
-    for (int j=0;j<n;j++){
+    for (int j=0;j<this->size;j++){
         vector_out[i]+=vector_in[j]*get(i,j);
     }
   }
