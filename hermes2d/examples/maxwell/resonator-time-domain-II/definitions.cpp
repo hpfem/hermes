@@ -36,11 +36,11 @@ public:
     add_matrix_form(new MatrixFormVolWave_1_0(c_squared));
 
     VectorFormVolWave_0* vector_form_0 = new VectorFormVolWave_0();
-    vector_form_0->ext.push_back(E_prev_sln);
+    vector_form_0->ext.push_back(F_prev_sln);
     add_vector_form(vector_form_0);
 
     VectorFormVolWave_1* vector_form_1 = new VectorFormVolWave_1(c_squared);
-    vector_form_1->ext.push_back(F_prev_sln);
+    vector_form_1->ext.push_back(E_prev_sln);
     add_vector_form(vector_form_1);
   };
 
@@ -48,7 +48,7 @@ private:
   class MatrixFormVolWave_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolWave_0_1() : WeakForm::MatrixFormVol(0, 1) { }
+    MatrixFormVolWave_0_1() : WeakForm::MatrixFormVol(0, 1, HERMES_NONSYM) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -75,7 +75,7 @@ private:
   {
   public:
     MatrixFormVolWave_1_0(double c_squared) 
-          : WeakForm::MatrixFormVol(1, 0), c_squared(c_squared) { }
+      : WeakForm::MatrixFormVol(1, 0, HERMES_NONSYM), c_squared(c_squared) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -110,7 +110,7 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[0];
+      Func<Scalar>* K_sln = u_ext[1];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
       for (int i = 0; i < n; i++) {
