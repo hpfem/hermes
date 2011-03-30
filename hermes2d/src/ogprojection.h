@@ -65,7 +65,7 @@ protected:
   class ProjectionMatrixVolForm : public MatrixFormVol<Scalar>
   {
   public:
-    ProjectionMatrixVolForm(int i, int j, ProjNormType projNormType) : MatrixFormVol(i, j)
+    ProjectionMatrixVolForm(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
     {
       this->adapt_eval = false;
       this->projNormType = projNormType;
@@ -179,7 +179,7 @@ protected:
   class ProjectionVectorVolForm : public VectorFormVol<Scalar>
   {
   public:
-    ProjectionVectorVolForm(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol(i)
+    ProjectionVectorVolForm(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
     {
       this->adapt_eval = false;
       this->projNormType = projNormType;

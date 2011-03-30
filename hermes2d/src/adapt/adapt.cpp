@@ -867,7 +867,7 @@ void Adapt<Scalar>::fill_regular_queue(Mesh** meshes) {
 
   //prepare initial fill
   Element* e;
-  vector<ElementReference>::iterator elem_info = regular_queue.begin();
+  typename std::vector<ElementReference>::iterator elem_info = regular_queue.begin();
   for (int i = 0; i < this->num; i++)
     for_all_active_elements(e, meshes[i])
       regular_queue.push_back(ElementReference(e->id, i));
