@@ -110,7 +110,7 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[0];
+      Func<Scalar>* K_sln = u_ext[1];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
       for (int i = 0; i < n; i++) {
