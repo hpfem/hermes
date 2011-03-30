@@ -438,7 +438,7 @@ bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 
 template<typename Scalar>
 PetscLinearSolver<Scalar>::PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
-  : LinearSolver(), m(mat), rhs(rhs)
+  : LinearSolver<Scalar>(), m(mat), rhs(rhs)
 {
   _F_
 #ifdef WITH_PETSC

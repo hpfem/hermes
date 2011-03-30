@@ -610,7 +610,7 @@ bool MumpsSolver<Scalar>::reinit()
 
 template<typename Scalar>
 MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
-  LinearSolver(), m(m), rhs(rhs)
+  LinearSolver<Scalar>(), m(m), rhs(rhs)
 {
   _F_
 #ifdef WITH_MUMPS

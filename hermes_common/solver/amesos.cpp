@@ -31,7 +31,7 @@ template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
+  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AMESOS
