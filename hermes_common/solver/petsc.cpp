@@ -114,7 +114,7 @@ void PetscMatrix<Scalar>::alloc() {
   MEM_CHECK(nnz_array);
 
   // fill in nnz_array
-  int aisize = get_num_indices();
+  int aisize = this->get_num_indices();
   int *ai = new int[aisize];
   MEM_CHECK(ai);
 
@@ -239,9 +239,9 @@ double PetscMatrix<Scalar>::get_fill_in() const {
 
 template<typename Scalar>
 void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
-  for (int i=0;i<this->size;i++){
+  for (unsigned int i=0;i<this->size;i++){
     vector_out[i]=0;
-    for (int j=0;j<this->size;j++){
+    for (unsigned int j=0;j<this->size;j++){
         vector_out[i]+=vector_in[j]*get(i,j);
     }
   }

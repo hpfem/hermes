@@ -109,7 +109,7 @@ void CSCMatrix<Scalar>::alloc() {
   // initialize the arrays Ap and Ai
   Ap = new int [this->size + 1];
   MEM_CHECK(Ap);
-  int aisize = get_num_indices();
+  int aisize = this->get_num_indices();
   Ai = new int [aisize];
   MEM_CHECK(Ai);
 
@@ -295,11 +295,11 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
     {
       fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
       int nnz_sym=0;
-      for (int j = 0; j < (int)size; j++)
+      for (unsigned int j = 0; j < this->size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           if (j <= Ai[i]) nnz_sym++;
       fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
-      for (int j = 0; j < (int)size; j++)
+      for (unsigned int j = 0; j < this->size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           // The following line was replaced with the one below, because it gave a warning 
 	  // to cause code abort at runtime. 
@@ -529,7 +529,7 @@ bool UMFPackLinearSolver<double>::solve() {
   assert(m != NULL);
   assert(rhs != NULL);
 
-  assert(m->size == rhs->size);
+  assert(m->get_size() == rhs->length());
 
   TimePeriod tmr;
 
@@ -543,10 +543,10 @@ bool UMFPackLinearSolver<double>::solve() {
 
   if(sln)
     delete [] sln;
-  sln = new double[m->size];
+  sln = new double[m->get_size()];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(double));
-  status = umfpack_di_solve(UMFPACK_A, m->Ap, m->Ai, m->Ax, sln, rhs->v, numeric, NULL, NULL);
+  memset(sln, 0, m->get_size() * sizeof(double));
+  status = umfpack_di_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
     check_status("umfpack_di_solve", status);
     return false;
@@ -568,7 +568,7 @@ bool UMFPackLinearSolver<std::complex<double> >::solve() {
   assert(m != NULL);
   assert(rhs != NULL);
 
-  assert(m->size == rhs->size);
+  assert(m->get_size() == rhs->length());
 
   TimePeriod tmr;
 
@@ -582,10 +582,10 @@ bool UMFPackLinearSolver<std::complex<double> >::solve() {
 
   if(sln)
     delete [] sln;
-  sln = new std::complex<double>[m->size];
+  sln = new std::complex<double>[m->get_size()];
   MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(std::complex<double>));
-  status = umfpack_zi_solve(UMFPACK_A, m->Ap, m->Ai, (double *)m->Ax, NULL, (double*) sln, NULL, (double *)rhs->v, NULL, numeric, NULL, NULL);
+  memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
+  status = umfpack_zi_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
     check_status("umfpack_di_solve", status);
     return false;
@@ -619,7 +619,7 @@ bool UMFPackLinearSolver<double>::setup_factorization()
       if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
       
       //debug_log("Factorizing symbolically.");
-      status = umfpack_di_symbolic(m->size, m->size, m->Ap, m->Ai, m->Ax, &symbolic, NULL, NULL);
+      status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_symbolic", status);
         return false;
@@ -631,7 +631,7 @@ bool UMFPackLinearSolver<double>::setup_factorization()
       if (numeric != NULL) umfpack_di_free_numeric(&numeric);
       
       //debug_log("Factorizing numerically.");
-      status = umfpack_di_numeric(m->Ap, m->Ai, m->Ax, symbolic, &numeric, NULL, NULL);
+      status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_numeric", status);
         return false;
@@ -664,7 +664,7 @@ bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
       if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
       
       //debug_log("Factorizing symbolically.");
-      status = umfpack_zi_symbolic(m->size, m->size, m->Ap, m->Ai, (double *)m->Ax, NULL, &symbolic, NULL, NULL);
+      status = umfpack_zi_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, &symbolic, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_symbolic", status);
         return false;
@@ -676,7 +676,7 @@ bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
       if (numeric != NULL) umfpack_zi_free_numeric(&numeric);
       
       //debug_log("Factorizing numerically.");
-      status = umfpack_zi_numeric(m->Ap, m->Ai, (double *) m->Ax, NULL, symbolic, &numeric, NULL, NULL);
+      status = umfpack_zi_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), NULL, symbolic, &numeric, NULL, NULL);
       if (status != UMFPACK_OK) {
         check_status("umfpack_di_numeric", status);
         return false;

@@ -27,8 +27,6 @@
 // General CSC Matrix class (can be used in umfpack, in that case use the
 // UMFPackMatrix subclass, or with EigenSolver, or anything else)
 
-template <typename Scalar> class UMFPackLinearSolver;
-
 template <typename Scalar>
 class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
 public:
@@ -85,7 +83,6 @@ protected:
 // This class is to be used with UMFPack solver only:
 template <typename Scalar>
 class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> {
-  friend class UMFPackLinearSolver<Scalar>;
 };
 
 template <typename Scalar>
@@ -120,7 +117,6 @@ public:
 protected:
   //UMFPack specific data structures for storing the rhs.
   Scalar *v;
-  friend class UMFPackLinearSolver<Scalar>;
 };
 
 
