@@ -96,7 +96,7 @@ void MumpsMatrix<Scalar>::alloc()
   // initialize the arrays Ap and Ai
   Ap = new unsigned int [this->size + 1];
   MEM_CHECK(Ap);
-  int aisize = get_num_indices();
+  int aisize = this->get_num_indices();
   Ai = new int [aisize];
   MEM_CHECK(Ai);
 
@@ -325,7 +325,7 @@ void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatr
   // Applies the matrix to vector_in and saves result to vector_out.
 template<typename Scalar>
 void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
-  for(unsigned int i=0;i<size;i++){
+  for(unsigned int i=0;i<this->size;i++){
     vector_out[i]=0;
   }
   Scalar a;
@@ -399,7 +399,7 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
     nmat->irn[i]=irn[i];
     nmat->jcn[i]=jcn[i];
   }
-  for (unsigned int i = 0;i<size+1;i++){
+  for (unsigned int i = 0;i<this->size+1;i++){
     nmat->Ap[i]=Ap[i];
   }
   return nmat;

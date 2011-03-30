@@ -192,7 +192,7 @@ void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
 template<typename Scalar>
 void PetscMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i = 0; i<size; i++) {
+  for (unsigned int i = 0; i<this->size; i++) {
     add(i, i, v);
   }
 };

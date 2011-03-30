@@ -77,7 +77,7 @@ void SuperLUMatrix<Scalar>::alloc()
   // Initialize the arrays Ap and Ai.
   Ap = new unsigned int [this->size + 1];
   MEM_CHECK(Ap);
-  int aisize = get_num_indices();
+  int aisize = this->get_num_indices();
   Ai = new int [aisize];
   MEM_CHECK(Ai);
   
@@ -159,7 +159,7 @@ void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
 template<typename Scalar>
 void SuperLUMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i = 0; i<size; i++) {
+  for (unsigned int i = 0; i<this->size; i++) {
     add(i, i, v);
   }
 };
@@ -287,11 +287,11 @@ void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLU
 template<typename Scalar>
 void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
   _F_
-  for(unsigned int i=0;i<size;i++){
+  for(unsigned int i=0;i<this->size;i++){
     vector_out[i]=0;
   }
   Scalar a;
-  for (unsigned int c=0;c<size;c++){
+  for (unsigned int c=0;c<this->size;c++){
     for (unsigned int i=Ap[c];i<Ap[c+1];i++){
 #ifndef HERMES_COMMON_COMPLEX
       a=Ax[i];
@@ -361,7 +361,7 @@ SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate(){
     nmat->Ai[i]=Ai[i];
     nmat->Ax[i]=Ax[i];
   }
-  for (unsigned int i = 0;i<size+1;i++){
+  for (unsigned int i = 0;i<this->size+1;i++){
     nmat->Ap[i]=Ap[i];
   }
   return nmat;
@@ -531,7 +531,7 @@ bool SuperLUSolver<Scalar>::check_status(unsigned int info)
   
 template<typename Scalar>
 SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
-  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
+  : LinearSolver<Solver>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
       local_Ai(NULL), local_Ap(NULL), local_Ax(NULL), local_rhs(NULL)
 {
   _F_
