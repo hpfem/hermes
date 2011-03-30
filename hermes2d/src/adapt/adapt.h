@@ -194,8 +194,8 @@ public:
    *  \param[in] j The second component index.
    *  \param[in] bi_form A bilinear form which calculates value.
    *  \param[in] bi_ord A bilinear form which calculates order. */
-  typename void set_error_form(int i, int j, MatrixFormVolError* form);
-  typename void set_error_form(MatrixFormVolError* form);   // i = j = 0
+  void set_error_form(int i, int j, MatrixFormVolError* form);
+  void set_error_form(MatrixFormVolError* form);   // i = j = 0
 
   /// Type-safe version of calc_err_est() for one solution.
   /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().

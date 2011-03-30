@@ -97,7 +97,7 @@ namespace RefinementSelectors {
   class HERMES_API HOnlySelector : public Selector<Scalar> {
   public:
     /// Constructor.
-    HOnlySelector() : Selector() {};
+    HOnlySelector() : Selector<Scalar>() {};
 
     /// Selects a refinement.
     /** Selects a H-refienements. For details, see Selector::select_refinement. */

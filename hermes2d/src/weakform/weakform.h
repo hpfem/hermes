@@ -134,7 +134,7 @@ public:
   Hermes::vector<VectorFormVol<Scalar> *> vfvol;
   Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
 
-  typename void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
+  void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
                   std::vector<Stage<Scalar> >& stages, bool rhsonly);
   bool** get_blocks(bool force_diagonal_blocks);
 
