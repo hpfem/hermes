@@ -156,8 +156,7 @@ public:
 
 protected:
 
-  typename Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
-                    Mesh* m1, Mesh* m2,
+  Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 
   Mesh::ElementMarkersConversion* element_markers_conversion;

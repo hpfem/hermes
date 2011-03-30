@@ -134,8 +134,6 @@ namespace RefinementSelectors {
             break;
         }
       }
-
-      friend HERMES_API std::ostream& operator<<(std::ostream& stream, const Cand& cand);
     };
 
     /// Returns a vector of the last generated candidates.

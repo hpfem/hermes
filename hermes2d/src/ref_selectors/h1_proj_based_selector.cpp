@@ -30,7 +30,7 @@ namespace RefinementSelectors {
   }
 
   template<typename Scalar>
-  void H1ProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
+  void H1ProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
     //for all transformations
     bool done = false;
     int inx_trf = 0;
@@ -77,7 +77,7 @@ namespace RefinementSelectors {
   }
 
   template<typename Scalar>
-  void H1ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
+  void H1ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {
     //calculate values
     precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals);
 
@@ -210,7 +210,7 @@ namespace RefinementSelectors {
   }
 
   template<typename Scalar>
-  Scalar H1ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) {
+  Scalar H1ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) {
     Scalar total_value = 0;
     for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) {
       double3 &gip_pt = sub_gip.gip_points[gip_inx];
@@ -250,7 +250,7 @@ namespace RefinementSelectors {
   }
 
   template<typename Scalar>
-  double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) {
+  double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) {
     double total_error_squared = 0;
     for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) {
       double3 &gip_pt = sub_gip.gip_points[gip_inx];

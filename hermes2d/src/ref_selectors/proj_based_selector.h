@@ -137,7 +137,7 @@ namespace RefinementSelectors {
      *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
      *             are precalculated if the array corresponding to the identity function is not empty.
      */
-    virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {};
+    virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {};
 
     /// Calculates values of orthogonalized shape function at GIP for all transformations.
     /** Override this method to supply a pre-calculated vales of orthonormalized shape function expansions
@@ -157,7 +157,7 @@ namespace RefinementSelectors {
      *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
      *             are precalculated if the array corresponding to the identity function is not empty.
      */
-    virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals) {};
+    virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals) {};
 
   protected:
     /// Constructor.
@@ -253,7 +253,7 @@ namespace RefinementSelectors {
      *  \param[out] herr An error of elements of H-candidates of various permutation of orders.
      *  \param[out] perr An error of elements of P-candidates of various permutation of orders.
      *  \param[out] anisoerr An error of elements of ANISO-candidates of various permutation of orders. */
-    virtual void calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]);
+    virtual void calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]);
 
     /// Calculate projection errors of an element of an candidate considering multiple orders.
     /** An element of a candidate may span over multiple sub-domains. All integration uses the reference domain.
@@ -270,7 +270,7 @@ namespace RefinementSelectors {
      *  \param[in] sub_ortho_svals
      *  \param[in] info Information about candidates: range of orders, etc.
      *  \param[out] errors_squared Calculated squared errors for all orders specified through \a info. */
-    void calc_error_cand_element(const int mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals, std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals, const CandsInfo& info, CandElemProjError errors_squared);
+    void calc_error_cand_element(const int mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals, std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared);
 
   protected: //projection
     /// Projection of an element of a candidate.

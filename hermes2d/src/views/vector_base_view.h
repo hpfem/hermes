@@ -32,10 +32,10 @@ class HERMES_API VectorBaseView : public VectorView<Scalar>
 public:
 
   VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-		: VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
+		: VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
 	VectorBaseView(char* title, WinGeom* wg = NULL)
-    : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; lines = false; basic_title.assign(title); }
+    : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
   void show(Space<Scalar>* space);
 

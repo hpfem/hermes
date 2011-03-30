@@ -109,7 +109,7 @@ public:
                                     SurfPos* surf_pos,
                                     LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
                                     int neighbor_index);
-    double eval_solution_norm(typename Adapt::MatrixFormVolError* form,
+    double eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
                               RefMap* rm,
                               MeshFunction<Scalar>* sln);
 
@@ -227,7 +227,7 @@ public:
     double calc_err_est(Solution<Scalar>*sln,
                         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
     {
-      if (num != 1) EXIT("Wrong number of solutions.");
+      if (this->num != 1) EXIT("Wrong number of solutions.");
       Hermes::vector<Solution<Scalar>*> slns;
       slns.push_back(sln);
       return calc_err_est(slns, NULL, error_flags);
@@ -267,10 +267,10 @@ template<typename Scalar>
 class HERMES_API BasicKellyAdapt : public KellyTypeAdapt<Scalar>
 {
 public:
-  class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt::ErrorEstimatorForm
+  class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
   {
   public:
-    ErrorEstimatorFormKelly(int i) : ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
+    ErrorEstimatorFormKelly(int i) : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
                          Func<Scalar> *u, Geom<double> *e,
@@ -304,14 +304,14 @@ public:
   ///
   BasicKellyAdapt(Hermes::vector<Space<Scalar>*> spaces_,
                   Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-                  double const_by_laplacian = 1.0) : KellyTypeAdapt(spaces_, norms_)
+                  double const_by_laplacian = 1.0) : KellyTypeAdapt<Scalar>(spaces_, norms_)
   {
     set_scaling_consts(const_by_laplacian);   
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
       this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
   }
   
-  BasicKellyAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0) : KellyTypeAdapt(space_, norm_) 
+  BasicKellyAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0) : KellyTypeAdapt<Scalar>(space_, norm_) 
   {
     set_scaling_consts(const_by_laplacian);
     this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0));
@@ -320,9 +320,9 @@ public:
 private:
   void set_scaling_consts(double C)
   {
-    interface_scaling_const = 1./(24.*C);
-    volumetric_scaling_const = interface_scaling_const;
-    boundary_scaling_const = interface_scaling_const;
+    this->interface_scaling_const = 1./(24.*C);
+    this->volumetric_scaling_const = this->interface_scaling_const;
+    this->boundary_scaling_const = this->interface_scaling_const;
   }
 };
 
