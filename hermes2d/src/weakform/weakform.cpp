@@ -238,7 +238,7 @@ void WeakForm<Scalar>::set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>
 ///
 template<typename Scalar>
 void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
-                          std::vector<Stage<Scalar>>& stages, bool rhsonly)
+                          std::vector<Stage<Scalar> >& stages, bool rhsonly)
 {
   _F_
   unsigned int i;
@@ -320,7 +320,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
 /// This function is the same in H2D and H3D.
 ///
 template<typename Scalar>
-Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar>>& stages, int ii, int jj,
+Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
                                       Mesh* m1, Mesh* m2,
                                       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext)
 {

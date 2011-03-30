@@ -7,7 +7,7 @@ KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
                                Hermes::vector< ProjNormType > norms_,
                                bool ignore_visited_segments_,
                                Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
-  : Adapt(spaces_, norms_)
+  : Adapt<Scalar>(spaces_, norms_)
 {
   error_estimators_surf.reserve(num);
   error_estimators_vol.reserve(num);

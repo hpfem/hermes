@@ -21,7 +21,7 @@
 
 class ElementToRefine;
 struct Element;
-class Solution;
+template<typename Scalar> class Solution;
 #else
 #include "../mesh/element_to_refine.h"
 #endif

@@ -43,7 +43,7 @@ public:
   virtual ~MeshFunction();
 
   virtual void init() {};
-  virtual void reinit() {free(); init();};
+  virtual void reinit() { this->free(); init();};
 
   virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
@@ -51,7 +51,7 @@ public:
   virtual int get_edge_fn_order(int edge) { return get_edge_fn_order(edge); }
 
   Mesh*   get_mesh() const { return mesh; }
-  RefMap* get_refmap() { update_refmap(); return refmap; }
+  RefMap* get_refmap() { this->update_refmap(); return refmap; }
 
   virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 
@@ -76,7 +76,7 @@ public:
   void force_transform(MeshFunction<Scalar>* mf)
     { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
   void update_refmap()
-    { refmap->force_transform(sub_idx, ctm); }
+    { refmap->force_transform(this->sub_idx, this->ctm); }
   void force_transform(uint64_t sub_idx, Trf* ctm)
   {
     this->sub_idx = sub_idx;
@@ -119,7 +119,7 @@ public:
   void set_zero(Mesh* mesh);
   void set_zero_2(Mesh* mesh); // two-component (Hcurl) zero
 
-  virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
+  virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
   int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
   /// Sets solution equal to Dirichlet lift only, solution vector = 0

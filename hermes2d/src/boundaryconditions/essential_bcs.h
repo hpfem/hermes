@@ -78,7 +78,7 @@ public:
   DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
   /// Function giving info that u_Essential is a constant.
-  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_CONST; }
+  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
 };
 
 /// Class representing non-constant essential boundary condition.
@@ -96,7 +96,7 @@ public:
   virtual Scalar value(double x, double y) const;
 
   /// Function giving info that u_Essential is a non-constant function.
-  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
+  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
   ExactSolutionScalar<Scalar>* exact_solution;
 };

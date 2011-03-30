@@ -135,7 +135,7 @@ public:
   Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
 
   typename void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
-                  std::vector<Stage<Scalar>>& stages, bool rhsonly);
+                  std::vector<Stage<Scalar> >& stages, bool rhsonly);
   bool** get_blocks(bool force_diagonal_blocks);
 
   bool is_in_area(std::string marker, std::string area) const
@@ -156,7 +156,7 @@ public:
 
 protected:
 
-  typename Stage<Scalar>* find_stage(std::vector<Stage<Scalar>>& stages, int ii, int jj,
+  typename Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
                     Mesh* m1, Mesh* m2,
                     Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 

@@ -478,7 +478,7 @@ void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* 
     get_matrix_buffer(9);
   
   // Create assembling stages.
-  std::vector<Stage<Scalar>> stages = std::vector<Stage<Scalar>>();
+  std::vector<Stage<Scalar> > stages = std::vector<Stage<Scalar> >();
   wf->get_stages(spaces, u_ext, stages, rhsonly);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
