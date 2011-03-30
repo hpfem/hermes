@@ -343,12 +343,14 @@ void Function<Scalar>::set_quad_2d(Quad2D* quad_2d)
   error("too many quadratures.");
 }
 
+template<>
 int Function<double>::idx2mask[6][2] =
 {
   { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
   { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
 };
 
+template<>
 int Function<std::complex<double> >::idx2mask[6][2] =
 {
   { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },

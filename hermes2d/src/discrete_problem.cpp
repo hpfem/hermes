@@ -26,7 +26,7 @@
 #include "function/solution.h"
 #include "config.h"
 #include "neighbor.h"
-#include "views/Scalar_view.h"
+#include "views/scalar_view.h"
 #include "views/base_view.h"
 #include "boundaryconditions/essential_bcs.h"
 
