@@ -297,14 +297,14 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       int nnz_sym=0;
       for (unsigned int j = 0; j < this->size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          if (j <= Ai[i]) nnz_sym++;
+          if ((int)j <= Ai[i]) nnz_sym++;
       fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
       for (unsigned int j = 0; j < this->size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           // The following line was replaced with the one below, because it gave a warning 
 	  // to cause code abort at runtime. 
           //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
-          if (j <= Ai[i]) fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
+          if ((int)j <= Ai[i]) fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, (int)j + 1, SCALAR(Ax[i]));
 
       return true;
     }
@@ -522,83 +522,63 @@ static void check_status(const char *fn_name, int status) {
 
 #endif
 
-template<>
-bool UMFPackLinearSolver<double>::solve() {
-  _F_
-#ifdef WITH_UMFPACK
-  assert(m != NULL);
-  assert(rhs != NULL);
 
-  assert(m->get_size() == rhs->length());
+/*** UMFPack matrix iterator ****/
 
-  TimePeriod tmr;
-
-  int status;
-
-  if ( !setup_factorization() )
-  {
-    warning("LU factorization could not be completed.");
-    return false;
-  }
-
-  if(sln)
-    delete [] sln;
-  sln = new double[m->get_size()];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->get_size() * sizeof(double));
-  status = umfpack_di_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_solve", status);
-    return false;
-  }
-
-  tmr.tick();
-  time = tmr.accumulated();
-  
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::init()
+{
+  if (this->size == 0 || this->nnz == 0) return false;
+  this->Ap_pos = 0;
+  this->Ai_pos = 0;
   return true;
-#else
-  return false;
-#endif
 }
 
-template<>
-bool UMFPackLinearSolver<std::complex<double> >::solve() {
-  _F_
-#ifdef WITH_UMFPACK
-  assert(m != NULL);
-  assert(rhs != NULL);
-
-  assert(m->get_size() == rhs->length());
-
-  TimePeriod tmr;
-
-  int status;
-
-  if ( !setup_factorization() )
-  {
-    warning("LU factorization could not be completed.");
-    return false;
-  }
-
-  if(sln)
-    delete [] sln;
-  sln = new std::complex<double>[m->get_size()];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
-  status = umfpack_zi_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
-  if (status != UMFPACK_OK) {
-    check_status("umfpack_di_solve", status);
-    return false;
-  }
-
-  tmr.tick();
-  time = tmr.accumulated();
-  
-  return true;
-#else
-  return false;
-#endif
+template<typename Scalar>
+void UMFPackIterator<Scalar>::get_current_position(int& i, int& j, Scalar& val)
+{
+  i = Ai[Ai_pos];
+  j = Ap_pos;
+  val = Ax[Ai_pos];
 }
+
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::move_to_position(int i, int j)
+{
+  int ii, jj;
+  Scalar val;
+  get_current_position(ii, jj, val);
+  while (!(ii == i && jj == j)) {
+    if(!this->move_ptr()) return false;
+    get_current_position(ii, jj, val);
+  }
+  return true;
+}
+
+template<typename Scalar>
+bool UMFPackIterator<Scalar>::move_ptr()
+{
+  if (Ai_pos >= nnz - 1) return false; // It is no longer possible to find next element.
+  if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
+    Ap_pos++;
+  }
+  Ai_pos++;
+  return true;
+}
+
+template<typename Scalar>
+void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
+{
+  this->Ax[this->Ai_pos] += val;
+}
+template class HERMES_API CSCMatrix<double>;
+template class HERMES_API CSCMatrix<std::complex<double> >;
+template class HERMES_API UMFPackMatrix<double>;
+template class HERMES_API UMFPackMatrix<std::complex<double> >;
+template class HERMES_API UMFPackVector<double>;
+template class HERMES_API UMFPackVector<std::complex<double> >;
+template class HERMES_API UMFPackLinearSolver<double>;
+template class HERMES_API UMFPackLinearSolver<std::complex<double> >;
 
 template<>
 bool UMFPackLinearSolver<double>::setup_factorization()
@@ -714,59 +694,80 @@ void UMFPackLinearSolver<std::complex<double> >::free_factorization_data()
 #endif
 }
 
-/*** UMFPack matrix iterator ****/
+template<>
+bool UMFPackLinearSolver<double>::solve() {
+  _F_
+#ifdef WITH_UMFPACK
+  assert(m != NULL);
+  assert(rhs != NULL);
 
-template<typename Scalar>
-bool UMFPackIterator<Scalar>::init()
-{
-  if (this->size == 0 || this->nnz == 0) return false;
-  this->Ap_pos = 0;
-  this->Ai_pos = 0;
-  return true;
-}
+  assert(m->get_size() == rhs->length());
 
-template<typename Scalar>
-void UMFPackIterator<Scalar>::get_current_position(int& i, int& j, Scalar& val)
-{
-  i = Ai[Ai_pos];
-  j = Ap_pos;
-  val = Ax[Ai_pos];
-}
+  TimePeriod tmr;
 
-template<typename Scalar>
-bool UMFPackIterator<Scalar>::move_to_position(int i, int j)
-{
-  int ii, jj;
-  Scalar val;
-  get_current_position(ii, jj, val);
-  while (!(ii == i && jj == j)) {
-    if(!this->move_ptr()) return false;
-    get_current_position(ii, jj, val);
+  int status;
+
+  if ( !setup_factorization() )
+  {
+    warning("LU factorization could not be completed.");
+    return false;
   }
-  return true;
-}
 
-template<typename Scalar>
-bool UMFPackIterator<Scalar>::move_ptr()
-{
-  if (Ai_pos >= nnz - 1) return false; // It is no longer possible to find next element.
-  if (Ai_pos + 1 >= Ap[Ap_pos + 1]) {
-    Ap_pos++;
+  if(sln)
+    delete [] sln;
+  sln = new double[m->get_size()];
+  MEM_CHECK(sln);
+  memset(sln, 0, m->get_size() * sizeof(double));
+  status = umfpack_di_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
+  if (status != UMFPACK_OK) {
+    check_status("umfpack_di_solve", status);
+    return false;
   }
-  Ai_pos++;
+
+  tmr.tick();
+  time = tmr.accumulated();
+  
   return true;
+#else
+  return false;
+#endif
 }
 
-template<typename Scalar>
-void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
-{
-  this->Ax[this->Ai_pos] += val;
+template<>
+bool UMFPackLinearSolver<std::complex<double> >::solve() {
+  _F_
+#ifdef WITH_UMFPACK
+  assert(m != NULL);
+  assert(rhs != NULL);
+
+  assert(m->get_size() == rhs->length());
+
+  TimePeriod tmr;
+
+  int status;
+
+  if ( !setup_factorization() )
+  {
+    warning("LU factorization could not be completed.");
+    return false;
+  }
+
+  if(sln)
+    delete [] sln;
+  sln = new std::complex<double>[m->get_size()];
+  MEM_CHECK(sln);
+  memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
+  status = umfpack_zi_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
+  if (status != UMFPACK_OK) {
+    check_status("umfpack_di_solve", status);
+    return false;
+  }
+
+  tmr.tick();
+  time = tmr.accumulated();
+  
+  return true;
+#else
+  return false;
+#endif
 }
-template class HERMES_API CSCMatrix<double>;
-template class HERMES_API CSCMatrix<std::complex<double> >;
-template class HERMES_API UMFPackMatrix<double>;
-template class HERMES_API UMFPackMatrix<std::complex<double> >;
-template class HERMES_API UMFPackVector<double>;
-template class HERMES_API UMFPackVector<std::complex<double> >;
-template class HERMES_API UMFPackLinearSolver<double>;
-template class HERMES_API UMFPackLinearSolver<std::complex<double> >;

@@ -139,8 +139,8 @@ protected:
   void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
   void *numeric;  // LU factorization of matrix A.
   
-  bool setup_factorization();
   void free_factorization_data();
+  bool setup_factorization();
 };
 
 
