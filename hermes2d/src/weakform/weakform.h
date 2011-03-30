@@ -98,8 +98,14 @@ public:
     // numerical quadrature.
     double adapt_rel_error_tol;
 
+    /// For time-dependent right-hand side functions.
+    /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.
+    void set_current_stage_time(double time);
+    double get_current_stage_time() const;
+
   protected:
     WeakForm* wf;
+    double stage_time;
   };
 
   class HERMES_API MatrixFormVol : public Form
