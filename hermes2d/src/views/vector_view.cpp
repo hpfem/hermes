@@ -516,4 +516,4 @@ const char* VectorView<Scalar>::get_help_text() const
 #endif // NOGLUT
 
 template class HERMES_API VectorView<double>;
-template class HERMES_API VectorView<std::complex<double>>;
+template class HERMES_API VectorView<std::complex<double> >;

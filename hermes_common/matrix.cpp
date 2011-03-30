@@ -132,13 +132,13 @@ double vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int n_dof)
 void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
 
 template class SparseMatrix<double>;
-template class SparseMatrix<std::complex<double>>;
+template class SparseMatrix<std::complex<double> >;
 
 template<typename Scalar>
 SparseMatrix<Scalar>::SparseMatrix()
 {
   _F_
-  size = 0;
+  this->size = 0;
   pages = NULL;
 
   row_storage = false;
@@ -215,7 +215,7 @@ int SparseMatrix<Scalar>::get_num_indices()
 {
   _F_
   int total = 0;
-  for (unsigned int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < this->size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
 
@@ -358,7 +358,7 @@ template HERMES_API SparseMatrix<double>*  create_matrix(MatrixSolverType matrix
 template HERMES_API Solver<double>*  create_linear_solver(MatrixSolverType matrix_solver, 
                                          Matrix<double>* matrix, Vector<double>* rhs);
 
-template HERMES_API Vector<std::complex<double>>* create_vector(MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<std::complex<double>>*  create_matrix(MatrixSolverType matrix_solver);
-template HERMES_API Solver<std::complex<double>>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<std::complex<double>>* matrix, Vector<std::complex<double>>* rhs);
+template HERMES_API Vector<std::complex<double> >* create_vector(MatrixSolverType matrix_solver);
+template HERMES_API SparseMatrix<std::complex<double> >*  create_matrix(MatrixSolverType matrix_solver);
+template HERMES_API Solver<std::complex<double> >*  create_linear_solver(MatrixSolverType matrix_solver, 
+                                         Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);

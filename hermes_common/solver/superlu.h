@@ -191,13 +191,13 @@ public:
 #else
   virtual Scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }
 #endif
-  virtual void extract(Scalar *v) const { memcpy(v, this->v, size * sizeof(Scalar)); }
+  virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
   virtual void zero();
   virtual void change_sign();
   virtual void set(unsigned int idx, Scalar y);
   virtual void add(unsigned int idx, Scalar y);
   virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-  virtual void add_vector(Vector* vec) {
+  virtual void add_vector(Vector<Scalar>* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };

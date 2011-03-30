@@ -234,4 +234,4 @@ Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 }
 
 template HERMES_API class L2Space<double>;
-template HERMES_API class L2Space<std::complex<double>>;
+template HERMES_API class L2Space<std::complex<double> >;

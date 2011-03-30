@@ -390,4 +390,4 @@ void HcurlSpace<Scalar>::update_constraints()
 }
 
 template class HERMES_API HcurlSpace<double>;
-template class HERMES_API HcurlSpace<std::complex<double>>;
+template class HERMES_API HcurlSpace<std::complex<double> >;

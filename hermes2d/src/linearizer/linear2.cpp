@@ -180,7 +180,7 @@ void Orderizer::process_space(Space<double>* space)
   refmap.set_quad_2d(&g_quad_2d_std);
 }
 
-void Orderizer::process_space(Space<std::complex<double>>* space)
+void Orderizer::process_space(Space<std::complex<double> >* space)
 {
   // sanity check
   if (space == NULL) error("Space is NULL in Orderizer:process_solution().");

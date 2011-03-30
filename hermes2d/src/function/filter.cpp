@@ -453,7 +453,7 @@ void RealFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, doub
 #endif
 };
 
-RealFilter::RealFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items)
+RealFilter::RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -471,7 +471,7 @@ void ImagFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, doub
 #endif
 };
 
-ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items)
+ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -485,7 +485,7 @@ void AbsFilter::filter_fn(int n,  Hermes::vector<std::complex<double>*> v1, doub
 		result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));
 };
 
-AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items)
+AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
           : SimpleFilter(solutions, items)
 {
 		if (solutions.size() > 1)
@@ -504,7 +504,7 @@ void AngleFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, dou
 #endif
 };
 
-AngleFilter::AngleFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items)
+AngleFilter::AngleFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
   : SimpleFilter(solutions, items)
 {
 	if (solutions.size() > 1)
@@ -657,14 +657,14 @@ void LinearFilter<Scalar>::set_active_element(Element* e)
 }
 
 template class HERMES_API SimpleFilter<double>;
-template class HERMES_API SimpleFilter<std::complex<double>>;
+template class HERMES_API SimpleFilter<std::complex<double> >;
 template class HERMES_API DXDYFilter<double>;
-template class HERMES_API DXDYFilter<std::complex<double>>;
+template class HERMES_API DXDYFilter<std::complex<double> >;
 template class HERMES_API MagFilter<double>;
-template class HERMES_API MagFilter<std::complex<double>>;
+template class HERMES_API MagFilter<std::complex<double> >;
 template class HERMES_API DiffFilter<double>;
-template class HERMES_API DiffFilter<std::complex<double>>;
+template class HERMES_API DiffFilter<std::complex<double> >;
 template class HERMES_API SumFilter<double>;
-template class HERMES_API SumFilter<std::complex<double>>;
+template class HERMES_API SumFilter<std::complex<double> >;
 template class HERMES_API SquareFilter<double>;
-template class HERMES_API SquareFilter<std::complex<double>>;
+template class HERMES_API SquareFilter<std::complex<double> >;

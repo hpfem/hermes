@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../h2d_common.h"
 #include "space.h"
-#include "../../../hermes_common/matrix.h"
-#include "../boundaryconditions/essential_bcs.h"
 
 template<typename Scalar>
 Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
@@ -638,90 +635,5 @@ void Space<Scalar>::free_extra_data()
   extra_data.clear();
 }
 
-template<typename Scalar>
-int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
-{
-  _F_
-  int ndof = 0;
-  for (unsigned int i=0; i<spaces.size(); i++) {
-    ndof += spaces[i]->get_num_dofs();
-  }
-  return ndof;
-}
-
-template<typename Scalar>
-int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
-{
-  _F_
-  return space->get_num_dofs();
-}
-
-// This is identical to H3D.
-template<typename Scalar>
-int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
-{
-  _F_
-  int n = spaces.size();
-  // assigning dofs to each space
-  int ndof = 0;
-  for (int i = 0; i < n; i++) {
-    ndof += spaces[i]->assign_dofs(ndof);
-  }
-
-  return ndof;
-}
-
-// Performs uniform global refinement of a FE space.
-template<typename Scalar>
-Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase)
-{
-  _F_
-  Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
-  bool same_meshes = true;
-  unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
-  for (unsigned int i = 0; i < coarse.size(); i++) {
-    if(coarse[i]->get_mesh()->get_seq() != same_seq)
-      same_meshes = false;
-    Mesh* ref_mesh = new Mesh;
-    ref_mesh->copy(coarse[i]->get_mesh());
-    ref_mesh->refine_all_elements();
-    ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
-  }
-
-  if(same_meshes)
-    for (unsigned int i = 0; i < coarse.size(); i++)
-      ref_spaces->at(i)->get_mesh()->set_seq(same_seq);
-  return ref_spaces;
-}
-
-// Light version for a single space.
-template<typename Scalar>
-Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase)
-{
-  _F_
-  Mesh* ref_mesh = new Mesh;
-  ref_mesh->copy(coarse->get_mesh());
-  ref_mesh->refine_all_elements();
-  Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
-
-  return ref_space;
-}
-
-// updating time-dependent essential BC
-template<typename Scalar>
-void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
-  int n = spaces.size();
-  for (int i = 0; i < n; i++) {
-    spaces[i]->get_essential_bcs()->set_current_time(time);
-    spaces[i]->update_essential_bc_values();
-  }
-}
-
-template<typename Scalar>
-void Space<Scalar>::update_essential_bc_values(Space<Scalar>*s, double time) {
-  s->get_essential_bcs()->set_current_time(time);
-  s->update_essential_bc_values();
-}
-
 template HERMES_API class Space<double>;
-template HERMES_API class Space<std::complex<double>>;
+template HERMES_API class Space<std::complex<double> >;

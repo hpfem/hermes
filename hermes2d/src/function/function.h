@@ -349,7 +349,7 @@ int Function<double>::idx2mask[6][2] =
   { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
 };
 
-int Function<std::complex<double>>::idx2mask[6][2] =
+int Function<std::complex<double> >::idx2mask[6][2] =
 {
   { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
   { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
@@ -387,6 +387,6 @@ typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_po
 #undef H2D_Node_HRD_SIZE
 
 template class HERMES_API Function<double>;
-template class HERMES_API Function<std::complex<double>>;
+template class HERMES_API Function<std::complex<double> >;
 
 #endif

@@ -313,4 +313,4 @@ const char* OrderView<Scalar>::get_help_text() const
 #endif // NOGLUT
 
 template class HERMES_API OrderView<double>;
-template class HERMES_API OrderView<std::complex<double>>;
+template class HERMES_API OrderView<std::complex<double> >;

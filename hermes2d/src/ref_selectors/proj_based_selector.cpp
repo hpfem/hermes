@@ -384,5 +384,5 @@ namespace RefinementSelectors {
   }
 
   template class HERMES_API ProjBasedSelector<double>;
-  template class HERMES_API ProjBasedSelector<std::complex<double>>;
+  template class HERMES_API ProjBasedSelector<std::complex<double> >;
 }

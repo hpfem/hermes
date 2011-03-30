@@ -442,4 +442,4 @@ void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
   }
 }
 template class HERMES_API RungeKutta<double>;
-template class HERMES_API RungeKutta<std::complex<double>>;
+template class HERMES_API RungeKutta<std::complex<double> >;

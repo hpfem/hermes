@@ -187,10 +187,10 @@ protected:
 };
 
 /// Removes the imaginary part from a function.
-class HERMES_API RealFilter : public SimpleFilter<std::complex<double>>
+class HERMES_API RealFilter : public SimpleFilter<std::complex<double> >
 {
 public:
-  RealFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
   virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
@@ -198,29 +198,29 @@ protected:
 
 /// ImagFilter puts the imaginary part of the input function to the real part of the
 /// output, allowing it to be visualized.
-class HERMES_API ImagFilter : public SimpleFilter<std::complex<double>>
+class HERMES_API ImagFilter : public SimpleFilter<std::complex<double> >
 {
 public:
-  ImagFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
   virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 
 /// Computes the absolute value of a complex solution.
-class HERMES_API AbsFilter : public SimpleFilter<std::complex<double>>
+class HERMES_API AbsFilter : public SimpleFilter<std::complex<double> >
 {
 public: 
-  AbsFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
   virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 /// Computes the angle of a complex solution.
-class HERMES_API AngleFilter : public SimpleFilter<std::complex<double>>
+class HERMES_API AngleFilter : public SimpleFilter<std::complex<double> >
 {
 public:
-  AngleFilter(Hermes::vector<MeshFunction<std::complex<double>>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  AngleFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
   virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };

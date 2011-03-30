@@ -118,4 +118,4 @@ const char* VectorBaseView<Scalar>::get_help_text() const
 #endif // NOGLUT
 
 template class HERMES_API VectorBaseView<double>;
-template class HERMES_API VectorBaseView<std::complex<double>>;
+template class HERMES_API VectorBaseView<std::complex<double> >;

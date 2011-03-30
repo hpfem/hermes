@@ -44,9 +44,9 @@ public:
                         MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
                         double dmult = 1.0);
 
-  void process_solution(MeshFunction<std::complex<double>>* sln, int item = H2D_FN_VAL_0,
+  void process_solution(MeshFunction<std::complex<double> >* sln, int item = H2D_FN_VAL_0,
                         double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                        MeshFunction<std::complex<double>>* xdisp = NULL, MeshFunction<std::complex<double>>* ydisp = NULL,
+                        MeshFunction<std::complex<double> >* xdisp = NULL, MeshFunction<std::complex<double> >* ydisp = NULL,
                         double dmult = 1.0) { error("Not implemented yet."); return; }
 
   void lock_data() const { pthread_mutex_lock(&data_mutex); }
@@ -175,7 +175,7 @@ public:
   ~Orderizer();
 
   void process_space(Space<double>* space);
-  void process_space(Space<std::complex<double>>* space);
+  void process_space(Space<std::complex<double> >* space);
 
   int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
         { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
@@ -213,7 +213,7 @@ public:
   ~Vectorizer();
 
   void process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps);
-  void process_solution(MeshFunction<std::complex<double>>* xsln, int xitem, MeshFunction<std::complex<double>>* ysln, int yitem, double eps) { error("Not implemented yet.");}
+  void process_solution(MeshFunction<std::complex<double> >* xsln, int xitem, MeshFunction<std::complex<double> >* ysln, int yitem, double eps) { error("Not implemented yet.");}
 
 public: //accessors
   double4* get_vertices() const { return verts; }

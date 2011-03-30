@@ -175,7 +175,7 @@ bool NoxProblemInterface<Scalar>::computePreconditioner(const Epetra_Vector &x, 
 // NOX solver //////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : IterSolver()
+NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : IterSolver<Scalar>()
 {
 #ifdef HAVE_NOX
   // default values

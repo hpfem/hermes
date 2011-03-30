@@ -156,7 +156,7 @@ namespace RefinementSelectors {
     }
   }
 
-  std::complex<double>** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<std::complex<double>>* rsln, Element* element, int intr_gip_order) {
+  std::complex<double>** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<std::complex<double> >* rsln, Element* element, int intr_gip_order) {
     //set element and integration order
     rsln->set_active_element(element);
     rsln->set_quad_order(intr_gip_order);
@@ -164,7 +164,7 @@ namespace RefinementSelectors {
 
     //allocate space for Curl
     if (precalc_rvals_curl == NULL)
-      precalc_rvals_curl = new_matrix<std::complex<double>>(H2D_MAX_ELEMENT_SONS, num_gip);
+      precalc_rvals_curl = new_matrix<std::complex<double> >(H2D_MAX_ELEMENT_SONS, num_gip);
 
     //prepre for curl
     std::complex<double>* curl = precalc_rvals_curl[inx_son];

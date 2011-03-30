@@ -632,4 +632,4 @@ HERMES_API void throw_exception(char *text)
 }
 
 template class HERMES_API Hermes2D<double>;
-template class HERMES_API Hermes2D<std::complex<double>>;
+template class HERMES_API Hermes2D<std::complex<double> >;

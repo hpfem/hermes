@@ -624,5 +624,5 @@ namespace RefinementSelectors {
   }
 
   template class HERMES_API OptimumSelector<double>;
-  template class HERMES_API OptimumSelector<std::complex<double>>;
+  template class HERMES_API OptimumSelector<std::complex<double> >;
 }

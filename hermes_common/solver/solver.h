@@ -177,13 +177,13 @@ class IterSolver : public Solver<Scalar>
 };
 
 template class HERMES_API Solver<double>;
-template class HERMES_API Solver<std::complex<double>>;
+template class HERMES_API Solver<std::complex<double> >;
 template class HERMES_API LinearSolver<double>;
-template class HERMES_API LinearSolver<std::complex<double>>;
+template class HERMES_API LinearSolver<std::complex<double> >;
 template class HERMES_API NonlinearSolver<double>;
-template class HERMES_API NonlinearSolver<std::complex<double>>;
+template class HERMES_API NonlinearSolver<std::complex<double> >;
 template class HERMES_API IterSolver<double>;
-template class HERMES_API IterSolver<std::complex<double>>;
+template class HERMES_API IterSolver<std::complex<double> >;
 
 
 /*@}*/ // End of documentation group Solvers.

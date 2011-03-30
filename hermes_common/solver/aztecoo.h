@@ -64,7 +64,7 @@ public:
 #else
   virtual void set_precond(Precond<Scalar> *pc) 
 #endif
-  { precond_yes = true; this->pc = pc; }
+  { this->precond_yes = true; this->pc = pc; }
 
   /// Option setting function
   void set_option(int option, int value);

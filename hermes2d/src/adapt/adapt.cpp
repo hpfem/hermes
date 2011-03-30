@@ -877,4 +877,4 @@ void Adapt<Scalar>::fill_regular_queue(Mesh** meshes) {
 }
 
 template HERMES_API class Adapt<double>;
-template HERMES_API class Adapt<std::complex<double>>;
+template HERMES_API class Adapt<std::complex<double> >;

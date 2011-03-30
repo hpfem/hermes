@@ -3220,4 +3220,4 @@ DiscreteProblem<Scalar>::AssemblingCaches::~AssemblingCaches()
 
 
 template class HERMES_API DiscreteProblem<double>;
-template class HERMES_API DiscreteProblem<std::complex<double>>;
+template class HERMES_API DiscreteProblem<std::complex<double> >;

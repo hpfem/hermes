@@ -388,4 +388,4 @@ void HdivSpace<Scalar>::update_constraints()
 }
 
 template HERMES_API class HdivSpace<double>;
-template HERMES_API class HdivSpace<std::complex<double>>;
+template HERMES_API class HdivSpace<std::complex<double> >;

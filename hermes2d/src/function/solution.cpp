@@ -1559,10 +1559,10 @@ unsigned int ExactSolutionVector<Scalar>::get_dimension() const
 }
 
 template HERMES_API class MeshFunction<double>;
-template HERMES_API class MeshFunction<std::complex<double>>;
+template HERMES_API class MeshFunction<std::complex<double> >;
 template HERMES_API class Solution<double>;
-template HERMES_API class Solution<std::complex<double>>;
+template HERMES_API class Solution<std::complex<double> >;
 template HERMES_API class ExactSolutionScalar<double>;
-template HERMES_API class ExactSolutionScalar<std::complex<double>>;
+template HERMES_API class ExactSolutionScalar<std::complex<double> >;
 template HERMES_API class ExactSolutionVector<double>;
-template HERMES_API class ExactSolutionVector<std::complex<double>>;
+template HERMES_API class ExactSolutionVector<std::complex<double> >;

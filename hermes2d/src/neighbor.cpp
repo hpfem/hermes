@@ -793,4 +793,4 @@ void NeighborSearch<Scalar>::ExtendedShapeset::combine_assembly_lists()
 }
 
 template class HERMES_API NeighborSearch<double>;
-template class HERMES_API NeighborSearch<std::complex<double>>;
+template class HERMES_API NeighborSearch<std::complex<double> >;

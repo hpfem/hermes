@@ -77,7 +77,14 @@
 ///
 /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.
 ///
-class Ord2;
+class Ord2
+{
+  public:
+    Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
+    Ord2(int order) : order_h(order), order_v(order) {};
+    int order_h;
+    int order_v;
+};
 
 template<typename Scalar>
 class HERMES_API Space
@@ -172,11 +179,32 @@ public:
   void update_essential_bc_values();
 
   /// \brief Returns the number of basis functions contained in the spaces.
-  static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
-  static int get_num_dofs(Space<Scalar>* space);
+  static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces) {
+    _F_
+    int ndof = 0;
+    for (unsigned int i=0; i<spaces.size(); i++) {
+      ndof += spaces[i]->get_num_dofs();
+    }
+    return ndof;
+  }
+
+  static int get_num_dofs(Space<Scalar>* space) {
+    _F_
+    return space->get_num_dofs();
+  }
 
   /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-  static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
+  static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces) {
+    _F_
+    int n = spaces.size();
+    // assigning dofs to each space
+    int ndof = 0;
+    for (int i = 0; i < n; i++) {
+      ndof += spaces[i]->assign_dofs(ndof);
+    }
+
+    return ndof;
+  }
 
 protected:
   static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
@@ -295,22 +323,49 @@ public:
   virtual ESpaceType get_type() const = 0;
 
   /// Create globally refined space.
-  static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1);
-  static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1);
+  static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1) {
+    _F_
+    Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
+    bool same_meshes = true;
+    unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
+    for (unsigned int i = 0; i < coarse.size(); i++) {
+      if(coarse[i]->get_mesh()->get_seq() != same_seq)
+        same_meshes = false;
+      Mesh* ref_mesh = new Mesh;
+      ref_mesh->copy(coarse[i]->get_mesh());
+      ref_mesh->refine_all_elements();
+      ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
+    }
+
+    if(same_meshes)
+      for (unsigned int i = 0; i < coarse.size(); i++)
+        ref_spaces->at(i)->get_mesh()->set_seq(same_seq);
+    return ref_spaces;
+  }
+
+  static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1) {
+    _F_
+    Mesh* ref_mesh = new Mesh;
+    ref_mesh->copy(coarse->get_mesh());
+    ref_mesh->refine_all_elements();
+    Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
+
+    return ref_space;
+  }
 
   // updating time-dependent essential (Dirichlet) boundary conditions
-  static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);  // multiple spaces
-  static void update_essential_bc_values(Space<Scalar>*s, double time);    // one space
-};
+  static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
+    int n = spaces.size();
+    for (int i = 0; i < n; i++) {
+      spaces[i]->get_essential_bcs()->set_current_time(time);
+      spaces[i]->update_essential_bc_values();
+    }
+  }
 
-class Ord2
-{
-  public:
-    Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
-    Ord2(int order) : order_h(order), order_v(order) {};
-    int order_h;
-    int order_v;
+  static void update_essential_bc_values(Space<Scalar>*s, double time) {
+    s->get_essential_bcs()->set_current_time(time);
+    s->update_essential_bc_values();
+  }
 };
-
 
 #endif

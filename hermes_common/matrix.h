@@ -315,7 +315,7 @@ public:
 
   virtual void finish() { }
 
-  virtual unsigned int get_size() { return size; }
+  virtual unsigned int get_size() { return this->size; }
 
   virtual void add_sparse_matrix(SparseMatrix* mat) 
   { 
@@ -431,7 +431,7 @@ public:
   virtual void add(unsigned int idx, Scalar y) = 0;
 
   /// Add a vector.
-  virtual void add_vector(Vector* vec) = 0;
+  virtual void add_vector(Vector<Scalar>* vec) = 0;
   virtual void add_vector(Scalar* vec) = 0;
 
   /// update subset of the elements

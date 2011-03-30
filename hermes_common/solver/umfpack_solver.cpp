@@ -562,7 +562,7 @@ bool UMFPackLinearSolver<double>::solve() {
 }
 
 template<>
-bool UMFPackLinearSolver<std::complex<double>>::solve() {
+bool UMFPackLinearSolver<std::complex<double> >::solve() {
   _F_
 #ifdef WITH_UMFPACK
   assert(m != NULL);
@@ -646,7 +646,7 @@ bool UMFPackLinearSolver<double>::setup_factorization()
 }
 
 template<>
-bool UMFPackLinearSolver<std::complex<double>>::setup_factorization()
+bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
 {
   _F_
 #ifdef WITH_UMFPACK
@@ -703,7 +703,7 @@ void UMFPackLinearSolver<double>::free_factorization_data()
 }
 
 template<>
-void UMFPackLinearSolver<std::complex<double>>::free_factorization_data()
+void UMFPackLinearSolver<std::complex<double> >::free_factorization_data()
 { 
   _F_
 #ifdef WITH_UMFPACK
@@ -763,10 +763,10 @@ void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
   this->Ax[this->Ai_pos] += val;
 }
 template class HERMES_API CSCMatrix<double>;
-template class HERMES_API CSCMatrix<std::complex<double>>;
+template class HERMES_API CSCMatrix<std::complex<double> >;
 template class HERMES_API UMFPackMatrix<double>;
-template class HERMES_API UMFPackMatrix<std::complex<double>>;
+template class HERMES_API UMFPackMatrix<std::complex<double> >;
 template class HERMES_API UMFPackVector<double>;
-template class HERMES_API UMFPackVector<std::complex<double>>;
+template class HERMES_API UMFPackVector<std::complex<double> >;
 template class HERMES_API UMFPackLinearSolver<double>;
-template class HERMES_API UMFPackLinearSolver<std::complex<double>>;
+template class HERMES_API UMFPackLinearSolver<std::complex<double> >;

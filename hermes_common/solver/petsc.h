@@ -98,7 +98,7 @@ public:
   virtual void set(unsigned int idx, Scalar y);
   virtual void add(unsigned int idx, Scalar y);
   virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-  virtual void add_vector(Vector* vec) {
+  virtual void add_vector(Vector<Scalar>* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };

@@ -51,6 +51,18 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
+
+// Matrix solvers (maybe we could move it to solver/solver.h)
+enum MatrixSolverType 
+{
+   SOLVER_UMFPACK = 0, 
+   SOLVER_PETSC, 
+   SOLVER_MUMPS,
+   SOLVER_SUPERLU,
+   SOLVER_AMESOS,
+   SOLVER_AZTECOO
+};
+
 //
 // commonly used functions from hermes_common
 #include "hermes_logging.h"       // logging
@@ -77,16 +89,6 @@
 #define HERMES_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
 #define HERMES_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
 
-// Matrix solvers (maybe we could move it to solver/solver.h)
-enum MatrixSolverType 
-{
-   SOLVER_UMFPACK = 0, 
-   SOLVER_PETSC, 
-   SOLVER_MUMPS,
-   SOLVER_SUPERLU,
-   SOLVER_AMESOS,
-   SOLVER_AZTECOO
-};
 
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.

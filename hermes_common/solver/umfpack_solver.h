@@ -98,13 +98,13 @@ public:
   virtual void alloc(unsigned int ndofs);
   virtual void free();
   virtual Scalar get(unsigned int idx) { return v[idx]; }
-  virtual void extract(Scalar *v) const { memcpy(v, this->v, size * sizeof(Scalar)); }
+  virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
   virtual void zero();
   virtual void change_sign();
   virtual void set(unsigned int idx, Scalar y);
   virtual void add(unsigned int idx, Scalar y);
   virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-  virtual void add_vector(Vector* vec) {
+  virtual void add_vector(Vector<Scalar>* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
   };

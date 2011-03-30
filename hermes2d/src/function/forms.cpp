@@ -421,7 +421,7 @@ Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order)
 }
 
 template Func<double>* init_fn(MeshFunction<double>*fu, const int order);
-template Func<std::complex<double>>* init_fn(MeshFunction<std::complex<double>>*fu, const int order);
+template Func<std::complex<double> >* init_fn(MeshFunction<std::complex<double> >*fu, const int order);
 
 template HERMES_API Func<double>* init_fn(Solution<double>*fu, const int order);
-template HERMES_API Func<std::complex<double>>* init_fn(Solution<std::complex<double>>*fu, const int order);
+template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >*fu, const int order);

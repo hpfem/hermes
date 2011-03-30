@@ -390,13 +390,13 @@ protected:
 
   friend class H2DReader;
   friend class DiscreteProblem<double>;
-  friend class DiscreteProblem<std::complex<double>>;
+  friend class DiscreteProblem<std::complex<double> >;
   friend class WeakForm<double>;
-  friend class WeakForm<std::complex<double>>;
+  friend class WeakForm<std::complex<double> >;
   friend class Space<double>;
-  friend class Space<std::complex<double>>;
+  friend class Space<std::complex<double> >;
   friend class KellyTypeAdapt<double>;
-  friend class KellyTypeAdapt<std::complex<double>>;
+  friend class KellyTypeAdapt<std::complex<double> >;
 
 public:
   ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };

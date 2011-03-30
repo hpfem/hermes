@@ -691,6 +691,6 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
 
 // #endif
 template HERMES_API class KellyTypeAdapt<double>;
-template HERMES_API class KellyTypeAdapt<std::complex<double>>;
+template HERMES_API class KellyTypeAdapt<std::complex<double> >;
 template HERMES_API class BasicKellyAdapt<double>;
-template HERMES_API class BasicKellyAdapt<std::complex<double>>;
+template HERMES_API class BasicKellyAdapt<std::complex<double> >;

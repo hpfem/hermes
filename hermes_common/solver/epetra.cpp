@@ -185,6 +185,7 @@ void EpetraMatrix<Scalar>::zero()
 #endif
 }
 
+template<>
 void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
 {
   _F_
@@ -197,7 +198,8 @@ void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
 #endif
 }
 
-void EpetraMatrix<std::complex<double>>::add(unsigned int m, unsigned int n, std::complex<double> v)
+template<>
+void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -217,7 +219,7 @@ void EpetraMatrix<std::complex<double>>::add(unsigned int m, unsigned int n, std
 template<typename Scalar>
 void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i=0; i<size; i++) {
+  for (unsigned int i=0; i < this->size; i++) {
     add(i, i, v);
   }
 };
@@ -358,6 +360,7 @@ void EpetraVector<Scalar>::free()
 #endif
 }
 
+template<>
 void EpetraVector<double>::set(unsigned int idx, double y)
 {
   _F_
@@ -366,7 +369,8 @@ void EpetraVector<double>::set(unsigned int idx, double y)
 #endif
 }
 
-void EpetraVector<std::complex<double>>::set(unsigned int idx, std::complex<double> y)
+template<>
+void EpetraVector<std::complex<double> >::set(unsigned int idx, std::complex<double> y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -375,6 +379,7 @@ void EpetraVector<std::complex<double>>::set(unsigned int idx, std::complex<doub
 #endif
 }
 
+template<>
 void EpetraVector<double>::add(unsigned int idx, double y)
 {
   _F_
@@ -383,7 +388,8 @@ void EpetraVector<double>::add(unsigned int idx, double y)
 #endif
 }
 
-void EpetraVector<std::complex<double>>::add(unsigned int idx, std::complex<double> y)
+template<>
+void EpetraVector<std::complex<double> >::add(unsigned int idx, std::complex<double> y)
 {
   _F_
 #ifdef HAVE_EPETRA
@@ -409,6 +415,6 @@ bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFor
   return false;
 }
 template class HERMES_API EpetraMatrix<double>;
-template class HERMES_API EpetraMatrix<std::complex<double>>;
+template class HERMES_API EpetraMatrix<std::complex<double> >;
 template class HERMES_API EpetraVector<double>;
-template class HERMES_API EpetraVector<std::complex<double>>;
+template class HERMES_API EpetraVector<std::complex<double> >;

@@ -26,7 +26,7 @@ namespace RefinementSelectors {
    *  Since an initialization of the class may take a long time,
    *  it is suggested to create the instance outside the adaptivity
    *  loop. */
-  class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector<std::complex<double>> {
+  class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector<std::complex<double> > {
   public: //API
     /// Constructor.
     /** \param[in] cand_list A predefined list of candidates.
@@ -59,7 +59,7 @@ namespace RefinementSelectors {
 
     /// Returns an array of values of the reference solution at integration points.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
-    virtual std::complex<double>** precalc_ref_solution(int inx_son, Solution<std::complex<double>>* rsln, Element* element, int intr_gip_order);
+    virtual std::complex<double>** precalc_ref_solution(int inx_son, Solution<std::complex<double> >* rsln, Element* element, int intr_gip_order);
 
     /// Calculates values of shape function at GIP for all transformations.
     /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
