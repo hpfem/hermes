@@ -29,8 +29,8 @@
 //
 // The following parameters can be changed:
 
-const int P_INIT = 6;                              // Initial polynomial degree of all elements.
-const int INIT_REF_NUM = 1;                        // Number of initial uniform mesh refinements.
+const int P_INIT = 2;                              // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 4;                        // Number of initial uniform mesh refinements.
 const double time_step = 0.01;                     // Time step.
 const double T_FINAL = 2.15;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -56,7 +56,7 @@ ButcherTableType butcher_table_type = Implicit_RK_1;
 const std::string BDY = "1";
 
 // Problem parameters.
-const double C_SQUARED = 100;                      // Square of wave speed.                     
+const double C_SQUARED = 1;                      // Square of wave speed.                     
 
 // Weak forms.
 #include "definitions.cpp"
@@ -101,12 +101,14 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space), is_linear);
 
   // Initialize views.
-  ScalarView E1_view("Solution u", new WinGeom(0, 0, 500, 400));
-  //E1_view.show_mesh(false);
+  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 420, 300));
   E1_view.fix_scale_width(50);
-  ScalarView E2_view("Solution v", new WinGeom(510, 0, 500, 400));
-  //E2_view.show_mesh(false);
+  ScalarView E2_view("Solution E2", new WinGeom(430, 0, 420, 300));
   E2_view.fix_scale_width(50);
+  ScalarView F1_view("Solution F1", new WinGeom(0, 355, 420, 300));
+  F1_view.fix_scale_width(50);
+  ScalarView F2_view("Solution E2", new WinGeom(430, 355, 420, 300));
+  F2_view.fix_scale_width(50);
 
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
@@ -130,9 +132,17 @@ int main(int argc, char* argv[])
     sprintf(title, "E2, t = %g", current_time);
     E2_view.set_title(title);
     E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
+    sprintf(title, "F1, t = %g", current_time);
+    F1_view.set_title(title);
+    F1_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
+    sprintf(title, "F2, t = %g", current_time);
+    F2_view.set_title(title);
+    F2_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
 
     // Update time.
     current_time += time_step;
+  
+    //View::wait(HERMES_WAIT_KEYPRESS);
 
   } while (current_time < T_FINAL);
 

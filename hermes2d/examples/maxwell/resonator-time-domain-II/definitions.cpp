@@ -153,7 +153,7 @@ private:
         Scalar sln_curl_i = sln_prev_time->curl[i] + K_sln->curl[i];
         result += wt[i] * sln_curl_i * v->curl[i];
       }
-      return - c_squared * result;
+      return c_squared * result;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 

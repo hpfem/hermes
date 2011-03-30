@@ -151,10 +151,9 @@ private:
       for (int i = 0; i < n; i++) {
         Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
         Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-        result += wt[i] * c_squared * (sln_dx_i * v->dx[i] 
-                  + sln_dy_i * v->dy[i]);
+        result += wt[i] * (sln_dx_i * v->dx[i] + sln_dy_i * v->dy[i]);
       }
-      return - result;
+      return - c_squared * result;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
