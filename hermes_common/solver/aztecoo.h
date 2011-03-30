@@ -60,7 +60,7 @@ public:
   /// @param[in] pc - IFPACK preconditioner
 
 #ifdef HAVE_TEUCHOS
-  virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc)
+  virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
 #else
   virtual void set_precond(Precond<Scalar> *pc) 
 #endif
@@ -80,7 +80,7 @@ protected:
   EpetraVector<Scalar> *rhs;
   
 #ifdef HAVE_TEUCHOS
-  Teuchos::RCP<Precond<Scalar>> pc;
+  Teuchos::RCP<Precond<Scalar> > pc;
 #else
   Precond<Scalar> *pc;
 #endif

@@ -106,7 +106,7 @@ public:
   }
   
 #ifdef HAVE_TEUCHOS
-  virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc);
+  virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
 #else
   virtual void set_precond(Precond<Scalar>* pc) 
   { 
@@ -117,7 +117,7 @@ public:
 
 protected:
 #ifdef HAVE_NOX
-  Teuchos::RCP<NoxProblemInterface<Scalar>> interface_;
+  Teuchos::RCP<NoxProblemInterface<Scalar> > interface_;
 #endif
   int num_iters;
   double residual;

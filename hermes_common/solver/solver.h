@@ -165,7 +165,7 @@ class IterSolver : public Solver<Scalar>
     virtual void set_precond(const char *name) = 0;
 
 #ifdef HAVE_TEUCHOS
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc) = 0;
+      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc) = 0;
 #else
       virtual void set_precond(Precond<Scalar> *pc) = 0;
 #endif            

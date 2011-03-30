@@ -23,7 +23,7 @@ using Teuchos::null;
 template <typename Scalar>
 class HERMES_API EigenSolver {
 public:
-    EigenSolver(const RCP<Matrix<Scalar>> &A, const RCP<Matrix<Scalar>> &B);
+    EigenSolver(const RCP<Matrix<Scalar> > &A, const RCP<Matrix<Scalar> > &B);
 
 
     // Solves for 'n_eigs' eigenvectors, around the 'target_value'. Use
@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    RCP<Matrix<Scalar>> A, B;
+    RCP<Matrix<Scalar> > A, B;
     int n_eigs;
     Python p;
 };

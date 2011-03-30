@@ -55,14 +55,14 @@ public:
   void set_init_sln(double *ic);
 
   /// Accessor for preconditioner
-    Teuchos::RCP<Precond<Scalar>> get_precond() { return precond; }
-  void set_precond(Teuchos::RCP<Precond<Scalar>> &pc);
+    Teuchos::RCP<Precond<Scalar> > get_precond() { return precond; }
+  void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
 
   DiscreteProblemInterface* fep;           // finite element problem being solved
 
   EpetraVector<Scalar> init_sln;          // initial solution
   EpetraMatrix<Scalar> jacobian;          // jacobian (optional)
-  Teuchos::RCP<Precond<Scalar>> precond;  // preconditioner (optional)
+  Teuchos::RCP<Precond<Scalar> > precond;  // preconditioner (optional)
 
   void prealloc_jacobian();
 };
@@ -95,7 +95,7 @@ void NoxProblemInterface<Scalar>::prealloc_jacobian()
 }
 
 template<typename Scalar>
-void NoxProblemInterface<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar>> &pc)
+void NoxProblemInterface<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
 {
   precond = pc;
   prealloc_jacobian();
@@ -276,7 +276,7 @@ NoxSolver<Scalar>::~NoxSolver()
 #ifdef HAVE_TEUCHOS
 
 template<typename Scalar>
-  void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar>> &pc)
+  void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
   {
   #ifdef HAVE_NOX
     precond_yes = true;
@@ -362,7 +362,7 @@ bool NoxSolver<Scalar>::solve()
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
    // precond stuff
-   Teuchos::RCP<Precond<Scalar>> precond = interface_->get_precond();
+   Teuchos::RCP<Precond<Scalar> > precond = interface_->get_precond();
    if(precond_yes == false) {
      ls_pars.set("Preconditioner", "None");
    }
