@@ -55,7 +55,7 @@ template<typename Scalar>
 SuperLUMatrix<Scalar>::SuperLUMatrix()
 {
   _F_
-  size = 0; nnz = 0;
+  this->size = 0; nnz = 0;
   Ax = NULL;
   Ap = NULL;
   Ai = NULL;
@@ -72,10 +72,10 @@ template<typename Scalar>
 void SuperLUMatrix<Scalar>::alloc()
 {
   _F_
-  assert(pages != NULL);
+  assert(this->pages != NULL);
   
   // Initialize the arrays Ap and Ai.
-  Ap = new unsigned int [size + 1];
+  Ap = new unsigned int [this->size + 1];
   MEM_CHECK(Ap);
   int aisize = get_num_indices();
   Ai = new int [aisize];
@@ -83,16 +83,16 @@ void SuperLUMatrix<Scalar>::alloc()
   
   // sort the indices and remove duplicities, insert into Ai
   unsigned int i, pos = 0;
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < this->size; i++) {
     Ap[i] = pos;
-    pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
+    pos += sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
   }
   Ap[i] = pos;
   
-  delete [] pages;
-  pages = NULL;
+  delete [] this->pages;
+  this->pages = NULL;
   
-  nnz = Ap[size];
+  nnz = Ap[this->size];
 
   Ax = new Scalar [nnz];
   memset(Ax, 0, sizeof(Scalar) * nnz);
@@ -185,8 +185,8 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   switch (fmt) 
   {      
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
-      for (unsigned int j = 0; j < size; j++)
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
+      for (unsigned int j = 0; j < this->size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           /*
 #ifndef HERMES_COMMON_COMPLEX          
@@ -203,9 +203,9 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       hermes_fwrite("HERMESX\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
-      hermes_fwrite(Ap, sizeof(int), size + 1, file);
+      hermes_fwrite(Ap, sizeof(int),this->size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
       hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
@@ -219,7 +219,7 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
 template<typename Scalar>
 unsigned int SuperLUMatrix<Scalar>::get_matrix_size() const
 {
-  return size;
+  return this->size;
 }
 
 /* THIS WAS WRONG
@@ -241,7 +241,7 @@ template<typename Scalar>
 double SuperLUMatrix<Scalar>::get_fill_in() const
 {
   _F_
-  return nnz / (double) (size * size);
+  return nnz / (double) (this->size * this->size);
 }
 
 template<typename Scalar>
@@ -328,11 +328,11 @@ void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap,
   _F_
   this->nnz = nnz;
   this->size = size;
-  this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
+  this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
   this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
 
-  for (unsigned int i = 0; i < size+1; i++){
+  for (unsigned int i = 0; i < this->size+1; i++){
     this->Ap[i] = ap[i];
   }
   for (unsigned int i = 0; i < nnz; i++) {
@@ -353,8 +353,8 @@ SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate(){
   SuperLUMatrix<Scalar> * nmat=new SuperLUMatrix<Scalar>();
 
   nmat->nnz = nnz;
-  nmat->size = size;
-  nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
+  nmat->size = this->size;
+  nmat->Ap = new unsigned int[this->size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
   nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
   for (unsigned int i = 0;i<nnz;i++){
@@ -374,7 +374,7 @@ SuperLUVector<Scalar>::SuperLUVector()
 {
   _F_
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -389,7 +389,7 @@ void SuperLUVector<Scalar>::alloc(unsigned int n)
 {
   _F_
   this->free();
-  size = n;
+  this->size = n;
   v = new Scalar[n];
   zero();
 }
@@ -398,7 +398,7 @@ template<typename Scalar>
 void SuperLUVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(Scalar));
+  memset(v, 0, this->size * sizeof(Scalar));
 }
 
 template<typename Scalar>
@@ -406,9 +406,9 @@ void SuperLUVector<Scalar>::change_sign()
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
-  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
 #else
-  for (unsigned int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < this->size; i++) {
     v[i].r *= -1.;
     v[i].i *= -1.;
   }
@@ -421,7 +421,7 @@ void SuperLUVector<Scalar>::free()
   _F_
   delete [] v;
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -470,14 +470,14 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (unsigned int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < this->size; i++)
         //fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       
       return true;
       
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (unsigned int i = 0; i < size; i++)
+      fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+      for (unsigned int i = 0; i < this->size; i++)
        // fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;
@@ -487,8 +487,8 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       hermes_fwrite("HERMESR\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(Scalar), size, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
+      hermes_fwrite(v, sizeof(Scalar), this->size, file);
       return true;
     }
     

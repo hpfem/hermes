@@ -72,7 +72,7 @@ MumpsMatrix<Scalar>::MumpsMatrix()
 {
   _F_
   nnz = 0;
-  size = 0;
+  this->size = 0;
   irn = NULL;
   jcn = NULL;
   Ax = NULL;
@@ -91,10 +91,10 @@ template<typename Scalar>
 void MumpsMatrix<Scalar>::alloc()
 {
   _F_
-  assert(pages != NULL);
+  assert(this->pages != NULL);
 
   // initialize the arrays Ap and Ai
-  Ap = new unsigned int [size + 1];
+  Ap = new unsigned int [this->size + 1];
   MEM_CHECK(Ap);
   int aisize = get_num_indices();
   Ai = new int [aisize];
@@ -102,16 +102,16 @@ void MumpsMatrix<Scalar>::alloc()
 
   // sort the indices and remove duplicities, insert into Ai
   unsigned int i, pos = 0;
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < this->size; i++) {
     Ap[i] = pos;
-    pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
+    pos += sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
   }
   Ap[i] = pos;
 
-  delete [] pages;
-  pages = NULL;
+  delete [] this->pages;
+  this->pages = NULL;
 
-  nnz = Ap[size];
+  nnz = Ap[this->size];
 
   Ax = new Scalar[nnz];
   memset(Ax, 0, sizeof(Scalar) * nnz);
@@ -158,7 +158,7 @@ template<typename Scalar>
 void MumpsMatrix<Scalar>::zero()
 {
   _F_
-  memset(Ax, 0, sizeof(Scalar) * Ap[size]);
+  memset(Ax, 0, sizeof(Scalar) * Ap[this->size]);
 }
 
 template<typename Scalar>
@@ -200,7 +200,7 @@ void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int 
 template<typename Scalar>
 void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < this->size; i++) {
     add(i, i, v);
   }
 };
@@ -216,15 +216,15 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      fprintf(file, "%d\n", size);
+      fprintf(file, "%d\n", this->size);
       fprintf(file, "%d\n", nnz);
       for (unsigned int i = 0; i < nnz; i++)
         fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], Scalar(Ax[i]));
       return true;
 
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", size, size, Ap[size], Ap[size]);
-      for (unsigned int j = 0; j < size; j++)
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
+      for (unsigned int j = 0; j < this->size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
 #ifndef HERMES_COMMON_COMPLEX          
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, Scalar(Ax[i]));
@@ -240,9 +240,9 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       hermes_fwrite("HERMESX\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
-      hermes_fwrite(Ap, sizeof(int), size + 1, file);
+      hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
       hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
@@ -257,7 +257,7 @@ template<typename Scalar>
 unsigned int MumpsMatrix<Scalar>::get_matrix_size() const
 {
   _F_
-  return size;
+  return this->size;
 }
 
 template<typename Scalar>
@@ -282,7 +282,7 @@ template<typename Scalar>
 double MumpsMatrix<Scalar>::get_fill_in() const
 {
   _F_
-  return Ap[size] / (double) (size * size);
+  return Ap[this->size] / (double) (this->size * this->size);
 }
 
 template<typename Scalar>
@@ -359,17 +359,17 @@ template<typename Scalar>
 void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
   this->nnz = nnz;
   this->size = size;
-  this->Ap = new unsigned int[size+1]; assert(this->Ap != NULL);
+  this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
   this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
   irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
   jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
 
-  for (unsigned int i = 0; i < size; i++){
+  for (unsigned int i = 0; i < this->size; i++){
     this->Ap[i] = ap[i];
     for (int j=ap[i];j<ap[i+1];j++) jcn[j]=i;
   }
-  this->Ap[size]=ap[size];
+  this->Ap[this->size]=ap[this->size];
   for (unsigned int i = 0; i < nnz; i++) {
 #ifndef HERMES_COMMON_COMPLEX
     this->Ax[i] = ax[i]; 
@@ -387,8 +387,8 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
   MumpsMatrix<Scalar> * nmat=new MumpsMatrix<Scalar>();
 
   nmat->nnz = nnz;
-  nmat->size = size;
-  nmat->Ap = new unsigned int[size+1]; assert(nmat->Ap != NULL);
+  nmat->size = this->size;
+  nmat->Ap = new unsigned int[this->size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
   nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
   nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
@@ -412,7 +412,7 @@ MumpsVector<Scalar>::MumpsVector()
 {
   _F_
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -427,7 +427,7 @@ void MumpsVector<Scalar>::alloc(unsigned int n)
 {
   _F_
   free();
-  size = n;
+  this->size = n;
   v = new Scalar[n];
   zero();
 }
@@ -437,9 +437,9 @@ void MumpsVector<Scalar>::change_sign()
 {
   _F_
 #ifndef HERMES_COMMON_COMPLEX
-  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
 #else
-  for (unsigned int i = 0; i < size; i++) {
+  for (unsigned int i = 0; i < this->size; i++) {
     v[i].r *= -1.;
     v[i].i *= -1.;
   }
@@ -450,7 +450,7 @@ template<typename Scalar>
 void MumpsVector<Scalar>::zero()
 {
   _F_
-  memset(v, 0, size * sizeof(Scalar));
+  memset(v, 0, this->size * sizeof(Scalar));
 }
 
 template<typename Scalar>
@@ -459,7 +459,7 @@ void MumpsVector<Scalar>::free()
   _F_
   delete [] v;
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -508,14 +508,14 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (unsigned int i = 0; i < size; i++)
+      for (unsigned int i = 0; i < this->size; i++)
         fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
 
       return true;
 
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (unsigned int i = 0; i < size; i++)
+      fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+      for (unsigned int i = 0; i < this->size; i++)
         fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
       fprintf(file, " ];\n");
       return true;
@@ -525,8 +525,8 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       hermes_fwrite("HERMESR\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(Scalar), size, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
+      hermes_fwrite(v, sizeof(Scalar), this->size, file);
       return true;
     }
 

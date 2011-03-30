@@ -107,10 +107,10 @@ template<typename Scalar>
 void PetscMatrix<Scalar>::alloc() {
   _F_
 #ifdef WITH_PETSC
-  assert(pages != NULL);
+  assert(this->pages != NULL);
 
   // calc nnz
-  int *nnz_array = new int[size];
+  int *nnz_array = new int[this->size];
   MEM_CHECK(nnz_array);
 
   // fill in nnz_array
@@ -120,17 +120,17 @@ void PetscMatrix<Scalar>::alloc() {
 
   // sort the indices and remove duplicities, insert into ai
   int pos = 0;
-  for (unsigned int i = 0; i < size; i++) {
-    nnz_array[i] = sort_and_store_indices(pages[i], ai + pos, ai + aisize);
+  for (unsigned int i = 0; i < this->size; i++) {
+    nnz_array[i] = sort_and_store_indices(this->pages[i], ai + pos, ai + aisize);
     pos += nnz_array[i];
   }
   // stote the number of nonzeros
   nnz = pos;
-  delete [] pages; pages = NULL;
+  delete [] this->pages; this->pages = NULL;
   delete [] ai;
 
   //
-  MatCreateSeqAIJ(PETSC_COMM_SELF, size, size, 0, nnz_array, &matrix);
+  MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
 //	MatSetOption(matrix, MAT_ROW_ORIENTED);
 //	MatSetOption(matrix, MAT_ROWS_SORTED);
 
@@ -221,7 +221,7 @@ bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 template<typename Scalar>
 unsigned int PetscMatrix<Scalar>::get_matrix_size() const {
   _F_
-  return size;
+  return this->size;
 }
 
 template<typename Scalar>
@@ -331,8 +331,8 @@ void PetscVector<Scalar>::alloc(unsigned int n) {
   _F_
 #ifdef WITH_PETSC
   free();
-  size = n;
-  VecCreateSeq(PETSC_COMM_SELF, size, &vec);
+  this->size = n;
+  VecCreateSeq(PETSC_COMM_SELF, this->size, &vec);
   inited = true;
 #endif
 }
@@ -370,9 +370,9 @@ template<typename Scalar>
 void PetscVector<Scalar>::extract(Scalar *v) const {
   _F_
 #ifdef WITH_PETSC
-  int *idx = new int [size];
-  for (unsigned int i = 0; i < size; i++) idx[i] = i;
-  VecGetValues(vec, size, idx, (PetscScalar *) v);
+  int *idx = new int [this->size];
+  for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
+  VecGetValues(vec, this->size, idx, (PetscScalar *) v);
   delete [] idx;
 #endif
 }
@@ -389,12 +389,12 @@ template<typename Scalar>
 void PetscVector<Scalar>::change_sign() {
   _F_
 #ifdef WITH_PETSC
-  PetscScalar* y = new PetscScalar [size];
-  int *idx = new int [size];
-  for (unsigned int i = 0; i < size; i++) idx[i] = i;
-  VecGetValues(vec, size, idx, y);
-  for (unsigned int i = 0; i < size; i++) y[i] *= -1.;
-  VecSetValues(vec, size, idx, y, INSERT_VALUES);
+  PetscScalar* y = new PetscScalar [this->size];
+  int *idx = new int [this->size];
+  for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
+  VecGetValues(vec, this->size, idx, y);
+  for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
+  VecSetValues(vec, this->size, idx, y, INSERT_VALUES);
   delete [] y;
   delete [] idx;
 #endif

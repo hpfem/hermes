@@ -64,7 +64,7 @@ static int find_position(int *Ai, int Alen, int idx) {
 template<typename Scalar>
 CSCMatrix<Scalar>::CSCMatrix() {
   _F_
-  size = 0; nnz = 0;
+  this->size = 0; nnz = 0;
   Ap = NULL;
   Ai = NULL;
   Ax = NULL;
@@ -104,10 +104,10 @@ void CSCMatrix<Scalar>::multiply_with_scalar(Scalar value)
 template<typename Scalar>
 void CSCMatrix<Scalar>::alloc() {
   _F_
-  assert(pages != NULL);
+  assert(this->pages != NULL);
 
   // initialize the arrays Ap and Ai
-  Ap = new int [size + 1];
+  Ap = new int [this->size + 1];
   MEM_CHECK(Ap);
   int aisize = get_num_indices();
   Ai = new int [aisize];
@@ -116,16 +116,16 @@ void CSCMatrix<Scalar>::alloc() {
   // sort the indices and remove duplicities, insert into Ai
   unsigned int i;
   int pos = 0;
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < this->size; i++) {
     Ap[i] = pos;
-    pos += sort_and_store_indices(pages[i], Ai + pos, Ai + aisize);
+    pos += sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
   }
   Ap[i] = pos;
 
-  delete [] pages;
-  pages = NULL;
+  delete [] this->pages;
+  this->pages = NULL;
 
-  nnz = Ap[size];
+  nnz = Ap[this->size];
   
   Ax = new Scalar [nnz];
   MEM_CHECK(Ax);
@@ -283,8 +283,8 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
   {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
-              size, size, nnz, nnz);
-      for (unsigned int j = 0; j < size; j++)
+              this->size, this->size, nnz, nnz);
+      for (unsigned int j = 0; j < this->size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -298,7 +298,7 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       for (int j = 0; j < (int)size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           if (j <= Ai[i]) nnz_sym++;
-      fprintf(file,"%d %d %d\n", size, size, nnz_sym);
+      fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
       for (int j = 0; j < (int)size; j++)
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
           // The following line was replaced with the one below, because it gave a warning 
@@ -314,9 +314,9 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       hermes_fwrite("HERMESX\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
       hermes_fwrite(&nnz, sizeof(int), 1, file);
-      hermes_fwrite(Ap, sizeof(int), size + 1, file);
+      hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
       hermes_fwrite(Ai, sizeof(int), nnz, file);
       hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
       return true;
@@ -333,7 +333,7 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
 template<typename Scalar>
 unsigned int CSCMatrix<Scalar>::get_matrix_size() const {
-  return size;
+  return this->size;
 }
 
 /* THIS WAS WRONG
@@ -348,7 +348,7 @@ int UMFPackMatrix<Scalar>::get_matrix_size() const {
 template<typename Scalar>
 double CSCMatrix<Scalar>::get_fill_in() const {
   _F_
-  return nnz / (double) (size * size);
+  return nnz / (double) (this->size * this->size);
 }
 
 template<typename Scalar>
@@ -357,10 +357,10 @@ void CSCMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int
   _F_
   this->nnz = nnz;
   this->size = size;
-  this->Ap = new int[size+1]; assert(this->Ap != NULL);
+  this->Ap = new int[this->size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
   this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
-  for (unsigned int i = 0; i < size+1; i++) this->Ap[i] = ap[i];
+  for (unsigned int i = 0; i < this->size+1; i++) this->Ap[i] = ap[i];
   for (unsigned int i = 0; i < nnz; i++) {
     this->Ax[i] = ax[i]; 
     this->Ai[i] = ai[i];
@@ -383,7 +383,7 @@ template<typename Scalar>
 UMFPackVector<Scalar>::UMFPackVector() {
   _F_
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -413,13 +413,13 @@ void UMFPackVector<Scalar>::alloc(unsigned int n) {
 template<typename Scalar>
 void UMFPackVector<Scalar>::zero() {
   _F_
-  memset(v, 0, size * sizeof(Scalar));
+  memset(v, 0, this->size * sizeof(Scalar));
 }
 
 template<typename Scalar>
 void UMFPackVector<Scalar>::change_sign() {
   _F_
-  for (unsigned int i = 0; i < size; i++) v[i] *= -1.;
+  for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
 }
 
 template<typename Scalar>
@@ -427,7 +427,7 @@ void UMFPackVector<Scalar>::free() {
   _F_
   delete [] v;
   v = NULL;
-  size = 0;
+  this->size = 0;
 }
 
 template<typename Scalar>
@@ -455,8 +455,8 @@ bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   switch (fmt) 
   {
     case DF_MATLAB_SPARSE:
-      fprintf(file, "%% Size: %dx1\n%s = [\n", size, var_name);
-      for (unsigned int i = 0; i < size; i++)
+      fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+      for (unsigned int i = 0; i < this->size; i++)
         fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
       fprintf(file, " ];\n");
       return true;
@@ -466,8 +466,8 @@ bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       hermes_fwrite("HERMESR\001", 1, 8, file);
       int ssize = sizeof(Scalar);
       hermes_fwrite(&ssize, sizeof(int), 1, file);
-      hermes_fwrite(&size, sizeof(int), 1, file);
-      hermes_fwrite(v, sizeof(Scalar), size, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
+      hermes_fwrite(v, sizeof(Scalar), this->size, file);
       return true;
     }
 

@@ -250,7 +250,7 @@ unsigned int EpetraMatrix<Scalar>::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return size;
+  return this->size;
 #else
   return -1;
 #endif
@@ -320,8 +320,8 @@ void EpetraVector<Scalar>::alloc(unsigned int n)
   _F_
 #ifdef HAVE_EPETRA
   free();
-  size = n;
-  std_map = new Epetra_Map(size, 0, seq_comm); MEM_CHECK(std_map);
+  this->size = n;
+  std_map = new Epetra_Map(this->size, 0, seq_comm); MEM_CHECK(std_map);
   vec = new Epetra_Vector(*std_map); MEM_CHECK(vec);
   vec_im = new Epetra_Vector(*std_map); MEM_CHECK(vec_im);
   zero();
@@ -333,8 +333,8 @@ void EpetraVector<Scalar>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < size; i++) (*vec)[i] = 0.0;
-  for (unsigned int i = 0; i < size; i++) (*vec_im)[i] = 0.0;
+  for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
+  for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
 #endif
 }
 
@@ -343,8 +343,8 @@ void EpetraVector<Scalar>::change_sign()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < size; i++) (*vec)[i] *= -1.;
-  for (unsigned int i = 0; i < size; i++) (*vec_im)[i] *= -1.;
+  for (unsigned int i = 0; i < this->size; i++) (*vec)[i] *= -1.;
+  for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] *= -1.;
 #endif
 }
 
@@ -356,7 +356,7 @@ void EpetraVector<Scalar>::free()
   delete std_map; std_map = NULL;
   delete vec; vec = NULL;
   delete vec_im; vec_im = NULL;
-  size = 0;
+  this->size = 0;
 #endif
 }
 
