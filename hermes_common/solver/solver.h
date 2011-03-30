@@ -142,6 +142,10 @@ class NonlinearSolver : public Solver<Scalar>
 
 /// Abstract class for defining interface for iterative solvers.
 ///
+
+template <typename Scalar> class Precond;
+
+
 template <typename Scalar>
 class IterSolver : public Solver<Scalar>
 {
@@ -159,11 +163,12 @@ class IterSolver : public Solver<Scalar>
     void set_max_iters(int iters) { this->max_iters = iters; }
     
     virtual void set_precond(const char *name) = 0;
-    #ifdef HAVE_TEUCHOS
+
+#ifdef HAVE_TEUCHOS
       virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc) = 0;
-    #else
+#else
       virtual void set_precond(Precond<Scalar> *pc) = 0;
-    #endif            
+#endif            
       
   protected:    
     int max_iters;          ///< Maximum number of iterations.

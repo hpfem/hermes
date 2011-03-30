@@ -16,8 +16,8 @@
 #ifndef __H2D_SPACE_H1_H
 #define __H2D_SPACE_H1_H
 
+#include "../shapeset/shapeset_h1_all.h"
 #include "space.h"
-
 
 /// H1Space represents a space of continuous Scalar functions over a domain (mesh).
 ///

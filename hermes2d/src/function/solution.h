@@ -82,7 +82,6 @@ public:
     this->sub_idx = sub_idx;
     this->ctm = ctm;
   }
-
 };
 
 /// \brief Represents the solution of a PDE.

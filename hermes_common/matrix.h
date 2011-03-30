@@ -451,4 +451,11 @@ public:
 protected:
   unsigned int size;
 };
+
+template<typename Scalar> class Solver;
+enum MatrixSolverType;
+template<typename Scalar> Vector<Scalar>* create_vector(MatrixSolverType matrix_solver);
+template<typename Scalar> SparseMatrix<Scalar>*  create_matrix(MatrixSolverType matrix_solver);
+template<typename Scalar> Solver<Scalar>*  create_linear_solver(MatrixSolverType matrix_solver, 
+                                         Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 #endif

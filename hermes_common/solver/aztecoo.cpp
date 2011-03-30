@@ -39,7 +39,6 @@ AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scala
 #endif
 }
 
-
 template<typename Scalar>
 AztecOOSolver<Scalar>::~AztecOOSolver()
 {

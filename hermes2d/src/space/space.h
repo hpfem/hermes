@@ -17,10 +17,9 @@
 #define __H2D_SPACE_H
 
 #include "../mesh/mesh.h"
-#include "../mesh/traverse.h"
 #include "../shapeset/shapeset.h"
 #include "../asmlist.h"
-#include "../shapeset/precalc.h"
+#include "../mesh/traverse.h"
 #include "../quadrature/quad_all.h"
 #include "../boundaryconditions/essential_bcs.h"
 

@@ -102,8 +102,6 @@ public:
   static const std::string get_quad_order_str(const int quad_order);
   ///< Returns the correct axial order for given edge.
   static int make_edge_order(int edge, int encoded_order, int mode);
-  
-
 
   double get_l2_norm(Vector<Scalar>* vec) const;
 

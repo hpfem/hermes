@@ -28,7 +28,7 @@
 /// @defgroup preconds Preconditioners
 ///
 
-
+template <typename Scalar> class Matrix;
 /// Abstract class to define interface for preconditioners
 ///
 /// @ingroup preconds

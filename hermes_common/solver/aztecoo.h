@@ -58,6 +58,7 @@ public:
   
   /// Set preconditioner from IFPACK
   /// @param[in] pc - IFPACK preconditioner
+
 #ifdef HAVE_TEUCHOS
   virtual void set_precond(Teuchos::RCP<Precond<Scalar>> &pc)
 #else
@@ -81,7 +82,7 @@ protected:
 #ifdef HAVE_TEUCHOS
   Teuchos::RCP<Precond<Scalar>> pc;
 #else
-  Precond *pc;
+  Precond<Scalar> *pc;
 #endif
 };
 
