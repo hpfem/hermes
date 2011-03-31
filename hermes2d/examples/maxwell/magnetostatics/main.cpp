@@ -20,8 +20,7 @@ using namespace RefinementSelectors;
 const int P_INIT = 2;                             // Initial polynomial degree.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
-const int INIT_GLOB_REF_NUM = 0;                  // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 0;                   // Number of initial refinements towards boundary.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -33,7 +32,7 @@ double CURRENT_DENSITY = 1e6;                     // Volume source term.
 // Material and boundary markers.
 const std::string MAT_AIR = "0";
 const std::string MAT_IRON = "1";
-const std::string MAT_COPPER = "2";
+const std::string MAT_COPPER = "3";
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
@@ -71,8 +70,10 @@ int main(int argc, char* argv[])
   mloader.load("actuator.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
+  mv.show(&mesh);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);

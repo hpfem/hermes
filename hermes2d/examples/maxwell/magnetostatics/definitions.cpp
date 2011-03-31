@@ -18,10 +18,14 @@ public:
     // Jacobian.
     add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_air, mu_air));
     add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_copper, mu_copper));
-    add_matrix_form(new DefaultJacobianNonlinearMagnetostatics(0, 0, mu_iron));
+    add_matrix_form(new DefaultJacobianNonlinearMagnetostatics(0, 0, std::string("1"), mu_iron));
+    add_matrix_form(new DefaultJacobianNonlinearMagnetostatics(0, 0, std::string("2"), mu_iron));           //FIXME
     // Residual.
-    add_vector_form(new DefaultResidualNonlinearDiffusion(0, mu_iron));
-    add_vector_form(new DefaultVectorFormConst(0, -current_density));
+    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_air, mu_air));
+    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_copper, mu_copper));
+    add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, std::string("1"), mu_iron));
+    add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, std::string("2"), mu_iron));              //FIXME
+    add_vector_form(new DefaultVectorFormConst(0, material_copper, -current_density));
   };
 };
 
