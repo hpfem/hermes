@@ -26,7 +26,7 @@ public:
     add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_copper, 1/mu_copper));
     add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, material_iron_1, mu_inv_iron));
     add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, material_iron_2, mu_inv_iron));
-    add_vector_form(new DefaultVectorFormConst(0, material_copper, -current_density));
+    add_vector_form(new DefaultVectorFormConst(0, material_copper, current_density));
   };
 };
 

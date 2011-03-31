@@ -153,9 +153,11 @@ namespace WeakFormsH1 {
           // functions is the same as the product of gradients.
           Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           //if (e->elem_marker != -9999) if (B_i > 3) printf("B = %g\n", B_i);
-          result -= wt[i] * spline_coeff->get_derivative(B_i) / B_i 
-                          * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-	                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          if (B_i > 1e-8) {
+            result -= wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+                            * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          }
           result -= wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
