@@ -59,6 +59,9 @@ void MeshView::show(Mesh* mesh)
   Solution sln;
   if (mesh == NULL) error("mesh == NULL in MeshView::show().");
   if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
+  
+  this->mesh = mesh;
+  
   sln.set_zero(mesh);
   lin.process_solution(&sln);
   lin.lock_data();
@@ -178,8 +181,8 @@ void MeshView::on_display()
     for (i = 0; i < ne; i++)
     {
       if (elems[i].id < 0) continue;
-      char text[20];
-      sprintf(text, "%d", elems[i].type);
+      char text[2000];
+      sprintf(text, "%s", mesh->get_element_markers_conversion().get_user_marker(elems[i].type).c_str());
       draw_text(transform_x(elems[i].x), transform_y(elems[i].y), text, 0);
     }
   }
