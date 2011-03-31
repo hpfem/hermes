@@ -55,7 +55,7 @@ const std::string BDY_RIGHT = "2";
 const std::string BDY_TOP = "3";
 const std::string BDY_LEFT = "4";
 
-// Right-hand side, exact solutionm weak forms.
+// Right-hand side, exact solution weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
