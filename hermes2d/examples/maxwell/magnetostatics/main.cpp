@@ -27,7 +27,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double MU_VACUUM = 4 * M_PI * 1e-7;
 double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
-double CURRENT_DENSITY = 1e6;                     // Volume source term.
+double CURRENT_DENSITY = 1e9;                     // Volume source term.
 
 // Material and boundary markers.
 const std::string MAT_AIR = "0";
@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
-  mv.show(&mesh);
+  //MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
+  //mv.show(&mesh);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
@@ -120,10 +120,10 @@ int main(int argc, char* argv[])
   delete solver;
 
   // Visualise the solution and mesh.
-  ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));
+  ScalarView s_view("Solution", new WinGeom(0, 0, 500, 650));
   s_view.show_mesh(false);
   s_view.show(&sln);
-  OrderView o_view("Mesh", new WinGeom(450, 0, 400, 350));
+  OrderView o_view("Mesh", new WinGeom(510, 0, 400, 650));
   o_view.show(&space);
 
   // Wait for all views to be closed.
