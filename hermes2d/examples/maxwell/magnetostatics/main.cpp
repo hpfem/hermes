@@ -8,8 +8,8 @@ using namespace RefinementSelectors;
 //  This example shows how to set an arbitrary initial guess for the
 //  Newton's method, and nonzero Dirichlet boundary conditions.
 //
-//  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] = heat_src.
+//  PDE: magnetostatics with nonlinear magnetic permeability
+//  curl[1/mu curl u] = current_density.
 //
 //  Domain: unit square (-10,10)^2.
 //
@@ -31,7 +31,8 @@ double CURRENT_DENSITY = 1e9;                     // Volume source term.
 
 // Material and boundary markers.
 const std::string MAT_AIR = "0";
-const std::string MAT_IRON = "1";
+const std::string MAT_IRON_1 = "1";
+const std::string MAT_IRON_2 = "2";
 const std::string MAT_COPPER = "3";
 const std::string BDY_DIRICHLET = "1";
 
@@ -43,10 +44,10 @@ int main(int argc, char* argv[])
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
 
-  // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
-  Hermes::vector<double> lambda_pts(0.0,    0.5,    0.7,    0.8,    0.9,    1.0,    1.1,    1.2,    1.3,   1.4,   1.6,   1.7,   1.8,   1.9,   3.0);
-  Hermes::vector<double> lambda_val(1500.0, 1480.0, 1460.0, 1450.0, 1440.0, 1400.0, 1300.0, 1150.0, 950.0, 750.0, 250.0, 180.0, 175.0, 150.0, 20.0);
-  for (unsigned int i=0; i < lambda_val.size(); i++) lambda_val[i] *= MU_VACUUM; 
+  // Define nonlinear magnetic permeability via a cubic spline.
+  Hermes::vector<double> mu_pts(0.0,    0.5,   0.9,    1.0,    1.1,    1.2,    1.3,   1.4,   1.6,   1.7,   1.8,   1.9,   3.0,    5.0,    10.0);
+  Hermes::vector<double> mu_val(1/1500.0, 1/1480.0,    1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0, 1/750.0, 1/250.0, 1/180.0, 1/175.0, 1/150.0, 1/20.0, 1/10.0,  1/5.0);
+  for (unsigned int i=0; i < mu_val.size(); i++) mu_val[i] /= MU_VACUUM; 
 
   // Create the cubic spline (and plot it for visual control). 
   double second_der_left = 0.0;
@@ -54,15 +55,15 @@ int main(int argc, char* argv[])
   bool first_der_left = false;
   bool first_der_right = false;
   bool extrapolate_der_left = false;
-  bool extrapolate_der_right = false;
-  CubicSpline mu_iron(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
-                      extrapolate_der_left, extrapolate_der_right);
-  bool success = mu_iron.calculate_coeffs(); 
+  bool extrapolate_der_right = true;
+  CubicSpline mu_inv_iron(mu_pts, mu_val, 0.0, 0.0, first_der_left, first_der_right,
+                           extrapolate_der_left, extrapolate_der_right);
+  bool success = mu_inv_iron.calculate_coeffs(); 
   if (!success) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
-  double interval_extension = 0.0; // The interval of definition of the spline will be 
+  double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
-  mu_iron.plot("spline.dat", interval_extension);
+  mu_inv_iron.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;
@@ -84,8 +85,8 @@ int main(int argc, char* argv[])
   info("ndof: %d", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation
-  CustomWeakFormMagnetostatics wf(&mu_iron, MAT_AIR, MU_VACUUM, MAT_COPPER, 
-                                  MU_VACUUM, CURRENT_DENSITY);
+  CustomWeakFormMagnetostatics wf(MAT_IRON_1, MAT_IRON_2, &mu_inv_iron, MAT_AIR, 
+                                  MU_VACUUM, MAT_COPPER, MU_VACUUM, CURRENT_DENSITY);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -114,7 +115,7 @@ int main(int argc, char* argv[])
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Cleanup.
-  delete []coeff_vec;
+  delete [] coeff_vec;
   delete matrix;
   delete rhs;
   delete solver;

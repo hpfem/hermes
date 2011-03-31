@@ -151,8 +151,10 @@ namespace WeakFormsH1 {
         for (int i = 0; i < n; i++) {
           // This is not a mistake, the inner product of two curls of scalar
           // functions is the same as the product of gradients.
-          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * 
-			     (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+          Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
+          //if (e->elem_marker != -9999) if (B_i > 3) printf("B = %g\n", B_i);
+          result -= wt[i] * spline_coeff->get_value(B_i) * 
+			     (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
       }
@@ -499,8 +501,9 @@ namespace WeakFormsH1 {
         // This is not a mistake, the inner product of two curls of scalar
         // functions is the same as the product of gradients.
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff->get_value(u_prev->val[i]) * 
-                             (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]));
+          Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
+          result += wt[i] * spline_coeff->get_value(B_i) * 
+                             (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
         }
         return result;
       }
