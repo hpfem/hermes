@@ -31,8 +31,10 @@ const double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;         // Kappa.
 
 // Boundary markers.
-const std::string BDY_SOLID_WALL = "1";
-const std::string BDY_INLET_OUTLET = "2";
+const std::string BDY_SOLID_WALL_BOTTOM = "1";
+const std::string BDY_OUTLET = "2";
+const std::string BDY_SOLID_WALL_TOP = "3";
+const std::string BDY_INLET = "4";
 
 // Weak forms.
 #include "../forms_explicit.cpp"
@@ -61,16 +63,19 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensity sln_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX sln_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY sln_rho_v_y(&mesh, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy sln_e(&mesh, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy sln_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
   
   InitialSolutionEulerDensity prev_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX prev_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy prev_e(&mesh, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy prev_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+
+  // Numerical flux.
+  OsherSolomonNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
-    BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+  EulerEquationsWeakFormExplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -140,7 +145,7 @@ int main(int argc, char* argv[])
       space_e.get_element_assembly_list(e, &al);
       double energy = solution_vector[al.dof[0]];
       
-      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
+              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
       
       if(condition < min_condition || min_condition == 0.)
         min_condition = condition;
