@@ -1,6 +1,506 @@
 #include "numerical_flux.h"
 
-double NumericalFlux::f_x(int i, double w0, double w1, double w3, double w4)
+NumericalFlux::NumericalFlux()
+{
+}
+
+void NumericalFlux::Q(double result[4], double state_vector[4], double nx, double ny)
+{
+  result[0] = state_vector[0];
+  double temp_result_1 = nx * state_vector[1] + ny * state_vector[2];
+  double temp_result_2 = -ny * state_vector[1] + ny * state_vector[2];
+  result[1] = temp_result_1;
+  result[2] = temp_result_2;
+  result[3] = state_vector[3];
+}
+
+void NumericalFlux::Q_inv(double result[4], double state_vector[4], double nx, double ny)
+{
+  result[0] = state_vector[0];
+  double temp_result_1 = nx * state_vector[1] - ny * state_vector[2];
+  double temp_result_2 = ny * state_vector[1] + ny * state_vector[2];
+  result[1] = temp_result_1;
+  result[2] = temp_result_2;
+  result[3] = state_vector[3];
+}
+
+VijayasundaramNumericalFlux::VijayasundaramNumericalFlux()
+{
+}
+
+void VijayasundaramNumericalFlux::numerical_flux(double result[4], double w_L[4], double w_R[4],
+          double nx, double ny)
+{
+  error("Not done yet.");
+}
+  
+double VijayasundaramNumericalFlux::numerical_flux_i(int component, double w_L[4], double w_R[4],
+          double nx, double ny)
+{
+  error("Not done yet.");
+  return 0.0;
+}
+
+OsherSolomonNumericalFlux::OsherSolomonNumericalFlux(double kappa) : kappa(kappa)
+{
+}
+
+void OsherSolomonNumericalFlux::numerical_flux(double result[4], double w_L[4], double w_R[4],
+          double nx, double ny)
+{
+
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+  Q(q_R, w_R, nx, ny);
+
+  // Decide what we have to calculate.
+  // Speeds of sound.
+  a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
+  a_R = QuantityCalculator::calc_sound_speed(q_R[0], q_R[1], q_R[2], q_R[3], kappa);
+
+  // Utility numbers.
+  this->z_L = 0.5 * (kappa - 1) * q_L[1] / q_L[0] + a_L;
+  this->z_R = 0.5 * (kappa - 1) * q_R[1] / q_R[0] - a_R;
+  this->s_L = QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa) / std::pow(q_L[0], kappa);
+  this->s_R = QuantityCalculator::calc_pressure(q_R[0], q_R[1], q_R[2], q_R[3], kappa) / std::pow(q_R[0], kappa);
+  this->alpha = std::pow(s_R / s_L, 1 / (2 * kappa));
+
+  // We always need to calculate q_1, a_1, a_3, as we are going to decide what to return based on this.
+  calculate_q_1_a_1_a_3();
+
+  // First column in table 3.4.1 on the page 233 in Feist (2003).
+  if(q_R[1] / q_R[0] >= - a_R && q_L[1] / q_L[0] <= a_L) {
+    // First row.
+    if(a_1 <= q_1[1] / q_1[0]) {
+      calculate_q_L_star();
+      f_1(result, q_L_star);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Second row.
+    if(0 < q_1[1] / q_1[0] && q_1[1] / q_1[0] < a_1) {
+      f_1(result, q_1);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Third row.
+    if(-a_3 <= q_1[1] / q_1[0] && q_1[1] / q_1[0] <= 0) {
+      calculate_q_3();
+      f_1(result, q_3);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Fourth row.
+    if(q_1[1] / q_1[0] < -a_3) {
+      calculate_q_R_star();
+      f_1(result, q_R_star);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+  }
+
+  // Second column in table 3.4.1 on the page 233 in Feist (2003).
+  if(q_R[1] / q_R[0] >= - a_R && q_L[1] / q_L[0] > a_L) {
+    // First row.
+    if(a_1 <= q_1[1] / q_1[0]) {
+      f_1(result, q_L);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Second row.
+    if(0 < q_1[1] / q_1[0] && q_1[1] / q_1[0] < a_1) {
+      calculate_q_L_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_L_star);
+      f_1(third_f_1, q_1);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Third row.
+    if(-a_3 <= q_1[1] / q_1[0] && q_1[1] / q_1[0] <= 0) {
+      calculate_q_L_star();
+      calculate_q_3();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_L_star);
+      f_1(third_f_1, q_3);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Fourth row.
+    if(q_1[1] / q_1[0] < -a_3) {
+      calculate_q_L_star();
+      calculate_q_R_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_L_star);
+      f_1(third_f_1, q_R_star);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+  }
+
+  // Third column in table 3.4.1 on the page 233 in Feist (2003).
+  if(q_R[1] / q_R[0] < - a_R && q_L[1] / q_L[0] <= a_L) {
+    // First row.
+    if(a_1 <= q_1[1] / q_1[0]) {
+      calculate_q_R_star();
+      calculate_q_L_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_R);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_L_star);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Second row.
+    if(0 < q_1[1] / q_1[0] && q_1[1] / q_1[0] < a_1) {
+      calculate_q_R_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_R);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_1);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Third row.
+    if(-a_3 <= q_1[1] / q_1[0] && q_1[1] / q_1[0] <= 0) {
+      calculate_q_R_star();
+      calculate_q_3();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_R);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_3);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      return;
+    }
+    // Fourth row.
+    if(q_1[1] / q_1[0] < -a_3) {
+      f_1(result, q_R);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+  }
+
+  // Fourth column in table 3.4.1 on the page 233 in Feist (2003).
+  if(q_R[1] / q_R[0] < - a_R && q_L[1] / q_L[0] > a_L) {
+    // First row.
+    if(a_1 <= q_1[1] / q_1[0]) {
+      calculate_q_R_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_R);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Second row.
+    if(0 < q_1[1] / q_1[0] && q_1[1] / q_1[0] < a_1) {
+      calculate_q_R_star();
+      calculate_q_L_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      double fourth_f_1[4];
+      double fifth_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_R);
+      f_1(fourth_f_1, q_L_star);
+      f_1(fifth_f_1, q_1);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i] - fourth_f_1[i] + fifth_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Third row.
+    if(-a_3 <= q_1[1] / q_1[0] && q_1[1] / q_1[0] <= 0) {
+      calculate_q_R_star();
+      calculate_q_L_star();
+      calculate_q_3();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      double fourth_f_1[4];
+      double fifth_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_R_star);
+      f_1(third_f_1, q_R);
+      f_1(fourth_f_1, q_L_star);
+      f_1(fifth_f_1, q_3);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] - second_f_1[i] + third_f_1[i] - fourth_f_1[i] + fifth_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    // Fourth row.
+    if(q_1[1] / q_1[0] < -a_3) {
+      calculate_q_L_star();
+      double first_f_1[4];
+      double second_f_1[4];
+      double third_f_1[4];
+      f_1(first_f_1, q_L);
+      f_1(second_f_1, q_R);
+      f_1(third_f_1, q_L_star);
+      for(unsigned int i = 0; i < 4; i++)
+        result[i] = first_f_1[i] + second_f_1[i] - third_f_1[i];
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+  }
+}
+
+void OsherSolomonNumericalFlux::numerical_flux_solid_wall(double result[4], double w_L[4], double nx, double ny)
+{
+  Q(q_L, w_L, nx, ny);
+  a_B = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa) + ((kappa - 1) * q_L[1] / (2 * q_L[0]));
+  double rho_B = std::pow(a_B * a_B * q_L[0] / (kappa * QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa)), (1 / (kappa - 1))) * q_L[0];
+  q_R[0] = 0;
+  q_R[1] = rho_B * a_B * a_B / kappa;
+  q_R[2] = 0;
+  q_R[3] = 0;
+  Q_inv(result, q_R, nx, ny);
+}
+  
+double OsherSolomonNumericalFlux::numerical_flux_solid_wall_i(int component, double w_L[4], double nx, double ny)
+{
+  double result[4];
+  numerical_flux_solid_wall(result, w_L, nx, ny);
+  return result[component];
+}
+
+void OsherSolomonNumericalFlux::numerical_flux_inlet(double result[4], double w_L[4], double w_B[4],
+        double nx, double ny)
+{
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+  Q(q_B, w_B, nx, ny);
+
+  // Speeds of sound.
+  a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
+  a_B = QuantityCalculator::calc_sound_speed(q_B[0], q_B[1], q_B[2], q_B[3], kappa);
+
+  if(q_B[1] / q_B[0] > a_B) {// Supersonic inlet - everything is prescribed.
+    f_1(result, q_B);
+    Q_inv(result, result, nx, ny);
+    return;
+  }
+  else {// Subsonic inlet - only rho_b, v_x, v_y are prescribed, pressure is calculated as follows. The pressure is prescribed always so that one can know if the
+    // inlet is subsonic or supersonic.
+    double a_1 = a_L + ((kappa - 1) / 2) * (q_L[1] / q_L[0] - q_B[1] / q_B[0]);
+    q_1[0] = std::pow(a_1 * a_1 * q_L[0] / (kappa * QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa)), 1 / (kappa - 1)) * q_L[0];
+    q_1[1] = q_1[0] * q_B[1] / q_B[0];
+    q_1[2] = q_1[0] * q_L[2] / q_L[0];
+    q_1[3] = QuantityCalculator::calc_energy(q_1[0], q_1[1], q_1[2], a_1 * a_1 * q_1[0] / kappa, kappa);
+    if(q_B[1] / q_B[0] < 0)
+      if(q_B[1] / q_B[0] < a_1) {
+        f_1(result, q_B);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+      else {
+        double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+        q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+        q_L_star[1] = a_l_star;
+        q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+        q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+        double first_f_1[4];
+        double second_f_1[4];
+        double third_f_1[4];
+        f_1(first_f_1, q_B);
+        f_1(second_f_1, q_L_star);
+        f_1(third_f_1, q_1);
+        for(unsigned int i = 0; i < 4; i++)
+          result[i] = first_f_1[i] + second_f_1[i] - third_f_1[i];
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+    else
+      if(q_B[1] / q_B[0] < a_1) {
+        f_1(result, q_1);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+      else {
+        double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+        q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+        q_L_star[1] = a_l_star;
+        q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+        q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+        f_1(result, q_L_star);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+  }
+}
+  
+double OsherSolomonNumericalFlux::numerical_flux_inlet_i(int component, double w_L[4], double w_B[4],
+        double nx, double ny)
+{
+  double result[4];
+  numerical_flux_inlet(result, w_L, w_B, nx, ny);
+  return result[component];
+}
+
+void OsherSolomonNumericalFlux::numerical_flux_outlet_supersonic(double result[4], double w_L[4], double nx, double ny)
+{
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+
+  f_1(result, q_L);
+  Q_inv(result, result, nx, ny);
+  return;
+}
+  
+double OsherSolomonNumericalFlux::numerical_flux_outlet_supersonic_i(int component, double w_L[4], double nx, double ny)
+{
+  double result[4];
+  numerical_flux_outlet_supersonic(result, w_L, nx, ny);
+  return result[component];
+}
+
+void OsherSolomonNumericalFlux::numerical_flux_outlet_subsonic(double result[4], double w_L[4], double pressure, double nx, double ny)
+{
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+
+  double a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
+  this->q_B[0] = q_L[0] * std::pow(pressure / QuantityCalculator::calc_pressure(this->q_L[0], this->q_L[1], this->q_L[2], this->q_L[3], kappa), 1 / kappa);
+  this->q_B[1] = this->q_B[0] * (q_L[1] / q_L[0] + (2 / (kappa - 1)) * (a_L - std::sqrt(kappa * pressure / q_B[0])));
+  this->q_B[2] = this->q_B[0] * this->q_L[2] / this->q_L[0];
+  this->q_B[3] = QuantityCalculator::calc_energy(this->q_B[0], this->q_B[1], this->q_B[2], pressure, kappa);
+  if(q_B[1] / q_B[0] < QuantityCalculator::calc_sound_speed(this->q_B[0], this->q_B[1], this->q_B[2], this->q_B[3], kappa)) {
+    f_1(result, q_B);
+    Q_inv(result, result, nx, ny);
+    return;
+  }
+  else {
+    double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+    q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+    q_L_star[1] = a_l_star;
+    q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+    q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+    f_1(result, q_L_star);
+    Q_inv(result, result, nx, ny);
+    return;
+  }
+}
+  
+double OsherSolomonNumericalFlux::numerical_flux_outlet_subsonic_i(int component, double w_L[4], double pressure, double nx, double ny)
+{
+  double result[4];
+  numerical_flux_outlet_supersonic(result, w_L, nx, ny);
+  return result[component];
+}
+
+void OsherSolomonNumericalFlux::calculate_q_1_a_1_a_3()
+{
+  this->a_1 = (z_L - z_R) / (1 + alpha);
+  this->q_1[0] = std::pow(a_1 / a_L, 2 / (kappa - 1)) * q_L[0];
+  this->q_1[1] = this->q_1[0] * 2 * (z_L - a_1) / (kappa - 1);
+  this->q_1[2] = this->q_1[0] * this->q_L[2] / this->q_L[0] ;
+  this->q_1[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_1 * a_1 * q_1[0] / kappa, kappa);
+  this->a_3 = alpha * a_1;
+}
+
+void OsherSolomonNumericalFlux::calculate_q_L_star()
+{
+  this->a_L_star = 2 * z_L / (kappa + 1);
+  this->q_L_star[0] = std::pow(a_L_star / a_L, 2 / (kappa -1 )) * q_L[0];
+  this->q_L_star[1] = this->q_L_star[0] * a_L_star;
+  this->q_L_star[2] = this->q_1[0] * this->q_L[2] / this->q_L[0] ;
+  this->q_L_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_L_star * a_L_star * q_L_star[0] / kappa, kappa);
+}
+
+void OsherSolomonNumericalFlux::calculate_q_3()
+{
+  // a_3 already calculated.
+  this->q_3[0] = q_1[0] / (alpha * alpha);
+  this->q_3[1] = this->q_3[0] * this->q_1[1] / this->q_1[0] ;
+  this->q_3[2] = this->q_3[0] * this->q_R[2] / this->q_R[0] ;
+  this->q_3[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_3 * a_3 * q_3[0] / kappa, kappa);
+}
+
+void OsherSolomonNumericalFlux::calculate_q_R_star()
+{
+  this->a_R_star = - 2 * z_R / (kappa + 1);
+  this->q_R_star[0] = std::pow(a_R_star / a_R, 2 / (kappa -1 )) * q_R[0];
+  this->q_R_star[1] = this->q_R_star[0] * -a_R_star;
+  this->q_R_star[2] = this->q_1[0] * this->q_R[2] / this->q_R[0] ;
+  this->q_R_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_R_star * a_R_star * q_R_star[0] / kappa, kappa);
+}
+
+void OsherSolomonNumericalFlux::f_1(double result[4], double state[4])
+{
+  result[0] = state[1];
+  result[1] = state[1] * state[1] / state[0] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa);
+  result[2] = state[2] * state[1] / state[0];
+  result[3] = (state[1] / state[0]) * (state[3] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa));
+}
+
+double OsherSolomonNumericalFlux::numerical_flux_i(int component, double w_L[4], double w_R[4],
+          double nx, double ny)
+{
+  double result[4];
+  numerical_flux(result, w_L, w_R, nx, ny);
+  return result[component];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+double NumericalFlux::f_x(int component, double w0, double w1, double w3, double w4)
 {
     if (i == 0)
         return w1;
@@ -15,7 +515,7 @@ double NumericalFlux::f_x(int i, double w0, double w1, double w3, double w4)
     return 0.0;
 }
 
-double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
+double NumericalFlux::f_z(int component, double w0, double w1, double w3, double w4)
 {
     if (i == 0)
         return w3;
@@ -30,7 +530,7 @@ double NumericalFlux::f_z(int i, double w0, double w1, double w3, double w4)
     return 0.0;
 }
 
-double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::A_x(int component, int j, double w0, double w1, double w3, double w4)
 {
     if (i == 0 && j == 0)
         return 0;
@@ -79,7 +579,7 @@ double NumericalFlux::A_x(int i, int j, double w0, double w1, double w3, double 
     return 0.0;
 }
 
-double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::A_z(int component, int j, double w0, double w1, double w3, double w4)
 {
     if (i == 0 && j == 0)
         return 0;
@@ -127,7 +627,7 @@ double NumericalFlux::A_z(int i, int j, double w0, double w1, double w3, double 
     return 0.0;
 }
 
-double NumericalFlux::matrix_R(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_R(int component, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -177,7 +677,7 @@ double NumericalFlux::matrix_R(int i, int j, double w0, double w1, double w3, do
     return 0.0;
 }
 
-double NumericalFlux::matrix_R_inv(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_R_inv(int component, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -229,7 +729,7 @@ double NumericalFlux::matrix_R_inv(int i, int j, double w0, double w1, double w3
     return result/(c*c);
 }
 
-double NumericalFlux::matrix_D_minus(int i, int j, double w0, double w1, double w3, double w4)
+double NumericalFlux::matrix_D_minus(int component, int j, double w0, double w1, double w3, double w4)
 {
     double rho = w0;
     double u = w1/w0;
@@ -285,7 +785,7 @@ double NumericalFlux::matrix_D_minus(int i, int j, double w0, double w1, double 
 // multiplies two matrices
 void NumericalFlux::dot(double result[4][4], double A[4][4], double B[4][4])
 {
-    for (int i=0; i < 4; i++)
+    for (int component=0; i < 4; i++)
         for (int j=0; j < 4; j++) {
             double sum=0;
             for (int k=0; k < 4; k++)
@@ -297,7 +797,7 @@ void NumericalFlux::dot(double result[4][4], double A[4][4], double B[4][4])
 // multiplies a matrix and a vector
 void NumericalFlux::dot_vector(double result[4], double A[4][4], double B[4])
 {
-    for (int i=0; i < 4; i++) {
+    for (int component=0; i < 4; i++) {
         double sum=0;
         for (int k=0; k < 4; k++)
             sum += A[i][k] * B[k];
@@ -313,7 +813,7 @@ void NumericalFlux::dot_vector(double result[4], double A[4][4], double B[4])
 // [-ny, nx]
 void NumericalFlux::T_rot(double result[4][4], double beta)
 {
-    for (int i=0; i < 4; i++)
+    for (int component=0; i < 4; i++)
         for (int j=0; j < 4; j++)
             result[i][j] = 0;
     result[0][0] = 1;
@@ -331,33 +831,33 @@ void NumericalFlux::A_minus(double result[4][4], double w0, double w1, double w3
     double _R_inv[4][4];
     double _A_minus[4][4];
     double _tmp[4][4];
-    for (int i=0; i < 4; i++)
+    for (int component=0; i < 4; i++)
         for (int j=0; j < 4; j++)
             _R[i][j] = matrix_R(i, j, w0, w1, w3, w4);
-    for (int i=0; i < 4; i++)
+    for (int component=0; i < 4; i++)
         for (int j=0; j < 4; j++)
             _D_minus[i][j] = matrix_D_minus(i, j, w0, w1, w3, w4);
-    for (int i=0; i < 4; i++)
+    for (int component=0; i < 4; i++)
         for (int j=0; j < 4; j++)
             _R_inv[i][j] = matrix_R_inv(i, j, w0, w1, w3, w4);
     dot(_tmp, _D_minus, _R_inv);
     dot(result, _R, _tmp);
 }
 
-void NumericalFlux::riemann_solver(double result[4], double w_l[4], double w_r[4])
+void NumericalFlux::riemann_solver(double result[4], double w_L[4], double w_R[4])
 {
-    //printf("w_l: %f %f %f %f\n", w_l[0], w_l[1], w_l[2], w_l[3]);
-    //printf("w_r: %f %f %f %f\n", w_r[0], w_r[1], w_r[2], w_r[3]);
+    //printf("w_l: %f %f %f %f\n", w_L[0], w_L[1], w_L[2], w_L[3]);
+    //printf("w_r: %f %f %f %f\n", w_R[0], w_R[1], w_R[2], w_R[3]);
     double _tmp1[4][4];
     double _tmp2[4][4];
     double _tmp3[4];
     double _tmp4[4];
-    A_minus(_tmp1, w_r[0], w_r[1], w_r[2], w_r[3]);
-    A_minus(_tmp2, w_l[0], w_l[1], w_l[2], w_l[3]);
+    A_minus(_tmp1, w_R[0], w_R[1], w_R[2], w_R[3]);
+    A_minus(_tmp2, w_L[0], w_L[1], w_L[2], w_L[3]);
     dot_vector(_tmp3, _tmp1, w_r);
     dot_vector(_tmp4, _tmp2, w_l);
-    for (int i=0; i < 4; i++) {
-        double _1 = f_x(i, w_l[0], w_l[1], w_l[2], w_l[3]);
+    for (int component=0; i < 4; i++) {
+        double _1 = f_x(i, w_L[0], w_L[1], w_L[2], w_L[3]);
         double _2 = _tmp3[i];
         double _3 = _tmp4[i];
         result[i] = _1 + _2 - _3;
@@ -366,11 +866,11 @@ void NumericalFlux::riemann_solver(double result[4], double w_l[4], double w_r[4
 
 // calculates the inverted flux, for testing purposes
 // it should return the same thing as riemann_solver(), only with minus sign
-void NumericalFlux::riemann_solver_invert(double result[4], double w_l[4], double w_r[4])
+void NumericalFlux::riemann_solver_invert(double result[4], double w_L[4], double w_R[4])
 {
     double m[4][4];
-    double _w_l[4];
-    double _w_r[4];
+    double _w_L[4];
+    double _w_R[4];
     double _tmp[4];
     T_rot(m, M_PI);
     dot_vector(_w_l, m, w_l);
@@ -383,7 +883,7 @@ void NumericalFlux::riemann_solver_invert(double result[4], double w_l[4], doubl
 // Calculates the numerical flux in the normal (nx, ny) by rotating into the
 // local system, solving the Riemann problem and rotating back. It returns the
 // state as a 4-component vector.
-void NumericalFlux::numerical_flux(double result[4], double w_l[4], double w_r[4],
+void NumericalFlux::numerical_flux(double result[4], double w_L[4], double w_R[4],
         double nx, double ny)
 {
     double alpha = atan2(ny, nx);
@@ -401,10 +901,11 @@ void NumericalFlux::numerical_flux(double result[4], double w_l[4], double w_r[4
 }
 
 // The same as numerical_flux, but only returns the i-th component:
-double NumericalFlux::numerical_flux_i(int i, double w_l[4], double w_r[4],
+double NumericalFlux::numerical_flux_i(int component, double w_L[4], double w_R[4],
         double nx, double ny)
 {
     double result[4];
     numerical_flux(result, w_l, w_r, nx, ny);
     return result[i];
 }
+*/

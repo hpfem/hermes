@@ -1,53 +1,22 @@
-extern NumericalFlux num_flux;
+#include "euler_util.h"
 
 // Calculates energy from other quantities.
-double calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
+double QuantityCalculator::calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
 {
   return pressure/(kappa - 1.) + (rho_v_x*rho_v_x+rho_v_y*rho_v_y) / 2*rho;
-};
+}
 
 // Calculates pressure from other quantities.
-double calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+double QuantityCalculator::calc_pressure(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
 {
   return (kappa - 1.) * (energy - (rho_v_x*rho_v_x + rho_v_y*rho_v_y) / (2*rho));
-};
+}
 
 // Calculates speed of sound.
-double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
+double QuantityCalculator::calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa)
 {
   return std::sqrt(kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy, kappa) / rho);
-};
-
-class DiscontinuityDetector
-{
-public:
-  /// Constructor.
-  DiscontinuityDetector(Hermes::vector<Space *> spaces, 
-                        Hermes::vector<Solution *> solutions);
-
-  /// Destructor.
-   ~DiscontinuityDetector();
-
-  /// Return a reference to the inner structures.
-  std::set<int>& get_discontinuous_element_ids(double threshold);
-
-  /// Calculates relative (w.r.t. the boundary edge_i of the Element e).
-  double calculate_relative_flow_direction(Element* e, int edge_i);
-
-  /// Calculates jumps of all solution components across the edge edge_i of the Element e.
-  double calculate_jumps(Element* e, int edge_i);
-
-  /// Calculates the norm of the solution on the central element.
-  double calculate_norm(Element* e, int edge_i);
-
-protected:
-  /// Members.
-  Hermes::vector<Space *> spaces;
-  Hermes::vector<Solution *> solutions;
-  Mesh* mesh;
-  std::set<int> discontinuous_element_ids;
-};
-
+}
 
 DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces, 
                         Hermes::vector<Solution *> solutions) : spaces(spaces), solutions(solutions)
@@ -242,25 +211,6 @@ double DiscontinuityDetector::calculate_norm(Element* e, int edge_i)
 
 };
 
-class FluxLimiter
-{
-public:
-  /// Constructor.
-  FluxLimiter(scalar* solution_vector, Hermes::vector<Space *> spaces, Hermes::vector<Solution *> solutions);
-
-  /// Destructor.
-   ~FluxLimiter();
-
-  /// Do the limiting.
-  void limit_according_to_detector(std::set<int>& discontinuous_elements);
-
-protected:
-  /// Members.
-  scalar* solution_vector;
-  Hermes::vector<Space *> spaces;
-  Hermes::vector<Solution *> solutions;
-};
-
 FluxLimiter::FluxLimiter(scalar* solution_vector, Hermes::vector<Space *> spaces, Hermes::vector<Solution *> solutions) : solution_vector(solution_vector), spaces(spaces), 
   solutions(solutions)
 {};
@@ -284,48 +234,24 @@ void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_eleme
   Solution::vector_to_solutions(solution_vector, spaces, solutions);
 };
 
-// Filters.
-class MachNumberFilter : public SimpleFilter
+void MachNumberFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) 
 {
-public: 
-  MachNumberFilter(Hermes::vector<MeshFunction*> solutions, double kappa) : SimpleFilter(solutions), kappa(kappa) {};
-  ~MachNumberFilter() {};
-protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
-    for (int i = 0; i < n; i++)
-      result[i] = std::sqrt((values.at(1)[i] / values.at(0)[i])*(values.at(1)[i] / values.at(0)[i]) + (values.at(2)[i] / values.at(0)[i])*(values.at(2)[i] / values.at(0)[i]))
-      / std::sqrt(kappa * calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / values.at(0)[i]);
-  }
+  for (int i = 0; i < n; i++)
+    result[i] = std::sqrt((values.at(1)[i] / values.at(0)[i])*(values.at(1)[i] / values.at(0)[i]) + (values.at(2)[i] / values.at(0)[i])*(values.at(2)[i] / values.at(0)[i]))
+    / std::sqrt(kappa * QuantityCalculator::calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / values.at(0)[i]);
+}
 
-  double kappa;
-};
-
-class PressureFilter : public SimpleFilter
+void PressureFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result)
 {
-public: 
-  PressureFilter(Hermes::vector<MeshFunction*> solutions, double kappa) : SimpleFilter(solutions), kappa(kappa) {};
-  ~PressureFilter() {};
-protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
-    for (int i = 0; i < n; i++)
-      result[i] = (kappa - 1.) * (values.at(3)[i] - (values.at(1)[i]*values.at(1)[i] + values.at(2)[i]*values.at(2)[i])/(2*values.at(0)[i]));
-  }
+  for (int i = 0; i < n; i++)
+    result[i] = (kappa - 1.) * (values.at(3)[i] - (values.at(1)[i]*values.at(1)[i] + values.at(2)[i]*values.at(2)[i])/(2*values.at(0)[i]));
+}
 
-  double kappa;
-};
 
-class EntropyFilter : public SimpleFilter
+void EntropyFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) 
 {
-public: 
-  EntropyFilter(Hermes::vector<MeshFunction*> solutions, double kappa, double rho_ext, double p_ext) : SimpleFilter(solutions), kappa(kappa), rho_ext(rho_ext), p_ext(p_ext) {};
-  ~EntropyFilter() {};
-protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) {
+  for (int i = 0; i < n; i++)
     for (int i = 0; i < n; i++)
-      for (int i = 0; i < n; i++)
-        result[i] = std::log((calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / p_ext)
-        / pow((values.at(0)[i] / rho_ext), kappa));
-  }
-
-  double kappa, rho_ext, p_ext;
-};
+      result[i] = std::log((QuantityCalculator::calc_pressure(values.at(0)[i], values.at(1)[i], values.at(2)[i], values.at(3)[i], kappa) / p_ext)
+      / pow((values.at(0)[i] / rho_ext), kappa));
+}

@@ -56,6 +56,7 @@ const double KAPPA = 1.4;                              // Kappa.
 const double CONCENTRATION_EXT = 1.0;                  // Concentration on the boundary.
 
 const double EPSILON = 0.01;                           // Diffusivity.
+
 // Boundary markers.
 const std::string BDY_INLET = "1";
 const std::string BDY_OUTLET = "2";
