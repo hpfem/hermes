@@ -26,12 +26,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormGradGrad : public WeakForm::MatrixFormVol
+    class DefaultLinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormGradGrad(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearDiffusion(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormGradGrad(int i, int j, std::string area, 
+      DefaultLinearDiffusion(int i, int j, std::string area, 
                                  double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
@@ -63,10 +63,10 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
       DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, 
-                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -74,9 +74,10 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-	  result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
-			     (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
-			     + spline_coeff->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+	        result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
+			           (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
+			           + spline_coeff->get_value(u_ext[0]->val[i]) 
+                                   * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
         }
         return result;
       }
@@ -99,13 +100,13 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormCurlCurl : public WeakForm::MatrixFormVol
+    class DefaultLinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMagnetostatics(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormCurlCurl(int i, int j, std::string area, 
-                                 double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMagnetostatics(int i, int j, std::string area, 
+                                  double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -134,13 +135,13 @@ namespace WeakFormsH1 {
        spline_coeff... nonconstant parameter given by cubic spline
     */
 
-    class DefaultMatrixFormCurlCurlSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormCurlCurlSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
-      DefaultMatrixFormCurlCurlSpline(int i, int j, std::string area, 
-                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
+                                      CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -150,8 +151,15 @@ namespace WeakFormsH1 {
         for (int i = 0; i < n; i++) {
           // This is not a mistake, the inner product of two curls of scalar
           // functions is the same as the product of gradients.
-          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * 
-			     (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+          Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
+          //if (e->elem_marker != -9999) if (B_i > 3) printf("B = %g\n", B_i);
+          if (B_i > 1e-8) {
+            result -= wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+                            * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          }
+          result -= wt[i] * spline_coeff->get_value(B_i) 
+                          * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
       }
@@ -174,12 +182,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
+    class DefaultLinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -206,12 +214,14 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by a cubic spline
     */
 
-    class DefaultMatrixFormMassSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormMassSpline(int i, int j, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, 
+                                   SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
-      DefaultMatrixFormMassSpline(int i, int j, std::string area, CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
+      DefaultJacobianNonlinearMass(int i, int j, std::string area, 
+                                   CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -242,12 +252,12 @@ namespace WeakFormsH1 {
        coeff1, coeff2... constant numbers
     */
 
-    class DefaultMatrixFormAdvection : public WeakForm::MatrixFormVol
+    class DefaultLinearAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     DefaultMatrixFormAdvection(int i, int j, double coeff1, double coeff2) 
+     DefaultLinearAdvection(int i, int j, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
-     DefaultMatrixFormAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
+     DefaultLinearAdvection(int i, int j, std::string area, double coeff1, double coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
 
       template<typename Real, typename Scalar>
@@ -272,17 +282,20 @@ namespace WeakFormsH1 {
     };
 
     /* Default volumetric matrix form 
-       \int_{area} (spline_coeff1(u_ext[0]), spline_coeff2(u_ext[0])) \cdot \nabla u vd\bfx 
+       \int_{area} spline_coeff1`(u_ext[0]) * u * u_ext[0]->dx * v
+       + spline_coeff1(u_ext[0]) * u->dx * v
+       + spline_coeff2`(u_ext[0]) * u * u_ext[0]->dy * v
+       + spline_coeff2(u_ext[0]) * u->dy * v d\bfx.
        spline_coeff1, spline_coeff2... non-constant parameters given by cubic splines
     */
 
-    class DefaultMatrixFormAdvectionSpline : public WeakForm::MatrixFormVol
+    class DefaultJacobianNonlinearAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     DefaultMatrixFormAdvectionSpline(int i, int j, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
+     DefaultJacobianNonlinearAdvection(int i, int j, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
                                  spline_coeff2(spline_coeff2) { }
-     DefaultMatrixFormAdvectionSpline(int i, int j, std::string area, 
+     DefaultJacobianNonlinearAdvection(int i, int j, std::string area, 
                                 CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
                                  spline_coeff2(spline_coeff2) { }
@@ -292,8 +305,10 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff1->get_value(u_ext[0]->val[i]) * (u->dx[i] * v->val[i])
-			     + spline_coeff2->get_value(u_ext[0]->val[i]) * (u->dy[i] * v->val[i]));
+          result += wt[i] * (  spline_coeff1->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dx[i] * v->val[i] 
+                             + spline_coeff1->get_value(u_ext[0]->val[i]) * u->dx[i] * v->val[i]
+                             + spline_coeff2->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dy[i] * v->val[i]
+			       + spline_coeff2->get_value(u_ext[0]->val[i]) * u->dy[i] * v->val[i]);
         }
         return result;
       }
@@ -353,6 +368,44 @@ namespace WeakFormsH1 {
       double coeff;
     };
 
+    /* Default volumetric vector form \int_{area} coeff 
+       \nabla u_ext[0] \cdot \nabla v d\bfx 
+       coeff... constant parameter
+    */
+
+    class DefaultResidualLinearDiffusion : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualLinearDiffusion(int i, double coeff) 
+                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
+      DefaultResidualLinearDiffusion(int i, std::string area, double coeff) 
+                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * coeff * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      double coeff;
+    };
+
     /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
        \nabla u_ext[0] \cdot \nabla v d\bfx 
        spline_coeff... non-constant parameter given by a cubic spline
@@ -390,6 +443,166 @@ namespace WeakFormsH1 {
 
     private:
       CubicSpline* spline_coeff;
+    };
+
+    /* Default volumetric vector form \int_{area} coeff 
+       \nabla u_ext[0] \cdot \nabla v d\bfx 
+       coeff... constant parameter
+    */
+
+    class DefaultResidualLinearMagnetostatics : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualLinearMagnetostatics(int i, double coeff) 
+                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
+      DefaultResidualLinearMagnetostatics(int i, std::string area, double coeff) 
+                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        // This is not a mistake, the inner product of two curls of scalar
+        // functions is the same as the product of gradients.
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * coeff * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      double coeff;
+    };
+
+    /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
+       \nabla u_ext[0] \cdot \nabla v d\bfx 
+       spline_coeff... non-constant parameter given by a cubic spline
+    */
+
+    class DefaultResidualNonlinearMagnetostatics : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff) 
+                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
+      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff) 
+                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        // This is not a mistake, the inner product of two curls of scalar
+        // functions is the same as the product of gradients.
+        for (int i = 0; i < n; i++) {
+          Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
+          result -= wt[i] * spline_coeff->get_value(B_i) * 
+                             (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      CubicSpline* spline_coeff;
+    };
+
+    /* Default volumetric vector form \int_{area} coeff1 * u->dx * v->val
+       + coeff2 * u->dy * v->val d\bfx
+       coeff1, coeff2... constant parameters
+    */
+
+    class DefaultResidualLinearAdvection : public WeakForm::VectorFormVol
+    {
+    public:
+    DefaultResidualLinearAdvection(int i, double coeff1, double coeff2)
+      : WeakForm::VectorFormVol(i), coeff1(coeff1), coeff2(coeff2) { }
+      DefaultResidualLinearAdvection(int i, std::string area, double coeff1, double coeff2) 
+                   : WeakForm::VectorFormVol(i, area), coeff1(coeff1), coeff2(coeff2) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (coeff1 * (u_prev->dx[i] * v->val[i])
+                             + coeff2 * (u_prev->dy[i] * v->val[i]));
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      double coeff1, coeff2;
+    };
+
+    /* Default volumetric vector form \int_{area} spline_coeff1(u_ext[0]) * u->dx * v->val
+       + spline_coeff2(u_ext[0]) * u->dy * v->val d\bfx
+       spline_coeff1, spline_coeff2... non-constant parameters given by cubic splines
+    */
+
+    class DefaultResidualNonlinearAdvection : public WeakForm::VectorFormVol
+    {
+    public:
+    DefaultResidualNonlinearAdvection(int i, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2)
+      : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2) { }
+      DefaultResidualNonlinearAdvection(int i, std::string area, CubicSpline* spline_coeff1, CubicSpline* spline_coeff2) 
+                   : WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * (spline_coeff1->get_value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
+                             + spline_coeff2->get_value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+    private:
+      CubicSpline* spline_coeff1, *spline_coeff2;
     };
 
     /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
@@ -430,12 +643,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultSurfaceMatrixForm : public WeakForm::MatrixFormSurf
+    class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultSurfaceMatrixForm(int i, int j, double coeff) 
+      DefaultMatrixFormSurf(int i, int j, double coeff) 
             : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
-      DefaultSurfaceMatrixForm(int i, int j, std::string area, double coeff) 
+      DefaultMatrixFormSurf(int i, int j, std::string area, double coeff) 
             : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -462,12 +675,12 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by a spline
     */
 
-    class DefaultSurfaceMatrixFormSpline : public WeakForm::MatrixFormSurf
+    class DefaultMatrixFormSurfSpline : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultSurfaceMatrixFormSpline(int i, int j, CubicSpline* spline_coeff) 
+      DefaultMatrixFormSurfSpline(int i, int j, CubicSpline* spline_coeff) 
             : WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff) { }
-      DefaultSurfaceMatrixFormSpline(int i, int j, std::string area, CubicSpline* spline_coeff) 
+      DefaultMatrixFormSurfSpline(int i, int j, std::string area, CubicSpline* spline_coeff) 
             : WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -501,12 +714,12 @@ namespace WeakFormsH1 {
        coeff... constant number
     */
 
-    class DefaultSurfaceVectorForm : public WeakForm::VectorFormSurf
+    class DefaultVectorFormSurf : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultSurfaceVectorForm(int i, double coeff) 
+      DefaultVectorFormSurf(int i, double coeff) 
              : WeakForm::VectorFormSurf(i), coeff(coeff) { }
-      DefaultSurfaceVectorForm(int i, std::string area, double coeff) 
+      DefaultVectorFormSurf(int i, std::string area, double coeff) 
              : WeakForm::VectorFormSurf(i, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -532,12 +745,12 @@ namespace WeakFormsH1 {
        spline_coeff... non-constant parameter given by cubic spline
     */
 
-    class DefaultSurfaceVectorFormSpline : public WeakForm::VectorFormSurf
+    class DefaultVectorFormSurfSpline : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultSurfaceVectorFormSpline(int i, CubicSpline* spline_coeff) 
+      DefaultVectorFormSurfSpline(int i, CubicSpline* spline_coeff) 
              : WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff) { }
-      DefaultSurfaceVectorFormSpline(int i, std::string area, CubicSpline* spline_coeff) 
+      DefaultVectorFormSurfSpline(int i, std::string area, CubicSpline* spline_coeff) 
              : WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff) { }
 
       template<typename Real, typename Scalar>
@@ -573,7 +786,7 @@ namespace WeakFormsH1 {
     public:
       DefaultWeakFormLaplace() : WeakForm(1)
       {
-        add_matrix_form(new VolumetricMatrixForms::DefaultMatrixFormGradGrad(0, 0));
+        add_matrix_form(new VolumetricMatrixForms::DefaultLinearDiffusion(0, 0));
       };
     };
   }

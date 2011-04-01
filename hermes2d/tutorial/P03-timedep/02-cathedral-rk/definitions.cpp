@@ -3,6 +3,10 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+using namespace WeakFormsH1;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::SurfaceMatrixForms;
+
 /* Weak forms */
 
 class CustomWeakFormHeatRK : public WeakForm
@@ -24,17 +28,19 @@ public:
     add_vector_form(vec_form_vol);
 
     // Residual - surface.
-    add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, lambda, rho, heatcap, 
-                         current_time_ptr, temp_init, t_final));
+    CustomFormResidualSurf* vec_form_surf = new CustomFormResidualSurf(0, bdy_air, alpha, lambda, rho, heatcap, 
+                         current_time_ptr, temp_init, t_final);
+    vec_form_surf->ext.push_back(prev_time_sln);
+    add_vector_form_surf(vec_form_surf);
   };
 
 private:
-  // Overriding method clone() in class DefaultMatrixFormGradGrad.
-  class CustomFormJacobianVol : public DefaultMatrixFormGradGrad
+  // Overriding method clone() in class DefaultLinearDiffusion.
+  class CustomFormJacobianVol : public DefaultLinearDiffusion
   {
   public:
     CustomFormJacobianVol(int i, int j, double coeff) 
-      : DefaultMatrixFormGradGrad(i, j, coeff) { }
+      : DefaultLinearDiffusion(i, j, coeff) { }
 
       virtual WeakForm::MatrixFormVol* clone() {
         return new CustomFormJacobianVol(*this);
@@ -109,14 +115,7 @@ private:
       Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      // This is a temporary workaround. The stage time t_n + h * c_i
-      // can be accessed via u_stage_time->val[0];
-      Func<Scalar>* u_stage_time = ext->fn[1]; 
-
-      Scalar stage_time = u_stage_time->val[0];
-      Real stage_ext_temp = temp_ext<Real>(stage_time);
-
-      Scalar result1 = stage_ext_temp * int_v<Real, Scalar>(n, wt, v);
+      Scalar result1 = get_current_stage_time() * int_v<Real, Scalar>(n, wt, v);
       Scalar result2 = 0;
       for (int i = 0; i < n; i++) {
         Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
@@ -141,7 +140,7 @@ private:
 
     // Time-dependent exterior temperature.
     template<typename Real>
-    Real temp_ext(Real t) {
+    Real temp_ext(Real t) const {
       return temp_init + 10. * sin(2*M_PI*t/t_final);
     }
 

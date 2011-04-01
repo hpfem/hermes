@@ -300,27 +300,6 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   // Original weak formulation.
   WeakForm* wf = dp->get_weak_formulation();
 
-  // Create constant Solutions to represent the stage times,
-  // stage_time = current_time + c_i*time_step.
-  // WARNING - THIS IS A TEMPORARY HACK. THE STAGE TIME SHOULD BE ENTERED
-  // AS A NUMBER, NOT IN THIS WAY. IT WILL BE ADDED AFTER EXISTING EXTERNAL
-  // SOLUTIONS IN ExtData.
-  /*
-  if(stage_time_sol != NULL) {
-    for (int i = 0; i < num_stages; i++)
-      delete stage_time_sol[i];
-    delete [] stage_time_sol;
-    stage_time_sol = NULL;
-  }
-
-  stage_time_sol = new Solution*[num_stages];
-
-  for (int i = 0; i < num_stages; i++) {
-    stage_time_sol[i] = new Solution(mesh);
-    stage_time_sol[i]->set_const(mesh, current_time + bt->get_C(i)*time_step);
-  }
-  */
-
   // Extracting volume and surface matrix and vector forms from the
   // original weak formulation.
   Hermes::vector<WeakForm::MatrixFormVol *> mfvol_base = wf->get_mfvol();
@@ -349,6 +328,8 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
         mfv_ij->adapt_order_increase = -1;
         mfv_ij->adapt_rel_error_tol = -1;
 
+        mfv_ij->set_current_stage_time(current_time + bt->get_C(i)*time_step);
+
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
         stage_wf_right.add_matrix_form(mfv_ij);
@@ -376,6 +357,8 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
         mfs_ij->adapt_order_increase = -1;
         mfs_ij->adapt_rel_error_tol = -1;
 
+        mfs_ij->set_current_stage_time(current_time + bt->get_C(i)*time_step);
+
         // Add the matrix form to the corresponding block of the
         // stage Jacobian matrix.
         stage_wf_right.add_matrix_form_surf(mfs_ij);
@@ -400,6 +383,8 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
       vfv_i->adapt_order_increase = -1;
       vfv_i->adapt_rel_error_tol = -1;
 
+      vfv_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
+
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.
       stage_wf_right.add_vector_form(vfv_i);
@@ -422,6 +407,8 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
       vfs_i->adapt_eval = false;
       vfs_i->adapt_order_increase = -1;
       vfs_i->adapt_rel_error_tol = -1;
+
+      vfs_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
 
       // Add the matrix form to the corresponding block of the
       // stage Jacobian matrix.

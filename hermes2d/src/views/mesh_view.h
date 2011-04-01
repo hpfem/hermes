@@ -65,6 +65,8 @@ protected:
   virtual void scale_dispatch() {}
   virtual const char* get_help_text() const;
 
+  Mesh* mesh;
+
 };
 
 #else // NOGLUT

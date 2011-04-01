@@ -3,7 +3,7 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace Laplace;
+using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::SurfaceMatrixForms;
 
@@ -14,13 +14,13 @@ public:
                         double time_step, double* current_time_ptr, double temp_init, double t_final, 
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    add_matrix_form(new DefaultMatrixFormGradGrad(0, 0, lambda));
-    add_matrix_form(new DefaultMatrixFormMass(0, 0, heatcap * rho / time_step));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, lambda));
+    add_matrix_form(new DefaultLinearMass(0, 0, heatcap * rho / time_step));
     CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);
 
-    add_matrix_form_surf(new DefaultSurfaceMatrixForm(0, 0, bdy_air, alpha * lambda));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha * lambda));
     add_vector_form_surf(new CustomVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
   };
 
@@ -75,7 +75,7 @@ private:
 
     // Time-dependent exterior temperature.
     template<typename Real>
-    Real temp_ext(Real t) {
+    Real temp_ext(Real t) const {
       return temp_init + 10. * sin(2*M_PI*t/t_final);
     }
 

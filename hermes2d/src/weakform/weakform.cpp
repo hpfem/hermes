@@ -25,6 +25,16 @@ WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, Herme
   area(area), ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
   adapt_eval = false;
+  stage_time = 0.0;
+}
+
+void WeakForm::Form::set_current_stage_time(double time)
+{
+  stage_time = time;
+}
+double WeakForm::Form::get_current_stage_time() const
+{
+  return stage_time;
 }
 
 scalar WeakForm::MatrixFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,

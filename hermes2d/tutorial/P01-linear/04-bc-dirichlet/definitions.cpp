@@ -36,7 +36,7 @@ class CustomWeakFormPoisson : public WeakForm
 {
 public:
   CustomWeakFormPoisson(double const_f) : WeakForm(1) {
-    add_matrix_form(new DefaultMatrixFormGradGrad(0, 0));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0));
     add_vector_form(new DefaultVectorFormConst(0, const_f));
   };
 };

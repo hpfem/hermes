@@ -8,8 +8,8 @@ using namespace RefinementSelectors;
 //  This example shows how to set an arbitrary initial guess for the
 //  Newton's method, and nonzero Dirichlet boundary conditions.
 //
-//  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] = heat_src.
+//  PDE: magnetostatics with nonlinear magnetic permeability
+//  curl[1/mu curl u] = current_density.
 //
 //  Domain: unit square (-10,10)^2.
 //
@@ -17,18 +17,23 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 2;                             // Initial polynomial degree.
+const int P_INIT = 3;                             // Initial polynomial degree.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
-const int INIT_GLOB_REF_NUM = 3;                  // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinements towards boundary.
+const int NEWTON_MAX_ITER = 1000;                 // Maximum allowed number of Newton iterations.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-double HEAT_SRC = 1.0;
+double MU_VACUUM = 4 * M_PI * 1e-7;
+double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
+double CURRENT_DENSITY = 1e6;                     // Volume source term.
 
-// Boundary markers.
+// Material and boundary markers.
+const std::string MAT_AIR = "0";
+const std::string MAT_IRON_1 = "1";
+const std::string MAT_IRON_2 = "2";
+const std::string MAT_COPPER = "3";
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
@@ -39,49 +44,49 @@ int main(int argc, char* argv[])
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
 
-  // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
-  // Here lambda(u) = 1 + u^4.
-  #define lambda(x) (1 + pow(x, 4))
-  Hermes::vector<double> lambda_pts(-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0);
-  Hermes::vector<double> lambda_val;
-  for (unsigned int i = 0; i < lambda_pts.size(); i++) {
-    lambda_val.push_back(lambda(lambda_pts[i]));
-  }
+  // Define nonlinear magnetic permeability via a cubic spline.
+  Hermes::vector<double> mu_pts(0.0,    0.5,   0.9,    1.0,    1.1,    1.2,    1.3,   1.4,   1.6,   1.7,   1.8,   1.9,   3.0,    5.0,    10.0);
+  Hermes::vector<double> mu_val(1/1500.0, 1/1480.0,    1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0, 1/750.0, 1/250.0, 1/180.0, 1/175.0, 1/150.0, 1/20.0, 1/10.0,  1/5.0);
+  for (unsigned int i=0; i < mu_val.size(); i++) mu_val[i] /= MU_VACUUM; 
 
   // Create the cubic spline (and plot it for visual control). 
   double second_der_left = 0.0;
   double second_der_right = 0.0;
   bool first_der_left = false;
   bool first_der_right = false;
-  bool extrapolate_der_left = true;
+  bool extrapolate_der_left = false;
   bool extrapolate_der_right = true;
-  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
-                 extrapolate_der_left, extrapolate_der_right);
-  bool success = cs.calculate_coeffs(); 
+  CubicSpline mu_inv_iron(mu_pts, mu_val, 0.0, 0.0, first_der_left, first_der_right,
+                           extrapolate_der_left, extrapolate_der_right);
+  bool success = mu_inv_iron.calculate_coeffs(); 
   if (!success) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
-  double interval_extension = 3.0; // The interval of definition of the spline will be 
+  double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
-  cs.plot("spline.dat", interval_extension);
+  mu_inv_iron.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("actuator.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+  //MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
+  //mv.show(&mesh);
 
   // Initialize boundary conditions.
-  CustomEssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
+  info("ndof: %d", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation
-  CustomWeakFormHeatTransferNewton wf(&cs, HEAT_SRC);
+  CustomWeakFormMagnetostatics wf(MAT_IRON_1, MAT_IRON_2, &mu_inv_iron, MAT_AIR, 
+                                  MU_VACUUM, MAT_COPPER, MU_VACUUM, CURRENT_DENSITY);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -93,34 +98,36 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
-  Solution sln;
+  Solution sln(&mesh, INIT_COND);
 
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  CustomInitialSolutionHeatTransfer init_sln(&mesh);
-  OGProjection::project_global(&space, &init_sln, coeff_vec, matrix_solver); 
+  OGProjection::project_global(&space, &sln, coeff_vec, matrix_solver); 
 
   // Perform Newton's iteration.
   bool verbose = true;
+  bool residual_as_function = false;
+  double damping_coeff = 0.6;
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
+                             damping_coeff)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Cleanup.
-  delete []coeff_vec;
+  delete [] coeff_vec;
   delete matrix;
   delete rhs;
   delete solver;
 
   // Visualise the solution and mesh.
-  ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));
+  ScalarView s_view("Solution", new WinGeom(0, 0, 500, 650));
   s_view.show_mesh(false);
   s_view.show(&sln);
-  OrderView o_view("Mesh", new WinGeom(450, 0, 400, 350));
+  OrderView o_view("Mesh", new WinGeom(510, 0, 400, 650));
   o_view.show(&space);
 
   // Wait for all views to be closed.

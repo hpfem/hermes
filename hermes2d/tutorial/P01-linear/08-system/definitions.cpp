@@ -22,7 +22,7 @@ public:
     add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
 
     // external forces
-    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultSurfaceVectorForm(0, non_zero_neumann_bnd, f0));
-    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultSurfaceVectorForm(1, non_zero_neumann_bnd, f1));
+    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultVectorFormSurf(0, non_zero_neumann_bnd, f0));
+    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultVectorFormSurf(1, non_zero_neumann_bnd, f1));
   };
 };

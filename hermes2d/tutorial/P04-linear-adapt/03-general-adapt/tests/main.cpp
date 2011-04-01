@@ -6,7 +6,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 12-adapt-general works correctly.
+// This test makes sure that example P04-linear-adapt/03-general-adapt works correctly.
 
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.6;                     // This is a quantitative parameter of the adapt(...) function and
@@ -62,7 +62,7 @@ scalar essential_bc_values(double x, double y)
 }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -79,22 +79,14 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_HORIZONTAL);
-  bc_types.add_bc_neumann(BDY_VERTICAL);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_HORIZONTAL, essential_bc_values);
+  CustomEssentialBCNonConst bc_essential(BDY_HORIZONTAL);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form, bilinear_form_ord, HERMES_SYM);
-  wf.add_vector_form(linear_form, linear_form_ord);
-  wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord, BDY_VERTICAL);
+  CustomWeakFormGeneral wf;
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -115,13 +107,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.

@@ -24,12 +24,12 @@
 
 namespace WeakFormsHcurl {
   namespace VolumetricMatrixForms {
-    class DefaultMatrixFormCurlCurl : public WeakForm::MatrixFormVol
+    class DefaultLinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMagnetostatics(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormCurlCurl(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMagnetostatics(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -56,12 +56,12 @@ namespace WeakFormsHcurl {
        coeff... constant number
     */
 
-    class DefaultMatrixFormMass : public WeakForm::MatrixFormVol
+    class DefaultLinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultMatrixFormMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
