@@ -27,7 +27,7 @@ private:
   class MatrixFormVolWave_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolWave_0_0(double tau) : WeakForm::MatrixFormVol(0, 0, HERMES_NONSYM), tau(tau) { }
+    MatrixFormVolWave_0_0(double tau) : WeakForm::MatrixFormVol(0, 0, HERMES_SYM), tau(tau) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -99,7 +99,7 @@ private:
   class MatrixFormVolWave_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolWave_1_1(double tau) : WeakForm::MatrixFormVol(1, 1, HERMES_NONSYM), tau(tau) { }
+    MatrixFormVolWave_1_1(double tau) : WeakForm::MatrixFormVol(1, 1, HERMES_SYM), tau(tau) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

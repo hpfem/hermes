@@ -18,7 +18,12 @@
 //      \frac{\partial E}{\partial t} = F,
 //      \frac{\partial F}{\partial t} = - SPEED_OF_LIGHT**2 * curl curl E.
 //
-// Domain: Rectangular domain (-a, a) x (-b, b)... See mesh file domain.mesh.
+// Approximated by
+// 
+//      \frac{E^{n+1}}{tau}                   - F^{n+1}             = \frac{E^{n}}{tau},
+//      SPEED_OF_LIGHT**2 * curl curl E^{n+1} + \frac{F^{n+1}}{tau} = \frac{F^{n}}{tau}.
+//
+// Domain: Rectangular domain (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
 //
 // BC:  E \times \nu = 0 on the boundary (perfect conductor),
 //      F \times \nu = 0 on the boundary (E \times \nu = 0 => \partial E / \partial t \times \nu = 0).
