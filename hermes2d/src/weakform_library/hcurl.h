@@ -24,12 +24,12 @@
 
 namespace WeakFormsHcurl {
   namespace VolumetricMatrixForms {
-    class DefaultLinearMagnetostatics : public WeakForm::MatrixFormVol
+    class DefaultLinearCurlCurl : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultLinearMagnetostatics(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultLinearMagnetostatics(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearCurlCurl(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -93,21 +93,25 @@ namespace WeakFormsHcurl {
       class DefaultVectorFormConst : public WeakForm::VectorFormVol
       {
       public:
-      DefaultVectorFormConst(int i, double coeff0, coeff1) 
+      DefaultVectorFormConst(int i, double coeff0, double coeff1) 
 	     : WeakForm::VectorFormVol(i), coeff0(coeff0), coeff1(coeff1) { }
       DefaultVectorFormConst(int i, std::string area, double coeff0, double coeff1) 
 	       : WeakForm::VectorFormVol(i, area), coeff0(coeff0), coeff1(coeff1) { }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                              Geom<double> *e, ExtData<scalar> *ext) const {
-          return coeff0 * int_v0<scalar, scalar>(n, wt, v) + 
-                 coeff1 * int_v1<scalar, scalar>(n, wt, v);
+          scalar int_v0 = 0, int_v1 = 0;
+          for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
+          for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
+          return coeff0 * int_v0 + coeff1 * int_v1;
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                 Geom<Ord> *e, ExtData<Ord> *ext) const {
-          return coeff0 * int_v0<Ord, Ord>(n, wt, v) + 
-                 coeff1 * int_v1<Ord, Ord>(n, wt, v);
+          Ord int_v0 = 0, int_v1 = 0;
+          for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
+          for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
+          return coeff0 * int_v0 + coeff1 * int_v1;
         }
 
       private:

@@ -117,7 +117,8 @@ public:
   static Trf ctm;
 
   static double nurbs_basis_fn(int i, int k, double t, double* knot);
-  static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y);
+  static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
+                         double& y, double& n_x, double& n_y, double& t_x, double& t_y);
   
   // definition of vertex basis functions for triangle
   static double lambda_0(double x, double y) { return -0.5 * (x + y); }
@@ -140,7 +141,8 @@ public:
 
   static const double2 ref_vert[2][4];
 
-  static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y);
+  // subtraction of straight edge and nurbs curve
+  static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
   static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y);
   static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
                               double& x, double& y);

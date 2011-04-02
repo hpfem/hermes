@@ -67,10 +67,7 @@ const double k = 1.0;
 
 #include "definitions.cpp"
 
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
+const std::string BDY = "Perfect conductor";
 
 /*
 // Unit tangential vectors to the boundary. 
@@ -108,6 +105,9 @@ Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Fu
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -115,40 +115,25 @@ int main(int argc, char* argv[])
   // mloader.load("screen-tri.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinements.
-  //for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Set exact solution.
   CustomExactSolution exact(&mesh);
 
-  // Initialize boundary conditions.
-  //DefaultEssentialBCNonConst bc_essential_top(BDY_TOP, &exact);
-  //EssentialBCs bcs(&bc_essential_top);
-/*
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_TOP, essential_bc_values_top);
-  bc_values.add_function(BDY_RIGHT, essential_bc_values_right);
-  bc_values.add_function(BDY_BOTTOM, essential_bc_values_bottom);
-  bc_values.add_function(BDY_LEFT, essential_bc_values_left);
-
-
-  // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
-  info("ndof = %d", ndof);
-
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
+  CustomWeakFormScreen wf;
+
+  // Initialize boundary conditions
+  DefaultEssentialBCNonConstHcurl bc_essential("Perfect conductor", &exact);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  HcurlSpace space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Set exact solution.
-  ExactSolution exact_sln(&mesh, exact);
 
   // Initialize views.
   VectorView v_view("Solution", new WinGeom(0, 0, 440, 350));
@@ -209,7 +194,7 @@ int main(int argc, char* argv[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    double err_exact_rel = calc_rel_error(&sln, &exact, HERMES_HCURL_NORM) * 100;
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_HCURL_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
@@ -257,6 +242,5 @@ int main(int argc, char* argv[])
   // Wait for all views to be closed.
   View::wait();
   return 0;
-*/
 }
 

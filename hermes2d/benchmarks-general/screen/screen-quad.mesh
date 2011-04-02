@@ -21,15 +21,15 @@ elements = [
 ]
 
 boundaries = [
-  [ 8, 9, 3 ],
-  [ 9, 0, 4 ],
-  [ 0, 1, 1 ],
-  [ 1, 2, 1 ],
-  [ 2, 3, 2 ],
-  [ 3, 4, 2 ],
-  [ 4, 5, 3 ],
-  [ 7, 8, 1 ],
-  [ 5, 6, 3 ],
-  [ 6, 7, 4 ]
+  [ 8, 9, "Perfect conductor" ],
+  [ 9, 0, "Perfect conductor" ],
+  [ 0, 1, "Perfect conductor" ],
+  [ 1, 2, "Perfect conductor" ],
+  [ 2, 3, "Perfect conductor" ],
+  [ 3, 4, "Perfect conductor" ],
+  [ 4, 5, "Perfect conductor" ],
+  [ 7, 8, "Perfect conductor" ],
+  [ 5, 6, "Perfect conductor" ],
+  [ 6, 7, "Perfect conductor" ]
 ]
 

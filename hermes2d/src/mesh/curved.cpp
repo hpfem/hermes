@@ -65,8 +65,10 @@ double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
   }
 }
 
-// nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
-void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y)
+// Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
+// as well as the unit normal and unit tangential vectors.
+void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
+                         double& y, double& n_x, double& n_y, double& t_x, double& t_y)
 {
   _F_
   t = (t + 1) / 2.0; // nurbs curves are parametrized from 0 to 1
@@ -77,6 +79,11 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     v[1] = e->vn[e->next_vert(edge)]->y - e->vn[edge]->y;
     x = e->vn[edge]->x + t * v[0];
     y = e->vn[edge]->y + t * v[1];
+    double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
+    t_x = v[0] / abs_v;
+    t_y = v[1] / abs_v;
+    n_x = t_y;
+    n_y = -t_x;
   }
   else
   {
@@ -95,6 +102,12 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     sum = 1.0 / sum;
     x *= sum;
     y *= sum;
+
+    printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
+    n_x = 0;
+    n_y = 0;
+    t_x = 0;
+    t_y = 0;
   }
 }
 
@@ -105,11 +118,11 @@ const double2 CurvMap::ref_vert[2][4] = {
   };
 
 // subtraction of straight edge and nurbs curve
-void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y)
+void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
 {
   int va = edge;
   int vb = e->next_vert(edge);
-  nurbs_edge(e, nurbs, edge, t, x, y);
+  nurbs_edge(e, nurbs, edge, t, x, y, n_x, n_y, t_x, t_y);
 
   x -= 0.5 * ((1-t) * (e->vn[va]->x) + (1+t) * (e->vn[vb]->x));
   y -= 0.5 * ((1-t) * (e->vn[va]->y) + (1+t) * (e->vn[vb]->y));
@@ -165,7 +178,8 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
     {
       // edge part
       double t = l_b - l_a;
-      nurbs_edge_0(e, nurbs[j], j, t, fx, fy);
+      double n_x, n_y, t_x, t_y;
+      nurbs_edge_0(e, nurbs[j], j, t, fx, fy, n_x, n_y, t_x, t_y);
       x += fx * l_a  * l_b;
       y += fy * l_a  * l_b;
     }
@@ -179,10 +193,11 @@ void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double x
   _F_
   double ex[4], ey[4];
 
-  nurbs_edge(e, nurbs[0], 0,  xi_1, ex[0], ey[0]);
-  nurbs_edge(e, nurbs[1], 1,  xi_2, ex[1], ey[1]);
-  nurbs_edge(e, nurbs[2], 2, -xi_1, ex[2], ey[2]);
-  nurbs_edge(e, nurbs[3], 3, -xi_2, ex[3], ey[3]);
+  double n_x, n_y, t_x, t_y;
+  nurbs_edge(e, nurbs[0], 0,  xi_1, ex[0], ey[0], n_x, n_y, t_x, t_y);
+  nurbs_edge(e, nurbs[1], 1,  xi_2, ex[1], ey[1], n_x, n_y, t_x, t_y);
+  nurbs_edge(e, nurbs[2], 2, -xi_1, ex[2], ey[2], n_x, n_y, t_x, t_y);
+  nurbs_edge(e, nurbs[3], 3, -xi_2, ex[3], ey[3], n_x, n_y, t_x, t_y);
 
   x = (1-xi_2)/2.0 * ex[0] + (1+xi_1)/2.0 * ex[1] +
       (1+xi_2)/2.0 * ex[2] + (1-xi_1)/2.0 * ex[3] -

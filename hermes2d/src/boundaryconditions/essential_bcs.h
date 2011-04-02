@@ -47,8 +47,9 @@ public:
   /// Pure virtual function giving info whether u_Essential is a constant or a function.
   virtual EssentialBCValueType get_value_type() const = 0;
 
-  /// Represents a function prescribed on the boundary.
-  virtual scalar value(double x, double y) const = 0;
+  /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
+  /// normal and tangential vectors.
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
 
   /// Special case of a constant function.
   scalar value_const;
@@ -77,7 +78,7 @@ public:
 
   /// Function giving info that u_Essential is a constant.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_CONST; }
-  virtual scalar value(double x, double y) const;
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 };
 
 /// Class representing non-constant essential boundary condition for scalar approximation.
@@ -91,7 +92,7 @@ public:
  
   ~DefaultEssentialBCNonConst() {};
 
-  virtual scalar value(double x, double y) const;
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
   /// Function giving info that u_Essential is a non-constant function.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
@@ -100,7 +101,7 @@ public:
 };
 
 /// Class representing non-constant essential boundary condition 
-//  (tangential component for Hcurl approximations).
+/// (tangential component for Hcurl approximations).
 class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition
 {
 public:
@@ -111,7 +112,7 @@ public:
  
   ~DefaultEssentialBCNonConstHcurl() {};
 
-  virtual scalar value(double x, double y) const;
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
   /// Function giving info that u_Essential is a non-constant function.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
