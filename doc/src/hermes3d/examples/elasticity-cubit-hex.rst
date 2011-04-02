@@ -1,5 +1,5 @@
 Elasticity-cubit-hex
-=============
+=====================
 
 **Git reference:** Example `elasticity-cubit-hex <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes3d/examples/elasticity-cubit-hex>`_.
 
