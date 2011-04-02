@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree.
-const double NEWTON_TOL = 1e-9;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 1000;                 // Maximum allowed number of Newton iterations.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -27,7 +27,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double MU_VACUUM = 4. * M_PI * 1e-7;
 double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
-double CURRENT_DENSITY = 1e9;                     // Volume source term.
+double CURRENT_DENSITY = 1e6;                     // Volume source term.
 
 // Material and boundary markers.
 const std::string MAT_AIR = "2";
@@ -131,10 +131,16 @@ int main(int argc, char* argv[])
   delete solver;
 
   // Visualise the solution and mesh.
-  ScalarView s_view("Solution", new WinGeom(0, 0, 500, 650));
-  s_view.show_mesh(false);
-  s_view.show(&sln);
-  OrderView o_view("Mesh", new WinGeom(510, 0, 400, 650));
+  ScalarView s_view1("Solution (vector potencial)", new WinGeom(0, 0, 350, 450));
+  s_view1.show_mesh(false);
+  s_view1.show(&sln);
+
+  ScalarView s_view2("Gradient (flux density)", new WinGeom(360, 0, 350, 450));
+  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+  s_view2.show_mesh(false);
+  s_view2.show(&grad);
+
+  OrderView o_view("Mesh", new WinGeom(730, 0, 350, 450));
   o_view.show(&space);
 
   // Wait for all views to be closed.
