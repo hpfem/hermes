@@ -34,8 +34,8 @@
 
 const int P_INIT = 2;                              // Initial polynomial degree of all elements.
 const int INIT_REF_NUM = 4;                        // Number of initial uniform mesh refinements.
-const double time_step = 0.01;                     // Time step.
-const double T_FINAL = 2.15;                       // Final time.
+const double time_step = 0.05;                     // Time step.
+const double T_FINAL = 35.0;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
