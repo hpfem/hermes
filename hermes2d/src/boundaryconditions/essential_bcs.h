@@ -25,6 +25,7 @@
 
 //#include "../function/solution.h"
 class ExactSolutionScalar;
+class ExactSolutionVector;
 
 /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
 class HERMES_API EssentialBoundaryCondition
@@ -79,13 +80,13 @@ public:
   virtual scalar value(double x, double y) const;
 };
 
-/// Class representing non-constant essential boundary condition.
+/// Class representing non-constant essential boundary condition for scalar approximation.
 class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition
 {
 public:
+  // Function values given by a scalar exact solution.
   DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
                              ExactSolutionScalar* exact_solution); 
-
   DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar* exact_solution); 
  
   ~DefaultEssentialBCNonConst() {};
@@ -96,6 +97,26 @@ public:
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   ExactSolutionScalar* exact_solution;
+};
+
+/// Class representing non-constant essential boundary condition 
+//  (tangential component for Hcurl approximations).
+class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition
+{
+public:
+  // Tangential values given by a vector-valued solution.
+  DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
+                                  ExactSolutionVector* exact_solution2); 
+  DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector* exact_solution2); 
+ 
+  ~DefaultEssentialBCNonConstHcurl() {};
+
+  virtual scalar value(double x, double y) const;
+
+  /// Function giving info that u_Essential is a non-constant function.
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
+
+  ExactSolutionVector* exact_solution2;
 };
 
 /// Class encapsulating all boundary conditions of one problem.
