@@ -2,6 +2,8 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+/* Essential boundary conditions */
+
 class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
   EssentialBCNonConst(std::string marker) 
@@ -15,10 +17,13 @@ public:
   inline EssentialBCValueType get_value_type() const 
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  virtual scalar value(double x, double y) const {
+  virtual scalar value(double x, double y, double n_x, double n_y, 
+                       double t_x, double t_y) const {
     return -cos(M_PI*x);
   }
 };
+
+/* Weak forms */
 
 class CustomWeakFormGeneral : public WeakForm
 {
