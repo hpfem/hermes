@@ -134,17 +134,20 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensity sln_rho(&mesh_flow, RHO_EXT);
   InitialSolutionEulerDensityVelX sln_rho_v_x(&mesh_flow, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY sln_rho_v_y(&mesh_flow, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy sln_e(&mesh_flow, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy sln_e(&mesh_flow, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
   InitialSolutionConcentration sln_c(&mesh_concentration, 0.0);
 
   InitialSolutionEulerDensity prev_rho(&mesh_flow, RHO_EXT);
   InitialSolutionEulerDensityVelX prev_rho_v_x(&mesh_flow, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh_flow, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy prev_e(&mesh_flow, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy prev_e(&mesh_flow, QuantityCalculator:: calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
   InitialSolutionConcentration prev_c(&mesh_concentration, 0.0);
 
+  // Numerical flux.
+  OsherSolomonNumericalFlux num_flux(KAPPA);
+
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitCoupled wf(SETUP_VARIANT, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+  EulerEquationsWeakFormExplicitCoupled wf(SETUP_VARIANT, &num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, EPSILON);
   wf.set_time_step(time_step);
 

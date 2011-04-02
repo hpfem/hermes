@@ -40,6 +40,8 @@ Trf CurvMap::ctm;
 
 //// NURBS //////////////////////////////////////////////////////////////////////////////////////////
 // recursive calculation of the basis function N_i,k
+bool CurvMap::warning_issued = false;
+
 double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
 {
   _F_
@@ -103,7 +105,10 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     x *= sum;
     y *= sum;
 
-    printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
+    if(!warning_issued) {
+      printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
+      warning_issued = true;
+    }
     n_x = 0;
     n_y = 0;
     t_x = 0;

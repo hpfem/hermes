@@ -62,7 +62,7 @@ struct HERMES_API Nurbs
 class HERMES_API CurvMap
 {
 public:
-  CurvMap() { coeffs = NULL; };
+  CurvMap() { coeffs = NULL;};
   CurvMap(CurvMap* cm);
   ~CurvMap();
 
@@ -160,6 +160,8 @@ public:
   static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
   
   static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
+
+  static bool warning_issued;
 };
 
 

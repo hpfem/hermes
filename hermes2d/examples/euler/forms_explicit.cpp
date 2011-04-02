@@ -12,7 +12,7 @@ public:
   // Constructor.
   EulerEquationsWeakFormExplicit(NumericalFlux* num_flux, double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
   std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
-  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, bool supersonic_outlet = false, int num_of_equations = 4) :
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, int num_of_equations = 4) :
   WeakForm(num_of_equations), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), pressure_ext(pressure_ext), 
   energy_ext(QuantityCalculator::calc_energy(rho_ext, rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)) {
     add_matrix_form(new EulerEquationsBilinearFormTime(0));
@@ -54,10 +54,10 @@ public:
     add_vector_form_surf(new EulerEquationsLinearFormInlet(2, inlet_marker, num_flux));
     add_vector_form_surf(new EulerEquationsLinearFormInlet(3, inlet_marker, num_flux));
 
-    add_vector_form_surf(new EulerEquationsLinearFormOutlet(0, outlet_marker, num_flux, supersonic_outlet));
-    add_vector_form_surf(new EulerEquationsLinearFormOutlet(1, outlet_marker, num_flux, supersonic_outlet));
-    add_vector_form_surf(new EulerEquationsLinearFormOutlet(2, outlet_marker, num_flux, supersonic_outlet));
-    add_vector_form_surf(new EulerEquationsLinearFormOutlet(3, outlet_marker, num_flux, supersonic_outlet));
+    add_vector_form_surf(new EulerEquationsLinearFormOutlet(0, outlet_marker, num_flux));
+    add_vector_form_surf(new EulerEquationsLinearFormOutlet(1, outlet_marker, num_flux));
+    add_vector_form_surf(new EulerEquationsLinearFormOutlet(2, outlet_marker, num_flux));
+    add_vector_form_surf(new EulerEquationsLinearFormOutlet(3, outlet_marker, num_flux));
 
     for(unsigned int vector_form_i = 0; vector_form_i < this->vfvol.size(); vector_form_i++) {
       vfvol.at(vector_form_i)->ext.push_back(prev_density);
@@ -468,8 +468,8 @@ protected:
   class EulerEquationsLinearFormOutlet : public WeakForm::VectorFormSurf
   {
   public:
-    EulerEquationsLinearFormOutlet(int i, std::string marker, NumericalFlux* num_flux, bool supersonic_outlet) : 
-    WeakForm::VectorFormSurf(i, marker), element(i), num_flux(num_flux), supersonic_outlet(supersonic_outlet) {}
+    EulerEquationsLinearFormOutlet(int i, std::string marker, NumericalFlux* num_flux) : 
+    WeakForm::VectorFormSurf(i, marker), element(i), num_flux(num_flux) {}
 
     double value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       double result = 0;
@@ -479,11 +479,7 @@ protected:
         w_L[1] = ext->fn[1]->val[i];
         w_L[2] = ext->fn[2]->val[i];
         w_L[3] = ext->fn[3]->val[i];
-    
-        if(supersonic_outlet)
-          result -= wt[i] * v->val[i] * num_flux->numerical_flux_outlet_supersonic_i(element, w_L, e->nx[i], e->ny[i]);
-        else
-          result -= wt[i] * v->val[i] * num_flux->numerical_flux_outlet_subsonic_i(element, w_L, static_cast<EulerEquationsWeakFormExplicit*>(wf)->pressure_ext, e->nx[i], e->ny[i]);
+        result -= wt[i] * v->val[i] * num_flux->numerical_flux_outlet_i(element, w_L, static_cast<EulerEquationsWeakFormExplicit*>(wf)->pressure_ext, e->nx[i], e->ny[i]);
       }
       return result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
     }
@@ -495,7 +491,6 @@ protected:
     // Members.
     int element;
     NumericalFlux* num_flux;
-    bool supersonic_outlet;
   };
   // Members.
   double rho_ext;
@@ -516,9 +511,9 @@ public:
   // Constructor.
   EulerEquationsWeakFormExplicitCoupled(int variant, NumericalFlux* num_flux, double kappa, double rho_ext, double v1_ext, double v2_ext, double pressure_ext, 
   std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, std::string inlet_marker, std::string outlet_marker, 
-  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, Solution* prev_concentration, double epsilon, bool supersonic_outlet = false) :
+  Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, Solution* prev_energy, Solution* prev_concentration, double epsilon) :
   EulerEquationsWeakFormExplicit(num_flux, kappa, rho_ext, v1_ext, v2_ext, pressure_ext, solid_wall_bottom_marker, solid_wall_top_marker, inlet_marker, outlet_marker, prev_density,
-  prev_density_vel_x, prev_density_vel_y, prev_energy, supersonic_outlet, 5) {
+  prev_density_vel_x, prev_density_vel_y, prev_energy, 5) {
 
     add_matrix_form(new EulerEquationsBilinearFormTime(4));
     
@@ -696,7 +691,7 @@ protected:
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return Ord(20);
+      return Ord(15);
     }
   };
 };

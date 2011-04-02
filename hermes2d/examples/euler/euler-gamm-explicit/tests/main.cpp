@@ -29,8 +29,10 @@ const double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;         // Kappa.
 
 // Boundary markers.
-const std::string BDY_SOLID_WALL = "1";
-const std::string BDY_INLET_OUTLET = "2";
+const std::string BDY_INLET = "1";
+const std::string BDY_OUTLET = "2";
+const std::string BDY_SOLID_WALL_BOTTOM = "3";
+const std::string BDY_SOLID_WALL_TOP = "4";
 
 // Weak forms.
 #include "../forms_explicit.cpp"
@@ -47,17 +49,7 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_SOLID_WALL, 1);
-  if(INIT_REF_NUM == 4) {
-  mesh.refine_element_id(1053);
-  mesh.refine_element_id(1054);
-  mesh.refine_element_id(1087);
-  mesh.refine_element_id(1088);
-  mesh.refine_element_id(1117);
-  mesh.refine_element_id(1118);
-  mesh.refine_element_id(1151);
-  mesh.refine_element_id(1152);
-  }
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -69,19 +61,23 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensity sln_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX sln_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY sln_rho_v_y(&mesh, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy sln_e(&mesh, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy sln_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
   
   InitialSolutionEulerDensity prev_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX prev_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy prev_e(&mesh, calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+  InitialSolutionEulerDensityEnergy prev_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
+
+  // Numerical flux.
+  OsherSolomonNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
-    BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+  EulerEquationsWeakFormExplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
   bool is_linear = true;
+  
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.
@@ -141,7 +137,7 @@ int main(int argc, char* argv[])
               double v2 = solution_vector[al.dof[0]] / rho;
               space_e.get_element_assembly_list(e, &al);
               double energy = solution_vector[al.dof[0]];
-              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
+              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + culator::calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
               if(condition < min_condition || min_condition == 0.)
                 min_condition = condition;
             }

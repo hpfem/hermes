@@ -310,7 +310,7 @@ void OsherSolomonNumericalFlux::numerical_flux_inlet(double result[4], double w_
   a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
   a_B = QuantityCalculator::calc_sound_speed(q_B[0], q_B[1], q_B[2], q_B[3], kappa);
 
-  if(q_B[1] / q_B[0] > a_B) {// Supersonic inlet - everything is prescribed.
+  if(q_L[1] / q_L[0] > a_L) {// Supersonic inlet - everything is prescribed.
     f_1(result, q_B);
     Q_inv(result, result, nx, ny);
     return;
@@ -372,56 +372,46 @@ double OsherSolomonNumericalFlux::numerical_flux_inlet_i(int component, double w
   return result[component];
 }
 
-void OsherSolomonNumericalFlux::numerical_flux_outlet_supersonic(double result[4], double w_L[4], double nx, double ny)
-{
-  // At the beginning, rotate the states into the local coordinate system and store the left and right state
-  // so we do not have to pass it around.
-  Q(q_L, w_L, nx, ny);
-
-  f_1(result, q_L);
-  Q_inv(result, result, nx, ny);
-  return;
-}
-  
-double OsherSolomonNumericalFlux::numerical_flux_outlet_supersonic_i(int component, double w_L[4], double nx, double ny)
-{
-  double result[4];
-  numerical_flux_outlet_supersonic(result, w_L, nx, ny);
-  return result[component];
-}
-
-void OsherSolomonNumericalFlux::numerical_flux_outlet_subsonic(double result[4], double w_L[4], double pressure, double nx, double ny)
+void OsherSolomonNumericalFlux::numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny)
 {
   // At the beginning, rotate the states into the local coordinate system and store the left and right state
   // so we do not have to pass it around.
   Q(q_L, w_L, nx, ny);
 
   double a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
-  this->q_B[0] = q_L[0] * std::pow(pressure / QuantityCalculator::calc_pressure(this->q_L[0], this->q_L[1], this->q_L[2], this->q_L[3], kappa), 1 / kappa);
-  this->q_B[1] = this->q_B[0] * (q_L[1] / q_L[0] + (2 / (kappa - 1)) * (a_L - std::sqrt(kappa * pressure / q_B[0])));
-  this->q_B[2] = this->q_B[0] * this->q_L[2] / this->q_L[0];
-  this->q_B[3] = QuantityCalculator::calc_energy(this->q_B[0], this->q_B[1], this->q_B[2], pressure, kappa);
-  if(q_B[1] / q_B[0] < QuantityCalculator::calc_sound_speed(this->q_B[0], this->q_B[1], this->q_B[2], this->q_B[3], kappa)) {
-    f_1(result, q_B);
+
+  if(q_L[1] / q_L[0] > a_L) {// Supersonic inlet - everything is prescribed.
+    f_1(result, q_L);
     Q_inv(result, result, nx, ny);
     return;
   }
   else {
-    double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
-    q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
-    q_L_star[1] = a_l_star;
-    q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
-    q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
-    f_1(result, q_L_star);
-    Q_inv(result, result, nx, ny);
-    return;
+    this->q_B[0] = q_L[0] * std::pow(pressure / QuantityCalculator::calc_pressure(this->q_L[0], this->q_L[1], this->q_L[2], this->q_L[3], kappa), 1 / kappa);
+    this->q_B[1] = this->q_B[0] * (q_L[1] / q_L[0] + (2 / (kappa - 1)) * (a_L - std::sqrt(kappa * pressure / q_B[0])));
+    this->q_B[2] = this->q_B[0] * this->q_L[2] / this->q_L[0];
+    this->q_B[3] = QuantityCalculator::calc_energy(this->q_B[0], this->q_B[1], this->q_B[2], pressure, kappa);
+    if(q_B[1] / q_B[0] < QuantityCalculator::calc_sound_speed(this->q_B[0], this->q_B[1], this->q_B[2], this->q_B[3], kappa)) {
+      f_1(result, q_B);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    else {
+      double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+      q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+      q_L_star[1] = a_l_star;
+      q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+      q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+      f_1(result, q_L_star);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
   }
 }
   
-double OsherSolomonNumericalFlux::numerical_flux_outlet_subsonic_i(int component, double w_L[4], double pressure, double nx, double ny)
+double OsherSolomonNumericalFlux::numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny)
 {
   double result[4];
-  numerical_flux_outlet_supersonic(result, w_L, nx, ny);
+  numerical_flux_outlet(result, w_L, pressure, nx, ny);
   return result[component];
 }
 

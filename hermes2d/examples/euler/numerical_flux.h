@@ -27,13 +27,9 @@ public:
   virtual double numerical_flux_inlet_i(int component, double w_L[4], double w_B[4],
           double nx, double ny) = 0;
 
-  virtual void numerical_flux_outlet_supersonic(double result[4], double w_L[4], double nx, double ny) = 0;
+  virtual void numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny) = 0;
   
-  virtual double numerical_flux_outlet_supersonic_i(int component, double w_L[4], double nx, double ny) = 0;
-
-  virtual void numerical_flux_outlet_subsonic(double result[4], double w_L[4], double pressure, double nx, double ny) = 0;
-  
-  virtual double numerical_flux_outlet_subsonic_i(int component, double w_L[4], double pressure, double nx, double ny) = 0;
+  virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny) = 0;
 
 protected:
   /// Rotates the state_vector into the local coordinate system.
@@ -76,13 +72,9 @@ public:
   virtual double numerical_flux_inlet_i(int component, double w_L[4], double w_R[4],
           double nx, double ny);
 
-  virtual void numerical_flux_outlet_supersonic(double result[4], double w_L[4], double nx, double ny);
+  virtual void numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny);
   
-  virtual double numerical_flux_outlet_supersonic_i(int component, double w_L[4], double nx, double ny);
-
-  virtual void numerical_flux_outlet_subsonic(double result[4], double w_L[4], double pressure, double nx, double ny);
-  
-  virtual double numerical_flux_outlet_subsonic_i(int component, double w_L[4], double pressure, double nx, double ny);
+  virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny);
 
 protected:
   void calculate_q_1_a_1_a_3();
