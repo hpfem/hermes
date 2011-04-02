@@ -16,10 +16,10 @@ using Teuchos::rcp;
 using Hermes::EigenSolver;
 
 // Boundary markers.
-const std::string BDY_ALL = "1";
+const std::string BDY = "Zero Dirichlet";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DefaultEssentialBCConst bc_essential(BDY_ALL, 0.0);
+  DefaultEssentialBCConst bc_essential(BDY, 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

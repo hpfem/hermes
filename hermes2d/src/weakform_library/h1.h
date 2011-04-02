@@ -32,7 +32,7 @@ namespace WeakFormsH1 {
       DefaultLinearDiffusion(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
       DefaultLinearDiffusion(int i, int j, std::string area, 
-                                 double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+                             double coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
