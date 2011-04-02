@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-9;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 1000;                 // Maximum allowed number of Newton iterations.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -27,7 +27,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double MU_VACUUM = 4. * M_PI * 1e-7;
 double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
-double CURRENT_DENSITY = 1e6;                     // Volume source term.
+double CURRENT_DENSITY = 1e9;                     // Volume source term.
 
 // Material and boundary markers.
 const std::string MAT_AIR = "2";
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
                                     1/750.0,  1/250.0,  1/180.0,  1/175.0,  1/150.0,  1/20.0,   1/10.0,  1/5.0);
   */
   Hermes::vector<double> mu_inv_pts(0.0,      10.0);
-  Hermes::vector<double> mu_inv_val(1/30.0,   1/30.0);
+  Hermes::vector<double> mu_inv_val(1/300.0,   1/300.0);
 
   // Create the cubic spline (and plot it for visual control). 
   double second_der_left = 0.0;
@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
-  mv.show(&mesh);
+  //MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
+  //mv.show(&mesh);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   bool verbose = true;
   bool residual_as_function = false;
-  double damping_coeff = 0.5;
+  double damping_coeff = 1.0;
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
                              damping_coeff)) error("Newton's iteration failed.");

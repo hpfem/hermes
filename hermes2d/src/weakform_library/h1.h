@@ -112,8 +112,7 @@ namespace WeakFormsH1 {
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        // This is not a mistake, the inner product of two curls of scalar
-        // functions is the same as the product of gradients.
+        // The following follows from the identity curl curl A = -Laplace A
         return coeff * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
       }
 
@@ -149,16 +148,14 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          // This is not a mistake, the inner product of two curls of scalar
-          // functions is the same as the product of gradients.
           Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           //if (e->elem_marker != -9999) printf("B = %g\n", B_i);
           if (B_i > 1e-12) {
-            result -= wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+            result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
           }
-          result -= wt[i] * spline_coeff->get_value(B_i) 
+          result += wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
@@ -463,8 +460,7 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         Func<Scalar>* u_prev = u_ext[0];
-        // This is not a mistake, the inner product of two curls of scalar
-        // functions is the same as the product of gradients.
+        // The following follows from the identity curl curl A = -Laplace A
         for (int i = 0; i < n; i++) {
           result += wt[i] * coeff * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
         }
@@ -503,12 +499,10 @@ namespace WeakFormsH1 {
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         Func<Scalar>* u_prev = u_ext[0];
-        // This is not a mistake, the inner product of two curls of scalar
-        // functions is the same as the product of gradients.
         for (int i = 0; i < n; i++) {
           Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result -= wt[i] * spline_coeff->get_value(B_i) * 
-                             (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+          result += wt[i] * spline_coeff->get_value(B_i) * 
+                    (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
         }
         return result;
       }
