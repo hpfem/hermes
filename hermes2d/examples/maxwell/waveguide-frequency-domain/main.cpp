@@ -37,7 +37,7 @@ const int P_INIT = 2;                             // Initial polynomial degree. 
                                                   // to the maximum poly order of the tangential component, and polynomials
                                                   // of degree P_INIT + 1 are present in element interiors. P_INIT = 0
                                                   // is for Whitney elements.
-const bool ALIGN_MESH = true;                     // if ALIGN_MESH == true, curvilinear elements aligned with the
+const bool ALIGN_MESH = false;                    // if ALIGN_MESH == true, curvilinear elements aligned with the
                                                   // circular load are used, otherwise one uses a non-aligned mesh.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -105,15 +105,15 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   if (ALIGN_MESH) mloader.load("oven_load_circle.mesh", &mesh);
   else mloader.load("oven_load_square.mesh", &mesh);
-
+  
   // Perform initial mesh refinemets.
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakForm wf();
+  CustomWeakForm wf(e_0, mu_0, mu_r, kappa, omega, J, ALIGN_MESH);
 
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY_PERFECT_CONDUCTOR, 0.0, 0.0);
+  DefaultEssentialBCConst bc_essential(BDY_PERFECT_CONDUCTOR, std::complex<double>(0.0, 0.0));
   EssentialBCs bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
