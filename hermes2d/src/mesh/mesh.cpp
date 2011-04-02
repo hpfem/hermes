@@ -735,6 +735,9 @@ static char* rtb_vert;
 
 void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
 {
+  if (rtb_tria_to_quad)  
+    this->convert_to_base();
+
   Element* e;
   elements.set_append_only(true);
   for (int r, i = 0; i < depth; i++) {
@@ -743,29 +746,6 @@ void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
     }
   }
   elements.set_append_only(false);
-
-  // FIXME:
-  if (rtb_tria_to_quad)
-  {
-    Mesh tmp;
-    tmp.copy_converted(this);
-    for (int i = 0; i < tmp.ntopvert; i++)
-    {
-      if (tmp.nodes[i].type == 1)
-      {
-       tmp.nodes[i].y = 0.0;
-      }
-    }
-    char* mesh_tmp = NULL;
-    mesh_tmp = tmpnam(NULL);
-    tmp.save(mesh_tmp);
-    Mesh mesh_tmp_for_convert;
-    H2DReader loader_mesh_tmp_for_convert;
-    loader_mesh_tmp_for_convert.load(mesh_tmp, &tmp);
-    remove(mesh_tmp);
-    copy(&tmp);
-  }
-
 }
 
 static int rtv_id;
@@ -1307,9 +1287,9 @@ void Mesh::copy_converted(Mesh* mesh)
 }
 
 ////convert a triangle element into three quadrilateral elements///////
-
 void Mesh::convert_triangles_to_quads()
 {
+  this->convert_to_base();
   Element* e;
   Mesh tmp;
 
@@ -1365,6 +1345,36 @@ void Mesh::convert_quads_to_triangles()
   copy(&tmp);
 }
 
+////convert all active elements to a base mesh.///////
+
+void Mesh::convert_to_base()
+{
+  Element* e;
+  Mesh tmp;
+
+  elements.set_append_only(true);
+  for_all_active_elements(e, this)
+    convert_element_to_base_id(e->id);
+  elements.set_append_only(false);
+
+  tmp.copy_converted(this);
+  for (int i = 0; i < tmp.ntopvert; i++)
+  {
+     if (tmp.nodes[i].type == 1)
+     {
+       tmp.nodes[i].y = 0.0;
+     }
+  }
+  char* mesh_tmp = NULL;
+  mesh_tmp = tmpnam(NULL);
+  tmp.save(mesh_tmp);
+  Mesh mesh_tmp_for_convert;
+  H2DReader loader_mesh_tmp_for_convert;
+  loader_mesh_tmp_for_convert.load(mesh_tmp, &tmp);
+  remove(mesh_tmp);
+  copy(&tmp);
+}
+
 void Mesh::refine_triangle_to_quads(Element* e)
 {
   // remember the markers of the edge nodes
@@ -1385,9 +1395,17 @@ void Mesh::refine_triangle_to_quads(Element* e)
   mid->x = (nodes[x0->id].x + nodes[x1->id].x + nodes[x2->id].x)/3;
   mid->y = (nodes[x0->id].y + nodes[x1->id].y + nodes[x2->id].y)/3;
 
-  // get the son's edge angle.
+  // check if element e is a internal element.
+  bool e_inter = true;
+  for (int n = 0; n < e->nvert; n++)
+  {  
+    if (bnd[n] == 1)
+      e_inter = false;
+  }
+
+  // get the boundary edge angle.
   double refinement_angle[3] = {0.0, 0.0, 0.0};
-  if (e->is_curved())
+  if (e->is_curved() && (!e_inter))
   {
 	// for base element.
     if (e->cm->toplevel == true) 
@@ -1460,14 +1478,6 @@ void Mesh::refine_triangle_to_quads(Element* e)
     }
   }
 
-  // check if element e is a internal element.
-  bool e_inter = true;
-  for (int n = 0; n < e->nvert; n++)
-  {  
-    if (bnd[n] == 1)
-      e_inter = false;
-  }
-
   // adjust mid-edge and gravity coordinates if this is a curved element
   if (e->is_curved())
   {
@@ -1479,11 +1489,11 @@ void Mesh::refine_triangle_to_quads(Element* e)
       x1->x = pt[1][0]; x1->y = pt[1][1];
       x2->x = pt[2][0]; x2->y = pt[2][1];
       mid->x = pt[3][0]; mid->y = pt[3][1];
-	}
-   }
+    }
+  }
 
-  double angle2;
-  int idx;
+  double angle2 = 0.0;
+  int idx = 0;
   CurvMap* cm[3];
   memset(cm, 0, sizeof(cm));
 
@@ -1501,7 +1511,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
       }
     }
 
-    idx=0;
+    idx = 0;
     if (e->cm->nurbs[idx] != NULL)
     {
       angle2 = refinement_angle[0] / 2;
@@ -1536,8 +1546,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
         nurbs->arc = cricle;
         nurbs->degree = 2;
 
-        int inner = 1, outer;
-        inner = 1;
+        int inner = 1, outer = 0;
         nurbs->np = inner + 2;
         nurbs->pt = new double3[nurbs->np];
 
@@ -1559,7 +1568,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
         nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
         nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
 
-        int i;
+        int i = 0;
         inner = 0;
         nurbs->nk = nurbs->degree + nurbs->np + 1;
         outer = nurbs->nk - inner;
@@ -1583,7 +1592,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
     idx = 1;
     if (e->cm->nurbs[idx] != NULL)
     { 
-	  angle2 = refinement_angle[1] / 2;
+      angle2 = refinement_angle[1] / 2;
       Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
       for (int k = 0; k < 2; k++)
       {
@@ -1612,8 +1621,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
 
         nurbs->arc = cricle;
         nurbs->degree = 2;
-        int inner = 1, outer;
-        inner = 1;
+        int inner = 1, outer = 0;
         nurbs->np = inner + 2;
         nurbs->pt = new double3[nurbs->np];
 
@@ -1635,7 +1643,7 @@ void Mesh::refine_triangle_to_quads(Element* e)
         nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
         nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
 
-        int i;
+        int i = 0;
         inner = 0;
         nurbs->nk = nurbs->degree + nurbs->np + 1;
         outer = nurbs->nk - inner;
@@ -1704,7 +1712,7 @@ void Mesh::refine_element_to_quads_id(int id)
   if (e->is_triangle())
     refine_triangle_to_quads(e);
   else
-    return;//refine_quad(this, e, 0);
+    return;
 
   seq = g_mesh_seq++;
 }
@@ -1905,6 +1913,20 @@ void Mesh::refine_element_to_triangles_id(int id)
     return;
   else
     refine_quad_to_triangles(e);
+
+  seq = g_mesh_seq++;
+}
+
+void Mesh::convert_element_to_base_id(int id)
+{
+  Element* e = get_element(id);
+  if (!e->used) error("Invalid element id number.");
+  if (!e->active) error("Attempt to refine element #%d which has been refined already.", e->id);
+
+  if (e->is_triangle())
+    convert_triangles_to_base(e);
+  else
+    convert_quads_to_base(e);
 
   seq = g_mesh_seq++;
 }
@@ -2263,3 +2285,385 @@ void Mesh::BoundaryMarkersConversion::operator=(const BoundaryMarkersConversion&
   
   min_marker_unused = src.min_marker_unused;
 }
+
+void Mesh::convert_triangles_to_base(Element *e)
+{
+  // remember the markers of the edge nodes
+  int bnd[3] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd    };
+  int mrk[3] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker };
+
+  // check if element e is a internal element.
+  bool e_inter = true;
+  for (int n = 0; n < e->nvert; n++)
+  {  
+    if (bnd[n] == 1)
+      e_inter = false;
+  }
+
+  // get the boundary edge angle.
+  double refinement_angle[3] = {0.0, 0.0, 0.0};
+  if (e->is_curved() && (!e_inter))
+  {
+    // for base element.
+    if (e->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->cm->nurbs[n]->angle;
+        }
+      }
+    }
+    else
+    // one level refinement.
+    if (e->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
+        }
+      }
+    }
+    else
+    // two level refinements.
+    if (e->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
+        }
+      }
+    }
+    else
+    // three level refinements.
+    if (e->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->parent->cm->nurbs[n] != NULL)
+        {
+	      //info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
+        }
+      }
+    }
+    else
+    // four level refinements.
+    if (e->parent->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
+        {
+          //info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
+        }
+      }
+    }
+  }
+
+  // deactivate this element and unregister from its nodes
+  e->active = false;
+  e->unref_all_nodes(this);
+
+  double angle2 = 0.0;
+  int idx = 0;
+  CurvMap* cm;
+  memset(&cm, 0, sizeof(cm));
+
+  // create CurvMaps for sons if this is a curved element
+  if ((e->is_curved()) && (!e_inter))
+  {
+    cm = new CurvMap;
+    memset(cm, 0, sizeof(CurvMap));
+
+    for (idx = 0; idx < 3; idx++)
+      if ((e->cm->nurbs[idx] != NULL) && (bnd[idx] == 1))
+      {
+        angle2 = refinement_angle[idx];
+        int p1, p2;
+        p1 = e->en[idx]->p1;
+        p2 = e->en[idx]->p2;
+        if (p1 > p2) std::swap(p1, p2);
+
+        Nurbs* nurbs = new Nurbs;
+        bool cricle = true;
+
+        nurbs->arc = cricle;
+        nurbs->degree = 2;
+
+        int inner = 1, outer = 0;
+        nurbs->np = inner + 2;
+        nurbs->pt = new double3[nurbs->np];
+
+        nurbs->pt[0][0] = nodes[p1].x;
+        nurbs->pt[0][1] = nodes[p1].y;
+        nurbs->pt[0][2] = 1.0;
+
+        nurbs->pt[inner+1][0] = nodes[p2].x;
+        nurbs->pt[inner+1][1] = nodes[p2].y;
+        nurbs->pt[inner+1][2] = 1.0;
+
+        double angle = angle2;
+        double a = (180.0 - angle) / 180.0 * M_PI;
+        nurbs->angle = angle;
+
+        // generate one control point
+        double x = 1.0 / tan(a * 0.5);
+        nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
+        nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
+        nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+
+        int i = 0;
+        inner = 0;
+        nurbs->nk = nurbs->degree + nurbs->np + 1;
+        outer = nurbs->nk - inner;
+
+        // knot vector is completed by 0.0 on the left and by 1.0 on the right
+        nurbs->kv = new double[nurbs->nk];
+
+        for (i = 0; i < outer/2; i++)
+          nurbs->kv[i] = 0.0;
+        for (i = outer/2 + inner; i < nurbs->nk; i++)
+          nurbs->kv[i] = 1.0;
+        nurbs->ref = 0;
+
+        cm->toplevel = 1;
+        cm->order = 4;
+        cm->nurbs[idx] = nurbs;
+        nurbs->ref++;
+      }
+  }
+
+  // create a new element.
+  Element* enew;
+  Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id];
+  enew = create_triangle(this, e->marker, v0, v1, v2, cm);
+
+  if (enew->is_curved())
+  {
+    enew->cm->update_refmap_coeffs(enew);
+  }
+
+  // now the original edge nodes may no longer exist...
+  // set correct boundary status and markers for the new nodes
+  enew->en[0]->bnd = bnd[0];  
+  enew->en[1]->bnd = bnd[1];    
+  enew->en[2]->bnd = bnd[2];    
+  enew->en[0]->marker = mrk[0];
+  enew->en[1]->marker = mrk[1];
+  enew->en[2]->marker = mrk[2];
+  enew->parent = e;
+}
+
+
+void Mesh::convert_quads_to_base(Element *e)
+{
+  // remember the markers of the edge nodes
+  int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
+  int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+
+  // check if element e is a internal element.
+  bool e_inter = true;
+  for (int n = 0; n < e->nvert; n++)
+  {  
+    if (bnd[n] == 1)
+      e_inter = false;
+  }
+
+  // get the boundary edge angle.
+  double refinement_angle[4] = {0.0, 0.0, 0.0, 0.0};
+  if (e->is_curved() && (!e_inter))
+  {
+    // for base element.
+    if (e->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if ((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+        {
+          //info("angle = %f", e->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->cm->nurbs[n]->angle;
+        }
+      }
+    }
+    else
+    // one level refinement.
+    if (e->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if ((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+        {
+          //info("angle = %f", e->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
+        }
+      }
+    }
+    else
+    // two level refinements.
+    if (e->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if ((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+        {
+          //info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
+        }
+      }
+    }
+    else
+    // three level refinements.
+    if (e->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if ((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+        {
+	      //info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
+        }
+      }
+    }
+    else
+    // four level refinements.
+    if (e->parent->parent->parent->parent->cm->toplevel == true) 
+    {	
+      int n = 0;
+      for (n = 0; n < e->nvert; n++)
+      {
+        if ((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+        {
+          //info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+          refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
+        }
+      }
+    }
+  }
+
+  // deactivate this element and unregister from its nodes
+  e->active = false;
+  e->unref_all_nodes(this);
+
+  double angle2 = 0.0;
+  int idx = 0;
+  CurvMap* cm;
+  memset(&cm, 0, sizeof(cm));
+
+  // create CurvMaps for sons if this is a curved element
+  if ((e->is_curved()) && (!e_inter))
+  {
+    bool create_new = false;
+    for (int i = 0; i < e->nvert; i++)
+    {
+      if (fabs(refinement_angle[i] - 0.0) > 1e-4)
+      {
+        create_new = true; 
+      }
+    }
+
+    if (create_new)
+	{
+      cm = new CurvMap;
+      memset(cm, 0, sizeof(CurvMap));
+    }  
+
+    for (idx = 0; idx < 4; idx++)
+      if (fabs(refinement_angle[idx] - 0.0) > 1e-4)
+      {
+        angle2 = refinement_angle[idx];
+        int p1, p2;
+        p1 = e->en[idx]->p1;
+        p2 = e->en[idx]->p2;
+        if (p1 > p2) std::swap(p1, p2);
+
+        Nurbs* nurbs = new Nurbs;
+        bool cricle = true;
+
+        nurbs->arc = cricle;
+        nurbs->degree = 2;
+
+        int inner = 1, outer = 0;
+        nurbs->np = inner + 2;
+        nurbs->pt = new double3[nurbs->np];
+
+        nurbs->pt[0][0] = nodes[p1].x;
+        nurbs->pt[0][1] = nodes[p1].y;
+        nurbs->pt[0][2] = 1.0;
+
+        nurbs->pt[inner+1][0] = nodes[p2].x;
+        nurbs->pt[inner+1][1] = nodes[p2].y;
+        nurbs->pt[inner+1][2] = 1.0;
+
+        double angle = angle2;
+        double a = (180.0 - angle) / 180.0 * M_PI;
+        nurbs->angle = angle;
+
+        // generate one control point
+        double x = 1.0 / tan(a * 0.5);
+        nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
+        nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
+        nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+
+        int i = 0;
+        inner = 0;
+        nurbs->nk = nurbs->degree + nurbs->np + 1;
+        outer = nurbs->nk - inner;
+
+        // knot vector is completed by 0.0 on the left and by 1.0 on the right
+        nurbs->kv = new double[nurbs->nk];
+
+        for (i = 0; i < outer/2; i++)
+          nurbs->kv[i] = 0.0;
+        for (i = outer/2 + inner; i < nurbs->nk; i++)
+          nurbs->kv[i] = 1.0;
+        nurbs->ref = 0;
+
+        cm->toplevel = 1;
+        cm->order = 4;
+        cm->nurbs[idx] = nurbs;
+        nurbs->ref++;
+      }
+  }
+
+  // create a new element.
+  Element* enew;
+  Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id],  *v3 = &nodes[e->vn[3]->id];
+  enew = create_quad(this, e->marker, v0, v1, v2, v3, cm);
+
+  if (enew->is_curved())
+  {
+    enew->cm->update_refmap_coeffs(enew);
+  }
+
+  // now the original edge nodes may no longer exist...
+  // set correct boundary status and markers for the new nodes
+  enew->en[0]->bnd = bnd[0];  
+  enew->en[1]->bnd = bnd[1];    
+  enew->en[2]->bnd = bnd[2];   
+  enew->en[3]->bnd = bnd[3]; 
+  enew->en[0]->marker = mrk[0];
+  enew->en[1]->marker = mrk[1];
+  enew->en[2]->marker = mrk[2];
+  enew->en[3]->marker = mrk[3];
+  enew->parent = e;
+}
+

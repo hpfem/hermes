@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
   else {info("Mesh has been rescaled by the factors of %g and %g in the x- and y- direction, respectively.", x_ref, y_ref);}
 
   // Conversion between triangular and quadrilateral meshes (optional). 
-  // Need to be done before any other type of mesh refinement.
   //mesh.convert_quads_to_triangles();
   //mesh.convert_triangles_to_quads();
 
