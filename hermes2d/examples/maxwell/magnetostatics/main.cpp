@@ -18,7 +18,7 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-10;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 1000;                 // Maximum allowed number of Newton iterations.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -27,7 +27,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double MU_VACUUM = 4. * M_PI * 1e-7;
 double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
-double CURRENT_DENSITY = 1e6;                     // Volume source term.
+double CURRENT_DENSITY = 1e9;                     // Volume source term.
 
 // Material and boundary markers.
 const std::string MAT_AIR = "2";
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   bool first_der_left = false;
   bool first_der_right = false;
   bool extrapolate_der_left = false;
-  bool extrapolate_der_right = true;
+  bool extrapolate_der_right = false;
   CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, 0.0, 0.0, first_der_left, first_der_right,
                           extrapolate_der_left, extrapolate_der_right);
   bool success = mu_inv_iron.calculate_coeffs(); 
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   s_view2.show_mesh(false);
   s_view2.show(&grad);
 
-  OrderView o_view("Mesh", new WinGeom(730, 0, 350, 450));
+  OrderView o_view("Mesh", new WinGeom(720, 0, 350, 450));
   o_view.show(&space);
 
   // Wait for all views to be closed.
