@@ -80,7 +80,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return c_squared * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
+      return -c_squared * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
@@ -153,7 +153,7 @@ private:
         Scalar sln_curl_i = sln_prev_time->curl[i] + K_sln->curl[i];
         result += wt[i] * sln_curl_i * v->curl[i];
       }
-      return c_squared * result;
+      return -c_squared * result;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 

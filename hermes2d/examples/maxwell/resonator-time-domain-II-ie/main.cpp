@@ -32,31 +32,14 @@
 //
 // The following parameters can be changed:
 
-const int P_INIT = 2;                              // Initial polynomial degree of all elements.
-const int INIT_REF_NUM = 4;                        // Number of initial uniform mesh refinements.
+const int P_INIT = 6;                              // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 1;                        // Number of initial uniform mesh refinements.
 const double time_step = 0.05;                     // Time step.
 const double T_FINAL = 35.0;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 
-// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
-// in the name of each method is its order. The one before last, if present, is the number of stages.
-// Explicit methods:
-//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
-// Implicit methods: 
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
-//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
-//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
-// Embedded explicit methods:
-//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
-//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
-// Embedded implicit methods:
-//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
-//   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
-
 // Boundary markers.
-const std::string BDY = "1";
+const std::string BDY = "Perfect conductor";
 
 // Problem parameters.
 const double C_SQUARED = 1;                      // Square of wave speed.                     
@@ -104,13 +87,13 @@ int main(int argc, char* argv[])
   solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
   // Initialize views.
-  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 420, 300));
+  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
   E1_view.fix_scale_width(50);
-  ScalarView E2_view("Solution E2", new WinGeom(430, 0, 420, 300));
+  ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
   E2_view.fix_scale_width(50);
-  ScalarView F1_view("Solution F1", new WinGeom(0, 355, 420, 300));
+  ScalarView F1_view("Solution F1", new WinGeom(0, 405, 400, 350));
   F1_view.fix_scale_width(50);
-  ScalarView F2_view("Solution E2", new WinGeom(430, 355, 420, 300));
+  ScalarView F2_view("Solution E2", new WinGeom(410, 405, 400, 350));
   F2_view.fix_scale_width(50);
 
   // Time stepping loop.

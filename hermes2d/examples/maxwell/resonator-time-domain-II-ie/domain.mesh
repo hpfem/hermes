@@ -10,13 +10,13 @@ vertices = [
 ]
 
 elements = [
-  [ 0, 1, 2, 3, 0 ]
+  [ 0, 1, 2, 3, "Vacuum" ]
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 1 ],
-  [ 2, 3, 1 ],
-  [ 3, 0, 1 ]
+  [ 0, 1, "Perfect conductor" ],
+  [ 1, 2, "Perfect conductor" ],
+  [ 2, 3, "Perfect conductor" ],
+  [ 3, 0, "Perfect conductor" ]
 ]
 
