@@ -37,7 +37,7 @@ const int P_INIT = 2;                             // Initial polynomial degree. 
                                                   // to the maximum poly order of the tangential component, and polynomials
                                                   // of degree P_INIT + 1 are present in element interiors. P_INIT = 0
                                                   // is for Whitney elements.
-const bool ALIGN_MESH = false;                    // if ALIGN_MESH == true, curvilinear elements aligned with the
+const bool ALIGN_MESH = true;                     // if ALIGN_MESH == true, curvilinear elements aligned with the
                                                   // circular load are used, otherwise one uses a non-aligned mesh.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
