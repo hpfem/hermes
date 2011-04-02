@@ -65,14 +65,14 @@ const double e_0  = 8.8541878176 * 1e-12;
 const double mu_0 = 1.256 * 1e-6;
 const double k = 1.0;
 
-// Exact solution.
-#include "exact_solution.cpp"
+#include "definitions.cpp"
 
 const int BDY_BOTTOM = 1;
 const int BDY_RIGHT = 2;
 const int BDY_TOP = 3;
 const int BDY_LEFT = 4;
 
+/*
 // Unit tangential vectors to the boundary. 
 double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
@@ -104,6 +104,7 @@ Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Fu
 {
   return int_curl_e_curl_f<Real, Scalar>(n, wt, u, v) - int_e_f<Real, Scalar>(n, wt, u, v);
 }
+*/
 
 int main(int argc, char* argv[])
 {
@@ -114,9 +115,15 @@ int main(int argc, char* argv[])
   // mloader.load("screen-tri.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  //for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+
+  // Set exact solution.
+  CustomExactSolution exact(&mesh);
 
   // Initialize boundary conditions.
+  //DefaultEssentialBCNonConst bc_essential_top(BDY_TOP, &exact);
+  //EssentialBCs bcs(&bc_essential_top);
+/*
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
 
@@ -127,8 +134,11 @@ int main(int argc, char* argv[])
   bc_values.add_function(BDY_BOTTOM, essential_bc_values_bottom);
   bc_values.add_function(BDY_LEFT, essential_bc_values_left);
 
+
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakForm wf;
@@ -247,5 +257,6 @@ int main(int argc, char* argv[])
   // Wait for all views to be closed.
   View::wait();
   return 0;
+*/
 }
 
