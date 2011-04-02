@@ -60,8 +60,8 @@ public:
   /// of the spline will be extended by "extension" both to the left 
   /// and to the right. This allows the user to see how the code will
   /// handle the spline if used for points that lie outside of its
-  /// interval of definition. 
-  void plot(const char* filename, double extension, int subdiv = 20);
+  /// interval of definition. If plot_value == false, derivative is plotted.
+  void plot(const char* filename, double extension, bool plot_value, int subdiv = 50);
 
 protected:
   /// Uses a bisection method to locale interval where a given point lies.

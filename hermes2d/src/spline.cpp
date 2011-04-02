@@ -117,7 +117,7 @@ bool CubicSpline::find_interval(double x_in, int &m)
   return true;
 };
 
-void CubicSpline::plot(const char* filename, double extension, int subdiv) 
+void CubicSpline::plot(const char* filename, double extension, bool plot_value, int subdiv) 
 {
   FILE *f = fopen(filename, "wb");
   if (f == NULL) error("Could not open a spline file for writing."); 
@@ -127,11 +127,15 @@ void CubicSpline::plot(const char* filename, double extension, int subdiv)
   double h = extension / subdiv;
   for (int j = 0; j < subdiv; j++) {
     double x = x_left + j * h;
-    double val = get_value(x); 
+    double val;
+    if (plot_value) val = get_value(x); 
+    else val = get_derivative(x); 
     fprintf(f, "%g %g\n", x, val);
   }
   double x_last = point_left;
-  double val_last = get_value(x_last);
+  double val_last;
+  if (plot_value) val_last = get_value(x_last);
+  else val_last = get_derivative(x_last); 
   fprintf(f, "%g %g\n", x_last, val_last);
 
   // Plotting inside the interval of definition.
@@ -139,12 +143,15 @@ void CubicSpline::plot(const char* filename, double extension, int subdiv)
     double h = (points[i+1] - points[i]) / subdiv;
     for (int j = 0; j < subdiv; j++) {
       double x = points[i] + j * h;
-      double val = get_value_from_interval(x, i); 
+      double val;
+      if (plot_value) val = get_value_from_interval(x, i); 
+      else val = get_derivative_from_interval(x, i); 
       fprintf(f, "%g %g\n", x, val);
     }
   }
   x_last = points[points.size() - 1];
-  val_last = get_value_from_interval(x_last, points.size() - 2);
+  if (plot_value) val_last = get_value_from_interval(x_last, points.size() - 2);
+  else val_last = get_derivative_from_interval(x_last, points.size() - 2);
   fprintf(f, "%g %g\n", x_last, val_last);
 
   // Plotting on the right of the area of definition.
@@ -152,11 +159,14 @@ void CubicSpline::plot(const char* filename, double extension, int subdiv)
   h = extension / subdiv;
   for (int j = 0; j < subdiv; j++) {
     double x = point_right + j * h;
-    double val = get_value(x); 
+    double val;
+    if (plot_value) val = get_value(x); 
+    else val = get_derivative(x); 
     fprintf(f, "%g %g\n", x, val);
   }
   x_last = x_right;
-  val_last = get_value(x_last);
+  if (plot_value) val_last = get_value(x_last);
+  else val_last = get_derivative(x_last);
   fprintf(f, "%g %g\n", x_last, val_last);
 
   fclose(f);

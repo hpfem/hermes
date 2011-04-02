@@ -25,15 +25,15 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-double MU_VACUUM = 4 * M_PI * 1e-7;
+double MU_VACUUM = 4. * M_PI * 1e-7;
 double INIT_COND = 0.0;                           // Initial condition for the magnetic potential.
 double CURRENT_DENSITY = 1e6;                     // Volume source term.
 
 // Material and boundary markers.
-const std::string MAT_AIR = "0";
-const std::string MAT_IRON_1 = "1";
-const std::string MAT_IRON_2 = "2";
-const std::string MAT_COPPER = "3";
+const std::string MAT_AIR = "2";
+const std::string MAT_IRON_1 = "0";
+const std::string MAT_IRON_2 = "3";
+const std::string MAT_COPPER = "1";
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
@@ -45,9 +45,13 @@ int main(int argc, char* argv[])
   Hermes2D hermes2d;
 
   // Define nonlinear magnetic permeability via a cubic spline.
-  Hermes::vector<double> mu_pts(0.0,    0.5,   0.9,    1.0,    1.1,    1.2,    1.3,   1.4,   1.6,   1.7,   1.8,   1.9,   3.0,    5.0,    10.0);
-  Hermes::vector<double> mu_val(1/1500.0, 1/1480.0,    1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0, 1/750.0, 1/250.0, 1/180.0, 1/175.0, 1/150.0, 1/20.0, 1/10.0,  1/5.0);
-  for (unsigned int i=0; i < mu_val.size(); i++) mu_val[i] /= MU_VACUUM; 
+  /*  Hermes::vector<double> mu_inv_pts(0.0,      0.5,      0.9,      1.0,      1.1,      1.2,      1.3,   
+                                    1.4,      1.6,      1.7,      1.8,      1.9,      3.0,      5.0,     10.0);
+  Hermes::vector<double> mu_inv_val(1/1500.0, 1/1480.0, 1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0,  
+                                    1/750.0,  1/250.0,  1/180.0,  1/175.0,  1/150.0,  1/20.0,   1/10.0,  1/5.0);
+  */
+  Hermes::vector<double> mu_inv_pts(0.0,      10.0);
+  Hermes::vector<double> mu_inv_val(1/30.0,   1/30.0);
 
   // Create the cubic spline (and plot it for visual control). 
   double second_der_left = 0.0;
@@ -56,14 +60,15 @@ int main(int argc, char* argv[])
   bool first_der_right = false;
   bool extrapolate_der_left = false;
   bool extrapolate_der_right = true;
-  CubicSpline mu_inv_iron(mu_pts, mu_val, 0.0, 0.0, first_der_left, first_der_right,
-                           extrapolate_der_left, extrapolate_der_right);
+  CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, 0.0, 0.0, first_der_left, first_der_right,
+                          extrapolate_der_left, extrapolate_der_right);
   bool success = mu_inv_iron.calculate_coeffs(); 
   if (!success) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
   double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
-  mu_inv_iron.plot("spline.dat", interval_extension);
+  mu_inv_iron.plot("spline.dat", interval_extension, true);
+  mu_inv_iron.plot("spline_der.dat", interval_extension, false);
 
   // Load the mesh.
   Mesh mesh;
@@ -73,8 +78,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  //MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
-  //mv.show(&mesh);
+  MeshView mv("Mesh", new WinGeom(0, 0, 400, 400));
+  mv.show(&mesh);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
@@ -86,7 +91,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation
   CustomWeakFormMagnetostatics wf(MAT_IRON_1, MAT_IRON_2, &mu_inv_iron, MAT_AIR, 
-                                  MU_VACUUM, MAT_COPPER, MU_VACUUM, CURRENT_DENSITY);
+                                  MAT_COPPER, MU_VACUUM, CURRENT_DENSITY);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -109,7 +114,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   bool verbose = true;
   bool residual_as_function = false;
-  double damping_coeff = 0.6;
+  double damping_coeff = 0.5;
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
                              damping_coeff)) error("Newton's iteration failed.");

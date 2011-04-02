@@ -152,8 +152,8 @@ namespace WeakFormsH1 {
           // This is not a mistake, the inner product of two curls of scalar
           // functions is the same as the product of gradients.
           Scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          //if (e->elem_marker != -9999) if (B_i > 3) printf("B = %g\n", B_i);
-          if (B_i > 1e-8) {
+          //if (e->elem_marker != -9999) printf("B = %g\n", B_i);
+          if (B_i > 1e-12) {
             result -= wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
