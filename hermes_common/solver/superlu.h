@@ -56,7 +56,6 @@
       #define SLU_SOLVER_DRIVER     dgssvx
     #endif
     
-    typedef scalar Scalar;
     #define SUPERLU_SCALAR(a) SCALAR(a)
   #else
     #ifdef SLU_MT

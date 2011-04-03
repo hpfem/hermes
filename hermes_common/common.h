@@ -70,7 +70,7 @@ enum MatrixSolverType
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
 #include "error.h"
-#include "solver/solver.h"
+//#include "solver/solver.h"
 //
 #include "vector.h"
 #include "tables.h"

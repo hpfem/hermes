@@ -26,17 +26,8 @@
 #ifdef WITH_MUMPS
   extern "C" {
     #include <mumps_c_types.h>
-  #ifndef HERMES_COMMON_COMPLEX
     #include <dmumps_c.h>
-    typedef Scalar Scalar;
-    #define Scalar(a) SCALAR(a)
-    #define MUMPS_STRUCT    DMUMPS_STRUC_C
-  #else
     #include <zmumps_c.h>
-    typedef ZMUMPS_COMPLEX Scalar;
-    #define Scalar(a) a.r, a.i  
-    #define MUMPS_STRUCT    ZMUMPS_STRUC_C
-  #endif
   }
   
   #ifdef WITH_MPI
@@ -140,6 +131,18 @@ protected:
 ///
 /// @ingroup solvers
 template <typename Scalar>
+struct mumps_type;
+
+template <>
+struct mumps_type<std::complex<double> >{
+  typedef ZMUMPS_STRUC_C mumps_struct;
+};
+template <>
+struct mumps_type<double>{
+  typedef DMUMPS_STRUC_C mumps_struct;
+};
+
+template <typename Scalar>
 class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
 public:
   MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
@@ -154,7 +157,7 @@ protected:
   bool setup_factorization();
 
 #ifdef WITH_MUMPS
-  MUMPS_STRUCT  param;
+  typename mumps_type<Scalar>::mumps_struct param;
   
   bool check_status();
   
