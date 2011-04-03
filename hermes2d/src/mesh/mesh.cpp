@@ -1290,7 +1290,6 @@ void Mesh::copy_converted(Mesh* mesh)
 ////convert a triangle element into three quadrilateral elements///////
 void Mesh::convert_triangles_to_quads()
 {
-  this->convert_to_base();
   Element* e;
 
   elements.set_append_only(true);
