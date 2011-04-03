@@ -69,7 +69,7 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 }
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../difinitions.cpp"
 
 int main(int argc, char* argv[])
 {
