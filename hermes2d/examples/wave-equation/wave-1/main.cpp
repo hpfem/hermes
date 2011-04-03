@@ -69,14 +69,14 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Convert to quadrilaterals.
-  mesh.convert_triangles_to_quads();
+  //mesh.convert_triangles_to_quads();
+
+  // Refine towards boundary.
+  mesh.refine_towards_boundary(BDY, 1, true, true);
 
   // Refine once towards vertex #4.
   mesh.refine_towards_vertex(4, 1);
 
-  // Refine towards boundary.
-  mesh.refine_towards_boundary(BDY, 1);
-  
   // Initialize solutions.
   CustomInitialConditionWave u_sln(&mesh);
   Solution v_sln(&mesh, 0.0);
