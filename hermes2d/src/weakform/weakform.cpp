@@ -622,21 +622,38 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
   _F_
   bool** blocks = new_matrix<bool>(neq, neq);
   for (unsigned int i = 0; i < neq; i++) {
-    for (unsigned int j = 0; j < neq; j++) {
+    for (unsigned int j = 0; j < neq; j++)
       blocks[i][j] = false;
-    }
-    if (force_diagonal_blocks == true) blocks[i][i] = true;
+    if (force_diagonal_blocks == true)
+      blocks[i][i] = true;
   }
   for (unsigned i = 0; i < mfvol.size(); i++) {
-    if (fabs(mfvol[i]->scaling_factor) > 1e-12) blocks[mfvol[i]->i][mfvol[i]->j] = true;
-    if (mfvol[i]->sym) {
-      if (fabs(mfvol[i]->scaling_factor) > 1e-12) blocks[mfvol[i]->j][mfvol[i]->i] = true;
-    }
+    if (fabs(mfvol[i]->scaling_factor) > 1e-12)
+      blocks[mfvol[i]->i][mfvol[i]->j] = true;
+    if (mfvol[i]->sym)
+      if (fabs(mfvol[i]->scaling_factor) > 1e-12)
+        blocks[mfvol[i]->j][mfvol[i]->i] = true;
   }
 
-  for (unsigned i = 0; i < mfsurf.size(); i++) {
-    if (fabs(mfsurf[i]->scaling_factor) > 1e-12) blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
+  for (unsigned i = 0; i < mfvol_mc.size(); i++) {
+    if (fabs(mfvol_mc[i]->scaling_factor) > 1e-12)
+      for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
+        blocks[mfvol_mc[i]->coordinates[component_i].first][mfvol_mc[i]->coordinates[component_i].second] = true;
+    if (mfvol_mc[i]->sym)
+      if (fabs(mfvol[i]->scaling_factor) > 1e-12)
+        for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
+          blocks[mfvol_mc[i]->coordinates[component_i].second][mfvol_mc[i]->coordinates[component_i].first] = true;
   }
+
+  for (unsigned i = 0; i < mfsurf.size(); i++)
+    if (fabs(mfsurf[i]->scaling_factor) > 1e-12)
+      blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
+
+  for (unsigned i = 0; i < mfsurf_mc.size(); i++)
+    if (fabs(mfsurf_mc[i]->scaling_factor) > 1e-12)
+      for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
+        blocks[mfsurf_mc[i]->coordinates[component_i].first][mfsurf_mc[i]->coordinates[component_i].second] = true;
+  
   return blocks;
 }
 

@@ -197,6 +197,19 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
     }
   }
 
+  for(unsigned int i = 0; i < this->wf->mfsurf_mc.size(); i++) {
+    if(this->wf->mfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
+  }
+  for(unsigned int i = 0; i < this->wf->vfsurf_mc.size(); i++) {
+    if(this->wf->vfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+      is_DG = true;
+      break;
+    }
+  }
+
   int ndof = get_num_dofs();
 
   if (mat != NULL)  // mat may be NULL when assembling the rhs for NOX
@@ -537,6 +550,19 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
     }
   }
 
+  for(unsigned int i = 0; i < stage.mfsurf_mc.size(); i++) {
+    if (stage.mfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+      DG_matrix_forms_present = true;
+      break;
+    }
+  }
+  for(unsigned int i = 0; i < stage.vfsurf_mc.size(); i++) {
+    if (stage.vfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+      DG_vector_forms_present = true;
+      break;
+    }
+  }
+
   // Loop through all assembling states.
   // Assemble each one.
   Element** e;
@@ -634,12 +660,22 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
                                block_weights, spss, refmap, u_ext, isempty,
                                rep_element->marker, al);
+  if(!stage.mfvol_mc.empty())
+    assemble_multicomponent_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
+                               block_weights, spss, refmap, u_ext, isempty,
+                               rep_element->marker, al);
+
 
   /// Assemble volume vector forms.
-  if (rhs != NULL)
+  if (rhs != NULL) {
     assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
                                  block_weights, spss, refmap, u_ext, isempty,
                                  rep_element->marker, al);
+    if(!stage.vfvol_mc.empty())
+      assemble_multicomponent_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
+                                 block_weights, spss, refmap, u_ext, isempty,
+                                 rep_element->marker, al);
+  }
 
   // Assemble surface integrals now: loop through surfaces of the element.
   for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++)
@@ -799,6 +835,152 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
     }
   }
 }
+void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stage& stage, 
+                      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+                      Table* block_weights,
+                      Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
+                      Hermes::vector<Solution *>& u_ext, Hermes::vector<bool>& isempty, 
+                      int marker, Hermes::vector<AsmList *>& al)
+{
+  _F_
+  if (mat != NULL) {
+    for (unsigned ww = 0; ww < stage.mfvol_mc.size(); ww++) {
+      WeakForm::MultiComponentMatrixFormVol* mfv = stage.mfvol_mc[ww];
+      Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
+      if(fabs(mfv->scaling_factor) < 1e-12)
+        continue;
+      if (mfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->area)))
+        continue;
+
+      // If a block scaling table is provided, and if the scaling coefficient
+      // A_mn for this block is zero, then the form does not need to be assembled.
+      Hermes::vector<double> block_scaling_coeffs;
+      for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+        if (block_weights != NULL)
+          block_scaling_coeffs.push_back(block_weights->get_A(mfv->coordinates[coordinate_i].first, mfv->coordinates[coordinate_i].second));
+        else
+          block_scaling_coeffs.push_back(1);
+      
+      bool tra = false;
+      bool sym = false;
+      if(mfv->sym == 1)
+        for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+          if(mfv->coordinates[coordinate_i].first == mfv->coordinates[coordinate_i].second)
+            sym = true;
+          else
+            if(sym == true)
+              error("!");
+      if(mfv->sym != 0)
+        for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+          if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
+            tra = true;
+          else
+            if(tra == true)
+              error("!");
+
+      // Assemble the local stiffness matrix for the form mfv.
+
+      unsigned int m = mfv->coordinates[0].first;
+      unsigned int n = mfv->coordinates[0].second;
+
+      for (unsigned int i = 0; i < al[m]->cnt; i++) {
+        if (tra) {
+          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+          if (rhs != NULL && this->is_linear)
+            for (unsigned int j = 0; j < al[m]->cnt; j++)
+              if (al[m]->dof[j] < 0)
+                for (unsigned int i = 0; i < al[n]->cnt; i++)
+                  if (al[n]->dof[i] >= 0)
+                    if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+                      Hermes::vector<scalar> result;
+                      eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                      for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+                        rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[i],
+                        -result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    }
+        }
+
+        if (!tra && al[m]->dof[i] < 0) 
+          continue;
+        spss[m]->set_active_shape(al[m]->idx[i]);
+        
+        // Unsymmetric block.
+        if (!sym) {
+          for (unsigned int j = 0; j < al[n]->cnt; j++) {
+            
+            pss[n]->set_active_shape(al[n]->idx[j]);
+            
+            if (al[n]->dof[j] < 0) {
+              // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+              if (rhs != NULL && this->is_linear) {
+                // Numerical integration performed only if all 
+                // coefficients multiplying the form are nonzero
+                // and if the basis function is active.
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+                  Hermes::vector<scalar> result;
+                  eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+                    rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                }
+              }
+            }
+            else if (rhsonly == false)
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                Hermes::vector<scalar> result;
+                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
+                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  if (tra)
+                    if (mfv->sym < 0)
+                      mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
+                      -result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    else
+                      mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
+                      result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                }
+              }
+          }
+        }
+        // Symmetric block.
+        else {
+          for (unsigned int j = 0; j < al[n]->cnt; j++) {
+            if (j < i && al[n]->dof[j] >= 0) 
+              continue;
+            
+            pss[n]->set_active_shape(al[n]->idx[j]);
+            
+            if (al[n]->dof[j] < 0) {
+              // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+              if (rhs != NULL && this->is_linear) {
+                // Numerical integration performed only if all 
+                // coefficients multiplying the form are nonzero
+                // and if basis function is active.
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+                  Hermes::vector<scalar> result;
+                  eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+                    rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+		            }
+              }
+            }
+            else if (rhsonly == false)
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                Hermes::vector<scalar> result;
+                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
+                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
+                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                }
+              }
+          }
+        }
+      }
+    }
+  }
+}
 
 void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
@@ -830,6 +1012,39 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
     }
   }
 }
+void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+      Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al)
+{
+  _F_
+  for (unsigned int ww = 0; ww < stage.vfvol_mc.size(); ww++) {
+    WeakForm::MultiComponentVectorFormVol* vfv = stage.vfvol_mc[ww];
+    Hermes::vector<unsigned int> coordinates;
+    if (fabs(vfv->scaling_factor) < 1e-12) 
+      continue;
+    if (vfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->area))) 
+      continue;
+
+    unsigned int m = vfv->coordinates[0];
+
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+      if (al[m]->dof[i] < 0) continue;
+      
+      spss[m]->set_active_shape(al[m]->idx[i]);
+
+      // Numerical integration performed only if the coefficient 
+      // multiplying the form is nonzero.
+      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+        Hermes::vector<scalar> result;
+        eval_form(vfv, u_ext, spss[m], refmap[m], result);
+        for(unsigned int coordinate_i = 0; coordinate_i < vfv->coordinates.size(); coordinate_i++)
+          rhs->add(al[vfv->coordinates[coordinate_i]]->dof[i], result[coordinate_i] * al[vfv->coordinates[coordinate_i]]->coef[i]);
+      }
+    }
+  }
+}
 
 void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
@@ -856,14 +1071,24 @@ void DiscreteProblem::assemble_surface_integrals(WeakForm::Stage& stage,
 
   // Assemble boundary edges: 
   if(bnd == 1) {
-    if (mat != NULL)
+    if (mat != NULL) {
       assemble_surface_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
                                     spss, refmap, u_ext, isempty, 
                                     marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
-    if (rhs != NULL)
+      if(!stage.mfsurf_mc.empty())
+        assemble_multicomponent_surface_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                                    spss, refmap, u_ext, isempty, 
+                                    marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
+    }
+    if (rhs != NULL) {
       assemble_surface_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
                                     spss, refmap, u_ext, isempty, 
                                     marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
+      if(!stage.vfsurf_mc.empty())
+        assemble_multicomponent_surface_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, 
+                                    spss, refmap, u_ext, isempty, 
+                                    marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
+    }
   }
   // Assemble inner edges (in discontinuous Galerkin discretization): 
   else
@@ -1028,12 +1253,21 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
 
   // The computation takes place here.
   if (mat != NULL)
-    if(DG_matrix_forms_present && !edge_processed)
+    if(DG_matrix_forms_present && !edge_processed) {
       assemble_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
-  if (DG_vector_forms_present && rhs != NULL)
+      if(!stage.mfsurf_mc.empty())
+        assemble_multicomponent_DG_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
+        marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+    }
+  if (DG_vector_forms_present && rhs != NULL) {
     assemble_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, neighbor_searches, u_ext, isempty, 
       marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+      if(!stage.vfsurf_mc.empty())
+        assemble_multicomponent_DG_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, block_weights, spss, refmap, neighbor_searches, u_ext, isempty, 
+        marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+  }
+
 
   /***/
 
@@ -1436,6 +1670,75 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
       mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
   }
 }
+void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Stage& stage, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base)
+{
+  _F_
+  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
+    WeakForm::MultiComponentMatrixFormSurf* mfs = stage.mfsurf_mc[ww];
+    Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
+    unsigned int m = mfs->coordinates[0].first;
+    unsigned int n = mfs->coordinates[0].second;
+
+    if (!nat[m] || !nat[n]) continue;
+    if (fabs(mfs->scaling_factor) < 1e-12) continue;
+    if (mfs->area == H2D_DG_INNER_EDGE) continue;
+    if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE 
+      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->area))) continue;
+
+    // If a block scaling table is provided, and if the scaling coefficient
+    // A_mn for this block is zero, then the form does not need to be assembled.
+    // If a block scaling table is provided, and if the scaling coefficient
+    // A_mn for this block is zero, then the form does not need to be assembled.
+    Hermes::vector<double> block_scaling_coeffs;
+    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+      if (block_weights != NULL)
+        block_scaling_coeffs.push_back(block_weights->get_A(mfs->coordinates[coordinate_i].first, mfs->coordinates[coordinate_i].second));
+      else
+        block_scaling_coeffs.push_back(1);
+
+    surf_pos.base = trav_base;
+    surf_pos.space_v = spaces[m];
+    surf_pos.space_u = spaces[n];
+
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+      if (al[m]->dof[i] < 0) continue;
+      spss[m]->set_active_shape(al[m]->idx[i]);
+      for (unsigned int j = 0; j < al[n]->cnt; j++) {
+        pss[n]->set_active_shape(al[n]->idx[j]);
+        if (al[n]->dof[j] < 0) {
+          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+          if (rhs != NULL && this->is_linear) {
+            // Numerical integration performed only if all coefficients multiplying the form are nonzero
+            // and if the basis function is active.
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+              Hermes::vector<scalar> result;
+              eval_form(mfs, u_ext, pss[n], spss[m], refmap[n], refmap[m], &surf_pos, result);
+              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+                rhs->add(al[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+            }
+          }
+        }
+        else 
+          if (rhsonly == false) {
+          // Numerical integration performed only if all coefficients multiplying the form are nonzero.
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+              Hermes::vector<scalar> result;
+              eval_form(mfs, u_ext, pss[n], spss[m], refmap[n], refmap[m], &surf_pos, result);
+              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+                mat->add(al[mfs->coordinates[coordinate_i].first]->dof[i], al[mfs->coordinates[coordinate_i].second]->dof[j],
+                result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+            }
+        }
+      }
+    }
+  }
+}
 
 void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
@@ -1468,6 +1771,44 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
       // Numerical integration performed only if the coefficient multiplying the form is nonzero.
       if (std::abs(al[m]->coef[i]) > 1e-12) {   
         rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
+      }
+    }
+  }
+}
+void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Stage& stage, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, 
+       bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base)
+{
+  _F_
+  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
+    WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
+    unsigned int m = vfs->coordinates[0];
+    Hermes::vector<unsigned int> coordinates;
+    if (fabs(vfs->scaling_factor) < 1e-12) continue;
+    if (vfs->area == H2D_DG_INNER_EDGE) continue;
+    if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE 
+        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->area))) continue;
+
+    if (vfs->area == HERMES_ANY && !nat[m]) continue;
+
+    surf_pos.base = trav_base;
+    surf_pos.space_v = spaces[m];
+
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+      if (al[m]->dof[i] < 0) continue;
+
+      spss[m]->set_active_shape(al[m]->idx[i]);
+
+      // Numerical integration performed only if the coefficient multiplying the form is nonzero.
+      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+        Hermes::vector<scalar> result;
+        eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, result);
+        for(unsigned int coordinate_i = 0; coordinate_i < vfs->coordinates.size(); coordinate_i++)
+          rhs->add(al[vfs->coordinates[coordinate_i]]->dof[i], result[coordinate_i] * al[vfs->coordinates[coordinate_i]]->coef[i]);
       }
     }
   }
@@ -1573,6 +1914,116 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
       mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
   }
 }
+void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& stage, 
+       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, 
+       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
+       Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
+       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, 
+       LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, 
+       SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 
+       Element* trav_base, Element* rep_element)
+{ 
+  _F_
+  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
+    WeakForm::MultiComponentMatrixFormSurf* mfs = stage.mfsurf_mc[ww];
+    if (mfs->area != H2D_DG_INNER_EDGE) continue;
+
+    Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
+
+    if (fabs(mfs->scaling_factor) < 1e-12) continue;
+
+    unsigned int m = mfs->coordinates[0].first;
+    unsigned int n = mfs->coordinates[0].second;
+
+    surf_pos.base = trav_base;
+    surf_pos.space_v = spaces[m];
+    surf_pos.space_u = spaces[n];
+            
+    // Create the extended shapeset on the union of the central element and its current neighbor.
+    Hermes::vector<NeighborSearch::ExtendedShapeset*> ext_asmlists;
+    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+      ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
+
+    NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+    NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
+
+    // If a block scaling table is provided, and if the scaling coefficient
+    // A_mn for this block is zero, then the form does not need to be assembled.
+    Hermes::vector<double> block_scaling_coeffs;
+    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+      if (block_weights != NULL)
+        block_scaling_coeffs.push_back(block_weights->get_A(mfs->coordinates[coordinate_i].first, mfs->coordinates[coordinate_i].second));
+      else
+        block_scaling_coeffs.push_back(1);
+
+    // Precalc shapeset and refmaps used for the evaluation.
+    PrecalcShapeset* fu;
+    PrecalcShapeset* fv;
+    RefMap* ru;
+    RefMap* rv;
+    bool support_neigh_u, support_neigh_v;
+
+    for (int i = 0; i < ext_asmlist_v->cnt; i++) {
+      if (ext_asmlist_v->dof[i] < 0) 
+        continue;
+      // Choose the correct shapeset for the test function.
+      if (!ext_asmlist_v->has_support_on_neighbor(i)) {
+        spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
+        fv = spss[m];
+        rv = refmap[m];
+        support_neigh_v = false;
+      }
+      else {
+        nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
+        fv = nspss[m];
+        rv = nrefmap[m];
+        support_neigh_v = true;
+      }
+      for (int j = 0; j < ext_asmlist_u->cnt; j++) {
+        // Choose the correct shapeset for the solution function.
+        if (!ext_asmlist_u->has_support_on_neighbor(j)) {
+          pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
+          fu = pss[n];
+          ru = refmap[n];
+          support_neigh_u = false;
+        }
+        else {
+          npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
+          fu = npss[n];
+          ru = nrefmap[n];
+          support_neigh_u = true;
+        }
+
+        if (ext_asmlist_u->dof[j] < 0) {
+          if (rhs != NULL && this->is_linear) {
+            // Evaluate the form with the activated discontinuous shape functions.
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+              Hermes::vector<scalar> result;
+              eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
+                                      &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
+                                      stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+                rhs->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] 
+                * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+                * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
+            }
+          }
+
+          if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+              Hermes::vector<scalar> result;
+              eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+                mat->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], ext_asmlists[mfs->coordinates[coordinate_i].second]->dof[j],
+                result[coordinate_i] * block_scaling_coeffs[coordinate_i] 
+                * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+                * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
+          }
+        }
+      }
+    }
+  }
+}
 
 void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
@@ -1593,6 +2044,31 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
       rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
+    }
+  }
+}
+void DiscreteProblem::assemble_multicomponent_DG_vector_forms(WeakForm::Stage& stage, 
+      SparseMatrix* mat, Vector* rhs, bool rhsonly, bool force_diagonal_blocks, Table* block_weights,
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+       int isurf, Element** e, Element* trav_base, Element* rep_element)
+{
+  _F_
+  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
+    WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
+    Hermes::vector<unsigned int> coordinates;
+    if (vfs->area != H2D_DG_INNER_EDGE) continue;
+    if (fabs(vfs->scaling_factor) < 1e-12) continue;
+            
+    // Here we use the standard pss, possibly just transformed by NeighborSearch.
+    unsigned int m = vfs->coordinates[0];
+    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+      if (al[m]->dof[i] < 0) continue;
+      Hermes::vector<scalar> result;
+      spss[m]->set_active_shape(al[m]->idx[i]);
+      eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+      for(unsigned int coordinate_i = 0; coordinate_i < vfs->coordinates.size(); coordinate_i++)
+        rhs->add(al[vfs->coordinates[coordinate_i]]->dof[i], result[coordinate_i] * al[vfs->coordinates[coordinate_i]]->coef[i]);
     }
   }
 }
@@ -1835,8 +2311,135 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
 
   return result;
 }
+void DiscreteProblem::eval_form(WeakForm::MultiComponentMatrixFormVol *mfv, 
+                                  Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, 
+                                  RefMap *ru, RefMap *rv, Hermes::vector<scalar>& result)
+{
+  _F_
+  // Determine the integration order by parsing the form.
+  int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+  
+  // Evaluate the form using numerical quadrature of order "order".
+  Quad2D* quad = fu->get_quad_2d();
+  double3* pt = quad->get_points(order);
+  int np = quad->get_num_points(order);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[order] == NULL)
+  {
+    cache_e[order] = init_geom_vol(ru, order);
+    double* jac = NULL;
+    if(!ru->is_jacobian_const()) 
+      jac = ru->get_jacobian(order);
+    cache_jwt[order] = new double[np];
+    for(int i = 0; i < np; i++) {
+      if(ru->is_jacobian_const())
+        cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
+      else
+        cache_jwt[order][i] = pt[i][2] * jac[i];
+    }
+  }
+  Geom<double>* e = cache_e[order];
+  double* jwt = cache_jwt[order];
+
+  // Values of the previous Newton iteration, shape functions 
+  // and external functions in quadrature points.
+  int prev_size = u_ext.size() - mfv->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + mfv->u_ext_offset] != NULL) 
+        prev[i] = init_fn(u_ext[i + mfv->u_ext_offset], order);
+      else 
+        prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  Func<double>* u = get_fn(fu, ru, order);
+  Func<double>* v = get_fn(fv, rv, order);
+
+  ExtData<scalar>* ext = init_ext_fns(mfv->ext, rv, order);
+
+  // The actual calculation takes place here.
+  mfv->value(np, jwt, prev, u, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= mfv->scaling_factor;
+
+  // Clean up.
+  for(int i = 0; i < prev_size; i++)
+    if (prev[i] != NULL) { 
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  delete [] prev;
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+}
 
 int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
+                                                PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
+{
+  _F_
+  // Order that will be returned.
+  int order;
+
+  if(is_fvm) 
+    order = ru->get_inv_ref_order();
+  else {
+    int u_ext_length = u_ext.size();      // Number of external solutions.
+    int u_ext_offset = mfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+                                          // and there will be only u_ext_length - u_ext_offset of them.
+  
+    // Increase for multi-valued shape functions.
+    int inc = (fu->get_num_components() == 2) ? 1 : 0;
+
+    // Order of solutions from the previous Newton iteration.
+    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    if (u_ext != Hermes::vector<Solution *>())
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        if (u_ext[i + u_ext_offset] != NULL)
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
+        else
+          oi[i] = get_fn_ord(0);
+    else
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        oi[i] = get_fn_ord(0);
+
+    // Order of shape functions.
+    Func<Ord>* ou = get_fn_ord(fu->get_fn_order() + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
+
+    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    double fake_wt = 1.0;
+
+    // Total order of the matrix form.
+    Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
+
+    // Increase due to reference map.
+    order = ru->get_inv_ref_order();
+    order += o.get_order();
+    limit_order(order);
+    
+    // Cleanup.
+    delete [] oi;
+
+    if (fake_ext != NULL) {
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+  }
+  return order;
+}
+int DiscreteProblem::calc_order_matrix_form_vol(WeakForm::MultiComponentMatrixFormVol *mfv, Hermes::vector<Solution *> u_ext,
                                                 PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
 {
   _F_
@@ -2093,8 +2696,131 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
 
   return result;
 }
+void DiscreteProblem::eval_form(WeakForm::MultiComponentVectorFormVol *vfv, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fv, RefMap *rv, Hermes::vector<scalar>& result)
+{
+  _F_
+  // Determine the integration order by parsing the form.
+  int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
+  // Evaluate the form using numerical quadrature of order "order".
+  Quad2D* quad = fv->get_quad_2d();
+  double3* pt = quad->get_points(order);
+  int np = quad->get_num_points(order);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[order] == NULL)
+  {
+    cache_e[order] = init_geom_vol(rv, order);
+    double* jac = NULL;
+    if(!rv->is_jacobian_const()) 
+      jac = rv->get_jacobian(order);
+    cache_jwt[order] = new double[np];
+    for(int i = 0; i < np; i++) {
+      if(rv->is_jacobian_const())
+        cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
+      else
+        cache_jwt[order][i] = pt[i][2] * jac[i];
+    }
+  }
+  Geom<double>* e = cache_e[order];
+  double* jwt = cache_jwt[order];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  int prev_size = u_ext.size() - vfv->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + vfv->u_ext_offset] != NULL) 
+        prev[i] = init_fn(u_ext[i + vfv->u_ext_offset], order);
+      else 
+        prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  Func<double>* v = get_fn(fv, rv, order);
+  ExtData<scalar>* ext = init_ext_fns(vfv->ext, rv, order);
+
+  // The actual calculation takes place here.
+  vfv->value(np, jwt, prev, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= vfv->scaling_factor;
+
+  // Clean up.
+  for(int i = 0; i < prev_size; i++)
+    if (prev[i] != NULL) { 
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  delete [] prev;
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+}
 
 int DiscreteProblem::calc_order_vector_form_vol(WeakForm::VectorFormVol *vfv, 
+                                                Hermes::vector<Solution *> u_ext,
+                                                PrecalcShapeset *fv, RefMap *rv)
+{
+  _F_
+  // Order that will be returned.
+  int order;
+
+  if(is_fvm) 
+    order = rv->get_inv_ref_order();
+  else {
+    int u_ext_length = u_ext.size();      // Number of external solutions.
+    int u_ext_offset = vfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+                                          // and there will be only u_ext_length - u_ext_offset of them.
+  
+    // Increase for multi-valued shape functions.
+    int inc = (fv->get_num_components() == 2) ? 1 : 0;
+
+    // Order of solutions from the previous Newton iteration.
+    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    if (u_ext != Hermes::vector<Solution *>())
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        if (u_ext[i + u_ext_offset] != NULL)
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
+        else
+          oi[i] = get_fn_ord(0);
+    else
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        oi[i] = get_fn_ord(0);
+
+    // Order of the shape function.
+    Func<Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
+
+    // Order of geometric attributes (eg. for multiplication of 
+    // a solution with coordinates, normals, etc.).
+    double fake_wt = 1.0;
+
+    // Total order of the vector form.
+    Ord o = vfv->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
+
+    // Increase due to reference map.
+    order = rv->get_inv_ref_order();
+    order += o.get_order();
+    limit_order(order);
+    
+    // Cleanup.
+    delete [] oi;
+
+    if (fake_ext != NULL) {
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+  }
+  return order;
+}
+int DiscreteProblem::calc_order_vector_form_vol(WeakForm::MultiComponentVectorFormVol *vfv, 
                                                 Hermes::vector<Solution *> u_ext,
                                                 PrecalcShapeset *fv, RefMap *rv)
 {
@@ -2337,8 +3063,127 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormSurf *mfs,
 
   return result;
 }
+void DiscreteProblem::eval_form(WeakForm::MultiComponentMatrixFormSurf *mfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos, Hermes::vector<scalar>& result)
+{
+  _F_
+  // Determine the integration order by parsing the form.
+  int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
+  // Evaluate the form using numerical quadrature of order "order".
+  Quad2D* quad = fu->get_quad_2d();
+
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
+  double3* pt = quad->get_points(eo);
+  int np = quad->get_num_points(eo);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL)
+  {
+    cache_e[eo] = init_geom_surf(ru, surf_pos, eo);
+    double3* tan = ru->get_tangent(surf_pos->surf_num, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+  Geom<double>* e = cache_e[eo];
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  int prev_size = u_ext.size() - mfs->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + mfs->u_ext_offset] != NULL) 
+        prev[i] = init_fn(u_ext[i + mfs->u_ext_offset], eo);
+      else 
+        prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  Func<double>* u = get_fn(fu, ru, eo);
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
+
+  // The actual calculation takes place here.
+  mfs->value(np, jwt, prev, u, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= mfs->scaling_factor * 0.5;
+
+  // Clean up.
+  for(int i = 0; i < prev_size; i++)
+    if (prev[i] != NULL) { 
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  delete [] prev;
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+}
 
 int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
+{
+  _F_
+  // Order that will be returned.
+  int order;
+
+  if(is_fvm)
+    order = ru->get_inv_ref_order();
+  else {
+    int u_ext_length = u_ext.size();      // Number of external solutions.
+    int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+                                          // and there will be only u_ext_length - u_ext_offset of them.
+  
+    // Increase for multi-valued shape functions.
+    int inc = (fu->get_num_components() == 2) ? 1 : 0;
+
+    // Order of solutions from the previous Newton iteration.
+    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    if (u_ext != Hermes::vector<Solution *>())
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        if (u_ext[i + u_ext_offset] != NULL)
+          oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_edge_fn_order(surf_pos->surf_num) + inc);
+        else
+          oi[i] = get_fn_ord(0);
+    else
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        oi[i] = get_fn_ord(0);
+
+    // Order of shape functions.
+    Func<Ord>* ou = get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, surf_pos->surf_num);
+
+    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    double fake_wt = 1.0;
+
+    // Total order of the matrix form.
+    Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
+
+    // Increase due to reference map.
+    order = ru->get_inv_ref_order();
+    order += o.get_order();
+    limit_order(order);
+
+    // Cleanup.
+    delete [] oi;
+
+    if (fake_ext != NULL) {
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+  }
+  return order;
+}
+int DiscreteProblem::calc_order_matrix_form_surf(WeakForm::MultiComponentMatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -2581,8 +3426,124 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs,
 
   return result;
 }
+void DiscreteProblem::eval_form(WeakForm::MultiComponentVectorFormSurf *vfs, 
+                                  Hermes::vector<Solution *> u_ext, 
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos, Hermes::vector<scalar>& result)
+{
+  _F_
+  // Determine the integration order by parsing the form.
+  int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
+  // Evaluate the form using numerical quadrature of order "order".
+  Quad2D* quad = fv->get_quad_2d();
+
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
+  double3* pt = quad->get_points(eo);
+  int np = quad->get_num_points(eo);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL) {
+    cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
+    double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+  Geom<double>* e = cache_e[eo];
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  int prev_size = u_ext.size() - vfs->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + vfs->u_ext_offset] != NULL) 
+        prev[i] = init_fn(u_ext[i + vfs->u_ext_offset], eo);
+      else 
+        prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
+
+  // The actual calculation takes place here.
+  vfs->value(np, jwt, prev, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= vfs->scaling_factor * 0.5;
+
+  // Clean up.
+  for(int i = 0; i < prev_size; i++)
+    if (prev[i] != NULL) { 
+      prev[i]->free_fn(); 
+      delete prev[i]; 
+    }
+  delete [] prev;
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+}
 
 int DiscreteProblem::calc_order_vector_form_surf(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
+{
+  _F_
+  // Order that will be returned.
+  int order;
+
+  if(is_fvm) 
+    order = rv->get_inv_ref_order();
+  else {
+    int u_ext_length = u_ext.size();      // Number of external solutions.
+    int u_ext_offset = vfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+                                          // and there will be only u_ext_length - u_ext_offset of them.
+  
+    // Increase for multi-valued shape functions.
+    int inc = (fv->get_num_components() == 2) ? 1 : 0;
+
+    // Order of solutions from the previous Newton iteration.
+    Func<Ord>** oi = new Func<Ord>*[u_ext_length - u_ext_offset];
+    if (u_ext != Hermes::vector<Solution *>())
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        if (u_ext[i + u_ext_offset] != NULL)
+          oi[i] = get_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
+        else
+          oi[i] = get_fn_ord(0);
+    else
+      for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        oi[i] = get_fn_ord(0);
+
+    // Order of the shape function.
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext);
+
+    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    double fake_wt = 1.0;
+
+    // Total order of the vector form.
+    Ord o = vfs->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
+
+    // Increase due to reference map.
+    order = rv->get_inv_ref_order();
+    order += o.get_order();
+    limit_order(order);
+    
+    // Cleanup.
+    delete [] oi;
+
+    if (fake_ext != NULL) {
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+  }
+  return order;
+}
+int DiscreteProblem::calc_order_vector_form_surf(WeakForm::MultiComponentVectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
 {
   _F_
@@ -2851,6 +3812,71 @@ int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MatrixFormSurf *mfs, He
   }
   return order;
 }
+int DiscreteProblem::calc_order_dg_matrix_form(WeakForm::MultiComponentMatrixFormSurf *mfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, SurfPos* surf_pos,
+                                  bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u)
+{
+  NeighborSearch* nbs_u = neighbor_searches.get(neighbor_index_u);
+  // Order that will be returned.
+  int order;
+  
+  if(this->is_fvm)
+    order = ru->get_inv_ref_order();
+  else {
+    // Order of solutions from the previous Newton iteration.
+    int prev_size = u_ext.size() - mfs->u_ext_offset;
+    Func<Ord>** oi = new Func<Ord>*[prev_size];
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + mfs->u_ext_offset] != NULL) 
+          oi[i] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
+        else 
+          oi[i] = get_fn_ord(0);
+    else
+      for (int i = 0; i < prev_size; i++) 
+        oi[i] = get_fn_ord(0);
+    
+    // Order of shape functions.
+    int inc = (fv->get_num_components() == 2) ? 1 : 0;
+    DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_u);
+    DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_v);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(mfs->ext, neighbor_searches);
+
+    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(&geom_ord, nbs_u->neighb_el->marker, 
+      nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+    double fake_wt = 1.0;
+    
+    // Total order of the matrix form.
+    Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
+
+    // Increase due to reference maps.
+    order = ru->get_inv_ref_order();
+
+    order += o.get_order();
+    limit_order(order);
+
+    // Clean up.
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + mfs->u_ext_offset] != NULL) 
+          delete oi[i];
+    delete [] oi;
+    delete fake_e;
+    delete ou;
+    delete ov;
+    if (fake_ext != NULL) {
+      for (int i = 0; i < fake_ext->nf; i++) {
+        delete fake_ext->fn[i];
+      }
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+  }
+  return order;
+}
 
 scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
                                      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru_central, RefMap *ru_actual, RefMap *rv, 
@@ -2940,8 +3966,157 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::MatrixFormSurf* mfs, Hermes::vect
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
 }
+void DiscreteProblem::eval_dg_form(WeakForm::MultiComponentMatrixFormSurf* mfs, Hermes::vector<Solution *> u_ext,
+                                     PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru_central, RefMap *ru_actual, RefMap *rv, 
+                                     bool neighbor_supp_u, bool neighbor_supp_v,
+                                     SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v, Hermes::vector<scalar>& result)
+{
+  _F_
+
+  NeighborSearch* nbs_u = neighbor_searches.get(neighbor_index_u);
+  NeighborSearch* nbs_v = neighbor_searches.get(neighbor_index_v);
+
+  // Determine the integration order.
+  int order = calc_order_dg_matrix_form(mfs, u_ext, fu, fv, ru_actual, surf_pos, neighbor_supp_u, neighbor_supp_v, neighbor_searches, neighbor_index_u);
+
+  // Evaluate the form using just calculated order.
+  Quad2D* quad = fu->get_quad_2d();
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
+  int np = quad->get_num_points(eo);
+  double3* pt = quad->get_points(eo);
+
+  // A (debug) check.
+  assert(surf_pos->surf_num == neighbor_searches.get(neighbor_index_u)->active_edge);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL) {
+    cache_e[eo] = init_geom_surf(ru_central, surf_pos, eo);
+    double3* tan = ru_central->get_tangent(surf_pos->surf_num, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+
+  Geom<double>* e = new InterfaceGeom<double>(cache_e[eo], nbs_u->neighb_el->marker, 
+    nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  int prev_size = u_ext.size() - mfs->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + mfs->u_ext_offset] != NULL) {
+        neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
+      }
+      else prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  nbs_u->set_quad_order(order);
+  DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(get_fn(fu, ru_actual, nbs_u->get_quad_eo(neighbor_supp_u)),
+    neighbor_supp_u, nbs_u->neighbor_edge.orientation);
+  nbs_v->set_quad_order(order);
+  DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
+    neighbor_supp_v, nbs_v->neighbor_edge.orientation);
+  
+  ExtData<scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
+
+  mfs->value(np, jwt, prev, u, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= mfs->scaling_factor * 0.5;
+
+  // Clean up.
+  for (int i = 0; i < prev_size; i++) {
+    if (prev[i] != NULL) {
+      prev[i]->free_fn();
+      delete prev[i];
+    }
+  }
+
+  delete [] prev;
+
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+
+  delete u;
+  delete v;
+  delete e;
+}
 
 int DiscreteProblem::calc_order_dg_vector_form(WeakForm::VectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
+                                  PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos,
+                                  LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v)
+{
+  NeighborSearch* nbs_v = neighbor_searches.get(neighbor_index_v);
+  // Order that will be returned.
+  int order;
+  int u_ext_length = u_ext.size();      // Number of external solutions.
+  int u_ext_offset = vfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+                                        // and there will be only u_ext_length - u_ext_offset of them.
+  if(this->is_fvm)
+    order = rv->get_inv_ref_order();
+  else {
+    // Order of solutions from the previous Newton iteration.
+    int prev_size = u_ext.size() - vfs->u_ext_offset;
+    Func<Ord>** oi = new Func<Ord>*[prev_size];
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + vfs->u_ext_offset] != NULL) 
+          oi[i] = init_ext_fn_ord(neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq), u_ext[i]);
+        else 
+          oi[i] = get_fn_ord(0);
+    else
+      for (int i = 0; i < prev_size; i++) 
+        oi[i] = get_fn_ord(0);
+
+    // Order of the shape function.
+    // Determine the integration order.
+    int inc = (fv->get_num_components() == 2) ? 1 : 0;
+    Func<Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
+
+    // Order of additional external functions.
+    ExtData<Ord>* fake_ext = init_ext_fns_ord(vfs->ext, neighbor_searches);
+
+    // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+    Geom<Ord>* fake_e = new InterfaceGeom<Ord>(&geom_ord,
+                        nbs_v->neighb_el->marker, nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+    double fake_wt = 1.0;
+
+    // Total order of the vector form.
+    Ord o = vfs->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
+
+    // Increase due to reference map.
+    order = rv->get_inv_ref_order();
+    order += o.get_order();
+    limit_order(order);
+
+    // Clean up.
+    if (u_ext != Hermes::vector<Solution *>())
+      for (int i = 0; i < prev_size; i++)
+        if (u_ext[i + vfs->u_ext_offset] != NULL) 
+          delete oi[i];
+    delete [] oi;
+    if (fake_ext != NULL) {
+      for (int i = 0; i < fake_ext->nf; i++) {
+        delete fake_ext->fn[i];
+      }
+      fake_ext->free_ord(); 
+      delete fake_ext;
+    }
+
+    delete fake_e;
+  }
+  return order;
+}
+int DiscreteProblem::calc_order_dg_vector_form(WeakForm::MultiComponentVectorFormSurf *vfs, Hermes::vector<Solution *> u_ext,
                                   PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos,
                                   LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v)
 {
@@ -3080,7 +4255,75 @@ scalar DiscreteProblem::eval_dg_form(WeakForm::VectorFormSurf* vfs, Hermes::vect
                     // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                     // the weights.
 }
+void DiscreteProblem::eval_dg_form(WeakForm::MultiComponentVectorFormSurf* vfs, Hermes::vector<Solution *> u_ext,
+                                     PrecalcShapeset *fv, RefMap *rv, 
+                                     SurfPos* surf_pos, LightArray<NeighborSearch*>& neighbor_searches, int neighbor_index_v, Hermes::vector<scalar>& result)
+{
+  _F_
+  NeighborSearch* nbs_v = (neighbor_searches.get(neighbor_index_v));
+  int order = calc_order_dg_vector_form(vfs, u_ext, fv, rv, surf_pos, neighbor_searches, neighbor_index_v);
+  
+  // Evaluate the form using just calculated order.
+  Quad2D* quad = fv->get_quad_2d();
+  int eo = quad->get_edge_points(surf_pos->surf_num, order);
+  int np = quad->get_num_points(eo);
+  double3* pt = quad->get_points(eo);
 
+  // A (debug) check.
+  assert(surf_pos->surf_num == nbs_v->active_edge);
+
+  // Init geometry and jacobian*weights.
+  if (cache_e[eo] == NULL) {
+    cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
+    double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
+    cache_jwt[eo] = new double[np];
+    for(int i = 0; i < np; i++)
+      cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+  }
+
+  Geom<double>* e = new InterfaceGeom<double>(cache_e[eo], nbs_v->neighb_el->marker, 
+    nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+  double* jwt = cache_jwt[eo];
+
+  // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+  int prev_size = u_ext.size() - vfs->u_ext_offset;
+  Func<scalar>** prev = new Func<scalar>*[prev_size];
+  if (u_ext != Hermes::vector<Solution *>())
+    for (int i = 0; i < prev_size; i++)
+      if (u_ext[i + vfs->u_ext_offset] != NULL) {
+        neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+        prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
+      }
+      else prev[i] = NULL;
+  else
+    for (int i = 0; i < prev_size; i++) 
+      prev[i] = NULL;
+
+  Func<double>* v = get_fn(fv, rv, eo);
+  ExtData<scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
+
+  vfs->value(np, jwt, prev, v, e, ext, result);
+
+  for(unsigned int i = 0; i < result.size(); i++)
+    result[i] *= vfs->scaling_factor * 0.5;
+
+  // Clean up.
+  for (int i = 0; i < prev_size; i++) {
+    if (prev[i] != NULL) {
+      prev[i]->free_fn(); 
+      delete prev[i];
+    }
+  }
+
+  delete [] prev;
+
+  if (ext != NULL) {
+    ext->free(); 
+    delete ext;
+  }
+
+  delete e;
+}
 
 DiscreteProblem::NeighborNode::NeighborNode(NeighborNode* parent, unsigned int transformation) : parent(parent), transformation(transformation)
 {

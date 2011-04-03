@@ -205,8 +205,8 @@ public:
 
     virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
-    virtual void ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext, Hermes::vector<Ord>& result) const = 0;
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
   };
 
   class HERMES_API MultiComponentMatrixFormSurf : public Form
@@ -223,8 +223,8 @@ public:
 
     virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
-    virtual void ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext, Hermes::vector<Ord>& result) const = 0;
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
   };
 
   class HERMES_API MultiComponentVectorFormVol : public Form
@@ -241,8 +241,8 @@ public:
 
     virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
-    virtual void ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-                    ExtData<Ord> *ext, Hermes::vector<Ord>& result) const = 0;
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const = 0;
   };
 
   class HERMES_API MultiComponentVectorFormSurf : public Form
@@ -259,8 +259,8 @@ public:
 
     virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
-    virtual void ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                      Geom<Ord> *e, ExtData<Ord> *ext, Hermes::vector<Ord>& result) const = 0;
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                      Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
   };
 
   // General case.
