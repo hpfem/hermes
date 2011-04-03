@@ -81,10 +81,6 @@ const std::string MAT_WIRE = "Wire";
 
 int main(int argc, char* argv[])
 {
-
-  scalar sss = scalar(0.5, 1.0);
-  double rp = REAL(sss);
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();

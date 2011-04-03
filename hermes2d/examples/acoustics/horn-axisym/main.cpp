@@ -1,15 +1,26 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
+#include "boundaryconditions/essential_bcs.h"
 
 using namespace RefinementSelectors;
 
-// This test makes sure that example 13-complex-adapt works correctly.
+//  This problem describes the distribution of the vector potential in
+//  a 2D domain comprising a wire carrying electrical current, air, and
+//  an iron which is not under voltage.
+//
+//  PDE: -Laplace A + ii*omega*gamma*mu*A = mu *J_ext.
+//
+//  Domain: Rectangle of height 0.003 and width 0.004. Different
+//  materials for the wire, air, and iron (see mesh file domain2.mesh).
+//
+//  BC: Zero Dirichlet on the top and right edges, zero Neumann
+//  elsewhere.
+//
+//  The following parameters can be changed:
 
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
+const int P_INIT = 6;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -47,25 +58,21 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+
 // Problem parameters.
-const double MU_0 = 4.0*M_PI*1e-7;
-const double MU_IRON = 1e3 * MU_0;
-const double GAMMA_IRON = 6e6;
-const double J_EXT = 1e6;
+const double RHO = 1.25;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
+const double SOUND_SPEED = 353.0;
+const scalar P_SOURCE = scalar(1.0, 0.0);
 
 // Boundary markers.
-const std::string BDY_NEUMANN = "Neumann";
-const std::string BDY_DIRICHLET = "Dirichlet";
-
-// Materials markers.
-const std::string MAT_AIR = "Air";
-const std::string MAT_IRON = "Iron";
-const std::string MAT_WIRE = "Wire";
+const std::string BDY_NEUMANN = "Symmetry";
+const std::string BDY_NEWTON = "Outlet";
+const std::string BDY_DIRICHLET = "Source";
 
 // Weak forms.
-#include "../definitions.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -76,19 +83,15 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../domain.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
+  //mesh.refine_element_id(2);
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential("Dirichlet", scalar(0.0, 0.0));
+  DefaultEssentialBCConst bc_essential("Dirichlet", P_SOURCE);
   EssentialBCs bcs(&bc_essential);
-  /*
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-  bc_types.add_bc_neumann(BDY_BUTTOM);
-  */
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
@@ -96,14 +99,8 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormMagnetics wf(MAT_AIR, MU_0, MAT_IRON, MU_IRON, GAMMA_IRON, MAT_WIRE, MU_0, scalar(J_EXT, 0.0), OMEGA);
-  /*
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_iron), HERMES_SYM, 3);
-  wf.add_matrix_form(callback(bilinear_form_wire), HERMES_SYM, 2);
-  wf.add_matrix_form(callback(bilinear_form_air), HERMES_SYM, 1);
-  wf.add_vector_form(callback(linear_form_wire), 2);
-  */
+  CustomWeakFormAcoustics wf(BDY_NEWTON, RHO, SOUND_SPEED, OMEGA);
+
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
@@ -111,9 +108,9 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  //ScalarView sview("Solution", new WinGeom(0, 0, 600, 350));
-  //sview.show_mesh(false);
-  //OrderView  oview("Polynomial orders", new WinGeom(610, 0, 520, 350));
+  ScalarView sview("Solution", new WinGeom(0, 0, 600, 350));
+  sview.show_mesh(false);
+  OrderView  oview("Polynomial orders", new WinGeom(610, 0, 520, 350));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
@@ -160,8 +157,8 @@ int main(int argc, char* argv[])
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
-    //sview.show(&sln);
-    //oview.show(&space);
+    sview.show(&sln);
+    oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
@@ -207,19 +204,12 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
+  
+  // Show the reference solution - the final result.
+  sview.set_title("Fine mesh solution");
+  sview.show(&ref_sln);
 
-  ndof = Space::get_num_dofs(&space);
-
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 650);
-  printf("ndof actual = %d\n", ndof);
-  if (ndof < 650) {      // ndofs was 625 atthe time this test was created
-    printf("Success!\n");
-    return ERROR_SUCCESS;
-  }
-  else {
-    printf("Failure!\n");
-    return ERROR_FAILURE;
-  }
+  // Wait for all views to be closed.
+  View::wait();
+  return 0;
 }
