@@ -45,7 +45,7 @@ public:
     double x_in = std::real(x_in_scalar); 
     return get_value(x_in);
   };
-#endif H2D_COMPLEX
+#endif
 
   /// For order calculation in Hermes.
   Ord get_value(Ord x_in) {return Ord(3);};
@@ -61,7 +61,7 @@ public:
     double x_in = std::real(x_in_scalar); 
     return get_derivative(x_in);
   };
-#endif H2D_COMPLEX
+#endif
 
   /// For order calculation in Hermes.
   Ord get_derivative(Ord x_in) {return Ord(2);};

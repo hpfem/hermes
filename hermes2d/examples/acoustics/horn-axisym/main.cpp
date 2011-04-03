@@ -19,8 +19,8 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 6;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
@@ -44,7 +44,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -64,7 +64,7 @@ const double RHO = 1.25;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
 const double SOUND_SPEED = 353.0;
-const scalar P_SOURCE = scalar(1.0, 0.0);
+const scalar P_SOURCE(1.0, 0.0);
 
 // Boundary markers.
 const std::string BDY_NEUMANN = "Symmetry";
@@ -87,10 +87,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   //mesh.refine_element_id(2);
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential("Dirichlet", P_SOURCE);
+  DefaultEssentialBCConst bc_essential("Source", P_SOURCE);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -108,9 +108,10 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 600, 350));
+  ScalarView sview("Solution", new WinGeom(0, 0, 330, 350));
   sview.show_mesh(false);
-  OrderView  oview("Polynomial orders", new WinGeom(610, 0, 520, 350));
+  sview.fix_scale_width(50);
+  OrderView  oview("Polynomial orders", new WinGeom(340, 0, 300, 350));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;

@@ -60,10 +60,6 @@ public:
 
   bool operator<(double d) { return true; }
   bool operator>(double d) { return false; }
-#ifdef H2D_COMPLEX
-  bool operator<(scalar d) { return true; }
-  bool operator>(scalar d) { return false; }
-#endif H2D_COMPLEX
   bool operator<(const Ord &o) { return this->order < o.order; }
   bool operator>(const Ord &o) { return this->order > o.order; }
 
