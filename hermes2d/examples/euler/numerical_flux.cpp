@@ -8,7 +8,7 @@ void NumericalFlux::Q(double result[4], double state_vector[4], double nx, doubl
 {
   result[0] = state_vector[0];
   double temp_result_1 = nx * state_vector[1] + ny * state_vector[2];
-  double temp_result_2 = -ny * state_vector[1] + ny * state_vector[2];
+  double temp_result_2 = -ny * state_vector[1] + nx * state_vector[2];
   result[1] = temp_result_1;
   result[2] = temp_result_2;
   result[3] = state_vector[3];
@@ -18,7 +18,7 @@ void NumericalFlux::Q_inv(double result[4], double state_vector[4], double nx, d
 {
   result[0] = state_vector[0];
   double temp_result_1 = nx * state_vector[1] - ny * state_vector[2];
-  double temp_result_2 = ny * state_vector[1] + ny * state_vector[2];
+  double temp_result_2 = ny * state_vector[1] + nx * state_vector[2];
   result[1] = temp_result_1;
   result[2] = temp_result_2;
   result[3] = state_vector[3];
