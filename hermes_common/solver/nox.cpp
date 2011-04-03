@@ -58,7 +58,7 @@ public:
     Teuchos::RCP<Precond<Scalar> > get_precond() { return precond; }
   void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
 
-  DiscreteProblemInterface* fep;           // finite element problem being solved
+  DiscreteProblemInterface<Scalar>* fep;           // finite element problem being solved
 
   EpetraVector<Scalar> init_sln;          // initial solution
   EpetraMatrix<Scalar> jacobian;          // jacobian (optional)
