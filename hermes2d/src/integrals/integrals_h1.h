@@ -184,7 +184,6 @@ inline double int_h1_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   return result;
 }
 
-
 template<typename T>
 inline double int_h1_semi_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
 {
@@ -208,7 +207,6 @@ inline double int_h1_semi_error(Function<T>* fu, Function<T>* fv, RefMap* ru, Re
   return result;
 }
 
-
 template<typename T>
 inline double int_l2_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
 {
@@ -227,7 +225,6 @@ inline double int_l2_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   h1_integrate_expression(sqr(fnu[i] - fnv[i]));
   return result;
 }
-
 
 template<typename T>
 inline double int_dx_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
@@ -249,7 +246,6 @@ inline double int_dx_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   return result;
 }
 
-
 template<typename T>
 inline double int_dy_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap* rv)
 {
@@ -270,7 +266,6 @@ inline double int_dy_error(Function<T>* fu, Function<T>* fv, RefMap* ru, RefMap*
   return result;
 }
 
-
 template<typename T>
 inline double int_h1_norm(Function<T>* fu, RefMap* ru)
 {
@@ -288,7 +283,6 @@ inline double int_h1_norm(Function<T>* fu, RefMap* ru)
   h1_integrate_expression(sqr(fnu[i]) + sqr(dudx[i]) + sqr(dudy[i]));
   return result;
 }
-
 
 template<typename T>
 inline double int_h1_seminorm(Function<T>* fu, RefMap* ru)
@@ -308,7 +302,6 @@ inline double int_h1_seminorm(Function<T>* fu, RefMap* ru)
   return result;
 }
 
-
 template<typename T>
 inline double int_l2_norm(Function<T>* fu, RefMap* ru)
 {
@@ -324,6 +317,5 @@ inline double int_l2_norm(Function<T>* fu, RefMap* ru)
   h1_integrate_expression(sqr(fnu[i]));
   return result;
 }
-
 
 #endif

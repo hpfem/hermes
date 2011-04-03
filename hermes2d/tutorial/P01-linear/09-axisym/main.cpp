@@ -1,34 +1,31 @@
 #define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
-// This example explains how to use Newton boundary conditions. Again,
-// a Filter is used to visualize the solution gradient.
+// This example shows how to solve exisymmetric problems.
 //
-// PDE: Laplace equation -Laplace u = 0 (this equation describes, among
-// many other things, also stationary heat transfer in a homogeneous linear
-// material).
+// PDE: Laplace equation -Laplace u = 0 (y-axis is the axis of symmetry).
 //
-// BC: u = T1 ... fixed temperature on Gamma_left (Dirichlet)
-//     du/dn = 0 ... insulated wall on Gamma_outer and Gamma_inner (Neumann)
-//     du/dn = H*(u - T0) ... heat flux on Gamma_bottom (Newton)
+// BC: u = T1 ... fixed temperature on Gamma_bottom,
+//     du/dn = 0 ... symmetry condition along the y-axis (Gamma_symmetry),
+//     du/dn = H*(u - T0) ... heat flux on the rest of the boundary (Gamma_heat_flux).
 //
 // Note that the last BC can be written in the form  du/dn - H*u = -H*T0.
 //
 // The following parameters can be changed:
 
-const int P_INIT = 6;                             // Uniform polynomial degree of all mesh elements.
+const int P_INIT = 4;                             // Uniform polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int CORNER_REF_LEVEL = 12;                  // Number of mesh refinements towards the re-entrant corner.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// Problem parameters.
+const double T1 = 30.0;       // Prescribed temperature on Gamma_bottom.
+const double T0 = 20.0;       // Outer temperature.
+const double LAMBDA = 100;    // Thermal conductivity.
+const double h = 1.0;         // Heat flux on Gamma_heat_flux.
 
 // Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
-
-// Problem parameters.
-const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
-const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
-const double h  = 0.05;       // Heat flux on Gamma_bottom.
+const std::string BDY_HEAT_FLUX = "Heat flux", BDY_BOTTOM = "Bottom", BDY_SYM = "Symmetry";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -45,7 +42,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY_LEFT, T1);
+  DefaultEssentialBCConst bc_essential(BDY_BOTTOM, T1);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -54,7 +51,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(h, T0, BDY_BOTTOM);
+  CustomWeakFormPoissonNewton wf(h, T0, LAMBDA, BDY_HEAT_FLUX);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -82,14 +79,6 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
   view.show(&sln);
-
-  // Compute and show gradient magnitude.
-  // (Note that the gradient at the re-entrant
-  // corner needs to be truncated for visualization purposes.)
-  ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
-  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), 
-                 Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
-  gradview.show(&grad);
 
   // Wait for all views to be closed.
   View::wait();

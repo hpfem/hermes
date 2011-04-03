@@ -10,13 +10,14 @@ int P_INIT = 6;                                   // Uniform polynomial degree o
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
-
 // Problem parameters.
-const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
-const double T0 = 20.0;       // Outer temperature on Gamma_bottom.
-const double h  = 0.05;       // Heat flux on Gamma_bottom.
+const double T1 = 300.0;      // Prescribed temperature on Gamma_bottom.
+const double T0 = 20.0;       // Outer temperature.
+const double LAMBDA = 100;    // Thermal conductivity.
+const double h  = 10.0;       // Heat flux on Gamma_heat_flux.
+
+// Boundary markers.
+const std::string BDY_HEAT_FLUX = "Heat flux", BDY_BOTTOM = "Bottom", BDY_SYM = "Symmetry";
 
 // Weak forms.
 #include "../definitions.cpp"
@@ -33,7 +34,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY_LEFT, T1);
+  DefaultEssentialBCConst bc_essential(BDY_BOTTOM, T1);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(h, T0, BDY_BOTTOM);
+  CustomWeakFormPoissonNewton wf(h, T0, LAMBDA, BDY_HEAT_FLUX);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
