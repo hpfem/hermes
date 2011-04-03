@@ -58,7 +58,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.ton(
-#include "forms.cpp"
+#include "definitions.cpp"
 
 // Initial condition.
 #include "initial_condition.cpp"
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  CustomEssentialBCNonConst bc_essential(BDY_DIRICHLET);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

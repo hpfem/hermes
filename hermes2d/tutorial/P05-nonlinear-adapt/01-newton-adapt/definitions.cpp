@@ -89,19 +89,19 @@ private:
   };
 };
 
-class EssentialBCNonConst : public EssentialBC {
+class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
-  {
+  CustomEssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>()) {
     markers.push_back(marker);
   }
 
-  ~EssentialBCNonConst() {};
+  ~CustomEssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const {
+    return EssentialBoundaryCondition::BC_FUNCTION;
+  }
 
-  scalar function(double x, double y) const
-  {
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
     return (x+10)*(y+10)/100.;
   }
 };
