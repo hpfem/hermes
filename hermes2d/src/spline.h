@@ -39,6 +39,13 @@ public:
 
   /// Get the value at a given point.
   double get_value(double x_in);
+#ifdef H2D_COMPLEX
+  // This is a hack for Hermes to build in complex mode.
+  double get_value(scalar x_in_scalar) {
+    double x_in = std::real(x_in_scalar); 
+    return get_value(x_in);
+  };
+#endif H2D_COMPLEX
 
   /// For order calculation in Hermes.
   Ord get_value(Ord x_in) {return Ord(3);};
@@ -48,6 +55,13 @@ public:
 
   /// Get first derivative at a given point.
   double get_derivative(double x_in);
+#ifdef H2D_COMPLEX
+  // This is a hack for Hermes to build in complex mode.
+  double get_derivative(scalar x_in_scalar) {
+    double x_in = std::real(x_in_scalar); 
+    return get_derivative(x_in);
+  };
+#endif H2D_COMPLEX
 
   /// For order calculation in Hermes.
   Ord get_derivative(Ord x_in) {return Ord(2);};

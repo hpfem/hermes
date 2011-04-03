@@ -72,23 +72,19 @@ const std::string BDY_NEUMANN = "Neumann";
 const std::string BDY_DIRICHLET = "Dirichlet";
 
 // Materials markers.
-const std::string MAT_AIR = "Background";
+const std::string MAT_AIR = "Air";
 const std::string MAT_IRON = "Iron";
 const std::string MAT_WIRE = "Wire";
-
-// Essential (Dirichlet) boundary condition values.
-/*
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return cplx(0.0,0.0);
-}
-*/
 
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+
+  scalar sss = scalar(0.5, 1.0);
+  double rp = REAL(sss);
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -96,7 +92,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain2.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -104,11 +100,6 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential("Dirichlet", scalar(0.0, 0.0));
   EssentialBCs bcs(&bc_essential);
-  /*
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-  bc_types.add_bc_neumann(BDY_BUTTOM);
-  */
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
@@ -116,14 +107,9 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormMagnetics wf(MAT_AIR, MU_0, MAT_IRON, MU_IRON, GAMMA_IRON, MAT_WIRE, MU_0, J_EXT, OMEGA);
-  /*
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_iron), HERMES_SYM, 3);
-  wf.add_matrix_form(callback(bilinear_form_wire), HERMES_SYM, 2);
-  wf.add_matrix_form(callback(bilinear_form_air), HERMES_SYM, 1);
-  wf.add_vector_form(callback(linear_form_wire), 2);
-  */
+  CustomWeakFormMagnetics wf(MAT_AIR, MU_0, MAT_IRON, MU_IRON, GAMMA_IRON, 
+                             MAT_WIRE, MU_0, scalar(J_EXT, 0.0), OMEGA);
+
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
