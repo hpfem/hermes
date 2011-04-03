@@ -21,7 +21,8 @@ Click into the image window and:\n\
   Also see help - click into the image window and press F1.\n";
 
 // Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
+const std::string BDY_BOTTOM = "Bottom", BDY_OUTER = "Outer", 
+                  BDY_LEFT = "Left", BDY_INNER = "Inner";
 
 int main(int argc, char* argv[])
 {
@@ -36,7 +37,10 @@ int main(int argc, char* argv[])
   // section in the mesh file.
   double x_ref = 2.0, y_ref = 3.0;
   if(!mesh.rescale(x_ref, y_ref)) info("Mesh was not rescaled.");
-  else {info("Mesh has been rescaled by the factors of %g and %g in the x- and y- direction, respectively.", x_ref, y_ref);}
+  else {
+    info("Mesh scaled by the factors of %g and %g in the x- and y- direction, respectively.", 
+         x_ref, y_ref);
+  }
 
   // Conversion between triangular and quadrilateral meshes (optional). 
   //mesh.convert_quads_to_triangles();
@@ -49,7 +53,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, 4);    // Four refinements towards vertex no. 3.
 
   // Refine towards boundary (optional).
-  mesh.refine_towards_boundary(BDY_OUTER, 4);  // Four refinements towards boundary with marker 2.
+  mesh.refine_towards_boundary(BDY_OUTER, 4);  // Four successive refinements towards 
+                                               // boundary with marker "Outer".
 
   // Refine individual elements (optional).
   mesh.refine_element_id(86, 0);          // 0... isotropic refinement.
