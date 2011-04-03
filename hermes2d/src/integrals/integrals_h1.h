@@ -27,7 +27,25 @@ Scalar int_v(int n, double *wt, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->val[i]);
+    result += wt[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_x_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_y_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * v->val[i];
   return result;
 }
 
@@ -37,6 +55,24 @@ Scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * (u->val[i] * v->val[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_y_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * (u->val[i] * v->val[i]);
   return result;
 }
 
@@ -55,6 +91,24 @@ Scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_y_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   return result;
 }
 

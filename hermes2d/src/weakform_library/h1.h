@@ -30,37 +30,33 @@ namespace WeakFormsH1 {
     {
     public:
     DefaultLinearDiffusion(int i, int j, double coeff = 1.0, 
-                           SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 5) 
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
+                           SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
+            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt) { }
       DefaultLinearDiffusion(int i, int j, std::string area, double coeff = 1.0, 
-                             SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 5) 
-	    : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
+                             SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
+	    : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else {
-          for (int i=0; i < n; i++) {
-            double r_i = (gt == HERMES_AXISYM_X ? e->y[i] : e->x[i]);
-            result += wt[i] * 1./r_i * (u->dx[i]*v->dx[i] + u->dy[i]*v->dy[i]);
-          }
-        } 
-
+        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
         return coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        if (gt != HERMES_PLANAR) result += Ord(axisym_ord_inc);
+        Ord result;
+        if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
         return result;
       }
 
       private:
         double coeff;
         GeomType gt;
-        int axisym_ord_inc;
     };
 
     /* Default volumetric matrix form \int_{area} coeff_spline'(u_ext[0]) u \nabla u_ext[0] \cdot \nabla v 
@@ -661,35 +657,32 @@ namespace WeakFormsH1 {
     class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultMatrixFormSurf(int i, int j, double coeff, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 10) 
-	: WeakForm::MatrixFormSurf(i, j), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
-      DefaultMatrixFormSurf(int i, int j, std::string area, double coeff, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 10) 
-	: WeakForm::MatrixFormSurf(i, j, area), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
+      DefaultMatrixFormSurf(int i, int j, double coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::MatrixFormSurf(i, j), coeff(coeff), gt(gt) { }
+      DefaultMatrixFormSurf(int i, int j, std::string area, double coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::MatrixFormSurf(i, j, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
-        else {
-          for (int i=0; i < n; i++) {
-            double r_i = (gt == HERMES_AXISYM_X ? e->y[i] : e->x[i]);
-            result += wt[i] * r_i * u->val[i] * v->val[i];
-          }
-        } 
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+        else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
         return coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
               Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = int_u_v<Ord, Ord>(n, wt, u, v);
-        if (gt != HERMES_PLANAR) result += Ord(axisym_ord_inc);
-        return result;
+        Ord result = 0;
+        if (gt == HERMES_PLANAR) result = int_u_v<Ord, Ord>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_v<Ord, Ord>(n, wt, u, v, e);
+        else result = int_x_u_v<Ord, Ord>(n, wt, u, v, e);
+        return coeff * result;
       }
 
       private:
         double coeff;
         GeomType gt;
-        int axisym_ord_inc;
     };
 
     /* Default surface matrix form \int_{area} spline_coeff(u_ext[0]) u v dS
@@ -738,34 +731,31 @@ namespace WeakFormsH1 {
     class DefaultVectorFormSurf : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultVectorFormSurf(int i, double coeff, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 5) 
-	: WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
-      DefaultVectorFormSurf(int i, std::string area, double coeff, GeomType gt = HERMES_PLANAR, int axisym_ord_inc = 5) 
-	: WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt), axisym_ord_inc(axisym_ord_inc) { }
+      DefaultVectorFormSurf(int i, double coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
+      DefaultVectorFormSurf(int i, std::string area, double coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                    Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_v<double, scalar>(n, wt, v);
-        else {
-          for (int i=0; i < n; i++) {
-            double r_i = (gt == HERMES_AXISYM_X ? e->y[i] : e->x[i]);
-            result += wt[i] * r_i * v->val[i];
-          }
-        } 
+        else if (gt == HERMES_AXISYM_X) result = int_y_v<double, scalar>(n, wt, v, e);
+        else result = int_x_v<double, scalar>(n, wt, v, e);
         return coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = int_v<Ord, Ord>(n, wt, v);
-        if (gt != HERMES_PLANAR) result += Ord(axisym_ord_inc);
-        return result;
+        Ord result = 0;
+        if (gt == HERMES_PLANAR) result = int_v<Ord, Ord>(n, wt, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_v<Ord, Ord>(n, wt, v, e);
+        else result = int_x_v<Ord, Ord>(n, wt, v, e);
+        return coeff * result;
       }
 
     private:
       double coeff;
       GeomType gt;
-      int axisym_ord_inc;
     };
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
