@@ -61,12 +61,13 @@ Scalar int_curl_e_curl_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
   return result;
 }
 
+
 template<typename Real, typename Scalar>
-Scalar int_v0(int n, double *wt, Func<Real> *v)
+Scalar int_v0(int n, double *wt, Func<Scalar> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->val0[i]);
+    result += wt[i] * v->val0[i];
   return result;
 }
 
@@ -75,7 +76,7 @@ Scalar int_v1(int n, double *wt, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->val1[i]);
+    result += wt[i] * v->val1[i];
   return result;
 }
 

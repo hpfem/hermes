@@ -7,9 +7,7 @@
 // equations, thus converting the first-order system into one second -order
 // equation in time. The second-order equation in time is decomposed back into 
 // a first-order system in time in the standard way (see example wave-1). Time 
-// discretization is performed using arbitrary Runge-Kutta methods entered via 
-// their Butcher's tables. For a list of available R-K methods see the file 
-// hermes_common/tables.h.
+// discretization is performed using the implicit Euler method.
 //
 // The function rk_time_step() needs more optimisation, see a todo list at 
 // the beginning of file src/runge-kutta.h.
@@ -20,7 +18,12 @@
 //      \frac{\partial E}{\partial t} = F,
 //      \frac{\partial F}{\partial t} = - SPEED_OF_LIGHT**2 * curl curl E.
 //
-// Domain: Rectangular domain (-a, a) x (-b, b)... See mesh file domain.mesh.
+// Approximated by
+// 
+//      \frac{E^{n+1}}{tau}                   - F^{n+1}             = \frac{E^{n}}{tau},
+//      SPEED_OF_LIGHT**2 * curl curl E^{n+1} + \frac{F^{n+1}}{tau} = \frac{F^{n}}{tau}.
+//
+// Domain: Rectangular domain (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
 //
 // BC:  E \times \nu = 0 on the boundary (perfect conductor),
 //      F \times \nu = 0 on the boundary (E \times \nu = 0 => \partial E / \partial t \times \nu = 0).
@@ -29,31 +32,14 @@
 //
 // The following parameters can be changed:
 
-const int P_INIT = 2;                              // Initial polynomial degree of all elements.
-const int INIT_REF_NUM = 4;                        // Number of initial uniform mesh refinements.
-const double time_step = 0.01;                     // Time step.
-const double T_FINAL = 2.15;                       // Final time.
+const int P_INIT = 6;                              // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 1;                        // Number of initial uniform mesh refinements.
+const double time_step = 0.05;                     // Time step.
+const double T_FINAL = 35.0;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 
-// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
-// in the name of each method is its order. The one before last, if present, is the number of stages.
-// Explicit methods:
-//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
-// Implicit methods: 
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
-//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
-//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
-// Embedded explicit methods:
-//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
-//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
-// Embedded implicit methods:
-//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
-//   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
-
 // Boundary markers.
-const std::string BDY = "1";
+const std::string BDY = "Perfect conductor";
 
 // Problem parameters.
 const double C_SQUARED = 1;                      // Square of wave speed.                     
@@ -63,12 +49,6 @@ const double C_SQUARED = 1;                      // Square of wave speed.
 
 int main(int argc, char* argv[])
 {
-  // Choose a Butcher's table or define your own.
-  ButcherTable bt(butcher_table_type);
-  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
-  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
-  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -100,29 +80,42 @@ int main(int argc, char* argv[])
   bool is_linear = true;
   DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space), is_linear);
 
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+
   // Initialize views.
-  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 420, 300));
+  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
   E1_view.fix_scale_width(50);
-  ScalarView E2_view("Solution E2", new WinGeom(430, 0, 420, 300));
+  ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
   E2_view.fix_scale_width(50);
-  ScalarView F1_view("Solution F1", new WinGeom(0, 355, 420, 300));
+  ScalarView F1_view("Solution F1", new WinGeom(0, 405, 400, 350));
   F1_view.fix_scale_width(50);
-  ScalarView F2_view("Solution E2", new WinGeom(430, 355, 420, 300));
+  ScalarView F2_view("Solution E2", new WinGeom(410, 405, 400, 350));
   F2_view.fix_scale_width(50);
 
-  // Initialize Runge-Kutta time stepping.
-  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
-
   // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1; bool rhs_only = false;
   do
   {
-    // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
-         current_time, time_step, bt.get_size());
+    // Perform one implicit Euler time step.
+    info("Implicit Euler time step (t = %g s, time_step = %g s).", current_time, time_step);
     bool verbose = true;
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, false, verbose))
-      error("Runge-Kutta time step failed, try to decrease time step size.");
+
+    // First time assemble both the stiffness matrix and right-hand side vector,
+    // then just the right-hand side vector.
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+    dp.assemble(matrix, rhs, rhs_only);
+    rhs_only = true;
+
+    // Solve the linear system and if successful, obtain the solution.
+    info("Solving the matrix problem.");
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space*>(&E_space, &F_space), 
+                                                      Hermes::vector<Solution*>(&E_sln, &F_sln));
+    else error ("Matrix solver failed.\n");
 
     // Visualize the solutions.
     char title[100];

@@ -47,29 +47,25 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-
 // Problem parameters.
-double mu_0 = 4.0*3.141592654E-7;
-double J_wire = 5000000.0;
-double freq = 5E3;
-double omega = 2*3.141592654*freq;
-double gamma_iron = 6E6;
-double mu_iron = 1000*mu_0;
+const double MU_0 = 4.0*M_PI*1e-7;
+const double MU_IRON = 1e3 * MU_0;
+const double GAMMA_IRON = 6e6;
+const double J_EXT = 1e6;
+const double FREQ = 5e3;
+const double OMEGA = 2 * M_PI * FREQ;
 
 // Boundary markers.
-const int BDY_BUTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
+const std::string BDY_NEUMANN = "Neumann";
+const std::string BDY_DIRICHLET = "Dirichlet";
 
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return cplx(0.0,0.0);
-}
+// Materials markers.
+const std::string MAT_AIR = "Air";
+const std::string MAT_IRON = "Iron";
+const std::string MAT_WIRE = "Wire";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -80,34 +76,57 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../domain2.mesh", &mesh);
+  mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_essential("Dirichlet", scalar(0.0, 0.0));
+  EssentialBCs bcs(&bc_essential);
+  /*
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
   bc_types.add_bc_neumann(BDY_BUTTOM);
+  */
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
+  CustomWeakFormMagnetics wf(MAT_AIR, MU_0, MAT_IRON, MU_IRON, GAMMA_IRON, MAT_WIRE, MU_0, scalar(J_EXT, 0.0), OMEGA);
+  /*
   WeakForm wf;
   wf.add_matrix_form(callback(bilinear_form_iron), HERMES_SYM, 3);
   wf.add_matrix_form(callback(bilinear_form_wire), HERMES_SYM, 2);
   wf.add_matrix_form(callback(bilinear_form_air), HERMES_SYM, 1);
   wf.add_vector_form(callback(linear_form_wire), 2);
-
+  */
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // Initialize views.
+  //ScalarView sview("Solution", new WinGeom(0, 0, 600, 350));
+  //sview.show_mesh(false);
+  //OrderView  oview("Polynomial orders", new WinGeom(610, 0, 520, 350));
   
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
+
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  
+  if (matrix_solver == SOLVER_AZTECOO) {
+    ((AztecOOSolver*) solver)->set_solver(iterative_method);
+    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    // Using default iteration parameters (see solver/aztecoo.h).
+  }
   
   // Adaptivity loop:
   int as = 1; 
@@ -123,17 +142,7 @@ int main(int argc, char* argv[])
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    
-    if (matrix_solver == SOLVER_AZTECOO) {
-      ((AztecOOSolver*) solver)->set_solver(iterative_method);
-      ((AztecOOSolver*) solver)->set_precond(preconditioner);
-      // Using default iteration parameters (see solver/aztecoo.h).
-    }
-    
+      
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -149,6 +158,10 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+   
+    // View the coarse mesh solution and polynomial orders.
+    //sview.show(&sln);
+    //oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
@@ -177,10 +190,6 @@ int main(int argc, char* argv[])
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-    // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
     delete adaptivity;
     if (done == false)
       delete ref_space->get_mesh();
@@ -194,7 +203,12 @@ int main(int argc, char* argv[])
   
   verbose("Total running time: %g s", cpu_time.accumulated());
   
-  int ndof = Space::get_num_dofs(&space);
+  // Clean up.
+  delete solver;
+  delete matrix;
+  delete rhs;
+
+  ndof = Space::get_num_dofs(&space);
 
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1

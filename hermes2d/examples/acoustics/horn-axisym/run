@@ -1,0 +1,4 @@
+rm *~  
+./horn-axisym
+python plot_graph.py &
+

@@ -1,17 +1,13 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-using namespace RefinementSelectors;
-
 // This example shows how to discretize the first-order time-domain Maxwell's equations 
 // with vector-valued E (an Hcurl function) and scalar B (an L2 function). Time integration 
-// is done using implicit Euler.
+// is done using an arbitrary R-K method (see below).
 //
-// PDE: (1. / SPEED_OF_LIGHT**2) \partial E / \partial t - curl B = 0,
-//      \partial B / \partial t + curl E = 0.
+// PDE: \partial E / \partial t = SPEED_OF_LIGHT**2 * curl B,
+//      \partial B / \partial t = - curl E.
 //
 // Note: curl E = \partial E_2 / \partial x - \partial E_1 / \partial y
 //       curl B = (\partial B / \partial y, - \partial B / \partial x)
@@ -25,55 +21,49 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 
-const int P_INIT_E = 1;                           // Initial polynomial degree for E.
-const int P_INIT_B = 1;                           // Initial polynomial degree for B.
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
-const double time_step = 0.005;                   // Time step.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+const int P_INIT = 4;                              // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 2;                        // Number of initial uniform mesh refinements.
+const double time_step = 0.05;                     // Time step.
+const double T_FINAL = 35.0;                       // Final time.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const double SPEED_OF_LIGHT = 1.0;                // Speed of light.
-const double T_FINAL = 10000;                     // Length of time interval.
-double current_time = 0;
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// in the name of each method is its order. The one before last, if present, is the number of stages.
+// Explicit methods:
+//   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
+// Implicit methods: 
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+//   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
+// Embedded explicit methods:
+//   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
+//   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
+// Embedded implicit methods:
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
+//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
+//   Implicit_DIRK_ISMAIL_7_45_embedded. 
+ButcherTableType butcher_table_type = Implicit_RK_1;
+//ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+//ButcherTableType butcher_table_type = Implicit_Radau_IIA_3_5;
 
-// Initial conditions for E and B (Version A).
-scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
-  dx[0] = sin(x) * sin(y);
-  dx[1] = cos(x) * cos(y);
-  dy[0] = -cos(x) * cos(y);
-  dy[1] = -sin(x) * sin(y);
-  return scalar2(-cos(x) * sin(y), sin(x) * cos(y));
-}
-scalar B_init_cond(double x, double y, scalar& dx, scalar& dy) {
-  dx = 0.0;
-  dy = 0.0;
-  return 0.0;
-}
+// Boundary markers.
+const std::string BDY = "Perfect conductor";
 
-/* 
-// Initial conditions for E and B (Version B).
-scalar2 E_init_cond(double x, double y, scalar2& dx, scalar2& dy) {
-  dx[0] = 0.0;
-  dx[1] = 0.0;
-  dy[0] = 0.0;
-  dy[1] = 0.0;
-  return scalar2(0.0, 0.0);
-}
-scalar B_init_cond(double x, double y, scalar& dx, scalar& dy) {
-  dx = - 0.5 * M_PI * sin(0.5 * M_PI * x) * cos(0.5 * M_PI * y);
-  dy = - 0.5 * M_PI * cos(0.5 * M_PI * x) * sin(0.5 * M_PI * y);
-  return cos(0.5 * M_PI * x) * cos(0.5 * M_PI * y);
-}
-*/
-
-//  Boundary markers.
-const int BDY_DIRICHLET = 1;
+// Problem parameters.
+const double C_SQUARED = 1;                      // Square of wave speed.                     
 
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Choose a Butcher's table or define your own.
+  ButcherTable bt(butcher_table_type);
+  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
+  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
+  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -82,90 +72,72 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinemets.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(BDY_DIRICHLET);
-
-  // Create an Hcurl space for E and L2 space for B.
-  HcurlSpace E_space(&mesh, &bc_types, &bc_values, P_INIT_E);
-  L2Space B_space(&mesh, P_INIT_B);
-  int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&E_space, &B_space));
-  info("ndof = %d", ndof);
-
-  // Initialize solutions for E and B.
-  Solution E_sln(&mesh, E_init_cond);
-  Solution B_sln(&mesh, B_init_cond);
+  // Initialize solutions.
+  CustomInitialConditionWave E_sln(&mesh);
+  Solution B_sln(&mesh, 0.0);
+  Hermes::vector<Solution*> slns_time_prev(&E_sln, &B_sln);
+  Hermes::vector<Solution*> slns_time_new(&E_sln, &B_sln);
 
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(bilinear_form_0_0));
-  wf.add_matrix_form(0, 1, callback(bilinear_form_0_1));
-  wf.add_matrix_form(1, 0, callback(bilinear_form_1_0));
-  wf.add_matrix_form(1, 1, callback(bilinear_form_1_1));
-  wf.add_vector_form(0, callback(linear_form_0), HERMES_ANY, &E_sln);
-  wf.add_vector_form(1, callback(linear_form_1), HERMES_ANY, &B_sln);
+  CustomWeakFormWave wf(time_step, C_SQUARED, &E_sln, &B_sln);
+  
+  // Initialize boundary conditions
+  DefaultEssentialBCConst bc_essential(BDY, 0.0);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create x- and y- displacement space using the default H1 shapeset.
+  HcurlSpace E_space(&mesh, &bcs, P_INIT);
+  L2Space B_space(&mesh, P_INIT);
+
+  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &B_space)));
+
+  // Initialize the FE problem.
+  bool is_linear = false;
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &B_space), is_linear);
 
   // Initialize views.
-  ScalarView E1_view("E1", new WinGeom(0, 0, 520, 400));
+  ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
   E1_view.fix_scale_width(50);
-  ScalarView E2_view("E2", new WinGeom(525, 0, 520, 400));
+  ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
   E2_view.fix_scale_width(50);
-  ScalarView B_view("B", new WinGeom(1050, 0, 520, 400));
+  ScalarView B_view("Solution B", new WinGeom(0, 405, 400, 350));
   B_view.fix_scale_width(50);
-  
-  // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&E_space, &B_space), is_linear);
 
-  // Initialize matrix solver.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+  // Initialize Runge-Kutta time stepping.
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
-  // Time stepping:
-  int ts = 1; bool rhs_only = false;
-  do 
+  // Time stepping loop.
+  double current_time = time_step; int ts = 1;
+  do
   {
-    info("---- Time step %d, time %3.5f s", ts, current_time);
+    // Perform one Runge-Kutta time step according to the selected Butcher's table.
+    info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
+         current_time, time_step, bt.get_size());
+    bool verbose = true;
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, false, verbose))
+      error("Runge-Kutta time step failed, try to decrease time step size.");
 
-    // First time assemble both the stiffness matrix and right-hand side vector,
-    // then just the right-hand side vector.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    dp.assemble(matrix, rhs, rhs_only);
-    rhs_only = true;
-
-    // Solve the linear system of the reference problem. 
-    // If successful, obtain the solutions.
-    info("Solving.");
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), 
-                                  Hermes::vector<Space*>(&E_space, &B_space), 
-				  Hermes::vector<Solution*>(&E_sln, &B_sln));
-    else error ("Matrix solver failed.\n");
-
-    // Show the solution.
+    // Visualize the solutions.
+    char title[100];
+    sprintf(title, "E1, t = %g", current_time);
+    E1_view.set_title(title);
     E1_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
+    sprintf(title, "E2, t = %g", current_time);
+    E2_view.set_title(title);
     E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
-    B_view.show(&B_sln);
+    sprintf(title, "B, t = %g", current_time);
+    B_view.set_title(title);
+    B_view.show(&B_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
 
-    // Increase current time and time step counter.
+    // Update time.
     current_time += time_step;
-    ts++;
+  
+    //View::wait(HERMES_WAIT_KEYPRESS);
 
   } while (current_time < T_FINAL);
 
-  // Clean up.
-  delete solver;
-  delete matrix;
-  delete rhs;
-
-  // Wait for all views to be closed.
+  // Wait for the view to be closed.
   View::wait();
+
   return 0;
 }
-

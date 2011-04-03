@@ -105,15 +105,15 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   if (ALIGN_MESH) mloader.load("oven_load_circle.mesh", &mesh);
   else mloader.load("oven_load_square.mesh", &mesh);
-
+  
   // Perform initial mesh refinemets.
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakForm wf();
+  CustomWeakForm wf(e_0, mu_0, mu_r, kappa, omega, J, ALIGN_MESH);
 
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY_PERFECT_CONDUCTOR, 0.0, 0.0);
+  DefaultEssentialBCConst bc_essential(BDY_PERFECT_CONDUCTOR, std::complex<double>(0.0, 0.0));
   EssentialBCs bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
