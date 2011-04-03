@@ -68,48 +68,15 @@ const double e_0  = 8.8541878176 * 1e-12;
 const double mu_0 = 1.256 * 1e-6;
 const double k = 1.0;
 
-// Exact solution.
-#include "exact_solution.cpp"
+#include "../definitions.cpp"
 
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
-
-// Unit tangential vectors to the boundary. 
-double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
-
-// Essential boundary condition values.
-scalar essential_bc_values_top(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[3][0] + exact1(x, y, dx, dy)*tau[3][1];
-}
-scalar essential_bc_values_right(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[2][0] + exact1(x, y, dx, dy)*tau[2][1];
-}
-scalar essential_bc_values_bottom(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[1][0] + exact1(x, y, dx, dy)*tau[1][1];
-}
-scalar essential_bc_values_left(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[4][0] + exact1(x, y, dx, dy)*tau[4][1];
-}
-
-// Weak forms.
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_curl_e_curl_f<Real, Scalar>(n, wt, u, v) - int_e_f<Real, Scalar>(n, wt, u, v);
-}
+const std::string BDY = "Perfect conductor";
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -117,31 +84,30 @@ int main(int argc, char* argv[])
   // mloader.load("../screen-tri.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_TOP, essential_bc_values_top);
-  bc_values.add_function(BDY_RIGHT, essential_bc_values_right);
-  bc_values.add_function(BDY_BOTTOM, essential_bc_values_bottom);
-  bc_values.add_function(BDY_LEFT, essential_bc_values_left);
-
-  // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
+  // Set exact solution.
+  CustomExactSolution exact(&mesh);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
+  CustomWeakFormScreen wf;
+
+  // Initialize boundary conditions
+  DefaultEssentialBCNonConstHcurl bc_essential("Perfect conductor", &exact);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  HcurlSpace space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Set exact solution.
-  ExactSolution exact_sln(&mesh, exact);
+  // Initialize views.
+  //VectorView v_view("Solution", new WinGeom(0, 0, 440, 350));
+  //v_view.set_min_max_range(0.0, 10.0);
+  //OrderView  o_view("Polynomial orders", new WinGeom(450, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -160,13 +126,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
+    // Set up the solver, matrix, and rhs according to the solver selection.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
     // Assemble the reference problem.
     info("Solving on reference mesh.");
     bool is_linear = true;
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
@@ -185,15 +153,17 @@ int main(int argc, char* argv[])
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
+    // View the coarse mesh solution and polynomial orders.
+    //v_view.show(&sln);
+    //o_view.show(&space);
+
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.   
-    bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact_sln, solutions_for_adapt) * 100;
-
+    double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_HCURL_NORM) * 100;
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
@@ -236,9 +206,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  verbose("Total running time: %g s", cpu_time.accumulated());
-
-  int ndof = Space::get_num_dofs(&space);
+  ndof = Space::get_num_dofs(&space);
 
   int n_dof_allowed = 1390;
   printf("n_dof_actual = %d\n", ndof);

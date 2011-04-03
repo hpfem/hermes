@@ -69,40 +69,6 @@ const double k = 1.0;
 
 const std::string BDY = "Perfect conductor";
 
-/*
-// Unit tangential vectors to the boundary. 
-double2 tau[5] = { { 0, 0}, { 1, 0 },  { 0, 1 }, { -1, 0 }, { 0, -1 } };
-
-// Essential boundary condition values.
-scalar essential_bc_values_top(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[3][0] + exact1(x, y, dx, dy)*tau[3][1];
-}
-scalar essential_bc_values_right(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[2][0] + exact1(x, y, dx, dy)*tau[2][1];
-}
-scalar essential_bc_values_bottom(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[1][0] + exact1(x, y, dx, dy)*tau[1][1];
-}
-scalar essential_bc_values_left(double x, double y)
-{
-  scalar dx, dy;
-  return exact0(x, y, dx, dy)*tau[4][0] + exact1(x, y, dx, dy)*tau[4][1];
-}
-
-// Weak forms.
-template<typename Real, typename Scalar>
-Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_curl_e_curl_f<Real, Scalar>(n, wt, u, v) - int_e_f<Real, Scalar>(n, wt, u, v);
-}
-*/
-
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
