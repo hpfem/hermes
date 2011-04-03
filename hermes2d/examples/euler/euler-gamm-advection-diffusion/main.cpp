@@ -75,9 +75,9 @@ int main(int argc, char* argv[])
   Mesh basemesh;
   H2DReader mloader;
   if(GAMM_CHANNEL)
-    mloader.load("GAMM-channel-4-bnds.mesh", &basemesh);
+    mloader.load("GAMM-channel.mesh", &basemesh);
   else
-    mloader.load("channel-4-bnds.mesh", &basemesh);
+    mloader.load("channel.mesh", &basemesh);
 
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;
