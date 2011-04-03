@@ -798,11 +798,12 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bo
   rtb_aniso  = aniso;
   rtb_tria_to_quad = tria_to_quad;
 
+  // refinement: refine all elements to quad elements.
+  if (rtb_tria_to_quad)  
+    this->convert_triangles_to_quads();
+
   for (int i = 0; i < depth; i++)
   {
-    if (rtb_tria_to_quad)  
-      this->convert_to_base();
-
     int size = get_max_node_id()+1;
     rtb_vert = new char[size];
     memset(rtb_vert, 0, sizeof(char) * size);
@@ -817,12 +818,6 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bo
 
     refine_by_criterion(rtb_criterion, 1);
     delete [] rtb_vert;
-  }
-
-  if (rtb_tria_to_quad)
-  {
-    rtb_aniso = false;
-    this->convert_to_base();
   }
 }
 
@@ -1929,7 +1924,7 @@ void Mesh::convert_element_to_base_id(int id)
   if (e->is_triangle())
     convert_triangles_to_base(e);
   else
-    convert_quads_to_base(e);
+    convert_quads_to_base(e);// FIXME:
 
   seq = g_mesh_seq++;
 }
@@ -2562,6 +2557,7 @@ void Mesh::convert_quads_to_base(Element *e)
     }
   }
 
+  // FIXME:
   if (rtb_aniso) 
     for (int i = 0; i < e->nvert; i++) 
       refinement_angle[i] = refinement_angle[i]*2;
