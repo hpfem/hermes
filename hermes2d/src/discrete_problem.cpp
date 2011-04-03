@@ -600,11 +600,11 @@ Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<Prec
   return e0;
 }
 
-void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage, 
-      SparseMatrix* mat, Vector* rhs, bool rhsonly, 
-      bool force_diagonal_blocks, Table* block_weights, 
-      Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, 
-      Hermes::vector<Solution *>& u_ext, Element** e, 
+void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
+      SparseMatrix* mat, Vector* rhs, bool rhsonly,
+      bool force_diagonal_blocks, Table* block_weights,
+      Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap,
+      Hermes::vector<Solution *>& u_ext, Element** e,
       bool* bnd, SurfPos* surf_pos, Element* trav_base)
 {
   _F_
@@ -631,21 +631,21 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   init_cache();
 
   /// Assemble volume matrix forms.
-  assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
-                               block_weights, spss, refmap, u_ext, isempty, 
+  assemble_volume_matrix_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
+                               block_weights, spss, refmap, u_ext, isempty,
                                rep_element->marker, al);
 
   /// Assemble volume vector forms.
   if (rhs != NULL)
-    assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
-                                 block_weights, spss, refmap, u_ext, isempty, 
+    assemble_volume_vector_forms(stage, mat, rhs, rhsonly, force_diagonal_blocks,
+                                 block_weights, spss, refmap, u_ext, isempty,
                                  rep_element->marker, al);
 
   // Assemble surface integrals now: loop through surfaces of the element.
   for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++)
-   assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks, 
-                              block_weights, spss, refmap, u_ext, isempty, 
-                              surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf], 
+   assemble_surface_integrals(stage, mat, rhs, rhsonly, force_diagonal_blocks,
+                              block_weights, spss, refmap, u_ext, isempty,
+                              surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf],
                               nat, isurf, e, trav_base, rep_element);
   
   // Delete assembly lists.

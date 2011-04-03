@@ -28,7 +28,7 @@ const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double time_step = 1E-2;                                // Time step.
 
 // Equation parameters.

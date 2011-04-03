@@ -134,6 +134,8 @@ int main(int argc, char* argv[])
   L2Space space_e(&mesh_flow, &bcs_flow, P_INIT_FLOW);
   // Space for concentration.
   H1Space space_c(&mesh_concentration, &bcs_concentration, P_INIT_CONCENTRATION);
+  int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e, &space_c));
+  info("ndof: %d", ndof);
 
   // Initialize solutions, set initial conditions.
   InitialSolutionEulerDensity sln_rho(&mesh_flow, RHO_EXT);
