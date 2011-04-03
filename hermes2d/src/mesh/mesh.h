@@ -301,6 +301,11 @@ public:
 
   void refine_element_to_triangles_id(int id);
   void refine_quad_to_triangles(Element* e);
+  /// Refines one quad element into four quad elements.
+  /// The difference between refine_quad_to_quads() and refine_quad() 
+  /// is that all the internal edges of the former's son elements are  
+  /// straight edges. 
+  void refine_quad_to_quads(Element* e, int refinement = 0);
 
   void convert_element_to_base_id(int id);
   void convert_triangles_to_base(Element* e);
