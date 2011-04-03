@@ -287,17 +287,29 @@ public:
   Element* get_element_fast(int id) const { return &(elements[id]);}
   /// Refines all triangle elements to quads.
   /// It can refine a triangle element into three quadrilaterals.
-  /// Note: this function creates a base mesh -- it can only be
-  /// used before any other mesh refinement function is called.
+  /// Note: this function creates a base mesh.
   void convert_triangles_to_quads();
   /// Refines all quad elements to triangles.
   /// It refines a quadrilateral element into two triangles.
-  /// Note: this function creates a base mesh -- it can only be
-  /// used before any other mesh refinement function is called.
+  /// Note: this function creates a base mesh. 
   void convert_quads_to_triangles();
+  /// Convert all active elements to a base mesh.
+  void convert_to_base();
 
-  void refine_triangle_to_quads(Element* e);
   void refine_element_to_quads_id(int id);
+  void refine_triangle_to_quads(Element* e);
+
+  void refine_element_to_triangles_id(int id);
+  void refine_quad_to_triangles(Element* e);
+  /// Refines one quad element into four quad elements.
+  /// The difference between refine_quad_to_quads() and refine_quad() 
+  /// is that all the internal edges of the former's son elements are  
+  /// straight edges. 
+  void refine_quad_to_quads(Element* e, int refinement = 0);
+
+  void convert_element_to_base_id(int id);
+  void convert_triangles_to_base(Element* e);
+  void convert_quads_to_base(Element* e);
 
   Array<Element> elements;
   int nactive;
@@ -321,9 +333,6 @@ protected:
   void regularize_triangle(Element* e);
   void regularize_quad(Element* e);
   void flatten();
-
-  void refine_quad_to_triangles(Element* e);
-  void refine_element_to_triangles_id(int id);
 
   class HERMES_API MarkersConversion
   {
