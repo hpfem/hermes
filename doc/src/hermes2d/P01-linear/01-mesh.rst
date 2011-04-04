@@ -60,8 +60,7 @@ of all mesh vertices (in any order). For the above geometry it looks like this::
 
 The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra string denoting the element's material marker. Element markers make it possible to use different equation parameters in subdomains. In Hermes one can assign different weak forms to those subdomains, or access the element and boundary markers from inside of weak forms::
 
-    elements =
-    [
+    elements = [
       [ 0, 1, 4, 3, "Iron" ]    # quad 0
       [ 3, 4, 7, "Iron" ],      # tri 1
       [ 3, 7, 6, "Copper" ],    # tri 2
