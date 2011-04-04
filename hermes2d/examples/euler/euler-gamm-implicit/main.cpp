@@ -39,8 +39,10 @@ const double V2_EXT = 0.0;                              // Inlet y-velocity (dim
 const double KAPPA = 1.4;                               // Kappa.
 
 // Boundary markers.
-const std::string BDY_SOLID_WALL = "1";
-const std::string BDY_INLET_OUTLET = "2";
+const std::string BDY_INLET = "1";
+const std::string BDY_OUTLET = "2";
+const std::string BDY_SOLID_WALL_BOTTOM = "3";
+const std::string BDY_SOLID_WALL_TOP = "4";
 
 // Weak forms.
 #include "../forms_implicit.cpp"
@@ -77,8 +79,14 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
-    BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
+  /*
+  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
+  */
+
+  EulerEquationsWeakFormImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
+
   wf.set_time_step(time_step);
 
   // Initialize the FE problem.

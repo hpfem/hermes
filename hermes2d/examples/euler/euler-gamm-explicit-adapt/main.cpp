@@ -21,10 +21,10 @@ bool SHOCK_CAPTURING = true;
 // Quantitative parameter of the discontinuity detector.
 double DISCONTINUITY_DETECTOR_PARAM = 0.05;
 
-const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                             // Number of initial uniform mesh refinements.                       
+const int P_INIT = 0;                             // Initial polynomial degree.                      
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
 double CFL = 0.8;                                 // CFL value.
-double time_step = 1E-4;                                // Time step.
+double time_step = 1E-4;                          // Time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 10;                        // Every UNREF_FREQth time step the mesh is unrefined.
@@ -42,7 +42,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -58,8 +58,9 @@ const double ERR_STOP = 0.5;                      // Stopping criterion for adap
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
+                                                  // Matrix solver for orthogonal projections.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PARDISO, SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
 const double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
@@ -137,7 +138,11 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
+  /*
   EulerEquationsWeakFormExplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+  */
+  EulerEquationsWeakFormExplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
@@ -154,12 +159,11 @@ int main(int argc, char* argv[])
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
 
-  /*
+  
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
-  */
 
   // Initialize refinement selector.
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -205,6 +209,7 @@ int main(int argc, char* argv[])
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+      wf.set_time_step(time_step);
       dp->assemble(matrix, rhs);
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
@@ -216,6 +221,12 @@ int main(int argc, char* argv[])
       }
       else 
         error ("Matrix solver failed.\n");
+
+      s1.show(&rsln_rho);
+      s2.show(&rsln_rho_v_x);
+      s3.show(&rsln_rho_v_y);
+      s4.show(&rsln_e);
+      View::wait();
 
       if(SHOCK_CAPTURING) {
         DiscontinuityDetector discontinuity_detector(*ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
@@ -249,8 +260,7 @@ int main(int argc, char* argv[])
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
         done = true;
-      else 
-      {
+      else {
         info("Adapting coarse mesh.");
         done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector, &selector, &selector), 
                                  THRESHOLD, STRATEGY, MESH_REGULARITY);

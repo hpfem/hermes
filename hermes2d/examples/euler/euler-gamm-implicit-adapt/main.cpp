@@ -27,13 +27,18 @@ const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every
 const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
 
+// Shock capturing.
+bool SHOCK_CAPTURING = true;
+// Quantitative parameter of the discontinuity detector.
+double DISCONTINUITY_DETECTOR_PARAM = 1;
+
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY = 1;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-double time_step = 1E-2;                                // Time step.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM_BOUNDARY = 3;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
@@ -48,7 +53,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //  than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_H_ANISO;           // Predefined list of element refinement candidates. Possible values are
+const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
                                                   // See User Documentation for details.
@@ -60,7 +65,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.4;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -76,8 +81,10 @@ const double V2_EXT = 0.0;                              // Inlet y-velocity (dim
 const double KAPPA = 1.4;                               // Kappa.
 
 // Boundary markers.
-const std::string BDY_SOLID_WALL = "1";
-const std::string BDY_INLET_OUTLET = "2";
+const std::string BDY_INLET = "1";
+const std::string BDY_OUTLET = "2";
+const std::string BDY_SOLID_WALL_BOTTOM = "3";
+const std::string BDY_SOLID_WALL_TOP = "4";
 
 // Weak forms.
 #include "../forms_implicit.cpp"
@@ -95,8 +102,8 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
-    basemesh.refine_all_elements();
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL, INIT_REF_NUM_BOUNDARY);
+    basemesh.refine_all_elements(0, true);
+  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY, true, false, true);
   mesh.copy(&basemesh);
   
   // Initialize boundary condition types and spaces with default shapesets.
@@ -108,7 +115,6 @@ int main(int argc, char* argv[])
   info("ndof: %d", ndof);
 
   // Initialize solutions, set initial conditions.
-  Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
   InitialSolutionEulerDensity sln_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX sln_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY sln_rho_v_y(&mesh, RHO_EXT * V2_EXT);
@@ -119,14 +125,22 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh, RHO_EXT * V2_EXT);
   InitialSolutionEulerDensityEnergy prev_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
 
+  Solution rsln_rho, rsln_rho_v_x, rsln_rho_v_y, rsln_e;
+  
   // Numerical flux.
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL, BDY_SOLID_WALL, 
-    BDY_INLET_OUTLET, BDY_INLET_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  wf.set_time_step(time_step);
+  /*
+  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
+  */
+
+  EulerEquationsWeakFormImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
   
+  wf.set_time_step(time_step);
+
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
@@ -150,9 +164,9 @@ int main(int argc, char* argv[])
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
 
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += time_step)
-  {
+  for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
+
     // Periodic global derefinements.
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
       REFINEMENT_COUNT = 0;
@@ -186,10 +200,6 @@ int main(int argc, char* argv[])
       bool is_linear = false;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
   
-      // If the FE problem is in fact a FV problem.
-      if(P_INIT == 0)
-        dp.set_fvm();
-      
       // Initialize NOX solver.
       NoxSolver solver(&dp);
       solver.set_ls_tolerance(1E-2);
@@ -200,10 +210,14 @@ int main(int argc, char* argv[])
         solver.set_precond(pc);
 
       info("Assembling by DiscreteProblem, solving by NOX.");
+
       solver.set_init_sln(coeff_vec);
-      if (solver.solve())
-        Solution::vector_to_solutions(solver.get_solution(), *ref_spaces, 
+      scalar* solution_vector;
+      if (solver.solve()) {
+        solution_vector = solver.get_solution();
+        Solution::vector_to_solutions(solution_vector, *ref_spaces, 
           Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+      }
       else
         error("NOX failed.");
       
@@ -211,6 +225,16 @@ int main(int argc, char* argv[])
         solver.get_num_iters(), solver.get_residual());
       info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
         solver.get_num_lin_iters(), solver.get_achieved_tol());
+      
+      if(SHOCK_CAPTURING) {
+        DiscontinuityDetector discontinuity_detector(*ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+
+        std::set<int> discontinuous_elements = discontinuity_detector.get_discontinuous_element_ids(DISCONTINUITY_DETECTOR_PARAM);
+
+        FluxLimiter flux_limiter(solution_vector, *ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+
+        flux_limiter.limit_according_to_detector(discontinuous_elements);
+      }
 
       // Project the fine mesh solution onto the coarse mesh.
       info("Projecting reference solution on coarse mesh.");
