@@ -1,2 +1,2 @@
-add_subdirectory(linear-advection-dg-adapt)
-add_subdirectory(linear-advection-diffusion)
+#add_subdirectory(linear-advection-dg-adapt) TODO: Convert to new forms.
+#add_subdirectory(linear-advection-diffusion) TODO: Convert to new forms.

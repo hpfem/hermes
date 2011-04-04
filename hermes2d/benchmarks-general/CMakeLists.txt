@@ -5,12 +5,12 @@ add_subdirectory(smooth-aniso-y)
 add_subdirectory(lshape)
 add_subdirectory(layer-interior)
 add_subdirectory(layer-boundary)
-add_subdirectory(neutronics-heat-conduction)
-add_subdirectory(neutronics-heat-conduction-adapt)
-add_subdirectory(neutronics-2-group-adapt)
-add_subdirectory(stabilized-advection-diffusion)
-add_subdirectory(stabilized-advection-reaction)  
-add_subdirectory(sdirk-22)
+#add_subdirectory(neutronics-heat-conduction) TODO: Confert to new forms.
+#add_subdirectory(neutronics-heat-conduction-adapt) TODO: Confert to new forms.
+#add_subdirectory(neutronics-2-group-adapt) TODO: Confert to new forms.
+#add_subdirectory(stabilized-advection-diffusion) TODO: Confert to new forms.
+#add_subdirectory(stabilized-advection-reaction) TODO: Confert to new forms.
+#add_subdirectory(sdirk-22) TODO: Confert to new forms.
 add_subdirectory(nonsym-check)
 
 #if(NOT WITH_TRILINOS)

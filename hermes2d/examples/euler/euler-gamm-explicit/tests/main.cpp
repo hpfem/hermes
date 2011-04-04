@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
               double v2 = solution_vector[al.dof[0]] / rho;
               space_e.get_element_assembly_list(e, &al);
               double energy = solution_vector[al.dof[0]];
-              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + culator::calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
+              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
               if(condition < min_condition || min_condition == 0.)
                 min_condition = condition;
             }
