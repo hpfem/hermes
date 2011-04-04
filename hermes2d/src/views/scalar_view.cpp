@@ -689,6 +689,13 @@ void ScalarView::draw_tri_contours(double3* vert, int3* tri)
 
   int l1 = 0, l2 = 1;
   int r1 = 0, r2 = 2;
+
+  // Adjustment of the contour step.
+  while(std::abs(val - vert[idx[r2]][2]) > 50 * cont_step)
+    cont_step *= 10;
+  while(std::abs(val - vert[idx[r2]][2]) < 2E-2 * cont_step)
+    cont_step /= 10;
+
   while (val < vert[idx[r2]][2])
   {
     double ld = vert[idx[l2]][2] - vert[idx[l1]][2];
