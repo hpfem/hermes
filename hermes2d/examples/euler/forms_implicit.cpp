@@ -514,14 +514,35 @@ public:
     matrix_coordinates.push_back(std::pair<unsigned int, unsigned int>(2, 2));
     matrix_coordinates.push_back(std::pair<unsigned int, unsigned int>(3, 3));
 
+    Hermes::vector<std::pair<unsigned int, unsigned int> > matrix_coordinates_precon_vol;
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(0, 0));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(0, 1));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(0, 2));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(0, 3));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(1, 0));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(1, 1));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(1, 2));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(1, 3));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(2, 0));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(2, 1));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(2, 2));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(2, 3));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(3, 0));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(3, 1));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(3, 2));
+    matrix_coordinates_precon_vol.push_back(std::pair<unsigned int, unsigned int>(3, 3));
+
     Hermes::vector<unsigned int> vector_coordinates;
     vector_coordinates.push_back(0);
     vector_coordinates.push_back(1);
     vector_coordinates.push_back(2);
     vector_coordinates.push_back(3);
 
-    if(preconditioning)
-      add_multicomponent_matrix_form(new EulerEquationsPreconditioning(matrix_coordinates));
+    if(preconditioning) {
+      //add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioning(matrix_coordinates));
+      add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioning(matrix_coordinates_precon_vol, kappa));
+      //add_multicomponent_matrix_form_surf(new EulerEquationsMatrixFormSurfPreconditioning(matrix_coordinates_precon_vol, num_flux));
+    }
 
     add_multicomponent_vector_form(new EulerEquationsLinearFormTime(vector_coordinates));
 
@@ -556,23 +577,301 @@ public:
   // Destructor.
   ~EulerEquationsWeakFormImplicitMultiComponent() {};
 protected:
-  class EulerEquationsPreconditioning : public WeakForm::MultiComponentMatrixFormVol
+  class EulerEquationsMatrixFormVolPreconditioning : public WeakForm::MultiComponentMatrixFormVol
   {
   public:
-    EulerEquationsPreconditioning(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates) : WeakForm::MultiComponentMatrixFormVol(coordinates) {}
+    EulerEquationsMatrixFormVolPreconditioning(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, double kappa) : WeakForm::MultiComponentMatrixFormVol(coordinates), kappa(kappa) {}
 
     void value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext, Hermes::vector<double>& result) const {
+      /*
       double result_n = int_u_v<double, double>(n, wt, u, v);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      */
+      double result_0_0 = 0;
+      double result_0_1 = 0;
+      double result_0_2 = 0;
+      double result_0_3 = 0;
+
+      double result_1_0 = 0;
+      double result_1_1 = 0;
+      double result_1_2 = 0;
+      double result_1_3 = 0;
+
+      double result_2_0 = 0;
+      double result_2_1 = 0;
+      double result_2_2 = 0;
+      double result_2_3 = 0;
+
+      double result_3_0 = 0;
+      double result_3_1 = 0;
+      double result_3_2 = 0;
+      double result_3_3 = 0;
+
+      for (int i = 0; i < n; i++) {
+        result_0_0 += wt[i] * u->val[i] * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+        result_0_1 += wt[i] * u->val[i] * v->dx[i];
+        result_0_2 += wt[i] * u->val[i] * v->dy[i];
+        
+        result_1_0 += wt[i] * u->val[i] * A_1_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_1_0 += wt[i] * u->val[i] * A_2_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_1_1 += wt[i] * u->val[i] * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+        result_1_1 += wt[i] * u->val[i] * A_1_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_1_1 += wt[i] * u->val[i] * A_2_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_1_2 += wt[i] * u->val[i] * A_1_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_1_2 += wt[i] * u->val[i] * A_2_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_1_3 += wt[i] * u->val[i] * A_1_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_1_3 += wt[i] * u->val[i] * A_2_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
       
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
+        result_2_0 += wt[i] * u->val[i] * A_1_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_2_0 += wt[i] * u->val[i] * A_2_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_2_1 += wt[i] * u->val[i] * A_1_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_2_1 += wt[i] * u->val[i] * A_2_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_2_2 += wt[i] * u->val[i] * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+        result_2_2 += wt[i] * u->val[i] * A_1_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_2_2 += wt[i] * u->val[i] * A_2_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_2_3 += wt[i] * u->val[i] * A_1_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_2_3 += wt[i] * u->val[i] * A_2_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+     
+        result_3_0 += wt[i] * u->val[i] * A_1_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dx[i];
+        result_3_0 += wt[i] * u->val[i] * A_2_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dy[i];
+        result_3_1 += wt[i] * u->val[i] * A_1_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dx[i];
+        result_3_1 += wt[i] * u->val[i] * A_2_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+        result_3_2 += wt[i] * u->val[i] * A_1_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_3_2 += wt[i] * u->val[i] * A_2_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) * v->dy[i];
+        result_3_3 += wt[i] * u->val[i] * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
+        result_3_3 += wt[i] * u->val[i] * A_1_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dx[i];
+        result_3_3 += wt[i] * u->val[i] * A_2_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) * v->dy[i];
+      }
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_1_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_2_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_3_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return int_u_v<Ord, Ord>(n, wt, u, v);
     }
+
+    protected:
+    template<typename Scalar>
+    Scalar A_1_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const {
+      return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (kappa - 1.) * 
+             ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_1_1_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return 2 * (rho_v_x / rho) - (kappa - 1.) * (rho_v_x / rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_1_1_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - (kappa - 1.) * (rho_v_y / rho);;
+    }
+
+    template<typename Scalar>
+    Scalar A_1_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return kappa - 1.;
+    }
+
+    template<typename Scalar>
+    Scalar A_2_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - rho_v_x * rho_v_y / (rho * rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_2_1_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_y / rho;
+    }
+
+    template<typename Scalar>
+    Scalar A_2_1_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_x / rho;
+    }
+
+    template<typename Scalar>
+    Scalar A_2_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return 0;
+    }
+
+    template<typename Scalar>
+    Scalar A_1_2_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - rho_v_x * rho_v_y / (rho * rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_1_2_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_y / rho;
+    }
+
+    template<typename Scalar>
+    Scalar A_1_2_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_x / rho;
+    }
+
+    template<typename Scalar>
+    Scalar A_1_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return 0;
+    }
+
+    template<typename Scalar>
+    Scalar A_2_2_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - ((rho_v_y * rho_v_y) / (rho * rho)) + 0.5 * (kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_2_2_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - (kappa - 1.) * (rho_v_x / rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_2_2_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return 2 * (rho_v_y / rho) - (kappa - 1.) * (rho_v_y / rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_2_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const {
+      return kappa - 1.;
+    }
+
+    template<typename Scalar>
+    Scalar A_1_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const {
+      return - (rho_v_x * energy) / (rho * rho) - (rho_v_x / (rho * rho)) * (kappa - 1.) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_x / rho) * (kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_1_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return (energy / rho) + (1 / rho) * (kappa - 1.) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (kappa - 1.) * ((rho_v_x * rho_v_x) / (rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_1_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - (kappa - 1.) * (rho_v_x * rho_v_y) / (rho * rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_1_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_x / rho + (kappa - 1.) * (rho_v_x / rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_2_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - (rho_v_y * energy) / (rho * rho) - (rho_v_y / (rho * rho)) * (kappa - 1.) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_y / rho) * (kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_2_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return - (kappa - 1.) * (rho_v_x * rho_v_y) / (rho * rho);
+    }
+
+    template<typename Scalar>
+    Scalar A_2_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return (energy / rho) + (1 / rho) * (kappa - 1.) * ( energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho))) - (kappa - 1.) * ((rho_v_y * rho_v_y) / (rho * rho));
+    }
+
+    template<typename Scalar>
+    Scalar A_2_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+      return rho_v_y / rho + (kappa - 1.) * (rho_v_y / rho);
+    }
+
+    double kappa;
+  };
+
+  class EulerEquationsMatrixFormSurfPreconditioning : public WeakForm::MultiComponentMatrixFormSurf
+  {
+  public:
+    EulerEquationsMatrixFormSurfPreconditioning(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, NumericalFlux* num_flux) : 
+        WeakForm::MultiComponentMatrixFormSurf(coordinates, H2D_DG_INNER_EDGE), num_flux(num_flux) {}
+
+    void value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext, Hermes::vector<double>& result) const {
+      double result_0_0 = 0;
+      double result_0_1 = 0;
+      double result_0_2 = 0;
+      double result_0_3 = 0;
+
+      double result_1_0 = 0;
+      double result_1_1 = 0;
+      double result_1_2 = 0;
+      double result_1_3 = 0;
+
+      double result_2_0 = 0;
+      double result_2_1 = 0;
+      double result_2_2 = 0;
+      double result_2_3 = 0;
+
+      double result_3_0 = 0;
+      double result_3_1 = 0;
+      double result_3_2 = 0;
+      double result_3_3 = 0;
+
+      double w_L[4], w_R[4];
+
+      for (int i = 0; i < n; i++) {
+        w_L[0] = u_ext[0]->get_val_central(i);
+        w_R[0] = u_ext[0]->get_val_neighbor(i);
+    
+        w_L[1] = u_ext[1]->get_val_central(i);
+        w_R[1] = u_ext[1]->get_val_neighbor(i);
+
+        w_L[2] = u_ext[2]->get_val_central(i);
+        w_R[2] = u_ext[2]->get_val_neighbor(i);
+
+        w_L[3] = u_ext[3]->get_val_central(i);
+        w_R[3] = u_ext[3]->get_val_neighbor(i);
+
+        double flux[4];
+        num_flux->numerical_flux(flux, w_L, w_R, e->nx[i], e->ny[i]);
+
+        result_0_0 -= wt[i] * v->val[i] * flux[0];
+        result_1_1 -= wt[i] * v->val[i] * flux[1];
+        result_2_2 -= wt[i] * v->val[i] * flux[2];
+        result_3_3 -= wt[i] * v->val[i] * flux[3];
+      }
+
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+    }
+
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+      return int_u_v<Ord, Ord>(n, wt, u, v);
+    }
+
+    NumericalFlux* num_flux;
   };
 
   class EulerEquationsLinearForm : public WeakForm::MultiComponentVectorFormVol
@@ -703,12 +1002,12 @@ protected:
     }
 
     template<typename Scalar>
-    Scalar A_2_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+    Scalar A_2_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const {
       return kappa - 1.;
     }
 
     template<typename Scalar>
-    Scalar A_1_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const{
+    Scalar A_1_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) const {
       return - (rho_v_x * energy) / (rho * rho) - (rho_v_x / (rho * rho)) * (kappa - 1.) * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_x / rho) * (kappa - 1.) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
     }
 
