@@ -18,18 +18,18 @@ const int P_INIT = 3;
 static char text[] = "\
 Click into the image window and:\n\
   press 'f' to make the color scale finer/coarser,\n\
-  press '3' to see 3D plot of the basis functions,\n\
+  press '3' to render 3D plot of the basis functions,\n\
+  change the scale on the vertical axis using the * and / keys,\n\
   use all three mouse buttons to rotate/move/enlarge the graphs,\n\
   use the right/left arrows to browse through basis functions,\n\
-  press 'l' to see linearizer output\n\
-      -- higher-order polynomials are plotted using \n\
-         adaptive piecewise-linear approximation,\n\
+  press 'l' to see adaptive linearizer output for OpenGL\n\
   use the left mouse button to drag the scale to another corner,\n\
   press 'p' to switch to greyscales and back,\n\
+  press 'h' to render high-resolution image,\n\
   press 'm' to hide the mesh,\n\
   press 's' to save screenshots,\n\
   press 'q' to quit.\n\
-  Also see help - click into the image window and press F1.\n";
+  Press F1 for help.\n";
 
 int main(int argc, char* argv[])
 {

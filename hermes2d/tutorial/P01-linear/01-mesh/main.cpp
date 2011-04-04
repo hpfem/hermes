@@ -13,9 +13,10 @@ Click into the image window and:\n\
   zoom into the mesh using the right mouse button\n\
   move the mesh around using the left mouse button\n\
   press 'c' to center the mesh again,\n\
+  press 'h' to render high resolution image,\n\
   press 's' to save a screenshot in bmp format\n\
   press 'q' to quit.\n\
-  Help can be accessed by pressing F1.\n";
+  Press F1 for help.\n";
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "Bottom", BDY_OUTER = "Outer", 
