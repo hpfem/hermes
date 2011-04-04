@@ -50,7 +50,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../main.cpp"
+#include "../definitions.cpp"
 
 // Initial condition.
 #include "../initial_condition.cpp"
