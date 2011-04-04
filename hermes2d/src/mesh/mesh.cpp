@@ -2769,7 +2769,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
   double angle2 = 0.0;
   int i, j;
   int idx = 0;
-  Element* sons[4];
+  Element* sons[4] = {NULL, NULL, NULL, NULL};
   CurvMap* cm[4];
   memset(cm, 0, sizeof(cm));
 

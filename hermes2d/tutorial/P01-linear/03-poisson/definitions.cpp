@@ -6,12 +6,17 @@
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
 
+/* Weak forms */
+
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(double const_f) : WeakForm(1)
+  CustomWeakFormPoisson(std::string mat_al, double lambda_al, 
+                        std::string mat_cu, double lambda_cu, 
+                        double vol_heat_src) : WeakForm(1)
   {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, const_f));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
+    add_vector_form(new DefaultVectorFormConst(0, vol_heat_src));
   };
 };
