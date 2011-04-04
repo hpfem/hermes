@@ -43,7 +43,7 @@ void View::init() {
   range_auto = true;
   range_min = 0;
   range_max = 1;
-  pal_type = H2DV_PT_DEFAULT;
+  pal_type = H2DV_PT_HUESCALE;
   pal_steps = 50;
   pal_filter = GL_NEAREST;
   margin = 15;
@@ -498,11 +498,20 @@ void View::on_key_down(unsigned char key, int x, int y)
 
     case 'p':
     {
+      // There used to be a type called default, but it caused some weird behavior.
+      /*
       switch(pal_type) {
         case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
         case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
         case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
         case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
+        default: error("Invalid palette type");
+      }
+      */
+      switch(pal_type) {
+        case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+        case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+        case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
         default: error("Invalid palette type");
       }
       debug_log("Switched to a palette type %d in view \"%s\"", (int)pal_type, title.c_str());
