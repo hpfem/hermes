@@ -792,7 +792,7 @@ static int rtb_criterion(Element* e)
   return 0;
 }
 
-void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad)
+void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad, bool mark_as_initial)
 {
   rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
   rtb_aniso  = aniso;
@@ -819,6 +819,9 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bo
     refine_by_criterion(rtb_criterion, 1);
     delete [] rtb_vert;
   }
+
+  if(mark_as_initial)
+    ninitial = this->get_max_element_id();
 }
 
 void Mesh::unrefine_element_id(int id)

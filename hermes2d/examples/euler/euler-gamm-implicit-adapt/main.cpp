@@ -30,15 +30,15 @@ const double NOX_LINEAR_TOLERANCE = 1e-2;
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
 // Quantitative parameter of the discontinuity detector.
-double DISCONTINUITY_DETECTOR_PARAM = 0.01;
+double DISCONTINUITY_DETECTOR_PARAM = 1;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY = 1;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM_BOUNDARY = 3;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
 double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
@@ -65,7 +65,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.2;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.4;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -102,8 +102,8 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
-    basemesh.refine_all_elements();
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY);
+    basemesh.refine_all_elements(0, true);
+  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY, true, false, true);
   mesh.copy(&basemesh);
   
   // Initialize boundary condition types and spaces with default shapesets.
