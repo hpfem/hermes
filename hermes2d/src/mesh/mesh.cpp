@@ -172,6 +172,8 @@ int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
 
 /*  node and son numbering on a triangle:
 
+    -Triangle to triangles refinement
+
                     vn[2]                                       vn[2]
 
                       *                                           *
@@ -190,6 +192,28 @@ int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
          /                         \                 /         \  *  /         \
         *-------------*-------------*               *-----------*   *-----------*
                                                vn[0]      vn[1] vn[2] vn[0]      vn[1]
+    vn[0]           en[0]           vn[1]
+
+    -Triangle to quads refinement
+
+                    vn[2]                                     vn[2]
+
+                      *                                        *                                 
+                     / \                                      / \                                   
+                    /   \                                    /   \    
+                   /     \                                  /     \  
+                  /       \                          vn[3] * son[2]* vn[1]    
+                 /         \                       vn[3] *  \     /  * vn[2]
+        en[2]   *           *   en[1]                   / \  \   /  / \
+               /             \                         /   \ vn[0] /   \
+              /               \                       /     \  *  /     \
+             /                 \                     /       \   /       \
+            /         *         \                   /   vn[2] * * vn[3]   \
+           /                     \                 /          | |          \
+          /                       \               /  son[0]   | |  son[1]   \      
+         /                         \             /            | |            \           
+        *-------------*-------------*           *-------------* *-------------*          
+                                              vn[0]      vn[1]   vn[0]        vn[1]
     vn[0]           en[0]           vn[1]
 
 
