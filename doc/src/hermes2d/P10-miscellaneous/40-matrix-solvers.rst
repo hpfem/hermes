@@ -31,10 +31,11 @@ aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, superlu-block.
 linsys-cplx-4.txt, linsys-cplx-hermitian-5.txt, linsys-cplx-nonhermitian-6.txt
 
 but the user can of course provide his/her own. In the input file, the first number is the 
-matrix/vector size, followed by the matrix in the coordinate format and the right-hand side 
-vector in the coordinate format. For example the file linsys-3.txt contains::
+matrix/vector size, followed by a number of non zero matrix entries, starting from the next line matrix and the right-hand side 
+vector in the coordinate format are given. For example the file linsys-3.txt contains::
 
     5
+    12
     0 0 2
     0 1 3
     1 0 3
