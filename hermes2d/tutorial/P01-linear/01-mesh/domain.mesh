@@ -31,6 +31,9 @@ boundaries = [
 ]
 
 curves = [
-  [ 4, 7, 45 ],  # +45 degree circular arcs
-  [ 7, 6, 45 ]
+  [ 4, 7, 45 ],  # circular arc with central angle of 45 degrees
+  [ 7, 6, 45 ]   # circular arc with central angle of 45 degrees
 ]
+
+
+
