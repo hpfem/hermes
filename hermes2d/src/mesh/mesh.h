@@ -372,6 +372,7 @@ protected:
     // Inverse tables, so that it is possible to search using either
     // the internal representation, or the user std::string value.
     std::map<std::string, int>* conversion_table_inverse;
+    friend class Space;
   };
 
   class ElementMarkersConversion : public MarkersConversion

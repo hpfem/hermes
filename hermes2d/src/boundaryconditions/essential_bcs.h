@@ -67,6 +67,7 @@ protected:
 
   // Friend class.
   friend class EssentialBCs;
+  friend class Space;
 };
 
 /// Class representing constant essential boundary condition.
