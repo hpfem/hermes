@@ -38,7 +38,6 @@ Thank you in advance for helping us improve Hermes!
     src/web-access
     src/citing-hermes
     src/first_pull_request
-    src/how_to/how_to_apps
 
 2. Installation
 ---------------
@@ -51,6 +50,8 @@ Thank you in advance for helping us improve Hermes!
     src/installation/win-cygwin
     src/installation/win-msvc
     src/installation/matrix_solvers
+    src/installation/cython_installation
+    src/installation/exodusII_netcdf
 
 3. Hermes2D
 -----------
@@ -79,6 +80,7 @@ Thank you in advance for helping us improve Hermes!
     :maxdepth: 1
 
     src/hermes3d/mesh.rst
+    src/hermes3d/paraview.rst
     src/hermes3d/benchmarks.rst
     src/hermes3d/examples.rst
 
