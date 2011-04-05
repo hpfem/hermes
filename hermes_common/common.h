@@ -158,7 +158,6 @@ enum ProjNormType
   #define SCALAR_FMT      "(%lf, %lf)"
   #define SCALAR(a)     std::real(a), std::imag(a)
   
-  inline double sqr(cplx x)   { return std::norm(x); }
   inline double magn(cplx x)  { return std::abs(x); }
   inline cplx conj(cplx a)    { return std::conj(a); }
   

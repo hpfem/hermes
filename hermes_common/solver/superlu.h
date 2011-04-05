@@ -89,7 +89,6 @@
       #define SLU_SOLVER_DRIVER     zgssvx
     #endif
     
-    typedef doublecomplex Scalar;
     #define SUPERLU_SCALAR(a) a.r, a.i
   #endif
   
