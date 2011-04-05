@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &F_space)));
 
   // Initialize the FE problem.
-  bool is_linear = false;
+  bool is_linear = true;
   DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space), is_linear);
 
   // Initialize views.
@@ -123,7 +123,8 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, false, verbose))
+    bool Jacobian_changed = false;
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, Jacobian_changed, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 
     // Visualize the solutions.
