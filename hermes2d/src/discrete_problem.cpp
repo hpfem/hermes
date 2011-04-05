@@ -921,7 +921,10 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                   Hermes::vector<scalar> result;
                   eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                   for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], -mfv->sym * result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    if(mfv->sym == HERMES_SYM)
+                      rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], - result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    else
+                      rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
               }
               else if (rhsonly == false) {
