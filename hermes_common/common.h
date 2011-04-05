@@ -143,6 +143,15 @@ enum ProjNormType
   HERMES_UNSET_NORM
 };
 
+inline void fprint_num(FILE*f,double x){
+  fprintf(f,"%lf",x);
+}
+
+inline void fprint_num(FILE*f,std::complex<double> x){
+  fprintf(f,"(%lf, %lf)",x.real(),x.imag());
+}
+
+
 #ifdef HERMES_COMMON_COMPLEX
 
   #include <complex>

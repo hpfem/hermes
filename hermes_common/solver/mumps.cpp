@@ -213,19 +213,21 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
     case DF_PLAIN_ASCII:
       fprintf(file, "%d\n", this->size);
       fprintf(file, "%d\n", nnz);
-      for (unsigned int i = 0; i < nnz; i++)
-        fprintf(file, "%d %d " SCALAR_FMT "\n", irn[i], jcn[i], Scalar(Ax[i]));
+      for (unsigned int i = 0; i < nnz; i++){
+          fprintf(file, "%d %d ", irn[i], jcn[i]);
+          fprint_num(file,Ax[i]);
+          fprintf(file, "\n");
+      }
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
       for (unsigned int j = 0; j < this->size; j++)
-        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
-#ifndef HERMES_COMMON_COMPLEX          
-          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, Scalar(Ax[i]));
-#else          
-          fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, Scalar(Ax[i]));
-#endif          
+        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++){
+          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+          fprint_num(file, Ax[i]);
+          fprintf(file, "\n");
+        }
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
       return true;
@@ -503,15 +505,19 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (unsigned int i = 0; i < this->size; i++)
-        fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file, v[i]);
+        fprintf(file, "\n");
+      }
 
       return true;
 
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-      for (unsigned int i = 0; i < this->size; i++)
-        fprintf(file, SCALAR_FMT "\n", Scalar(v[i]));
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file, v[i]);
+        fprintf(file, "\n");
+      }
       fprintf(file, " ];\n");
       return true;
 
