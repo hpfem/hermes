@@ -40,8 +40,10 @@ namespace WeakFormsH1 {
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        else {
+          if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+          else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        }
         return coeff * result;
       }
 
@@ -49,8 +51,10 @@ namespace WeakFormsH1 {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        else {
+          if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+          else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        }
         return result;
       }
 
@@ -401,23 +405,26 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultVectorFormConst(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
+                   : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
       DefaultVectorFormConst(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
         if (gt == HERMES_PLANAR) return coeff * int_v<double>(n, wt, v);
-        else if (gt == HERMES_AXISYM_X) return coeff * int_y_v<double>(n, wt, v, e);
-        else return coeff * int_x_v<double>(n, wt, v, e);
-        
+        else {
+          if (gt == HERMES_AXISYM_X) return coeff * int_y_v<double>(n, wt, v, e);
+          else return coeff * int_x_v<double>(n, wt, v, e);
+        }
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         if (gt == HERMES_PLANAR) return int_v<Ord>(n, wt, v);
-        else if (gt == HERMES_AXISYM_X) return int_y_v<Ord>(n, wt, v, e);
-        else return int_x_v<Ord>(n, wt, v, e);
+        else {
+          if (gt == HERMES_AXISYM_X) return int_y_v<Ord>(n, wt, v, e);
+          else return int_x_v<Ord>(n, wt, v, e);
+        }
       }
 
       private:
