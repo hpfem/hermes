@@ -824,7 +824,7 @@ namespace WeakFormsH1 {
 	    : WeakForm::MultiComponentVectorFormSurf(coordinates, area), coeffs(coeffs), gt(gt) { }
 
       virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<double>& result) const {
+                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const {
         scalar result_base = 0;
         if (gt == HERMES_PLANAR) 
           result_base = int_v<double>(n, wt, v);
