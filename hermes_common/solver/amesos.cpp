@@ -121,16 +121,16 @@ bool AmesosSolver<Scalar>::solve()
   }
   
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
-  delete [] sln;
-  sln = new Scalar[m->size]; MEM_CHECK(sln);
+  delete [] this->sln;
+  this->sln = new Scalar[m->size]; MEM_CHECK(this->sln);
   // copy the solution into sln vector
-  memset(sln, 0, m->size * sizeof(Scalar));
+  memset(this->sln, 0, m->size * sizeof(Scalar));
   
 #ifdef HERMES_COMMON_COMPLEX
 #else 
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
 #endif
 
   return true;
@@ -146,11 +146,11 @@ bool AmesosSolver<Scalar>::setup_factorization()
 #ifdef HAVE_AMESOS
   // Perform both factorization phases for the first time.
   int eff_fact_scheme;
-  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
+  if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
       solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
     eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
   else
-    eff_fact_scheme = factorization_scheme;
+    eff_fact_scheme = this->factorization_scheme;
   
   int status;
   switch(eff_fact_scheme)
@@ -182,3 +182,4 @@ bool AmesosSolver<Scalar>::setup_factorization()
 
 template class HERMES_API AmesosSolver<double>;
 template class HERMES_API AmesosSolver<std::complex<double> >;
+

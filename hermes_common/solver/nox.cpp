@@ -279,7 +279,7 @@ template<typename Scalar>
   void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
   {
   #ifdef HAVE_NOX
-    precond_yes = true;
+    this->precond_yes = true;
     interface_->set_precond(pc);
   #endif
   }
@@ -289,7 +289,7 @@ template<typename Scalar>
 void NoxSolver<Scalar>::set_precond(const char *pc)
 {
 #ifdef HAVE_NOX
-  precond_yes = true;
+  this->precond_yes = true;
   precond_type = pc;
 #endif
 }
@@ -363,7 +363,7 @@ bool NoxSolver<Scalar>::solve()
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
    // precond stuff
    Teuchos::RCP<Precond<Scalar> > precond = interface_->get_precond();
-   if(precond_yes == false) {
+   if(this->precond_yes == false) {
      ls_pars.set("Preconditioner", "None");
    }
    else 
@@ -483,11 +483,11 @@ bool NoxSolver<Scalar>::solve()
 #endif
        // extract solution
        int n = interface_->fep->get_num_dofs();
-       delete [] sln;
-       sln = new Scalar[n];
-       memset(sln, 0, n * sizeof(double));
+       delete [] this->sln;
+       this->sln = new Scalar[n];
+       memset(this->sln, 0, n * sizeof(double));
 #ifndef HERMES_COMMON_COMPLEX
-       f_sln.ExtractCopy(sln);
+       f_sln.ExtractCopy(this->sln);
 #else
 #endif
        success = true;

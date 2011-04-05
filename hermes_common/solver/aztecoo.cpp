@@ -78,7 +78,7 @@ void AztecOOSolver<Scalar>::set_precond(const char *name)
   else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
   else az_precond = AZ_none;
   
-  precond_yes = (az_precond != AZ_none);
+  this->precond_yes = (az_precond != AZ_none);
   aztec.SetAztecOption(AZ_precond, az_precond);
 #endif
 }
@@ -134,18 +134,18 @@ bool AztecOOSolver<Scalar>::solve()
   }
 
   // solve it
-  aztec.Iterate(max_iters, tolerance);
+  aztec.Iterate(this->max_iters, this->tolerance);
 
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
-  delete [] sln;
-  sln = new Scalar[m->size];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(Scalar));
+  delete [] this->sln;
+  this->sln = new Scalar[m->size];
+  MEM_CHECK(this->sln);
+  memset(this->sln, 0, m->size * sizeof(Scalar));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
 #else
   double c0r = 1.0, c0i = 0.0;
   double c1r = 0.0, c1i = 1.0;
@@ -162,13 +162,13 @@ bool AztecOOSolver<Scalar>::solve()
 
   kp.ExtractSolution(xr, xi);
 
-  delete [] sln;
-  sln = new Scalar[m->size];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(Scalar));
+  delete [] this->sln;
+  this->sln = new Scalar[m->size];
+  MEM_CHECK(this->sln);
+  memset(this->sln, 0, m->size * sizeof(Scalar));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = Scalar(xr[i], xi[i]);
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = Scalar(xr[i], xi[i]);
 #endif
   return true;
 #else
