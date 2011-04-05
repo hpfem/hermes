@@ -328,8 +328,14 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
 
       fprintf(file, "%d\n", size);
       fprintf(file, "%d\n", nnz);
-      for (unsigned int k = 0; k < nnz; k++)
-          fprintf(file, "%d %d %E %E \n", ascii_entry_i[k], ascii_entry_j[k], SCALAR(ascii_entry_buff[k]));      
+      for (unsigned int k = 0; k < nnz; k++) {
+
+#ifdef HERMES_COMMON_COMPLEX
+      fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], REAL(ascii_entry_buff[k]), IMAG(ascii_entry_buff[k]));     
+#else
+      fprintf(file, "%d %d" SCALAR_FMT "\n", ascii_entry_i[k], ascii_entry_j[k], SCALAR(ascii_entry_buff[k]));
+#endif 
+      }
 
       //Free memory
       delete [] ascii_entry_buff;
@@ -478,8 +484,14 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     {
       fprintf(file, "\n");
       for (unsigned int i = 0; i < size; i++){
-        fprintf(file, "%E %E \n", SCALAR(v[i]));
+
+#ifdef HERMES_COMMON_COMPLEX
+        fprintf(file, "%E %E\n", REAL(v[i]), IMAG(v[i]));     
+#else
+        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
+#endif
       }
+
       return true;
     }
     default:
