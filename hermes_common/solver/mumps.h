@@ -48,6 +48,20 @@
 
 template <typename Scalar> class MumpsSolver;
 
+template <typename Scalar> struct mumps_type;
+
+template <>
+struct mumps_type<std::complex<double> >{
+  typedef ZMUMPS_STRUC_C mumps_struct;
+  typedef ZMUMPS_COMPLEX mumps_scalar;
+};
+template <>
+struct mumps_type<double>{
+  typedef DMUMPS_STRUC_C mumps_struct;
+  typedef double mumps_scalar;
+};
+
+
 template <typename Scalar>
 class MumpsMatrix : public SparseMatrix<Scalar> 
 {
@@ -131,21 +145,10 @@ protected:
 ///
 /// @ingroup solvers
 template <typename Scalar>
-struct mumps_type;
-
-template <>
-struct mumps_type<std::complex<double> >{
-  typedef ZMUMPS_STRUC_C mumps_struct;
-};
-template <>
-struct mumps_type<double>{
-  typedef DMUMPS_STRUC_C mumps_struct;
-};
-
-template <typename Scalar>
 class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
 private:
   void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
+  Scalar mumps_to_scalar(typename mumps_type<Scalar>::mumps_scalar x);
 public:
   MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
   virtual ~MumpsSolver();

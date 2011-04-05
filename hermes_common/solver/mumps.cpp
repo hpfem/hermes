@@ -553,6 +553,16 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 #define JOB_SOLVE                    3
 
 template<>
+std::complex<double> MumpsSolver<std::complex<double> >::mumps_to_scalar(typename mumps_type<std::complex<double> >::mumps_scalar x){
+  return std::complex<double>(x.r,x.i);
+};
+
+template<>
+double MumpsSolver<double>::mumps_to_scalar(typename mumps_type<double>::mumps_scalar x){
+  return x;
+};
+
+template<>
 void MumpsSolver<double>::mumps_c(typename mumps_type<double>::mumps_struct * param){
 #ifdef WITH_MUMPS
   dmumps_c(param);
@@ -679,7 +689,7 @@ bool MumpsSolver<Scalar>::solve()
   }
   
   // Specify the right-hand side (will be replaced by the solution).
-  param.rhs = new Scalar[m->size];
+  param.rhs = new typename mumps_type<Scalar>::mumps_scalar[m->size];
   memcpy(param.rhs, rhs->v, m->size * sizeof(Scalar));
   
   // Do the jobs specified in setup_factorization().
@@ -691,13 +701,8 @@ bool MumpsSolver<Scalar>::solve()
   {
     delete [] this->sln;
     this->sln = new Scalar[m->size];
-#ifndef HERMES_COMMON_COMPLEX
     for (unsigned int i = 0; i < rhs->size; i++)
-      this->sln[i] = param.rhs[i];
-#else
-    for (unsigned int i = 0; i < rhs->size; i++)
-      this->sln[i] = cplx(param.rhs[i].r, param.rhs[i].i);
-#endif
+      this->sln[i] = mumps_to_scalar(param.rhs[i]);
   }
 
   tmr.tick();
