@@ -116,11 +116,11 @@ namespace WeakFormsH1 {
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        else if (gt == HERMES_AXISYM_X) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
+        else result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
 
         return coeff * result;
       }
@@ -129,8 +129,8 @@ namespace WeakFormsH1 {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        else if (gt == HERMES_AXISYM_X) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
+        else result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
 
         return result;
       }
@@ -167,11 +167,11 @@ namespace WeakFormsH1 {
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           //if (e->elem_marker != -9999) printf("B = %g\n", B_i);
           if (std::abs(B_i) > 1e-12) {
-            result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+            result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
 	  }
-          result += r * wt[i] * spline_coeff->get_value(B_i) 
+          result += wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
@@ -187,10 +187,10 @@ namespace WeakFormsH1 {
           else r = e->x[i];
 
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+          result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                           * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          result += r * wt[i] * spline_coeff->get_value(B_i) 
+          result += wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
@@ -215,24 +215,30 @@ namespace WeakFormsH1 {
                         SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        return coeff * int_u_v<Real, Scalar>(n, wt, u, v);
-      }
-
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        scalar result = 0;
+        if (gt == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+        else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+
+        return coeff * result;        
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        Ord result = 0;
+        if (gt == HERMES_PLANAR) result = int_u_v<Ord, Ord>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_v<Ord, Ord>(n, wt, u, v, e);
+        else result = int_x_u_v<Ord, Ord>(n, wt, u, v, e);
+
+        return result;        
+        
       }
 
       private:
         scalar coeff;
+        GeomType gt;
     };
 
     /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) u v d\bfx 
@@ -719,12 +725,12 @@ namespace WeakFormsH1 {
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+                      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) result = int_u_v<Ord, Ord>(n, wt, u, v);
         else if (gt == HERMES_AXISYM_X) result = int_y_u_v<Ord, Ord>(n, wt, u, v, e);
         else result = int_x_u_v<Ord, Ord>(n, wt, u, v, e);
-        return coeff * result;
+        return result;
       }
 
       private:

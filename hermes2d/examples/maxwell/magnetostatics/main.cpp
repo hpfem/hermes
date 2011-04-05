@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   bool verbose = true;
   bool residual_as_function = false;
-  double damping_coeff = 1.0;
+  double damping_coeff = 0.1;
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
                              damping_coeff)) error("Newton's iteration failed.");
