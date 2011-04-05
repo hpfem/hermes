@@ -46,13 +46,13 @@ private:
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u) { 
+    Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
-    Real dlam_du(Real u) { 
+    Real dlam_du(Real u) const { 
       return alpha*pow(u, alpha - 1); 
     }
     
@@ -89,7 +89,7 @@ private:
   }
 
   template<typename Real, typename Scalar>
-  Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t) {
+  Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t) const {
     Scalar result = 0;
     Func<Scalar>* Y_prev_newton = u_ext[0];
     for (int i = 0; i < n; i++) {
@@ -101,14 +101,14 @@ private:
 
   // Heat sources (can be a general function of 'x' and 'y').
   template<typename Real>
-  Real heat_src(Real x, Real y) {
+  Real heat_src(Real x, Real y) const {
     return 1.0;
   }
 
   // Thermal conductivity (temperature-dependent)
   // Note: for any u, this function has to be positive.
   template<typename Real>
-  Real lam(Real u)  { 
+  Real lam(Real u) const  { 
     return 1 + pow(u, alpha); 
   }
 
@@ -169,13 +169,13 @@ private:
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u) { 
+    Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
-    Real dlam_du(Real u) { 
+    Real dlam_du(Real u) const { 
       return alpha*pow(u, alpha - 1); 
     }
     
@@ -216,7 +216,7 @@ private:
     }
 
     template<typename Real, typename Scalar>
-    Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t) {
+    Scalar res_ss(int n, double *wt, Func<Real> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext, double t) const {
       Scalar result = 0;
       Func<Scalar>* Y_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++) {
@@ -228,14 +228,14 @@ private:
 
     // Heat sources (can be a general function of 'x' and 'y').
     template<typename Real>
-    Real heat_src(Real x, Real y) {
+    Real heat_src(Real x, Real y) const {
       return 1.0;
     }
 
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u)  { 
+    Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
     }
 
@@ -263,7 +263,7 @@ public:
 
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  virtual scalar value(double x, double y) const
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
     return (x+10)*(y+10)/100.;
   }
