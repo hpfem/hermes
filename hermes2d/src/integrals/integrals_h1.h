@@ -93,6 +93,18 @@ Scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   return result;
 }
+// This is the same as above but able to accept complex-valued external
+// solution instead of the basis functions 'u'.
+#ifdef H2D_COMPLEX
+template<typename Real, typename Scalar>
+Scalar int_grad_u_grad_v(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+#endif
 
 template<typename Real, typename Scalar>
 Scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
@@ -147,6 +159,18 @@ Scalar int_u_dvdx_over_x(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<R
     result += wt[i] * u->val[i] * v->dx[i] / e->x[i];
   return result;
 }
+// This is the same as above but able to accept complex-valued external
+// solution instead of the basis functions 'u'.
+#ifdef H2D_COMPLEX
+template<typename Real, typename Scalar>
+Scalar int_u_dvdx_over_x(int n, double *wt, Func<Scalar> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->dx[i] / e->x[i];
+  return result;
+}
+#endif
 
 template<typename Real, typename Scalar>
 Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
@@ -165,6 +189,18 @@ Scalar int_u_dvdy_over_y(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<R
     result += wt[i] * u->val[i] * v->dy[i] / e->y[i];
   return result;
 }
+// This is the same as above but able to accept complex-valued external
+// solution instead of the basis functions 'u'.
+#ifdef H2D_COMPLEX
+template<typename Real, typename Scalar>
+Scalar int_u_dvdy_over_y(int n, double *wt, Func<Scalar> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->dy[i] / e->y[i];
+  return result;
+}
+#endif
 
 template<typename Real, typename Scalar>
 Scalar int_dudx_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
