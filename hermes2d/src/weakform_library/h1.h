@@ -150,7 +150,8 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, 
-                                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+                                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, 
+                                             int order_increase = 3) 
             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
                                              CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM,
@@ -169,13 +170,13 @@ namespace WeakFormsH1 {
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
             if (gt == HERMES_AXISYM_X) {
               axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->y[i]
-		                   * (u_ext[0]->val[i] * u->dy[i])
+                                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                           * (u_ext[0]->val[i] * v->dy[i]);
 	    }
             else if (gt == HERMES_AXISYM_Y) {
               axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->x[i]
-		                   * (u_ext[0]->val[i] * u->dx[i])
-	                           * (u_ext[0]->val[i] * v->dx[i]);
+                                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+	                           * (u_ext[0]->val[i] * v->dy[i]);
 	    }
 	  }
           planar_part += wt[i] * spline_coeff->get_value(B_i) 
@@ -195,20 +196,20 @@ namespace WeakFormsH1 {
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = 0;
+        Ord planar_part = 0;
         for (int i = 0; i < n; i++) {
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
-                          * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-	                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          result += wt[i] * spline_coeff->get_value(B_i) 
-                          * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+          planar_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+                               * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+	                       * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          planar_part += wt[i] * spline_coeff->get_value(B_i) 
+                               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
 
         // This increase is for the axisymmetric part. We are not letting the 
         // Ord class do it since it would automatically choose the highest order
         // due to the nonpolynomial 1/r term.
-        return result*Ord(order_increase);
+        return planar_part * Ord(order_increase);
       }
 
       private:
@@ -577,7 +578,7 @@ namespace WeakFormsH1 {
           planar_part += wt[i] * spline_coeff->get_value(B_i) *
                                  (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         }
-        return planar_part*Ord(order_increase);
+        return planar_part * Ord(order_increase);
 
       }
 

@@ -38,7 +38,7 @@ const std::string MAT_COPPER = "1";
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "definitions.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
   bool extrapolate_der_right = false;
   CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, 0.0, 0.0, first_der_left, first_der_right,
                           extrapolate_der_left, extrapolate_der_right);
-  bool success = mu_inv_iron.calculate_coeffs(); 
-  if (!success) error("There was a problem constructing a cubic spline.");
+  bool success0 = mu_inv_iron.calculate_coeffs(); 
+  if (!success0) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
   double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("actuator.mesh", &mesh);
+  mloader.load("../actuator.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -133,17 +133,45 @@ int main(int argc, char* argv[])
   delete solver;
 
   // Visualise the solution and mesh.
-  ScalarView s_view1("Solution (vector potencial)", new WinGeom(0, 0, 350, 450));
-  s_view1.show_mesh(false);
-  s_view1.show(&sln);
+  //ScalarView s_view1("Solution (vector potencial)", new WinGeom(0, 0, 350, 450));
+  //s_view1.show_mesh(false);
+  //s_view1.show(&sln);
 
-  ScalarView s_view2("Gradient (flux density)", new WinGeom(360, 0, 350, 450));
-  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
-  s_view2.show_mesh(false);
-  s_view2.show(&grad);
+  //ScalarView s_view2("Gradient (flux density)", new WinGeom(360, 0, 350, 450));
+  //MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+  //s_view2.show_mesh(false);
+  //s_view2.show(&grad);
 
-  OrderView o_view("Mesh", new WinGeom(720, 0, 350, 450));
-  o_view.show(&space);
+  //OrderView o_view("Mesh", new WinGeom(720, 0, 350, 450));
+  //o_view.show(&space);
+
+  double coord_x[4] = {0.03, 0.06, 0.06, 0.03};
+  double coord_y[4] = {0, 0, 0.05, 0.05};
+
+  info("Coordinate (1, 0) value = %lf", sln.get_pt_value(coord_x[0], coord_y[0]));
+  info("Coordinate (3, 0) value = %lf", sln.get_pt_value(coord_x[1], coord_y[1]));
+  info("Coordinate (5, 0) value = %lf", sln.get_pt_value(coord_x[2], coord_y[2]));
+  info("Coordinate (7, 0) value = %lf", sln.get_pt_value(coord_x[3], coord_y[3]));
+
+  double t_value[4] = {0.001257, 0.000365, 0.000363, 0.018063};
+  bool success = true;
+
+  for (int i = 0; i < 4; i++)
+  {
+    if (abs(t_value[i] - sln.get_pt_value(coord_x[i], coord_y[i])) > 1E-6) success = false;
+  }
+
+  if (success) {  // should pass with NEWTON_MAX_ITER = 9 and fail with NEWTON_MAX_ITER = 8
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
+  }
+
+
+
 
   // Wait for all views to be closed.
   View::wait();
