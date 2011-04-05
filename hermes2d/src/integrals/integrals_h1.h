@@ -22,28 +22,28 @@
 
 //// the following integrals can be used in both volume and surface forms ////
 
-template<typename Real, typename Scalar>
-Scalar int_v(int n, double *wt, Func<Real> *v)
+template<typename Real>
+Real int_v(int n, double *wt, Func<Real> *v)
 {
-  Scalar result = 0;
+  Real result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * v->val[i];
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_x_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
+template<typename Real>
+Real int_x_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
 {
-  Scalar result = 0;
+  Real result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * e->x[i] * v->val[i];
   return result;
 }
 
-template<typename Real, typename Scalar>
-Scalar int_y_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
+template<typename Real>
+Real int_y_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
 {
-  Scalar result = 0;
+  Real result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * e->y[i] * v->val[i];
   return result;
