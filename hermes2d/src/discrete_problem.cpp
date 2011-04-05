@@ -924,22 +924,24 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 }
               }
             }
-            else if (rhsonly == false)
+            else if (rhsonly == false) {
               if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
                 Hermes::vector<scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
                   mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
                   result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  if (tra)
+                  if (tra) {
                     if (mfv->sym < 0)
                       mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
                       -result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                     else
                       mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
                       result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  }
                 }
               }
+            }
           }
         }
         // Symmetric block.

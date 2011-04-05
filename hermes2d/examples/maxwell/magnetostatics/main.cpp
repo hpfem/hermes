@@ -18,8 +18,9 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 3;                             // Initial polynomial degree.
-const double NEWTON_TOL = 1e-10;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-10;                  // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 1000;                 // Maximum allowed number of Newton iterations.
+const double NEWTON_DAMPING = 1.0;                // Number between 0 and 1 to damp Newton's iterations.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -116,10 +117,9 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   bool verbose = true;
   bool residual_as_function = false;
-  double damping_coeff = 0.1;
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
 			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
-                             damping_coeff)) error("Newton's iteration failed.");
+                             NEWTON_DAMPING)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solution(coeff_vec, &space, &sln);

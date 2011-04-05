@@ -135,7 +135,16 @@ Scalar int_u_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->dx[i] * u->val[i]);
+    result += wt[i] * u->val[i] * v->dx[i];
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_u_dvdx_over_x(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->dx[i] / e->x[i];
   return result;
 }
 
@@ -144,7 +153,16 @@ Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->dy[i] * u->val[i]);
+    result += wt[i] * u->val[i] * v->dy[i] ;
+  return result;
+}
+
+template<typename Real, typename Scalar>
+Scalar int_u_dvdy_over_y(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->dy[i] / e->y[i];
   return result;
 }
 

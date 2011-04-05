@@ -108,36 +108,38 @@ namespace WeakFormsH1 {
     class DefaultLinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
+      // The optional order_increase takes into account the axisymmetric part.
       DefaultLinearMagnetostatics(int i, int j, scalar coeff = 1.0, 
-                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+	: WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), order_increase(order_increase) { }
       DefaultLinearMagnetostatics(int i, int j, std::string area, scalar coeff = 1.0, 
-                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-        scalar result = 0;
-        if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        scalar planar_part = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
+        scalar axisym_part = 0;
+        if (gt == HERMES_AXISYM_X) axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u, v, e);
+        else if (gt == HERMES_AXISYM_Y) axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u, v, e);
 
-        return coeff * result;
+        return coeff * (planar_part + axisym_part);
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result;
-        if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
-        else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        Ord planar_part = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
 
-        return result;
+        // This increase is for the axisymmetric part. We are not letting the 
+        // Ord class do it since it would automatically choose the highest order
+        // due to the nonpolynomial 1/r term.
+        return planar_part * Ord(order_increase);
       }
 
       private:
         scalar coeff;
         GeomType gt;
+        int order_increase;
     };
 
     /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx 
@@ -148,57 +150,71 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, 
-                                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+                                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
                                              CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM,
-                                             GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+                                             GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-        scalar result = 0;
+        scalar planar_part = 0;
+        scalar axisym_part = 0;
         for (int i = 0; i < n; i++) {
-          scalar r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
-          
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          //if (e->elem_marker != -9999) printf("B = %g\n", B_i);
           if (std::abs(B_i) > 1e-12) {
-            result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+            planar_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+            if (gt == HERMES_AXISYM_X) {
+              axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->y[i]
+		                   * (u_ext[0]->val[i] * u->dy[i])
+	                           * (u_ext[0]->val[i] * v->dy[i]);
+	    }
+            else if (gt == HERMES_AXISYM_Y) {
+              axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->x[i]
+		                   * (u_ext[0]->val[i] * u->dx[i])
+	                           * (u_ext[0]->val[i] * v->dx[i]);
+	    }
 	  }
-          result += r * wt[i] * spline_coeff->get_value(B_i) 
-                          * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+          planar_part += wt[i] * spline_coeff->get_value(B_i) 
+                               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+          if (gt == HERMES_AXISYM_X) {
+            axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->y[i]
+                                 * (u->val[i] * v->dy[i]);
+	  }
+          else if (gt == HERMES_AXISYM_Y) {
+            axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->x[i]
+                                 * (u->val[i] * v->dx[i]);
+	  }
         }
-        return result;
+
+        return planar_part + axisym_part;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         for (int i = 0; i < n; i++) {
-          Ord r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
-
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+          result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                           * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          result += r * wt[i] * spline_coeff->get_value(B_i) 
+          result += wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
-        return result;
+
+        // This increase is for the axisymmetric part. We are not letting the 
+        // Ord class do it since it would automatically choose the highest order
+        // due to the nonpolynomial 1/r term.
+        return result*Ord(order_increase);
       }
 
       private:
         CubicSpline* spline_coeff;
         GeomType gt;
+        int order_increase;
     };
 
     /* Default volumetric matrix form \int_{area} coeff u v d\bfx 
@@ -403,9 +419,9 @@ namespace WeakFormsH1 {
         else return int_x_v<Ord>(n, wt, v, e);
       }
 
-    private:
-      scalar coeff;
-      GeomType gt;
+      private:
+        scalar coeff;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} coeff 
@@ -442,8 +458,8 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
-    private:
-      scalar coeff;
+      private:
+        scalar coeff;
     };
 
     /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
@@ -481,8 +497,8 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
-    private:
-      CubicSpline* spline_coeff;
+      private:
+        CubicSpline* spline_coeff;
     };
 
     /* Default volumetric vector form \int_{area} coeff 
@@ -493,46 +509,33 @@ namespace WeakFormsH1 {
     class DefaultResidualLinearMagnetostatics : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualLinearMagnetostatics(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
-      DefaultResidualLinearMagnetostatics(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+      DefaultResidualLinearMagnetostatics(int i, scalar coeff, GeomType gt = HERMES_PLANAR, 
+                                          int order_increase = 3) 
+                   : WeakForm::VectorFormVol(i), coeff(coeff), order_increase(order_increase) { }
+      DefaultResidualLinearMagnetostatics(int i, std::string area, scalar coeff, 
+                                          GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+                   : WeakForm::VectorFormVol(i, area), coeff(coeff), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
-        scalar result = 0;
-        Func<scalar>* u_prev = u_ext[0];
-        // The following follows from the identity curl curl A = -Laplace A
-        for (int i = 0; i < n; i++) {
-          scalar r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
+        scalar planar_part = int_grad_u_grad_v<double, scalar>(n, wt, u_ext[0], v);
+        scalar axisym_part = 0;
+        if (gt == HERMES_AXISYM_X) axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u_ext[0], v, e);
+        else if (gt == HERMES_AXISYM_Y) axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u_ext[0], v, e);
 
-          result += r * wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
-        }
-        return coeff * result;
+        return coeff * (planar_part + axisym_part);
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = 0;
-        Func<Ord>* u_prev = u_ext[0];
-        // The following follows from the identity curl curl A = -Laplace A
-        for (int i = 0; i < n; i++) {
-          Ord r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
-
-          result += r * wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
-        }
-        return result;        
+        Ord planar_part = int_grad_u_grad_v<Ord, Ord>(n, wt, u_ext[0], v);
+        return planar_part * Ord(order_increase);
       }
 
-    private:
-      scalar coeff;
-      GeomType gt;
+      private:
+        scalar coeff;
+        GeomType gt;
+        int order_increase;
     };
 
     /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
@@ -543,48 +546,45 @@ namespace WeakFormsH1 {
     class DefaultResidualNonlinearMagnetostatics : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
-      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR, 
+                                             int order_increase = 3) 
+                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), order_increase(order_increase) { }
+      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, 
+                                             GeomType gt = HERMES_PLANAR, int order_increase = 3) 
+                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
-        scalar result = 0;
-        Func<scalar>* u_prev = u_ext[0];
+        scalar planar_part = 0;
+        scalar axisym_part = 0;
         for (int i = 0; i < n; i++) {
-          scalar r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
-
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += r * wt[i] * spline_coeff->get_value(B_i) * 
-                    (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+          planar_part += wt[i] * spline_coeff->get_value(B_i) *
+                                 (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->y[i] 
+                                     * u_ext[0]->val[i] * v->dy[i];
+          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->x[i] 
+                                     * u_ext[0]->val[i] * v->dx[i];
         }
-        return result;
+        return planar_part + axisym_part;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord result = 0;
-        Func<Ord>* u_prev = u_ext[0];
+        Ord planar_part = 0;
         for (int i = 0; i < n; i++) {
-          Ord r;
-          if (gt == HERMES_PLANAR) r = 1.0;
-          else if (gt == HERMES_AXISYM_X) r = e->y[i];
-          else r = e->x[i];
-
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += r * wt[i] * spline_coeff->get_value(B_i) * 
-                    (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+          planar_part += wt[i] * spline_coeff->get_value(B_i) *
+                                 (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         }
-        return result;       
+        return planar_part*Ord(order_increase);
+
       }
 
-    private:
-      CubicSpline* spline_coeff;
-      GeomType gt;
+      private:
+        CubicSpline* spline_coeff;
+        GeomType gt;
+        int order_increase;
     };
 
     /* Default volumetric vector form \int_{area} coeff1 * u->dx * v->val
@@ -622,8 +622,8 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
-    private:
-      scalar coeff1, coeff2;
+      private:
+        scalar coeff1, coeff2;
     };
 
     /* Default volumetric vector form \int_{area} spline_coeff1(u_ext[0]) * u->dx * v->val
@@ -663,8 +663,8 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
-    private:
-      CubicSpline* spline_coeff1, *spline_coeff2;
+      private:
+        CubicSpline* spline_coeff1, *spline_coeff2;
     };
 
     /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
@@ -696,8 +696,8 @@ namespace WeakFormsH1 {
         return result;
       }
 
-    private:
-      RightHandSides::DefaultNonConstRightHandSide* rhs;
+      private:
+        RightHandSides::DefaultNonConstRightHandSide* rhs;
     };
   }
 
@@ -809,9 +809,9 @@ namespace WeakFormsH1 {
         return result;
       }
 
-    private:
-      scalar coeff;
-      GeomType gt;
+      private:
+        scalar coeff;
+        GeomType gt;
     };
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
@@ -847,8 +847,8 @@ namespace WeakFormsH1 {
         return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
-    private:
-      CubicSpline* spline_coeff;
+      private:
+        CubicSpline* spline_coeff;
     };
   }
 
