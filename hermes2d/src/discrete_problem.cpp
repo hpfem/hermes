@@ -846,7 +846,6 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
   if (mat != NULL) {
     for (unsigned ww = 0; ww < stage.mfvol_mc.size(); ww++) {
       WeakForm::MultiComponentMatrixFormVol* mfv = stage.mfvol_mc[ww];
-      Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
       if(fabs(mfv->scaling_factor) < 1e-12)
         continue;
       if (mfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->area)))
@@ -973,7 +972,7 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
                   mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
                   result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
+                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], al[mfv->coordinates[coordinate_i].second]->dof[i],
                   result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
               }
@@ -1023,7 +1022,6 @@ void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stag
   _F_
   for (unsigned int ww = 0; ww < stage.vfvol_mc.size(); ww++) {
     WeakForm::MultiComponentVectorFormVol* vfv = stage.vfvol_mc[ww];
-    Hermes::vector<unsigned int> coordinates;
     if (fabs(vfv->scaling_factor) < 1e-12) 
       continue;
     if (vfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->area))) 
@@ -1683,7 +1681,6 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
   _F_
   for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
     WeakForm::MultiComponentMatrixFormSurf* mfs = stage.mfsurf_mc[ww];
-    Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
     unsigned int m = mfs->coordinates[0].first;
     unsigned int n = mfs->coordinates[0].second;
 
@@ -1789,7 +1786,6 @@ void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Sta
   for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
     WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
     unsigned int m = vfs->coordinates[0];
-    Hermes::vector<unsigned int> coordinates;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
     if (vfs->area == H2D_DG_INNER_EDGE) continue;
     if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE 
@@ -1931,8 +1927,6 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
     WeakForm::MultiComponentMatrixFormSurf* mfs = stage.mfsurf_mc[ww];
     if (mfs->area != H2D_DG_INNER_EDGE) continue;
 
-    Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates;
-
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
 
     unsigned int m = mfs->coordinates[0].first;
@@ -2058,7 +2052,6 @@ void DiscreteProblem::assemble_multicomponent_DG_vector_forms(WeakForm::Stage& s
   _F_
   for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
     WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
-    Hermes::vector<unsigned int> coordinates;
     if (vfs->area != H2D_DG_INNER_EDGE) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
             

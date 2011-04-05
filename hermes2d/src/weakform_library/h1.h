@@ -785,9 +785,9 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultVectorFormSurf(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
+	    : WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
       DefaultVectorFormSurf(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
+	    : WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -812,6 +812,45 @@ namespace WeakFormsH1 {
       private:
         scalar coeff;
         GeomType gt;
+    };
+
+    class MultiComponentDefaultVectorFormSurf : public WeakForm::MultiComponentVectorFormSurf
+    {
+    public:
+      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
+	    : WeakForm::MultiComponentVectorFormSurf(coordinates), coeffs(coeffs), gt(gt) { }
+      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area, Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
+	    : WeakForm::MultiComponentVectorFormSurf(coordinates, area), coeffs(coeffs), gt(gt) { }
+
+      virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                          Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<double>& result) const {
+        scalar result_base = 0;
+        if (gt == HERMES_PLANAR) 
+          result_base = int_v<double>(n, wt, v);
+        else 
+          if (gt == HERMES_AXISYM_X) 
+            result_base = int_y_v<double>(n, wt, v, e);
+          else 
+            result_base = int_x_v<double>(n, wt, v, e);
+
+        for(unsigned int result_i = 0; result_i < this->coordinates.size(); result_i++)
+          result.push_back(result_base * coeffs[result_i]);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                          Geom<Ord> *e, ExtData<Ord> *ext) const {
+        if (gt == HERMES_PLANAR) 
+          return int_v<Ord>(n, wt, v);
+        else
+          if (gt == HERMES_AXISYM_X) 
+            return int_y_v<Ord>(n, wt, v, e);
+          else
+            return int_x_v<Ord>(n, wt, v, e);
+      }
+
+    private:
+      Hermes::vector<scalar> coeffs;
+      GeomType gt;
     };
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
