@@ -303,8 +303,52 @@ bool CSCMatrix::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-      return false;
+    {
+
+      const double zero_cutoff = 1e-10;
+      scalar *ascii_entry_buff = new scalar[nnz];
+      int *ascii_entry_i = new int[nnz];
+      int *ascii_entry_j = new int[nnz];
+      int k = 0;
+
+      // If real or imaginary part of scalar entry is below zero_cutoff
+      // it's not included in ascii file, and number of non-zeros is reduced by one.
+      for (unsigned int j = 0; j < size; j++){
+        for (int i = Ap[j]; i < Ap[j + 1]; i++){
+          if (REAL(Ax[i]) > zero_cutoff || IMAG(Ax[i]) > zero_cutoff){
+            ascii_entry_buff[k] = Ax[i];
+            ascii_entry_i[k] = Ai[i];
+            ascii_entry_j[k] = j;
+            k++; 
+          }
+          else
+            nnz -= 1;            
+        }
+      }
+
+      fprintf(file, "%d\n", size);
+      fprintf(file, "%d\n", nnz);
+      for (unsigned int k = 0; k < nnz; k++) {
+
+#ifdef HERMES_COMMON_COMPLEX
+      fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], REAL(ascii_entry_buff[k]), IMAG(ascii_entry_buff[k]));     
+#else
+      fprintf(file, "%d %d" SCALAR_FMT "\n", ascii_entry_i[k], ascii_entry_j[k], SCALAR(ascii_entry_buff[k]));
+#endif 
+      }
+
+      //Free memory
+      delete [] ascii_entry_buff;
+      delete [] ascii_entry_i;
+      delete [] ascii_entry_j;
+
+      //Clear pointer
+      ascii_entry_buff = NULL;
+      ascii_entry_i = NULL;
+      ascii_entry_j = NULL;
+
+      return true;
+    }
 
     default:
       return false;
@@ -437,9 +481,19 @@ bool UMFPackVector::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt
     }
 
     case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
-      return false;
+    {
+      fprintf(file, "\n");
+      for (unsigned int i = 0; i < size; i++){
 
+#ifdef HERMES_COMMON_COMPLEX
+        fprintf(file, "%E %E\n", REAL(v[i]), IMAG(v[i]));     
+#else
+        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
+#endif
+      }
+
+      return true;
+    }
     default:
       return false;
   }

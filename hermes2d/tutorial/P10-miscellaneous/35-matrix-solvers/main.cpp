@@ -50,6 +50,7 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
 
   // Prepare to read from file.
   int n;                               // Matrix size.
+  int nnz;                             // Number on non-zero entries
   bool cplx_2_real;                    // Decides do we turn complex matrix to real
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, scalar> ar_rhs;
@@ -60,7 +61,7 @@ aztecoo, aztecoo-block, amesos, amesos-block, mumps, mumps-block, superlu, super
      cplx_2_real = false;
 
   // Read matrix and rhs from file.
-  if (!read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real))
+  if (!read_matrix_and_rhs(argv[2], n, nnz, ar_mat, ar_rhs, cplx_2_real))
     error("Failed to read the matrix and rhs.");
   else info("Matrix and rhs loaded from file %s.", argv[2]);
 
