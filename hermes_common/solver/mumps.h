@@ -144,6 +144,8 @@ struct mumps_type<double>{
 
 template <typename Scalar>
 class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
+private:
+  void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
 public:
   MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
   virtual ~MumpsSolver();

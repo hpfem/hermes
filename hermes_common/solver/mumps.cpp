@@ -23,18 +23,13 @@
 #include "../utils.h"
 #include "../callstack.h"
 
-#ifndef HERMES_COMMON_COMPLEX
-  #define MUMPS         dmumps_c
-#else
-  #define MUMPS         zmumps_c
-#endif
-
 #define USE_COMM_WORLD  -987654
 
 #ifdef WITH_MUMPS
 
 extern "C" {
-  extern void MUMPS(MUMPS_STRUCT *mumps_param_ptr);
+  extern void dmumps_c(DMUMPS_STRUC_C *mumps_param_ptr);
+  extern void zmumps_c(ZMUMPS_STRUC_C *mumps_param_ptr);
 }
 
 #else
@@ -551,6 +546,21 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 #define JOB_FACTORIZE_SOLVE          5
 #define JOB_SOLVE                    3
 
+template<>
+void MumpsSolver<double>::mumps_c(typename mumps_type<double>::mumps_struct * param){
+#ifdef WITH_MUMPS
+  dmumps_c(param);
+#endif 
+}
+
+template<>
+void MumpsSolver<std::complex<double> >::mumps_c(typename mumps_type<std::complex<double> >::mumps_struct * param){
+#ifdef WITH_MUMPS
+  zmumps_c(param);
+#endif 
+}
+
+
 template<typename Scalar>
 bool MumpsSolver<Scalar>::check_status()
 {
@@ -573,7 +583,7 @@ bool MumpsSolver<Scalar>::reinit()
     // If there is already an instance of MUMPS running, 
     // terminate it.
     param.job = JOB_END;
-    MUMPS(&param);
+    mumps_c(&param);
   }
   
   param.job = JOB_INIT;
@@ -581,7 +591,7 @@ bool MumpsSolver<Scalar>::reinit()
   param.sym = 0; // 0 = unsymmetric
   param.comm_fortran=USE_COMM_WORLD;
   
-  MUMPS(&param);
+  mumps_c(&param);
   inited = check_status();
   
   if (inited)
@@ -635,7 +645,7 @@ MumpsSolver<Scalar>::~MumpsSolver()
   if (inited)
   {
     param.job = JOB_END;
-    MUMPS(&param);
+    mumps_c(&param);
   }
   
   if (param.rhs != NULL) delete [] param.rhs;
@@ -667,25 +677,25 @@ bool MumpsSolver<Scalar>::solve()
   memcpy(param.rhs, rhs->v, m->size * sizeof(Scalar));
   
   // Do the jobs specified in setup_factorization().
-  MUMPS(&param);
+  mumps_c(&param);
   
   ret = check_status();
 
   if (ret) 
   {
-    delete [] sln;
-    sln = new Scalar[m->size];
+    delete [] this->sln;
+    this->sln = new Scalar[m->size];
 #ifndef HERMES_COMMON_COMPLEX
     for (unsigned int i = 0; i < rhs->size; i++)
-      sln[i] = param.rhs[i];
+      this->sln[i] = param.rhs[i];
 #else
     for (unsigned int i = 0; i < rhs->size; i++)
-      sln[i] = cplx(param.rhs[i].r, param.rhs[i].i);
+      this->sln[i] = cplx(param.rhs[i].r, param.rhs[i].i);
 #endif
   }
 
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
   delete [] param.rhs;
   param.rhs = NULL;
@@ -703,10 +713,10 @@ bool MumpsSolver<Scalar>::setup_factorization()
 #ifdef WITH_MUMPS
   // When called for the first time, all three phases (analysis, factorization,
   // solution) must be performed. 
-  int eff_fact_scheme = factorization_scheme;
+  int eff_fact_scheme = this->factorization_scheme;
   if (!inited)
-    if( factorization_scheme == HERMES_REUSE_MATRIX_REORDERING || 
-        factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
+    if( this->factorization_scheme == HERMES_REUSE_MATRIX_REORDERING || 
+        this->factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
       eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
   
   switch (eff_fact_scheme)
