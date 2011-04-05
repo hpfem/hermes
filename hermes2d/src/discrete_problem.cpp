@@ -735,7 +735,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
         // Unsymmetric block.
         if (!sym) {
           for (unsigned int j = 0; j < al[n]->cnt; j++) {
-            
+
             pss[n]->set_active_shape(al[n]->idx[j]);
             
             if (al[n]->dof[j] < 0) {
@@ -859,69 +859,32 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
           block_scaling_coeffs.push_back(block_weights->get_A(mfv->coordinates[coordinate_i].first, mfv->coordinates[coordinate_i].second));
         else
           block_scaling_coeffs.push_back(1);
-      
-      bool tra = false;
-      bool sym = false;
-      if(mfv->sym == 1)
-        for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-          if(mfv->coordinates[coordinate_i].first == mfv->coordinates[coordinate_i].second)
-            sym = true;
-          else
-            if(sym == true)
-              error("!");
-      if(mfv->sym != 0)
-        for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-          if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
-            tra = true;
-          else
-            if(tra == true)
-              error("!");
 
       // Assemble the local stiffness matrix for the form mfv.
-
       unsigned int m = mfv->coordinates[0].first;
       unsigned int n = mfv->coordinates[0].second;
 
-      for (unsigned int i = 0; i < al[m]->cnt; i++) {
-        if (tra) {
-          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-          if (rhs != NULL && this->is_linear)
-            for (unsigned int j = 0; j < al[m]->cnt; j++)
-              if (al[m]->dof[j] < 0)
-                for (unsigned int i = 0; i < al[n]->cnt; i++)
-                  if (al[n]->dof[i] >= 0)
-                    if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
-                      Hermes::vector<scalar> result;
-                      eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                      for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                        rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[i],
-                        -result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                    }
-        }
+      bool sym = mfv->sym;
+      for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+        if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
+          error("Symmetrical multicomponent forms need to take both basis function from one space.");
 
-        if (!tra && al[m]->dof[i] < 0) 
-          continue;
+      for (unsigned int i = 0; i < al[m]->cnt; i++) {
         spss[m]->set_active_shape(al[m]->idx[i]);
-        
-        // Unsymmetric block.
-        if (!sym) {
+        if(al[m]->dof[i] < 0 && mfv->sym == HERMES_NONSYM)
+          continue;
+        if(mfv->sym == HERMES_NONSYM) {
           for (unsigned int j = 0; j < al[n]->cnt; j++) {
-            
             pss[n]->set_active_shape(al[n]->idx[j]);
-            
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-              if (rhs != NULL && this->is_linear) {
-                // Numerical integration performed only if all 
-                // coefficients multiplying the form are nonzero
-                // and if the basis function is active.
+              if (rhs != NULL && this->is_linear)
                 if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
                   Hermes::vector<scalar> result;
                   eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                   for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
                     rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
-              }
             }
             else if (rhsonly == false) {
               if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
@@ -930,52 +893,51 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
                   mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
                   result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  if (tra) {
-                    if (mfv->sym < 0)
-                      mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
-                      -result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                    else
-                      mat->add(al[mfv->coordinates[coordinate_i].second]->dof[j], al[mfv->coordinates[coordinate_i].first]->dof[i],
-                      result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  }
                 }
               }
             }
           }
         }
-        // Symmetric block.
         else {
           for (unsigned int j = 0; j < al[n]->cnt; j++) {
-            if (j < i && al[n]->dof[j] >= 0) 
+            if(j < i && al[n]->dof[j] >= 0)
               continue;
-            
             pss[n]->set_active_shape(al[n]->idx[j]);
-            
+
             if (al[n]->dof[j] < 0) {
               // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-              if (rhs != NULL && this->is_linear) {
-                // Numerical integration performed only if all 
-                // coefficients multiplying the form are nonzero
-                // and if basis function is active.
+              if (rhs != NULL && this->is_linear)
                 if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
                   Hermes::vector<scalar> result;
                   eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                   for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
                     rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-		            }
-              }
+                }
             }
-            else if (rhsonly == false)
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-                Hermes::vector<scalar> result;
-                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
-                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
-                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], al[mfv->coordinates[coordinate_i].second]->dof[i],
-                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+            else {
+              if (al[m]->dof[i] < 0) {
+                if (rhs != NULL && this->is_linear)
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                  Hermes::vector<scalar> result;
+                  eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], -mfv->sym * result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
               }
+              else if (rhsonly == false) {
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                  Hermes::vector<scalar> result;
+                  eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                    mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
+                    result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    if(i != j)
+                      mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], al[mfv->coordinates[coordinate_i].second]->dof[i],
+                      result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  }
+                }
+              }
+            }
           }
         }
       }
