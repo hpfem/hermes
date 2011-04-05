@@ -379,40 +379,46 @@ void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solutio
 
   // Multi component forms.
   for (unsigned i = 0; i < mfvol_mc.size(); i++) {
+    Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
     for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++) {
-      unsigned int ii = mfvol_mc.at(i)->coordinates.at(form_i).first;
-      unsigned int jj = mfvol_mc.at(i)->coordinates.at(form_i).second;
-      Mesh* m1 = spaces[ii]->get_mesh();
-      Mesh* m2 = spaces[jj]->get_mesh();
-      Stage* s = find_stage(stages, mfvol_mc.at(i)->coordinates, m1, m2, mfvol_mc[i]->ext, u_ext);
-      s->mfvol_mc.push_back(mfvol_mc[i]);
+      if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
+      if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
     }
+    
+    Stage* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext);
+    s->mfvol_mc.push_back(mfvol_mc[i]);
   }
   for (unsigned i = 0; i < mfsurf_mc.size(); i++) {
+    Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
     for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++) {
-      unsigned int ii = mfsurf_mc.at(i)->coordinates.at(form_i).first;
-      unsigned int jj = mfsurf_mc.at(i)->coordinates.at(form_i).second;
-      Mesh* m1 = spaces[ii]->get_mesh();
-      Mesh* m2 = spaces[jj]->get_mesh();
-      Stage* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, m1, m2, mfsurf_mc[i]->ext, u_ext);
-      s->mfsurf_mc.push_back(mfsurf_mc[i]);
+      if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
+      if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
     }
+    
+    Stage* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext);
+    s->mfsurf_mc.push_back(mfsurf_mc[i]);
   }
   for (unsigned i = 0; i < vfvol_mc.size(); i++) {
-    for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++) {
-      unsigned int ii = vfvol_mc.at(i)->coordinates.at(form_i);
-      Mesh *m = spaces[ii]->get_mesh();
-      Stage *s = find_stage(stages, vfvol_mc.at(i)->coordinates, m, m, vfvol_mc[i]->ext, u_ext);
-      s->vfvol_mc.push_back(vfvol_mc[i]);
-    }
+    Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
+    for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
+      if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
+    
+    Stage *s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext);
+    s->vfvol_mc.push_back(vfvol_mc[i]);
   }
   for (unsigned i = 0; i < vfsurf_mc.size(); i++) {
-    for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++) {
-      unsigned int ii = vfsurf_mc.at(i)->coordinates.at(form_i);
-      Mesh *m = spaces[ii]->get_mesh();
-      Stage *s = find_stage(stages, vfsurf_mc.at(i)->coordinates, m, m, vfsurf_mc[i]->ext, u_ext);
-      s->vfsurf_mc.push_back(vfsurf_mc[i]);
-    }
+    Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
+    for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
+      if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+        error("When using multi-component forms, the Meshes have to be identical.");
+    
+    Stage *s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext);
+    s->vfsurf_mc.push_back(vfsurf_mc[i]);
   }
 
   // helper macro for iterating in a set
@@ -640,7 +646,7 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
       for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
         blocks[mfvol_mc[i]->coordinates[component_i].first][mfvol_mc[i]->coordinates[component_i].second] = true;
     if (mfvol_mc[i]->sym)
-      if (fabs(mfvol[i]->scaling_factor) > 1e-12)
+      if (fabs(mfvol_mc[i]->scaling_factor) > 1e-12)
         for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
           blocks[mfvol_mc[i]->coordinates[component_i].second][mfvol_mc[i]->coordinates[component_i].first] = true;
   }

@@ -61,7 +61,7 @@ private:
     }
 
     template<typename Real>
-    Real F(Real x, Real y) {
+    Real F(Real x, Real y) const {
       return 0;
     }
   };
@@ -144,12 +144,12 @@ private:
     }
 
     template<typename Real>
-    Real F(Real x, Real y) {
+    Real F(Real x, Real y) const{
       return 0;
     }
 
     template<typename Real, typename Scalar>
-    Scalar g(std::string ess_bdy_marker, Real x, Real y) {
+    Scalar g(std::string ess_bdy_marker, Real x, Real y) const {
       if (ess_bdy_marker == left_bottom_bnd_part) return 1; else return 0;
     }
     
@@ -157,20 +157,20 @@ private:
     std::string left_bottom_bnd_part;
   };
   
-  double calculate_a_dot_v(double x, double y, double vx, double vy) {
+  double calculate_a_dot_v(double x, double y, double vx, double vy) const {
     double norm = std::max<double>(1e-12, sqrt(sqr(x) + sqr(y)));
     return -y/norm*vx + x/norm*vy;
   }
 
-  Ord calculate_a_dot_v(Ord x, Ord y, Ord vx, Ord vy) {
+  Ord calculate_a_dot_v(Ord x, Ord y, Ord vx, Ord vy) const {
     return Ord(10);
   }
 
-  double upwind_flux(double u_cent, double u_neib, double a_dot_n) {
+  double upwind_flux(double u_cent, double u_neib, double a_dot_n) const {
     return a_dot_n * (a_dot_n >= 0 ? u_cent : u_neib); 
   }
 
-  Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n) {
+  Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n) const {
     return a_dot_n * (u_cent + u_neib); 
   }
 };
