@@ -20,7 +20,7 @@ private:
     }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
@@ -29,24 +29,24 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u) { 
+    Real lam(Real u) const { 
       return 1 + pow(u, 4); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
-    Real dlam_du(Real u) { 
+    Real dlam_du(Real u) const { 
       return 4*pow(u, 3); 
     }
   };
@@ -57,7 +57,7 @@ private:
     VectorFormVolHeatTransfer(int i) : WeakForm::VectorFormVol(i) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev = u_ext[0];
       for (int i = 0; i < n; i++)
@@ -66,24 +66,24 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
     // Heat sources (can be a general function of 'x' and 'y').
     template<typename Real>
-    Real heat_src(Real x, Real y) {
+    Real heat_src(Real x, Real y) const {
       return 1.0;
     }
 
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u)  { 
+    Real lam(Real u) const { 
       return 1 + pow(u, 4); 
     }
   };
