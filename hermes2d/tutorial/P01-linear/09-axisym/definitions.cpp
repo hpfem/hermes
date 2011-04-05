@@ -10,11 +10,11 @@ using namespace WeakFormsH1;
 class CustomWeakFormPoissonNewton : public WeakForm
 {
 public:
-  CustomWeakFormPoissonNewton(double h, double T0, double lambda, std::string bdy_heat_flux) : WeakForm(1)
+  CustomWeakFormPoissonNewton(double lambda, double alpha, double T0, std::string bdy_heat_flux) : WeakForm(1)
   {
     add_matrix_form(new VolumetricMatrixForms::DefaultLinearDiffusion(0, 0, lambda, HERMES_SYM, HERMES_AXISYM_Y));
-    add_matrix_form_surf(new SurfaceMatrixForms::DefaultMatrixFormSurf(0, 0, bdy_heat_flux, lambda * h, HERMES_AXISYM_Y));
-    add_vector_form_surf(new SurfaceVectorForms::DefaultVectorFormSurf(0, bdy_heat_flux, lambda * h * T0, HERMES_AXISYM_Y));
+    add_matrix_form_surf(new SurfaceMatrixForms::DefaultMatrixFormSurf(0, 0, bdy_heat_flux, alpha, HERMES_AXISYM_Y));
+    add_vector_form_surf(new SurfaceVectorForms::DefaultVectorFormSurf(0, bdy_heat_flux, alpha * T0, HERMES_AXISYM_Y));
   };
 };
 

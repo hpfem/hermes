@@ -9,7 +9,7 @@
 // PDE: Laplace equation -Laplace u = 0 (y-axis is the axis of symmetry).
 //
 // BC: u = T1 ... fixed temperature on Gamma_bottom,
-//     du/dn = H*(u - T0) ... heat flux on the rest of the boundary (Gamma_heat_flux).
+//     -LAMBDA * du/dn = ALPHA*(u - T0) ... heat flux on the rest of the boundary (Gamma_heat_flux).
 //
 // Note that the last BC can be written in the form  du/dn - H*u = -H*T0.
 //
@@ -23,7 +23,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double T1 = 30.0;       // Prescribed temperature on Gamma_bottom.
 const double T0 = 20.0;       // Outer temperature.
 const double LAMBDA = 386;    // Thermal conductivity.
-const double H = 5.0;         // Heat flux coefficient on Gamma_heat_flux.
+const double ALPHA = 5.0;     // Heat flux coefficient on Gamma_heat_flux.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "Bottom", BDY_HEAT_FLUX = "Heat flux";
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(H, T0, LAMBDA, BDY_HEAT_FLUX);
+  CustomWeakFormPoissonNewton wf(LAMBDA, ALPHA, T0, BDY_HEAT_FLUX);
 
   // Initialize the FE problem.
   bool is_linear = true;

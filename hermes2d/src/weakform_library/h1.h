@@ -119,8 +119,8 @@ namespace WeakFormsH1 {
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
-        else result = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
+        else result = int_x_grad_u_grad_v<double, scalar>(n, wt, u, v, e);
 
         return coeff * result;
       }
@@ -129,8 +129,8 @@ namespace WeakFormsH1 {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result;
         if (gt == HERMES_PLANAR) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        else if (gt == HERMES_AXISYM_X) result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
-        else result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
+        else result = int_x_grad_u_grad_v<Ord, Ord>(n, wt, u, v, e);
 
         return result;
       }
@@ -167,11 +167,11 @@ namespace WeakFormsH1 {
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           //if (e->elem_marker != -9999) printf("B = %g\n", B_i);
           if (std::abs(B_i) > 1e-12) {
-            result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+            result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
 	  }
-          result += wt[i] * spline_coeff->get_value(B_i) 
+          result += r * wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
@@ -187,10 +187,10 @@ namespace WeakFormsH1 {
           else r = e->x[i];
 
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          result += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+          result += r * wt[i] * spline_coeff->get_derivative(B_i) / B_i 
                           * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          result += wt[i] * spline_coeff->get_value(B_i) 
+          result += r * wt[i] * spline_coeff->get_value(B_i) 
                           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
         return result;
@@ -525,7 +525,7 @@ namespace WeakFormsH1 {
           else if (gt == HERMES_AXISYM_X) r = e->y[i];
           else r = e->x[i];
 
-          result += wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
+          result += r * wt[i] * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
         }
         return result;        
       }
