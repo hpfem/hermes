@@ -799,7 +799,8 @@ namespace WeakFormsH1 {
         return coeff * result;
       }
 
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
+                      ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) result = int_v<Ord>(n, wt, v);
         else if (gt == HERMES_AXISYM_X) result = int_y_v<Ord>(n, wt, v, e);

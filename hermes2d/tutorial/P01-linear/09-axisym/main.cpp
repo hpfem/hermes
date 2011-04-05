@@ -1,12 +1,14 @@
 #define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
-// This example shows how to solve exisymmetric problems.
+// This example shows how to solve exisymmetric problems. The domain of interest
+// is a hollow cylinder whose axis is aligned with the y-axis. It has fixed
+// temperature on the bottom face, and a Newton-type heat flux condition on
+// all other faces.
 //
 // PDE: Laplace equation -Laplace u = 0 (y-axis is the axis of symmetry).
 //
 // BC: u = T1 ... fixed temperature on Gamma_bottom,
-//     du/dn = 0 ... symmetry condition along the y-axis (Gamma_symmetry),
 //     du/dn = H*(u - T0) ... heat flux on the rest of the boundary (Gamma_heat_flux).
 //
 // Note that the last BC can be written in the form  du/dn - H*u = -H*T0.
@@ -15,17 +17,16 @@
 
 const int P_INIT = 4;                             // Uniform polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const int CORNER_REF_LEVEL = 12;                  // Number of mesh refinements towards the re-entrant corner.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // Problem parameters.
 const double T1 = 30.0;       // Prescribed temperature on Gamma_bottom.
 const double T0 = 20.0;       // Outer temperature.
-const double LAMBDA = 100;    // Thermal conductivity.
-const double h = 1.0;         // Heat flux on Gamma_heat_flux.
+const double LAMBDA = 386;    // Thermal conductivity.
+const double H = 5.0;         // Heat flux coefficient on Gamma_heat_flux.
 
 // Boundary markers.
-const std::string BDY_HEAT_FLUX = "Heat flux", BDY_BOTTOM = "Bottom", BDY_SYM = "Symmetry";
+const std::string BDY_BOTTOM = "Bottom", BDY_HEAT_FLUX = "Heat flux";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -39,7 +40,6 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
 
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY_BOTTOM, T1);
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(h, T0, LAMBDA, BDY_HEAT_FLUX);
+  CustomWeakFormPoissonNewton wf(H, T0, LAMBDA, BDY_HEAT_FLUX);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -77,8 +77,11 @@ int main(int argc, char* argv[])
     error ("Matrix solver failed.\n");
 
   // Visualize the solution.
-  ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+  ScalarView view("Solution", new WinGeom(0, 0, 300, 400));
   view.show(&sln);
+  ScalarView gradview("Gradient", new WinGeom(310, 0, 300, 400));
+  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+  gradview.show(&grad);
 
   // Wait for all views to be closed.
   View::wait();
