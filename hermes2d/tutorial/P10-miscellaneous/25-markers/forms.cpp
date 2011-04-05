@@ -46,7 +46,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) {
-      return rhs * int_v<Real, Scalar>(n, wt, v);
+      return rhs * int_v<Real>(n, wt, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
@@ -73,17 +73,17 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) {
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_VERTICAL_SE)
-        return - A_SE * int_v<Real, Scalar>(n, wt, v);
+        return - A_SE * int_v<Real>(n, wt, v);
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_VERTICAL_NE)
-        return - A_NE * int_v<Real, Scalar>(n, wt, v);
+        return - A_NE * int_v<Real>(n, wt, v);
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_VERTICAL_NW)
-        return - A_NW * int_v<Real, Scalar>(n, wt, v);
+        return - A_NW * int_v<Real>(n, wt, v);
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_VERTICAL_SW)
-        return - A_SW * int_v<Real, Scalar>(n, wt, v);
+        return - A_SW * int_v<Real>(n, wt, v);
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_TOP_NE)
-        return A_NE * int_v<Real, Scalar>(n, wt, v);
+        return A_NE * int_v<Real>(n, wt, v);
       if(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker) == BDY_TOP_NW)
-        return A_NW * int_v<Real, Scalar>(n, wt, v);
+        return A_NW * int_v<Real>(n, wt, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
@@ -93,7 +93,7 @@ private:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) {
-      return int_v<Ord, Ord>(n, wt, v);
+      return int_v<Ord>(n, wt, v);
     }
 
     // Members.

@@ -108,7 +108,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar dfdx_at_1 = 1. / (1 + (this->K * 1.) * (this->K * 1.)) * this->K;
-      return - dfdx_at_1 * int_v<Real, Scalar>(n, wt, v);
+      return - dfdx_at_1 * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -131,7 +131,7 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar dfdx_at_minus_1 = -1. / (1 + (-this->K * 1.) * (-this->K * 1.)) * this->K;
-      return - dfdx_at_minus_1 * int_v<Real, Scalar>(n, wt, v);
+      return - dfdx_at_minus_1 * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {

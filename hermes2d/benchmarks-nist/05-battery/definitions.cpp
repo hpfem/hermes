@@ -145,7 +145,7 @@ private:
             f = static_cast<CustomWeakFormPoisson*>(wf)->f_5;
       }
 
-      return f * int_v<Real, Scalar>(n, wt, v);
+      return f * int_v<Real>(n, wt, v);
     };
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
@@ -255,7 +255,7 @@ private:
       if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
         g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_top;
       }
-      return g * int_v<Real, Scalar>(n, wt, v);
+      return g * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 

@@ -62,7 +62,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return lambda * alpha * temp_ext(*current_time_ptr + time_step) * int_v<Real, Scalar>(n, wt, v);
+      return lambda * alpha * temp_ext(*current_time_ptr + time_step) * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {

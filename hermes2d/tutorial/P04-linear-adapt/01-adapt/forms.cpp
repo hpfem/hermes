@@ -59,7 +59,7 @@ public:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      return static_cast<WeakFormElectrostatic *>(wf)->rho[wf->get_element_markers_conversion()->get_user_marker(e->elem_marker)] * int_v<Real, Scalar>(n, wt, v);
+      return static_cast<WeakFormElectrostatic *>(wf)->rho[wf->get_element_markers_conversion()->get_user_marker(e->elem_marker)] * int_v<Real>(n, wt, v);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
@@ -69,7 +69,7 @@ public:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return int_v<Ord, Ord>(n, wt, v);
+      return int_v<Ord>(n, wt, v);
     }
   };
 };

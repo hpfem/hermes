@@ -40,12 +40,12 @@ public:
     LinearFormSurfOuter(int i, double CONST_GAMMA_OUTER, std::string area) : WeakForm::VectorFormSurf(i, area), CONST_GAMMA_OUTER(CONST_GAMMA_OUTER) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return CONST_GAMMA_OUTER * int_v<double, scalar>(n, wt, v);
+      return CONST_GAMMA_OUTER * int_v<double>(n, wt, v);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return CONST_GAMMA_OUTER * int_v<Ord, Ord>(n, wt, v);
+      return CONST_GAMMA_OUTER * int_v<Ord>(n, wt, v);
     }
   protected:
     // Members.
@@ -76,12 +76,12 @@ public:
     LinearFormSurfBottom(int i, double H, double T0, std::string area) : WeakForm::VectorFormSurf(i, area), H(H), T0(T0) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return T0 * H * int_v<double, scalar>(n, wt, v);
+      return T0 * H * int_v<double>(n, wt, v);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
     {
-      return T0 * H * int_v<Ord, Ord>(n, wt, v);
+      return T0 * H * int_v<Ord>(n, wt, v);
     }
   protected:
     // Members.

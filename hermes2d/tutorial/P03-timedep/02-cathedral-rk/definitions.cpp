@@ -115,7 +115,7 @@ private:
       Func<Scalar>* K_sln = u_ext[0];
       Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      Scalar result1 = get_current_stage_time() * int_v<Real, Scalar>(n, wt, v);
+      Scalar result1 = get_current_stage_time() * int_v<Real>(n, wt, v);
       Scalar result2 = 0;
       for (int i = 0; i < n; i++) {
         Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
