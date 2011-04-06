@@ -37,11 +37,7 @@ public:
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
-    return x*x + y*y;
+    return x + y;
   }
-
-  //virtual Ord ord(Ord x, Ord y) const {
-  //  return Ord(10);
-  //}
 };
 
