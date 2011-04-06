@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -61,11 +59,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_INNER = 1;
-const int BDY_OUTER = 2;
+const std::string BDY_INNER = "1";
+const std::string BDY_OUTER = "2";
 
 // Current time (used in weak forms).
-double TIME = 0;
+double current_time = 0;
 
 // Essential (Dirichlet) boundary condition values for x-velocity.
 scalar essential_bc_values_xvel(double x, double y, double time) {
@@ -129,6 +127,8 @@ double integrate_over_wall(MeshFunction* meshfn, int marker)
 
 int main(int argc, char* argv[])
 {
+  Hermes2D hermes_2D;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -140,25 +140,17 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_INNER, INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
   mesh.refine_towards_boundary(BDY_OUTER, INIT_BDY_REF_NUM_OUTER, false);  // false for isotropic refinements
 
-  // Enter boundary markers for x-velocity and y-velocity.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_INNER, BDY_OUTER));
-
-  BCTypes bc_types_p;
-  bc_types_p.add_bc_none(Hermes::vector<int>(BDY_INNER, BDY_OUTER));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values_xvel(&TIME);
-  bc_values_xvel.add_timedep_function(BDY_INNER, essential_bc_values_xvel);
-  bc_values_xvel.add_zero(BDY_OUTER);
-
-  BCValues bc_values_yvel(&TIME);
-  bc_values_yvel.add_timedep_function(BDY_INNER, essential_bc_values_yvel);
-  bc_values_yvel.add_zero(BDY_OUTER);
+  // Initialize boundary conditions.
+  EssentialBCNonConst bc_inner_vel_x(BDY_INNER, VEL, STARTUP_TIME);
+  EssentialBCNonConst bc_inner_vel_y(BDY_INNER, VEL, STARTUP_TIME);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_inner_vel_y));
+  DefaultEssentialBCConst bc_outer_vel_x(BDY_OUTER, 0.0);
+  DefaultEssentialBCConst bc_outer_vel_y(BDY_OUTER, 0.0);
+  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_outer_vel_x, &bc_outer_vel_y));
 
   // Create spaces with default shapesets. 
-  H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &bc_types, &bc_values_yvel, P_INIT_VEL);
+  H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
   L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
