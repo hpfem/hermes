@@ -2,18 +2,18 @@
 #include <integrals/integrals_h1.h>
 #include "boundaryconditions/essential_bcs.h"
 
-class EssentialBCNonConst : public EssentialBC {
+class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-    EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+    EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>())
     {
         markers.push_back(marker);
     }
 
     ~EssentialBCNonConst() {};
 
-    inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+    inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-    virtual scalar value(double x, double y) const
+    virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
     {
         return 100*cos(y*M_PI/0.1);
     }
@@ -43,8 +43,7 @@ private:
         }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) - sqr(omega) * mu * eps * int_u_v<Real, Scalar>(n, wt, u, v);
         }
 
@@ -77,8 +76,7 @@ private:
         }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return -omega * mu * sigma * int_u_v<Real, Scalar>(n, wt, u, v);
         }
 
@@ -105,8 +103,7 @@ private:
         }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return  omega * mu * sigma * int_u_v<Real, Scalar>(n, wt, u, v);
         }
 
@@ -128,8 +125,7 @@ private:
         }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) - sqr(omega) * mu * eps * int_u_v<Real, Scalar>(n, wt, u, v);
         }
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -157,8 +153,7 @@ private:
             : WeakForm::MatrixFormSurf(i, j, area), beta(beta){ }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return beta * int_u_v<Real, Scalar>(n, wt, u, v);
         }
 
@@ -183,8 +178,7 @@ private:
             : WeakForm::MatrixFormSurf(i, j, area), beta(beta){ }
 
         template<typename Real, typename Scalar>
-        Scalar matrix_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-        {
+        Scalar matrix_form_surf(int n, double *wt, Func<Real> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
             return - beta*int_u_v<Real, Scalar>(n, wt, u, v);
         }
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -196,5 +190,3 @@ private:
         }
     };
 };
-
-

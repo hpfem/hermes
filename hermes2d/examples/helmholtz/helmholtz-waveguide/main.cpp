@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     // Initialize boundary conditions
     DefaultEssentialBCConst bc1(BDY_PERFECT, 0.0);
     EssentialBCNonConst bc2(BDY_LEFT);
-    EssentialBCs bcs(Hermes::vector<EssentialBC *>(&bc1, &bc2));
+    EssentialBCs bcs(Hermes::vector<EssentialBoundaryCondition *>(&bc1, &bc2));
 
     // Create an H1 space with default shapeset.
     H1Space e_r_space(&mesh, &bcs, P_INIT);
