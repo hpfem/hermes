@@ -44,7 +44,7 @@ public:
     BC_CONST
   };
 
-  /// Pure virtual function giving info whether u_Essential is a constant or a function.
+  /// Pure virtual function reporting the type of the essential boundary condition.
   virtual EssentialBCValueType get_value_type() const = 0;
 
   /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
@@ -77,7 +77,7 @@ public:
   DefaultEssentialBCConst(Hermes::vector<std::string> markers, scalar value_const);
   DefaultEssentialBCConst(std::string marker, scalar value_const);
 
-  /// Function giving info that u_Essential is a constant.
+  /// Function reporting the type of the essential boundary condition.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_CONST; }
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 };
@@ -95,7 +95,7 @@ public:
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
-  /// Function giving info that u_Essential is a non-constant function.
+  /// Function reporting the type of the essential boundary condition.
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   ExactSolutionScalar* exact_solution;
