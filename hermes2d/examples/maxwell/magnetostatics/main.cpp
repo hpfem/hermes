@@ -50,7 +50,6 @@ int main(int argc, char* argv[])
                                     1.4,      1.6,      1.7,      1.8,      1.9,      3.0,      5.0,     10.0);
   Hermes::vector<double> mu_inv_val(1/1500.0, 1/1480.0, 1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0,  
                                     1/750.0,  1/250.0,  1/180.0,  1/175.0,  1/150.0,  1/20.0,   1/10.0,  1/5.0);
-
   /* This is for debugging (iron is assumed linear with mu_r = 300.0
   Hermes::vector<double> mu_inv_pts(0.0,      10.0);
   Hermes::vector<double> mu_inv_val(1/300.0,   1/300.0);

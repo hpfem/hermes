@@ -125,8 +125,10 @@ namespace WeakFormsH1 {
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar planar_part = int_grad_u_grad_v<double, scalar>(n, wt, u, v);
         scalar axisym_part = 0;
-        if (gt == HERMES_AXISYM_X) axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u, v, e);
-        else if (gt == HERMES_AXISYM_Y) axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u, v, e);
+        if (gt == HERMES_AXISYM_X)
+          axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u, v, e);
+        else if (gt == HERMES_AXISYM_Y)
+          axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u, v, e);
 
         return coeff * (planar_part + axisym_part);
       }
@@ -183,7 +185,7 @@ namespace WeakFormsH1 {
             else if (gt == HERMES_AXISYM_Y) {
               axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->x[i]
                                    * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-	                           * (u_ext[0]->val[i] * v->dy[i]);
+	                           * (u_ext[0]->val[i] * v->dx[i]);
 	    }
 	  }
           planar_part += wt[i] * spline_coeff->get_value(B_i) 
@@ -419,8 +421,8 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         if (gt == HERMES_PLANAR) return coeff * int_v<double>(n, wt, v);
         else {
-          if (gt == HERMES_AXISYM_X) return coeff * int_y_v<double>(n, wt, v, e);
-          else return coeff * int_x_v<double>(n, wt, v, e);
+          if (gt == HERMES_AXISYM_X) return coeff * int_v<double>(n, wt, v);
+          else return coeff * int_v<double>(n, wt, v);
         }
       }
 
@@ -428,8 +430,8 @@ namespace WeakFormsH1 {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         if (gt == HERMES_PLANAR) return int_v<Ord>(n, wt, v);
         else {
-          if (gt == HERMES_AXISYM_X) return int_y_v<Ord>(n, wt, v, e);
-          else return int_x_v<Ord>(n, wt, v, e);
+          if (gt == HERMES_AXISYM_X) return int_v<Ord>(n, wt, v);
+          else return int_v<Ord>(n, wt, v);
         }
       }
 
@@ -536,8 +538,10 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar planar_part = int_grad_u_grad_v<double, scalar>(n, wt, u_ext[0], v);
         scalar axisym_part = 0;
-        if (gt == HERMES_AXISYM_X) axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u_ext[0], v, e);
-        else if (gt == HERMES_AXISYM_Y) axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u_ext[0], v, e);
+        if (gt == HERMES_AXISYM_X)
+          axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u_ext[0], v, e);
+        else if (gt == HERMES_AXISYM_Y)
+          axisym_part = int_u_dvdx_over_x<double, scalar>(n, wt, u_ext[0], v, e);
 
         return coeff * (planar_part + axisym_part);
       }
