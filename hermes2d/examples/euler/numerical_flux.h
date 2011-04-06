@@ -51,6 +51,68 @@ public:
           double nx, double ny);
 };
 
+class StegerWarmingNumericalFlux : public NumericalFlux
+{
+public:
+  StegerWarmingNumericalFlux(double kappa);
+
+  virtual void numerical_flux(double result[4], double w_L[4], double w_R[4],
+          double nx, double ny);
+  
+  virtual double numerical_flux_i(int component, double w_L[4], double w_R[4],
+          double nx, double ny);
+
+  void P_plus(double result[4], double w[4], double param[4],
+          double nx, double ny);
+
+  void P_minus(double result[4], double w[4], double param[4],
+          double nx, double ny);
+
+  // Also calculates the speed of sound.
+  void Lambda_plus(double result[4], double nx, double ny);
+
+  // Also calculates the speed of sound.
+  void Lambda_minus(double result[4], double nx, double ny);
+
+  void T_1(double result[4][4], double nx, double ny);
+  void T_2(double result[4][4], double nx, double ny);
+  void T_3(double result[4][4], double nx, double ny);
+  void T_4(double result[4][4], double nx, double ny);
+
+  void T_inv_1(double result[4][4], double nx, double ny);
+  void T_inv_2(double result[4][4], double nx, double ny);
+  void T_inv_3(double result[4][4], double nx, double ny);
+  void T_inv_4(double result[4][4], double nx, double ny);
+
+  virtual void numerical_flux_solid_wall(double result[4], double w_L[4], double nx, double ny) {};
+  
+  virtual double numerical_flux_solid_wall_i(int component, double w_L[4], double nx, double ny) {return 0.0;};
+
+  virtual void numerical_flux_inlet(double result[4], double w_L[4], double w_B[4],
+          double nx, double ny) {};
+  
+  virtual double numerical_flux_inlet_i(int component, double w_L[4], double w_B[4],
+          double nx, double ny) {return 0.0;};
+
+  virtual void numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny) {};
+  
+  virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny) {return 0.0;};
+
+protected:
+  // Poisson adiabatic ant = c_p/c_v = 1 + R/c_v.
+  double kappa;
+  
+  // States.
+  double q[4];
+  double q_L[4];
+  double q_R[4];
+
+  // Speed of sound.
+  double a;
+  // x-velocity, y-velocity, magnitude.
+  double u, v, V;
+};
+
 class OsherSolomonNumericalFlux : public NumericalFlux
 {
 public:

@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     basemesh.refine_all_elements(0, true);
   basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY, true, false, true);
   mesh.copy(&basemesh);
-  
+
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
   L2Space space_rho_v_x(&mesh, P_INIT);
@@ -213,6 +213,7 @@ int main(int argc, char* argv[])
 
       solver.set_init_sln(coeff_vec);
       scalar* solution_vector;
+
       if (solver.solve()) {
         solution_vector = solver.get_solution();
         Solution::vector_to_solutions(solution_vector, *ref_spaces, 

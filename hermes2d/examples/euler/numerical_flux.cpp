@@ -41,6 +41,217 @@ double VijayasundaramNumericalFlux::numerical_flux_i(int component, double w_L[4
   return 0.0;
 }
 
+StegerWarmingNumericalFlux::StegerWarmingNumericalFlux(double kappa) : kappa(kappa) {};
+
+
+void StegerWarmingNumericalFlux::numerical_flux(double result[4], double w_L[4], double w_R[4],
+        double nx, double ny)
+{
+  double result_temp[4];
+  P_plus(result_temp, w_L, w_L, nx, ny);
+  P_minus(result, w_R, w_R, nx, ny);
+  for(unsigned int i = 0; i < 4; i++)
+    result[i] += result_temp[i];
+}
+  
+double StegerWarmingNumericalFlux::numerical_flux_i(int component, double w_L[4], double w_R[4],
+          double nx, double ny)
+{
+  double result[4];
+  numerical_flux(result, w_L, w_R, nx, ny);
+  return result[component];
+}
+
+void StegerWarmingNumericalFlux::P_plus(double result[4], double w[4], double param[4],
+          double nx, double ny)
+{
+  Q(q, w, nx, ny);
+
+  // Initialize the matrices.
+  double T[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      T[i][j] = 0.0;
+
+  double T_inv[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      T_inv[i][j] = 0.0;
+
+  // Calculate A_plus.
+  Lambda_plus(result, nx, ny);
+
+  // Calculate the necessary rows / columns of T(T_inv).
+  if(result[0] > 0) {
+    T_1(T, nx, ny);
+    T_inv_1(T_inv, nx, ny);
+  }
+  if(result[1] > 0) {
+    T_2(T, nx, ny);
+    T_inv_2(T_inv, nx, ny);
+  }
+  if(result[2] > 0) {
+    T_3(T, nx, ny);
+    T_inv_3(T_inv, nx, ny);
+  }
+  if(result[3] > 0) {
+    T_4(T, nx, ny);
+    T_inv_4(T_inv, nx, ny);
+  }
+
+  // The matrix T * Lambda * T^{-1}
+  double middle_matrix[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++) {
+      middle_matrix[i][j] = 0;
+      for(unsigned int k = 0; k < 4; k++)
+        middle_matrix[i][j] += T[i][k] * result[k] * T_inv[k][j];
+    }
+
+  // Finale.
+  Q(param, param, nx, ny);
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      result[i] = middle_matrix[i][j] * param[j];
+  Q_inv(result, result, nx, ny);
+}
+
+void StegerWarmingNumericalFlux::P_minus(double result[4], double w[4], double param[4],
+          double nx, double ny)
+{
+  Q(q, w, nx, ny);
+
+  // Initialize the matrices.
+  double T[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      T[i][j] = 0.0;
+
+  double T_inv[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      T_inv[i][j] = 0.0;
+
+  // Calculate A_plus.
+  Lambda_minus(result, nx, ny);
+
+  // Calculate the necessary rows / columns of T(T_inv).
+  if(result[0] < 0) {
+    T_1(T, nx, ny);
+    T_inv_1(T_inv, nx, ny);
+  }
+  if(result[1] < 0) {
+    T_2(T, nx, ny);
+    T_inv_2(T_inv, nx, ny);
+  }
+  if(result[2] < 0) {
+    T_3(T, nx, ny);
+    T_inv_3(T_inv, nx, ny);
+  }
+  if(result[3] < 0) {
+    T_4(T, nx, ny);
+    T_inv_4(T_inv, nx, ny);
+  }
+
+  // The matrix T * Lambda * T^{-1}
+  double middle_matrix[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++) {
+      middle_matrix[i][j] = 0;
+      for(unsigned int k = 0; k < 4; k++)
+        middle_matrix[i][j] += T[i][k] * result[k] * T_inv[k][j];
+    }
+
+  // Finale.
+  Q(param, param, nx, ny);
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      result[i] = middle_matrix[i][j] * param[j];
+  Q_inv(result, result, nx, ny);
+}
+
+void StegerWarmingNumericalFlux::Lambda_plus(double result[4], double nx, double ny)
+{
+  a = QuantityCalculator::calc_sound_speed(q[0], q[1], q[2], q[3], kappa);
+  u = q[1] / q[0];
+  v = q[2] / q[0];
+  V = u*u + v*v;
+  result[0] = u - a < 0 ? u - a : 0;
+  result[1] = u < 0 ? u : 0;
+  result[2] = u < 0 ? u : 0;
+  result[3] = u + a < 0 ? u + a : 0;
+}
+
+void StegerWarmingNumericalFlux::Lambda_minus(double result[4], double nx, double ny)
+{
+  a = QuantityCalculator::calc_sound_speed(q[0], q[1], q[2], q[3], kappa);
+  u = q[1] / q[0];
+  v = q[2] / q[0];
+  V = u*u + v*v;
+  result[0] = u - a > 0 ? u - a : 0;
+  result[1] = u > 0 ? u : 0;
+  result[2] = u > 0 ? u : 0;
+  result[3] = u + a > 0 ? u + a : 0;
+}
+
+void StegerWarmingNumericalFlux::T_1(double result[4][4], double nx, double ny)
+{
+  result[0][0] = 1;
+  result[1][0] = u - a;
+  result[2][0] = v;
+  result[3][0] = (V / 2) + (a*a / (kappa - 1)) - (u * a);
+}
+void StegerWarmingNumericalFlux::T_2(double result[4][4], double nx, double ny)
+{
+  result[0][1] = 1;
+  result[1][1] = u;
+  result[2][1] = v;
+  result[3][1] = V / 2;
+}
+void StegerWarmingNumericalFlux::T_3(double result[4][4], double nx, double ny)
+{
+  result[0][2] = 1;
+  result[1][2] = u;
+  result[2][2] = v - a;
+  result[3][2] = (V / 2)  - v * a;
+}
+void StegerWarmingNumericalFlux::T_4(double result[4][4], double nx, double ny)
+{
+  result[0][3] = 1;
+  result[1][3] = u + a;
+  result[2][3] = v;
+  result[3][3] = (V / 2) + (a * a / (kappa - 1)) + (u * a);
+}
+
+void StegerWarmingNumericalFlux::T_inv_1(double result[4][4], double nx, double ny)
+{
+  result[0][0] = (1 / (a * a)) * (0.5 * (((kappa - 1) * V / 2) + u * a));
+  result[0][1] = (1 / (a * a)) * (- (a + u * (kappa - 1)) / 2);
+  result[0][2] = (1 / (a * a)) * (- (v * (kappa - 1)) / 2);
+  result[0][3] = (1 / (a * a)) * (kappa - 1) / 2;
+}
+void StegerWarmingNumericalFlux::T_inv_2(double result[4][4], double nx, double ny)
+{
+  result[1][0] = (1 / (a * a)) * (a * a - v * a - (kappa - 1) * V);
+  result[1][1] = (1 / (a * a)) * u * (kappa - 1);
+  result[1][2] = (1 / (a * a)) * (a + v * (kappa - 1));
+  result[1][3] = (1 / (a * a)) * (1 - kappa);
+}
+void StegerWarmingNumericalFlux::T_inv_3(double result[4][4], double nx, double ny)
+{
+  result[2][0] = (1 / (a * a)) * v * a;
+  result[2][1] = (1 / (a * a)) * 0;
+  result[2][2] = (1 / (a * a)) * (-a);
+  result[2][3] = (1 / (a * a)) * 0;
+}
+void StegerWarmingNumericalFlux::T_inv_4(double result[4][4], double nx, double ny)
+{
+  result[3][0] = (1 / (a * a)) * (0.5 * (((kappa - 1) * V / 2) - u * a));
+  result[3][1] = (1 / (a * a)) * (a - u * (kappa - 1)) / 2;
+  result[3][2] = (1 / (a * a)) * (- (v * (kappa - 1)) / 2);
+  result[3][3] = (1 / (a * a)) * (kappa - 1) / 2;
+}
+
 OsherSolomonNumericalFlux::OsherSolomonNumericalFlux(double kappa) : kappa(kappa)
 {
 }
