@@ -10,7 +10,7 @@ const int INIT_REF_NUM = 2;                       // Number of initial uniform m
 const int INIT_BDY_REF_NUM_INNER = 2;             // Number of initial mesh refinements towards boundary. 
 const int INIT_BDY_REF_NUM_OUTER = 2;             // Number of initial mesh refinements towards boundary. 
 
-//#define STOKES                                  // If this is defined, Stokes problem is solved, otherwise N-S.
+const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
                                                   // divergence-free, more accurate than using a continuous
@@ -30,41 +30,17 @@ const double STARTUP_TIME = 1.0;                  // During this time, surface v
                                                   // gradually from 0 to VEL, then it stays constant.
 const double TAU = 10.0;                          // Time step.
 const double T_FINAL = 2*TAU + 1e-4;              // Time interval length.
-const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-1;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const int BDY_INNER = 1;
-const int BDY_OUTER = 2;
+const std::string BDY_INNER = "Inner";
+const std::string BDY_OUTER = "Outer";
 
 // Current time (used in weak forms).
-double TIME = 0;
-
-// Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(double x, double y, double time) {
-    // Time-dependent surface velocity of inner circle.
-    double velocity;
-  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
-    else velocity = VEL;
-    double alpha = atan2(x, y);
-    double xvel = velocity*cos(alpha);
-    //printf("%g %g xvel = %g\n", x, y, xvel);
-    return xvel; 
-  }
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(double x, double y, double time) {
-    // Time-dependent surface velocity of inner circle.
-    double velocity;
-  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
-    else velocity = VEL;
-    double alpha = atan2(x, y);
-    double yvel = -velocity*sin(alpha);
-    //printf("%g %g yvel = %g\n", x, y, yvel);
-    return yvel; 
-  }
+double current_time = 0;
 
 // Weak forms.
 #include "../definitions.cpp"
@@ -104,6 +80,8 @@ double integrate_over_wall(MeshFunction* meshfn, int marker)
 
 int main(int argc, char* argv[])
 {
+  Hermes2D hermes_2D;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -115,34 +93,25 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_INNER, INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
   mesh.refine_towards_boundary(BDY_OUTER, INIT_BDY_REF_NUM_OUTER, false);  // false for isotropic refinements
 
-  // Enter boundary markers for x-velocity and y-velocity.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_INNER, BDY_OUTER));
+  // Initialize boundary conditions.
+  EssentialBCNonConstX bc_inner_vel_x(BDY_INNER, VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_inner_vel_y(BDY_INNER, VEL, STARTUP_TIME);
+  DefaultEssentialBCConst bc_outer_vel(BDY_OUTER, 0.0);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_outer_vel));
+  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_y, &bc_outer_vel));
+  EssentialBCs bcs_pressure;
 
-  BCTypes bc_types_p;
-  bc_types_p.add_bc_none(Hermes::vector<int>(BDY_INNER, BDY_OUTER));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values_xvel(&TIME);
-  bc_values_xvel.add_timedep_function(BDY_INNER, essential_bc_values_xvel);
-  bc_values_xvel.add_zero(BDY_OUTER);
-
-  BCValues bc_values_yvel(&TIME);
-  bc_values_yvel.add_timedep_function(BDY_INNER, essential_bc_values_yvel);
-  bc_values_yvel.add_zero(BDY_OUTER);
-
-  // Create spaces with default shapesets. 
-  H1Space xvel_space(&mesh, &bc_types, &bc_values_xvel, P_INIT_VEL);
-  H1Space yvel_space(&mesh, &bc_types, &bc_values_yvel, P_INIT_VEL);
+  // Spaces for velocity components and pressure.
+  H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
+  H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space p_space(&mesh, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, &bc_types_p, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
-  info("ndof = %d.", ndof);
 
   // Define projection norms.
   ProjNormType vel_proj_norm = HERMES_H1_NORM;
@@ -153,50 +122,37 @@ int main(int argc, char* argv[])
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
-  info("Setting initial conditions.");
   Solution xvel_prev_time, yvel_prev_time, p_prev_time;
   xvel_prev_time.set_zero(&mesh);
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
 
   // Initialize weak formulation.
-  WeakForm wf(3);
-  if (NEWTON) {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
-  }
-  else {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
-    wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
-  }
+  WeakForm* wf;
+  if (NEWTON)
+    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  else
+    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
-  // Project initial conditions on FE spaces to obtain initial coefficient 
-  // vector for the Newton's method.
+  // Initialize the FE problem.
+  bool is_linear;
+  if (NEWTON) is_linear = false;
+  else is_linear = true;
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
   scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
-    info("Projecting initial conditions to obtain initial vector for the Newton's method.");
     OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space),
                    Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   coeff_vec, matrix_solver, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+                   coeff_vec, matrix_solver, 
+                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -204,120 +160,93 @@ int main(int argc, char* argv[])
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    TIME += TAU;
-    info("---- Time step %d, time = %g:", ts, TIME);
-
-    // Update time-dependent essential BC are used.
-    if (TIME <= STARTUP_TIME) {
-      info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
-    }
+    current_time += TAU;
+    
+    // Update time-dependent essential BCs.
+    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
 
     if (NEWTON) 
     {
-      info("Performing Newton's method.");
-      // Initialize the FE problem.
-      bool is_linear = false;
-      DiscreteProblem dp(&wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
       // Perform Newton's iteration.
-      info("Solving nonlinear problem:");
-      bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      bool verbose = false;
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
       
-      // Translate the resulting coefficient vector into the actual solutions. 
+      // Update previous time level solutions.
       Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
                                     Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-
-      // Cleanup.
-      delete matrix;
-      delete rhs;
-      delete solver;
     }
     else {
       // Linear solve.  
-      info("Assembling and solving linear problem.");
-      bool is_linear = true;
-      DiscreteProblem dp(&wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-      dp.assemble(matrix, rhs);
-
-      // Solve the linear system and if successful, obtain the solution.
-      info("Solving the matrix problem.");
+      dp.assemble(matrix, rhs, false);
       if(solver->solve())
-        Solution::vector_to_solutions(solver->get_solution(),  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+        Solution::vector_to_solutions(solver->get_solution(), 
+                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
                                       Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else
         error ("Matrix solver failed.\n");
     }
   }
+
   // Clean up.
   delete [] coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
   
-  info("Coordinate ( 0.1, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.1, 0.0));
-  info("Coordinate ( 0.5, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.5, 0.0));
+  info("Coordinate ( -0.7, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(-0.7, 0.1));
+  info("Coordinate ( 0.65, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.65, 0.0));
+  info("Coordinate ( 0.7, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.7, 0.0));
   info("Coordinate ( 0.9, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(0.9, 0.0));
-  info("Coordinate ( 1.3, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(1.3, 0.0));
-  info("Coordinate ( 1.7, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(1.7, 0.0));
+  info("Coordinate ( 1.1, 0.0) xvel value = %lf", xvel_prev_time.get_pt_value(1.1, 0.0));
 
-  info("Coordinate ( 0.1, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(0.1, 0.0));
-  info("Coordinate ( 0.5, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(0.5, 0.0));
+  info("Coordinate ( -0.7, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(-0.7, 0.1));
+  info("Coordinate ( 0.65, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(0.65, 0.0));
+  info("Coordinate ( 0.7, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(0.7, 0.0));
   info("Coordinate ( 0.9, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(0.9, 0.0));
-  info("Coordinate ( 1.3, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(1.3, 0.0));
-  info("Coordinate ( 1.7, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(1.7, 0.0));
+  info("Coordinate ( 1.1, 0.0) yvel value = %lf", yvel_prev_time.get_pt_value(1.1, 0.0));
 
   int success = 1;
   double eps = 1e-5;
-  if (fabs(xvel_prev_time.get_pt_value(0.1, 0.0) - (0.000000)) > eps) {
-    printf("Coordinate ( 0.1, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.1, 0.0));
+  if (fabs(xvel_prev_time.get_pt_value(-0.7, 0.1) - (0.003199)) > eps) {
+    printf("Coordinate ( -0.7, 0.1) xvel value = %lf\n", xvel_prev_time.get_pt_value(-0.7, 0.1));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.5, 0.0) - (-0.000403)) > eps) {
-    printf("Coordinate ( 0.5, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.5, 0.0));
+  if (fabs(xvel_prev_time.get_pt_value(0.65, 0.0) - (-0.001314)) > eps) {
+    printf("Coordinate ( 0.65, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.65, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000057)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.7, 0.0) - (-0.001888)) > eps) {
+    printf("Coordinate ( 0.7, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.7, 0.0));
+    success = 0;
+  }
+  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.001262)) > eps) {
     printf("Coordinate ( 0.9, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(1.3, 0.0) - (-0.000004)) > eps) {
-    printf("Coordinate ( 1.3, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(1.3, 0.0));
-    success = 0;
-  }
-  if (fabs(xvel_prev_time.get_pt_value(1.7, 0.0) - (-0.000001)) > eps) {
-    printf("Coordinate ( 1.7, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(1.7, 0.0));
+  if (fabs(xvel_prev_time.get_pt_value(1.1, 0.0) - (-0.000218)) > eps) {
+    printf("Coordinate ( 1.1, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(1.1, 0.0));
     success = 0;
   }
 
-  if (fabs(yvel_prev_time.get_pt_value(0.1, 0.0) - (-0.100000)) > eps) {
-    printf("Coordinate ( 0.1, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.1, 0.0));
+  if (fabs(yvel_prev_time.get_pt_value(-0.7, 0.1) - (0.014744)) > eps) {
+    printf("Coordinate ( -0.7, 0.1) yvel value = %lf\n", yvel_prev_time.get_pt_value(-0.7, 0.1));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.5, 0.0) - (0.001477)) > eps) {
-    printf("Coordinate ( 0.5, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.5, 0.0));
+  if (fabs(yvel_prev_time.get_pt_value(0.65, 0.0) - (-0.033332)) > eps) {
+    printf("Coordinate ( 0.65, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.65, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (0.000572)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.7, 0.0) - (-0.012353)) > eps) {
+    printf("Coordinate ( 0.7, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.7, 0.0));
+    success = 0;
+  }
+  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (-0.001691)) > eps) {
     printf("Coordinate ( 0.9, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(1.3, 0.0) - (0.000296)) > eps) {
-    printf("Coordinate ( 1.3, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.3, 0.0));
-    success = 0;
-  }
-  if (fabs(yvel_prev_time.get_pt_value(1.7, 0.0) - (0.000169)) > eps) {
-    printf("Coordinate ( 1.7, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.7, 0.0));
+  if (fabs(yvel_prev_time.get_pt_value(1.1, 0.0) - (-0.000986)) > eps) {
+    printf("Coordinate ( 1.1, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.1, 0.0));
     success = 0;
   }
 
