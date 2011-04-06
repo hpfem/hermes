@@ -580,7 +580,13 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   if (mat != NULL) mat->finish();
   if (rhs != NULL) rhs->finish();
   trav.finish();
-  
+
+  if(DG_matrix_forms_present || DG_vector_forms_present) {
+    Element* element_to_set_nonvisited;
+    for(unsigned int mesh_i = 0; mesh_i < stage.meshes.size(); mesh_i++)
+      for_all_elements(element_to_set_nonvisited, stage.meshes[mesh_i])
+        element_to_set_nonvisited->visited = false;
+  }
 }
 
 Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<PrecalcShapeset *>& spss, 
@@ -621,7 +627,8 @@ Element* DiscreteProblem::init_state(WeakForm::Stage& stage, Hermes::vector<Prec
     refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
 
     // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
-    e[i]->visited = true;
+    if(DG_matrix_forms_present || DG_vector_forms_present)
+      e[i]->visited = true;
   }
   return e0;
 }
@@ -864,10 +871,10 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
       unsigned int m = mfv->coordinates[0].first;
       unsigned int n = mfv->coordinates[0].second;
 
-      bool sym = mfv->sym;
-      for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-        if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
-          error("Symmetrical multicomponent forms need to take both basis function from one space.");
+      if(mfv->sym)
+        for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
+          if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
+            error("Symmetrical multicomponent forms need to take both basis function from one space.");
 
       for (unsigned int i = 0; i < al[m]->cnt; i++) {
         spss[m]->set_active_shape(al[m]->idx[i]);
@@ -1903,9 +1910,27 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
             
     // Create the extended shapeset on the union of the central element and its current neighbor.
     Hermes::vector<NeighborSearch::ExtendedShapeset*> ext_asmlists;
-    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-      ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
+    Hermes::vector<unsigned int> coordinates_processed;
+    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++) {
+      bool new_coordinate = true;
+      for(unsigned int i = 0; i < coordinates_processed.size(); i++)
+        if(coordinates_processed[i] == mfs->coordinates[coordinate_i].first)
+          new_coordinate = false;
+      if(new_coordinate) {
+        coordinates_processed.push_back(mfs->coordinates[coordinate_i].first);
+        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
+      }
 
+      new_coordinate = true;
+      for(unsigned int i = 0; i < coordinates_processed.size(); i++)
+        if(coordinates_processed[i] == mfs->coordinates[coordinate_i].second)
+          new_coordinate = false;
+      if(new_coordinate) {
+        coordinates_processed.push_back(mfs->coordinates[coordinate_i].second);
+        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].second]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].second], al[mfs->coordinates[coordinate_i].second]));
+      }
+    }
+      
     NeighborSearch::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
     NeighborSearch::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
@@ -1970,7 +1995,8 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
                 * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
             }
           }
-
+        }
+        else if (rhsonly == false) {
           if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
               Hermes::vector<scalar> result;
               eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
