@@ -5,19 +5,25 @@
 
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1::SurfaceVectorForms;
 
 /* Weak forms */
 
-class CustomWeakFormPoisson : public WeakForm
+class CustomWeakFormPoissonNeumann : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(std::string mat_al, double lambda_al, 
+  CustomWeakFormPoissonNeumann(std::string mat_al, double lambda_al, 
                         std::string mat_cu, double lambda_cu, 
-                        double vol_heat_src) : WeakForm(1)
+                        double vol_heat_src, std::string bdy_heat_flux, 
+                        double heat_flux) : WeakForm(1)
   {
+    // Volumetric integrals.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
     add_vector_form(new DefaultVectorFormConst(0, vol_heat_src));
+    
+    // Surface integral due to the Neumann condition.
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, heat_flux));
   };
 };
 
@@ -25,8 +31,8 @@ public:
 
 class CustomDirichletCondition : public EssentialBoundaryCondition {
 public:
-  CustomDirichletCondition(std::string marker, double A, double B, double C) 
-    : EssentialBoundaryCondition(marker), A(A), B(B), C(C) { }
+  CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C) 
+    : EssentialBoundaryCondition(markers), A(A), B(B), C(C) { }
 
   ~CustomDirichletCondition() {};
 
