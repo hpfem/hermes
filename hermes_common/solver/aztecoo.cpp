@@ -158,7 +158,7 @@ bool AztecOOSolver<Scalar>::solve()
   aztec.SetProblem(*lp);
 
   // solve it
-  aztec.Iterate(max_iters, tolerance);
+  aztec.Iterate(this->max_iters, this->tolerance);
 
   kp.ExtractSolution(xr, xi);
 
