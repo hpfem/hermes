@@ -70,7 +70,7 @@ const std::string OUTER_BDY = "1", STATOR_BDY = "2";
 const double VOLTAGE = 50.0;
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
