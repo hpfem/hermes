@@ -33,15 +33,15 @@ public:
 
   ~CustomDirichletCondition() {};
 
-  inline EssentialBCValueType get_value_type() const
+  virtual EssentialBCValueType get_value_type() const
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
     return x*x + y*y;
   }
 
-  virtual Ord ord(Ord x, Ord y) const {
-    return Ord(10);
-  }
+  //virtual Ord ord(Ord x, Ord y) const {
+  //  return Ord(10);
+  //}
 };
 
