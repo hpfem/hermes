@@ -113,13 +113,13 @@ bool read_matrix_and_rhs(char *file_name, int &n, int &nnz,
         if (cplx_2_real){
           if (read_n_numbers(row, 4, buffer)) { 
 
-            mat.insert(pair<unsigned int, MatrixEntry>(k,   MatrixEntry((int) buffer[0],     (int) buffer[1],     buffer[2])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k,   MatrixEntry((int) buffer[0],     (int) buffer[1],     buffer[2])));
 
-            mat.insert(pair<unsigned int, MatrixEntry>(k+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1],     buffer[3])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1],     buffer[3])));
 
-            mat.insert(pair<unsigned int, MatrixEntry>(k+2*nnz, MatrixEntry((int) buffer[0],     (int) buffer[1] + n/2, (-1)*buffer[3])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz, MatrixEntry((int) buffer[0],     (int) buffer[1] + n/2, (-1)*buffer[3])));
 
-            mat.insert(pair<unsigned int, MatrixEntry>(k+2*nnz+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1] + n/2, buffer[2])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1] + n/2, buffer[2])));
 
             k=k+2;
           }
