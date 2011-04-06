@@ -25,11 +25,8 @@ public:
 
 class CustomDirichletCondition : public EssentialBoundaryCondition {
 public:
-  CustomDirichletCondition(std::string marker) 
-           : EssentialBoundaryCondition(Hermes::vector<std::string>())
-  {
-    markers.push_back(marker);
-  }
+  CustomDirichletCondition(std::string marker, double A, double B, double C) 
+    : EssentialBoundaryCondition(marker), A(A), B(B), C(C) { }
 
   ~CustomDirichletCondition() {};
 
@@ -37,7 +34,10 @@ public:
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
-    return x + y;
+    return A*x + B*y + C;
   }
+
+  protected:
+    double A, B, C;
 };
 
