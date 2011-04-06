@@ -14,18 +14,18 @@ public:
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_1);
 
-    BilinearFormUnSymVel* unsym_vel_form_0 = new BilinearFormUnSymVel(0, 0, Stokes);
-    unsym_vel_form_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
-    add_matrix_form(unsym_vel_form_0);
-    BilinearFormUnSymVel* unsym_vel_form_1 = new BilinearFormUnSymVel(1, 1, Stokes);
-    unsym_vel_form_1->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
-    add_matrix_form(unsym_vel_form_1);
+    BilinearFormNonsymVel* nonsym_vel_form_0 = new BilinearFormNonsymVel(0, 0, Stokes);
+    nonsym_vel_form_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    add_matrix_form(nonsym_vel_form_0);
+    BilinearFormNonsymVel* nonsym_vel_form_1 = new BilinearFormNonsymVel(1, 1, Stokes);
+    nonsym_vel_form_1->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    add_matrix_form(nonsym_vel_form_1);
 
-    BilinearFormUnSymXVelPressure* unsym_velx_pressure_form = new BilinearFormUnSymXVelPressure(0, 2);
-    add_matrix_form(unsym_velx_pressure_form);
+    BilinearFormNonsymXVelPressure* nonsym_velx_pressure_form = new BilinearFormNonsymXVelPressure(0, 2);
+    add_matrix_form(nonsym_velx_pressure_form);
 
-    BilinearFormUnSymYVelPressure* unsym_vely_pressure_form = new BilinearFormUnSymYVelPressure(1, 2);
-    add_matrix_form(unsym_vely_pressure_form);
+    BilinearFormNonsymYVelPressure* nonsym_vely_pressure_form = new BilinearFormNonsymYVelPressure(1, 2);
+    add_matrix_form(nonsym_vely_pressure_form);
     
     VectorFormVolVel* vector_vel_form_x = new VectorFormVolVel(0, Stokes, time_step);
     
@@ -46,8 +46,7 @@ public:
   {
   public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
-            : WeakForm::MatrixFormVol(i, j), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
-      sym = HERMES_SYM;
+            : WeakForm::MatrixFormVol(i, j, HERMES_SYM), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
@@ -74,10 +73,10 @@ public:
   };
 
 
-  class BilinearFormUnSymVel : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymVel : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel(int i, int j, bool Stokes) 
+    BilinearFormNonsymVel(int i, int j, bool Stokes) 
       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
         adapt_eval = false;
     }
@@ -108,11 +107,10 @@ public:
   };
 
 
-  class BilinearFormUnSymXVelPressure : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymXVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_ANTISYM;
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -128,11 +126,10 @@ public:
   };
 
 
-  class BilinearFormUnSymYVelPressure : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymYVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_ANTISYM;
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -199,20 +196,20 @@ public:
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_1);
 
-    BilinearFormUnSymVel_0_0* unsym_vel_form_0_0 = new BilinearFormUnSymVel_0_0(0, 0, Stokes);
-    add_matrix_form(unsym_vel_form_0_0);
-    BilinearFormUnSymVel_0_1* unsym_vel_form_0_1 = new BilinearFormUnSymVel_0_1(0, 1, Stokes);
-    add_matrix_form(unsym_vel_form_0_1);
-    BilinearFormUnSymVel_1_0* unsym_vel_form_1_0 = new BilinearFormUnSymVel_1_0(1, 0, Stokes);
-    add_matrix_form(unsym_vel_form_1_0);
-    BilinearFormUnSymVel_1_1* unsym_vel_form_1_1 = new BilinearFormUnSymVel_1_1(1, 1, Stokes);
-    add_matrix_form(unsym_vel_form_1_1);
+    BilinearFormNonsymVel_0_0* nonsym_vel_form_0_0 = new BilinearFormNonsymVel_0_0(0, 0, Stokes);
+    add_matrix_form(nonsym_vel_form_0_0);
+    BilinearFormNonsymVel_0_1* nonsym_vel_form_0_1 = new BilinearFormNonsymVel_0_1(0, 1, Stokes);
+    add_matrix_form(nonsym_vel_form_0_1);
+    BilinearFormNonsymVel_1_0* nonsym_vel_form_1_0 = new BilinearFormNonsymVel_1_0(1, 0, Stokes);
+    add_matrix_form(nonsym_vel_form_1_0);
+    BilinearFormNonsymVel_1_1* nonsym_vel_form_1_1 = new BilinearFormNonsymVel_1_1(1, 1, Stokes);
+    add_matrix_form(nonsym_vel_form_1_1);
 
-    BilinearFormUnSymXVelPressure* unsym_velx_pressure_form = new BilinearFormUnSymXVelPressure(0, 2);
-    add_matrix_form(unsym_velx_pressure_form);
+    BilinearFormNonsymXVelPressure* nonsym_velx_pressure_form = new BilinearFormNonsymXVelPressure(0, 2);
+    add_matrix_form(nonsym_velx_pressure_form);
 
-    BilinearFormUnSymYVelPressure* unsym_vely_pressure_form = new BilinearFormUnSymYVelPressure(1, 2);
-    add_matrix_form(unsym_vely_pressure_form);
+    BilinearFormNonsymYVelPressure* nonsym_vely_pressure_form = new BilinearFormNonsymYVelPressure(1, 2);
+    add_matrix_form(nonsym_vely_pressure_form);
     
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
     F_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
@@ -229,7 +226,7 @@ public:
   public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
             : WeakForm::MatrixFormVol(i, j, HERMES_SYM), Stokes(Stokes), 
-                       Reynolds(Reynolds), time_step(time_step) {
+                        Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
@@ -255,12 +252,11 @@ public:
   };
 
 
-  class BilinearFormUnSymVel_0_0 : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymVel_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel_0_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes) {
+    BilinearFormNonsymVel_0_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
-      sym = HERMES_NONSYM;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
@@ -293,12 +289,11 @@ public:
   };
 
 
-  class BilinearFormUnSymVel_0_1 : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymVel_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel_0_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes) {
+    BilinearFormNonsymVel_0_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
-      sym = HERMES_NONSYM;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
@@ -327,12 +322,11 @@ public:
   };
 
 
-  class BilinearFormUnSymVel_1_0 : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymVel_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel_1_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes) {
+    BilinearFormNonsymVel_1_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
-      sym = HERMES_NONSYM;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
@@ -361,12 +355,11 @@ public:
   };
 
 
-  class BilinearFormUnSymVel_1_1 : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymVel_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel_1_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes) {
+    BilinearFormNonsymVel_1_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
-      sym = HERMES_NONSYM;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
@@ -399,11 +392,10 @@ public:
   };
 
 
-  class BilinearFormUnSymXVelPressure : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymXVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_ANTISYM;
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -419,11 +411,10 @@ public:
   };
 
 
-  class BilinearFormUnSymYVelPressure : public WeakForm::MatrixFormVol
+  class BilinearFormNonsymYVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j) {
-      sym = HERMES_ANTISYM;
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
