@@ -421,8 +421,8 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         if (gt == HERMES_PLANAR) return coeff * int_v<double>(n, wt, v);
         else {
-          if (gt == HERMES_AXISYM_X) return coeff * int_v<double>(n, wt, v);
-          else return coeff * int_v<double>(n, wt, v);
+          if (gt == HERMES_AXISYM_X) return coeff * int_y_v<double>(n, wt, v, e);
+          else return coeff * int_x_v<double>(n, wt, v, e);
         }
       }
 
@@ -430,8 +430,8 @@ namespace WeakFormsH1 {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         if (gt == HERMES_PLANAR) return int_v<Ord>(n, wt, v);
         else {
-          if (gt == HERMES_AXISYM_X) return int_v<Ord>(n, wt, v);
-          else return int_v<Ord>(n, wt, v);
+          if (gt == HERMES_AXISYM_X) return int_y_v<Ord>(n, wt, v, e);
+          else return int_x_v<Ord>(n, wt, v, e);
         }
       }
 
