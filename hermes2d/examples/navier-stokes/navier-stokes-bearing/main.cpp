@@ -199,10 +199,8 @@ int main(int argc, char* argv[])
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME) {
-      info("Updating time-dependent essential BC.");
-      Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
-    }
+    info("Updating time-dependent essential BC.");
+    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
 
     if (NEWTON) 
     {
