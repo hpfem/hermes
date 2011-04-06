@@ -11,7 +11,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
+const std::string BDY_BOTTOM = "Bottom", BDY_OUTER = "Outer", BDY_LEFT = "Left", BDY_INNER = "Inner";
 
 // Problem parameters.
 const double T1 = 30.0;       // Prescribed temperature on Gamma_left.
