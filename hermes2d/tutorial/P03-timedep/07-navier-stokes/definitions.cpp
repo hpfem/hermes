@@ -5,8 +5,10 @@
 class WeakFormNSSimpleLinearization : public WeakForm
 {
 public:
-  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step, Solution* x_vel_previous_time, Solution* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
-                                      Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) {
+  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step, Solution* x_vel_previous_time, 
+                                Solution* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
+                                Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), 
+                                y_vel_previous_time(y_vel_previous_time) {
     BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_0);
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
@@ -43,20 +45,22 @@ public:
   class BilinearFormSymVel : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes), 
-                       Reynolds(Reynolds), time_step(time_step) {
+    BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
+            : WeakForm::MatrixFormVol(i, j), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       sym = HERMES_SYM;
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+                    Geom<Ord> *e, ExtData<Ord> *ext)
     {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
@@ -74,12 +78,13 @@ public:
   class BilinearFormUnSymVel : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormUnSymVel(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes) {
-      adapt_eval = false;
-      sym = HERMES_NONSYM;
+    BilinearFormUnSymVel(int i, int j, bool Stokes) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+        adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_time = ext->fn[0];
@@ -89,7 +94,8 @@ public:
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_time = ext->fn[0];
@@ -112,11 +118,13 @@ public:
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdx<double, scalar>(n, wt, u, v);
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -130,11 +138,13 @@ public:
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdy<double, scalar>(n, wt, u, v);
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -143,11 +153,13 @@ public:
   class VectorFormVolVel : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormVolVel(int i, bool Stokes, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), time_step(time_step) {
+    VectorFormVolVel(int i, bool Stokes, double time_step) 
+          : WeakForm::VectorFormVol(i), Stokes(Stokes), time_step(time_step) {
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                         ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -182,8 +194,10 @@ protected:
 class WeakFormNSNewton : public WeakForm
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, Solution* x_vel_previous_time, Solution* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
-                                      Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) {
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, Solution* x_vel_previous_time, 
+                   Solution* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
+                   Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), 
+                   y_vel_previous_time(y_vel_previous_time) {
     BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_0);
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
@@ -217,20 +231,22 @@ public:
   class BilinearFormSymVel : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) : WeakForm::MatrixFormVol(i, j), Stokes(Stokes), 
+    BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
+            : WeakForm::MatrixFormVol(i, j, HERMES_SYM), Stokes(Stokes), 
                        Reynolds(Reynolds), time_step(time_step) {
-      sym = HERMES_SYM;
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<Ord, Ord>(n, wt, u, v) / time_step;
@@ -252,7 +268,8 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -264,7 +281,8 @@ public:
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -289,7 +307,8 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -299,7 +318,8 @@ public:
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -322,7 +342,8 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* yvel_prev_newton = u_ext[0];
@@ -332,7 +353,8 @@ public:
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* yvel_prev_newton = u_ext[0];
@@ -355,7 +377,8 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
       if(!Stokes) {
         Func<scalar>* xvel_prev_newton = u_ext[0];
@@ -367,7 +390,8 @@ public:
       return result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -392,11 +416,13 @@ public:
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdx<double, scalar>(n, wt, u, v);
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -410,11 +436,13 @@ public:
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
       return - int_u_dvdy<double, scalar>(n, wt, u, v);
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -423,11 +451,13 @@ public:
   class VectorFormNS_0 : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormNS_0(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
+    VectorFormNS_0(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), 
+                   Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                         ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -435,11 +465,13 @@ public:
       Func<scalar>* yvel_prev_newton = u_ext[1];  
       Func<scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
-        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
+        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds 
+                          - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
           result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
-                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] 
+                            + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
 
@@ -451,11 +483,13 @@ public:
       Func<Ord>* yvel_prev_newton = u_ext[1];  
       Func<Ord>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
-        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
+        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds 
+                            - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
           result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step)
-                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] 
+                            + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
   protected:
@@ -468,11 +502,13 @@ public:
   class VectorFormNS_1 : public WeakForm::VectorFormVol
   {
   public:
-    VectorFormNS_1(int i, bool Stokes, double Reynolds, double time_step) : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
+    VectorFormNS_1(int i, bool Stokes, double Reynolds, double time_step) 
+        : WeakForm::VectorFormVol(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                         ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
       Func<scalar>* yvel_prev_time = ext->fn[1];
@@ -480,11 +516,13 @@ public:
       Func<scalar>* yvel_prev_newton = u_ext[1];  
       Func<scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
-        result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dy[i]));
+        result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Reynolds 
+                          - (p_prev_newton->val[i] * v->dy[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
           result += wt[i] * (((yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step )
-                            + ((xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i]));
+                            + ((xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] 
+                            + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
 
@@ -496,11 +534,13 @@ public:
       Func<Ord>* yvel_prev_newton = u_ext[1];  
       Func<Ord>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
-        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
+        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds 
+                  - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
           result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
-                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+                            + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] 
+                            + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
     }
   protected:
@@ -517,7 +557,8 @@ public:
       adapt_eval = false;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                         ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_newton = u_ext[0];  
       Func<scalar>* yvel_prev_newton = u_ext[1];  
@@ -551,9 +592,9 @@ class EssentialBCNonConst : public EssentialBoundaryCondition
 {
 public:
   EssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
-        EssentialBoundaryCondition(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
+    EssentialBoundaryCondition(markers), startup_time(startup_time), vel_inlet(vel_inlet), H(H)  {};
   EssentialBCNonConst(std::string marker, double vel_inlet, double H, double startup_time) : 
-        EssentialBoundaryCondition(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
+    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel_inlet(vel_inlet), H(H)  {
     markers.push_back(marker);
   };
   
@@ -563,7 +604,7 @@ public:
     return BC_FUNCTION; 
   };
 
-  virtual scalar value(double x, double y) const {
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
     double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     if (current_time <= startup_time) 
       return val_y * current_time/startup_time;

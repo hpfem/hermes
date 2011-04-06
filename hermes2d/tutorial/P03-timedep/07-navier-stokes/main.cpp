@@ -31,6 +31,7 @@ using namespace RefinementSelectors;
 //           parameters can be changed in the mesh file "domain.mesh".
 //
 // The following parameters can be changed:
+
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
