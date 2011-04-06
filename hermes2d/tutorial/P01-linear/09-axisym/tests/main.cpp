@@ -4,34 +4,31 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-int UNIFORM_REF_LEVEL = 1;                        // number of initial uniform mesh refinements.
-int CORNER_REF_LEVEL = 3;                         // number of mesh refinements towards the re-entrant corner.
-int P_INIT = 6;                                   // Uniform polynomial degree of all mesh elements.
+const int P_INIT = 4;                             // Uniform polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
 // Problem parameters.
-const double T1 = 300.0;      // Prescribed temperature on Gamma_bottom.
+const double T1 = 30.0;       // Prescribed temperature on Gamma_bottom.
 const double T0 = 20.0;       // Outer temperature.
-const double LAMBDA = 100;    // Thermal conductivity.
-const double h  = 10.0;       // Heat flux on Gamma_heat_flux.
+const double LAMBDA = 386;    // Thermal conductivity.
+const double ALPHA = 5.0;     // Heat flux coefficient on Gamma_heat_flux.
 
 // Boundary markers.
-const std::string BDY_HEAT_FLUX = "Heat flux", BDY_BOTTOM = "Bottom", BDY_SYM = "Symmetry";
+const std::string BDY_BOTTOM = "Bottom", BDY_HEAT_FLUX = "Heat flux";
 
 // Weak forms.
 #include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
-  // Load the mesh file.
+  // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
   mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i=0; i<UNIFORM_REF_LEVEL; i++) mesh.refine_all_elements();
-  mesh.refine_towards_vertex(3, CORNER_REF_LEVEL);
+  for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY_BOTTOM, T1);
@@ -43,7 +40,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(h, T0, LAMBDA, BDY_HEAT_FLUX);
+  CustomWeakFormPoissonNewton wf(LAMBDA, ALPHA, T0, BDY_HEAT_FLUX);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
@@ -87,16 +84,16 @@ int main(int argc, char* argv[])
     // Actual test. The values of 'sum' depend on the
     // current shapeset. If you change the shapeset,
     // you need to correct these numbers.
-    if (p_init == 1 && fabs(sum - 1146.15) > 1e-1) success = 0;
-    if (p_init == 2 && fabs(sum - 1145.97) > 1e-1) success = 0;
-    if (p_init == 3 && fabs(sum - 1145.97) > 1e-1) success = 0;
-    if (p_init == 4 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 5 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 6 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 7 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 8 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 9 && fabs(sum - 1145.96) > 1e-1) success = 0;
-    if (p_init == 10 && fabs(sum - 1145.96) > 1e-1) success = 0;
+    if (p_init == 1 && fabs(sum - 597.764) > 1e-1) success = 0;
+    if (p_init == 2 && fabs(sum - 597.808) > 1e-1) success = 0;
+    if (p_init == 3 && fabs(sum - 597.8) > 1e-1) success = 0;
+    if (p_init == 4 && fabs(sum - 597.807) > 1e-1) success = 0;
+    if (p_init == 5 && fabs(sum - 597.8) > 1e-1) success = 0;
+    if (p_init == 6 && fabs(sum - 597.806) > 1e-1) success = 0;
+    if (p_init == 7 && fabs(sum - 597.8) > 1e-1) success = 0;
+    if (p_init == 8 && fabs(sum - 597.806) > 1e-1) success = 0;
+    if (p_init == 9 && fabs(sum - 597.8) > 1e-1) success = 0;
+    if (p_init == 10 && fabs(sum - 597.806) > 1e-1) success = 0;
   }
 
   if (success == 1) {
