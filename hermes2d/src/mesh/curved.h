@@ -19,7 +19,7 @@
 #include "../h2d_common.h"
 #include "../shapeset/shapeset_common.h"
 
-struct Element;
+class Element;
 class H1ShapesetJacobi;
 class PrecalcShapeset;
 class Quad1DStd;

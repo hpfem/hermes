@@ -19,7 +19,7 @@
 #include "../h2d_common.h"
 #include "curved.h"
 
-struct Element;
+class Element;
 class HashTable;
 class Space;
 struct MItem;
@@ -85,8 +85,11 @@ struct HERMES_API Node
 /// If an element has curved edges, the member 'cm' points to an associated CurvMap structure,
 /// otherwise it is NULL.
 ///
-struct HERMES_API Element
+class HERMES_API Element
 {
+public:
+  Element() : visited(false) {};
+
   int id;            ///< element id number
   unsigned nvert:30; ///< number of vertices (3 or 4)
   unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons

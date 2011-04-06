@@ -28,7 +28,7 @@ class MeshFunction;
 struct SurfPos;
 class Ord;
 
-struct Element;
+class Element;
 class Shapeset;
 template<typename T> class Func;
 template<typename T> class Geom;

@@ -657,7 +657,7 @@ bool** WeakForm::get_blocks(bool force_diagonal_blocks)
 
   for (unsigned i = 0; i < mfsurf_mc.size(); i++)
     if (fabs(mfsurf_mc[i]->scaling_factor) > 1e-12)
-      for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
+      for(unsigned int component_i = 0; component_i < mfsurf_mc[i]->coordinates.size(); component_i++)
         blocks[mfsurf_mc[i]->coordinates[component_i].first][mfsurf_mc[i]->coordinates[component_i].second] = true;
   
   return blocks;
