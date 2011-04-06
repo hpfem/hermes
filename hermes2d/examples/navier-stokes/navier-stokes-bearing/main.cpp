@@ -33,7 +33,7 @@ const int INIT_REF_NUM = 2;                       // Number of initial uniform m
 const int INIT_BDY_REF_NUM_INNER = 2;             // Number of initial mesh refinements towards boundary. 
 const int INIT_BDY_REF_NUM_OUTER = 2;             // Number of initial mesh refinements towards boundary. 
 
-//#define STOKES                                  // If this is defined, Stokes problem is solved, otherwise N-S.
+const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
                                                   // divergence-free, more accurate than using a continuous
@@ -59,12 +59,13 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const std::string BDY_INNER = "1";
-const std::string BDY_OUTER = "2";
+const std::string BDY_INNER = "Inner";
+const std::string BDY_OUTER = "Outer";
 
 // Current time (used in weak forms).
 double current_time = 0;
 
+/*
 // Essential (Dirichlet) boundary condition values for x-velocity.
 scalar essential_bc_values_xvel(double x, double y, double time) {
   // Time-dependent surface velocity of inner circle.
@@ -88,6 +89,7 @@ scalar essential_bc_values_yvel(double x, double y, double time) {
   //printf("%g %g yvel = %g\n", x, y, yvel);
   return yvel; 
 }
+*/
 
 // Weak forms.
 #include "definitions.cpp"
@@ -141,20 +143,20 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_OUTER, INIT_BDY_REF_NUM_OUTER, false);  // false for isotropic refinements
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_inner_vel_x(BDY_INNER, VEL, STARTUP_TIME);
-  EssentialBCNonConst bc_inner_vel_y(BDY_INNER, VEL, STARTUP_TIME);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_inner_vel_y));
-  DefaultEssentialBCConst bc_outer_vel_x(BDY_OUTER, 0.0);
-  DefaultEssentialBCConst bc_outer_vel_y(BDY_OUTER, 0.0);
-  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_outer_vel_x, &bc_outer_vel_y));
+  EssentialBCNonConstX bc_inner_vel_x(BDY_INNER, VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_inner_vel_y(BDY_INNER, VEL, STARTUP_TIME);
+  DefaultEssentialBCConst bc_outer_vel(BDY_OUTER, 0.0);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_outer_vel));
+  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_y, &bc_outer_vel));
+  EssentialBCs bcs_pressure;
 
-  // Create spaces with default shapesets. 
+  // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
   H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space p_space(&mesh, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, &bc_types_p, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
 
   // Calculate and report the number of degrees of freedom.
@@ -171,40 +173,28 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  Solution xvel_prev_time, yvel_prev_time, p_prev_time;
+  Solution xvel_prev_time, yvel_prev_time, p_prev_time; 
   xvel_prev_time.set_zero(&mesh);
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
 
   // Initialize weak formulation.
-  WeakForm wf(3);
-  if (NEWTON) {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(newton_bilinear_form_unsym_0_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 1, callback(newton_bilinear_form_unsym_0_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 0, callback(newton_bilinear_form_unsym_1_0), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(newton_bilinear_form_unsym_1_1), HERMES_NONSYM, HERMES_ANY);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(newton_F_0), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(1, callback(newton_F_1), HERMES_ANY, 
-                       Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_vector_form(2, callback(newton_F_2), HERMES_ANY);
-  }
-  else {
-    wf.add_matrix_form(0, 0, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(0, 0, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(1, 1, callback(bilinear_form_sym_0_0_1_1), HERMES_SYM);
-    wf.add_matrix_form(1, 1, callback(simple_bilinear_form_unsym_0_0_1_1), 
-                  HERMES_NONSYM, HERMES_ANY, Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time));
-    wf.add_matrix_form(0, 2, callback(bilinear_form_unsym_0_2), HERMES_ANTISYM);
-    wf.add_matrix_form(1, 2, callback(bilinear_form_unsym_1_2), HERMES_ANTISYM);
-    wf.add_vector_form(0, callback(simple_linear_form), HERMES_ANY, &xvel_prev_time);
-    wf.add_vector_form(1, callback(simple_linear_form), HERMES_ANY, &yvel_prev_time);
-  }
+  WeakForm* wf;
+  if (NEWTON)
+    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  else
+    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+
+  // Initialize the FE problem.
+  bool is_linear;
+  if (NEWTON) is_linear = false;
+  else is_linear = true;
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
   VectorView vview("velocity [m/s]", new WinGeom(0, 0, 600, 500));
@@ -215,14 +205,15 @@ int main(int argc, char* argv[])
   pview.fix_scale_width(80);
   pview.show_mesh(true);
 
-  // Project initial conditions on FE spaces to obtain initial coefficient 
-  // vector for the Newton's method.
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
   scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
-    info("Projecting initial conditions to obtain initial vector for the Newton's method.");
-    OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space),
-                   Hermes::vector<MeshFunction*>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-                   coeff_vec, matrix_solver, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    info("Projecting initial condition to obtain initial vector for the Newton's method.");
+    OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+                   coeff_vec, matrix_solver, 
+                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -230,75 +221,53 @@ int main(int argc, char* argv[])
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    TIME += TAU;
-    info("---- Time step %d, time = %g:", ts, TIME);
+    current_time += TAU;
+    info("---- Time step %d, time = %g:", ts, current_time);
 
-    // Update time-dependent essential BC are used.
-    if (TIME <= STARTUP_TIME) {
+    // Update time-dependent essential BCs.
+    if (current_time <= STARTUP_TIME) {
       info("Updating time-dependent essential BC.");
-      update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+      Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
     if (NEWTON) 
     {
-      info("Performing Newton's method.");
-      // Initialize the FE problem.
-      bool is_linear = false;
-      DiscreteProblem dp(&wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-      // Translate the resulting coefficient vector into the actual solutions. 
+      // Update previous time level solutions.
       Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
                                     Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-
-      // Cleanup.
-      delete matrix;
-      delete rhs;
-      delete solver;
     }
     else {
-      // Linear solve.  
+      // Linear solve.
       info("Assembling and solving linear problem.");
-      bool is_linear = true;
-      DiscreteProblem dp(&wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
-
-      // Set up the solver, matrix, and rhs according to the solver selection.
-      SparseMatrix* matrix = create_matrix(matrix_solver);
-      Vector* rhs = create_vector(matrix_solver);
-      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
-      dp.assemble(matrix, rhs);
-
-      // Solve the linear system and if successful, obtain the solution.
-      info("Solving the matrix problem.");
-      if(solver->solve())
-        Solution::vector_to_solutions(solver->get_solution(),  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                                      Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-      else
+      dp.assemble(matrix, rhs, false);
+      if(solver->solve()) 
+        Solution::vector_to_solutions(solver->get_solution(), 
+                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+                  Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      else 
         error ("Matrix solver failed.\n");
     }
 
     // Show the solution at the end of time step.
-    sprintf(title, "Velocity, time %g", TIME);
+    sprintf(title, "Velocity, time %g", current_time);
     vview.set_title(title);
-    vview.show(&xvel_prev_time, &yvel_prev_time, HERMES_EPS_LOW);
-    sprintf(title, "Pressure, time %g", TIME);
+    vview.show(&xvel_prev_time, &yvel_prev_time);
+    sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
  }
 
   // Clean up.
   delete [] coeff_vec;
+  delete matrix;
+  delete rhs;
+  delete solver;
 
   // Wait for all views to be closed.
   View::wait();

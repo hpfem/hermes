@@ -37,7 +37,6 @@ public:
          { return EssentialBoundaryCondition::BC_FUNCTION; }
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
-    printf("zde\n");
     return x*x + y*y;
   }
 

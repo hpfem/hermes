@@ -68,7 +68,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -105,7 +104,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -177,13 +175,11 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double time_step;
   };
 
 protected:
-  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -253,7 +249,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -294,7 +289,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -329,7 +323,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -364,7 +357,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -403,7 +395,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -493,7 +484,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -544,7 +534,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -580,7 +569,6 @@ public:
   };
 
 protected:
-  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -588,33 +576,74 @@ protected:
   Solution* y_vel_previous_time;
 };
 
-class EssentialBCNonConst : public EssentialBoundaryCondition
+/* Essential boundary conditions */
+
+// Time-dependent surface x-velocity of inner circle.
+class EssentialBCNonConstX : public EssentialBoundaryCondition
 {
 public:
-  EssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
-    EssentialBoundaryCondition(markers), startup_time(startup_time), vel_inlet(vel_inlet), H(H)  {};
-  EssentialBCNonConst(std::string marker, double vel_inlet, double H, double startup_time) : 
-    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel_inlet(vel_inlet), H(H)  {
+  EssentialBCNonConstX(Hermes::vector<std::string> markers, double vel, double startup_time) : 
+    EssentialBoundaryCondition(markers), startup_time(startup_time), vel(vel)  {};
+  EssentialBCNonConstX(std::string marker, double vel_inlet, double H, double startup_time) : 
+    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel(vel)  {
     markers.push_back(marker);
   };
   
-  ~EssentialBCNonConst() {};
+  ~EssentialBCNonConstX() {};
 
   virtual EssentialBCValueType get_value_type() const { 
     return BC_FUNCTION; 
   };
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    double velocity;
+    if (current_time <= startup_time) velocity = vel * current_time/startup_time;
+    else velocity = vel;
+    double alpha = atan2(x, y);
+    double xvel = velocity*cos(alpha);
+    return xvel; 
+
+    /*
     double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     if (current_time <= startup_time) 
       return val_y * current_time/startup_time;
     else 
       return val_y;
+    */
   };
 
-protected:
-  // Members.
-  double startup_time;
-  double vel_inlet;
-  double H;
+  protected:
+    double startup_time;
+    double vel;
+};
+
+// Time-dependent surface y-velocity of inner circle.
+class EssentialBCNonConstY : public EssentialBoundaryCondition
+{
+public:
+  EssentialBCNonConstY(Hermes::vector<std::string> markers, double vel, double startup_time) : 
+    EssentialBoundaryCondition(markers), startup_time(startup_time), vel(vel)  {};
+  EssentialBCNonConstY(std::string marker, double vel_inlet, double H, double startup_time) : 
+    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel(vel)  {
+    markers.push_back(marker);
+  };
+  
+  ~EssentialBCNonConstY() {};
+
+  virtual EssentialBCValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    double velocity;
+    if (current_time <= startup_time) velocity = vel * current_time/startup_time;
+    else velocity = vel;
+    double alpha = atan2(x, y);
+    double yvel = -velocity*sin(alpha);
+    return yvel; 
+  };
+
+  protected:
+    double startup_time;
+    double vel;
 };

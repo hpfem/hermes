@@ -174,6 +174,7 @@ int main(int argc, char* argv[])
       info("Updating time-dependent essential BC.");
       Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
+
     if (NEWTON) 
     {
       // Perform Newton's iteration.
@@ -205,7 +206,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
- }
+  }
 
   delete [] coeff_vec;
   delete matrix;

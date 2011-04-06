@@ -83,18 +83,23 @@ int main(int argc, char* argv[])
     info("Element orders in VTK format saved to file %s.", "ord.vtk");
   }
 
-  // Visualize the solution.
-  if (HERMES_VISUALIZATION) {
-    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
-    view.show(&sln);
-    View::wait();
+  ndof = Space::get_num_dofs(&space);
+  printf("ndof = %d\n", ndof);
+  double sum = 0;
+  for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
+  printf("coefficient sum = %g\n", sum);
+
+  bool success = true;
+  if (fabs(sum + 7.14632) > 1e-3) success = 0;
+
+  if (success == 1) {
+    printf("Success!\n");
+    return ERR_SUCCESS;
+  }
+  else {
+    printf("Failure!\n");
+    return ERR_FAILURE;
   }
 
-  // Clean up.
-  delete solver;
-  delete matrix;
-  delete rhs;
-
-  return 0;
 }
 

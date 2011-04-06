@@ -68,7 +68,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -105,7 +104,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -177,13 +175,11 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double time_step;
   };
 
 protected:
-  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -253,7 +249,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -294,7 +289,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -329,7 +323,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -364,7 +357,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -403,7 +395,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
   };
 
@@ -493,7 +484,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -544,7 +534,6 @@ public:
       return result;
     }
   protected:
-    // Members.
     bool Stokes;
     double Reynolds;
     double time_step;
@@ -580,7 +569,6 @@ public:
   };
 
 protected:
-  // Members.
   bool Stokes;
   double Reynolds;
   double time_step;
@@ -613,7 +601,6 @@ public:
   };
 
 protected:
-  // Members.
   double startup_time;
   double vel_inlet;
   double H;
