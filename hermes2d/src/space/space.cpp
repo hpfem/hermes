@@ -19,8 +19,7 @@
 #include "../boundaryconditions/essential_bcs.h"
 
 Space::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs* essential_bcs, Ord2 p_init)
-        : shapeset(shapeset), mesh(mesh), essential_bcs(essential_bcs)
-{
+  : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh) {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
   this->default_tri_order = -1;

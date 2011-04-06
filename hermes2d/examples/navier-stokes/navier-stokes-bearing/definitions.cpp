@@ -602,14 +602,6 @@ public:
     double alpha = atan2(x, y);
     double xvel = velocity*cos(alpha);
     return xvel; 
-
-    /*
-    double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
-    if (current_time <= startup_time) 
-      return val_y * current_time/startup_time;
-    else 
-      return val_y;
-    */
   };
 
   protected:

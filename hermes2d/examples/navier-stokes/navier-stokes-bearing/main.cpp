@@ -65,32 +65,6 @@ const std::string BDY_OUTER = "Outer";
 // Current time (used in weak forms).
 double current_time = 0;
 
-/*
-// Essential (Dirichlet) boundary condition values for x-velocity.
-scalar essential_bc_values_xvel(double x, double y, double time) {
-  // Time-dependent surface velocity of inner circle.
-  double velocity;
-  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
-  else velocity = VEL;
-  double alpha = atan2(x, y);
-  double xvel = velocity*cos(alpha);
-  //printf("%g %g xvel = %g\n", x, y, xvel);
-  return xvel; 
-}
-
-// Essential (Dirichlet) boundary condition values for y-velocity.
-scalar essential_bc_values_yvel(double x, double y, double time) {
-  // Time-dependent surface velocity of inner circle.
-  double velocity;
-  if (time <= STARTUP_TIME) velocity = VEL * time/STARTUP_TIME;
-  else velocity = VEL;
-  double alpha = atan2(x, y);
-  double yvel = -velocity*sin(alpha);
-  //printf("%g %g yvel = %g\n", x, y, yvel);
-  return yvel; 
-}
-*/
-
 // Weak forms.
 #include "definitions.cpp"
 
