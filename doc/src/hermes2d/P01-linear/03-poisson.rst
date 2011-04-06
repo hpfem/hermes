@@ -1,5 +1,5 @@
 Poisson Equation (03-poisson)
----------------------
+-----------------------------
 
 **Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/03-poisson>`_. 
 

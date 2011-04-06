@@ -1,5 +1,5 @@
 Helmholtz
-========
+=========
 
 .. toctree::
    :maxdepth: 2

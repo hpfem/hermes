@@ -9,19 +9,21 @@ in the source code.
 .. toctree::
    :maxdepth: 1
 
-   examples/linear-elasticity
-   examples/thermoelasticity
-   examples/neutronics
-   examples/maxwell
-   examples/helmholtz
-   examples/navier-stokes
-   examples/nernst-planck
+   examples/acoustics/
    examples/advection-diffusion-reaction/
-   examples/richards
    examples/euler
    examples/heat-transfer
+   examples/helmholtz
+   examples/linear-elasticity
+   examples/maxwell
+   examples/navier-stokes
+   examples/nernst-planck
+   examples/neutronics
    examples/poisson
+   examples/richards
    examples/schroedinger
+   examples/thermoelasticity
    examples/wave-equation
+
    examples/miscellaneous
 	
