@@ -9,17 +9,17 @@ using namespace RefinementSelectors;
 //  a 2D domain comprising a wire carrying electrical current, air, and
 //  an iron which is not under voltage.
 //
-//  PDE: -Laplace A + ii*omega*gamma*mu*A = mu *J_ext.
+//  PDE: -div(1/rho grad p) - omega**2 / (rho c**2) * p = 0.
 //
-//  Domain: Rectangle of height 0.003 and width 0.004. Different
-//  materials for the wire, air, and iron (see mesh file domain2.mesh).
+//  Domain: Axisymmetric geometry of a horn, see mesh file domain.mesh.
 //
-//  BC: Zero Dirichlet on the top and right edges, zero Neumann
-//  elsewhere.
+//  BC: Prescribed pressure on the bottom edge, 
+//      zero Neumann on the walls and on the axis of symmetry,
+//      Newton matched boundary at outlet 1/rho dp/dn = j omega p / (rho c)
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
@@ -44,7 +44,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -86,7 +86,6 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  //mesh.refine_element_id(2);
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.

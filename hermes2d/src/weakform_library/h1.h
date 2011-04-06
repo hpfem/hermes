@@ -73,10 +73,10 @@ namespace WeakFormsH1 {
     public:
       DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, 
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt) { }
       DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, CubicSpline* spline_coeff, 
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -103,6 +103,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff;
+        GeomType gt;
     };
 
     /* Default volumetric matrix form \int_{area} coeff \curl u \cdot \curl v d\bfx 
@@ -115,10 +116,10 @@ namespace WeakFormsH1 {
       // The optional order_increase takes into account the axisymmetric part.
       DefaultLinearMagnetostatics(int i, int j, scalar coeff = 1.0, 
                                   SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-	: WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), order_increase(order_increase) { }
+	: WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
       DefaultLinearMagnetostatics(int i, int j, std::string area, scalar coeff = 1.0, 
                                   SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), order_increase(order_increase) { }
+            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -156,11 +157,13 @@ namespace WeakFormsH1 {
       DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, 
                                              SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
-            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), order_increase(order_increase) { }
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt), 
+                                  order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
                                              CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), order_increase(order_increase) { }
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt), 
+                                      order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -231,10 +234,10 @@ namespace WeakFormsH1 {
     public:
       DefaultLinearMass(int i, int j, scalar coeff = 1.0, 
                         SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt) { }
       DefaultLinearMass(int i, int j, std::string area, scalar coeff = 1.0, 
                         SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -271,11 +274,11 @@ namespace WeakFormsH1 {
     public:
       DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, 
                                    SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff) { }
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt) { }
       DefaultJacobianNonlinearMass(int i, int j, std::string area, 
                                    CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM, 
                                    GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff) { }
+	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -299,6 +302,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff;
+        GeomType gt;
     };
 
     /* Default volumetric matrix form \int_{area} (coeff1, coeff2) \cdot \nabla u vd\bfx 
@@ -309,9 +313,9 @@ namespace WeakFormsH1 {
     {
     public:
      DefaultLinearAdvection(int i, int j, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
-       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2) { }
+       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
      DefaultLinearAdvection(int i, int j, std::string area, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
-       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2) { }
+       : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -332,6 +336,7 @@ namespace WeakFormsH1 {
 
       private:
       scalar coeff1, coeff2;
+      GeomType gt;
     };
 
     /* Default volumetric matrix form 
@@ -348,12 +353,12 @@ namespace WeakFormsH1 {
      DefaultJacobianNonlinearAdvection(int i, int j, CubicSpline* spline_coeff1, 
                                        CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
-                                 spline_coeff2(spline_coeff2) { }
+	                         spline_coeff2(spline_coeff2), gt(gt) { }
      DefaultJacobianNonlinearAdvection(int i, int j, std::string area, 
                                        CubicSpline* spline_coeff1, CubicSpline* spline_coeff2, 
                                        GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
-                                 spline_coeff2(spline_coeff2) { }
+	                         spline_coeff2(spline_coeff2), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -380,6 +385,7 @@ namespace WeakFormsH1 {
 
       private:
       CubicSpline* spline_coeff1, *spline_coeff2;
+      GeomType gt;
     };
   }
 
@@ -441,9 +447,9 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultResidualLinearDiffusion(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), coeff(coeff) { }
+	: WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
       DefaultResidualLinearDiffusion(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), coeff(coeff) { }
+	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -468,6 +474,7 @@ namespace WeakFormsH1 {
 
       private:
         scalar coeff;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} spline_coeff(u_ext[0]) 
@@ -479,9 +486,9 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff) { }
+	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), gt(gt) { }
       DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff) { }
+	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -507,6 +514,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} coeff 
@@ -519,10 +527,10 @@ namespace WeakFormsH1 {
     public:
       DefaultResidualLinearMagnetostatics(int i, scalar coeff, GeomType gt = HERMES_PLANAR, 
                                           int order_increase = 3) 
-                   : WeakForm::VectorFormVol(i), coeff(coeff), order_increase(order_increase) { }
+	: WeakForm::VectorFormVol(i), coeff(coeff), gt(gt), order_increase(order_increase) { }
       DefaultResidualLinearMagnetostatics(int i, std::string area, scalar coeff, 
                                           GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-                   : WeakForm::VectorFormVol(i, area), coeff(coeff), order_increase(order_increase) { }
+	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -556,10 +564,10 @@ namespace WeakFormsH1 {
     public:
       DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
-                   : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), order_increase(order_increase) { }
+	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), gt(gt), order_increase(order_increase) { }
       DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, 
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-                   : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), order_increase(order_increase) { }
+	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -604,9 +612,9 @@ namespace WeakFormsH1 {
     {
     public:
     DefaultResidualLinearAdvection(int i, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR)
-      : WeakForm::VectorFormVol(i), coeff1(coeff1), coeff2(coeff2) { }
+      : WeakForm::VectorFormVol(i), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
       DefaultResidualLinearAdvection(int i, std::string area, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), coeff1(coeff1), coeff2(coeff2) { }
+	: WeakForm::VectorFormVol(i, area), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -632,6 +640,7 @@ namespace WeakFormsH1 {
 
       private:
         scalar coeff1, coeff2;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} spline_coeff1(u_ext[0]) * u->dx * v->val
@@ -644,10 +653,11 @@ namespace WeakFormsH1 {
     public:
     DefaultResidualNonlinearAdvection(int i, CubicSpline* spline_coeff1, 
                                       CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR)
-      : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2) { }
+      : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), gt(gt) { }
       DefaultResidualNonlinearAdvection(int i, std::string area, CubicSpline* spline_coeff1, 
                                         CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2) { }
+	: WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2),
+	gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -673,6 +683,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff1, *spline_coeff2;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} rhs(x, y) v d\bfx 
@@ -683,10 +694,10 @@ namespace WeakFormsH1 {
     public:
       DefaultVectorFormNonConst(int i, RightHandSides::DefaultNonConstRightHandSide* rhs, 
                                 GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i), rhs(rhs) { }
+	: WeakForm::VectorFormVol(i), rhs(rhs), gt(gt) { }
       DefaultVectorFormNonConst(int i, std::string area, RightHandSides::DefaultNonConstRightHandSide* rhs, 
                                 GeomType gt = HERMES_PLANAR) 
-                   : WeakForm::VectorFormVol(i, area), rhs(rhs) { }
+	: WeakForm::VectorFormVol(i, area), rhs(rhs), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                    Geom<double> *e, ExtData<scalar> *ext) const {
@@ -706,6 +717,7 @@ namespace WeakFormsH1 {
 
       private:
         RightHandSides::DefaultNonConstRightHandSide* rhs;
+        GeomType gt;
     };
   }
 
@@ -754,9 +766,9 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultMatrixFormSurfSpline(int i, int j, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff) { }
+	: WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff), gt(gt) { }
       DefaultMatrixFormSurfSpline(int i, int j, std::string area, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff) { }
+	: WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -780,6 +792,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff;
+        GeomType gt;
     };
   }
 
@@ -825,9 +838,11 @@ namespace WeakFormsH1 {
     class MultiComponentDefaultVectorFormSurf : public WeakForm::MultiComponentVectorFormSurf
     {
     public:
-      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
+      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
+                                          Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
 	    : WeakForm::MultiComponentVectorFormSurf(coordinates), coeffs(coeffs), gt(gt) { }
-      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area, Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
+      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area, 
+                                          Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR) 
 	    : WeakForm::MultiComponentVectorFormSurf(coordinates, area), coeffs(coeffs), gt(gt) { }
 
       virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
@@ -869,10 +884,10 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultVectorFormSurfSpline(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-             : WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff) { }
+	: WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff), gt(gt) { }
       DefaultVectorFormSurfSpline(int i, std::string area, CubicSpline* spline_coeff, 
                                   GeomType gt = HERMES_PLANAR) 
-             : WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff) { }
+	: WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -896,6 +911,7 @@ namespace WeakFormsH1 {
 
       private:
         CubicSpline* spline_coeff;
+        GeomType gt;
     };
   }
 
