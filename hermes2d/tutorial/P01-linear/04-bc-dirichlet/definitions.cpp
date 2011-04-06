@@ -25,8 +25,8 @@ public:
 
 class CustomDirichletCondition : public EssentialBoundaryCondition {
 public:
-  CustomDirichletCondition(std::string marker, double A, double B, double C) 
-    : EssentialBoundaryCondition(marker), A(A), B(B), C(C) { }
+  CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C) 
+    : EssentialBoundaryCondition(markers), A(A), B(B), C(C) { }
 
   ~CustomDirichletCondition() {};
 

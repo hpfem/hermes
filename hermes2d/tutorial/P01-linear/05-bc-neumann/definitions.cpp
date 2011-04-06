@@ -3,24 +3,41 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/h1.h"
 
-using namespace WeakFormsH1;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::VolumetricVectorForms;
 
-class CustomWeakFormPoissonNeumann : public WeakForm
+/* Weak forms */
+
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoissonNeumann(double const_f,
-                               std::string bdy_bottom,
-                               double const_gamma_bottom,
-                               std::string bdy_outer,
-                               double const_gamma_outer,
-                               std::string bdy_left,
-                               double const_gamma_left) : WeakForm(1)
+  CustomWeakFormPoisson(std::string mat_al, double lambda_al, 
+                        std::string mat_cu, double lambda_cu, 
+                        double vol_heat_src) : WeakForm(1)
   {
-    add_matrix_form(new VolumetricMatrixForms::DefaultLinearDiffusion(0, 0));
-    add_vector_form(new VolumetricVectorForms::DefaultVectorFormConst(0, const_f));
-
-    add_vector_form_surf(new SurfaceVectorForms::DefaultVectorFormSurf(0, bdy_bottom, const_gamma_bottom));
-    add_vector_form_surf(new SurfaceVectorForms::DefaultVectorFormSurf(0, bdy_outer, const_gamma_outer));
-    add_vector_form_surf(new SurfaceVectorForms::DefaultVectorFormSurf(0, bdy_left, const_gamma_left));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
+    add_vector_form(new DefaultVectorFormConst(0, vol_heat_src));
   };
 };
+
+/* Custom non-constant Dirichlet condition */
+
+class CustomDirichletCondition : public EssentialBoundaryCondition {
+public:
+  CustomDirichletCondition(std::string marker, double A, double B, double C) 
+    : EssentialBoundaryCondition(marker), A(A), B(B), C(C) { }
+
+  ~CustomDirichletCondition() {};
+
+  virtual EssentialBCValueType get_value_type() const
+         { return EssentialBoundaryCondition::BC_FUNCTION; }
+
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    return A*x + B*y + C;
+  }
+
+  protected:
+    double A, B, C;
+};
+
