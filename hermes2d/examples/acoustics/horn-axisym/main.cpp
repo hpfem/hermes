@@ -85,6 +85,10 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("domain.mesh", &mesh);
 
+  //MeshView mv("Initial mesh", new WinGeom(0, 0, 400, 400));
+  //mv.show(&mesh);
+  //View::wait(HERMES_WAIT_KEYPRESS);
+
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 

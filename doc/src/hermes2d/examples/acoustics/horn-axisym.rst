@@ -11,7 +11,7 @@ of a harmonic acoustic horn. The geometry and initial mesh are shown below.
 
 .. image:: horn-axisym/domain.png
    :align: center
-   :width: 200  
+   :width: 400  
    :alt: Domain.
 
 Equation solved: 

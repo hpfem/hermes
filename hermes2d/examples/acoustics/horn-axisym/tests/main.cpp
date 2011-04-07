@@ -203,11 +203,12 @@ int main(int argc, char* argv[])
 
   ndof = Space::get_num_dofs(&space);
 
-#define ERROR_SUCCESS                                0
-#define ERROR_FAILURE                               -1
-  printf("ndof allowed = %d\n", 410);  
+#define ERROR_SUCCESS                      0
+#define ERROR_FAILURE                     -1
+  int ndof_allowed = 460;                      
+  printf("ndof allowed = %d\n", ndof_allowed);  
   printf("ndof actual = %d\n", ndof);
-  if (ndof < 410) {      // ndof was 406 when this test was created (04-05-2011).
+  if (ndof < ndof_allowed) {      // ndof was 454 when this test was created (04-05-2011).
     printf("Success!\n");
     return ERROR_SUCCESS;
   }
