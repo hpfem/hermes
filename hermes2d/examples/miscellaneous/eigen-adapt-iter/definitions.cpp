@@ -32,7 +32,7 @@ private:
       return Ord(30);
     }
 
-    double V(double x, double y) {
+    double V(double x, double y) const {
       return 0;
       //double r = sqrt(x*x + y*y);
       //return -1./(0.001 + r*r);
