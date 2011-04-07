@@ -108,7 +108,7 @@ void MumpsMatrix<Scalar>::alloc()
 
   nnz = Ap[this->size];
 
-  Ax = new Scalar[nnz];
+  Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz];
   memset(Ax, 0, sizeof(Scalar) * nnz);
 
   irn = new int[nnz];
@@ -132,6 +132,9 @@ void MumpsMatrix<Scalar>::free()
   delete[] jcn; jcn = NULL;
 }
 
+inline double mumps_to_scalar(double x){return x;}
+inline std::complex<double> mumps_to_scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r,x.i);}
+
 template<typename Scalar>
 Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
@@ -142,11 +145,7 @@ Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
   if (mid < 0) return 0.0;
   // Otherwise, add offset to the n-th column and return the value.
   if (mid >= 0) mid += Ap[n];
-#ifndef HERMES_COMMON_COMPLEX
-  return Ax[mid];
-#else
-  return cplx(Ax[mid].r, Ax[mid].i);
-#endif
+  return mumps_to_scalar(Ax[mid]);
 }
 
 template<typename Scalar>
@@ -154,6 +153,12 @@ void MumpsMatrix<Scalar>::zero()
 {
   _F_
   memset(Ax, 0, sizeof(Scalar) * Ap[this->size]);
+}
+
+inline ZMUMPS_COMPLEX& operator+=(ZMUMPS_COMPLEX &a,std::complex<double> b){
+  a.r+=b.real();
+  a.i+=b.imag();
+  return a;
 }
 
 template<typename Scalar>
@@ -170,12 +175,7 @@ void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     error("Sparse matrix entry not found");
   // Add offset to the n-th column.
   pos += Ap[n];
-#ifndef HERMES_COMMON_COMPLEX
   Ax[pos] += v;
-#else
-  Ax[pos].r += v.real();
-  Ax[pos].i += v.imag();
-#endif
   irn[pos] = m + 1;  // MUMPS is indexing from 1
   jcn[pos] = n + 1;
 }
@@ -215,7 +215,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       fprintf(file, "%d\n", nnz);
       for (unsigned int i = 0; i < nnz; i++){
           fprintf(file, "%d %d ", irn[i], jcn[i]);
-          fprint_num(file,Ax[i]);
+          fprint_num(file,mumps_to_scalar(Ax[i]));
           fprintf(file, "\n");
       }
       return true;
@@ -225,7 +225,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       for (unsigned int j = 0; j < this->size; j++)
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++){
           fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-          fprint_num(file, Ax[i]);
+          fprint_num(file, mumps_to_scalar(Ax[i]));
           fprintf(file, "\n");
         }
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -300,6 +300,12 @@ void MumpsMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, MumpsMatrix<Sca
   }
 }
 
+inline ZMUMPS_COMPLEX& operator+=(ZMUMPS_COMPLEX &a,ZMUMPS_COMPLEX b){
+  a.r+=b.r;
+  a.i+=b.i;
+  return a;
+}
+
 template<typename Scalar>
 void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatrix<Scalar>* mat){
   _F_
@@ -309,12 +315,7 @@ void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatr
       idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col],mat->Ai[n]+i);
       if (idx<0)
         error("Sparse matrix entry not found");
-#ifndef HERMES_COMMON_COMPLEX
       Ax[idx]+=mat->Ax[n];
-#else      
-      Ax[idx].r+=mat->Ax[n].r;
-      Ax[idx].i+=mat->Ax[n].i;
-#endif
     }
   }
 }
@@ -327,30 +328,40 @@ void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector
   }
   Scalar a;
   for (unsigned int i=0;i<nnz;i++){
-#ifndef HERMES_COMMON_COMPLEX
-    a=Ax[i];
-#else
-    a=cplx(Ax[i].r,Ax[i].i);
-#endif
+    a=mumps_to_scalar(Ax[i]);
     vector_out[jcn[i]]+=vector_in[irn[i]]*a;
   }
 }
   // Multiplies matrix with a Scalar.
-template<typename Scalar>
-void MumpsMatrix<Scalar>::multiply_with_scalar(Scalar value){
+template<>
+void MumpsMatrix<double>::multiply_with_scalar(double value){
   int n=nnz;
-  Scalar a;
   for(int i=0;i<n;i++){
-#ifndef HERMES_COMMON_COMPLEX
     Ax[i]=Ax[i]*value;
-#else
-    a=cplx(Ax[i].r,Ax[i].i);
+  }
+}
+
+template<>
+void MumpsMatrix<std::complex<double> >::multiply_with_scalar(std::complex<double> value){
+  int n=nnz;
+  std::complex<double> a;
+  for(int i=0;i<n;i++){
+    a=std::complex<double>(Ax[i].r,Ax[i].i);
     a=a*value;
     Ax[i].r=a.real();
     Ax[i].i=a.imag();
-#endif
   }
 }
+
+inline void mumps_assign_scalar(ZMUMPS_COMPLEX & a,std::complex<double> b){
+  a.r=b.real();
+  a.i=b.imag();
+}
+
+inline void mumps_assign_scalar(double & a,double b){
+  a=b;
+}
+
   // Creates matrix using size, nnz, and the three arrays.
 template<typename Scalar>
 void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
@@ -358,7 +369,7 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   this->size = size;
   this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz]; assert(this->Ax != NULL);
   irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
   jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
 
@@ -368,12 +379,7 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   }
   this->Ap[this->size]=ap[this->size];
   for (unsigned int i = 0; i < nnz; i++) {
-#ifndef HERMES_COMMON_COMPLEX
-    this->Ax[i] = ax[i]; 
-#else
-    this->Ax[i].r=ax[i].real();
-    this->Ax[i].i=ax[i].imag();
-#endif
+    mumps_assign_scalar(this->Ax[i],ax[i]);
     this->Ai[i] = ai[i];
     irn[i]=ai[i];
   } 
@@ -387,7 +393,7 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
   nmat->size = this->size;
   nmat->Ap = new unsigned int[this->size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz]; assert(nmat->Ax != NULL);
   nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
   nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
   for (unsigned int i = 0;i<nnz;i++){
@@ -551,16 +557,6 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 #define JOB_ANALYZE_FACTORIZE_SOLVE  6
 #define JOB_FACTORIZE_SOLVE          5
 #define JOB_SOLVE                    3
-
-template<>
-std::complex<double> MumpsSolver<std::complex<double> >::mumps_to_scalar(typename mumps_type<std::complex<double> >::mumps_scalar x){
-  return std::complex<double>(x.r,x.i);
-};
-
-template<>
-double MumpsSolver<double>::mumps_to_scalar(typename mumps_type<double>::mumps_scalar x){
-  return x;
-};
 
 template<>
 void MumpsSolver<double>::mumps_c(typename mumps_type<double>::mumps_struct * param){

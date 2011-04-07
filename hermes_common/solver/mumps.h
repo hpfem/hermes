@@ -98,7 +98,7 @@ protected:
   unsigned int nnz;          // Number of non-zero elements. 
   int *irn;         // Row indices.
   int *jcn;         // Column indices.
-  Scalar *Ax; // Matrix entries (column-wise).
+  typename mumps_type<Scalar>::mumps_scalar *Ax; // Matrix entries (column-wise).
   int *Ai;          // Row indices of values in Ax.
   unsigned int *Ap;          // Index to Ax/Ai, where each column starts.
 
@@ -148,7 +148,6 @@ template <typename Scalar>
 class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
 private:
   void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
-  Scalar mumps_to_scalar(typename mumps_type<Scalar>::mumps_scalar x);
 public:
   MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
   virtual ~MumpsSolver();
