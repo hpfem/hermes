@@ -1,15 +1,16 @@
 Mathematical Background
 -----------------------
 
-Main strengths of Hermes are 
+The main strength of Hermes is a mature adaptive higher-order 
+approximation technology finite element methods (hp-FEM). 
 
- * Robust PDE-independent adaptivity algorithms. 
- * Adaptivity algorithms for time-dependent problems.
+ * Fast convergence based on advanced adaptive hp-FEM algorithms.
+ * Adaptivity with dynamical meshes for time-dependent problems.
  * Monolithic discretization of multiphysics problems.
 
 The following list describes the above in more detail:
 
-* **Mature hp-adaptivity algorithms**. Hermes puts a major emphasis on error control and automatic adaptivity. Practitioners know well how painful it is to use automatic adaptivity in conjunction with standard lower-order approximations such as linear or quadratic elements - the error decreases somehow during a few initial adaptivity steps, but then it slows down and it does not help to invest more unknowns or CPU time. This is typical for low-order methods. In contrast to this, the exponentially-convergent adaptive *hp*-FEM and *hp*-DG do not have this problem - the error drops steadily and fast during adaptivity all the way to the desired accuracy. The following graph shows typical convergence rates of *h*-FEM with linear elements, *h*-FEM with quadratic elements, and *hp*-FEM on a log-log scale:
+* **Mature adaptive hp-FEM technology**. Hermes puts a major emphasis on error control and automatic adaptivity. Practitioners know well how painful it is to use automatic adaptivity in conjunction with standard lower-order approximations such as linear or quadratic elements - the error decreases somehow during a few initial adaptivity steps, but then it slows down and it does not help to invest more unknowns or CPU time. This is typical for low-order methods. In contrast to this, the exponentially-convergent adaptive *hp*-FEM and *hp*-DG do not have this problem - the error drops steadily and fast during adaptivity all the way to the desired accuracy. The following graph shows typical convergence rates of *h*-FEM with linear elements, *h*-FEM with quadratic elements, and *hp*-FEM on a log-log scale:
 
 .. image:: hermes2d/img/intro/conv_dof.png
    :align: center
