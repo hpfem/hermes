@@ -89,6 +89,11 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
 
   int ndof = dp->get_num_dofs();
 
+  // Project the previous time level solutions onto the actual spaces to be able to add the resulting vector to
+  // the K_vector when passing the u_ext.
+  scalar* slns_prev_time_projection = new scalar[ndof];
+  OGProjection::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, SOLVER_UMFPACK);
+
   // Creates the stage weak formulation.
   create_stage_wf(dp->get_spaces().size(), current_time, time_step);
   
@@ -123,7 +128,7 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   int it = 1;
   while (true) {
     // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
-    prepare_u_ext_vec(time_step);
+    prepare_u_ext_vec(time_step, slns_prev_time_projection);
    
     multiply_as_diagonal_block_matrix(&matrix_left, num_stages, K_vector, vector_left);
 
@@ -417,17 +422,19 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   }
 }
 
-void RungeKutta::prepare_u_ext_vec(double time_step)
+void RungeKutta::prepare_u_ext_vec(double time_step, scalar* slns_prev_time_projection)
 {
-  unsigned int running_space_ndofs = 0;
-  for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++) {
-    for (unsigned int i = 0; i < num_stages; i++)
+  unsigned int ndof = dp->get_num_dofs();
+  for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++) {
+    unsigned int running_space_ndofs = 0;
+    for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++) {
       for (int idx = 0; idx < dp->get_space(space_i)->get_num_dofs(); idx++) {
         scalar increment = 0;
-        for (unsigned int j = 0; j < num_stages; j++)
-          increment += bt->get_A(i, j) * K_vector[num_stages * running_space_ndofs + j * dp->get_space(space_i)->get_num_dofs() + idx];
-        u_ext_vec[num_stages * running_space_ndofs + i * dp->get_space(space_i)->get_num_dofs() + idx] = time_step * increment;
+        for (unsigned int stage_j = 0; stage_j < num_stages; stage_j++)
+          increment += bt->get_A(stage_i, stage_j) * K_vector[stage_j * ndof + running_space_ndofs + idx];
+        u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = time_step * increment + slns_prev_time_projection[running_space_ndofs + idx];
       }
-    running_space_ndofs += dp->get_space(space_i)->get_num_dofs();
+      running_space_ndofs += dp->get_space(space_i)->get_num_dofs();
+    }
   }
 }

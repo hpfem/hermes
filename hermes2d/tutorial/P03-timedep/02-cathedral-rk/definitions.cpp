@@ -73,8 +73,8 @@ private:
       Func<Real>* sln_prev_time = ext->fn[0];
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
+        Scalar sln_dx_i = K_sln->dx[i];
+        Scalar sln_dy_i = K_sln->dy[i];
         result += -wt[i] * (sln_dx_i * v->dx[i] +  sln_dy_i * v->dy[i]);	       
       }
 
@@ -118,7 +118,7 @@ private:
       Scalar result1 = get_current_stage_time() * int_v<Real>(n, wt, v);
       Scalar result2 = 0;
       for (int i = 0; i < n; i++) {
-        Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
+        Scalar sln_val_i = K_sln->val[i];
         result2 += wt[i] * sln_val_i * v->val[i];		       
       }
       

@@ -123,7 +123,7 @@ protected:
   void create_stage_wf(unsigned int size, double current_time, double time_step);
   
   // Prepare u_ext_vec.
-  void prepare_u_ext_vec(double time_step);
+  void prepare_u_ext_vec(double time_step, scalar* slns_prev_time_projection);
 
 
   /// Members.
