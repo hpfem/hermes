@@ -6,13 +6,9 @@ class WeakFormHeatTransferRungeKuttaTimedep : public WeakForm
 {
 public:
   WeakFormHeatTransferRungeKuttaTimedep(double alpha, Solution* sln_prev_time) : WeakForm(1) {
-    MatrixFormVolHeatTransfer* matrix_form = new MatrixFormVolHeatTransfer(0, 0, alpha);
-    matrix_form->ext.push_back(sln_prev_time);
-    add_matrix_form(matrix_form);
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha));
 
-    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha);
-    vector_form->ext.push_back(sln_prev_time);
-    add_vector_form(vector_form);
+    add_vector_form(new VectorFormVolHeatTransfer(0, alpha));
   };
 
 private:
@@ -25,17 +21,12 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
-
       // Stationary part of the Jacobian matrix (time derivative term left out).
       Scalar result1 = 0, result2 = 0;
+
       for (int i = 0; i < n; i++) {
-        Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-        result1 += -wt[i] * dlam_du<Real>(sln_val_i) * u->val[i] * (sln_dx_i * v->dx[i] + sln_dy_i * v->dy[i]);
-        result2 += -wt[i] * lam<Real>(sln_val_i) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+        result1 += -wt[i] * dlam_du<Real>(u_ext[0]->val[i]) * u->val[i] * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+        result2 += -wt[i] * lam<Real>(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       }
 
       return result1 + result2;
@@ -77,16 +68,11 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
-
       // Stationary part of the residual (time derivative term left out).
       Scalar result1 = 0, result2 = 0;
+
       for (int i = 0; i < n; i++) {
-        Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-        result1 = result1 - wt[i] * lam<Real>(sln_val_i) * (sln_dx_i * v->dx[i] + sln_dy_i * v->dy[i]);
+        result1 = result1 - wt[i] * lam<Real>(u_ext[0]->val[i]) * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         result2 = result2 + wt[i] * heat_src<Real>(e->x[i], e->y[i]) * v->val[i];
       }
 
