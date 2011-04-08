@@ -96,8 +96,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)));
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u_space, &v_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u_space, &v_space));
 
   // Initialize views.
   ScalarView u_view("Solution u", new WinGeom(0, 0, 500, 400));

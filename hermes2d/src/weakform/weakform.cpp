@@ -335,97 +335,107 @@ void WeakForm::set_ext_fns(void* fn, Hermes::vector<MeshFunction*> ext)
 /// This function is identical in H2D and H3D.
 ///
 void WeakForm::get_stages(Hermes::vector<Space *> spaces, Hermes::vector<Solution *>& u_ext,
-                          std::vector<WeakForm::Stage>& stages, bool rhsonly)
+                          std::vector<WeakForm::Stage>& stages, bool want_matrix, bool want_vector)
 {
   _F_
+
+  if (!want_matrix && !want_vector) return;
+
   unsigned int i;
   stages.clear();
 
-  // process volume matrix forms
-  for (i = 0; i < mfvol.size(); i++)
-  {
-    unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
-    Mesh* m1 = spaces[ii]->get_mesh();
-    Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext);
-    s->mfvol.push_back(mfvol[i]);
-  }
-
-  // process surface matrix forms
-  for (i = 0; i < mfsurf.size(); i++)
-  {
-    unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
-    Mesh* m1 = spaces[ii]->get_mesh();
-    Mesh* m2 = spaces[jj]->get_mesh();
-    Stage* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext);
-    s->mfsurf.push_back(mfsurf[i]);
-  }
-
-  // process volume vector forms
-  for (unsigned i = 0; i < vfvol.size(); i++) {
-    unsigned int ii = vfvol[i]->i;
-    Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
-    s->vfvol.push_back(vfvol[i]);
-  }
-
-  // process surface vector forms
-  for (unsigned i = 0; i < vfsurf.size(); i++) {
-    unsigned int ii = vfsurf[i]->i;
-    Mesh *m = spaces[ii]->get_mesh();
-    Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
-    s->vfsurf.push_back(vfsurf[i]);
-  }
-
-  // Multi component forms.
-  for (unsigned i = 0; i < mfvol_mc.size(); i++) {
-    Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
-    for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++) {
-      if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
-      if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
+  if (want_matrix || want_vector) {    // This is because of linear problems where 
+                                       // matrix terms with the Dirichlet lift go to rhs.
+    // Process volume matrix forms.
+    for (i = 0; i < mfvol.size(); i++)
+    {
+      unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
+      Mesh* m1 = spaces[ii]->get_mesh();
+      Mesh* m2 = spaces[jj]->get_mesh();
+      Stage* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext);
+      s->mfvol.push_back(mfvol[i]);
     }
-    
-    Stage* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext);
-    s->mfvol_mc.push_back(mfvol_mc[i]);
-  }
-  for (unsigned i = 0; i < mfsurf_mc.size(); i++) {
-    Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
-    for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++) {
-      if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
-      if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
+
+    // Process surface matrix forms.
+    for (i = 0; i < mfsurf.size(); i++)
+    {
+      unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
+      Mesh* m1 = spaces[ii]->get_mesh();
+      Mesh* m2 = spaces[jj]->get_mesh();
+      Stage* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext);
+      s->mfsurf.push_back(mfsurf[i]);
     }
+
+    // Multi component forms.
+    for (unsigned i = 0; i < mfvol_mc.size(); i++) {
+      Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
+      for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++) {
+        if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+        if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+      }
     
-    Stage* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext);
-    s->mfsurf_mc.push_back(mfsurf_mc[i]);
-  }
-  for (unsigned i = 0; i < vfvol_mc.size(); i++) {
-    Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
-    for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
-      if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
+      Stage* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext);
+      s->mfvol_mc.push_back(mfvol_mc[i]);
+    }
+    for (unsigned i = 0; i < mfsurf_mc.size(); i++) {
+      Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
+      for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++) {
+        if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+        if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+      }
     
-    Stage *s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext);
-    s->vfvol_mc.push_back(vfvol_mc[i]);
-  }
-  for (unsigned i = 0; i < vfsurf_mc.size(); i++) {
-    Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
-    for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
-      if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-        error("When using multi-component forms, the Meshes have to be identical.");
-    
-    Stage *s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext);
-    s->vfsurf_mc.push_back(vfsurf_mc[i]);
+      Stage* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext);
+      s->mfsurf_mc.push_back(mfsurf_mc[i]);
+    }
   }
 
-  // helper macro for iterating in a set
+  if (want_vector) {
+    // Process volume vector forms.
+    for (unsigned i = 0; i < vfvol.size(); i++) {
+      unsigned int ii = vfvol[i]->i;
+      Mesh *m = spaces[ii]->get_mesh();
+      Stage *s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
+      s->vfvol.push_back(vfvol[i]);
+    }
+
+    // Process surface vector forms.
+    for (unsigned i = 0; i < vfsurf.size(); i++) {
+      unsigned int ii = vfsurf[i]->i;
+      Mesh *m = spaces[ii]->get_mesh();
+      Stage *s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
+      s->vfsurf.push_back(vfsurf[i]);
+    }
+
+    // Multi component forms.
+    for (unsigned i = 0; i < vfvol_mc.size(); i++) {
+      Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
+      for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
+        if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+    
+      Stage *s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext);
+      s->vfvol_mc.push_back(vfvol_mc[i]);
+    }
+    for (unsigned i = 0; i < vfsurf_mc.size(); i++) {
+      Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
+      for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
+        if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
+          error("When using multi-component forms, the Meshes have to be identical.");
+    
+      Stage *s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext);
+      s->vfsurf_mc.push_back(vfsurf_mc[i]);
+    }
+  }
+
+  // Helper macro for iterating in a set,
 #define set_for_each(myset, type) \
   for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
 
-  // initialize the arrays meshes and fns needed by Traverse for each stage
+  // Initialize the arrays meshes and fns needed by Traverse for each stage.
   for (i = 0; i < stages.size(); i++)
   {
     Stage* s = &stages[i];
