@@ -91,17 +91,21 @@ int main(int argc, char* argv[])
   Tview.fix_scale_width(30);
 
   // Time stepping:
-  int ts = 1; bool rhs_only = false;
+  int ts = 1;
   do 
   {
     info("---- Time step %d, time %3.5f s", ts, current_time);
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    dp.assemble(matrix, rhs, rhs_only);
-    rhs_only = true;
+    if (ts == 1) {
+      info("Assembling the stiffness matrix and right-hand side vector.");
+      dp.assemble(matrix, rhs);
+    }
+    else {
+      info("Assembling the right-hand side vector (only).");
+      dp.assemble(NULL, rhs);
+    }
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
