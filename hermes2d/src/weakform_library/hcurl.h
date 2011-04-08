@@ -50,6 +50,7 @@ namespace WeakFormsHcurl {
 
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearCurlCurl(*this);
+      }
 
       private:
         double coeff;
@@ -85,6 +86,7 @@ namespace WeakFormsHcurl {
 
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearMass(*this);
+      }
 
       private:
         double coeff;
@@ -122,6 +124,7 @@ namespace WeakFormsHcurl {
 
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultVectorFormConst(*this);
+      }
 
       private:
         double coeff0, coeff1;
