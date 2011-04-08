@@ -215,6 +215,7 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
   if (mat != NULL)  
   {
     // Spaces have changed: create the matrix from scratch.
+    have_matrix = true;
     mat->free();
     mat->prealloc(ndof);
 
@@ -371,7 +372,6 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
   wf_seq = wf->get_seq();
 
   struct_changed = true;
-  have_matrix = true;
 }
 
 //// assembly ////////////////////////////////////////////////////////////////////
