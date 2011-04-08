@@ -61,6 +61,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearDiffusion(*this);
+      }
 
       private:
         scalar coeff;
@@ -75,10 +76,10 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
+      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
-      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0,
+      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
@@ -108,10 +109,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultJacobianNonlinearDiffusion(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
 
@@ -155,6 +157,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearMagnetostatics(*this);
+      }
 
       private:
         scalar coeff;
@@ -169,13 +172,13 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
                                              SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
 	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), 
                                   order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
-                                             CubicSpline* spline_coeff, double const_coeff = 1.0, SymFlag sym = HERMES_NONSYM,
+                                             CubicSpline* spline_coeff, scalar const_coeff = 1.0, SymFlag sym = HERMES_NONSYM,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), 
                                       order_increase(order_increase) { }
@@ -237,10 +240,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultJacobianNonlinearMagnetostatics(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
         int order_increase;
     };
@@ -282,6 +286,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearMass(*this);
+      }
 
       private:
         scalar coeff;
@@ -295,11 +300,11 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
+      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
                                    SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
       DefaultJacobianNonlinearMass(int i, int j, std::string area, 
-                                   CubicSpline* spline_coeff, double const_coeff = 1.0, SymFlag sym = HERMES_SYM, 
+                                   CubicSpline* spline_coeff, scalar const_coeff = 1.0, SymFlag sym = HERMES_SYM, 
                                    GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
@@ -326,10 +331,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultJacobianNonlinearMass(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
 
@@ -340,9 +346,9 @@ namespace WeakFormsH1 {
     class DefaultLinearAdvection : public WeakForm::MatrixFormVol
     {
     public:
-     DefaultLinearAdvection(int i, int j, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
+      DefaultLinearAdvection(int i, int j, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
-     DefaultLinearAdvection(int i, int j, std::string area, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
+      DefaultLinearAdvection(int i, int j, std::string area, scalar coeff1, scalar coeff2, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), coeff1(coeff1), coeff2(coeff2), gt(gt) { }
 
       template<typename Real, typename Scalar>
@@ -365,6 +371,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
         return new DefaultLinearAdvection(*this);
+      }
 
       private:
       scalar coeff1, coeff2;
@@ -383,12 +390,12 @@ namespace WeakFormsH1 {
     {
     public:
      DefaultJacobianNonlinearAdvection(int i, int j, CubicSpline* spline_coeff1, 
-                                       CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+                                       CubicSpline* spline_coeff2, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
 	spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
      DefaultJacobianNonlinearAdvection(int i, int j, std::string area, 
                                        CubicSpline* spline_coeff1, CubicSpline* spline_coeff2, 
-                                       double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+                                       scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
 	                         spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
 
@@ -417,11 +424,12 @@ namespace WeakFormsH1 {
 
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormVol* clone() {
-        return new DefaultJacobianNonlinearAdvecttion(*this);
+        return new DefaultJacobianNonlinearAdvection(*this);
+      }
 
       private:
       CubicSpline* spline_coeff1, *spline_coeff2;
-      double const_coeff;
+      scalar const_coeff;
       GeomType gt;
     };
   }
@@ -473,6 +481,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultVectorFormConst(*this);
+      }
 
       private:
         scalar coeff;
@@ -516,6 +525,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultResidualLinearDiffusion(*this);
+      }
 
       private:
         scalar coeff;
@@ -530,9 +540,9 @@ namespace WeakFormsH1 {
     class DefaultResidualNonlinearDiffusion : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+      DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
-      DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+      DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
@@ -560,10 +570,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultResidualNonlinearDiffusion(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
 
@@ -603,6 +614,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultResidualLinearMagnetostatics(*this);
+      }
 
       private:
         scalar coeff;
@@ -618,10 +630,10 @@ namespace WeakFormsH1 {
     class DefaultResidualNonlinearMagnetostatics : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR, 
+      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
 	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
-      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0,
+      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
 	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
 
@@ -656,10 +668,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultResidualNonlinearMagnetostatics(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff; 
+        scalar const_coeff; 
         GeomType gt;
         int order_increase;
     };
@@ -702,6 +715,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultResidualLinearAdvection(*this);
+      }
 
       private:
         scalar coeff1, coeff2;
@@ -717,10 +731,10 @@ namespace WeakFormsH1 {
     {
     public:
     DefaultResidualNonlinearAdvection(int i, CubicSpline* spline_coeff1, 
-                                      CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR)
+                                      CubicSpline* spline_coeff2, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR)
       : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
       DefaultResidualNonlinearAdvection(int i, std::string area, CubicSpline* spline_coeff1, 
-                                        CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+                                        CubicSpline* spline_coeff2, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), const_coeff(const_coeff), 
 	gt(gt) { }
 
@@ -748,11 +762,12 @@ namespace WeakFormsH1 {
 
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
-        return new DefaultResidualNonlinearAdvaction(*this);
+        return new DefaultResidualNonlinearAdvection(*this);
+      }
 
       private:
         CubicSpline* spline_coeff1, *spline_coeff2;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
 
@@ -788,6 +803,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormVol* clone() {
         return new DefaultVectorFormNonConst(*this);
+      }
 
       private:
         RightHandSides::DefaultNonConstRightHandSide* rhs;
@@ -830,6 +846,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormSurf* clone() {
         return new DefaultMatrixFormSurf(*this);
+      }
 
       private:
         scalar coeff;
@@ -843,11 +860,11 @@ namespace WeakFormsH1 {
     class DefaultJacobianFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultJacobianFormSurf(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0, 
-                                  GeomType gt = HERMES_PLANAR) 
+      DefaultJacobianFormSurf(int i, int j, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
+                              GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
       DefaultJacobianFormSurf(int i, int j, std::string area, CubicSpline* spline_coeff, 
-                                  double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+                              scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
@@ -857,7 +874,7 @@ namespace WeakFormsH1 {
         for (int i = 0; i < n; i++) {
           result += wt[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u_ext[0]->val[i]
                              + const_coeff*spline_coeff->get_value(u_ext[0]->val[i]))  
-                          * u->val[i] * v->val[i]);
+	                  * u->val[i] * v->val[i];
         }
         return result;
       }
@@ -875,10 +892,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::MatrixFormSurf* clone() {
         return new DefaultJacobianFormSurf(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
   }
@@ -920,6 +938,7 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormSurf* clone() {
         return new DefaultVectorFormSurf(*this);
+      }
 
       private:
         scalar coeff;
@@ -962,14 +981,18 @@ namespace WeakFormsH1 {
             return int_x_v<Ord>(n, wt, v, e);
       }
 
+      /*
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormSurf* clone() {
         return new MultiComponentDefaultVectorFormSurf(*this);
+      }
+      */
 
       private:
         Hermes::vector<scalar> coeffs;
         GeomType gt;
-      };
+    };
+
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
        spline_coeff... non-constant parameter given by cubic spline
@@ -978,10 +1001,10 @@ namespace WeakFormsH1 {
     class DefaultResidualFormSurf : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultResidualFormSurf(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, 
+      DefaultResidualFormSurf(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
                               GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
-      DefaultResidualFormSurf(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0, 
+      DefaultResidualFormSurf(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
                               GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
@@ -1008,10 +1031,11 @@ namespace WeakFormsH1 {
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormSurf* clone() {
         return new DefaultResidualFormSurf(*this);
+      }
 
       private:
         CubicSpline* spline_coeff;
-        double const_coeff;
+        scalar const_coeff;
         GeomType gt;
     };
   }
@@ -1030,4 +1054,5 @@ namespace WeakFormsH1 {
     };
   }
 }
+
 #endif
