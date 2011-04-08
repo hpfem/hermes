@@ -23,6 +23,54 @@
 #include "../utils.h"
 #include "../callstack.h"
 
+
+#ifdef SLU_MT
+template <>    
+void SuperLu<double>::sequ(SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info){
+  dsequ (A,r,c,rowcnd, colcnd,amax,info);
+}
+
+template <>    
+void SuperLu<double>::laqgs (SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed){
+  dlaqgs (A, r, c, rowcnd, colcnd, amax, equed);
+}
+
+template <>    
+int_t SuperLu<double>::gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info){
+  return dgstrf (options, m, n, anorm, LUstruct, grid, stat, info);
+}
+
+template <>    
+float SuperLu<double>::pivotGrowth (int ncols, SuperMatrix *A, int *perm_c, SuperMatrix *L, SuperMatrix *U){
+  return dPivotGrowth (ncols, A, perm_c, L, U);
+}
+
+template <>    
+float SuperLu<double>::langs (char *norm, SuperMatrix *A){
+  return dlangs (norm, A);
+}
+template <>    
+void  SuperLu<double>::gscon (char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info){
+  dgscon (norm, L, U, anorm, rcond, stat, info);
+}
+
+template <>    
+void  SuperLu<double>::gstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U, int *perm_c, int *perm_r, SuperMatrix *B, SuperLUStat_t *stat, int *info){
+  dgstrs (trans, L, U, perm_c, perm_r, B, stat, info);
+}
+
+template <>    
+double SuperLu<double>::lamch_ (char *cmach){
+  return dlamch_ (cmach);
+}
+
+template <>    
+int SuperLu<double>::querySpace (SuperMatrix *a, SuperMatrix *b, mem_usage_t *mu){
+  return dquerySpace (a, b,mu);
+}
+#endif
+
+
 // Binary search for the location of a particular CSC/CSR matrix entry.
 //
 // Typically, we search for the index into Ax that corresponds to a given 
@@ -498,6 +546,35 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
 }
 
 // SUPERLU solver ////////////////////////////////////////////////////////////////////////////////////
+#ifndef SLU_MT
+template <>
+void  SuperLUSolver<double>::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
+                                          double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, 
+                                          double *recip_pivot_growth, double *rcond, double *ferr, double *berr, mem_usage_t *mem_usage, SuperLUStat_t *stat, 
+                                          int *info){
+  dSuperLu::dgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, mem_usage, stat, info);
+}
+
+template <>
+void SuperLUSolver<std::complex<double> >::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, 
+                        typename SuperLuType<std::complex<double> >::scalar *nzval, 
+                        int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+  zSuperLu::zCreate_CompCol_Matrix (A, m, n, nnz, nzval, rowind, colptr, stype, dtype, mtype);
+}
+
+template <>
+void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<double>::scalar *nzval, 
+                        int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+  dSuperLu::dCreate_CompCol_Matrix (A, m, n, nnz, nzval, rowind, colptr, stype, dtype, mtype);
+}
+
+template<>
+void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<std::complex<double> >::scalar *x, 
+                                                          int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+    zCreate_Dense_Matrix (X, m, n, x, ldx, stype, dtype, mtype);
+}
+
+#endif
 
 template<typename Scalar>
 bool SuperLUSolver<Scalar>::check_status(unsigned int info)
@@ -590,6 +667,18 @@ SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Sca
 #endif
 }
 
+
+typename SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b){
+  a.r=b.real();
+  a.i=b.imag();
+  return a;
+}
+
+typename SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b){
+  a=b;
+  return a;
+}
+
 template<typename Scalar>
 SuperLUSolver<Scalar>::~SuperLUSolver()
 {
@@ -646,7 +735,7 @@ bool SuperLUSolver<Scalar>::solve()
   // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it 
   // from the master SuperLUMatrix<Scalar> pointed to by this->m (this also applies to the case when 
   // A does not yet exist).
-  if (!has_A || factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+  if (!has_A || this->factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
   {
     if (A_changed) 
       free_matrix();
@@ -664,11 +753,12 @@ bool SuperLUSolver<Scalar>::solve()
       memcpy(local_Ap, m->Ap, (m->size+1) * sizeof(int));
       
       if (local_Ax) delete [] local_Ax;
-      local_Ax = new Scalar [m->nnz];
-      memcpy(local_Ax, m->Ax, m->nnz * sizeof(Scalar));
+      local_Ax = new typename SuperLuType<Scalar>::scalar[m->nnz];
+      for (unsigned int i=0;i<m->nnz;i++)
+        to_superlu(local_Ax[i],m->Ax[i]);
       
       // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
-      SLU_CREATE_CSC_MATRIX(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
+      create_csc_matrix(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
       
       has_A = true;
     }
@@ -678,19 +768,20 @@ bool SuperLUSolver<Scalar>::solve()
   free_rhs();
  
   if (local_rhs) delete [] local_rhs;
-  local_rhs = new Scalar [rhs->size];
-  memcpy(local_rhs, rhs->v, rhs->size * sizeof(Scalar));
+  local_rhs = new typename SuperLuType<Scalar>::scalar[rhs->size];
+  for (unsigned int i=0;i<rhs->size;i++)
+    to_superlu(local_rhs[i],rhs->v[i]);
   
-  SLU_CREATE_DENSE_MATRIX(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
+  create_dense_matrix(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
   
   has_B = true;
   
   // Initialize the solution variable.
-  SuperMatrix<Scalar> X;
-  Scalar *x;
-  if ( !(x = Scalar_MALLOC(m->size)) ) 
+  SuperMatrix X;
+  typename SuperLuType<Scalar>::scalar *x;
+  if ( !(x = new typename SuperLuType<Scalar>::scalar[m->size]) ) 
     error("Malloc fails for x[].");
-  SLU_CREATE_DENSE_MATRIX(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
+  create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
     
   // Solve the system.
   int info;
@@ -735,7 +826,7 @@ bool SuperLUSolver<Scalar>::solve()
                         &stat, NULL, &info );                        
 */
 #else
-  SLU_SOLVER_DRIVER(&options, &A, perm_c, perm_r, etree, equed, R, C, &L, &U,
+  solver_driver(&options, &A, perm_c, perm_r, etree, equed, R, C, &L, &U,
                     work, lwork, &B, &X, &rpivot_growth, &rcond, &ferr, &berr,
                     &memusage, &stat, &info);
 #endif
@@ -754,16 +845,16 @@ bool SuperLUSolver<Scalar>::solve()
   
   if (factorized) 
   {
-    delete [] sln;
-    sln = new Scalar[m->size];
+    delete [] this->sln;
+    this->sln = new Scalar[m->size];
     
     Scalar *sol = (Scalar*) ((DNformat*) X.Store)->nzval; 
     
     for (unsigned int i = 0; i < rhs->size; i++)
 #ifndef HERMES_COMMON_COMPLEX      
-      sln[i] = sol[i];
+      this->sln[i] = sol[i];
 #else
-      sln[i] = cplx(sol[i].r, sol[i].i);
+      this->sln[i] = cplx(sol[i].r, sol[i].i);
 #endif
   }
   
@@ -772,11 +863,12 @@ bool SuperLUSolver<Scalar>::solve()
   
   // Free temporary local variables.
   StatFree(&stat);
-  SUPERLU_FREE (x);
-  Destroy_SuperMatrix<Scalar>_Store(&X);
+  //SUPERLU_FREE (x);
+  delete x;
+  Destroy_SuperMatrix_Store(&X);
   
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
   
   return factorized;
 #else
@@ -790,7 +882,7 @@ bool SuperLUSolver<Scalar>::setup_factorization()
   _F_
 #ifdef WITH_SUPERLU
   unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
-  if (has_A && factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
+  if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
   {
     warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
     return false;
@@ -801,7 +893,7 @@ bool SuperLUSolver<Scalar>::setup_factorization()
   if (!inited)
     eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
   else
-    eff_fact_scheme = factorization_scheme;
+    eff_fact_scheme = this->factorization_scheme;
   
   // Prepare factorization structures. In case of a particular reuse scheme, comments are given
   // to clarify which arguments will be reused and which will be reset by the dgssvx (zgssvx) routine. 
@@ -900,7 +992,7 @@ void SuperLUSolver<Scalar>::free_matrix()
 #ifdef WITH_SUPERLU  
   if (has_A)
   {
-    Destroy_SuperMatrix<Scalar>_Store(&A);
+    Destroy_SuperMatrix_Store(&A);
     has_A = false;
   }
 #endif  
@@ -913,7 +1005,7 @@ void SuperLUSolver<Scalar>::free_rhs()
   #ifdef WITH_SUPERLU  
   if (has_B)
   {
-    Destroy_SuperMatrix<Scalar>_Store(&B);
+    Destroy_SuperMatrix_Store(&B);
     has_B = false;
   }
   #endif  
@@ -971,11 +1063,11 @@ void SuperLUSolver<Scalar>::free_factorization_data()
 //                          estimates of the computed solution;
 //  * memusage            - memory usage during the factorization/solution will not be queried.
 //
-void slu_mt_solver_driver(slu_options_t *options, SuperMatrix<Scalar> *A, 
-                          int *perm_c, int *perm_r, SuperMatrix<Scalar> *AC,
+void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A, 
+                          int *perm_c, int *perm_r, SuperMatrix *AC,
                           equed_t *equed, double *R, double *C,
-                          SuperMatrix<Scalar> *L, SuperMatrix<Scalar> *U,
-                          SuperMatrix<Scalar> *B, SuperMatrix<Scalar> *X, 
+                          SuperMatrix *L, SuperMatrix *U,
+                          SuperMatrix *B, SuperMatrix *X, 
                           double *recip_pivot_growth, double *rcond, 
                           double *ferr, double *berr, 
                           slu_stat_t *stat, slu_memusage_t *memusage,

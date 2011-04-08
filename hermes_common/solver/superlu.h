@@ -24,96 +24,34 @@
 #include "../matrix.h"
 
 #ifdef WITH_SUPERLU  
-  #ifndef HERMES_COMMON_COMPLEX
-    #ifdef SLU_MT
-      #include <pdsp_defs.h>  
-            
-      #define SLU_GSEQU         dgsequ
-      #define SLU_LAQGS         dlaqgs
-      #define SLU_SP_COLORDER   sp_colorder
-      #define SLU_GSTRF         pdgstrf
-      #define SLU_PIVOT_GROWTH  dPivotGrowth
-      #define SLU_LANGS         dlangs
-      #define SLU_GSCON         dgscon
-      #define SLU_GSTRS         dgstrs
-      #define SLU_GSRFS         dgsrfs
-      #define SLU_LAMCH_        dlamch_
-      #define SLU_QUERY_SPACE   superlu_dQuerySpace
-      
-      #define SLU_MULT(a,b)     a *= b
-      
-    #else
-      #include <slu_ddefs.h>
-    #endif
-    
-    #define SLU_DTYPE               SLU_D
-    #define SLU_CREATE_DENSE_MATRIX dCreate_Dense_Matrix
-    #define SLU_CREATE_CSC_MATRIX   dCreate_CompCol_Matrix
-    #define SLU_PRINT_CSC_MATRIX    dPrint_CompCol_Matrix
-    #define Scalar_MALLOC       doubleMalloc
-    
-    #ifndef SLU_MT
-      #define SLU_SOLVER_DRIVER     dgssvx
-    #endif
-    
-    #define SUPERLU_SCALAR(a) SCALAR(a)
-  #else
-    #ifdef SLU_MT
-      #include <pzsp_defs.h>
-      
-      #define SLU_GSEQU         zgsequ
-      #define SLU_LAQGS         zlaqgs
-      #define SLU_SP_COLORDER   sp_colorder
-      #define SLU_GSTRF         pzgstrf
-      #define SLU_PIVOT_GROWTH  zPivotGrowth
-      #define SLU_LANGS         zlangs
-      #define SLU_GSCON         zgscon
-      #define SLU_GSTRS         zgstrs
-      #define SLU_GSRFS         zgsrfs
-      #define SLU_LAMCH_        dlamch_
-      #define SLU_QUERY_SPACE   superlu_zQuerySpace
-      
-      #define SLU_MULT(a,b)     zd_mult(&a, &a, b)
-      
-    #else
-      #include <slu_zdefs.h>
-    #endif
-    
-    #define SLU_DTYPE               SLU_Z
-    #define SLU_CREATE_DENSE_MATRIX zCreate_Dense_Matrix
-    #define SLU_CREATE_CSC_MATRIX   zCreate_CompCol_Matrix
-    #define SLU_PRINT_CSC_MATRIX    zPrint_CompCol_Matrix
-    #define Scalar_MALLOC       doublecomplexMalloc
-    
-    #ifndef SLU_MT
-      #define SLU_SOLVER_DRIVER     zgssvx
-    #endif
-    
-    #define SUPERLU_SCALAR(a) a.r, a.i
-  #endif
-  
   #ifdef SLU_MT
-    typedef superlumt_options_t       slu_options_t;
-    typedef Gstat_t                   slu_stat_t;
-    typedef superlu_memusage_t        slu_memusage_t;
-    #define SLU_DESTROY_L             Destroy_SuperNode_SCP 
-    #define SLU_DESTROY_U             Destroy_CompCol_NCP
-    #define SLU_INIT_STAT(stat_ptr)   StatAlloc(m->size, options.nprocs,\
-                                                options.panel_size, options.relax,\
-                                                stat_ptr);\
-                                      StatInit(m->size, options.nprocs, stat_ptr)  
-    #define SLU_PRINT_STAT(stat_ptr)  PrintStat(stat_ptr)    
-    
-    void slu_mt_solver_driver(slu_options_t *options, SuperMatrix *A, 
-                              int *perm_c, int *perm_r, SuperMatrix *AC,
-                              equed_t *equed, double *R, double *C,
-                              SuperMatrix *L, SuperMatrix *U,
-                              SuperMatrix *B, SuperMatrix *X, 
-                              double *recip_pivot_growth, double *rcond, 
-                              double *ferr, double *berr, 
-                              slu_stat_t *stat, slu_memusage_t *memusage,
-                              int *info);        
+    #include <pdsp_defs.h>  
+    #include <pzsp_defs.h>
+    template <typename Scalar>    
+    class SuperLu{
+      public:
+        void gsequ (SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info);
+        void laqgs (SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed);
+        int_t gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info);
+        float pivotGrowth (int ncols, SuperMatrix *A, int *perm_c, SuperMatrix *L, SuperMatrix *U);
+        float langs (char *norm, SuperMatrix *A);
+        void  gscon (char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info);
+        void  gstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U, int *perm_c, int *perm_r, SuperMatrix *B, SuperLUStat_t *stat, int *info);
+        double lamch_ (char *cmach);
+        int querySpace (SuperMatrix *, SuperMatrix *, mem_usage_t *);
+    }
   #else
+    typedef int int_t; /* default */
+    #include <slu_Cnames.h>
+    #include <supermatrix.h>
+    #include <slu_util.h>
+    namespace zSuperLu{ 
+      #include <slu_zdefs.h>
+    };
+    namespace dSuperLu{ 
+      #include <slu_ddefs.h>
+    };
+
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
     typedef mem_usage_t               slu_memusage_t;
@@ -121,17 +59,25 @@
     #define SLU_DESTROY_U             Destroy_CompCol_Matrix
     #define SLU_INIT_STAT(stat_ptr)   StatInit(stat_ptr)
     #define SLU_PRINT_STAT(stat_ptr)  StatPrint(stat_ptr)
+
+    #define SLU_DTYPE                 SLU_Z
+
+    #define SLU_PRINT_CSC_MATRIX    zPrint_CompCol_Matrix
+    #define Scalar_MALLOC       doublecomplexMalloc
+
+    template<typename Scalar> struct SuperLuType;
+
+    template<>
+    struct SuperLuType<double>{
+      typedef double scalar;
+    };
+
+    template<>
+    struct SuperLuType<std::complex<double> >{
+      typedef zSuperLu::doublecomplex scalar;
+    };
+
   #endif
-#else
-/*
-  #ifndef HERMES_COMMON_COMPLEX
-    typedef scalar Scalar;
-    #define SUPERLU_SCALAR(a) SCALAR(a)
-  #else
-    typedef struct  { double r, i; } Scalar;
-    #define SUPERLU_SCALAR(a) a.r, a.i
-  #endif
-  */
 #endif
 
 template <typename Scalar> class SuperLUSolver;
@@ -217,6 +163,15 @@ friend class SuperLUSolver<Scalar>;
 /// @ingroup solvers
 template <typename Scalar>
 class HERMES_API SuperLUSolver : public LinearSolver<Scalar> {
+private:
+#ifndef SLU_MT
+  void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::scalar *nzval, int *rowind, int *colptr, 
+                       Stype_t stype, Dtype_t dtype, Mtype_t mtype);
+  void  solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
+                         double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth, 
+                         double *rcond, double *ferr, double *berr, mem_usage_t *mem_usage, SuperLUStat_t *stat, int *info);
+  void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
+#endif  
 public:
   SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
   virtual ~SuperLUSolver();
@@ -238,7 +193,7 @@ protected:
   // Deep copies of matrix and rhs data vectors (they may be changed by the solver driver,
   // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
   int *local_Ai, *local_Ap;
-  Scalar *local_Ax, *local_rhs;
+  typename SuperLuType<Scalar>::scalar *local_Ax, *local_rhs;
   
   bool setup_factorization();
   void free_factorization_data();
