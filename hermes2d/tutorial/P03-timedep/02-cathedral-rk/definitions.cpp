@@ -69,14 +69,10 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Func<Real>* K_sln = u_ext[0];
-      Func<Real>* sln_prev_time = ext->fn[0];
       Scalar result = 0;
-      for (int i = 0; i < n; i++) {
-        Scalar sln_dx_i = K_sln->dx[i];
-        Scalar sln_dy_i = K_sln->dy[i];
-        result += -wt[i] * (sln_dx_i * v->dx[i] +  sln_dy_i * v->dy[i]);	       
-      }
+
+      for (int i = 0; i < n; i++)
+        result += -wt[i] * (u_ext[0]->dx[i] * v->dx[i] +  u_ext[0]->dy[i] * v->dy[i]);	       
 
       return lambda / (heatcap * rho) * result;
     }
@@ -112,15 +108,11 @@ private:
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                             Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
-
       Scalar result1 = get_current_stage_time() * int_v<Real>(n, wt, v);
       Scalar result2 = 0;
-      for (int i = 0; i < n; i++) {
-        Scalar sln_val_i = K_sln->val[i];
-        result2 += wt[i] * sln_val_i * v->val[i];		       
-      }
+      
+      for (int i = 0; i < n; i++)
+        result2 += wt[i] * u_ext[0]->val[i] * v->val[i];		       
       
       return lambda * alpha / (rho * heatcap) * (result1 - result2);
     }
