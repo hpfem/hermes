@@ -166,11 +166,7 @@ Scalar SuperLUMatrix<Scalar>::get(unsigned int m, unsigned int n)
   if (mid < 0) return 0.0;
   // Otherwise, add offset to the n-th column and return the value.
   if (mid >= 0) mid += Ap[n];
-#ifndef HERMES_COMMON_COMPLEX
   return Ax[mid];
-#else
-  return cplx(Ax[mid].r, Ax[mid].i);
-#endif
 }
 
 template<typename Scalar>
@@ -193,12 +189,7 @@ void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
       error("Sparse matrix entry not found");
     // Add offset to the n-th column.
     pos += Ap[n];
-#ifndef HERMES_COMMON_COMPLEX
     Ax[pos] += v;
-#else
-    Ax[pos].r += v.real();
-    Ax[pos].i += v.imag();
-#endif
   }
 }
 
@@ -235,13 +226,11 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
       for (unsigned int j = 0; j < this->size; j++)
-        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
-          /*
-#ifndef HERMES_COMMON_COMPLEX          
-          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));
-#else          
-        fprintf(file, "%d %d %lf+%lfi\n", Ai[i] + 1, j + 1, SUPERLU_SCALAR(Ax[i]));
-#endif      */    
+        for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++){
+          fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
+          fprint_num(file, Ax[i]);
+          fprintf(file,"\n", Ax[i]);
+        }
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
       
       return true;
@@ -320,12 +309,7 @@ void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLU
       if (idx<0)
         error("Sparse matrix entry not found");
       idx += Ap[col+j];
-#ifndef HERMES_COMMON_COMPLEX
       Ax[idx]+=mat->Ax[n];
-#else
-      Ax[idx].r+=mat->Ax[n].r;
-      Ax[idx].i+=mat->Ax[n].i;
-#endif
     }
   }
 }
@@ -341,12 +325,7 @@ void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vect
   Scalar a;
   for (unsigned int c=0;c<this->size;c++){
     for (unsigned int i=Ap[c];i<Ap[c+1];i++){
-#ifndef HERMES_COMMON_COMPLEX
-      a=Ax[i];
-#else
-      a=cplx(Ax[i].r,Ax[i].i);
-#endif
-      vector_out[c]+=vector_in[Ai[i]]*a;
+      vector_out[c]+=vector_in[Ai[i]]*Ax[i];
     }
   }
 }
@@ -359,14 +338,7 @@ void SuperLUMatrix<Scalar>::multiply_with_scalar(Scalar value){
   int n=nnz;
   Scalar a;
   for(int i=0;i<n;i++){
-#ifndef HERMES_COMMON_COMPLEX
     Ax[i]=Ax[i]*value;
-#else
-    a=cplx(Ax[i].r,Ax[i].i);
-    a=a*value;
-    Ax[i].r=a.real();
-    Ax[i].i=a.imag();
-#endif
   }
 }
   // Creates matrix using size, nnz, and the three arrays.
@@ -384,12 +356,7 @@ void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap,
     this->Ap[i] = ap[i];
   }
   for (unsigned int i = 0; i < nnz; i++) {
-#ifndef HERMES_COMMON_COMPLEX
     this->Ax[i] = ax[i]; 
-#else
-    this->Ax[i].r=ax[i].real();
-    this->Ax[i].i=ax[i].imag();
-#endif
     this->Ai[i] = ai[i];
   } 
 }
@@ -453,14 +420,7 @@ template<typename Scalar>
 void SuperLUVector<Scalar>::change_sign()
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
-#else
-  for (unsigned int i = 0; i < this->size; i++) {
-    v[i].r *= -1.;
-    v[i].i *= -1.;
-  }
-#endif
 }
 
 template<typename Scalar>
@@ -476,24 +436,14 @@ template<typename Scalar>
 void SuperLUVector<Scalar>::set(unsigned int idx, Scalar y)
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   v[idx] = y;
-#else
-  v[idx].r = y.real();
-  v[idx].i = y.imag();
-#endif
 }
 
 template<typename Scalar>
 void SuperLUVector<Scalar>::add(unsigned int idx, Scalar y)
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   v[idx] += y;
-#else
-  v[idx].r += y.real();
-  v[idx].i += y.imag();
-#endif
 }
 
 template<typename Scalar>
@@ -501,12 +451,7 @@ void SuperLUVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++) {
-#ifndef HERMES_COMMON_COMPLEX
     v[idx[i]] += y[i];
-#else
-    v[idx[i]].r += y[i].real();
-    v[idx[i]].i += y[i].imag();
-#endif
   }
 }
 
@@ -518,15 +463,19 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   {
     case DF_NATIVE:
     case DF_PLAIN_ASCII:
-      for (unsigned int i = 0; i < this->size; i++)
-        //fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file, v[i]);
+        fprintf(file, "\n");
+      }
       
       return true;
       
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-      for (unsigned int i = 0; i < this->size; i++)
-       // fprintf(file, SCALAR_FMT "\n", SUPERLU_SCALAR(v[i]));
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file, v[i]);
+        fprintf(file, "\n");
+      }
       fprintf(file, " ];\n");
       return true;
       
@@ -851,11 +800,7 @@ bool SuperLUSolver<Scalar>::solve()
     Scalar *sol = (Scalar*) ((DNformat*) X.Store)->nzval; 
     
     for (unsigned int i = 0; i < rhs->size; i++)
-#ifndef HERMES_COMMON_COMPLEX      
       this->sln[i] = sol[i];
-#else
-      this->sln[i] = cplx(sol[i].r, sol[i].i);
-#endif
   }
   
   // If required, print statistics.
