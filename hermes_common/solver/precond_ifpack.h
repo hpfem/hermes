@@ -25,7 +25,7 @@
 /// Preconditioners built on IFPACK
 ///
 /// @ingroup preconds
-class IfpackPrecond: public Precond {
+class HERMES_API IfpackPrecond: public Precond {
 public:
   /// Constructor for relaxation methods
   /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]

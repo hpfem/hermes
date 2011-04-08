@@ -331,11 +331,13 @@ void EpetraVector::free()
 {
   _F_
 #ifdef HAVE_EPETRA
-  delete std_map; std_map = NULL;
-  delete vec; vec = NULL;
+  if(this->owner) {
+    delete std_map; std_map = NULL;
+    delete vec; vec = NULL;
 #ifdef HERMES_COMMON_COMPLEX
-  delete vec_im; vec_im = NULL;
+    delete vec_im; vec_im = NULL;
 #endif
+  }
   size = 0;
 #endif
 }
