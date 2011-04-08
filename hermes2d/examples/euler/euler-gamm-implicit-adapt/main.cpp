@@ -15,7 +15,7 @@ using namespace RefinementSelectors;
 // BC: Normal velocity component is zero on solid walls.
 //     Subsonic state prescribed on inlet and outlet.
 //
-// IC: Constant subsonic state identical to inlet. 
+// IC: Constant subsonic state identical to inlet.
 //
 // The following parameters can be changed:
 // Visualization.
@@ -26,6 +26,7 @@ const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
+const double NOX_NONLINEAR_TOLERANCE = 1e-1;
 
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
@@ -34,8 +35,9 @@ double DISCONTINUITY_DETECTOR_PARAM = 1;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY = 3;              // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-double time_step = 1E-2;                          // Time step.
+const int INIT_REF_NUM_BOUNDARY_ANISO = 2;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM_BOUNDARY_ISO = 2;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
+double time_step = 1E-3;                          // Time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -65,7 +67,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.4;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -103,7 +105,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
     basemesh.refine_all_elements(0, true);
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY, true, false, true);
+  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
+  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
   mesh.copy(&basemesh);
 
   // Initialize boundary condition types and spaces with default shapesets.
@@ -161,7 +164,7 @@ int main(int argc, char* argv[])
   L2ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Select preconditioner.
-  RCP<Precond> pc = rcp(new MlPrecond("sa"));
+  RCP<Precond> pc = rcp(new IfpackPrecond("point-relax"));
 
   int iteration = 0; double t = 0;
   for(t = 0.0; t < 3.0; t += time_step) {
@@ -172,10 +175,10 @@ int main(int argc, char* argv[])
       REFINEMENT_COUNT = 0;
       info("Global mesh derefinement.");
       mesh.unrefine_all_elements();
-      space_rho.set_uniform_order(P_INIT);
-      space_rho_v_x.set_uniform_order(P_INIT);
-      space_rho_v_y.set_uniform_order(P_INIT);
-      space_e.set_uniform_order(P_INIT);
+      space_rho.adjust_element_order(-1, P_INIT);
+      space_rho_v_x.adjust_element_order(-1, P_INIT);
+      space_rho_v_y.adjust_element_order(-1, P_INIT);
+      space_e.adjust_element_order(-1, P_INIT);
     }
 
     // Adaptivity loop:
@@ -185,8 +188,7 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      // Global polynomial order increase = 0;
-      int order_increase = 0;
+      int order_increase = 1;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
 
@@ -202,9 +204,9 @@ int main(int argc, char* argv[])
   
       // Initialize NOX solver.
       NoxSolver solver(&dp);
-      solver.set_ls_tolerance(1E-2);
+      solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
       solver.disable_abs_resid();
-      solver.set_conv_rel_resid(0.50);
+      solver.set_conv_rel_resid(NOX_NONLINEAR_TOLERANCE);
 
       if(PRECONDITIONING)
         solver.set_precond(pc);
