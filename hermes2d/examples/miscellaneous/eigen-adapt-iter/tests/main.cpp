@@ -51,6 +51,7 @@ const double NEWTON_TOL = 1e-3;
 const int NEWTON_MAX_ITER = 10;
 const double PICARD_TOL = 1e-3;
 const int PICARD_MAX_ITER = 50;
+const int USE_SHIFT = 0;
 
 // Boundary markers.
 const std::string BDY_MARKER = "1";
@@ -213,7 +214,7 @@ int main(int argc, char* argv[])
     else {
       // Picard's method on the reference mesh.
       if(!solve_picard_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
-	  		     coeff_vec_ref, lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER))
+	  		     coeff_vec_ref, lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER, USE_SHIFT))
         error("Picard's method failed.");
     }
     Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln);
