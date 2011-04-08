@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
+  info("ndof: %d", ndof);
 
   // Initialize the FE problem.
   bool is_linear = false;
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)];
+  scalar* coeff_vec = new scalar[ndof];
   Solution* init_sln = new Solution(&mesh, INIT_COND_CONST);
   OGProjection::project_global(&space, init_sln, coeff_vec, matrix_solver);
   delete init_sln;
