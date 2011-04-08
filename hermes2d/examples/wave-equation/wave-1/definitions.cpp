@@ -34,13 +34,9 @@ public:
     add_matrix_form(new MatrixFormVolWave_0_1);
     add_matrix_form(new MatrixFormVolWave_1_0(c_squared));
 
-    VectorFormVolWave_0* vector_form_0 = new VectorFormVolWave_0();
-    vector_form_0->ext.push_back(v_prev_sln);
-    add_vector_form(vector_form_0);
+    add_vector_form(new VectorFormVolWave_0());
     
-    VectorFormVolWave_1* vector_form_1 = new VectorFormVolWave_1(c_squared);
-    vector_form_1->ext.push_back(u_prev_sln);
-    add_vector_form(vector_form_1);
+    add_vector_form(new VectorFormVolWave_1(c_squared));
   };
 
 private:
@@ -110,13 +106,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[1];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      for (int i = 0; i < n; i++) {
-        Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-        result += wt[i] * sln_val_i * v->val[i];
-      }
+      for (int i = 0; i < n; i++)
+        result += wt[i] * u_ext[1]->val[i] * v->val[i];
+
       return result;
     }
 
@@ -145,14 +138,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
       
-      for (int i = 0; i < n; i++) {
-        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-        result += wt[i] * (sln_dx_i * v->dx[i] + sln_dy_i * v->dy[i]);
-      }
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+      
       return - c_squared * result;
     }
 
