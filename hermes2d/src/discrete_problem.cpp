@@ -490,10 +490,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat,
     // mesh of the current test function, then the stage would have 
     // three meshes. By stage functions, all functions are meant: shape 
     // functions (their precalculated values), and mesh functions.
-    printf("Assembling stage %d\n", ss);
     assemble_one_stage(stages[ss], mat, rhs, force_diagonal_blocks, 
                        block_weights, spss, refmap, u_ext);
-    printf("Finished assembling stage %d\n", ss);
   }
 
   // Deinitialize matrix buffer.
@@ -575,11 +573,9 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
     // The proper sub-element mappings to all the functions of
     // this stage is supplied by the function Traverse::get_next_state() 
     // called in the while loop.
-    printf("Assembling one state\n");    
     assemble_one_state(stage, matrix, rhs, force_diagonal_blocks, 
                        block_weights, spss, refmap, 
                        u_ext, e, bnd, surf_pos, trav.get_base());
-    printf("Finished assembling one state\n");    
   }
 
   if (matrix != NULL) matrix->finish();
@@ -670,7 +666,6 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
 
   /// Assemble volume matrix forms.
   if (matrix != NULL) {
-    printf("Assembling volume matrix forms\n");
     assemble_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
                                  block_weights, spss, refmap, u_ext, isempty,
                                  rep_element->marker, al);
@@ -682,7 +677,6 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
 
   /// Assemble volume vector forms.
   if (rhs != NULL) {
-    printf("Assembling volume vector forms\n");
     assemble_volume_vector_forms(stage, matrix, rhs, force_diagonal_blocks,
                                  block_weights, spss, refmap, u_ext, isempty,
                                  rep_element->marker, al);
@@ -795,10 +789,6 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
               if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
                   && al[m]->dof[i] >= 0) {
 
-                // Debug.
-                //printf("Eval form I: al[%d]->dof[%d] = %d, al[%d]->dof[%d] = %d\n", 
-                //       m, i, al[m]->dof[i], n, j, al[n]->dof[j]);
-
                 scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m]) * 
                                        al[n]->coef[j] * al[m]->coef[i];
                 rhs->add(al[m]->dof[i], -val);
@@ -810,10 +800,6 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
             // Numerical integration performed only if all coefficients 
             // multiplying the form are nonzero.
             if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-               // Debug.
-              //printf("Eval form II: al[%d]->dof[%d] = %d, al[%d]->dof[%d] = %d\n", 
-              //       m, i, al[m]->dof[i], n, j, al[n]->dof[j]);
-
               val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
                                                     refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
             }
@@ -825,7 +811,6 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
 
     // Insert the local stiffness matrix into the global one.
     if (mat != NULL) {
-      printf("Here 1.\n");
       mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
     }
 
@@ -837,7 +822,6 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
       if (mat != NULL) {
-        printf("Here 2.\n");
         mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
       }
 
@@ -991,7 +975,6 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       // Numerical integration performed only if the coefficient 
       // multiplying the form is nonzero.
       if (std::abs(al[m]->coef[i]) > 1e-12) {   
-        printf("Adding to RHS[%d]\n", al[m]->dof[i]);
         rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
       }
     }
@@ -2314,8 +2297,6 @@ scalar DiscreteProblem::eval_form(WeakForm::MatrixFormVol *mfv,
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
 
-    //printf("Eval_form: initial result = %g\n", result_init);
-
     // Calculate the value of the form using adaptive quadrature.    
     result = eval_form_adaptive(order_init, result_init,
                                 mfv, u_ext, fu, fv, ru, rv);
@@ -2572,9 +2553,6 @@ scalar DiscreteProblem::eval_form_subelement(int order, WeakForm::MatrixFormVol 
     delete ext;
   }
 
-  // Debug.
-  //printf("Result = %g\n", res);
-
   return res;
 }
 
@@ -2618,8 +2596,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
-
-    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
 
     result_current_subelements += subs_value[sons_i];
 
@@ -2698,8 +2674,6 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormVol *vfv,
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, vfv, u_ext, fv, rv);
-
-    //printf("Eval_form: initial result = %g\n", result_init);
 
     // Calculate the value of the form using adaptive quadrature.    
     result = eval_form_adaptive(order_init, result_init,
@@ -2990,8 +2964,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
-
-    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
 
     result_current_subelements += subs_value[sons_i];
 
@@ -3353,8 +3325,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
 
-    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
-
     result_current_subelements += subs_value[sons_i];
 
     // Reset the transformation.
@@ -3428,8 +3398,6 @@ scalar DiscreteProblem::eval_form(WeakForm::VectorFormSurf *vfs,
 
     // Calculate initial value of the form on coarse element.
     scalar result_init = eval_form_subelement(order_init, vfs, u_ext, fv, rv, surf_pos);
-
-    //printf("Eval_form: initial result = %g\n", result_init);
 
     // Calculate the value of the form using adaptive quadrature.    
     result = eval_form_adaptive(order_init, result_init,
@@ -3707,8 +3675,6 @@ scalar DiscreteProblem::eval_form_adaptive(int order_init, scalar result_init,
 
     // Clear of the geometry cache for the current active subelement.
     this->delete_single_geom_cache(order_init + order_increase);
-
-    //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
 
     result_current_subelements += subs_value[sons_i];
 
@@ -4504,9 +4470,7 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     int ndof = dp->get_num_dofs();
 
     // Assemble the residual vector.
-    printf("Assembling RHS.\n");
     dp->assemble(coeff_vec, NULL, rhs); // NULL = we do not want the Jacobian.
-    printf("RHS finished.\n");
 
     // Measure the residual norm.
     if (residual_as_function) {
@@ -4544,9 +4508,7 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
     // Assemble the Jacobian matrix.
-    printf("Assembling JAC.\n");
     dp->assemble(coeff_vec, matrix, NULL); // NULL means that we do not want the rhs.
-    printf("JAC finished.\n");
 
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
