@@ -110,14 +110,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[1];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
 
-      for (int i = 0; i < n; i++) {
-        Scalar sln_val0_i = sln_prev_time->val0[i] + K_sln->val0[i];
-        Scalar sln_val1_i = sln_prev_time->val1[i] + K_sln->val1[i];
-        result += wt[i] * (sln_val0_i * v->val0[i] + sln_val1_i * v->val1[i]);
-      }
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u_ext[1]->val0[i] * v->val0[i] + u_ext[1]->val1[i] * v->val1[i]);
+      
       return result;
     }
 
@@ -146,13 +142,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
       
-      for (int i = 0; i < n; i++) {
-        Scalar sln_curl_i = sln_prev_time->curl[i] + K_sln->curl[i];
-        result += wt[i] * sln_curl_i * v->curl[i];
-      }
+      for (int i = 0; i < n; i++)
+        result += wt[i] * u_ext[0]->curl[i] * v->curl[i];
+      
       return -c_squared * result;
     }
 
