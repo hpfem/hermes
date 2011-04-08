@@ -16,7 +16,7 @@ CONSTITUTIVE_RELATIONS constitutive_relations = CONSTITUTIVE_GENUCHTEN;
 
 // Choose full domain or half domain.
 // const char* mesh_file = "domain-full.mesh";
-std::string mesh_file = "domain-half.mesh";
+std::string mesh_file = "../domain-half.mesh";
 
 // Methods.
 const int ITERATIVE_METHOD = 2;		          // 1 = Newton, 2 = Picard.

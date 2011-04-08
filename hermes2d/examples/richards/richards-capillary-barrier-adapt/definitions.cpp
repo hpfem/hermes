@@ -331,20 +331,20 @@ private:
   };
 };
 
-class RichardsEssentialBC : public EssentialBC {
+class RichardsEssentialBC : public EssentialBoundaryCondition {
 public:
 
   RichardsEssentialBC(std::string marker, double h_elevation, double pulse_end_time, double h_init, double startup_time) :
-  EssentialBC(Hermes::vector<std::string>()), h_elevation(h_elevation), pulse_end_time(pulse_end_time), h_init(h_init), startup_time(startup_time)
+  EssentialBoundaryCondition(Hermes::vector<std::string>()), h_elevation(h_elevation), pulse_end_time(pulse_end_time), h_init(h_init), startup_time(startup_time)
   {
     markers.push_back(marker);
   }
 
   ~RichardsEssentialBC() {}
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  virtual scalar value(double x, double y) const {
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
     if (current_time < startup_time)
       return h_init + current_time/startup_time*(h_elevation-h_init);
     else if (current_time > pulse_end_time)
