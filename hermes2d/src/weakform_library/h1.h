@@ -29,8 +29,8 @@ namespace WeakFormsH1 {
     class DefaultLinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-    DefaultLinearDiffusion(int i, int j, scalar coeff = 1.0, 
-                           SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
+      DefaultLinearDiffusion(int i, int j, scalar coeff = 1.0, 
+                             SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt) { }
       DefaultLinearDiffusion(int i, int j, std::string area, scalar coeff = 1.0, 
                              SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
@@ -58,6 +58,10 @@ namespace WeakFormsH1 {
         return result;
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearDiffusion(*this);
+
       private:
         scalar coeff;
         GeomType gt;
@@ -71,21 +75,21 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, 
+      DefaultJacobianNonlinearDiffusion(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt) { }
-      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, CubicSpline* spline_coeff, 
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
+      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0,
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt) { }
+	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-	        result += wt[i] * (spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
+	        result += wt[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] * 
 			           (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
-			           + spline_coeff->get_value(u_ext[0]->val[i]) 
+			           + const_coeff*spline_coeff->get_value(u_ext[0]->val[i]) 
                                    * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
         }
         return result;
@@ -101,8 +105,13 @@ namespace WeakFormsH1 {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultJacobianNonlinearDiffusion(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
     };
 
@@ -143,6 +152,10 @@ namespace WeakFormsH1 {
         return planar_part * Ord(order_increase);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearMagnetostatics(*this);
+
       private:
         scalar coeff;
         GeomType gt;
@@ -156,15 +169,15 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, 
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
                                              SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
-	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt), 
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), 
                                   order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area, 
-                                             CubicSpline* spline_coeff, SymFlag sym = HERMES_NONSYM,
+                                             CubicSpline* spline_coeff, double const_coeff = 1.0, SymFlag sym = HERMES_NONSYM,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt), 
+            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), 
                                       order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
@@ -174,28 +187,28 @@ namespace WeakFormsH1 {
         for (int i = 0; i < n; i++) {
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           if (std::abs(B_i) > 1e-12) {
-            planar_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+            planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i 
                             * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
             if (gt == HERMES_AXISYM_X) {
-              axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->y[i]
+              axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->y[i]
                                    * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                           * (u_ext[0]->val[i] * v->dy[i]);
 	    }
             else if (gt == HERMES_AXISYM_Y) {
-              axisym_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i / e->x[i]
+              axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->x[i]
                                    * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                           * (u_ext[0]->val[i] * v->dx[i]);
 	    }
 	  }
-          planar_part += wt[i] * spline_coeff->get_value(B_i) 
+          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) 
                                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           if (gt == HERMES_AXISYM_X) {
-            axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->y[i]
+            axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i]
                                  * (u->val[i] * v->dy[i]);
 	  }
           else if (gt == HERMES_AXISYM_Y) {
-            axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->x[i]
+            axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i]
                                  * (u->val[i] * v->dx[i]);
 	  }
         }
@@ -208,10 +221,10 @@ namespace WeakFormsH1 {
         Ord planar_part = 0;
         for (int i = 0; i < n; i++) {
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          planar_part += wt[i] * spline_coeff->get_derivative(B_i) / B_i 
+          planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i 
                                * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
 	                       * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          planar_part += wt[i] * spline_coeff->get_value(B_i) 
+          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) 
                                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
 
@@ -221,8 +234,13 @@ namespace WeakFormsH1 {
         return planar_part * Ord(order_increase);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultJacobianNonlinearMagnetostatics(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
         int order_increase;
     };
@@ -258,9 +276,12 @@ namespace WeakFormsH1 {
         else if (gt == HERMES_AXISYM_X) result = int_y_u_v<Ord, Ord>(n, wt, u, v, e);
         else result = int_x_u_v<Ord, Ord>(n, wt, u, v, e);
 
-        return result;        
-        
+        return result;                
       }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearMass(*this);
 
       private:
         scalar coeff;
@@ -274,20 +295,20 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, 
+      DefaultJacobianNonlinearMass(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0,
                                    SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), gt(gt) { }
+	: WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
       DefaultJacobianNonlinearMass(int i, int j, std::string area, 
-                                   CubicSpline* spline_coeff, SymFlag sym = HERMES_SYM, 
+                                   CubicSpline* spline_coeff, double const_coeff = 1.0, SymFlag sym = HERMES_SYM, 
                                    GeomType gt = HERMES_PLANAR) 
-	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), gt(gt) { }
+	: WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
+          result += wt[i] * (const_coeff*spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
         }
         return result;
       }
@@ -302,8 +323,13 @@ namespace WeakFormsH1 {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultJacobianNonlinearMass(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
     };
 
@@ -336,6 +362,10 @@ namespace WeakFormsH1 {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearAdvection(*this);
+
       private:
       scalar coeff1, coeff2;
       GeomType gt;
@@ -353,24 +383,24 @@ namespace WeakFormsH1 {
     {
     public:
      DefaultJacobianNonlinearAdvection(int i, int j, CubicSpline* spline_coeff1, 
-                                       CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR) 
+                                       CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), spline_coeff1(spline_coeff1), 
-	                         spline_coeff2(spline_coeff2), gt(gt) { }
+	spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
      DefaultJacobianNonlinearAdvection(int i, int j, std::string area, 
                                        CubicSpline* spline_coeff1, CubicSpline* spline_coeff2, 
-                                       GeomType gt = HERMES_PLANAR) 
+                                       double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
        : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), spline_coeff1(spline_coeff1), 
-	                         spline_coeff2(spline_coeff2), gt(gt) { }
+	                         spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (  spline_coeff1->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dx[i] * v->val[i] 
-                             + spline_coeff1->get_value(u_ext[0]->val[i]) * u->dx[i] * v->val[i]
-                             + spline_coeff2->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dy[i] * v->val[i]
-			       + spline_coeff2->get_value(u_ext[0]->val[i]) * u->dy[i] * v->val[i]);
+          result += wt[i] * (  const_coeff*spline_coeff1->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dx[i] * v->val[i] 
+                             + const_coeff*spline_coeff1->get_value(u_ext[0]->val[i]) * u->dx[i] * v->val[i]
+                             + const_coeff*spline_coeff2->get_derivative(u_ext[0]->val[i]) * u->val[i] * u_ext[0]->dy[i] * v->val[i]
+			     + const_coeff*spline_coeff2->get_value(u_ext[0]->val[i]) * u->dy[i] * v->val[i]);
         }
         return result;
       }
@@ -385,8 +415,13 @@ namespace WeakFormsH1 {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultJacobianNonlinearAdvecttion(*this);
+
       private:
       CubicSpline* spline_coeff1, *spline_coeff2;
+      double const_coeff;
       GeomType gt;
     };
   }
@@ -435,6 +470,10 @@ namespace WeakFormsH1 {
         }
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultVectorFormConst(*this);
+
       private:
         scalar coeff;
         GeomType gt;
@@ -474,6 +513,10 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualLinearDiffusion(*this);
+
       private:
         scalar coeff;
         GeomType gt;
@@ -487,10 +530,10 @@ namespace WeakFormsH1 {
     class DefaultResidualNonlinearDiffusion : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), gt(gt) { }
-      DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), gt(gt) { }
+      DefaultResidualNonlinearDiffusion(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
+      DefaultResidualNonlinearDiffusion(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
@@ -498,7 +541,7 @@ namespace WeakFormsH1 {
         Scalar result = 0;
         Func<Scalar>* u_prev = u_ext[0];
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff->get_value(u_prev->val[i]) * 
+          result += wt[i] * (const_coeff*spline_coeff->get_value(u_prev->val[i]) * 
                              (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]));
         }
         return result;
@@ -514,8 +557,13 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualNonlinearDiffusion(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
     };
 
@@ -552,6 +600,10 @@ namespace WeakFormsH1 {
         return planar_part * Ord(order_increase);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualLinearMagnetostatics(*this);
+
       private:
         scalar coeff;
         GeomType gt;
@@ -566,12 +618,12 @@ namespace WeakFormsH1 {
     class DefaultResidualNonlinearMagnetostatics : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR, 
+      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR, 
                                              int order_increase = 3) 
-	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), gt(gt), order_increase(order_increase) { }
-      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, 
+	: WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
+      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3) 
-	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), gt(gt), order_increase(order_increase) { }
+	: WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -579,11 +631,11 @@ namespace WeakFormsH1 {
         scalar axisym_part = 0;
         for (int i = 0; i < n; i++) {
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          planar_part += wt[i] * spline_coeff->get_value(B_i) *
+          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) *
                                  (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->y[i] 
+          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i] 
                                      * u_ext[0]->val[i] * v->dy[i];
-          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * spline_coeff->get_value(B_i) / e->x[i] 
+          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i] 
                                      * u_ext[0]->val[i] * v->dx[i];
         }
         return planar_part + axisym_part;
@@ -594,15 +646,20 @@ namespace WeakFormsH1 {
         Ord planar_part = 0;
         for (int i = 0; i < n; i++) {
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
-          planar_part += wt[i] * spline_coeff->get_value(B_i) *
+          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) *
                                  (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         }
         return planar_part * Ord(order_increase);
 
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualNonlinearMagnetostatics(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff; 
         GeomType gt;
         int order_increase;
     };
@@ -642,6 +699,10 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualLinearAdvection(*this);
+
       private:
         scalar coeff1, coeff2;
         GeomType gt;
@@ -656,11 +717,11 @@ namespace WeakFormsH1 {
     {
     public:
     DefaultResidualNonlinearAdvection(int i, CubicSpline* spline_coeff1, 
-                                      CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR)
-      : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), gt(gt) { }
+                                      CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR)
+      : WeakForm::VectorFormVol(i), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), const_coeff(const_coeff), gt(gt) { }
       DefaultResidualNonlinearAdvection(int i, std::string area, CubicSpline* spline_coeff1, 
-                                        CubicSpline* spline_coeff2, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2),
+                                        CubicSpline* spline_coeff2, double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormVol(i, area), spline_coeff1(spline_coeff1), spline_coeff2(spline_coeff2), const_coeff(const_coeff), 
 	gt(gt) { }
 
       template<typename Real, typename Scalar>
@@ -669,8 +730,8 @@ namespace WeakFormsH1 {
         Scalar result = 0;
         Func<Scalar>* u_prev = u_ext[0];
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff1->get_value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
-                             + spline_coeff2->get_value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
+          result += wt[i] * (const_coeff*spline_coeff1->get_value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
+                             + const_coeff*spline_coeff2->get_value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
         }
         return result;
       }
@@ -685,8 +746,13 @@ namespace WeakFormsH1 {
         return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualNonlinearAdvaction(*this);
+
       private:
         CubicSpline* spline_coeff1, *spline_coeff2;
+        double const_coeff;
         GeomType gt;
     };
 
@@ -718,6 +784,10 @@ namespace WeakFormsH1 {
           result += wt[i] * (rhs->ord(e->x[i], e->y[i]) * v->val[i]);
         return result;
       }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultVectorFormNonConst(*this);
 
       private:
         RightHandSides::DefaultNonConstRightHandSide* rhs;
@@ -757,29 +827,37 @@ namespace WeakFormsH1 {
         return result;
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormSurf* clone() {
+        return new DefaultMatrixFormSurf(*this);
+
       private:
         scalar coeff;
         GeomType gt;
     };
 
-    /* Default surface matrix form \int_{area} spline_coeff(u_ext[0]) u v dS
+    /* Default surface matrix form \int_{area} spline_coeff'(u_ext[0]) u_ext[0] u v + spline_coeff(u_ext[0]) u v dS
        spline_coeff... non-constant parameter given by a spline
     */
 
-    class DefaultMatrixFormSurfSpline : public WeakForm::MatrixFormSurf
+    class DefaultJacobianFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultMatrixFormSurfSpline(int i, int j, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff), gt(gt) { }
-      DefaultMatrixFormSurfSpline(int i, int j, std::string area, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff), gt(gt) { }
+      DefaultJacobianFormSurf(int i, int j, CubicSpline* spline_coeff, double const_coeff = 1.0, 
+                                  GeomType gt = HERMES_PLANAR) 
+	: WeakForm::MatrixFormSurf(i, j), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
+      DefaultJacobianFormSurf(int i, int j, std::string area, CubicSpline* spline_coeff, 
+                                  double const_coeff = 1.0, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::MatrixFormSurf(i, j, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (spline_coeff->get_value(u_ext[0]->val[i]) * (u->val[i] * v->val[i]));
+          result += wt[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u_ext[0]->val[i]
+                             + const_coeff*spline_coeff->get_value(u_ext[0]->val[i]))  
+                          * u->val[i] * v->val[i]);
         }
         return result;
       }
@@ -794,8 +872,13 @@ namespace WeakFormsH1 {
         return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::MatrixFormSurf* clone() {
+        return new DefaultJacobianFormSurf(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
     };
   }
@@ -833,6 +916,10 @@ namespace WeakFormsH1 {
 
         return result;
       }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormSurf* clone() {
+        return new DefaultVectorFormSurf(*this);
 
       private:
         scalar coeff;
@@ -875,30 +962,35 @@ namespace WeakFormsH1 {
             return int_x_v<Ord>(n, wt, v, e);
       }
 
-    private:
-      Hermes::vector<scalar> coeffs;
-      GeomType gt;
-    };
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormSurf* clone() {
+        return new MultiComponentDefaultVectorFormSurf(*this);
+
+      private:
+        Hermes::vector<scalar> coeffs;
+        GeomType gt;
+      };
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
        spline_coeff... non-constant parameter given by cubic spline
     */
 
-    class DefaultVectorFormSurfSpline : public WeakForm::VectorFormSurf
+    class DefaultResidualFormSurf : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultVectorFormSurfSpline(int i, CubicSpline* spline_coeff, GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff), gt(gt) { }
-      DefaultVectorFormSurfSpline(int i, std::string area, CubicSpline* spline_coeff, 
-                                  GeomType gt = HERMES_PLANAR) 
-	: WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff), gt(gt) { }
+      DefaultResidualFormSurf(int i, CubicSpline* spline_coeff, double const_coeff = 1.0, 
+                              GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
+      DefaultResidualFormSurf(int i, std::string area, CubicSpline* spline_coeff, double const_coeff = 1.0, 
+                              GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>
       Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
+          result += wt[i] * const_coeff*spline_coeff->get_value(u_ext[0]->val[i]) * v->val[i];
         }
         return result;
       }
@@ -913,8 +1005,13 @@ namespace WeakFormsH1 {
         return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
       }
 
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormSurf* clone() {
+        return new DefaultResidualFormSurf(*this);
+
       private:
         CubicSpline* spline_coeff;
+        double const_coeff;
         GeomType gt;
     };
   }

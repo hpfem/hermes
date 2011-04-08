@@ -1,174 +1,143 @@
-/* Problem-specific functions */
+#include "weakform/weakform.h"
+#include "weakform_library/h1.h"
+#include "integrals/integrals_h1.h"
+#include "boundaryconditions/essential_bcs.h"
 
-// Space distribution of fire temperature.
-template<typename Real>
-Real T_fire_x(Real x) {
-  return -1./32 * x*x*x + 3./16 * x*x;
-}
-
-// Temporal distribution of fire temperature.
-template<typename Real>
-Real T_fire_t(Real t) {
-  if (0 <= t  &&  t <= 100) return 0;
-  if (100 <= t  &&  t <= 600) return 980. / 500 * (t - 100.);
-  if (600 <= t  &&  t <= 1800) return 980;
-  if (1800 <= t  &&  t <= 3000) return 980 - 980. / 1200 * (t - 1800.);
-  return 0.;
-}
-
-// Fire temperature as function of x and time.
-template<typename Real>
-Real T_fire(Real x, Real t) {
-  return T_fire_x(x) * T_fire_t(t) + 20;
-}
-
-// Thermal conductivity of the material.
-double lambda(double x, double y, double solution_value) {
-  return 1.0;
-}
+using namespace WeakFormsH1;
+using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::SurfaceMatrixForms;
 
 /* Weak forms */
 
-double stac_jacobian_vol(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
+class CustomWeakFormHeatRK : public WeakForm
 {
-  Func<double>* K_sln = u_ext[0];             // Stage increment from the Runge-Kutta method.
-  Func<double>* sln_prev_time = ext->fn[0];   // Previous time step solution.
-                                              // To obtain current solution, add these two together.
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    result += -wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) * lambda(e->x[i], e->y[i], sln_val_i);
-  }
+public:
+  CustomWeakFormHeatRK(std::string bdy_fire, std::string bdy_air, CubicSpline* lambda_spline,
+                       double alpha_bottom, double alpha_top, double rho, double heatcap, 
+                       double temp_ext_top, double temp_init, double* current_time_ptr,
+                       Solution* prev_time_sln) : WeakForm(1)
+  {
+    // Jacobian volumetric part.
+    add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0, lambda_spline, -1.0/(rho*heatcap)));
 
-  return result / HEATCAP / RHO;
-}
+    // Jacobian surface part.
+    add_matrix_form_surf(new DefaultJacobianFormSurf(0, 0, bdy_fire, lambda_spline, -alpha_fire/(rho*heatcap)));
+    add_matrix_form_surf(new DefaultJacobianFormSurf(0, 0, bdy_air, lambda_spline, -alpha_air/(rho*heatcap)));
 
-Ord stac_jacobian_vol_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-                          Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  // This assumes that lambda is at most a cubic polynomial.
-  return u->dx[0] * v->dx[0] * pow(e->x[0], 3);
-}
+    // Residual - volumetric part.
+    DefaultResidualNonlinearDiffusion* vec_form_vol 
+      = new DefaultResidualNonlinearDiffusion(0, lambda_spline, -1.0/(heatcap*rho));
+    vec_form_vol->ext.push_back(prev_time_sln);
+    add_vector_form(vec_form_vol);
 
-double stac_residual_vol(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
-{
-  Func<double>* K_sln = u_ext[0];             
-  Func<double>* sln_prev_time = ext->fn[0];   
+    // Residual - surface part.
+    add_vector_form_surf(new DefaultResidualFormSurf(0, 0, bdy_fire, lambda_spline, -alpha_fire/(rho*heatcap)));
+    CustomFormResidualSurf* vec_form_surf = new CustomFormResidualSurf(0, bdy_air, alpha, 
+					    lambda_spline, 1/(heatcap * rho), 
+                                            current_time_ptr, temp_init);
+    vec_form_surf->ext.push_back(prev_time_sln);
+    add_vector_form_surf(vec_form_surf);
+  };
 
-  // This is a temporary workaround. The stage time t_n + h * c_i
-  // can be accessed via u_stage_time->val[0];
-  // In this particular case the stage time is not needed as 
-  // the form does not depend explicitly on time.
-  //Func<double>* u_stage_time = ext->fn[0]; 
-  //double current_time = u_stage_time->val[0];
+private:
+  class CustomFormJacobianSurf : public DefaultMatrixFormSurf
+  {
+  public:
+    CustomFormJacobianSurf(int i, int j, std::string area, double coeff) 
+      : DefaultMatrixFormSurf(i, j, area, coeff) { }
 
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    double sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-    double sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-    result += -wt[i] * ( sln_dx_i * v->dx[i] +  sln_dy_i * v->dy[i]) * lambda(e->x[i], e->y[i], sln_val_i);	       
-  }
+      virtual WeakForm::MatrixFormSurf* clone() {
+        return new CustomFormJacobianSurf(*this);
+    }
+  };
 
-  return result / HEATCAP / RHO;
-}
+  // This form is custom since it contains previous time-level solution.
+  class CustomFormResidualVol : public WeakForm::VectorFormVol
+  {
+  public:
+    CustomFormResidualVol(int i, double heatcap, double rho, double lambda) 
+      : WeakForm::VectorFormVol(i), heatcap(heatcap), rho(rho), lambda(lambda) { }
 
-Ord stac_residual_vol_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                          Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return Ord(30);
-}
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
+      Func<Real>* K_sln = u_ext[0];
+      Func<Real>* sln_prev_time = ext->fn[0];
+      Scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
+        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
+        result += -wt[i] * (sln_dx_i * v->dx[i] +  sln_dy_i * v->dy[i]);	       
+      }
 
-double stac_jacobian_top(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
-{
-  Func<double>* K_sln = u_ext[0];             
-  Func<double>* sln_prev_time = ext->fn[0];   
+      return lambda / (heatcap * rho) * result;
+    }
 
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    result += wt[i] * u->val[i] * v->val[i] * lambda(e->x[i], e->y[i], sln_val_i);
-  }
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) const {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
 
-  return - result / HEATCAP / RHO * ALPHA_TOP;
-}
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
 
-Ord stac_jacobian_top_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-                          Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return u->val[0] * v->val[0] * pow(e->x[0], 3);
-}
+    virtual WeakForm::VectorFormVol* clone() {
+      return new CustomFormResidualVol(*this);
+    }
 
-double stac_residual_top(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
-{
-  Func<double>* K_sln = u_ext[0];
-  Func<double>* sln_prev_time = ext->fn[0];
+    double alpha, heatcap, rho, lambda;
+  };
 
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    result += wt[i] * (TEMP_EXT_TOP - sln_val_i) * v->val[i] * lambda(e->x[i], e->y[i], sln_val_i);		       
-  }
+  // This form is custom since it contains time-dependent exterior temperature.
+  class CustomFormResidualSurf : public WeakForm::VectorFormSurf
+  {
+  private:
+      double h;
+  public:
+    CustomFormResidualSurf(int i, std::string area, double alpha, double lambda, double rho, 
+                           double heatcap, double* current_time_ptr, double temp_init, double t_final) 
+      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), rho(rho), 
+	                         heatcap(heatcap), current_time_ptr(current_time_ptr), 
+                                 temp_init(temp_init), t_final(t_final) { }
 
-  return result / HEATCAP / RHO * ALPHA_TOP;
-}
+    template<typename Real, typename Scalar>
+    Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                            Geom<Real> *e, ExtData<Scalar> *ext) const {
+      Func<Scalar>* K_sln = u_ext[0];
+      Func<Scalar>* sln_prev_time = ext->fn[0];
 
-Ord stac_residual_top_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                          Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return Ord(30);
-}
+      Scalar result1 = get_current_stage_time() * int_v<Real>(n, wt, v);
+      Scalar result2 = 0;
+      for (int i = 0; i < n; i++) {
+        Scalar sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
+        result2 += wt[i] * sln_val_i * v->val[i];		       
+      }
+      
+      return lambda * alpha / (rho * heatcap) * (result1 - result2);
+    }
 
-double stac_jacobian_bottom(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
-{
-  Func<double>* K_sln = u_ext[0];
-  Func<double>* sln_prev_time = ext->fn[0];
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+                 ExtData<scalar> *ext) const {
+        return vector_form_surf<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
 
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    result += wt[i] * u->val[i] * v->val[i] * lambda(e->x[i], e->y[i], sln_val_i);
-  }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
 
-  return - result / HEATCAP / RHO * ALPHA_BOTTOM;
-}
+    virtual WeakForm::VectorFormSurf* clone() {
+      return new CustomFormResidualSurf(*this);
+    }
 
-Ord stac_jacobian_bottom_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-                             Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return u->val[0] * v->val[0] * pow(e->x[0], 3);
-}
+    // Time-dependent exterior temperature.
+    template<typename Real>
+    Real temp_ext(Real t) const {
+      return temp_init + 10. * sin(2*M_PI*t/t_final);
+    }
 
-double stac_residual_bottom(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<double> *ext)
-{
-  Func<double>* K_sln = u_ext[0];
-  Func<double>* sln_prev_time = ext->fn[0];
-
-  // This is a temporary workaround. The stage time t_n + h * c_i
-  // can be accessed via u_stage_time->val[0];
-  Func<double>* u_stage_time = ext->fn[1]; 
-  
-  double stage_time = u_stage_time->val[0];
-
-  double result = 0;
-  for (int i = 0; i < n; i++) {
-    double sln_val_i = sln_prev_time->val[i] + K_sln->val[i];
-    result += wt[i] * (T_fire(e->x[i], stage_time) - sln_val_i) * v->val[i] * lambda(e->x[i], e->y[i], sln_val_i);		       
-  }
-
-  return result / HEATCAP / RHO * ALPHA_BOTTOM;
-}
-
-Ord stac_residual_bottom_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                             Geom<Ord> *e, ExtData<Ord> *ext)
-{
-  return Ord(30);
-}
-
+    // Members.
+    double alpha, lambda, rho, heatcap, *current_time_ptr, temp_init, t_final;
+  };
+};
 

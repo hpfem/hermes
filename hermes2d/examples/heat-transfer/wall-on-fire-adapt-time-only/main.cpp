@@ -7,13 +7,13 @@
 //  exposed to ISO fire.
 //
 //  PDE: non-stationary heat transfer equation
-//       HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
-//  This equation is, however, written in such a way that the time-derivative 
-//  is on the left and everything else on the right:
+//       HEATCAP * RHO * dT/dt - div (LAMBDA grad T) = 0.
+//  Here LAMBDA is a nonlinear thermal conductivity given via a cubic spline.
 //
-//  dT/dt = LAMBDA * Laplace T / (HEATCAP * RHO).
+//  For the sake of using abritraru RK methods, this equation is written in such 
+//  a way that the time-derivative is on the left and everything else on the right:
 //
-//  We only need the weak formulation of the right-hand side.
+//  dT/dt = -div(LAMBDA grad T) / (HEATCAP * RHO)
 //
 //  Domain: rectangle 4.0 x 0.5 (file wall.mesh).
 //
@@ -59,10 +59,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
 // Boundary markers.
-const int BDY_BOTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
+const std::string BDY_FIRE = "Bottom";
+const std::string BDY_WALL = "Vertical";
+const std::string BDY_AIR  = "Top";
 
 // Problem parameters.
 const double TEMP_INIT = 20;       // Initial temperature.
@@ -79,11 +78,39 @@ const double T_FINAL = 4000;       // Length of time interval in seconds.
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
   if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
   if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
   if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
+
+  // Table of values for the nonlinear thermal conductivity lambda(u).
+  // Here lambda(u) = 1 + u^4 for simplicity.
+  #define lambda(x) (1 + pow(x, 4))
+  Hermes::vector<double> lambda_pts(-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0);
+  Hermes::vector<double> lambda_val;
+  for (unsigned int i = 0; i < lambda_pts.size(); i++) {
+    lambda_val.push_back(lambda(lambda_pts[i]));.
+  }
+
+  // Use the table to create a cubic spline (and plot it for visual control). 
+  double second_der_left = 0.0;
+  double second_der_right = 0.0;
+  bool first_der_left = false;
+  bool first_der_right = false;
+  bool extrapolate_der_left = true;
+  bool extrapolate_der_right = true;
+  CubicSpline lambda_spline(lambda_pts, lambda_val_scaled, second_der_left, second_der_right, 
+                            first_der_left, first_der_right, extrapolate_der_left, extrapolate_der_right);
+  bool success = lambda_spline.calculate_coeffs(); 
+  if (!success) error("There was a problem constructing a cubic spline.");
+  info("Saving cubic spline into a Pylab file spline.dat.");
+  double interval_extension = 3.0; // The interval of definition of the spline will be 
+                                   // extended by "interval_extension" on both sides.
+  cs.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;
@@ -94,13 +121,11 @@ int main(int argc, char* argv[])
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_BOTTOM, INIT_REF_NUM_BDY);
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_RIGHT, BDY_LEFT));
-  bc_types.add_bc_newton(Hermes::vector<int>(BDY_BOTTOM, BDY_TOP));
+  // Initialize essential boundary conditions (none).
+  EssentialBCs bcs;
 
   // Initialize an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, NULL, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
  
@@ -109,6 +134,12 @@ int main(int argc, char* argv[])
   Solution* sln_time_new = new Solution(&mesh);
   Solution* time_error_fn = new Solution(&mesh, 0.0);
 
+  // Initialize the weak formulation.
+  double current_time = 0;
+  CustomWeakFormHeatRK wf(BDY_FIRE, BDY_AIR, &lambda_spline, ALPHA_BOTTOM, ALPHA_TOP,
+                          RHO, HEATCAP, TEMP_EXT_TOP, TEMP_INIT, &current_time, sln_time_prev);
+
+  /*
   // Initialize weak formulation.
   WeakForm wf;
   wf.add_matrix_form(stac_jacobian_vol, stac_jacobian_vol_ord, HERMES_NONSYM, HERMES_ANY, sln_time_prev);
@@ -117,6 +148,7 @@ int main(int argc, char* argv[])
   wf.add_vector_form_surf(stac_residual_bottom, stac_residual_bottom_ord, BDY_BOTTOM, sln_time_prev);
   wf.add_matrix_form_surf(stac_jacobian_top, stac_jacobian_top_ord, BDY_TOP, sln_time_prev);
   wf.add_vector_form_surf(stac_residual_top, stac_residual_top_ord, BDY_TOP, sln_time_prev);
+  */
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -133,7 +165,7 @@ int main(int argc, char* argv[])
   info("Time step history will be saved to file time_step_history.dat.");
 
   // Time stepping loop:
-  double current_time = 0; int ts = 1;
+  int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -141,8 +173,8 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool verbose = true;
     bool is_linear = true;
-    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, time_error_fn, &dp, matrix_solver,
-		      verbose, is_linear)) {
+    if (!rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, 
+                      time_error_fn, &dp, matrix_solver, verbose, is_linear)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 

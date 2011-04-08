@@ -48,6 +48,9 @@ namespace WeakFormsHcurl {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearCurlCurl(*this);
+
       private:
         double coeff;
     };
@@ -79,6 +82,9 @@ namespace WeakFormsHcurl {
               Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
+
+      virtual WeakForm::MatrixFormVol* clone() {
+        return new DefaultLinearMass(*this);
 
       private:
         double coeff;
@@ -113,6 +119,9 @@ namespace WeakFormsHcurl {
           for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
           return coeff0 * int_v0 + coeff1 * int_v1;
         }
+
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultVectorFormConst(*this);
 
       private:
         double coeff0, coeff1;
