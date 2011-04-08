@@ -91,13 +91,9 @@ int main(int argc, char* argv[])
   E1_view.fix_scale_width(50);
   ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
   E2_view.fix_scale_width(50);
-  ScalarView F1_view("Solution F1", new WinGeom(0, 405, 400, 350));
-  F1_view.fix_scale_width(50);
-  ScalarView F2_view("Solution E2", new WinGeom(410, 405, 400, 350));
-  F2_view.fix_scale_width(50);
 
   // Time stepping loop.
-  double current_time = 0; int ts = 1; bool rhs_only = false;
+  double current_time = 0; int ts = 1;
   do
   {
     // Perform one implicit Euler time step.
@@ -106,10 +102,14 @@ int main(int argc, char* argv[])
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    dp.assemble(matrix, rhs, rhs_only);
-    rhs_only = true;
+    if (ts == 1) {
+      info("Assembling the stiffness matrix and right-hand side vector.");
+      dp.assemble(matrix, rhs);
+    }
+    else {
+      info("Assembling the right-hand side vector (only).");
+      dp.assemble(NULL, rhs);
+    }
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
@@ -125,12 +125,6 @@ int main(int argc, char* argv[])
     sprintf(title, "E2, t = %g", current_time);
     E2_view.set_title(title);
     E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
-    sprintf(title, "F1, t = %g", current_time);
-    F1_view.set_title(title);
-    F1_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-    sprintf(title, "F2, t = %g", current_time);
-    F2_view.set_title(title);
-    F2_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
 
     // Update time.
     current_time += time_step;
