@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
       NoxSolver solver(&dp);
       solver.set_ls_tolerance(1E-2);
       solver.disable_abs_resid();
-      solver.set_conv_rel_resid(1.00);
+      solver.set_conv_rel_resid(0.50);
 
       if(PRECONDITIONING)
         solver.set_precond(pc);
