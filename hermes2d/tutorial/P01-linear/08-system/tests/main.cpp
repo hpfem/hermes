@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 // This test makes sure that example 08-system works correctly.
