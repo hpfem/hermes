@@ -1,6 +1,9 @@
 #include "weakform/weakform.h"
+#include "weakform_library/h1.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
+
+using namespace WeakFormsH1::VolumetricMatrixForms;
 
 /* Weak forms */
 
@@ -8,35 +11,7 @@ class WeakFormS : public WeakForm
 {
 public:
   WeakFormS() : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolS(0, 0));
-  };
-
-private:
-  class MatrixFormVolS : public WeakForm::MatrixFormVol
-  {
-  public:
-    MatrixFormVolS(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      scalar result = 0;
-      for (int i = 0; i < n; i++) {
-        double x = e->x[i];
-        double y = e->y[i];
-        result += wt[i] * (u->dx[i]*v->dx[i] + u->dy[i]*v->dy[i] 
-                           + V(x, y) * u->val[i] * v->val[i]);
-      }
-      return result;
-    }
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return Ord(30);
-    }
-
-    double V(double x, double y) const {
-      return 0;
-      //double r = sqrt(x*x + y*y);
-      //return -1./(0.001 + r*r);
-    }
+    add_matrix_form(new DefaultLinearDiffusion(0, 0));
   };
 };
 
@@ -44,27 +19,7 @@ class WeakFormM : public WeakForm
 {
 public:
   WeakFormM() : WeakForm(1) {
-    add_matrix_form(new MatrixFormVolM(0, 0));
-  };
-
-private:
-  class MatrixFormVolM : public WeakForm::MatrixFormVol
-  {
-  public:
-    MatrixFormVolM(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return int_u_v<Real, Scalar>(n, wt, u, v);
-    }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
-    }
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-    }
+    add_matrix_form(new DefaultLinearMass(0, 0));
   };
 };
 
