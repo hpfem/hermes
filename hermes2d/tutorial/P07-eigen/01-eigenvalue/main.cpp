@@ -6,11 +6,10 @@ using Teuchos::RCP;
 using Teuchos::rcp;
 using Hermes::EigenSolver;
 
-//  This example solves the eigenproblem for the Laplace operator in 
-//  a square with zero boundary conditions. Python and Pysparse must
-//  be installed. 
+//  This example solves a simple eigenproblem in a square. 
+//  Python and Pysparse must be installed. 
 //
-//  PDE: -Laplace u = lambda_k u,
+//  PDE: -Laplace u + (x*x + y*y)u = lambda_k u,
 //  where lambda_0, lambda_1, ... are the eigenvalues.
 //
 //  Domain: Square (0, pi)^2.
