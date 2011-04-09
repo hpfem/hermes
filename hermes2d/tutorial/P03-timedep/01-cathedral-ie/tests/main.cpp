@@ -8,8 +8,6 @@ const int P_INIT = 2;                             // Polynomial degree of all me
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
 const double time_step = 3e+2;                    // Time step in seconds.
-const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // Boundary markers.
@@ -19,8 +17,8 @@ const std::string BDY_AIR = "Boundary air";
 // Problem parameters.
 const double TEMP_INIT = 10;         // Temperature of the ground (also initial temperature).
 const double ALPHA = 10;             // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;           // Thermal conductivity of the material.
-const double HEATCAP = 1e6;          // Heat capacity.
+const double LAMBDA = 1e2;           // Thermal conductivity of the material.
+const double HEATCAP = 1e2;          // Heat capacity.
 const double RHO = 3000;             // Material density.
 const double T_FINAL = 5*time_step;  // Length of time interval (24 hours) in seconds.
 
@@ -114,11 +112,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 10.342338) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 10.453113) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(0.0, 2.0) - 10.413864) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(1.0, 2.0) - 10.453113) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(2.0, 2.0) - 10.342338) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 10.001043) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 10.000171) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(0.0, 2.0) - 10.000085) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(1.0, 2.0) - 10.000171) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(2.0, 2.0) - 10.001043) > 1E-6) success = false;
 
   if (success) {
     printf("Success!\n");
