@@ -78,7 +78,7 @@ const std::string BDY_TOP_NE = "3";
 const std::string BDY_TOP_NW = "30";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {

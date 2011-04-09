@@ -11,11 +11,12 @@ private:
   class MatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVol(int i, int j, double A_SE, double A_NE, double A_SW, double A_NW) : WeakForm::MatrixFormVol(i, j), A_SE(A_SE),
-                  A_NE(A_NE), A_SW(A_SW), A_NW(A_NW) { }
+    MatrixFormVol(int i, int j, double A_SE, double A_NE, double A_SW, double A_NW) 
+                  : WeakForm::MatrixFormVol(i, j), A_SE(A_SE), A_NE(A_NE), A_SW(A_SW), A_NW(A_NW) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) {
       if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == SOUTH_EAST)
         return this->A_SE * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
       if(wf->get_element_markers_conversion()->get_user_marker(e->elem_marker) == NORTH_EAST)
@@ -26,15 +27,16 @@ private:
         return this->A_NW * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const {
+      return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
+                    ExtData<Ord> *ext) const {
       return int_grad_u_grad_v<Ord, Ord>(n, wt, u, v);
     }
 
-    // Members.
     double A_SE, A_NE, A_SW, A_NW;
   };
 
@@ -49,25 +51,24 @@ private:
       return rhs * int_v<Real>(n, wt, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) const {
+      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
-    // Members.
     double rhs;
   };
 
   class VectorFormSurf : public WeakForm::VectorFormSurf
   {
   public:
-    VectorFormSurf(int i, double A_SE, double A_NE, double A_SW, double A_NW) : WeakForm::VectorFormSurf(i), A_SE(A_SE),
-                  A_NE(A_NE), A_SW(A_SW), A_NW(A_NW) {}
+    VectorFormSurf(int i, double A_SE, double A_NE, double A_SW, double A_NW) 
+                   : WeakForm::VectorFormSurf(i), A_SE(A_SE), A_NE(A_NE), A_SW(A_SW), A_NW(A_NW) {}
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
@@ -86,17 +87,16 @@ private:
         return A_NW * int_v<Real>(n, wt, v);
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                 Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                 Geom<double> *e, ExtData<scalar> *ext) const {
+      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
       return int_v<Ord>(n, wt, v);
     }
 
-    // Members.
     double A_SE, A_NE, A_SW, A_NW;
   };
 

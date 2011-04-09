@@ -455,9 +455,9 @@ namespace WeakFormsH1 {
     class DefaultVectorFormConst : public WeakForm::VectorFormVol
     {
     public:
-      DefaultVectorFormConst(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
+      DefaultVectorFormConst(int i, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR) 
                    : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
-      DefaultVectorFormConst(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
+      DefaultVectorFormConst(int i, std::string area, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,

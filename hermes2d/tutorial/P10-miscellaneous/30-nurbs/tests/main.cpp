@@ -21,7 +21,7 @@ const std::string BDY_MARKER = "1";
 const double CONST_F = 1.0;  
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

@@ -12,8 +12,8 @@
 //
 // Choose one of the following mesh files:
 
-const char* mesh_file = "domain-1.mesh";          // One control point.
-//const char* mesh_file = "domain-2.mesh";          // Two control points.
+//const char* mesh_file = "domain-1.mesh";            // One control point.
+const char* mesh_file = "domain-2.mesh";          // Two control points.
 //const char* mesh_file = "domain-3.mesh";          // Three control points.
 
 // The following parameters can be also changed:
@@ -30,7 +30,7 @@ const std::string BDY_MARKER = "1";
 const double CONST_F = 1.0;  
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
