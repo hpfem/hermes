@@ -18,9 +18,7 @@ private:
   {
   public:
     MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau) : WeakForm::MatrixFormVol(i, j), alpha(alpha),
-                                                                        tau(tau) {
-      sym = HERMES_NONSYM; 
-    }
+                                                                        tau(tau) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -33,24 +31,24 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u) { 
+    Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
     }
 
     // Derivative of the thermal conductivity with respect to 'u'.
     template<typename Real>
-    Real dlam_du(Real u) { 
+    Real dlam_du(Real u) const { 
       return alpha*pow(u, alpha - 1); 
     }
     
@@ -76,24 +74,24 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
     // Heat sources (can be a general function of 'x' and 'y').
     template<typename Real>
-    Real heat_src(Real x, Real y) {
+    Real heat_src(Real x, Real y) const {
       return 1.0;
     }
 
     // Thermal conductivity (temperature-dependent)
     // Note: for any u, this function has to be positive.
     template<typename Real>
-    Real lam(Real u)  { 
+    Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
     }
 
@@ -103,18 +101,18 @@ private:
   };
 };
 
-class EssentialBCNonConst : public EssentialBC {
+class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) : EssentialBC(Hermes::vector<std::string>())
+  EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
   }
 
   ~EssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { return EssentialBC::BC_FUNCTION; }
+  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  scalar function(double x, double y) const
+  virtual scalar function(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
     return (x+10)*(y+10)/100.;
   }
