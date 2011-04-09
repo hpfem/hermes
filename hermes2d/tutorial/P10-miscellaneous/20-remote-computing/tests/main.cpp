@@ -9,26 +9,26 @@ int OUTPUT_FREQUENCY = 20;                        // Number of time steps betwee
 const int P_INIT = 4;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
-const double TAU = 300.0;                         // Time step in seconds.
+const double time_step = 300.0;                   // Time step in seconds.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double T_INIT = 10;                         // Temperature of the ground (also initial temperature).
-const double ALPHA = 10;                          // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;                        // Thermal conductivity of the material.
-const double HEATCAP = 1e6;                       // Heat capacity.
-const double RHO = 3000;                          // Material density.
-const double FINAL_TIME = 18000;                  // Length of time interval (24 hours) in seconds.
+const double TEMP_INIT = 10;     // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;         // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;       // Thermal conductivity of the material.
+const double HEATCAP = 1e6;      // Heat capacity.
+const double RHO = 3000;         // Material density.
+const double T_FINAL = 18000;    // Length of time interval (24 hours) in seconds.
 
 // Global time variable.
-double TIME = 0;
+double current_time = 0;
 
 // Boundary markers.
 const std::string BDY_GROUND = "1", BDY_AIR = "2";
 
 // Weak forms.
-#include "forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst essential_bc(BDY_GROUND, T_INIT);
+  DefaultEssentialBCConst essential_bc(BDY_GROUND, TEMP_INIT);
   EssentialBCs bcs(&essential_bc);
 
   // Initialize an H1 space with default shepeset.
@@ -51,13 +51,11 @@ int main(int argc, char* argv[])
   info("ndof = %d.", ndof);
 
   // Initialize and set the initial condition.
-  Solution tsln(&mesh, T_INIT);
-
-  // Initialize the exact function representing the external temperature.
-  CustomExactFunction exact_ext_temp(T_INIT, FINAL_TIME);
+  Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
-  CustomWeakForm wf(HEATCAP, RHO, LAMBDA, TAU, ALPHA, &tsln, &exact_ext_temp);
+  CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+                           &current_time, TEMP_INIT, T_FINAL, &tsln);
 
   // Initialize the FE problem.
   bool is_linear = true;
@@ -71,25 +69,28 @@ int main(int argc, char* argv[])
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
   char title[100];
-  sprintf(title, "Time %3.5f, exterior temperature %3.5f", TIME, exact_ext_temp.temp_ext(TIME));
+  sprintf(title, "Time %3.5f", current_time);
   Tview.set_min_max_range(0,20);
   Tview.set_title(title);
   Tview.fix_scale_width(3);
 
   // Time stepping:
-  int nsteps = (int)(FINAL_TIME/TAU + 0.5);
-  bool rhs_only = false;
+  int nsteps = (int)(T_FINAL/time_step + 0.5);
   for(int ts = 1; ts <= nsteps; ts++)
   {
-    info("---- Time step %d, time %3.5f, ext_temp %g", ts, TIME, exact_ext_temp.temp_ext(TIME));
+    info("---- Time step %d, time %3.5f", ts, current_time);
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
-    wf.set_current_time(TIME);
-    dp.assemble(matrix, rhs, rhs_only);
-    rhs_only = true;
+    wf.set_current_time(current_time);
+    if (ts == 1) {
+      info("Assembling the stiffness matrix and right-hand side vector.");
+      dp.assemble(matrix, rhs);
+    }
+    else {
+      info("Assembling the right-hand side vector (only).");
+      dp.assemble(NULL, rhs);
+    }
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
@@ -122,7 +123,7 @@ int main(int argc, char* argv[])
     }
 
     // Update the time variable.
-    TIME += TAU;
+    current_time += time_step;
   }
 
   info("Let's assume that the remote computation has finished and you fetched the *.lin files.");

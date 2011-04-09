@@ -133,8 +133,8 @@ public:
   CustomInitialCondition(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
-    dx = (y+10)/10.;
-    dy = (x+10)/10.;
+    dx = (y+10)/100.;
+    dy = (x+10)/100.;
   };
 
   virtual scalar value (double x, double y) const {

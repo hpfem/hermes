@@ -40,7 +40,7 @@ space(space), is_linear(is_linear)
 }
 
 // process volumetric weak forms
-void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhsonly) {
+void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs) {
   int n_eq = space->get_n_eq();
   Element *elems = space->get_base_elems();
   int n_elem = space->get_n_base_elem();
@@ -112,7 +112,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
               // add the result to the matrix
               if (val_ij != 0) {
                 if(pos_j != -1) {
-                  if(!rhsonly) {
+                  if(mat != NULL) {
                     mat->add(pos_i, pos_j, val_ij);
                     if (DEBUG_MATRIX) {
                       info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
@@ -123,7 +123,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
                 else
                   if(this->is_linear && rhs != NULL)
                     rhs->add(pos_i, -val_ij * e->coeffs[c_j][c_j][j]);
-            }
+	      }
             }
           }
         }
@@ -165,7 +165,7 @@ void DiscreteProblem::process_vol_forms(SparseMatrix *mat, Vector *rhs, bool rhs
 }
 
 // process boundary weak forms
-void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy_index, bool rhsonly) {
+void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy_index) {
   Iterator *I = new Iterator(space);
   Element *e; 
 
@@ -225,7 +225,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
           // add the result to the matrix
           if (val_ij_surf != 0) {
             if(pos_j != -1) {
-              if(!rhsonly) {
+              if(mat != NULL) {
                 mat->add(pos_i, pos_j, val_ij_surf);
                 if (DEBUG_MATRIX) {
                     info("Adding to matrix pos %d, %d value %g (comp %d, %d)", 
@@ -272,7 +272,7 @@ void DiscreteProblem::process_surf_forms(SparseMatrix *mat, Vector *rhs, int bdy
 }
 
 // construct Jacobi matrix or residual vector
-void DiscreteProblem::assemble(scalar *coeff_vec, SparseMatrix *mat, Vector *rhs, bool rhsonly,
+void DiscreteProblem::assemble(scalar *coeff_vec, SparseMatrix *mat, Vector *rhs,
                                bool force_diagonal_blocks, bool add_dir_lift, Table* block_weights) {
   // number of equations in the system
   int n_eq = space->get_n_eq();
@@ -300,13 +300,13 @@ void DiscreteProblem::assemble(scalar *coeff_vec, SparseMatrix *mat, Vector *rhs
   }
 
   // process volumetric weak forms via an element loop
-  process_vol_forms(mat, rhs, rhsonly);
+  process_vol_forms(mat, rhs);
 
   // process surface weak forms for the left boundary
-  process_surf_forms(mat, rhs, BOUNDARY_LEFT, rhsonly);
+  process_surf_forms(mat, rhs, BOUNDARY_LEFT);
 
   // process surface weak forms for the right boundary
-  process_surf_forms(mat, rhs, BOUNDARY_RIGHT, rhsonly);
+  process_surf_forms(mat, rhs, BOUNDARY_RIGHT);
 
   // DEBUG: print Jacobi matrix
   if(DEBUG_MATRIX) {
@@ -488,5 +488,5 @@ int DiscreteProblem::get_num_dofs() { return space->get_num_dofs(); };
 bool DiscreteProblem::is_matrix_free() { return false; };
 
 // Signature of this function is identical in H1D, H2D, H3D, but it is currently unused in H1D.
-void DiscreteProblem::create_sparse_structure(SparseMatrix* matrix, Vector* rhs, bool rhsonly,
+void DiscreteProblem::create_sparse_structure(SparseMatrix* matrix, Vector* rhs,
                                               bool force_diagonal_blocks, Table* block_weights) { return; };

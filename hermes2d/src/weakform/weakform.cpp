@@ -678,7 +678,7 @@ void WeakForm::set_current_time(double time)
   current_time = time;
 }
 
-double WeakForm::get_current_time()
+double WeakForm::get_current_time() const
 {
   return current_time;
 }

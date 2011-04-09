@@ -97,8 +97,8 @@ int main(int argc, char **args)
     // Assemble the linear problem.
     info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
 
-    bool rhsonly = (ts > 0);
-    dp.assemble(matrix, rhs, rhsonly);
+    if (ts == 0) dp.assemble(matrix, rhs);
+    else dp.assemble(NULL, rhs);
 
     // Solve the linear system. If successful, obtain the solution.
     info("Solving the linear problem.");

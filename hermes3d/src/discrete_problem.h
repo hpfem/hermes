@@ -51,18 +51,18 @@ public:
   Space* get_space(int n) {  return this->spaces[n];  }
 
   // Precalculate matrix sparse structure.
-  void create_sparse_structure(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false,
+  void create_sparse_structure(SparseMatrix* mat, Vector* rhs = NULL,
                                bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
   // General assembling procedure for nonlinear problems. coeff_vec is the 
   // previous Newton vector.
   void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
-                bool rhsonly = false, bool force_diagonal_blocks = false, 
+                bool force_diagonal_blocks = false, 
                 bool add_dir_lift = true, Table* block_weights = NULL);
 
   // Assembling for linear problems. Same as the previous functions, but 
   // does not need the coeff_vector.
-  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool rhsonly = false);
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL);
 	
   // Get the number of spaces.
   int get_num_spaces() {return this->spaces.size();}

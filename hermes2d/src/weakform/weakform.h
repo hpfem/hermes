@@ -307,7 +307,7 @@ public:
 
   /// For time-dependent right-hand side functions.
   void set_current_time(double time);
-  double get_current_time();
+  virtual double get_current_time() const;
 
 protected:
   double current_time;

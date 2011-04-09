@@ -70,9 +70,10 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Solution* s
                       newton_damping_coeff, newton_max_allowed_residual_norm);
 }
 
-bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, Hermes::vector<Solution*> slns_time_new, 
-                  Hermes::vector<Solution*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
-                  double newton_damping_coeff, double newton_max_allowed_residual_norm)
+bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vector<Solution*> slns_time_prev, 
+                              Hermes::vector<Solution*> slns_time_new, Hermes::vector<Solution*> error_fns, 
+                              bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
+                              double newton_damping_coeff, double newton_max_allowed_residual_norm)
 {
   // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
   if(error_fns != Hermes::vector<Solution*>() && bt->is_embedded() == false)
@@ -97,8 +98,13 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   // Creates the stage weak formulation.
   create_stage_wf(dp->get_spaces().size(), current_time, time_step);
   
-  // Initialize discrete problems for the assembling of the
-  // matrix M and the stage Jacobian matrix and residual.
+  // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian 
+  // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is 
+  // a block-diagonal mass matrix. The corresponding part of the residual is obtained by multiplying
+  // this block mass matrix with the tensor vector K. Next, matrix_right and vector_right are the Jacobian 
+  // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
+  // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
+  // are added to matrix_right and vector_right, respectively.
   DiscreteProblem stage_dp_left(&stage_wf_left, dp->get_spaces());
   DiscreteProblem stage_dp_right(&stage_wf_right, stage_spaces_vector);
 
@@ -106,22 +112,24 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
   Hermes::vector<Solution*> residuals_vector;
   // A technical workabout.
   Hermes::vector<bool> add_dir_lift;
-  for (unsigned int i = 0; i < num_stages; i++)
+  for (unsigned int i = 0; i < num_stages; i++) {
     for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++) {
       residuals_vector.push_back(new Solution(dp->get_space(sln_i)->get_mesh()));
       add_dir_lift.push_back(false);
     }
+  }
 
   // Zero utility vectors.
   if(start_from_zero_K_vector || !iteration)
-    memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
+     memset(K_vector, 0, num_stages * ndof * sizeof(scalar));
   memset(u_ext_vec, 0, num_stages * ndof * sizeof(scalar));
   memset(vector_left, 0, num_stages * ndof * sizeof(scalar));
 
   // Assemble the block-diagonal mass matrix M of size ndof times ndof.
   // The corresponding part of the global residual vector is obtained 
-  // just by multiplication.
-  stage_dp_left.assemble(&matrix_left);
+  // just by multiplication with the stage vector K.
+  // FIXME: This should not be repeated if spaces have not changed.
+  stage_dp_left.assemble(&matrix_left, NULL);
 
   // The Newton's loop.
   double residual_norm;
@@ -130,15 +138,17 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
     prepare_u_ext_vec(time_step, slns_prev_time_projection);
    
+    // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
     multiply_as_diagonal_block_matrix(&matrix_left, num_stages, K_vector, vector_left);
 
     // Assemble the block Jacobian matrix of the stationary residual F
     // Diagonal blocks are created even if empty, so that matrix_left
     // can be added later.
-    stage_dp_right.assemble(u_ext_vec, &matrix_right, &vector_right, !jacobian_changed && it > 1, true, false);
-    
-    matrix_right.add_to_diagonal_blocks(num_stages, &matrix_left);
-
+    bool force_diagonal_blocks = true;
+    bool add_dir_lift = false;
+    stage_dp_right.assemble(u_ext_vec, NULL, &vector_right, force_diagonal_blocks, add_dir_lift);
+  
+    // Finalizing the residual vector.
     vector_right.add_vector(vector_left);
 
     // Multiply the residual vector with -1 since the matrix
@@ -156,7 +166,10 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     }
 
     // Info for the user.
-    if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
+    if (it == 1) {
+      if (verbose) info("---- Newton initial residual norm: %g", residual_norm);
+    }
+    else if (verbose) info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
     // If maximum allowed residual norm is exceeded, fail.
     if (residual_norm > newton_max_allowed_residual_norm) {
@@ -170,9 +183,22 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
 
     // If residual norm is within tolerance, or the maximum number
     // of iteration has been reached, or the problem is linear, then quit.
-    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) 
+    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) {
       break;
+    }
 
+    bool rhs_only = (!jacobian_changed && it > 1);
+    if (!rhs_only) {
+      // Assemble the block Jacobian matrix of the stationary residual F
+      // Diagonal blocks are created even if empty, so that matrix_left
+      // can be added later.
+      stage_dp_right.assemble(u_ext_vec, &matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
+
+      // Adding the block mass matrix M to matrix_right. This completes the 
+      // resulting tensor Jacobian.
+      matrix_right.add_to_diagonal_blocks(num_stages, &matrix_left);
+    }
+    
     // Solve the linear system.
     if(!solver->solve()) 
       error ("Matrix solver failed.\n");
@@ -180,13 +206,6 @@ bool RungeKutta::rk_time_step(double current_time, double time_step, Hermes::vec
     // Add \deltaK^{n+1} to K^n.
     for (unsigned int i = 0; i < num_stages*ndof; i++)
       K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
-
-    // If the problem is linear, quit.
-    if (is_linear) {
-      if (verbose)
-        info("Terminating Newton's loop as problem is linear.");
-      break;
-    }
 
     // Increase iteration counter.
     it++;

@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
+    wf.set_current_time(current_time);
     if (ts == 1) {
       info("Assembling the stiffness matrix and right-hand side vector.");
       dp.assemble(matrix, rhs);

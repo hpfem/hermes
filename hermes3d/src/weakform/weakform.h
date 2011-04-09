@@ -173,7 +173,7 @@ protected:
 	// OLD CODE: 
         // void get_stages(Space **spaces, std::vector<Stage> &stages, bool rhsonly);
         void get_stages(Hermes::vector< Space* > spaces, Hermes::vector< Solution* >& u_ext, 
-                        std::vector< WeakForm::Stage >& stages, bool rhsonly);
+                        std::vector< WeakForm::Stage >& stages, bool want_matrix, bool want_vector);
 	bool **get_blocks();
 
 	bool is_in_area(int marker, int area) const

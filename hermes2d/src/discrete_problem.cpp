@@ -4398,69 +4398,6 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
   }
 
-
-  /* OLD VERSION - ASSEMBLES JACOBIAN AND RESIDUAL SIMULTANEOUSLY,
-     THUS WASTING ONE MATRIX ASSEMBLY AT THE END.
-  // The Newton's loop.
-  double residual_norm;
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = dp->get_num_dofs();
-
-    // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(coeff_vec, matrix, rhs, false);
-
-    // Multiply the residual vector with -1 since the matrix
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs->change_sign();
-
-    // Measure the residual norm.
-    if (residual_as_function) {
-      // Translate the residual vector into a residual function (or multiple functions)
-      // in the corresponding finite element space(s) and measure their norm(s) there.
-      // This is more meaningful than just measuring the l2-norm of the residual vector,
-      // since in the FE space not all components in the residual vector have the same weight.
-      // On the other hand, this is slower as it requires global norm calculation, and thus
-      // numerical integration over the entire domain. Therefore this option is off by default.
-      Solution::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
-      residual_norm = calc_norms(solutions);
-    }
-    else {
-      // Calculate the l2-norm of residual vector, this is the traditional way.
-      residual_norm = get_l2_norm(rhs);
-    }
-
-    // Info for the user.
-    if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
-
-    // If maximum allowed residual norm is exceeded, fail.
-    if (residual_norm > max_allowed_residual_norm) {
-      if (verbose) {
-        info("Current residual norm: %g", residual_norm);
-        info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
-        info("Newton solve not successful, returning false.");
-      }
-      for (unsigned int i = 0; i < solutions.size(); i++)
-        delete solutions[i];
-      return false;
-    }
-
-    // If residual norm is within tolerance, or the maximum number
-    // of iteration has been reached, then quit.
-    if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
-
-    // Solve the linear system.
-    if(!solver->solve()) error ("Matrix solver failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
-
-    it++;
-  }
-  */
-
   // The Newton's loop.
   double residual_norm;
   int it = 1;
@@ -4489,7 +4426,10 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     }
 
     // Info for the user.
-    if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
+    if (it == 1) {
+      if (verbose) info("---- Newton initial residual norm: %g", residual_norm);
+    }
+    else if (verbose) info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
     // If maximum allowed residual norm is exceeded, fail.
     if (residual_norm > max_allowed_residual_norm) {

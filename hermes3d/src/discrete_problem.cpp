@@ -183,14 +183,14 @@ bool DiscreteProblem::is_up_to_date()
 
 // Signature of this function is identical in H1D, H2D, H3D, but only first three parameters are 
 // used in H3D.
-void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, bool rhsonly, 
+void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, 
                                               bool force_diagonal_blocks, Table* block_weights)
 {
   _F_
 
   if (is_up_to_date())
   {
-    if (!rhsonly && mat != NULL) 
+    if (mat != NULL) 
     {
       verbose("Reusing matrix sparse structure.");
       mat->zero();
@@ -276,13 +276,13 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix *mat, Vector* rhs, bo
 //// assembly //////////////////////////////////////////////////////////////////////////////////////
 
 // Light version for linear problems.
-void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool rhsonly) 
+void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs) 
 {
   _F_
-  assemble(NULL, mat, rhs, rhsonly);
+  assemble(NULL, mat, rhs);
 }
 
-void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs, bool rhsonly,
+void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs,
                                bool force_diagonal_blocks, bool add_dir_lift, Table* block_weights)
 {
   /* BEGIN IDENTICAL CODE WITH H2D */
@@ -296,7 +296,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
   }
  
-  this->create_sparse_structure(mat, rhs, rhsonly);
+  this->create_sparse_structure(mat, rhs);
 
   // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
   Hermes::vector<Solution*> u_ext;
@@ -338,7 +338,9 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   // obtain a list of assembling stages
   std::vector<WeakForm::Stage> stages;
-  wf->get_stages(spaces, u_ext, stages, rhsonly);
+  bool want_matrix = (mat != NULL);
+  bool want_vector = (rhs != NULL);
+  wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector);
 
   // Loop through all assembling stages -- the purpose of this is increased performance
   // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -430,7 +432,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                     rhs->add(am->dof[i], -val);
                   } 
                 }
-                else if (rhsonly == false) 
+                else if (mat != NULL) 
                 {
                   scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = val;
@@ -452,7 +454,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                     rhs->add(am->dof[i], -val);
                   }
                 } 
-                else if (rhsonly == false) 
+                else if (mat != NULL) 
                 {
                   scalar val = eval_form(mfv, u_ext, fu, fv, refmap + n, refmap + m) * an->coef[j] * am->coef[i];
                   local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
@@ -462,7 +464,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
           }
 
           // insert the local stiffness matrix into the global one
-          if (rhsonly == false)
+          if (mat != NULL)
             mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
 
           // insert also the off-diagonal (anti-)symmetric block, if required
@@ -473,7 +475,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
             
             transpose(local_stiffness_matrix, am->cnt, an->cnt);
 
-            if (rhsonly == false) 
+            if (mat != NULL) 
               mat->add(an->cnt, am->cnt, local_stiffness_matrix, an->dof, am->dof);
 
             // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
@@ -579,7 +581,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                     rhs->add(am->dof[i], -val);
                   }
                 }
-                else if (rhsonly == false) 
+                else if (mat != NULL) 
                 {
                   scalar val = eval_form(mfs, u_ext, fu, fv, refmap + n, refmap + m, 
                                          surf_pos + isurf) * an->coef[j] * am->coef[i];
@@ -587,7 +589,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
                 } 
               }
             }
-            if (rhsonly == false) 
+            if (mat != NULL) 
               mat->add(am->cnt, an->cnt, local_stiffness_matrix, am->dof, an->dof);
           }
         }

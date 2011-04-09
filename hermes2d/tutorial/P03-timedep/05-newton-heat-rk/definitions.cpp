@@ -2,12 +2,13 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+/* Weak forms */
+
 class WeakFormHeatTransferRungeKuttaTimedep : public WeakForm
 {
 public:
   WeakFormHeatTransferRungeKuttaTimedep(double alpha, Solution* sln_prev_time) : WeakForm(1) {
     add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha));
-
     add_vector_form(new VectorFormVolHeatTransfer(0, alpha));
   };
 
@@ -15,9 +16,7 @@ private:
   class MatrixFormVolHeatTransfer : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolHeatTransfer(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j), alpha(alpha) {
-      sym = HERMES_NONSYM; 
-    }
+    MatrixFormVolHeatTransfer(int i, int j, double alpha) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
@@ -104,10 +103,11 @@ private:
       return 1 + pow(u, alpha); 
     }
 
-    // Member.
     double alpha;
   };
 };
+
+/* Essential boundary conditions */
 
 class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
@@ -126,15 +126,16 @@ public:
   }
 };
 
+/* Initial condition */
+
 class InitialSolutionHeatTransfer : public ExactSolutionScalar
 {
 public:
   InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
-  // Function representing an exact one-dimension valued solution.
   virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
-    dx = (y+10)/10.;
-    dy = (x+10)/10.;
+    dx = (y+10)/100.;
+    dy = (x+10)/100.;
   };
 
   virtual scalar value (double x, double y) const {
