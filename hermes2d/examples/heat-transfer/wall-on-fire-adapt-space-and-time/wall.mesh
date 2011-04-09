@@ -1,4 +1,4 @@
-Lx = 4     # width
+Lx = 4.0   # width
 Ly = 0.5   # height
 
 vertices = [
@@ -9,14 +9,14 @@ vertices = [
 ]
 
 elements = [
-  [ 0, 1, 2, 3, 0 ]
+  [ 0, 1, 2, 3, "Wall" ]
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 2 ],
-  [ 2, 3, 3 ],
-  [ 3, 0, 4 ]
+  [ 0, 1, "Bottom" ],
+  [ 1, 2, "Right" ],
+  [ 2, 3, "Top" ],
+  [ 3, 0, "Left" ]
 ]
 
 

@@ -14,9 +14,9 @@ elements = [
 
 boundaries = [
   [ 0, 1, "Bottom" ],
-  [ 1, 2, "Vertical" ],
+  [ 1, 2, "Right" ],
   [ 2, 3, "Top" ],
-  [ 3, 0, "Vertical" ]
+  [ 3, 0, "Left" ]
 ]
 
 

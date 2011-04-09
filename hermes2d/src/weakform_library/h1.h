@@ -993,18 +993,61 @@ namespace WeakFormsH1 {
         GeomType gt;
     };
 
+    /* Default surface vector form \int_{area} coeff * u_ext[0] v dS
+       coeff... constant parameter
+    */
+
+    class DefaultResidualSurfConst : public WeakForm::VectorFormSurf
+    {
+    public:
+      DefaultResidualSurfConst(int i, scalar coeff = 1.0, 
+                               GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
+      DefaultResidualSurfConst(int i, std::string area, scalar coeff = 1.0, 
+                               GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], 
+                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * u_ext[0]->val[i] * v->val[i];
+        }
+        return coeff * result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                   Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form_surf<double, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormSurf* clone() {
+        return new DefaultResidualSurfConst(*this);
+      }
+
+      private:
+        scalar coeff;
+        GeomType gt;
+    };
 
     /* Default surface vector form \int_{area} spline_coeff(u_ext[0]) v dS
        spline_coeff... non-constant parameter given by cubic spline
     */
 
-    class DefaultResidualFormSurf : public WeakForm::VectorFormSurf
+    class DefaultResidualSurfSpline : public WeakForm::VectorFormSurf
     {
     public:
-      DefaultResidualFormSurf(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
+      DefaultResidualSurfSpline(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
                               GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormSurf(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
-      DefaultResidualFormSurf(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
+      DefaultResidualSurfSpline(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0, 
                               GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormSurf(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
 
@@ -1030,7 +1073,7 @@ namespace WeakFormsH1 {
 
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormSurf* clone() {
-        return new DefaultResidualFormSurf(*this);
+        return new DefaultResidualSurfSpline(*this);
       }
 
       private:
