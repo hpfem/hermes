@@ -3,8 +3,7 @@
 #include "hermes2d.h"
 #include "runge_kutta.h"
 
-// This test makes sure that example 09-timedep-rk works correctly.
-
+// This test makes sure that example P03-timedep/02-cathedral-rk works correctly.
 
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -38,10 +37,10 @@ const std::string BDY_AIR = "Boundary air";
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
 const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 10;          // Thermal conductivity of the material.
+const double LAMBDA = 1e2;         // Thermal conductivity of the material.
 const double HEATCAP = 1e2;        // Heat capacity.
 const double RHO = 3000;           // Material density.
-const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
+const double T_FINAL = 5*time_step;
 
 // Weak forms.
 #include "../definitions.cpp"

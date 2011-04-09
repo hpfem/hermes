@@ -20,7 +20,7 @@ const double ALPHA = 10;             // Heat flux coefficient for Newton's bound
 const double LAMBDA = 1e2;           // Thermal conductivity of the material.
 const double HEATCAP = 1e2;          // Heat capacity.
 const double RHO = 3000;             // Material density.
-const double T_FINAL = 5*time_step;  // Length of time interval (24 hours) in seconds.
+const double T_FINAL = 5*time_step;
 
 // Weak forms.
 #include "../definitions.cpp"
