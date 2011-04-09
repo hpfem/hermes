@@ -63,7 +63,9 @@ const double TAU = 0.1;
 const double RHO = M_PI/4.;              
 const double SIGMA = -14.92256510455152; 
 
-// Boundary markers.
+// Materials and boundary markers.
+const std::string AREA_1 = "0";
+const std::string AREA_2 = "1";
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
@@ -86,7 +88,7 @@ int main(int argc, char* argv[])
   CustomExactSolution exact(&mesh, SIGMA, TAU, RHO);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(R);
+  CustomWeakFormPoisson wf(AREA_1, R, AREA_2);
 
   // Initialize boundary conditions
   DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
