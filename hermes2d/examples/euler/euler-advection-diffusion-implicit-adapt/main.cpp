@@ -40,7 +40,7 @@ double DISCONTINUITY_DETECTOR_PARAM = 1;
 
 const int P_INIT_FLOW = 0;                        // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;               // Polynomial degree for the concentration.
-double time_step = 1E-3;                          // Time step.
+double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -70,7 +70,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 20.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 10.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -78,8 +78,8 @@ const int NDOF_STOP = 100000;                     // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 2;               // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 2;      // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 3;               // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 3;      // Number of initial uniform mesh refinements of the mesh for the concentration.
 unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 2;  // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                   // part of the boundary where the concentration is prescribed.
 // Equation parameters.
@@ -88,7 +88,7 @@ const double RHO_EXT = 1.0;                             // Inlet density (dimens
 const double V1_EXT = 0.25;                             // Inlet x-velocity (dimensionless).
 const double V2_EXT = 0.0;                              // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;                               // Kappa.
-const double CONCENTRATION_EXT = 1.0;                  // Concentration on the boundary.
+const double CONCENTRATION_EXT = 1.0;                   // Concentration on the boundary.
 
 const double EPSILON = 0.01;                           // Diffusivity.
 
@@ -307,11 +307,21 @@ int main(int argc, char* argv[])
           as++;
       }
 
+      // Save orders.
+      Orderizer ord;
+      char filename[40];
+      sprintf(filename, "Flow-mesh-%i-%i.vtk", iteration - 1, as - 1);
+      ord.save_orders_vtk((*ref_spaces)[0], filename);
+      sprintf(filename, "Concentration-mesh-%i-%i.vtk", iteration - 1, as - 1);
+      ord.save_orders_vtk((*ref_spaces)[4], filename);
+      
       // Clean up.
       delete adaptivity;
       if(!done)
         for(unsigned int i = 0; i < ref_spaces->size(); i++)
           delete (*ref_spaces)[i]->get_mesh();
+
+
       for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i];
     }
@@ -357,6 +367,11 @@ int main(int argc, char* argv[])
         lin.save_solution_vtk(&Mach_number, filename, "MachNumber", false);
         sprintf(filename, "Mach number-3D-%i.vtk", iteration - 1);
         lin.save_solution_vtk(&Mach_number, filename, "MachNumber", true);
+        sprintf(filename, "Concentration-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&prev_c, filename, "Concentration", true);
+        sprintf(filename, "Concentration-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&prev_c, filename, "Concentration", true);
+ 
       }
     }
   }
