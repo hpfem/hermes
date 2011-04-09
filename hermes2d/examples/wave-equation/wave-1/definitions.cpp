@@ -62,7 +62,7 @@ private:
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                  Geom<double> *e, ExtData<scalar> *ext) const {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
@@ -94,7 +94,7 @@ private:
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                  Geom<double> *e, ExtData<scalar> *ext) const {
-      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 

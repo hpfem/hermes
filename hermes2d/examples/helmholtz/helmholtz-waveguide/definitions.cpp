@@ -48,7 +48,7 @@ private:
         }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
@@ -81,7 +81,7 @@ private:
         }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
@@ -108,7 +108,7 @@ private:
         }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
@@ -129,7 +129,7 @@ private:
             return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) - sqr(omega) * mu * eps * int_u_v<Real, Scalar>(n, wt, u, v);
         }
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
@@ -158,7 +158,7 @@ private:
         }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form_surf<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
@@ -182,7 +182,7 @@ private:
             return - beta*int_u_v<Real, Scalar>(n, wt, u, v);
         }
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-            return matrix_form_surf<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+            return matrix_form_surf<double, scalar>(n, wt, u_ext, u, v, e, ext);
         }
 
         virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
