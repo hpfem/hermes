@@ -21,7 +21,7 @@ private:
                                                                         tau(tau) {}
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
@@ -63,7 +63,7 @@ private:
     VectorFormVolHeatTransfer(int i, double alpha, double tau) : WeakForm::VectorFormVol(i), alpha(alpha), tau(tau) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       Func<Scalar>* u_prev_time = ext->fn[0];
@@ -112,7 +112,7 @@ public:
 
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  virtual scalar function(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
     return (x+10)*(y+10)/100.;
   }
