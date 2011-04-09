@@ -38,10 +38,10 @@ const std::string BDY_AIR = "Boundary air";
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
 const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;         // Thermal conductivity of the material.
-const double HEATCAP = 1e6;        // Heat capacity.
+const double LAMBDA = 10;          // Thermal conductivity of the material.
+const double HEATCAP = 1e2;        // Heat capacity.
 const double RHO = 3000;           // Material density.
-const double T_FINAL = time_step*5;// Length of time interval (24 hours) in seconds.
+const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
 // Weak forms.
 #include "../definitions.cpp"
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   double current_time = 0;
   CustomWeakFormHeatRK wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO,
-                          &current_time, TEMP_INIT, T_FINAL, sln_time_prev);
+                          &current_time, TEMP_INIT, T_FINAL);
   
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential(BDY_GROUND, TEMP_INIT);
@@ -83,8 +83,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Initialize views.
   //ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));

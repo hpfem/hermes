@@ -666,7 +666,7 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   init_cache();
 
   /// Assemble volume matrix forms.
-  assemble_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
+   assemble_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
                                block_weights, spss, refmap, u_ext, isempty,
                                rep_element->marker, al);
   if(!stage.mfvol_mc.empty())

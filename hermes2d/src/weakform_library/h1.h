@@ -489,6 +489,50 @@ namespace WeakFormsH1 {
     };
 
     /* Default volumetric vector form \int_{area} coeff 
+       u_ext[0] v d\bfx 
+       coeff... constant parameter
+    */
+
+    class DefaultResidualLinearMass : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualLinearMass(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
+      DefaultResidualLinearMass(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
+	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
+
+      template<typename Real, typename Scalar>
+      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], 
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        Scalar result = 0;
+        Func<Scalar>* u_prev = u_ext[0];
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * coeff * u_prev->val[i] * v->val[i];
+        }
+        return result;
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+              Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualLinearMass(*this);
+      }
+
+      private:
+        scalar coeff;
+        GeomType gt;
+    };
+
+    /* Default volumetric vector form \int_{area} coeff 
        \nabla u_ext[0] \cdot \nabla v d\bfx 
        coeff... constant parameter
     */

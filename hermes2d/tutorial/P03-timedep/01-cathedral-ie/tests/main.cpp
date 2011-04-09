@@ -17,16 +17,15 @@ const std::string BDY_GROUND = "Boundary ground";
 const std::string BDY_AIR = "Boundary air";
 
 // Problem parameters.
-const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
-const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;         // Thermal conductivity of the material.
-const double HEATCAP = 1e6;        // Heat capacity.
-const double RHO = 3000;           // Material density.
-const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
-double current_time = 0;
+const double TEMP_INIT = 10;         // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;             // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e5;           // Thermal conductivity of the material.
+const double HEATCAP = 1e6;          // Heat capacity.
+const double RHO = 3000;             // Material density.
+const double T_FINAL = 5*time_step;  // Length of time interval (24 hours) in seconds.
 
 // Weak forms.
-#include "definitions.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -44,6 +43,7 @@ int main(int argc, char* argv[])
   Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
+  double current_time = 0;
   CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
                            &current_time, TEMP_INIT, T_FINAL, &tsln);
   

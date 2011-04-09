@@ -10,13 +10,13 @@
 //  in the surrounding air temperature during one 24-hour cycle. 
 //
 //  PDE: non-stationary heat transfer equation
-//  HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
+//  dT/dt - LAMBDA / (HEATCAP * RHO) * Laplace T = 0.
 //
 //  Domain: St. Vitus cathedral (file cathedral.mesh).
 //
 //  IC:  T = TEMP_INIT.
 //  BC:  T = TEMP_INIT on the bottom edge ... Dirichlet,
-//       dT/dn = ALPHA*(t_exterior(time) - T) ... Newton, time-dependent.
+//       LAMBDA * dT/dn = ALPHA*(t_exterior(time) - T) ... Newton, time-dependent.
 //
 //  Time-stepping: implicit Euler method.
 //
@@ -42,7 +42,6 @@ const double LAMBDA = 1e5;         // Thermal conductivity of the material.
 const double HEATCAP = 1e6;        // Heat capacity.
 const double RHO = 3000;           // Material density.
 const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
-double current_time = 0;
 
 // Weak forms.
 #include "definitions.cpp"
@@ -63,6 +62,7 @@ int main(int argc, char* argv[])
   Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
+  double current_time = 0;
   CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
                            &current_time, TEMP_INIT, T_FINAL, &tsln);
   
