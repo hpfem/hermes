@@ -16,15 +16,15 @@ using namespace RefinementSelectors;
  *   - STRATEGY=1
  *   - CAND_LIST=HP_ANISO_H
  *   - MESH_REGULARITY=-1
- *   - ERR_STOP=1.0
+ *   - ERR_STOP=3.0
  *   - CONV_EXP=1.0
  *   - NDOF_STOP=50000
  *   - matrix_solver = SOLVER_UMFPACK
  *   
  *  \section s_res Results
- *   - DOFs: 1383
- *   - Error estimate: 0.907777 %
- *   - Iterations: 9 (the last iteration at which ERR_STOP is fulfilled)
+ *   - DOFs: 561
+ *   - Error estimate: 2.46608 %
+ *   - Iterations: 5 (the last iteration at which ERR_STOP is fulfilled)
  */
 
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
@@ -56,7 +56,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 50000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 
   ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 1390;
+  int n_dof_allowed = 570;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);
   if (ndof <= n_dof_allowed) {

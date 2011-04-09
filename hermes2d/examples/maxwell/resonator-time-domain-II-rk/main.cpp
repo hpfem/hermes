@@ -99,18 +99,13 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &F_space)));
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space));
 
   // Initialize views.
   ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
   E1_view.fix_scale_width(50);
   ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
   E2_view.fix_scale_width(50);
-  ScalarView F1_view("Solution F1", new WinGeom(0, 405, 400, 350));
-  F1_view.fix_scale_width(50);
-  ScalarView F2_view("Solution E2", new WinGeom(410, 405, 400, 350));
-  F2_view.fix_scale_width(50);
 
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
@@ -135,12 +130,6 @@ int main(int argc, char* argv[])
     sprintf(title, "E2, t = %g", current_time);
     E2_view.set_title(title);
     E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
-    sprintf(title, "F1, t = %g", current_time);
-    F1_view.set_title(title);
-    F1_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-    sprintf(title, "F2, t = %g", current_time);
-    F2_view.set_title(title);
-    F2_view.show(&F_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
 
     // Update time.
     current_time += time_step;
