@@ -87,7 +87,8 @@ void DiscreteProblem::init()
   // according to the conversion table contained in the mesh.
   element_markers_conversion = &spaces[0]->get_mesh()->element_markers_conversion;
   boundary_markers_conversion = &spaces[0]->get_mesh()->boundary_markers_conversion;
-  wf->set_markers_conversion(&spaces[0]->get_mesh()->element_markers_conversion, &spaces[0]->get_mesh()->boundary_markers_conversion);
+  wf->set_markers_conversion(&spaces[0]->get_mesh()->element_markers_conversion, 
+                             &spaces[0]->get_mesh()->boundary_markers_conversion);
 
   // There is a special function that sets a DiscreteProblem to be FVM.
   // Purpose is that this constructor looks cleaner and is simpler.
@@ -4448,7 +4449,7 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
     // Assemble the Jacobian matrix.
-    dp->assemble(coeff_vec, matrix, NULL); // NULL means that we do not want the rhs.
+    dp->assemble(coeff_vec, matrix, NULL); // NULL = we do not want the rhs.
 
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
