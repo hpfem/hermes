@@ -142,6 +142,7 @@ int main(int argc, char* argv[])
   Mesh mesh, basemesh;
   H2DReader mloader;
   mloader.load("wall.mesh", &basemesh);
+  mesh.copy(&basemesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -185,13 +186,6 @@ int main(int argc, char* argv[])
   SimpleGraph time_step_graph;
   if (ADAPTIVE_TIME_STEP_ON) info("Time step history will be saved to file time_step_history.dat.");
 
-  // Initialize discrete problem on reference mesh.
-  Space* ref_space;
-  DiscreteProblem ref_dp(&wf, ref_space);
-
-  // Initialize Runge-Kutta time stepping on the reference mesh.
-  RungeKutta runge_kutta(&ref_dp, &bt, matrix_solver);
-
   // Time stepping loop:
   int ts = 1;
   do 
@@ -226,7 +220,13 @@ int main(int argc, char* argv[])
     double err_est;
     do {
       // Construct globally refined reference mesh and setup reference space.
-      ref_space = Space::construct_refined_space(&space);
+      Space* ref_space = Space::construct_refined_space(&space);
+
+      // Initialize discrete problem on reference mesh.
+      DiscreteProblem ref_dp(&wf, ref_space);
+      
+      // Initialize Runge-Kutta time stepping on the reference mesh.
+      RungeKutta runge_kutta(&ref_dp, &bt, matrix_solver);
 
       OGProjection::project_global(ref_space, Hermes::vector<Solution *>(&sln_prev_time), 
                                    Hermes::vector<Solution *>(&sln_prev_time), matrix_solver);
