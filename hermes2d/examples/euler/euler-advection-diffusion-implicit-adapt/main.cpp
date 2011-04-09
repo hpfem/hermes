@@ -28,8 +28,8 @@ const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
-const double NOX_LINEAR_TOLERANCE = 1e-2;
-const double NOX_NONLINEAR_TOLERANCE = 1e-3;
+const double NOX_LINEAR_TOLERANCE = 1e-3;
+const double NOX_NONLINEAR_TOLERANCE = 1.0;
 unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
 
 // Shock capturing.
@@ -70,7 +70,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 5.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 20.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -78,9 +78,9 @@ const int NDOF_STOP = 100000;                     // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 3;               // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 3;      // Number of initial uniform mesh refinements of the mesh for the concentration.
-unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 3;  // Number of initial mesh refinements of the mesh for the concentration towards the 
+unsigned int INIT_REF_NUM_FLOW = 2;               // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 2;      // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 2;  // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                   // part of the boundary where the concentration is prescribed.
 // Equation parameters.
 const double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
