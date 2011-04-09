@@ -1138,10 +1138,10 @@ protected:
     }
   };
     
-  class EulerEquationsreconditioningSingle : public WeakForm::MatrixFormVol
+  class EulerEquationsPreconditioningSingle : public WeakForm::MatrixFormVol
   {
   public:
-    EulerEquationsreconditioningSingle(unsigned int i, unsigned int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
+    EulerEquationsPreconditioningSingle(unsigned int i, unsigned int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
 
     virtual double value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return int_u_v<double, double>(n, wt, u, v);;
@@ -1635,20 +1635,20 @@ class EulerEquationsWeakFormImplicitCoupled : public EulerEquationsWeakFormImpli
 {
 public:
   // Constructor.
-  EulerEquationsWeakFormImplicitCoupled(int variant, NumericalFlux* num_flux, double kappa, 
+  EulerEquationsWeakFormImplicitCoupled(NumericalFlux* num_flux, double kappa, 
                                         double rho_ext, double v1_ext, double v2_ext, 
-                                        double pressure_ext, std::string solid_wall_bottom_marker, 
-                                        std::string solid_wall_top_marker, std::string inlet_marker, 
-                                        std::string outlet_marker, Solution* prev_density, 
-                                        Solution* prev_density_vel_x, Solution* prev_density_vel_y, 
-                                        Solution* prev_energy, Solution* prev_concentration, 
-                                        bool preconditioning, double epsilon) 
-       : EulerEquationsWeakFormImplicit(num_flux, kappa, rho_ext, v1_ext, v2_ext, pressure_ext, 
-                                        solid_wall_bottom_marker, solid_wall_top_marker, inlet_marker, 
+                                        double pressure_ext, std::string solid_wall_marker,
+										std::string inlet_marker, std::string outlet_marker, 
+										Hermes::vector<std::string> natrural_bc_concentration_markers,
+										Solution* prev_density, Solution* prev_density_vel_x, 
+										Solution* prev_density_vel_y, Solution* prev_energy, 
+										Solution* prev_concentration, bool preconditioning, double epsilon) 
+       : EulerEquationsWeakFormImplicitMultiComponent(num_flux, kappa, rho_ext, v1_ext, v2_ext, pressure_ext, 
+                                        solid_wall_marker, solid_wall_marker, inlet_marker, 
                                         outlet_marker, prev_density, prev_density_vel_x, 
                                         prev_density_vel_y, prev_energy, preconditioning, 5) {
     if(preconditioning)
-      add_matrix_form(new EulerEquationsreconditioningSingle(4, 4));
+      add_matrix_form(new EulerEquationsPreconditioningSingle(4, 4));
     
     EulerEquationsLinearFormTimeSingle* linear_form_time = new EulerEquationsLinearFormTimeSingle(4);
     linear_form_time->ext.push_back(prev_density);
@@ -1661,15 +1661,9 @@ public:
     add_vector_form(new VectorFormConcentrationDiffusion(4, epsilon));
     add_vector_form(new VectorFormConcentrationAdvection(4));
 
-    if(variant != 1)
-      add_vector_form_surf(new VectorFormConcentrationNatural(4, inlet_marker));
-    if(variant != 2)
-      add_vector_form_surf(new VectorFormConcentrationNatural(4, solid_wall_bottom_marker));
-    if(variant != 3)
-      add_vector_form_surf(new VectorFormConcentrationNatural(4, solid_wall_top_marker));
-
-    add_vector_form_surf(new VectorFormConcentrationNatural(4, outlet_marker));
-
+    for(unsigned int i = 0; i < natrural_bc_concentration_markers.size(); i++)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, natrural_bc_concentration_markers[i]));
+    
     add_vector_form_surf(new VectorFormConcentrationInterface (4));
   };
 

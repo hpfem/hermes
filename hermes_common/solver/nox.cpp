@@ -343,6 +343,8 @@ bool NoxSolver::solve()
    ls_pars.set("Max Iterations", ls_max_iters);
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
+   ls_pars.set("Preconditioner Reuse Policy", "Reuse");
+
    // precond stuff
    Teuchos::RCP<Precond> precond = interface_->get_precond();
    if(precond_yes == false) {
