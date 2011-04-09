@@ -666,15 +666,13 @@ void DiscreteProblem::assemble_one_state(WeakForm::Stage& stage,
   init_cache();
 
   /// Assemble volume matrix forms.
-  if (matrix != NULL) {
-    assemble_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
-                                 block_weights, spss, refmap, u_ext, isempty,
-                                 rep_element->marker, al);
-    if(!stage.mfvol_mc.empty())
-      assemble_multicomponent_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
-                                 block_weights, spss, refmap, u_ext, isempty,
-                                 rep_element->marker, al);
-  }
+  assemble_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
+                               block_weights, spss, refmap, u_ext, isempty,
+                               rep_element->marker, al);
+  if(!stage.mfvol_mc.empty())
+    assemble_multicomponent_volume_matrix_forms(stage, matrix, rhs, force_diagonal_blocks,
+                               block_weights, spss, refmap, u_ext, isempty,
+                               rep_element->marker, al);
 
   /// Assemble volume vector forms.
   if (rhs != NULL) {
