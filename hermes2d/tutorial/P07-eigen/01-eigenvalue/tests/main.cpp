@@ -2,7 +2,7 @@
 #include "hermes2d.h"
 #include <stdio.h>
 
-// This test makes sure that example 50-eigenvalue works correctly.
+// This test makes sure that example P07-eigen/01-eigenvalue works correctly.
 
 int NUMBER_OF_EIGENVALUES = 1;                    // Desired number of eigenvalues.
 int P_INIT = 4;                                   // Uniform polynomial degree of mesh elements.
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
   double coor_x[4] = {0.5, 1.0, 1.5, 2.0};
   double coor_y = 0.5;
-  double t_value[4] = {0.146640, 0.257224, 0.304497, 0.277808};
+  double t_value[4] = {0.464485, 0.591468, 0.502567, 0.309183};
   bool success = true;
   for (int i = 0; i < 4; i++)
   {
