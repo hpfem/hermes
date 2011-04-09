@@ -540,9 +540,9 @@ namespace WeakFormsH1 {
     class DefaultResidualLinearDiffusion : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualLinearDiffusion(int i, scalar coeff, GeomType gt = HERMES_PLANAR) 
+      DefaultResidualLinearDiffusion(int i, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
-      DefaultResidualLinearDiffusion(int i, std::string area, scalar coeff, GeomType gt = HERMES_PLANAR) 
+      DefaultResidualLinearDiffusion(int i, std::string area, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR) 
 	: WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       template<typename Real, typename Scalar>

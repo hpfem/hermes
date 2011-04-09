@@ -51,8 +51,7 @@ int max_iters = 100;                              // Max number of iterations.
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
-#include "forms_nox.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char **argv)
 {
@@ -72,14 +71,14 @@ int main(int argc, char **argv)
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionPoisson exact(&mesh);
+  CustomExactSolution exact(&mesh);
+
+  // Initialize boundary conditions
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  EssentialBCs bcs(&bc_essential);
   
   // Initialize the weak formulation.
   WeakFormPoisson wf1;
-
-  // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
-  EssentialBCs bcs(&bc_essential);
  
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
@@ -202,7 +201,7 @@ int main(int argc, char **argv)
   time2 = cpu_time.tick().last();
 
   // Show the NOX solution.
-  ScalarView view2("Solution 2", new WinGeom(450, 0, 440, 350));
+  ScalarView view2("Solution 2", new WinGeom(450, 0, 460, 350));
   view2.show(&sln2);
   //view2.show(&exact);
 
