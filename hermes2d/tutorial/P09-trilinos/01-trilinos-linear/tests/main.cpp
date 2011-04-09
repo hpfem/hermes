@@ -37,8 +37,7 @@ int max_iters = 100;                              // Max number of iterations.
 const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
-#include "../forms_nox.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char **argv)
 {
@@ -58,13 +57,13 @@ int main(int argc, char **argv)
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Set exact solution.
-  ExactSolutionPoisson exact(&mesh);
+  CustomExactSolution exact(&mesh);
   
   // Initialize the weak formulation.
   WeakFormPoisson wf1;
 
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
   EssentialBCs bcs(&bc_essential);
  
   // Create an H1 space with default shapeset.
