@@ -61,7 +61,7 @@ IF(HERMES_COMMON_REAL) # Search for the real version of the library.
 
   # Look for the libraries only if they are not already in cache.
   IF(NOT PETSC_REAL_LIBRARIES)  
-    SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-real)
+    SET(PETSC_ARCH ${BASIC_PETSC_ARCH}-complex)
 
     # PETSc 3.1    
     SET(PETSC_DIR ${MY_PETSC_LIB_DIRS}/${PETSC_ARCH})

@@ -159,15 +159,26 @@ void PetscMatrix<Scalar>::finish()
 #endif
 }
 
-template<typename Scalar>
-Scalar PetscMatrix<Scalar>::get(unsigned int m, unsigned int n)
+template<>
+double PetscMatrix<double>::get(unsigned int m, unsigned int n)
+{
+  _F_
+  double v = 0.0;
+#ifdef WITH_PETSC
+  PetscScalar pv;
+  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
+  v=pv.real();
+#endif
+  return v;
+}
+
+template<>
+std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n)
 {
   _F_
   Scalar v = 0.0;
 #ifdef WITH_PETSC
-  PetscScalar pv;
-  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
-  v=pv;
+  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
 #endif
   return v;
 }
@@ -180,12 +191,12 @@ void PetscMatrix<Scalar>::zero() {
 #endif
 }
 
-PetscScalar & to_petsc(double & a,double b){  //unused
-  return a=b;
+PetscScalar to_petsc(double x){  //unused
+  return std::complex<double>(x,0);
 }
 
-PetscScalar & to_petsc(double & a,std::complex<double> b){  //unused
-  return a=b.real();
+PetscScalar to_petsc(std::complex<double> x){  //unused
+  return x;
 }
 
 template<typename Scalar>
@@ -193,9 +204,7 @@ void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
   _F_
 #ifdef WITH_PETSC
   if (v != 0.0){		// ignore zero values.
-    PetscScalar pv;
-    to_petsc(pv,v);
-    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, pv, ADD_VALUES);
+    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
   }
 #endif
 }
@@ -294,9 +303,7 @@ void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatr
 template<typename Scalar>
 void PetscMatrix<Scalar>::multiply_with_scalar(Scalar value){
   _F_
-  PetscScalar pv;
-  to_petsc(pv,value);
-  MatScale(matrix,pv);
+  MatScale(matrix,to_petsc(value));
 }
 // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
@@ -307,7 +314,7 @@ void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   this->nnz=nnz;
   PetscScalar* pax = new PetscScalar[nnz];
   for (unsigned i=0;i<nnz;i++)
-    to_petsc(pax[i],ax[i]);
+    pax[i]=to_petsc(ax[i]);
   MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,pax,&matrix);
   delete pax;
 }
@@ -374,14 +381,24 @@ void PetscVector<Scalar>::finish()
 #endif
 }
 
-template<typename Scalar>
-Scalar PetscVector<Scalar>::get(unsigned int idx) {
+template<>
+double PetscVector<double>::get(unsigned int idx) {
   _F_
-  Scalar y = 0;
+  double y = 0;
 #ifdef WITH_PETSC
   PetscScalar py;
   VecGetValues(vec, 1, (PetscInt*) &idx, &py);
-  y=py;
+  y=py.real();
+#endif
+  return y;
+}
+
+template<>
+std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) {
+  _F_
+  std::complex<double> y = 0;
+#ifdef WITH_PETSC
+  VecGetValues(vec, 1, (PetscInt*) &idx, &y);
 #endif
   return y;
 }
@@ -425,9 +442,7 @@ template<typename Scalar>
 void PetscVector<Scalar>::set(unsigned int idx, Scalar y) {
   _F_
 #ifdef WITH_PETSC
-  PetscScalar py;
-  to_petsc(py,y);
-  VecSetValue(vec, idx, py, INSERT_VALUES);
+  VecSetValue(vec, idx, to_petsc(y), INSERT_VALUES);
 #endif
 }
 
@@ -435,9 +450,7 @@ template<typename Scalar>
 void PetscVector<Scalar>::add(unsigned int idx, Scalar y) {
   _F_
 #ifdef WITH_PETSC
-  PetscScalar py;
-  to_petsc(py,y);
-  VecSetValue(vec, idx, py, ADD_VALUES);
+  VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
 #endif
 }
 
@@ -447,8 +460,7 @@ void PetscVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) {
 #ifdef WITH_PETSC
   PetscScalar py;
   for (unsigned int i = 0; i < n; i++){
-    to_petsc(py,y[i]);
-    VecSetValue(vec, idx[i], (PetscScalar) py, ADD_VALUES);
+    VecSetValue(vec, idx[i],to_petsc(y[i]), ADD_VALUES);
   }
 #endif
 }
