@@ -210,7 +210,7 @@ void Space::set_default_order(int tri_order, int quad_order)
   default_quad_order = quad_order;
 }
 
-void Space::adjust_element_order(int order_change, unsigned int min_order)
+void Space::adjust_element_order(int order_change, int min_order)
 {
   _F_
   Element* e;
