@@ -217,9 +217,21 @@ void Space::adjust_element_order(int order_change, unsigned int min_order)
   for_all_active_elements(e, this->get_mesh()) {
     if(e->is_triangle())
       set_element_order_internal(e->id, std::max<int>(min_order, get_element_order(e->id) + order_change));
-    else
-      set_element_order_internal(e->id, std::max<int>(H2D_MAKE_QUAD_ORDER(min_order, min_order), 
-      H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + order_change)));
+    else {
+      int h_order, v_order;
+      // check that we are not imposing smaller than minimal orders.
+      if(H2D_GET_H_ORDER(get_element_order(e->id)) + order_change < min_order)
+        h_order = min_order;
+      else
+        h_order = H2D_GET_H_ORDER(get_element_order(e->id)) + order_change;
+
+      if(H2D_GET_V_ORDER(get_element_order(e->id)) + order_change < min_order)
+        v_order = min_order;
+      else
+        v_order = H2D_GET_V_ORDER(get_element_order(e->id)) + order_change;
+
+      set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(h_order, v_order));
+    }
   }
   assign_dofs();
 }
