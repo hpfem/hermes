@@ -229,7 +229,7 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++){
           fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
           fprint_num(file, Ax[i]);
-          fprintf(file,"\n", Ax[i]);
+          fprintf(file,"\n");
         }
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
       
