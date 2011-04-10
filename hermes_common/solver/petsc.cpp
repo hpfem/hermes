@@ -165,7 +165,9 @@ Scalar PetscMatrix<Scalar>::get(unsigned int m, unsigned int n)
   _F_
   Scalar v = 0.0;
 #ifdef WITH_PETSC
-  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
+  PetscScalar pv;
+  MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
+  v=pv;
 #endif
   return v;
 }
@@ -178,12 +180,23 @@ void PetscMatrix<Scalar>::zero() {
 #endif
 }
 
+PetscScalar & to_petsc(double & a,double b){  //unused
+  return a=b;
+}
+
+PetscScalar & to_petsc(double & a,std::complex<double> b){  //unused
+  return a=b.real();
+}
+
 template<typename Scalar>
 void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
   _F_
 #ifdef WITH_PETSC
-  if (v != 0.0)		// ignore zero values.
-    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, (PetscScalar) v, ADD_VALUES);
+  if (v != 0.0){		// ignore zero values.
+    PetscScalar pv;
+    to_petsc(pv,v);
+    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, pv, ADD_VALUES);
+  }
 #endif
 }
 
@@ -281,7 +294,9 @@ void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatr
 template<typename Scalar>
 void PetscMatrix<Scalar>::multiply_with_scalar(Scalar value){
   _F_
-  MatScale(matrix,value);
+  PetscScalar pv;
+  to_petsc(pv,value);
+  MatScale(matrix,pv);
 }
 // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
@@ -290,7 +305,11 @@ void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   _F_
   this->size=size;
   this->nnz=nnz;
-  MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,ax,&matrix);
+  PetscScalar* pax = new PetscScalar[nnz];
+  for (unsigned i=0;i<nnz;i++)
+    to_petsc(pax[i],ax[i]);
+  MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,pax,&matrix);
+  delete pax;
 }
 // Duplicates a matrix (including allocation).
 
@@ -299,7 +318,7 @@ PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate(){
   _F_
   PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();        
   MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
-  ptscmatrix->size=size;
+  ptscmatrix->size=this->size;
   ptscmatrix->nnz=nnz;
   return ptscmatrix;
 };
@@ -360,7 +379,9 @@ Scalar PetscVector<Scalar>::get(unsigned int idx) {
   _F_
   Scalar y = 0;
 #ifdef WITH_PETSC
-  VecGetValues(vec, 1, (PetscInt*) &idx, &y);
+  PetscScalar py;
+  VecGetValues(vec, 1, (PetscInt*) &idx, &py);
+  y=py;
 #endif
   return y;
 }
@@ -404,7 +425,9 @@ template<typename Scalar>
 void PetscVector<Scalar>::set(unsigned int idx, Scalar y) {
   _F_
 #ifdef WITH_PETSC
-  VecSetValue(vec, idx, (PetscScalar) y, INSERT_VALUES);
+  PetscScalar py;
+  to_petsc(py,y);
+  VecSetValue(vec, idx, py, INSERT_VALUES);
 #endif
 }
 
@@ -412,7 +435,9 @@ template<typename Scalar>
 void PetscVector<Scalar>::add(unsigned int idx, Scalar y) {
   _F_
 #ifdef WITH_PETSC
-  VecSetValue(vec, idx, (PetscScalar) y, ADD_VALUES);
+  PetscScalar py;
+  to_petsc(py,y);
+  VecSetValue(vec, idx, py, ADD_VALUES);
 #endif
 }
 
@@ -420,8 +445,11 @@ template<typename Scalar>
 void PetscVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) {
   _F_
 #ifdef WITH_PETSC
-  for (unsigned int i = 0; i < n; i++)
-    VecSetValue(vec, idx[i], (PetscScalar) y[i], ADD_VALUES);
+  PetscScalar py;
+  for (unsigned int i = 0; i < n; i++){
+    to_petsc(py,y[i]);
+    VecSetValue(vec, idx[i], (PetscScalar) py, ADD_VALUES);
+  }
 #endif
 }
 
@@ -478,13 +506,13 @@ bool PetscLinearSolver<Scalar>::solve() {
   if (ec) return false;
 
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
   // allocate memory for solution vector
-  delete [] sln;
-  sln = new Scalar [m->size];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(Scalar));
+  delete [] this->sln;
+  this->sln = new Scalar [m->size];
+  MEM_CHECK(this->sln);
+  memset(this->sln, 0, m->size * sizeof(Scalar));
 
   // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
   int *idx = new int [m->size];
@@ -492,7 +520,7 @@ bool PetscLinearSolver<Scalar>::solve() {
   for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
   // copy solution to the output solution vector
-  VecGetValues(x, m->size, idx, (PetscScalar *) sln);
+  VecGetValues(x, m->size, idx, (PetscScalar *) this->sln);
   delete [] idx;
 
   KSPDestroy(ksp);
@@ -510,3 +538,4 @@ template class HERMES_API PetscVector<double>;
 template class HERMES_API PetscVector<std::complex<double> >;
 template class HERMES_API PetscLinearSolver<double>;
 template class HERMES_API PetscLinearSolver<std::complex<double> >;
+
