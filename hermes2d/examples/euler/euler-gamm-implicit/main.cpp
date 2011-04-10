@@ -30,9 +30,9 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Use of preconditioning.
-const bool PRECONDITIONING = false;
+const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
-const double NOX_NONLINEAR_TOLERANCE = 1.0;
+const double NOX_NONLINEAR_TOLERANCE = 1e-3;
 unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
@@ -87,11 +87,6 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  /*
-  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  */
-
   EulerEquationsWeakFormImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
 
@@ -145,9 +140,11 @@ int main(int argc, char* argv[])
 
     OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
     Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), coeff_vec);
+    solver.set_init_sln(coeff_vec);
 
     info("Assembling by DiscreteProblem, solving by NOX.");
-    solver.set_init_sln(coeff_vec);
+    if(iteration > 1)
+      solver.unset_precond();
     if (solver.solve())
       Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
       Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));

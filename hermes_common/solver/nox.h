@@ -107,6 +107,7 @@ public:
   
 #ifdef HAVE_TEUCHOS
   virtual void set_precond(Teuchos::RCP<Precond> &pc);
+  virtual void unset_precond();
 #else
   virtual void set_precond(Precond* pc) 
   { 

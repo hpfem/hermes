@@ -115,6 +115,9 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
   xx.extract(coeff_vec);
   fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
   delete [] coeff_vec;
+
+  for(unsigned int i = 0; i < rhs.length(); i++)
+    f.ReplaceGlobalValue(0, i, rhs.get(i));
   
   return true;
 }
@@ -269,6 +272,14 @@ NoxSolver::~NoxSolver()
     interface_->set_precond(pc);
   #endif
   }
+
+void NoxSolver::unset_precond()
+{
+  #ifdef HAVE_NOX
+    precond_yes = false;
+  #endif
+}
+
 #endif
 
 void NoxSolver::set_precond(const char *pc)
