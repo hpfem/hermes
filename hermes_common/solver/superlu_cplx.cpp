@@ -1,0 +1,35 @@
+// This file is part of Hermes3D
+//
+// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
+// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+//
+// Hermes3D is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation; either version 2 of the License,
+// or (at your option) any later version.
+//
+// Hermes3D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Hermes3D; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#include"superlu.h"
+#include <slu_zdefs.h>
+
+template <>
+void SuperLUSolver<std::complex<double> >::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, 
+                        typename SuperLuType<std::complex<double> >::scalar *nzval, 
+                        int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+  zCreate_CompCol_Matrix (A, m, n, nnz, (doublecomplex*) nzval, rowind, colptr, stype, dtype, mtype);
+}
+
+template<>
+void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<std::complex<double> >::scalar *x, 
+                                                          int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+    zCreate_Dense_Matrix (X, m, n, (doublecomplex *) x, ldx, stype, dtype, mtype);
+}
+

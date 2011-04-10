@@ -51,6 +51,8 @@ set(SRC
   solver/amesos.cpp
   solver/mumps.cpp
   solver/superlu.cpp
+  solver/superlu_real.cpp
+  solver/superlu_cplx.cpp
   solver/petsc.cpp
   solver/umfpack_solver.cpp
   solver/precond_ml.cpp

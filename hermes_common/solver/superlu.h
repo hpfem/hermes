@@ -25,8 +25,6 @@
 
 #ifdef WITH_SUPERLU  
   #ifdef SLU_MT
-    #include <pdsp_defs.h>  
-    #include <pzsp_defs.h>
     template <typename Scalar>    
     class SuperLu{
       public:
@@ -42,15 +40,8 @@
     }
   #else
     typedef int int_t; /* default */
-    #include <slu_Cnames.h>
     #include <supermatrix.h>
     #include <slu_util.h>
-    namespace zSuperLu{ 
-      #include <slu_zdefs.h>
-    };
-    namespace dSuperLu{ 
-      #include <slu_ddefs.h>
-    };
 
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
@@ -74,7 +65,7 @@
 
     template<>
     struct SuperLuType<std::complex<double> >{
-      typedef zSuperLu::doublecomplex scalar;
+      typedef struct { double r, i; } scalar;
     };
 
   #endif
