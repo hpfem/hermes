@@ -92,42 +92,69 @@ void EpetraMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 #endif
 }
 
-template<typename Scalar>
-void EpetraMatrix<Scalar>::finish()
+template<>
+void EpetraMatrix<double>::finish()
 {
   _F_
 #ifdef HAVE_EPETRA
   mat->FillComplete();
-#ifdef HERMES_COMMON_COMPLEX
-  mat_im->FillComplete();
-#endif
 #endif
 }
 
-template<typename Scalar>
-void EpetraMatrix<Scalar>::alloc()
+template<>
+void EpetraMatrix<std::complex<double> >::finish()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  mat->FillComplete();
+  mat_im->FillComplete();
+#endif
+}
+
+template<>
+void EpetraMatrix<double>::alloc()
 {
   _F_
 #ifdef HAVE_EPETRA
   grph->FillComplete();
   // create the matrix
   mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
-#ifdef HERMES_COMMON_COMPLEX
-  mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
-#endif
 #endif
 }
 
-template<typename Scalar>
-void EpetraMatrix<Scalar>::free()
+template<>
+void EpetraMatrix<std::complex<double> >::alloc()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  grph->FillComplete();
+  // create the matrix
+  mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
+  mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
+#endif
+}
+
+template<>
+void EpetraMatrix<double>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
   if (owner) {
     delete mat; mat = NULL;
-#ifdef HERMES_COMMON_COMPLEX
-    delete mat_im; mat_im = NULL;
+    delete grph; grph = NULL;
+    delete std_map; std_map = NULL;
+  }
 #endif
+}
+
+template<>
+void EpetraMatrix<std::complex<double> >::free()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  if (owner) {
+    delete mat; mat = NULL;
+    delete mat_im; mat_im = NULL;
     delete grph; grph = NULL;
     delete std_map; std_map = NULL;
   }
@@ -173,15 +200,22 @@ void EpetraMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len, 
 #endif
 }
 
-template<typename Scalar>
-void EpetraMatrix<Scalar>::zero()
+template<>
+void EpetraMatrix<double>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
   mat->PutScalar(0.0);
-#ifdef HERMES_COMMON_COMPLEX
-  mat_im->PutScalar(0.0);
 #endif
+}
+
+template<>
+void EpetraMatrix<std::complex<double> >::zero()
+{
+  _F_
+#ifdef HAVE_EPETRA
+  mat->PutScalar(0.0);
+  mat_im->PutScalar(0.0);
 #endif
 }
 

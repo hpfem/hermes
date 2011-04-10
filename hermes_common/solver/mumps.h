@@ -33,17 +33,6 @@
   #ifdef WITH_MPI
     #include <mpi.h>
   #endif
-  
-#else
-/*
-  #ifndef HERMES_COMMON_COMPLEX
-    typedef Scalar Scalar;
-    #define Scalar(a) SCALAR(a)
-  #else
-    typedef struct { double r, i; } Scalar;
-    #define Scalar(a) a.r, a.i
-  #endif
-  */
 #endif
 
 template <typename Scalar> class MumpsSolver;
@@ -113,11 +102,7 @@ public:
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-#ifndef HERMES_COMMON_COMPLEX
   virtual Scalar get(unsigned int idx) { return v[idx]; }
-#else
-  virtual Scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }
-#endif
   virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
   virtual void zero();
   virtual void change_sign();

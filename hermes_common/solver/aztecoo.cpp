@@ -19,9 +19,7 @@
 
 #include "aztecoo.h"
 #include "../callstack.h"
-#ifdef HAVE_KOMPLEX
-  #include <Komplex_LinearProblem.h>
-#endif
+#include <Komplex_LinearProblem.h>
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
@@ -101,8 +99,8 @@ void AztecOOSolver<Scalar>::set_param(int param, double value)
 #endif
 }
 
-template<typename Scalar>
-bool AztecOOSolver<Scalar>::solve()
+template<>
+bool AztecOOSolver<double>::solve()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -115,7 +113,6 @@ bool AztecOOSolver<Scalar>::solve()
   // no output
   aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
 
-#ifndef HERMES_COMMON_COMPLEX
   // setup the problem
   aztec.SetUserMatrix(m->mat);
   aztec.SetRHS(rhs->vec);
@@ -140,13 +137,32 @@ bool AztecOOSolver<Scalar>::solve()
   this->time = tmr.accumulated();
 
   delete [] this->sln;
-  this->sln = new Scalar[m->size];
+  this->sln = new double[m->size];
   MEM_CHECK(this->sln);
-  memset(this->sln, 0, m->size * sizeof(Scalar));
+  memset(this->sln, 0, m->size * sizeof(double));
 
   // copy the solution into sln vector
   for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
+  return true;
 #else
+  return false;
+#endif
+}
+
+template<>
+bool AztecOOSolver<std::complex<double> >::solve()
+{
+  _F_
+#ifdef HAVE_AZTECOO
+  assert(m != NULL);
+  assert(rhs != NULL);
+  assert(m->size == rhs->size);
+
+  TimePeriod tmr;
+
+  // no output
+  aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
+
   double c0r = 1.0, c0i = 0.0;
   double c1r = 0.0, c1i = 1.0;
 
@@ -163,13 +179,12 @@ bool AztecOOSolver<Scalar>::solve()
   kp.ExtractSolution(xr, xi);
 
   delete [] this->sln;
-  this->sln = new Scalar[m->size];
+  this->sln = new std::complex<double>[m->size];
   MEM_CHECK(this->sln);
-  memset(this->sln, 0, m->size * sizeof(Scalar));
+  memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = Scalar(xr[i], xi[i]);
-#endif
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = std::complex<double>(xr[i], xi[i]);
   return true;
 #else
   return false;

@@ -439,14 +439,7 @@ template<typename Scalar>
 void MumpsVector<Scalar>::change_sign()
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
-#else
-  for (unsigned int i = 0; i < this->size; i++) {
-    v[i].r *= -1.;
-    v[i].i *= -1.;
-  }
-#endif
 }
 
 template<typename Scalar>
@@ -469,24 +462,14 @@ template<typename Scalar>
 void MumpsVector<Scalar>::set(unsigned int idx, Scalar y)
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   v[idx] = y;
-#else
-  v[idx].r = y.real();
-  v[idx].i = y.imag();
-#endif
 }
 
 template<typename Scalar>
 void MumpsVector<Scalar>::add(unsigned int idx, Scalar y)
 {
   _F_
-#ifndef HERMES_COMMON_COMPLEX
   v[idx] += y;
-#else
-  v[idx].r += y.real();
-  v[idx].i += y.imag();
-#endif
 }
 
 template<typename Scalar>
@@ -494,12 +477,7 @@ void MumpsVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
   for (unsigned int i = 0; i < n; i++) {
-#ifndef HERMES_COMMON_COMPLEX
     v[idx[i]] += y[i];
-#else
-    v[idx[i]].r += y[i].real();
-    v[idx[i]].i += y[i].imag();
-#endif
   }
 }
 

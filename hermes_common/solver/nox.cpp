@@ -318,6 +318,29 @@ bool NoxSolver<Scalar>::set_init_sln(EpetraVector<Scalar> *ic)
 #endif
 }
 
+template<>
+void NoxSolver<double>::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver){
+       const NOX::Epetra::Group &f_grp =
+       dynamic_cast<const NOX::Epetra::Group &>(solver->getSolutionGroup());
+       const Epetra_Vector &f_sln =
+       (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
+       // extract solution
+       int n = interface_->fep->get_num_dofs();
+       delete [] this->sln;
+       this->sln = new double[n];
+       memset(this->sln, 0, n * sizeof(double));
+       f_sln.ExtractCopy(this->sln);
+}
+
+template<>
+void NoxSolver<std::complex<double> >::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver){
+       // extract solution
+       int n = interface_->fep->get_num_dofs();
+       delete [] this->sln;
+       this->sln = new std::complex<double>[n];
+       memset(this->sln, 0, n * sizeof(std::complex<double>));
+}
+
 template<typename Scalar>
 bool NoxSolver<Scalar>::solve()
 {
@@ -475,21 +498,7 @@ bool NoxSolver<Scalar>::solve()
        achieved_tol = final_pars->sublist("Direction").sublist(nl_dir).sublist("Linear Solver").sublist("Output").get("Achieved Tolerance", 0.0);
 
        // Get the Epetra_Vector with the final solution from the solver
-#ifndef HERMES_COMMON_COMPLEX
-       const NOX::Epetra::Group &f_grp =
-       dynamic_cast<const NOX::Epetra::Group &>(solver->getSolutionGroup());
-       const Epetra_Vector &f_sln =
-       (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
-#endif
-       // extract solution
-       int n = interface_->fep->get_num_dofs();
-       delete [] this->sln;
-       this->sln = new Scalar[n];
-       memset(this->sln, 0, n * sizeof(double));
-#ifndef HERMES_COMMON_COMPLEX
-       f_sln.ExtractCopy(this->sln);
-#else
-#endif
+       get_final_solution();
        success = true;
      }
      else { // not converged

@@ -86,8 +86,8 @@ bool AmesosSolver<Scalar>::use_transpose()
 #endif
 }
 
-template<typename Scalar>
-bool AmesosSolver<Scalar>::solve()
+template<>
+bool AmesosSolver<double>::solve()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -98,14 +98,10 @@ bool AmesosSolver<Scalar>::solve()
   
   TimePeriod tmr;  
 
-#ifdef HERMES_COMMON_COMPLEX
-  error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
-#else
   problem.SetOperator(m->mat);
   problem.SetRHS(rhs->vec);
   Epetra_Vector x(*rhs->std_map);
   problem.SetLHS(&x);
-#endif
 
   if (!setup_factorization())
   {
@@ -124,15 +120,53 @@ bool AmesosSolver<Scalar>::solve()
   this->time = tmr.accumulated();
 
   delete [] this->sln;
-  this->sln = new Scalar[m->size]; MEM_CHECK(this->sln);
+  this->sln = new double[m->size]; MEM_CHECK(this->sln);
   // copy the solution into sln vector
-  memset(this->sln, 0, m->size * sizeof(Scalar));
+  memset(this->sln, 0, m->size * sizeof(double));
   
-#ifdef HERMES_COMMON_COMPLEX
-#else 
   for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
-#endif
 
+  return true;
+#else
+  return false;
+#endif
+}
+
+template<>
+bool AmesosSolver<std::complex<double> >::solve()
+{
+  _F_
+#ifdef HAVE_AMESOS
+  assert(m != NULL);
+  assert(rhs != NULL);
+  
+  assert(m->size == rhs->size);
+  
+  TimePeriod tmr;  
+
+  error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
+
+  if (!setup_factorization())
+  {
+    warning("AmesosSolver: LU factorization could not be completed");
+    return false;
+  }
+
+  int status = solver->Solve();
+  if (status != 0) 
+  {
+    error("AmesosSolver: Solution failed.");
+    return false;
+  }
+  
+  tmr.tick();
+  this->time = tmr.accumulated();
+
+  delete [] this->sln;
+  this->sln = new std::complex<double>[m->size]; MEM_CHECK(this->sln);
+  // copy the solution into sln vector
+  memset(this->sln, 0, m->size * sizeof(std::complex<double>));
+  
   return true;
 #else
   return false;

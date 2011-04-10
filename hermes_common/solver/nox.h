@@ -38,6 +38,8 @@ template<typename Scalar> class NoxProblemInterface;
 template <typename Scalar>
 class HERMES_API NoxSolver : public IterSolver<Scalar>
 {
+private: 
+  void get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver);
 public:
   // Basic constructor.
   NoxSolver(DiscreteProblemInterface<Scalar> *problem);
