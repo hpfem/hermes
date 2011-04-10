@@ -285,8 +285,11 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
               this->size, this->size, nnz, nnz);
       for (unsigned int j = 0; j < this->size; j++)
-        for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, j + 1, SCALAR(Ax[i]));
+        for (int i = Ap[j]; i < Ap[j + 1]; i++){
+          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+          fprint_num(file, Ax[i]);
+          fprintf(file, "\n");
+        }
       fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
       return true;
@@ -304,7 +307,11 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
           // The following line was replaced with the one below, because it gave a warning 
 	  // to cause code abort at runtime. 
           //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
-          if ((int)j <= Ai[i]) fprintf(file, "%d %d " SCALAR_FMT "\n", Ai[i] + 1, (int)j + 1, SCALAR(Ax[i]));
+          if ((int)j <= Ai[i]){
+            fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
+            fprint_num(file, Ax[i]);
+            fprintf(file, "\n");
+          }
 
       return true;
     }
@@ -456,8 +463,10 @@ bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   {
     case DF_MATLAB_SPARSE:
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-      for (unsigned int i = 0; i < this->size; i++)
-        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file,v[i]);
+        fprintf(file, "\n");
+      }
       fprintf(file, " ];\n");
       return true;
 

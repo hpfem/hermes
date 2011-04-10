@@ -193,7 +193,7 @@ double HERMES_API vec_dot(double *r, double *s, int ndof);
 
 template<typename Scalar> class Vector;
 template<typename Scalar>
-double HERMES_API vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int ndof);
+Scalar HERMES_API vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int ndof);
 
 /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
 /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not

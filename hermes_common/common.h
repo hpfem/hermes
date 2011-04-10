@@ -152,58 +152,43 @@ inline void fprint_num(FILE*f,std::complex<double> x){
 }
 
 
-#ifdef HERMES_COMMON_COMPLEX
+#include <complex>
 
-  #include <complex>
+typedef std::complex<double> cplx;
+typedef cplx complex2[2];
+typedef cplx Scalar;
 
-  typedef std::complex<double> cplx;
-  typedef cplx complex2[2];
-  typedef cplx Scalar;
+#define CONJ(a)       (std::conj(a))
+#define REAL(a)       (std::real(a))
+#define IMAG(a)       (std::imag(a))
+#define ABS(a)        (std::abs(a))
+#define SCALAR_FMT      "(%lf, %lf)"
+#define SCALAR(a)     std::real(a), std::imag(a)
 
-  #define CONJ(a)       (std::conj(a))
-  #define REAL(a)       (std::real(a))
-  #define IMAG(a)       (std::imag(a))
-  #define ABS(a)        (std::abs(a))
-  #define SCALAR_FMT      "(%lf, %lf)"
-  #define SCALAR(a)     std::real(a), std::imag(a)
-  
-  inline double magn(cplx x)  { return std::abs(x); }
-  inline cplx conj(cplx a)    { return std::conj(a); }
-  
-  #ifdef WITH_BLAS         // always true for Hermes3D
-  // BLAS-related functions
+inline double magn(cplx x)  { return std::abs(x); }
+inline cplx conj(cplx a)    { return std::conj(a); }
 
-    #ifdef __cplusplus
-    extern "C" {
-    #endif
+#ifdef WITH_BLAS         // always true for Hermes3D
+// BLAS-related functions
 
-    extern int zscal_(int *, cplx *, cplx *, int *);
-    extern int zaxpy_(int *, cplx *, cplx *, int *, cplx *, int *);
-    extern int zcopy_(int *, cplx *, int *, cplx *, int *);
-
-    #ifdef __cplusplus
-    }
-    #endif
-
-    /// x <- alpha * x
-    inline void blas_scal(int n, cplx alpha, cplx *x, int incx) { zscal_(&n, &alpha, x, &incx); }
-    /// y <- alpha * x + y
-    inline void blas_axpy(int n, cplx alpha, cplx *x, int incx, cplx *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
-    /// y <- x
-    inline void blas_copy(int n, cplx *x, int incx, cplx *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
+  #ifdef __cplusplus
+  extern "C" {
   #endif
 
-#else
+  extern int zscal_(int *, cplx *, cplx *, int *);
+  extern int zaxpy_(int *, cplx *, cplx *, int *, cplx *, int *);
+  extern int zcopy_(int *, cplx *, int *, cplx *, int *);
 
-  // typedef double Scalar;
-  
-  #define CONJ(a)       (a)
-  #define REAL(a)       (a)
-  #define IMAG(a)       (0)
-  #define ABS(a)        (fabs(a))
-  #define SCALAR_FMT      "%lf"
-  #define SCALAR(a)     (a)
+  #ifdef __cplusplus
+  }
+  #endif
 
+  /// x <- alpha * x
+  inline void blas_scal(int n, cplx alpha, cplx *x, int incx) { zscal_(&n, &alpha, x, &incx); }
+  /// y <- alpha * x + y
+  inline void blas_axpy(int n, cplx alpha, cplx *x, int incx, cplx *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
+  /// y <- x
+  inline void blas_copy(int n, cplx *x, int incx, cplx *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
 #endif
 
 enum // node types
