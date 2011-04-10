@@ -30,8 +30,10 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Use of preconditioning.
-const bool PRECONDITIONING = true;
+const bool PRECONDITIONING = false;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
+const double NOX_NONLINEAR_TOLERANCE = 1.0;
+unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
 const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
@@ -127,14 +129,14 @@ int main(int argc, char* argv[])
   */
 
   // Initialize NOX solver.
-  NoxSolver solver(&dp);
+  NoxSolver solver(&dp, NOX_MESSAGE_TYPE);
   solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
   solver.disable_abs_resid();
-  solver.set_conv_rel_resid(1.00);
-
-  // Select preconditioner.
-  RCP<Precond> pc = rcp(new MlPrecond("sa"));
-  solver.set_precond(pc);
+  solver.set_conv_rel_resid(NOX_NONLINEAR_TOLERANCE);
+  if(PRECONDITIONING) {
+    RCP<Precond> pc = rcp(new MlPrecond("sa"));
+    solver.set_precond(pc);
+  }
 
   int iteration = 0; double t = 0;
   for(t = 0.0; t < 3.0; t += time_step)

@@ -43,7 +43,8 @@ public:
 #ifdef HAVE_NOX
   // Enhanced constructor.
   // For details of the parameter message_type, please see NOX_Utils.H, enum MsgType.
-  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, 
+  // nl_dir \in {"Newton", "Steepest Descent"}
+  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* nl_dir = "Newton",
     double ls_tolerance = 1e-8,
     const char* precond_type = "None",
     unsigned flag_absresid = 1,
