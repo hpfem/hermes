@@ -1,3 +1,5 @@
+//#define H2D_EULER_NUM_FLUX_IMPLICIT_TESTING  // For testing of numerical fluxes.
+
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
