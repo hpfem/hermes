@@ -602,6 +602,8 @@ protected:
   double pressure_ext;
   double energy_ext;
   double tau;
+
+  friend class EulerEquationsWeakFormImplicitCoupled;
 };
 
 class EulerEquationsWeakFormImplicitMultiComponent : public WeakForm
@@ -1138,20 +1140,6 @@ protected:
     }
   };
     
-  class EulerEquationsPreconditioningSingle : public WeakForm::MatrixFormVol
-  {
-  public:
-    EulerEquationsPreconditioningSingle(unsigned int i, unsigned int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
-
-    virtual double value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return int_u_v<double, double>(n, wt, u, v);;
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return int_u_v<Ord, Ord>(n, wt, u, v);
-    }
-  };
-
   class EulerEquationsLinearForm : public WeakForm::MultiComponentVectorFormVol
   {
   public:
@@ -1408,31 +1396,7 @@ protected:
       return int_u_v<Ord, Ord>(n, wt, v, v);
     }
   };
-
-  class EulerEquationsLinearFormTimeSingle : public WeakForm::VectorFormVol
-  {
-  public:
-    EulerEquationsLinearFormTimeSingle(int i) : WeakForm::VectorFormVol(i), component_i(i) {}
-
-    template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return int_u_v<Real, Scalar>(n, wt, ext->fn[component_i], v)
-        -
-      int_u_v<Real, Scalar>(n, wt, u_ext[component_i], v);
-    }
-
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-    }
-
-    // Member.
-    int component_i;
-  };
-
+  
   class EulerEquationsLinearFormInterface : public WeakForm::MultiComponentVectorFormSurf
   {
   public:
@@ -1648,9 +1612,9 @@ public:
                                         outlet_marker, prev_density, prev_density_vel_x, 
                                         prev_density_vel_y, prev_energy, preconditioning, 5) {
     if(preconditioning)
-      add_matrix_form(new EulerEquationsPreconditioningSingle(4, 4));
+      add_matrix_form(new EulerEquationsWeakFormImplicit::EulerEquationsPreconditioning(4));
     
-    EulerEquationsLinearFormTimeSingle* linear_form_time = new EulerEquationsLinearFormTimeSingle(4);
+    EulerEquationsWeakFormImplicit::EulerEquationsLinearFormTime* linear_form_time = new EulerEquationsWeakFormImplicit::EulerEquationsLinearFormTime(4);
     linear_form_time->ext.push_back(prev_density);
     linear_form_time->ext.push_back(prev_density_vel_x);
     linear_form_time->ext.push_back(prev_density_vel_y);
