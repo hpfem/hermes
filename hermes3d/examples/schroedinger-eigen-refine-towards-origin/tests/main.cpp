@@ -2,6 +2,7 @@
 #define HERMES_REPORT_ERROR
 #include "hermes3d.h"
 #include <stdio.h>
+
 // test of refinement towards the origin for hermes3d
 // test problem is harmonic oscillator with
 // V(x,y,z)=x*x+y*y+z*z with lowest eigenvalue 3 and
@@ -16,10 +17,10 @@ using Hermes::EigenSolver;
 int NUMBER_OF_EIGENVALUES = 1;
 //const int INIT_REF_NUM = 0;                       // Number of initial mesh refinements.
 //const int REF_ORIGIN = 5;
-
 double TOL = 1e-10;                               // Pysparse parameter: Error tolerance.
 int MAX_ITER = 1000;                              // PySparse parameter: Maximum number of iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
+
 // Boundary condition types.
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
@@ -34,8 +35,10 @@ scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
   return 0;
 }
+
 // potential and weight function for respective molecule
- double TARGET_VALUE = 3.0;
+double TARGET_VALUE = 3.0;
+
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -54,6 +57,7 @@ int main(int argc, char* argv[])
   int INIT_REF_NUM, REF_ORIGIN;
   if (argc <2)
     error("Not enough parameters, provide a test number!");
+
   int test_type=atoi(argv[1]);
   if ( test_type == 1){
     INIT_REF_NUM = 0;
@@ -66,6 +70,7 @@ int main(int argc, char* argv[])
   else
     error("Invalid test number"); 
   TimePeriod cpu_time;
+
   // Load the mesh.
   info("Loading mesh...");
   Mesh mesh;
@@ -75,17 +80,19 @@ int main(int argc, char* argv[])
   cpu_time.tick();
   info("time taken for loading mesh : %g s", cpu_time.accumulated());
   cpu_time.reset();
+
   // Perform initial mesh refinements
   cpu_time.tick();
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
   int NUM_ELEMS=mesh.get_num_active_elements();
   info("NUM_ELEMS=%d",NUM_ELEMS);
+
   // iterate over all elements to find those including the origin!
   // There are at most 8 active elements that have the origin 
   // as a vertex  at every step of the refinement
   int list_of_ids[8];
   int io,ir=0;
-  while(ir<REF_ORIGIN){
+  while(ir<REF_ORIGIN) {
     io=0;
     for(std::map<unsigned int, Element*>::const_iterator it=mesh.elements.begin(); it != mesh.elements.end(); it++) {
       Element *e=it->second;
@@ -116,6 +123,7 @@ int main(int argc, char* argv[])
   GmshOutputEngine *gout = new GmshOutputEngine(out);
   gout->out( &mesh);
   fclose(out);
+
   // setting up space for eigen value calculation with zero boundary conditions
   H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
   bool is_linear = true;
@@ -146,6 +154,7 @@ int main(int argc, char* argv[])
   dp_left.assemble(matrix_left.get());
   cpu_time.tick();
   info("time taken for assembling LHS matrix : %g", cpu_time.accumulated());
+
   // Initialize eigensolver
   cpu_time.reset();
   EigenSolver es(matrix_left, matrix_right);
@@ -169,6 +178,7 @@ int main(int argc, char* argv[])
     eival[ieig]=es.get_eigenvalue(ieig);
     info("eival[%d]=%24.15E",ieig,eival[ieig]);
     out_fn_vtk(&sln, "phi", ieig );
-    }  
+    }
+
   return 0; 
 };
