@@ -5,19 +5,23 @@
 using namespace Teuchos;
 using namespace RefinementSelectors;
 
-// This example solves the compressible Euler equations using the JFNK
-// method implemented in the NOX package of the Trilinos library.
+// This example solves the compressible Euler equations using 
+// Discontinuous Galerkin in space and implicit Euler in time. 
+// The resulting nonlinear problem on each time level is solved 
+// via JFNK. We use JFNK implementation from the NOX package 
+// of the Trilinos library.
 //
 // Equations: Compressible Euler equations, perfect gas state equation.
 //
 // Domain: GAMM channel, see mesh file GAMM-channel.mesh
 //
-// BC: Normal velocity component is zero on solid walls.
-//     Subsonic state prescribed on inlet and outlet.
+// BC: Zero normal velocity component on solid walls.
+//     Subsonic inlet and outlet.
 //
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
+
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.

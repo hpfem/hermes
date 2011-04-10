@@ -6,7 +6,8 @@
 using namespace RefinementSelectors;
 
 //  This example models a nonstationary distribution of temperature within a wall
-//  exposed to ISO fire. Adaptivity in space and in time is performed.
+//  exposed to ISO fire. Spatial adaptivity is ON by default, adaptivity in time 
+//  can be turned ON and OFF using the flag ADAPTIVE_TIME_STEP_ON.
 //
 //  PDE: non-stationary heat transfer equation
 //       HEATCAP * RHO * dT/dt - div (LAMBDA grad T) = 0.
@@ -29,9 +30,9 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int P_INIT = 3;                             // Polynomial degree of all mesh elements.
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
+const int P_INIT = 1;                             // Polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 double time_step = 20;                            // Time step in seconds.
 
 // Spatial adaptivity.
@@ -70,7 +71,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Temporal adaptivity.
-bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
+bool ADAPTIVE_TIME_STEP_ON = false;                // This flag decides whether adaptive time stepping will be done.
                                                   // The methods for the adaptive and fixed-step versions are set
                                                   // below. An embedded method must be used with adaptive time stepping. 
 const double TIME_ERR_TOL_UPPER = 1.0;                // If rel. temporal error is greater than this threshold, decrease time 
@@ -254,7 +255,7 @@ int main(int argc, char* argv[])
         char title[100];
         sprintf(title, "Temporal error est, spatial adaptivity step %d", as);     
         time_error_view.set_title(title);
-        time_error_view.show_mesh(false);
+        //time_error_view.show_mesh(false);
         time_error_view.show(&time_error_fn, HERMES_EPS_VERYHIGH);
 
         rel_err_time = hermes2d.calc_norm(&time_error_fn, HERMES_H1_NORM) 
@@ -298,7 +299,7 @@ int main(int argc, char* argv[])
       sprintf(title, "Spatial error est, spatial adaptivity step %d", as);  
       DiffFilter space_error_fn(Hermes::vector<MeshFunction*>(&ref_sln, &sln));   
       space_error_view.set_title(title);
-      space_error_view.show_mesh(false);
+      //space_error_view.show_mesh(false);
       AbsFilter abs_sef(&space_error_fn);
       space_error_view.show(&abs_sef, HERMES_EPS_VERYHIGH);
 
@@ -334,7 +335,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Solution, time %g s", current_time);
     sln_view.set_title(title);
-    sln_view.show_mesh(false);
+    //sln_view.show_mesh(false);
     sln_view.show(&ref_sln, HERMES_EPS_VERYHIGH);
     sprintf(title, "Mesh, time %g s", current_time);
     ordview.set_title(title);

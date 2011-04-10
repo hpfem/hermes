@@ -25,7 +25,7 @@ public:
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);
 
-    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, - alpha / (rho * heatcap)));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha / (rho * heatcap)));
 
     add_vector_form_surf(new CustomVectorFormSurf(0, bdy_air, alpha, rho, heatcap, 
                          current_time_ptr, temp_init, t_final));
@@ -67,7 +67,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return - alpha / (rho * heatcap) * temp_ext(*current_time_ptr + time_step) * int_v<Real>(n, wt, v);
+      return alpha / (rho * heatcap) * temp_ext(*current_time_ptr + time_step) * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {

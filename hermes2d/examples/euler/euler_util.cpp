@@ -22,7 +22,7 @@ DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces,
                         Hermes::vector<Solution *> solutions) : spaces(spaces), solutions(solutions)
 {
   // A check that all meshes are the same in the spaces.
-  int mesh0_seq = spaces[0]->get_mesh()->get_seq();
+  unsigned int mesh0_seq = spaces[0]->get_mesh()->get_seq();
   for(unsigned int i = 0; i < spaces.size(); i++)
     if(spaces[i]->get_mesh()->get_seq() != mesh0_seq)
       error("So far DiscontinuityDetector works only for single mesh.");
