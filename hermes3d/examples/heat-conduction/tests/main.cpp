@@ -144,6 +144,4 @@ int main(int argc, char **args)
     info("Failure!");
     return ERR_FAILURE;
   }
-
-  return 0;
 }

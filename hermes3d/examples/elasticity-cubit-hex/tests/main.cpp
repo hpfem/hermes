@@ -140,7 +140,7 @@ int main(int argc, char **args)
   delete matrix;
   delete rhs;
   delete solver;
-//   
+   
   if (success_test) {
     info("Success!");
     return ERR_SUCCESS;
@@ -149,6 +149,4 @@ int main(int argc, char **args)
     info("Failure!");
     return ERR_FAILURE;
   }
-
-  return 0;
 }

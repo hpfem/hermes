@@ -4,13 +4,13 @@
 #include "../config.h"
 #include <hermes3d.h>
 
-// This test makes sure that the benchmark example bessel works correctly.
+// This test makes sure that the example heat-cubit works correctly.
 
 //  The following parameters can be changed:
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const int P_INIT_X = 2,
-          P_INIT_Y = 2,
-          P_INIT_Z = 2;                           // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+const int P_INIT_X = 1,
+          P_INIT_Y = 1,
+          P_INIT_Z = 1;                           // Initial polynomial degree of all mesh elements.
 bool solution_output = true;                      // Generate output files (if true).
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -22,59 +22,55 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// The error should be smaller than this epsilon.
-#define EPS								1
-
-// Problem parameters.
-const double mu_r   = 1.0;
-const double kappa  = 1.0;
-const double lambda = 1.0;
-
-// Bessel functions, exact solution, and weak forms.
-#include "../definitions.cpp"
-
 // Boundary condition types. 
 BCType bc_types(int marker)
 {
-  if (marker == 1 || marker == 6)
-    return BC_ESSENTIAL; // perfect conductor
-  else
-    return BC_NATURAL; // impedance
+  if (marker == 1) return BC_ESSENTIAL;
+  else return BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values. 
 scalar essential_bc_values(int ess_bdy_marker, double x, double y, double z)
 {
-  return 0;
+  return 10;
 }
 
-int main(int argc, char **args) 
+// Weak forms.
+#include "../definitions.cpp"
+
+int main(int argc, char **args)
 {
   // Test variable.
   int success_test = 1;
 
+  // Time measurement.
+  TimePeriod cpu_time;
+  cpu_time.tick();
+
   // Load the mesh. 
   Mesh mesh;
-  H3DReader mloader;
-  mloader.load("../lshape_hex.mesh3d", &mesh);
+  ExodusIIReader mesh_loader;
+  if (!mesh_loader.load("../cylinder2.e", &mesh))
+    error("Loading mesh file '%s' failed.\n", "cylinder2.e");
 
   // Perform initial mesh refinement.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(H3D_H3D_H3D_REFT_HEX_XYZ);
-
-  // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
+  
+  // Create H1 space with default shapeset.
+  H1Space space(&mesh, bc_types, essential_bc_values, Ord3(P_INIT_X, P_INIT_Y, P_INIT_Z));
+  info("Number of DOF: %d.", Space::get_num_dofs(&space));
 
   // Initialize weak formulation.
   WeakForm wf;
-  wf.add_matrix_form(biform<double, scalar>, biform<Ord, Ord>, HERMES_SYM);
-  wf.add_matrix_form_surf(biform_surf, biform_surf_ord);
-  wf.add_vector_form_surf(liform_surf, liform_surf_ord);
+  wf.add_matrix_form(callback(bilinear_form1), HERMES_SYM, 1);
+  wf.add_matrix_form(callback(bilinear_form2), HERMES_SYM, 2);
+  wf.add_vector_form(callback(linear_form), HERMES_ANY_INT);
 
   // Initialize discrete problem.
   bool is_linear = true;
   DiscreteProblem dp(&wf, &space, is_linear);
 
-  // Set up the solver, matrix, and rhs according to the solver selection.
+  // Set up the solver, matrix, and rhs according to the solver selection.  
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -87,26 +83,34 @@ int main(int argc, char **args)
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
-  // Assemble stiffness matrix and load vector.
+  // Assemble stiffness amtrix and load vector.
   info("Assembling the linear problem (ndof: %d).", Space::get_num_dofs(&space));
   dp.assemble(matrix, rhs);
-
+	
   // Solve the linear system. If successful, obtain the solution.
   info("Solving the linear problem.");
   Solution sln(space.get_mesh());
   if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
   else error ("Matrix solver failed.\n");
 
-  ExactSolution ex_sln(&mesh, exact);
+  // Output solution and the boundary condition.
+  if (solution_output) 
+  {
+    out_fn_vtk(&sln, "sln");
+    out_bc_vtk(&mesh, "bc");
+  }
 
-  // Calculate exact error.
-  info("Calculating exact error.");
-  Adapt *adaptivity = new Adapt(&space, HERMES_HCURL_NORM);
-  bool solutions_for_adapt = false;
-  double err_exact = adaptivity->calc_err_exact(&sln, &ex_sln, solutions_for_adapt, HERMES_TOTAL_ERROR_REL);
+  // Time measurement.
+  cpu_time.tick();
 
-  if (err_exact > EPS)
-    // Calculated solution is not precise enough.
+  // Print timing information.
+  info("Solution and the boundary condition saved. Total running time: %g s", cpu_time.accumulated());
+
+  double sum = 0;
+  for(int i = 0; i < Space::get_num_dofs(Hermes::vector<Space *>(&space)); i++)
+    sum += solver->get_solution()[i];
+
+  if (abs(sum - 0.00037) / sum > 1.00)
     success_test = 0;
 
   // Clean up.
