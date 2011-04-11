@@ -36,7 +36,7 @@
         void  gscon (char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info);
         void  gstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U, int *perm_c, int *perm_r, SuperMatrix *B, SuperLUStat_t *stat, int *info);
         double lamch_ (char *cmach);
-        int querySpace (SuperMatrix *, SuperMatrix *, mem_usage_t *);
+        int querySpace (SuperMatrix *, SuperMatrix *, slu_memusage_t *);
     }
   #else
     typedef int int_t; /* default */
@@ -45,7 +45,10 @@
 
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
-    typedef mem_usage_t               slu_memusage_t;
+    typedef struct {
+      float for_lu;
+      float total_needed;
+    } slu_memusage_t;
     #define SLU_DESTROY_L             Destroy_SuperNode_Matrix
     #define SLU_DESTROY_U             Destroy_CompCol_Matrix
     #define SLU_INIT_STAT(stat_ptr)   StatInit(stat_ptr)
@@ -156,7 +159,7 @@ private:
                        Stype_t stype, Dtype_t dtype, Mtype_t mtype);
   void  solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
                          double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth, 
-                         double *rcond, double *ferr, double *berr, mem_usage_t *mem_usage, SuperLUStat_t *stat, int *info);
+                         double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
   void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  
 public:

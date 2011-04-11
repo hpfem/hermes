@@ -537,14 +537,14 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
 #define JOB_SOLVE                    3
 
 template<>
-void MumpsSolver<double>::mumps_c(typename mumps_type<double>::mumps_struct * param){
+void MumpsSolver<double>::mumps_c(mumps_type<double>::mumps_struct * param){
 #ifdef WITH_MUMPS
   dmumps_c(param);
 #endif 
 }
 
 template<>
-void MumpsSolver<std::complex<double> >::mumps_c(typename mumps_type<std::complex<double> >::mumps_struct * param){
+void MumpsSolver<std::complex<double> >::mumps_c(mumps_type<std::complex<double> >::mumps_struct * param){
 #ifdef WITH_MUMPS
   zmumps_c(param);
 #endif 

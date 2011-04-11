@@ -22,13 +22,13 @@
 
 template <>
 void SuperLUSolver<std::complex<double> >::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, 
-                        typename SuperLuType<std::complex<double> >::scalar *nzval, 
+                        SuperLuType<std::complex<double> >::scalar *nzval, 
                         int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
   zCreate_CompCol_Matrix (A, m, n, nnz, (doublecomplex*) nzval, rowind, colptr, stype, dtype, mtype);
 }
 
 template<>
-void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<std::complex<double> >::scalar *x, 
+void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<std::complex<double> >::scalar *x, 
                                                           int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
     zCreate_Dense_Matrix (X, m, n, (doublecomplex *) x, ldx, stype, dtype, mtype);
 }

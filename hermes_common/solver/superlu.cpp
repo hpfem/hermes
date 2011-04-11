@@ -590,13 +590,13 @@ SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Sca
 }
 
 
-typename SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b){
+SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b){
   a.r=b.real();
   a.i=b.imag();
   return a;
 }
 
-typename SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b){
+SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b){
   a=b;
   return a;
 }
