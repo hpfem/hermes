@@ -16,6 +16,19 @@ public:
   static double calc_sound_speed(double rho, double rho_v_x, double rho_v_y, double energy, double kappa);
 };
 
+class CFLCalculation
+{
+public:
+  CFLCalculation(double CFL_number, double kappa);
+
+  // If the time step is necessary to decrease / possible to increase, the value time_step will be rewritten.
+  void calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step);
+  
+protected:
+  double CFL_number;
+  double kappa;
+};
+
 class DiscontinuityDetector
 {
 public:

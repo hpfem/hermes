@@ -18,6 +18,49 @@ double QuantityCalculator::calc_sound_speed(double rho, double rho_v_x, double r
   return std::sqrt(kappa * calc_pressure(rho, rho_v_x, rho_v_y, energy, kappa) / rho);
 }
 
+CFLCalculation::CFLCalculation(double CFL_number, double kappa) : CFL_number(CFL_number), kappa(kappa)
+{
+}
+
+void CFLCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step)
+{
+  // Create spaces of constant functions over the given mesh.
+  L2Space constant_rho_space(mesh, 0);
+  L2Space constant_rho_v_x_space(mesh, 0);
+  L2Space constant_rho_v_y_space(mesh, 0);
+  L2Space constant_energy_space(mesh, 0);
+
+  scalar* sln_vector = new scalar[constant_rho_space.get_num_dofs() * 4];
+
+  OGProjection::project_global(Hermes::vector<Space*>(&constant_rho_space, &constant_rho_v_x_space, &constant_rho_v_y_space, &constant_energy_space), solutions, sln_vector);
+
+  // Determine the time step according to the CFL condition.
+
+    double min_condition = 0;
+    Element *e;
+    for_all_active_elements(e, mesh) {
+      AsmList al;
+      constant_rho_space.get_element_assembly_list(e, &al);
+      double rho = sln_vector[al.dof[0]];
+      constant_rho_v_x_space.get_element_assembly_list(e, &al);
+      double v1 = sln_vector[al.dof[0]] / rho;
+      constant_rho_v_y_space.get_element_assembly_list(e, &al);
+      double v2 = sln_vector[al.dof[0]] / rho;
+      constant_energy_space.get_element_assembly_list(e, &al);
+      double energy = sln_vector[al.dof[0]];
+      
+      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, kappa));
+      
+      if(condition < min_condition || min_condition == 0.)
+        min_condition = condition;
+    }
+    if(time_step > min_condition)
+      time_step = min_condition;
+    if(time_step < min_condition * 0.9)
+      time_step = min_condition;
+}
+
+
 DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces, 
                         Hermes::vector<Solution *> solutions) : spaces(spaces), solutions(solutions)
 {

@@ -27,8 +27,9 @@ double DISCONTINUITY_DETECTOR_PARAM = 0.05;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
 const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
-double CFL = 0.8;                                       // CFL value.
-double time_step = 1E-4;                                // Time step.
+double CFL_NUMBER = 1.0;                                // CFL value.
+int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
+double time_step = 1E-4;                                // Initial time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                         // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -112,6 +113,10 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
+  // Set up CFL calculation class.
+  CFLCalculation CFL(CFL_NUMBER, KAPPA);
+
+
   int iteration = 0; double t = 0;
   for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
@@ -153,33 +158,8 @@ int main(int argc, char* argv[])
       flux_limiter.limit_according_to_detector(discontinuous_elements);
     }
 
-    // Determine the time step according to the CFL condition.
-    // Only mean values on an element of each solution component are taken into account.
-    double *solution_vectora = solver->get_solution();
-    double min_condition = 0;
-    Element *e;
-    for (int _id = 0, _max = mesh.get_max_element_id(); _id < _max; _id++) \
-          if (((e) = mesh.get_element_fast(_id))->used) \
-            if ((e)->active) {
-              AsmList al;
-              space_rho.get_element_assembly_list(e, &al);
-              double rho = solution_vectora[al.dof[0]];
-              space_rho_v_x.get_element_assembly_list(e, &al);
-              double v1 = solution_vectora[al.dof[0]] / rho;
-              space_rho_v_y.get_element_assembly_list(e, &al);
-              double v2 = solution_vectora[al.dof[0]] / rho;
-              space_e.get_element_assembly_list(e, &al);
-              double energy = solution_vectora[al.dof[0]];
-      
-              double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, KAPPA));
-      
-              if(condition < min_condition || min_condition == 0.)
-                min_condition = condition;
-            }
-    if(time_step > min_condition)
-      time_step = min_condition;
-    if(time_step < min_condition * 0.9)
-      time_step = min_condition;
+    if((iteration - 1) % CFL_CALC_FREQ == 0)
+      CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh, time_step);
 
     // Visualization.
     Mach_number.reinit();
