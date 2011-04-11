@@ -116,9 +116,11 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
   fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
   delete [] coeff_vec;
 
-  for(unsigned int i = 0; i < rhs.length(); i++)
-    f.ReplaceGlobalValue(0, (int)i, rhs.get(i));
-  
+#ifndef HERMES_COMMON_COMPLEX
+  for(int i = 0; i < rhs.length(); i++)
+    f.ReplaceGlobalValue(0, i, rhs.get(i));
+#endif
+
   return true;
 }
 
@@ -343,7 +345,7 @@ bool NoxSolver::solve()
    ls_pars.set("Max Iterations", ls_max_iters);
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
-   ls_pars.set("Preconditioner Reuse Policy", "Reuse");
+   ls_pars.set("Preconditioner Reuse Policy", "Recompute");
    ls_pars.set("Output Frequency", AZ_all);
 
    // precond stuff
