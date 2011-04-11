@@ -1,4 +1,5 @@
 #include "euler_util.h"
+#include "limits.h"
 
 // Calculates energy from other quantities.
 double QuantityCalculator::calc_energy(double rho, double rho_v_x, double rho_v_y, double pressure, double kappa)
@@ -75,24 +76,44 @@ DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces,
 DiscontinuityDetector::~DiscontinuityDetector()
 {};
 
+double DiscontinuityDetector::calculate_h(Element* e, int polynomial_order)
+{
+  double h = std::sqrt(std::pow(e->vn[(0 + 1) % e->get_num_surf()]->x - e->vn[0]->x, 2) + std::pow(e->vn[(0 + 1) % e->get_num_surf()]->y - e->vn[0]->y, 2));
+  for(unsigned int edge_i = 0; edge_i < e->get_num_surf(); edge_i++) {
+    double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->y - e->vn[edge_i]->y, 2));
+    if(edge_length < h)
+      h = edge_length;
+  }
+  return std::pow(h, (0.5 * (H2D_GET_H_ORDER(spaces[0]->get_element_order(e->id)) 
+                                                     + 
+                                                     H2D_GET_V_ORDER(spaces[0]->get_element_order(e->id)))
+                                              + 1) / 2);
+}
+
 std::set<int>& DiscontinuityDetector::get_discontinuous_element_ids(double threshold)
 {
   Element* e;
   for_all_active_elements(e, mesh) {
-    for(int edge_i = 0; edge_i < e->get_num_surf(); edge_i++)
-      if(calculate_relative_flow_direction(e, edge_i) < -1e-3 && !e->en[edge_i]->bnd) {
-        double jump = calculate_jumps(e, edge_i);
-        double diameter_indicator = std::pow(e->get_diameter(), 
-                                             (0.5 * (H2D_GET_H_ORDER(spaces[0]->get_element_order(e->id)) 
-                                                     + 
-                                                     H2D_GET_V_ORDER(spaces[0]->get_element_order(e->id)))
-                                              + 1)
-                                              / 2);
-        double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % 4]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % 4]->y - e->vn[edge_i]->y, 2));
-        double norm = calculate_norm(e, edge_i);
-        double discontinuity_detector = jump / (diameter_indicator * edge_length * norm);
-        if(discontinuity_detector > threshold)
-          discontinuous_element_ids.insert(e->id);
+    bool element_inserted = false;
+    for(int edge_i = 0; edge_i < e->get_num_surf() && !element_inserted; edge_i++)
+      if(calculate_relative_flow_direction(e, edge_i) < 0 && !e->en[edge_i]->bnd) {
+        double jumps[4];
+        calculate_jumps(e, edge_i, jumps);
+        double diameter_indicator = calculate_h(e, spaces[0]->get_element_order(e->id));
+        double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->y - e->vn[edge_i]->y, 2));
+        double norms[4];
+        calculate_norms(e, edge_i, norms);
+
+        for(unsigned int component_i = 0; component_i < 1; component_i++) {
+          if(norms[component_i] < 1E-8)
+            continue;
+          double discontinuity_detector = jumps[component_i] / (diameter_indicator * edge_length * norms[component_i]);
+          if(discontinuity_detector > threshold) {
+            discontinuous_element_ids.insert(e->id);
+            element_inserted = true;
+            break;
+          }
+        }
       }
   }
   return discontinuous_element_ids;
@@ -130,14 +151,14 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
   return result;
 };
 
-double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
+void DiscontinuityDetector::calculate_jumps(Element* e, int edge_i, double result[4])
 {
   // Set Geometry.
   SurfPos surf_pos;
   surf_pos.marker = e->marker;
   surf_pos.surf_num = edge_i;
 
-  int eo = solutions[0]->get_quad_2d()->get_edge_points(surf_pos.surf_num, 5);
+  int eo = solutions[0]->get_quad_2d()->get_edge_points(surf_pos.surf_num, 8);
   double3* pt = solutions[0]->get_quad_2d()->get_points(eo);
   int np = solutions[0]->get_quad_2d()->get_num_points(eo);
 
@@ -145,8 +166,11 @@ double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
   NeighborSearch ns(e, mesh);
   ns.set_active_edge(edge_i);
 
-  // The value to be returned.
-  double result = 0.0;
+  // The values to be returned.
+  result[0] = 0.0;
+  result[1] = 0.0;
+  result[2] = 0.0;
+  result[3] = 0.0;
 
   // Go through all neighbors.
   for(int neighbor_i = 0; neighbor_i < ns.get_num_neighbors(); neighbor_i++) {
@@ -178,7 +202,7 @@ double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
     Func<scalar>* density = init_fn(solutions[0], eo);
     Func<scalar>* density_vel_x = init_fn(solutions[1], eo);
     Func<scalar>* density_vel_y = init_fn(solutions[2], eo);
-    Func<scalar>* density_energy = init_fn(solutions[3], eo);
+    Func<scalar>* energy = init_fn(solutions[3], eo);
 
     // Set neighbor element to the solutions.
     solutions[0]->set_active_element(ns.neighb_el);
@@ -198,38 +222,46 @@ double DiscontinuityDetector::calculate_jumps(Element* e, int edge_i)
     Func<scalar>* density_neighbor = init_fn(solutions[0], eo);
     Func<scalar>* density_vel_x_neighbor = init_fn(solutions[1], eo);
     Func<scalar>* density_vel_y_neighbor = init_fn(solutions[2], eo);
-    Func<scalar>* density_energy_neighbor = init_fn(solutions[3], eo);
+    Func<scalar>* energy_neighbor = init_fn(solutions[3], eo);
 
     DiscontinuousFunc<scalar> density_discontinuous(density, density_neighbor, true);
     DiscontinuousFunc<scalar> density_vel_x_discontinuous(density_vel_x, density_vel_x_neighbor, true);
     DiscontinuousFunc<scalar> density_vel_y_discontinuous(density_vel_y, density_vel_y_neighbor, true);
-    DiscontinuousFunc<scalar> density_energy_discontinuous(density_energy, density_energy_neighbor, true);
+    DiscontinuousFunc<scalar> energy_discontinuous(energy, energy_neighbor, true);
 
-    for(int point_i = 0; point_i < np; point_i++)
-      result += jwt[point_i] * (
-      std::pow(density_discontinuous.get_val_central(point_i) - density_discontinuous.get_val_neighbor(point_i), 2) + 
-      std::pow(density_vel_x_discontinuous.get_val_central(point_i) - density_vel_x_discontinuous.get_val_neighbor(point_i), 2) + 
-      std::pow(density_vel_y_discontinuous.get_val_central(point_i) - density_vel_y_discontinuous.get_val_neighbor(point_i), 2) + 
-      std::pow(density_energy_discontinuous.get_val_central(point_i) - density_energy_discontinuous.get_val_neighbor(point_i), 2));
+    for(int point_i = 0; point_i < np; point_i++) {
+      result[0] += jwt[point_i] * (density_discontinuous.get_val_central(point_i) - density_discontinuous.get_val_neighbor(point_i)); 
+      result[1] += jwt[point_i] * (density_vel_x_discontinuous.get_val_central(point_i) - density_vel_x_discontinuous.get_val_neighbor(point_i));
+      result[2] += jwt[point_i] * (density_vel_y_discontinuous.get_val_central(point_i) - density_vel_y_discontinuous.get_val_neighbor(point_i));
+      result[3] += jwt[point_i] * (energy_discontinuous.get_val_central(point_i) - energy_discontinuous.get_val_neighbor(point_i));
+    }
   }
-
-  return std::sqrt(result);
+  result[0] = std::abs(result[0]);
+  result[1] = std::abs(result[1]);
+  result[2] = std::abs(result[2]);
+  result[3] = std::abs(result[3]);
 };
 
-double DiscontinuityDetector::calculate_norm(Element* e, int edge_i)
+void DiscontinuityDetector::calculate_norms(Element* e, int edge_i, double result[4])
 {
   // Set active element to the solutions.
   solutions[0]->set_active_element(e);
   solutions[1]->set_active_element(e);
   solutions[2]->set_active_element(e);
   solutions[3]->set_active_element(e);
+  
+  // The values to be returned.
+  result[0] = 0.0;
+  result[1] = 0.0;
+  result[2] = 0.0;
+  result[3] = 0.0;
 
   // Set Geometry.
   SurfPos surf_pos;
   surf_pos.marker = e->marker;
   surf_pos.surf_num = edge_i;
 
-  int eo = solutions[0]->get_quad_2d()->get_edge_points(surf_pos.surf_num, 5);
+  int eo = solutions[0]->get_quad_2d()->get_edge_points(surf_pos.surf_num, 8);
   double3* pt = solutions[0]->get_quad_2d()->get_points(eo);
   int np = solutions[0]->get_quad_2d()->get_num_points(eo);
 
@@ -243,14 +275,14 @@ double DiscontinuityDetector::calculate_norm(Element* e, int edge_i)
   Func<scalar>* density = init_fn(solutions[0], eo);
   Func<scalar>* density_vel_x = init_fn(solutions[1], eo);
   Func<scalar>* density_vel_y = init_fn(solutions[2], eo);
-  Func<scalar>* density_energy = init_fn(solutions[3], eo);
+  Func<scalar>* energy = init_fn(solutions[3], eo);
 
-  double result = 0.0;
-  for(int point_i = 0; point_i < np; point_i++)
-    result += jwt[point_i] * density->val[point_i] * density->val[point_i] + density_vel_x->val[point_i] * density_vel_x->val[point_i]
-              + density_vel_y->val[point_i] * density_vel_y->val[point_i] + density_energy->val[point_i] * density_energy->val[point_i];
-
-  return std::sqrt(result);
+  for(int point_i = 0; point_i < np; point_i++) {
+    result[0] = std::max(result[0], std::abs(density->val[point_i]));
+    result[1] = std::max(result[1], std::abs(density_vel_x->val[point_i]));
+    result[2] = std::max(result[2], std::abs(density_vel_y->val[point_i]));
+    result[3] = std::max(result[3], std::abs(energy->val[point_i]));
+  }
 
 };
 

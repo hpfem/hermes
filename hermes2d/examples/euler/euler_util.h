@@ -46,10 +46,13 @@ public:
   double calculate_relative_flow_direction(Element* e, int edge_i);
 
   /// Calculates jumps of all solution components across the edge edge_i of the Element e.
-  double calculate_jumps(Element* e, int edge_i);
+  void calculate_jumps(Element* e, int edge_i, double result[4]);
+
+  /// Calculates h.
+  double calculate_h(Element* e, int polynomial_order);
 
   /// Calculates the norm of the solution on the central element.
-  double calculate_norm(Element* e, int edge_i);
+  void calculate_norms(Element* e, int edge_i, double result[4]);
 
 protected:
   /// Members.

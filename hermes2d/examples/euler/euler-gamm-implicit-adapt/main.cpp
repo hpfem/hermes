@@ -33,7 +33,7 @@ unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils
 bool SHOCK_CAPTURING = true;
 
 // Quantitative parameter of the discontinuity detector.
-double DISCONTINUITY_DETECTOR_PARAM = 1;
+double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
@@ -100,17 +100,15 @@ const std::string BDY_SOLID_WALL_TOP = "4";
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh basemesh;
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &basemesh);
+  mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
-    basemesh.refine_all_elements(0, true);
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
-  mesh.copy(&basemesh);
+    mesh.refine_all_elements(0, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -186,6 +184,7 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
+      // Global polynomial order increase;
       int order_increase = 0;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
@@ -233,11 +232,13 @@ int main(int argc, char* argv[])
         solver.get_num_lin_iters(), solver.get_achieved_tol());
       
       if(SHOCK_CAPTURING) {
-        DiscontinuityDetector discontinuity_detector(*ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+        DiscontinuityDetector discontinuity_detector(*ref_spaces, 
+						Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
 
         std::set<int> discontinuous_elements = discontinuity_detector.get_discontinuous_element_ids(DISCONTINUITY_DETECTOR_PARAM);
 
-        FluxLimiter flux_limiter(solution_vector, *ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+        FluxLimiter flux_limiter(solution_vector, *ref_spaces,
+						Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
 
         flux_limiter.limit_according_to_detector(discontinuous_elements);
       }
@@ -286,7 +287,7 @@ int main(int argc, char* argv[])
     }
     while (done == false);
 
-    // Copy the solutions into previous time level ones.
+    // Copy the solutions into the previous time level ones.
     prev_rho.copy(&rsln_rho);
     prev_rho_v_x.copy(&rsln_rho_v_x);
     prev_rho_v_y.copy(&rsln_rho_v_y);
