@@ -15,6 +15,11 @@
 // IC: Constant subsonic state identical to inlet. 
 //
 // The following parameters can be changed:
+// Visualization.
+const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
+
 // Shock capturing.
 bool SHOCK_CAPTURING = false;
 // Quantitative parameter of the discontinuity detector.
@@ -66,11 +71,6 @@ int main(int argc, char* argv[])
   info("ndof: %d", ndof);
 
   // Initialize solutions, set initial conditions.
-  InitialSolutionEulerDensity sln_rho(&mesh, RHO_EXT);
-  InitialSolutionEulerDensityVelX sln_rho_v_x(&mesh, RHO_EXT * V1_EXT);
-  InitialSolutionEulerDensityVelY sln_rho_v_y(&mesh, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy sln_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
-  
   InitialSolutionEulerDensity prev_rho(&mesh, RHO_EXT);
   InitialSolutionEulerDensityVelX prev_rho_v_x(&mesh, RHO_EXT * V1_EXT);
   InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh, RHO_EXT * V2_EXT);
@@ -80,16 +80,11 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
-  /*
-  EulerEquationsWeakFormExplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
-  */
   EulerEquationsWeakFormExplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  
+  bool is_linear = true;  
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
 
   // If the FE problem is in fact a FV problem.
@@ -97,9 +92,9 @@ int main(int argc, char* argv[])
     dp.set_fvm();  
 
   // Filters for visualization of Mach number, pressure and entropy.
-  MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
-  PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
-  EntropyFilter entropy(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA, RHO_EXT, P_EXT);
+  MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
+  PressureFilter pressure(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
+  EntropyFilter entropy(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA, RHO_EXT, P_EXT);
 
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
@@ -121,13 +116,19 @@ int main(int argc, char* argv[])
   for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
-    bool rhs_only = (iteration == 1 ? false : true);
-    // Assemble stiffness matrix and rhs or just rhs.
-    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
-    else info("Assembling the right-hand side vector (only).");
     // Set the current time step.
     wf.set_time_step(time_step);
-    dp.assemble(matrix, rhs, rhs_only);
+
+    bool rhs_only = (iteration == 1 ? false : true);
+    // Assemble stiffness matrix and rhs or just rhs.
+    if (rhs_only == false) {
+      info("Assembling the stiffness matrix and right-hand side vector.");
+      dp.assemble(matrix, rhs);
+    }
+    else {
+      info("Assembling the right-hand side vector (only).");
+      dp.assemble(NULL, rhs);
+    }
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
@@ -135,19 +136,19 @@ int main(int argc, char* argv[])
     if(solver->solve()) {
       solution_vector = solver->get_solution();
       Solution::vector_to_solutions(solution_vector, Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+      &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
     }
     else
       error ("Matrix solver failed.\n");
 
     if(SHOCK_CAPTURING) {
       DiscontinuityDetector discontinuity_detector(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+        &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
       std::set<int> discontinuous_elements = discontinuity_detector.get_discontinuous_element_ids(DISCONTINUITY_DETECTOR_PARAM);
 
       FluxLimiter flux_limiter(solution_vector, Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e));
+        &space_rho_v_y, &space_e), Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));
 
       flux_limiter.limit_according_to_detector(discontinuous_elements);
     }
@@ -179,12 +180,6 @@ int main(int argc, char* argv[])
       time_step = min_condition;
     if(time_step < min_condition * 0.9)
       time_step = min_condition;
-
-    // Copy the solutions into the previous time level ones.
-    prev_rho.copy(&sln_rho);
-    prev_rho_v_x.copy(&sln_rho_v_x);
-    prev_rho_v_y.copy(&sln_rho_v_y);
-    prev_e.copy(&sln_e);
 
     // Visualization.
     Mach_number.reinit();

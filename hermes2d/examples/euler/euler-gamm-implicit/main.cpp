@@ -1,4 +1,4 @@
-//#define H2D_EULER_NUM_FLUX_IMPLICIT_TESTING  // For testing of numerical fluxes.
+//#define H2D_EULER_NUM_FLUX_TESTING  // For testing of numerical fluxes.
 
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
@@ -66,8 +66,8 @@ int main(int argc, char* argv[])
   mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) 
-    mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -134,8 +134,7 @@ int main(int argc, char* argv[])
   }
 
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += time_step)
-  {
+  for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
     OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 

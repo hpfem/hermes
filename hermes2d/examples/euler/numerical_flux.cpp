@@ -272,7 +272,7 @@ void OsherSolomonNumericalFlux::numerical_flux(double result[4], double w_L[4], 
   
   // Check that we can use the following.
   double right_hand_side = 0;
-  if(q_L[2] / q_L[0] - q_R[2] / q_R[0] > 0)
+  if((q_L[2] / q_L[0]) - (q_R[2] / q_R[0]) > 0)
     right_hand_side = (q_L[2] / q_L[0] - q_R[2] / q_R[0] > 0) / 2;
   if(a_L + a_R + ((kappa - 1) * (q_L[1] / q_L[0] - q_R[1] / q_R[0]) / 2) <= right_hand_side)
     error("Osher-Solomon numerical flux is not possible to construct according to the table.");
