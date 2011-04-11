@@ -21,11 +21,11 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Shock capturing.
-bool SHOCK_CAPTURING = false;
+bool SHOCK_CAPTURING = true;
 // Quantitative parameter of the discontinuity detector.
-double DISCONTINUITY_DETECTOR_PARAM = 0.05;
+double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
-const int P_INIT = 0;                                   // Initial polynomial degree.                      
+const int P_INIT = 2;                                   // Initial polynomial degree.                      
 const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
@@ -62,6 +62,9 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
+
+  MeshView m_view;
+  m_view.show(&mesh);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -116,7 +119,6 @@ int main(int argc, char* argv[])
   // Set up CFL calculation class.
   CFLCalculation CFL(CFL_NUMBER, KAPPA);
 
-
   int iteration = 0; double t = 0;
   for(t = 0.0; t < 3.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
@@ -168,7 +170,7 @@ int main(int argc, char* argv[])
     pressure_view.show(&pressure);
     entropy_production_view.show(&entropy);
     Mach_number_view.show(&Mach_number);
-   
+
     /*
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
