@@ -204,7 +204,7 @@ NoxSolver::NoxSolver(DiscreteProblemInterface* problem) : IterSolver()
 #endif
 }
 #ifdef HAVE_NOX
-NoxSolver::NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* nl_dir,
+NoxSolver::NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
     double ls_tolerance,
     const char* precond_type,
     unsigned flag_absresid,
@@ -213,7 +213,6 @@ NoxSolver::NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, c
     double rel_resid,
     int max_iters,
     double update,
-    const char* ls_type,
     int ls_max_iters,
     int ls_sizeof_krylov_subspace,
     NOX::Abstract::Vector::NormType norm_type,
@@ -345,6 +344,7 @@ bool NoxSolver::solve()
    ls_pars.set("Tolerance", ls_tolerance);
    ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
    ls_pars.set("Preconditioner Reuse Policy", "Reuse");
+   ls_pars.set("Output Frequency", AZ_all);
 
    // precond stuff
    Teuchos::RCP<Precond> precond = interface_->get_precond();
