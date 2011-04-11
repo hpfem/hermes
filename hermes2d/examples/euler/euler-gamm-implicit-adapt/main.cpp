@@ -25,19 +25,22 @@ const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
-const double NOX_LINEAR_TOLERANCE = 1e-2;
-const double NOX_NONLINEAR_TOLERANCE = 1e-1;
+const double NOX_LINEAR_TOLERANCE = 1e-1;
+const double NOX_NONLINEAR_TOLERANCE = 1e-2;
+unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details | NOX::Utils::LinearSolverDetails;
 
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
+
 // Quantitative parameter of the discontinuity detector.
 double DISCONTINUITY_DETECTOR_PARAM = 1;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY_ANISO = 2;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-const int INIT_REF_NUM_BOUNDARY_ISO = 2;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
-double time_step = 1E-3;                          // Time step.
+const int INIT_REF_NUM_BOUNDARY_ANISO = 3;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM_BOUNDARY_ISO = 3;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
+
+double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -134,11 +137,6 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  /*
-  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  */
-
   EulerEquationsWeakFormImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
   
@@ -188,9 +186,14 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      int order_increase = 1;
+      int order_increase = 0;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
+      
+      // Report NDOFs.
+      info("ndof_coarse: %d, ndof_fine: %d.", 
+        Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces));
 
       // Project the previous time level solution onto the new fine mesh
       // in order to obtain initial vector for NOX. 
@@ -203,7 +206,7 @@ int main(int argc, char* argv[])
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
   
       // Initialize NOX solver.
-      NoxSolver solver(&dp);
+      NoxSolver solver(&dp, NOX_MESSAGE_TYPE);
       solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
       solver.disable_abs_resid();
       solver.set_conv_rel_resid(NOX_NONLINEAR_TOLERANCE);
@@ -254,9 +257,7 @@ int main(int argc, char* argv[])
 							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e)) * 100;
 
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+      info("err_est_rel: %g%%", err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
