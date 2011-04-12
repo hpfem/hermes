@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
       // Project the previous time level solution onto the new fine mesh.
       info("Projecting the previous time level solution onto the new fine mesh.");
       OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, Hermes::vector<ProjNormType>(), as > 1 || iteration > 1); 
+        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, Hermes::vector<ProjNormType>(), iteration > 1); 
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
