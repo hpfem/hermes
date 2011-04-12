@@ -672,7 +672,7 @@ void OsherSolomonNumericalFlux::calculate_q_L_star()
   this->q_L_star[0] = std::pow(a_L_star / a_L, 2 / (kappa -1 )) * q_L[0];
   this->q_L_star[1] = this->q_L_star[0] * a_L_star;
   this->q_L_star[2] = this->q_1[0] * this->q_L[2] / this->q_L[0] ;
-  this->q_L_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_L_star * a_L_star * q_L_star[0] / kappa, kappa);
+  this->q_L_star[3] = QuantityCalculator::calc_energy(this->q_L_star[0], this->q_L_star[1], this->q_L_star[2], a_L_star * a_L_star * q_L_star[0] / kappa, kappa);
 }
 
 void OsherSolomonNumericalFlux::calculate_q_3()
@@ -681,7 +681,7 @@ void OsherSolomonNumericalFlux::calculate_q_3()
   this->q_3[0] = q_1[0] / (alpha * alpha);
   this->q_3[1] = this->q_3[0] * this->q_1[1] / this->q_1[0] ;
   this->q_3[2] = this->q_3[0] * this->q_R[2] / this->q_R[0] ;
-  this->q_3[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_3 * a_3 * q_3[0] / kappa, kappa);
+  this->q_3[3] = QuantityCalculator::calc_energy(this->q_3[0], this->q_3[1], this->q_3[2], a_3 * a_3 * q_3[0] / kappa, kappa);
 }
 
 void OsherSolomonNumericalFlux::calculate_q_R_star()
@@ -690,7 +690,7 @@ void OsherSolomonNumericalFlux::calculate_q_R_star()
   this->q_R_star[0] = std::pow(a_R_star / a_R, 2 / (kappa -1 )) * q_R[0];
   this->q_R_star[1] = this->q_R_star[0] * -a_R_star;
   this->q_R_star[2] = this->q_1[0] * this->q_R[2] / this->q_R[0] ;
-  this->q_R_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_R_star * a_R_star * q_R_star[0] / kappa, kappa);
+  this->q_R_star[3] = QuantityCalculator::calc_energy(this->q_R_star[0], this->q_R_star[1], this->q_R_star[2], a_R_star * a_R_star * q_R_star[0] / kappa, kappa);
 }
 
 void OsherSolomonNumericalFlux::f_1(double result[4], double state[4])
