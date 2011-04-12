@@ -48,8 +48,18 @@ void StegerWarmingNumericalFlux::numerical_flux(double result[4], double w_L[4],
         double nx, double ny)
 {
   double result_temp[4];
-  P_plus(result_temp, w_L, w_L, nx, ny);
-  P_minus(result, w_R, w_R, nx, ny);
+  double w_L_temp[4];
+  w_L_temp[0] = w_L[0];
+  w_L_temp[1] = w_L[1];
+  w_L_temp[2] = w_L[2];
+  w_L_temp[3] = w_L[3];
+  double w_R_temp[4];
+  w_R_temp[0] = w_R[0];
+  w_R_temp[1] = w_R[1];
+  w_R_temp[2] = w_R[2];
+  w_R_temp[3] = w_R[3];
+  P_plus(result_temp, w_L, w_L_temp, nx, ny);
+  P_minus(result, w_R, w_R_temp, nx, ny);
   for(unsigned int i = 0; i < 4; i++)
     result[i] += result_temp[i];
 }
@@ -176,10 +186,10 @@ void StegerWarmingNumericalFlux::Lambda_plus(double result[4], double nx, double
   u = q[1] / q[0];
   v = q[2] / q[0];
   V = u*u + v*v;
-  result[0] = u - a < 0 ? u - a : 0;
-  result[1] = u < 0 ? u : 0;
-  result[2] = u < 0 ? u : 0;
-  result[3] = u + a < 0 ? u + a : 0;
+  result[0] = u - a < 0 ? 0 : u - a;
+  result[1] = u < 0 ? 0 : u;
+  result[2] = u < 0 ? 0 : u;
+  result[3] = u + a < 0 ? 0 : u + a;
 }
 
 void StegerWarmingNumericalFlux::Lambda_minus(double result[4], double nx, double ny)
@@ -188,10 +198,10 @@ void StegerWarmingNumericalFlux::Lambda_minus(double result[4], double nx, doubl
   u = q[1] / q[0];
   v = q[2] / q[0];
   V = u*u + v*v;
-  result[0] = u - a > 0 ? u - a : 0;
-  result[1] = u > 0 ? u : 0;
-  result[2] = u > 0 ? u : 0;
-  result[3] = u + a > 0 ? u + a : 0;
+  result[0] = u - a < 0 ? u - a : 0;
+  result[1] = u < 0 ? u : 0;
+  result[2] = u < 0 ? u : 0;
+  result[3] = u + a < 0 ? u + a : 0;
 }
 
 void StegerWarmingNumericalFlux::T_1(double result[4][4], double nx, double ny)
