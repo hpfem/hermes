@@ -18,12 +18,13 @@
 
 #include "../integrals/integrals_hcurl.h"
 
-/* Default volumetric matrix form \int_{area} coeff \curl E \curl F d\bfx 
-   coeff... constant number
-*/
-
 namespace WeakFormsHcurl {
   namespace VolumetricMatrixForms {
+
+    /* Default volumetric matrix form \int_{area} coeff \curl E \curl F d\bfx 
+     coeff... constant number
+    */
+
     class DefaultLinearCurlCurl : public WeakForm::MatrixFormVol
     {
     public:
@@ -93,7 +94,43 @@ namespace WeakFormsHcurl {
     };
   }
 
+  namespace SurfaceMatrixForms {
+
+    /* Default surface matrix form \int_{area} coeff e tau f tau dS 
+       coeff... constant number
+    */
+
+    class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
+    {
+    public:
+      DefaultMatrixFormSurf(int i, int j, scalar coeff)
+        : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
+      DefaultMatrixFormSurf(int i, int j, std::string area, scalar coeff)
+        : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
+
+      template<typename Real, typename Scalar>
+      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+        return coeff * int_e_tau_f_tau<Real, Scalar>(n, wt, u, v, e);
+      }
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        return matrix_form(n, wt, u_ext, u, v, e, ext);
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+      }
+
+      private:
+        scalar coeff;
+    };
+  }
+
   namespace VolumetricVectorForms {
+
       /* Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx 
          coeff... constant number
       */
