@@ -156,7 +156,7 @@ int main(int argc, char **argv)
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
   // "" stands for preconditioning that is set later.
-  NoxSolver nox_solver(&dp2, message_type, ls_tolerance, "", flag_absresid, abs_resid, 
+  NoxSolver nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
                        flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
   
