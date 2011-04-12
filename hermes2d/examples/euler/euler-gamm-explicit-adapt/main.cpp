@@ -17,7 +17,7 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
@@ -29,14 +29,14 @@ double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY_ANISO = 2;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-const int INIT_REF_NUM_BOUNDARY_ISO = 3;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM_BOUNDARY_ANISO = 1;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM_BOUNDARY_ISO = 2;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
 double CFL_NUMBER = 1.0;                          // CFL value.
 int CFL_CALC_FREQ = 1;                            // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                          // Initial time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 10;                        // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
@@ -63,7 +63,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.4;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -190,8 +190,12 @@ int main(int argc, char* argv[])
       OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
                      Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver); 
 
-      if(as > 1)
+      if(as > 1) {
         delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
+        delete rsln_rho_v_y.get_mesh();
+        delete rsln_e.get_mesh();
+      }
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -245,7 +249,7 @@ int main(int argc, char* argv[])
       info("err_est_rel: %g%%", err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
-      if (err_est_rel_total < ERR_STOP) 
+      if (err_est_rel_total < ERR_STOP && (iteration > 1 || as > 1)) 
         done = true;
       else {
         info("Adapting coarse mesh.");
