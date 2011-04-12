@@ -1103,13 +1103,13 @@ protected:
 
         num_flux->numerical_flux(flux_testing_num_flux, w_L, w_L, e->nx[i], e->ny[i]);
 
-        //num_flux->numerical_flux(flux_testing_num_flux_conservativity_1, w_L, w_R, e->nx[i], e->ny[i]);
-        //num_flux->numerical_flux(flux_testing_num_flux_conservativity_2, w_R, w_L, -e->nx[i], -e->ny[i]);
+        num_flux->numerical_flux(flux_testing_num_flux_conservativity_1, w_L, w_R, e->nx[i], e->ny[i]);
+        num_flux->numerical_flux(flux_testing_num_flux_conservativity_2, w_R, w_L, -e->nx[i], -e->ny[i]);
 
-        //for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
-         // if(std::abs(flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) > 1E-4)
-          //  if(std::abs((flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) / flux_testing_num_flux_conservativity_1[flux_i]) > 1E-6)
-           //   info("Flux is not conservative.");
+       for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
+          if(std::abs(flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) > 1E-4)
+            if(std::abs((flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) / flux_testing_num_flux_conservativity_1[flux_i]) > 1E-6)
+              info("Flux is not conservative.");
 
         //num_flux->Q(w_L, w_L, e->nx[i], e->ny[i]);
         
@@ -1164,7 +1164,7 @@ protected:
 
         for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
           if(std::abs(flux_testing_num_flux[flux_i] - flux_testing_flux[flux_i]) > 1E-8)
-            if(std::abs((flux_testing_num_flux[flux_i] - flux_testing_flux[flux_i]) / flux_testing_num_flux[flux_i]) > 1E-7)
+            if(std::abs((flux_testing_num_flux[flux_i] - flux_testing_flux[flux_i]) / flux_testing_num_flux[flux_i]) > 1E-6)
               info("Flux is not consistent.");
 #endif
 

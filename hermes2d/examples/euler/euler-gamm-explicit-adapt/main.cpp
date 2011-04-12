@@ -1,4 +1,4 @@
-#define H2D_EULER_NUM_FLUX_TESTING
+//#define H2D_EULER_NUM_FLUX_TESTING
 
 #define HERMES_REPORT_INFO
 #define HERMES_REPORT_FILE "application.log"
