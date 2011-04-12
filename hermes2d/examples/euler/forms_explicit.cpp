@@ -1098,17 +1098,21 @@ protected:
         double flux_testing_num_flux_conservativity_1[4];
         double flux_testing_num_flux_conservativity_2[4];
         double flux_testing_flux_1[4];
+        double flux_testing_flux_2[4];
+        double flux_testing_flux[4];
+
         num_flux->numerical_flux(flux_testing_num_flux, w_L, w_L, e->nx[i], e->ny[i]);
 
-        num_flux->numerical_flux(flux_testing_num_flux_conservativity_1, w_L, w_R, e->nx[i], e->ny[i]);
-        num_flux->numerical_flux(flux_testing_num_flux_conservativity_2, w_R, w_L, -e->nx[i], -e->ny[i]);
+        //num_flux->numerical_flux(flux_testing_num_flux_conservativity_1, w_L, w_R, e->nx[i], e->ny[i]);
+        //num_flux->numerical_flux(flux_testing_num_flux_conservativity_2, w_R, w_L, -e->nx[i], -e->ny[i]);
 
-        for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
-          if(std::abs(flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) > 1E-4)
-            if(std::abs((flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) / flux_testing_num_flux_conservativity_1[flux_i]) > 1E-6)
-              info("Flux is not conservative.");
+        //for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
+         // if(std::abs(flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) > 1E-4)
+          //  if(std::abs((flux_testing_num_flux_conservativity_1[flux_i] + flux_testing_num_flux_conservativity_2[flux_i]) / flux_testing_num_flux_conservativity_1[flux_i]) > 1E-6)
+           //   info("Flux is not conservative.");
 
-        num_flux->Q(w_L, w_L, e->nx[i], e->ny[i]);
+        //num_flux->Q(w_L, w_L, e->nx[i], e->ny[i]);
+        
         EulerEquationsLinearForm form(Hermes::vector<unsigned int>(), num_flux->kappa);
         flux_testing_flux_1[0] = form.A_1_0_0<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[0]
           + form.A_1_0_1<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[1]
@@ -1130,11 +1134,37 @@ protected:
           + form.A_1_3_2<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[2]
           + form.A_1_3_3<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[3];
 
-        num_flux->Q_inv(flux_testing_flux_1, flux_testing_flux_1, e->nx[i], e->ny[i]);
+        flux_testing_flux_2[0] = form.A_2_0_0<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[0]
+          + form.A_2_0_1<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[1]
+          + form.A_2_0_2<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[2]
+          + form.A_2_0_3<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[3];
+
+        flux_testing_flux_2[1] = form.A_2_1_0<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[0]
+          + form.A_2_1_1<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[1]
+          + form.A_2_1_2<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[2]
+          + form.A_2_1_3<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[3];
+
+        flux_testing_flux_2[2] = form.A_2_2_0<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[0]
+          + form.A_2_2_1<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[1]
+          + form.A_2_2_2<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[2]
+          + form.A_2_2_3<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[3];
+
+        flux_testing_flux_2[3] = form.A_2_3_0<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[0]
+          + form.A_2_3_1<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[1]
+          + form.A_2_3_2<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[2]
+          + form.A_2_3_3<double>(w_L[0], w_L[1], w_L[2], w_L[3]) * w_L[3];
+
+
+          flux_testing_flux[0] = flux_testing_flux_1[0] * e->nx[i] + flux_testing_flux_2[0] * e->ny[i];
+          flux_testing_flux[1] = flux_testing_flux_1[1] * e->nx[i] + flux_testing_flux_2[1] * e->ny[i];
+          flux_testing_flux[2] = flux_testing_flux_1[2] * e->nx[i] + flux_testing_flux_2[2] * e->ny[i];
+          flux_testing_flux[3] = flux_testing_flux_1[3] * e->nx[i] + flux_testing_flux_2[3] * e->ny[i];
+
+        //num_flux->Q_inv(flux_testing_flux_1, flux_testing_flux_1, e->nx[i], e->ny[i]);
 
         for(unsigned int flux_i = 0;flux_i < 4;flux_i++)
-          if(std::abs(flux_testing_num_flux[flux_i] - flux_testing_flux_1[flux_i]) > 1E-4)
-            if(std::abs((flux_testing_num_flux[flux_i] - flux_testing_flux_1[flux_i]) / flux_testing_num_flux[flux_i]) > 1E-6)
+          if(std::abs(flux_testing_num_flux[flux_i] - flux_testing_flux[flux_i]) > 1E-8)
+            if(std::abs((flux_testing_num_flux[flux_i] - flux_testing_flux[flux_i]) / flux_testing_num_flux[flux_i]) > 1E-7)
               info("Flux is not consistent.");
 #endif
 
