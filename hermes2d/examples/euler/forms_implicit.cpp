@@ -710,15 +710,14 @@ public:
     vector_coordinates.push_back(3);
 
     if(preconditioning) {
+      //EulerEquationsMatrixFormVolPreconditioning* precon_vol 
+      //  = new EulerEquationsMatrixFormVolPreconditioning(matrix_coordinates_precon_vol, kappa);
+      //EulerEquationsMatrixFormSurfPreconditioning* precon_surf 
+      // = new EulerEquationsMatrixFormSurfPreconditioning(matrix_coordinates, kappa);
+      //add_multicomponent_matrix_form(precon_vol);
+      //add_multicomponent_matrix_form_surf(precon_surf);
       
-      EulerEquationsMatrixFormVolPreconditioning* precon_vol 
-        = new EulerEquationsMatrixFormVolPreconditioning(matrix_coordinates_precon_vol, kappa);
-      EulerEquationsMatrixFormSurfPreconditioning* precon_surf 
-       = new EulerEquationsMatrixFormSurfPreconditioning(matrix_coordinates, kappa);
-      add_multicomponent_matrix_form(precon_vol);
-      add_multicomponent_matrix_form_surf(precon_surf);
-      
-      //add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates));
+      add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates));
     }
 
     add_multicomponent_vector_form(new EulerEquationsLinearFormTime(vector_coordinates));

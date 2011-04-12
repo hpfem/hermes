@@ -19,7 +19,7 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
@@ -36,14 +36,14 @@ bool SHOCK_CAPTURING = true;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY_ANISO = 3;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-const int INIT_REF_NUM_BOUNDARY_ISO = 3;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM_BOUNDARY_ANISO = 1;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM_BOUNDARY_ISO = 2;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
 
 double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 3;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.

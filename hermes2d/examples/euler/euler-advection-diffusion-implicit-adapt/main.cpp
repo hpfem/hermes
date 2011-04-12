@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
       
       // Initialize NOX solver.
-      NoxSolver solver(&dp, NOX_MESSAGE_TYPE, NOX_LINEAR_TOLERANCE, "None", 0, 0, 1, NOX_NONLINEAR_TOLERANCE);
+      NoxSolver solver(&dp, NOX_MESSAGE_TYPE, "GMRES", "Newton", NOX_LINEAR_TOLERANCE, "None", 0, 0, 1, NOX_NONLINEAR_TOLERANCE);
       solver.set_init_sln(coeff_vec);
       if(PRECONDITIONING)
         solver.set_precond(pc);
