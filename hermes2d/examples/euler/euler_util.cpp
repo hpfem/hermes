@@ -50,15 +50,13 @@ void CFLCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, 
       constant_energy_space.get_element_assembly_list(e, &al);
       double energy = sln_vector[al.dof[0]];
       
-      double condition = e->get_area() / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, kappa));
+      double condition = e->get_area() * CFL_number / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, kappa));
       
       if(condition < min_condition || min_condition == 0.)
         min_condition = condition;
     }
-    if(time_step > min_condition)
-      time_step = min_condition;
-    if(time_step < min_condition * 0.9)
-      time_step = min_condition;
+
+    time_step = min_condition;
 }
 
 
@@ -148,6 +146,11 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
   for(int point_i = 0; point_i < np; point_i++)
     result += jwt[point_i] * density_vel_x->val[point_i] * geom->nx[point_i] + density_vel_y->val[point_i] * geom->ny[point_i];
 
+  delete geom;
+  delete [] jwt;
+  delete density_vel_x;
+  delete density_vel_y;
+
   return result;
 };
 
@@ -235,7 +238,19 @@ void DiscontinuityDetector::calculate_jumps(Element* e, int edge_i, double resul
       result[2] += jwt[point_i] * (density_vel_y_discontinuous.get_val_central(point_i) - density_vel_y_discontinuous.get_val_neighbor(point_i));
       result[3] += jwt[point_i] * (energy_discontinuous.get_val_central(point_i) - energy_discontinuous.get_val_neighbor(point_i));
     }
+    
+    delete geom;
+    delete [] jwt;
+    delete density;
+    delete density_vel_x;
+    delete density_vel_y;
+    delete energy;
+    delete density_neighbor;
+    delete density_vel_x_neighbor;
+    delete density_vel_y_neighbor;
+    delete energy_neighbor;
   }
+
   result[0] = std::abs(result[0]);
   result[1] = std::abs(result[1]);
   result[2] = std::abs(result[2]);
@@ -284,6 +299,12 @@ void DiscontinuityDetector::calculate_norms(Element* e, int edge_i, double resul
     result[3] = std::max(result[3], std::abs(energy->val[point_i]));
   }
 
+  delete geom;
+  delete [] jwt;
+  delete density;
+  delete density_vel_x;
+  delete density_vel_y;
+  delete energy;
 };
 
 FluxLimiter::FluxLimiter(scalar* solution_vector, Hermes::vector<Space *> spaces, Hermes::vector<Solution *> solutions) : solution_vector(solution_vector), spaces(spaces), 
@@ -293,7 +314,7 @@ FluxLimiter::FluxLimiter(scalar* solution_vector, Hermes::vector<Space *> spaces
 FluxLimiter::~FluxLimiter()
 {};
 
-void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_elements)
+void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_elements, Hermes::vector<Space *> coarse_spaces)
 {
   // First adjust the solution_vector.
   for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -307,6 +328,37 @@ void FluxLimiter::limit_according_to_detector(std::set<int>& discontinuous_eleme
 
   // Now adjust the solutions.
   Solution::vector_to_solutions(solution_vector, spaces, solutions);
+
+  if(coarse_spaces != Hermes::vector<Space *>()) {
+    // Now set the element order to zero.
+    Element* e;
+
+    for_all_elements(e, spaces[0]->get_mesh())
+      e->visited = false;
+
+    for(unsigned int space_i = 0; space_i < spaces.size(); space_i++) {
+      for(std::set<int>::iterator it = discontinuous_elements.begin(); it != discontinuous_elements.end(); it++) {
+        AsmList al;
+        spaces[space_i]->get_element_assembly_list(spaces[space_i]->get_mesh()->get_element(*it), &al);
+        for(unsigned int shape_i = 0; shape_i < al.cnt; shape_i++) {
+          if(H2D_GET_H_ORDER(spaces[space_i]->get_shapeset()->get_order(al.idx[shape_i])) > 0 || H2D_GET_V_ORDER(spaces[space_i]->get_shapeset()->get_order(al.idx[shape_i])) > 0) {
+            spaces[space_i]->get_mesh()->get_element(*it)->visited = true;
+            bool all_sons_visited = true;
+            for(unsigned int son_i = 0; son_i < 4; son_i++)
+              if(!spaces[space_i]->get_mesh()->get_element(*it)->parent->sons[son_i]->visited) {
+                all_sons_visited = false;
+                break;
+              }
+            if(all_sons_visited)
+              coarse_spaces[space_i]->set_element_order_internal(spaces[space_i]->get_mesh()->get_element(*it)->parent->id, 0);
+            break;
+          }
+        }
+      }
+    }
+
+    Space::assign_dofs(coarse_spaces);
+  }
 };
 
 void MachNumberFilter::filter_fn(int n, Hermes::vector<scalar*> values, scalar* result) 

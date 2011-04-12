@@ -108,7 +108,7 @@ void OGProjection::project_global(Space* space, MeshFunction* source_meshfn,
 
 void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector<Solution *> sols_src,
                                   Hermes::vector<Solution *> sols_dest, MatrixSolverType matrix_solver,
-                                  Hermes::vector<ProjNormType> proj_norms)
+                                  Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
 {
   _F_
 
@@ -118,6 +118,12 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
     ref_slns_mf.push_back(static_cast<MeshFunction*>(sols_src[i]));
 
   OGProjection::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
+
+  if(delete_old_meshes)
+    for(unsigned int i = 0; i < sols_src.size(); i++) {
+      delete sols_src[i]->get_mesh();
+      sols_src[i]->own_mesh = false;
+    }
 
   Solution::vector_to_solutions(target_vec, spaces, sols_dest);
 

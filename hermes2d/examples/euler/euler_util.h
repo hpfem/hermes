@@ -72,7 +72,7 @@ public:
    ~FluxLimiter();
 
   /// Do the limiting.
-  void limit_according_to_detector(std::set<int>& discontinuous_elements);
+  void limit_according_to_detector(std::set<int>& discontinuous_elements, Hermes::vector<Space *> coarse_spaces = Hermes::vector<Space *>());
 
 protected:
   /// Members.
