@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
   WeakForm* wf = new WeakFormRayleighBenard(Pr);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
