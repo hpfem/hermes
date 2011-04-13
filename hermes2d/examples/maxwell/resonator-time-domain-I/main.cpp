@@ -21,8 +21,8 @@
 //
 // The following parameters can be changed:
 
-const int P_INIT = 4;                              // Initial polynomial degree of all elements.
-const int INIT_REF_NUM = 2;                        // Number of initial uniform mesh refinements.
+const int P_INIT = 6;                              // Initial polynomial degree of all elements.
+const int INIT_REF_NUM = 1;                        // Number of initial uniform mesh refinements.
 const double time_step = 0.05;                     // Time step.
 const double T_FINAL = 35.0;                       // Final time.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -43,9 +43,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
+//ButcherTableType butcher_table_type = Implicit_RK_1;
 //ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
-//ButcherTableType butcher_table_type = Implicit_Radau_IIA_3_5;
+ButcherTableType butcher_table_type = Implicit_Radau_IIA_3_5;
 
 // Boundary markers.
 const std::string BDY = "Perfect conductor";
@@ -83,11 +83,12 @@ int main(int argc, char* argv[])
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY, 0.0);
-  EssentialBCs bcs(&bc_essential);
+  EssentialBCs bcs_E(&bc_essential);
+  EssentialBCs bcs_B;
 
   // Create x- and y- displacement space using the default H1 shapeset.
-  HcurlSpace E_space(&mesh, &bcs, P_INIT);
-  L2Space B_space(&mesh, P_INIT);
+  HcurlSpace E_space(&mesh, &bcs_E, P_INIT);
+  H1Space B_space(&mesh, &bcs_B, P_INIT);
 
   info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &B_space)));
 
