@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakForm wf(MU_R, KAPPA, LAMBDA);
+  CustomWeakForm wf(MU_R, KAPPA);
   /*
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_matrix_form_surf(callback(bilinear_form_surf));
