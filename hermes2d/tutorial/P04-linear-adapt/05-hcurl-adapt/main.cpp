@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_spacer);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
     dp->assemble(matrix, rhs);
 
     // Time measurement.

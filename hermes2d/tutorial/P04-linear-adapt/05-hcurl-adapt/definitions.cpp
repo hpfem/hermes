@@ -8,6 +8,7 @@ using namespace WeakFormsHcurl::VolumetricMatrixForms;
 using namespace WeakFormsHcurl::SurfaceMatrixForms;
 
 /* Exact solution */
+
 double jv(double n, double x);
 
 static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
@@ -31,9 +32,8 @@ static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
   e1 = -t11*x*t14-2.0/3.0*t18*y*t20*t23;
 }
 
-static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, scalar& e0dy)
+static void exact_sol_der(double x, double y, scalar& e1dx, scalar& e0dy)
 {
-  exact_sol_val(x,y,e0,e1);
   double t1 = x*x;
   double t2 = y*y;
   double t3 = t1+t2;
@@ -69,43 +69,56 @@ static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, 
   e0dy = (t11*y+2.0/3.0*t15*y-2.0/3.0*t22*y)*t6*y*t29-t32*t2*t29+t36-t47-4.0/9.0*t48*t41*t53+4.0/3.0*t57*t59*t53*y;
 }
 
-scalar2 exact(double x, double y, scalar2& dx, scalar2& dy)
-{
-  static scalar2 ex(0.0, 0.0);
-  exact_sol(x,y, ex[0], ex[1], dx[1], dy[0]);
-  return ex;
-}
-
 class CustomExactSolution : public ExactSolutionVector
 {
 public:
   CustomExactSolution(Mesh* mesh) : ExactSolutionVector(mesh) {};
   ~CustomExactSolution() {};
+
+  virtual scalar2 value(double x, double y) const {
+    scalar2 ex(0.0, 0.0);
+    exact_sol_val(x, y,  ex.val[0], ex.val[1]);
+    return ex;
+  };
+
+  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const {
+    scalar e1dx, e0dy;
+    exact_sol_der(x, y, e1dx, e0dy);
+    dx.val[0] = 0;
+    dx.val[1] = e1dx;
+    dy.val[0] = e0dy;
+    dy.val[1] = 0;
+    return;
+  };
+  
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(10);
+  } 
 };
 
-/* Weekforms */
+/* Weak forms */
 
 class CustomWeakForm : public WeakForm
 {
 public:
-  CustomWeakForm(double mu_r, double kappa, double lambda) : WeakForm(1)
+  CustomWeakForm(double mu_r, double kappa) : WeakForm(1)
   {
     cplx ii = cplx(0.0, 1.0);
     add_matrix_form(new DefaultLinearCurlCurl(0, 0, 1.0/mu_r));
     add_matrix_form(new DefaultLinearMass(0, 0, -sqr(kappa)));
-    add_matrix_form(new DefaultMatrixFormSurf(0, 0, -kappa*ii));
-    add_matrix_form(new CustomMatrixFormSurf(0, 0));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, -kappa*ii));
+    add_matrix_form_surf(new CustomMatrixFormSurf(0, 0));
   };
 
-private:
-  class CustomMatrixFormSurf : WeakForm::MatrixFormSurf
+  class CustomMatrixFormSurf : public WeakForm::MatrixFormSurf
   {
   public:
     CustomMatrixFormSurf(int i, int j)
               : WeakForm::MatrixFormSurf(i, j) {}
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
         double r = sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
@@ -123,14 +136,14 @@ private:
       return result;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      return matrix_form_surf<double, scalar>(n, wt, u_ext, u, v, e, ext);
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+                    Geom<Ord> *e, ExtData<Ord> *ext) const {
+      return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
   };
 };

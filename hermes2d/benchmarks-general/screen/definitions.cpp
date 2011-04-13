@@ -3,7 +3,8 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/hcurl.h"
 
-// Fresnel integral
+/* Fresnel integral */
+
 extern "C" void fresnl( double xxa, double *ssa, double *cca );
 
 /* Exact solution */
@@ -162,42 +163,6 @@ scalar exact1(double x, double y, scalar& dx, scalar& dy)
   scalar i = cplx(0.0,1.0);
   return  i * ( Hr * x/r - Ht * y/(r*r));
 }
-
-/*
-static void exact_sol(double x, double y, scalar& u0, scalar& u1, scalar& u1dx, scalar& u0dy)
-{
-  scalar dx,dy;
-  u0 = exact0(x,y,dx,dy);
-  u1 = exact1(x,y,dx,dy);
-
-  scalar Hr = der_Hr(x,y);
-  scalar Ht = der_Ht(x,y);
-  scalar Hrr = der_Hrr(x,y);
-  scalar Hrt = der_Hrt(x,y);
-  scalar Htr = der_Htr(x,y);
-  scalar Htt = der_Htt(x,y);
-
-  double r = sqrt(x*x + y*y);
-  double theta = atan2(y,x);
-  scalar i = cplx(0.0,1.0);
-
-  u1dx =  i * (( Hrr * x/r + Hrt * (-y/(r*r))) * x/r     + Hr * (y*y)/(r*r*r) -
-               ((Htr * x/r + Htt * (-y/(r*r))) * y/(r*r) + Ht * (-2.0*x*y/(r*r*r*r))));
-  u0dy = -i * (( Hrr * y/r + Hrt *   x/(r*r))  * y/r     + Hr * (x*x)/(r*r*r) +
-                (Htr * y/r + Htt *   x/(r*r))  * x/(r*r) + Ht * (-2.0*x*y/(r*r*r*r)));
-}
-
-scalar2 exact(double x, double y, scalar2& dx, scalar2& dy)
-{
-  static scalar2 ex(0.0, 0.0);
-  exact_sol(x,y, ex[0], ex[1], dx[1], dy[0]);
-
-  dx[0] = 0.0; // not important
-  dy[1] = 0.0; // not important
-
-  return ex;
-}
-*/
 
 /* Exact solution */
 

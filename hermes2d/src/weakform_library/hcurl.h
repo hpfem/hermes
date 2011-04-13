@@ -28,9 +28,9 @@ namespace WeakFormsHcurl {
     class DefaultLinearCurlCurl : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultLinearCurlCurl(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearCurlCurl(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultLinearCurlCurl(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearCurlCurl(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -40,12 +40,12 @@ namespace WeakFormsHcurl {
       }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-              Geom<Ord> *e, ExtData<Ord> *ext) const {
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -54,7 +54,7 @@ namespace WeakFormsHcurl {
       }
 
       private:
-        double coeff;
+        scalar coeff;
     };
 
     /* Default volumetric matrix form \int_{area} coeff E \cdot F d\bfx 
@@ -64,9 +64,9 @@ namespace WeakFormsHcurl {
     class DefaultLinearMass : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultLinearMass(int i, int j, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
-      DefaultLinearMass(int i, int j, std::string area, double coeff = 1.0, SymFlag sym = HERMES_SYM) 
+      DefaultLinearMass(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM) 
             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
@@ -76,7 +76,7 @@ namespace WeakFormsHcurl {
       }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
       }
 
@@ -90,7 +90,7 @@ namespace WeakFormsHcurl {
       }
 
       private:
-        double coeff;
+        scalar coeff;
     };
   }
 
@@ -124,6 +124,10 @@ namespace WeakFormsHcurl {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 
+      virtual WeakForm::MatrixFormSurf* clone() {
+        return new DefaultMatrixFormSurf(*this);
+      }
+
       private:
         scalar coeff;
     };
@@ -138,9 +142,9 @@ namespace WeakFormsHcurl {
       class DefaultVectorFormConst : public WeakForm::VectorFormVol
       {
       public:
-      DefaultVectorFormConst(int i, double coeff0, double coeff1) 
+      DefaultVectorFormConst(int i, scalar coeff0, scalar coeff1) 
 	     : WeakForm::VectorFormVol(i), coeff0(coeff0), coeff1(coeff1) { }
-      DefaultVectorFormConst(int i, std::string area, double coeff0, double coeff1) 
+      DefaultVectorFormConst(int i, std::string area, scalar coeff0, scalar coeff1) 
 	       : WeakForm::VectorFormVol(i, area), coeff0(coeff0), coeff1(coeff1) { }
 
         virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
@@ -164,7 +168,7 @@ namespace WeakFormsHcurl {
       }
 
       private:
-        double coeff0, coeff1;
+        scalar coeff0, coeff1;
       };
   }
 }
