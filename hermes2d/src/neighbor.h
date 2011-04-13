@@ -149,6 +149,7 @@ public:
   /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
   ///
   NeighborSearch::ExtendedShapeset* create_extended_asmlist(Space* space, AsmList* al);
+  NeighborSearch::ExtendedShapeset* create_extended_asmlist_multicomponent(Space *space, AsmList* al);
 
 /*** Methods for working with quadrature on the active edge. ***/
 
@@ -370,7 +371,7 @@ public:
   /// current neighbor element, extended by zero to the union of these elements.
   class ExtendedShapeset
   {
-  private:
+  public:
     /// Constructor.
     ///
     /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
@@ -378,10 +379,15 @@ public:
     /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
     ///
     ExtendedShapeset(NeighborSearch* neighborhood, AsmList* central_al, Space *space);
+    ExtendedShapeset(const ExtendedShapeset & other);
 
     /// Destructor.
     ~ExtendedShapeset() {
       delete [] dof; delete neighbor_al;
+    }
+
+    void free_central_al() {
+      delete central_al;
     }
 
     /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
