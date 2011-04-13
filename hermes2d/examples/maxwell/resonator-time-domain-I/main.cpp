@@ -80,12 +80,12 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY, 0.0);
   EssentialBCs bcs_E(&bc_essential);
-  //EssentialBCs bcs_B;
+  EssentialBCs bcs_B;
 
   // Create x- and y- displacement space using the default H1 shapeset.
   HcurlSpace E_space(&mesh, &bcs_E, P_INIT);
-  //H1Space B_space(&mesh, &bcs_B, P_INIT);
-  L2Space B_space(&mesh, P_INIT);
+  H1Space B_space(&mesh, &bcs_B, P_INIT);
+  //L2Space B_space(&mesh, P_INIT);
   Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&E_space, &B_space);
   info("ndof = %d.", Space::get_num_dofs(spaces));
 
