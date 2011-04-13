@@ -21,12 +21,12 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Shock capturing.
-bool SHOCK_CAPTURING = true;
+bool SHOCK_CAPTURING = false;
 // Quantitative parameter of the discontinuity detector.
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 1;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -57,14 +57,11 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &mesh);
+  mloader.load("channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
-
-  MeshView m_view;
-  m_view.show(&mesh);
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(1);
+  //mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -84,7 +81,7 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+  EulerEquationsWeakFormExplicitMultiComponentSemiImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
@@ -92,8 +89,8 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
 
   // If the FE problem is in fact a FV problem.
-  if(P_INIT == 0)
-    dp.set_fvm();  
+  //if(P_INIT == 0)
+    //dp.set_fvm();  
 
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
@@ -104,12 +101,12 @@ int main(int argc, char* argv[])
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
 
-  /*
+  
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
-  */
+  
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -132,6 +129,7 @@ int main(int argc, char* argv[])
       info("Assembling the stiffness matrix and right-hand side vector.");
       dp.assemble(matrix, rhs);
     }
+
     else {
       info("Assembling the right-hand side vector (only).");
       dp.assemble(NULL, rhs);
@@ -164,31 +162,34 @@ int main(int argc, char* argv[])
       CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh, time_step);
 
     // Visualization.
+    /*
     Mach_number.reinit();
     pressure.reinit();
     entropy.reinit();
     pressure_view.show(&pressure);
     entropy_production_view.show(&entropy);
     Mach_number_view.show(&Mach_number);
-
-    /*
+    */
+    
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
     s3.show(&prev_rho_v_y);
     s4.show(&prev_e);
-    */
+
+    View::wait();
+    
   }
   
   pressure_view.close();
   entropy_production_view.close();
   Mach_number_view.close();
 
-  /*
+  
   s1.close();
   s2.close();
   s3.close();
   s4.close();
-  */
+  
 
   return 0;
 }
