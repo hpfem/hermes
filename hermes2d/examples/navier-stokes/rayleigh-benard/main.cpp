@@ -25,7 +25,7 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements. 
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements. 
 
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
@@ -37,6 +37,7 @@ const int P_INIT_VEL = 2;                         // Initial polynomial degree f
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
                                                   // P_INIT_PRESSURE because of the inf-sup condition.
+const int P_INIT_TEMP = 1;                        // Initial polynomial degree for temperature
 const double time_step = 0.1;                     // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
@@ -45,11 +46,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const int P_INIT_TEMP = 1;                        // Initial polynomial degree for temperature
-const double Pr = 1.0;                            // Prandtl number.
-const double Ra = 1.0;                            // Rayleigh number.
+const double Pr = 1000.0;                         // Prandtl number.
+const double Ra = 1000.0;                         // Rayleigh number.
 const double TEMP_INIT = 20;
-const double TEMP_BOTTOM = 100;
+const double TEMP_BOTTOM = 21;
 
 // Current time (used in weak forms).
 double current_time = 0;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
                                                              &p_prev_time, &t_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, time_step);
+  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, time_step, &xvel_prev_time, &yvel_prev_time, &t_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
