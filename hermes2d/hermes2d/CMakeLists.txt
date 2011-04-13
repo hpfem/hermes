@@ -6,7 +6,7 @@ include_directories(${PROJECT_BINARY_DIR}/../hermes_common/)  # TODO: probably n
 cython_add_module(hermes2d)
 
 include(PickRealOrCplxLibs)
-PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB_REAL} hermes2d)
+PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} hermes2d)
 target_link_libraries(hermes2d ${HERMES2D_REAL})
 
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d)

@@ -17,7 +17,7 @@ macro(LINVIEW_SETTINGS VIEW)
 	  endif(MSVC)
 	  
     # Set correct include directories for PETSc.
-    PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB_REAL} ${PROJECT_NAME})
+    PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${PROJECT_NAME})
     get_property(FLAGS TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS)
 
     # Should debugging information be included?

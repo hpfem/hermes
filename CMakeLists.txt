@@ -7,8 +7,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
-set(HERMES_COMMON_LIB_REAL  hermes_common-real)
-set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
+set(HERMES_COMMON_LIB  hermes_common)
 
 
 #ADDED BY COLMAN
@@ -200,68 +199,23 @@ endif(WITH_PYTHON)
 # Allow to override the default values in CMake.vars:
 include(CMake.vars OPTIONAL)
 
-# Ensure that the correct version of hermes_common required by the selected
-# Hermes libraries will be built. Note that the debug/release decision has to
-# be made also here and not in ./hermes_common, so as to expose 
-# HERMES_COMMON_LIB_{REAL/CPLX}_{DEBUG/RELEASE} to all Hermeses. The logic is
-# as follows:
-# If any HXD (X={1/2/3}) is configured for a Debug version, Debug version of 
-# hermes_common will be built (the same for Release).  
-# If any HXD is configured for a Complex version, Complex version of 
-# hermes_common will be built (the same for Real).  
-
-macro (DETERMINE_HERMES_COMMON_REAL_COMPLEX HXD)
-    if (WITH_${HXD})
-        if (${HXD}_REAL)
-            set(HERMES_COMMON_REAL  YES)
-        endif (${HXD}_REAL)
-        if (${HXD}_COMPLEX)
-            set(HERMES_COMMON_COMPLEX YES)
-        endif (${HXD}_COMPLEX)
-    endif (WITH_${HXD})   
-endmacro(DETERMINE_HERMES_COMMON_REAL_COMPLEX)
-
-set(HERMES_COMMON_REAL    NO)
-set(HERMES_COMMON_COMPLEX NO)
-
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H1D)
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H2D)
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H3D)
 
 macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
         if(MSVC)
             # In MSVC, Release/Debug is distinguished in a special way
             # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
-            if (HERMES_COMMON_REAL)
-                set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
-                set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif (HERMES_COMMON_REAL)
-            if (HERMES_COMMON_COMPLEX)
-                set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
-                set(HERMES_COMMON_LIB_CPLX_DEBUG ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif (HERMES_COMMON_COMPLEX)
+            set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
+            set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
         else(MSVC)        
           if(${HXD}_DEBUG)
             set(HERMES_COMMON_DEBUG YES)
-            
-            if(HERMES_COMMON_REAL)
-              set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
-            endif(HERMES_COMMON_REAL)
-            if(HERMES_COMMON_COMPLEX)
-              set(HERMES_COMMON_LIB_CPLX_DEBUG  ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif(HERMES_COMMON_COMPLEX)
+            set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
           endif(${HXD}_DEBUG)
 
           if(${HXD}_RELEASE)
             set(HERMES_COMMON_RELEASE YES)
-            
-            if(HERMES_COMMON_REAL)
-              set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif(HERMES_COMMON_REAL)
-            if(HERMES_COMMON_COMPLEX)
-              set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
-            endif(HERMES_COMMON_COMPLEX)
+            set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
           endif(${HXD}_RELEASE)
         endif(MSVC)
     endif (WITH_${HXD})   
