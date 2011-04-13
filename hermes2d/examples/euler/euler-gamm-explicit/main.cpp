@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 2;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   mloader.load("channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(1);
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2);
   //mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensityEnergy prev_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
 
   // Numerical flux.
-  OsherSolomonNumericalFlux num_flux(KAPPA); 
+  StegerWarmingNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
   EulerEquationsWeakFormExplicitMultiComponentSemiImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
