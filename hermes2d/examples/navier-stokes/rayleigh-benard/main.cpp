@@ -7,7 +7,7 @@
 // In this problem, a steady fluid is heated from the bottom and 
 // it starts to move. The time-dependent laminar incompressible Navier-Stokes 
 // equations are coupled with a heat transfer equation and discretized 
-// in time via an arbitrary Runge-Kutta method. The Newton's method is used 
+// in time via the implicit Euler method. The Newton's method is used 
 // to solve the nonlinear problem at each time step. Flow pressure can be 
 // approximated using either continuous (H1) elements or discontinuous (L2)
 // elements. 
@@ -37,9 +37,7 @@ const int P_INIT_VEL = 2;                         // Initial polynomial degree f
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
                                                   // P_INIT_PRESSURE because of the inf-sup condition.
-const int P_INIT_TEMP = 1;                        // Initial polynomial degree for temperature
-const double Pr = 1.0;                            // Prandtl number.
-const double TAU = 0.1;                           // Time step.
+const double time_step = 0.1;                     // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
@@ -47,6 +45,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
+const int P_INIT_TEMP = 1;                        // Initial polynomial degree for temperature
+const double Pr = 1.0;                            // Prandtl number.
+const double Ra = 1.0;                            // Rayleigh number.
 const double TEMP_INIT = 20;
 const double TEMP_BOTTOM = 100;
 
@@ -85,6 +86,7 @@ int main(int argc, char* argv[])
   H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
   H1Space t_space(&mesh, &bcs_temp, P_INIT_TEMP);
+  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space);
 
   // Calculate and report the number of degrees of freedom.
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space));
@@ -106,12 +108,14 @@ int main(int argc, char* argv[])
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
   t_prev_time.set_const(&mesh, TEMP_INIT);
+  Hermes::vector<Solution*> slns = Hermes::vector<Solution*>(&xvel_prev_time, &yvel_prev_time, 
+                                                             &p_prev_time, &t_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf = new WeakFormRayleighBenard(Pr);
+  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, time_step);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space));
+  DiscreteProblem dp(wf, spaces);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -129,24 +133,22 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-                   coeff_vec, matrix_solver, 
-                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+  OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
+                               Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm, t_proj_norm));
 
   // Time-stepping loop:
   char title[100];
-  int num_time_steps = T_FINAL / TAU;
+  int num_time_steps = T_FINAL / time_step;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    current_time += TAU;
+    current_time += time_step;
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
     info("Updating time-dependent essential BC.");
-    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
+    Space::update_essential_bc_values(spaces, current_time);
 
     // Perform Newton's iteration.
     info("Solving nonlinear problem:");
@@ -155,8 +157,7 @@ int main(int argc, char* argv[])
         NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solutions.
-    Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                                  Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+    Solution::vector_to_solutions(coeff_vec, spaces, slns);
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);
     vview.set_title(title);
