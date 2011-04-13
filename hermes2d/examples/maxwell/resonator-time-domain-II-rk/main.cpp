@@ -20,7 +20,7 @@
 //      \frac{\partial E}{\partial t} = F,
 //      \frac{\partial F}{\partial t} = - SPEED_OF_LIGHT**2 * curl curl E.
 //
-// Domain: Rectangular domain (-a, a) x (-b, b)... See mesh file domain.mesh.
+// Domain: Square (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
 //
 // BC:  E \times \nu = 0 on the boundary (perfect conductor),
 //      F \times \nu = 0 on the boundary (E \times \nu = 0 => \partial E / \partial t \times \nu = 0).
@@ -82,11 +82,10 @@ int main(int argc, char* argv[])
   // Initialize solutions.
   CustomInitialConditionWave E_sln(&mesh);
   Solution F_sln(&mesh, 0.0, 0.0);
-  Hermes::vector<Solution*> slns_time_prev(&E_sln, &F_sln);
-  Hermes::vector<Solution*> slns_time_new(&E_sln, &F_sln);
+  Hermes::vector<Solution*> slns(&E_sln, &F_sln);
 
   // Initialize the weak formulation.
-  CustomWeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
+  CustomWeakFormWave wf(C_SQUARED);
   
   // Initialize boundary conditions
   DefaultEssentialBCConst bc_essential(BDY, 0.0);
@@ -95,11 +94,11 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   HcurlSpace E_space(&mesh, &bcs, P_INIT);
   HcurlSpace F_space(&mesh, &bcs, P_INIT);
-
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &F_space)));
+  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&E_space, &F_space);
+  info("ndof = %d.", Space::get_num_dofs(spaces));
 
   // Initialize the FE problem.
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space));
+  DiscreteProblem dp(&wf, spaces);
 
   // Initialize views.
   ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
@@ -111,15 +110,15 @@ int main(int argc, char* argv[])
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
   // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+  double current_time = 0; int ts = 1;
   do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g s, time_step = %g s, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    bool Jacobian_changed = true;
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, Jacobian_changed, verbose))
+    bool jacobian_changed = true;
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns, slns, jacobian_changed, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 
     // Visualize the solutions.
@@ -134,8 +133,6 @@ int main(int argc, char* argv[])
     // Update time.
     current_time += time_step;
   
-    //View::wait(HERMES_WAIT_KEYPRESS);
-
   } while (current_time < T_FINAL);
 
   // Wait for the view to be closed.
