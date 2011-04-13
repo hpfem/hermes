@@ -19,7 +19,7 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh and setup reference space.
       // Global polynomial order increase;
-      int order_increase = 0;
+      int order_increase = 1;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
       
