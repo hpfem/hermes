@@ -19,7 +19,7 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
@@ -75,11 +75,11 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Equation parameters.
-const double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
-const double RHO_EXT = 1.0;                             // Inlet density (dimensionless).   
-const double V1_EXT = 1.25;                             // Inlet x-velocity (dimensionless).
-const double V2_EXT = 0.0;                              // Inlet y-velocity (dimensionless).
-const double KAPPA = 1.4;                               // Kappa.
+const double P_EXT = 2.5;                         // Exterior pressure (dimensionless).
+const double RHO_EXT = 1.0;                       // Inlet density (dimensionless).   
+const double V1_EXT = 1.25;                       // Inlet x-velocity (dimensionless).
+const double V2_EXT = 0.0;                        // Inlet y-velocity (dimensionless).
+const double KAPPA = 1.4;                         // Kappa.
 
 // Boundary markers.
 const std::string BDY_INLET = "1";
@@ -197,7 +197,14 @@ int main(int argc, char* argv[])
       // Project the previous time level solution onto the new fine mesh.
       info("Projecting the previous time level solution onto the new fine mesh.");
       OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), 
-        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver, Hermes::vector<ProjNormType>(), iteration > 1); 
+        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), matrix_solver);
+
+      if(as > 1) {
+        delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
+        delete rsln_rho_v_y.get_mesh();
+        delete rsln_e.get_mesh();
+      }
 
       // Assemble the reference problem.
       info("Solving on reference mesh.");
@@ -310,13 +317,13 @@ int main(int argc, char* argv[])
     while (done == false);
 
     // Copy the solutions into the previous time level ones.
+
     prev_rho.copy(&rsln_rho);
     prev_rho_v_x.copy(&rsln_rho_v_x);
     prev_rho_v_y.copy(&rsln_rho_v_y);
     prev_e.copy(&rsln_e);
-
-    delete rsln_rho.get_mesh(); 
-    delete rsln_rho_v_x.get_mesh(); 
+    delete rsln_rho.get_mesh();
+    delete rsln_rho_v_x.get_mesh();
     delete rsln_rho_v_y.get_mesh();
     delete rsln_e.get_mesh();
 

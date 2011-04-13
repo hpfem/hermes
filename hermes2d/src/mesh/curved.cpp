@@ -626,6 +626,7 @@ void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, doubl
     delete [] rhside[i];
     delete [] old[i];
   }
+  delete [] fn;
 }
 
 
