@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
       dp.assemble(matrix, rhs);
 
       // Solve the linear system of the reference problem. If successful, obtain the solutions.
-      scalar* solution_vector;
+      scalar* solution_vector = NULL;
       if(solver->solve()) {
         solution_vector = solver->get_solution();
         Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 

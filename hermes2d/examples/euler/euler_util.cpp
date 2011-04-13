@@ -77,7 +77,7 @@ DiscontinuityDetector::~DiscontinuityDetector()
 double DiscontinuityDetector::calculate_h(Element* e, int polynomial_order)
 {
   double h = std::sqrt(std::pow(e->vn[(0 + 1) % e->get_num_surf()]->x - e->vn[0]->x, 2) + std::pow(e->vn[(0 + 1) % e->get_num_surf()]->y - e->vn[0]->y, 2));
-  for(unsigned int edge_i = 0; edge_i < e->get_num_surf(); edge_i++) {
+  for(int edge_i = 0; edge_i < e->get_num_surf(); edge_i++) {
     double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->y - e->vn[edge_i]->y, 2));
     if(edge_length < h)
       h = edge_length;
@@ -148,6 +148,8 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
 
   delete geom;
   delete [] jwt;
+  density_vel_x->free_fn();
+  density_vel_y->free_fn();
   delete density_vel_x;
   delete density_vel_y;
 
@@ -241,6 +243,15 @@ void DiscontinuityDetector::calculate_jumps(Element* e, int edge_i, double resul
     
     delete geom;
     delete [] jwt;
+    density->free_fn();
+    density_vel_x->free_fn();
+    density_vel_y->free_fn();
+    energy->free_fn();
+    density_neighbor->free_fn();
+    density_vel_x_neighbor->free_fn();
+    density_vel_y_neighbor->free_fn();
+    energy_neighbor->free_fn();
+    
     delete density;
     delete density_vel_x;
     delete density_vel_y;
@@ -301,6 +312,12 @@ void DiscontinuityDetector::calculate_norms(Element* e, int edge_i, double resul
 
   delete geom;
   delete [] jwt;
+  
+  density->free_fn();
+  density_vel_x->free_fn();
+  density_vel_y->free_fn();
+  energy->free_fn();
+    
   delete density;
   delete density_vel_x;
   delete density_vel_y;
