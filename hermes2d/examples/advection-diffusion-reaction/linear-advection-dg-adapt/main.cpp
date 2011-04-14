@@ -11,9 +11,9 @@
 //
 //  PDE: \nabla \cdot (\Beta u) = 0, where \Beta = (-x_2, x_1) / |x| represents a circular counterclockwise flow field.
 //
-//  Domain: Square (0, 1)x(0, 1).
+//  Domain: Square (0, 1) x (0, 1).
 //
-//  BC:		Dirichlet,  u = g where \Beta(x) \cdot n(x) < 0, where g = 1 on [0,0.5] x {0}, g = anywhere else.
+//  BC:		Dirichlet, u = 1 where \Beta(x) \cdot n(x) < 0, that is on [0,0.5] x {0}, and g = 0 anywhere else.
 //				
 //  The following parameters can be changed:
 
