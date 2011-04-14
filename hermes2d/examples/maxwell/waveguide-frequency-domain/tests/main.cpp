@@ -121,10 +121,6 @@ int main(int argc, char* argv[])
   // Initialize refinements selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Initialize views.
-  //VectorView eview("Electric field", new WinGeom(0, 0, 580, 400));
-  //OrderView  oview("Polynomial orders", new WinGeom(590, 0, 550, 400));
-  
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
   
@@ -164,18 +160,6 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
-
-    // Time measurement.
-    cpu_time.tick();
-   
-    // Show real part of the solution.
-    //AbsFilter abs(&sln);
-    //eview.set_min_max_range(0, 4e3);
-    //eview.show(&abs);
-    //oview.show(&space);
-
-    // Skip visualization time.
-    cpu_time.tick(HERMES_SKIP);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
