@@ -185,18 +185,19 @@ int main(int argc, char **args)
 
     // Increase the counter of performed adaptivity steps.
     as++;
-  } while (!done);
+  } while (as < 2);
 
-  info("%lf", err_exact_rel);
-  if(err_exact_rel > 3.00)
-    success_test = 0;
+  int ndof = Space::get_num_dofs(&space);
+  int ndof_allowed = 230;
 
-  if (success_test) {
-    info("Success!");
+  printf("ndof allowed = %d\n", ndof_allowed);
+  printf("ndof actual = %d\n", ndof);
+  if (ndof < ndof_allowed) {      // ndofs was 223 at the time this test was created
+    printf("Success!\n");
     return ERR_SUCCESS;
   }
   else {
-    info("Failure!");
+    printf("Failure!\n");
     return ERR_FAILURE;
   }
 }
