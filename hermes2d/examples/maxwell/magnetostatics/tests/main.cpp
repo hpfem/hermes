@@ -148,17 +148,17 @@ int main(int argc, char* argv[])
   double coord_x[4] = {0.03, 0.06, 0.06, 0.03};
   double coord_y[4] = {0, 0, 0.05, 0.05};
 
-  info("Coordinate (1, 0) value = %lf", sln.get_pt_value(coord_x[0], coord_y[0]));
-  info("Coordinate (3, 0) value = %lf", sln.get_pt_value(coord_x[1], coord_y[1]));
-  info("Coordinate (5, 0) value = %lf", sln.get_pt_value(coord_x[2], coord_y[2]));
-  info("Coordinate (7, 0) value = %lf", sln.get_pt_value(coord_x[3], coord_y[3]));
+  info("Coordinate (0.03,    0) value = %lf", sln.get_pt_value(coord_x[0], coord_y[0]));
+  info("Coordinate (0.06,    0) value = %lf", sln.get_pt_value(coord_x[1], coord_y[1]));
+  info("Coordinate (0.06, 0.05) value = %lf", sln.get_pt_value(coord_x[2], coord_y[2]));
+  info("Coordinate (0.03, 0.05) value = %lf", sln.get_pt_value(coord_x[3], coord_y[3]));
 
   double t_value[4] = {0.031507, 0.012295, 0.026515, 0.153505};
   bool success = true;
 
   for (int i = 0; i < 4; i++)
   {
-    if (abs(t_value[i] - sln.get_pt_value(coord_x[i], coord_y[i])) > 1E-6) success = false;
+    if (fabs(t_value[i] - sln.get_pt_value(coord_x[i], coord_y[i])) > 1E-6) success = false;
   }
 
   if (success) {  // should pass with NEWTON_MAX_ITER = 9 and fail with NEWTON_MAX_ITER = 8

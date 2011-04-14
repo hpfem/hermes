@@ -4,9 +4,9 @@
 
 using namespace RefinementSelectors;
 
-/** \addtogroup t_example_waveguide Examples/Waveguide
+/** \addtogroup t_example_microwave-oven Examples/Maxwell/Microwave-oven
  *  \{
- *  \brief This test makes sure that the example "waveguide" works correctly.
+ *  \brief This test makes sure that the example "maxwell/microwave-oven" works correctly.
  *
  *  \section s_params Parameters
  *   - P_INIT=1
