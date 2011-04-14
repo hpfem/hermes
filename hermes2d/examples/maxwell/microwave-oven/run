@@ -1,4 +1,4 @@
 rm *~ 
-./waveguide
+./microwave-oven
 python plot_graph.py &
 
