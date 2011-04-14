@@ -25,8 +25,6 @@
 //
 // The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements. 
-
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
                                                   // divergence-free, more accurate than using a continuous
@@ -46,13 +44,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double Pr = 1000.0;                         // Prandtl number.
-const double Ra = 1000.0;                         // Rayleigh number.
+const double Pr = 7.0;                            // Prandtl number (water around 20 degrees Celsius).
+const double Ra = 10.0;                           // Rayleigh number.
 const double TEMP_INIT = 20;
-const double TEMP_BOTTOM = 21;
-
-// Current time (used in weak forms).
-double current_time = 0;
+const double TEMP_BOTTOM = 25;
 
 // Weak forms.
 #include "definitions.cpp"
@@ -67,7 +62,12 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i=0; i < 3; i++) mesh.refine_all_elements(2);
+  for (int i=0; i < 3; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary("Bottom", 2);
+  mesh.refine_towards_boundary("Right", 2);
+  mesh.refine_towards_boundary("Top", 2);
+  mesh.refine_towards_boundary("Left", 2);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst zero_vel_bc(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
@@ -123,12 +123,13 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
-  VectorView vview("velocity [m/s]", new WinGeom(0, 0, 600, 500));
-  ScalarView pview("pressure [Pa]", new WinGeom(610, 0, 600, 500));
+  VectorView vview("velocity", new WinGeom(0, 0, 1000, 200));
+  ScalarView tview("temperature", new WinGeom(0, 255, 1000, 200));
+  ScalarView pview("pressure", new WinGeom(0, 485, 1000, 200));
   //vview.set_min_max_range(0, 1.6);
   vview.fix_scale_width(80);
-  //pview.set_min_max_range(-0.9, 1.0);
   pview.fix_scale_width(80);
+  tview.fix_scale_width(80);
   pview.show_mesh(true);
 
   // Project the initial condition on the FE space to obtain initial
@@ -140,15 +141,11 @@ int main(int argc, char* argv[])
 
   // Time-stepping loop:
   char title[100];
+  double current_time = 0;
   int num_time_steps = T_FINAL / time_step;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    current_time += time_step;
     info("---- Time step %d, time = %g:", ts, current_time);
-
-    // Update time-dependent essential BCs.
-    info("Updating time-dependent essential BC.");
-    Space::update_essential_bc_values(spaces, current_time);
 
     // Perform Newton's iteration.
     info("Solving nonlinear problem:");
@@ -165,6 +162,10 @@ int main(int argc, char* argv[])
     sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
+    tview.show(&t_prev_time);
+
+    // Update current time.
+    current_time += time_step;
   }
 
   // Clean up.
