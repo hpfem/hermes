@@ -24,6 +24,15 @@ void NumericalFlux::Q_inv(double result[4], double state_vector[4], double nx, d
   result[3] = state_vector[3];
 }
 
+void NumericalFlux::f_1(double result[4], double state[4])
+{
+  result[0] = state[1];
+  result[1] = state[1] * state[1] / state[0] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa);
+  result[2] = state[2] * state[1] / state[0];
+  result[3] = (state[1] / state[0]) * (state[3] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa));
+}
+
+
 VijayasundaramNumericalFlux::VijayasundaramNumericalFlux() : NumericalFlux(0)
 {
 }
@@ -48,8 +57,18 @@ void StegerWarmingNumericalFlux::numerical_flux(double result[4], double w_L[4],
         double nx, double ny)
 {
   double result_temp[4];
-  P_plus(result_temp, w_L, w_L, nx, ny);
-  P_minus(result, w_R, w_R, nx, ny);
+  double w_L_temp[4];
+  w_L_temp[0] = w_L[0];
+  w_L_temp[1] = w_L[1];
+  w_L_temp[2] = w_L[2];
+  w_L_temp[3] = w_L[3];
+  double w_R_temp[4];
+  w_R_temp[0] = w_R[0];
+  w_R_temp[1] = w_R[1];
+  w_R_temp[2] = w_R[2];
+  w_R_temp[3] = w_R[3];
+  P_plus(result_temp, w_L, w_L_temp, nx, ny);
+  P_minus(result, w_R, w_R_temp, nx, ny);
   for(unsigned int i = 0; i < 4; i++)
     result[i] += result_temp[i];
 }
@@ -100,19 +119,25 @@ void StegerWarmingNumericalFlux::P_plus(double result[4], double w[4], double pa
   }
 
   // The matrix T * Lambda * T^{-1}
-  double middle_matrix[4][4];
+  double diag_inv[4][4];
+  double A_1[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      diag_inv[i][j] = result[i] * T_inv[i][j];
   for(unsigned int i = 0; i < 4; i++)
     for(unsigned int j = 0; j < 4; j++) {
-      middle_matrix[i][j] = 0;
+      A_1[i][j] = 0;
       for(unsigned int k = 0; k < 4; k++)
-        middle_matrix[i][j] += T[i][k] * result[k] * T_inv[k][j];
+        A_1[i][j] += T[i][k] * diag_inv[k][j];
     }
 
   // Finale.
   Q(param, param, nx, ny);
-  for(unsigned int i = 0; i < 4; i++)
+  for(unsigned int i = 0; i < 4; i++) {
+    result[i] = 0;
     for(unsigned int j = 0; j < 4; j++)
-      result[i] = middle_matrix[i][j] * param[j];
+      result[i] +=A_1[i][j] * param[j];
+  }
   Q_inv(result, result, nx, ny);
 }
 
@@ -153,24 +178,43 @@ void StegerWarmingNumericalFlux::P_minus(double result[4], double w[4], double p
     T_inv_4(T_inv, nx, ny);
   }
 
+
   // The matrix T * Lambda * T^{-1}
-  double middle_matrix[4][4];
+  double diag_inv[4][4];
+  double A_1[4][4];
+  for(unsigned int i = 0; i < 4; i++)
+    for(unsigned int j = 0; j < 4; j++)
+      diag_inv[i][j] = result[i] * T_inv[i][j];
   for(unsigned int i = 0; i < 4; i++)
     for(unsigned int j = 0; j < 4; j++) {
-      middle_matrix[i][j] = 0;
+      A_1[i][j] = 0;
       for(unsigned int k = 0; k < 4; k++)
-        middle_matrix[i][j] += T[i][k] * result[k] * T_inv[k][j];
+        A_1[i][j] += T[i][k] * diag_inv[k][j];
     }
 
   // Finale.
   Q(param, param, nx, ny);
-  for(unsigned int i = 0; i < 4; i++)
+  for(unsigned int i = 0; i < 4; i++) {
+    result[i] = 0;
     for(unsigned int j = 0; j < 4; j++)
-      result[i] = middle_matrix[i][j] * param[j];
+      result[i] +=A_1[i][j] * param[j];
+  }
   Q_inv(result, result, nx, ny);
 }
 
 void StegerWarmingNumericalFlux::Lambda_plus(double result[4], double nx, double ny)
+{
+  a = QuantityCalculator::calc_sound_speed(q[0], q[1], q[2], q[3], kappa);
+  u = q[1] / q[0];
+  v = q[2] / q[0];
+  V = u*u + v*v;
+  result[0] = u - a < 0 ? 0 : u - a;
+  result[1] = u < 0 ? 0 : u;
+  result[2] = u < 0 ? 0 : u;
+  result[3] = u + a < 0 ? 0 : u + a;
+}
+
+void StegerWarmingNumericalFlux::Lambda_minus(double result[4], double nx, double ny)
 {
   a = QuantityCalculator::calc_sound_speed(q[0], q[1], q[2], q[3], kappa);
   u = q[1] / q[0];
@@ -182,75 +226,203 @@ void StegerWarmingNumericalFlux::Lambda_plus(double result[4], double nx, double
   result[3] = u + a < 0 ? u + a : 0;
 }
 
-void StegerWarmingNumericalFlux::Lambda_minus(double result[4], double nx, double ny)
-{
-  a = QuantityCalculator::calc_sound_speed(q[0], q[1], q[2], q[3], kappa);
-  u = q[1] / q[0];
-  v = q[2] / q[0];
-  V = u*u + v*v;
-  result[0] = u - a > 0 ? u - a : 0;
-  result[1] = u > 0 ? u : 0;
-  result[2] = u > 0 ? u : 0;
-  result[3] = u + a > 0 ? u + a : 0;
-}
-
 void StegerWarmingNumericalFlux::T_1(double result[4][4], double nx, double ny)
 {
-  result[0][0] = 1;
+  result[0][0] = 1.0;
   result[1][0] = u - a;
   result[2][0] = v;
-  result[3][0] = (V / 2) + (a*a / (kappa - 1)) - (u * a);
+  result[3][0] = (V / 2.0) + (a*a / (kappa - 1.0)) - (u * a);
 }
 void StegerWarmingNumericalFlux::T_2(double result[4][4], double nx, double ny)
 {
-  result[0][1] = 1;
+  result[0][1] = 1.0;
   result[1][1] = u;
   result[2][1] = v;
-  result[3][1] = V / 2;
+  result[3][1] = V / 2.0;
 }
 void StegerWarmingNumericalFlux::T_3(double result[4][4], double nx, double ny)
 {
-  result[0][2] = 1;
+  result[0][2] = 1.0;
   result[1][2] = u;
   result[2][2] = v - a;
-  result[3][2] = (V / 2)  - v * a;
+  result[3][2] = (V / 2.0)  - v * a;
 }
 void StegerWarmingNumericalFlux::T_4(double result[4][4], double nx, double ny)
 {
-  result[0][3] = 1;
+  result[0][3] = 1.0;
   result[1][3] = u + a;
   result[2][3] = v;
-  result[3][3] = (V / 2) + (a * a / (kappa - 1)) + (u * a);
+  result[3][3] = (V / 2.0) + (a * a / (kappa - 1.0)) + (u * a);
 }
 
 void StegerWarmingNumericalFlux::T_inv_1(double result[4][4], double nx, double ny)
 {
-  result[0][0] = (1 / (a * a)) * (0.5 * (((kappa - 1) * V / 2) + u * a));
-  result[0][1] = (1 / (a * a)) * (- (a + u * (kappa - 1)) / 2);
-  result[0][2] = (1 / (a * a)) * (- (v * (kappa - 1)) / 2);
-  result[0][3] = (1 / (a * a)) * (kappa - 1) / 2;
+  result[0][0] = (1.0 / (a * a)) * (0.5 * (((kappa - 1) * V / 2.0) + u * a));
+  result[0][1] = (1.0 / (a * a)) * (- (a + u * (kappa - 1.0)) / 2.0);
+  result[0][2] = (1.0 / (a * a)) * (- (v * (kappa - 1.0)) / 2.0);
+  result[0][3] = (1.0 / (a * a)) * (kappa - 1.0) / 2.0;
 }
 void StegerWarmingNumericalFlux::T_inv_2(double result[4][4], double nx, double ny)
 {
-  result[1][0] = (1 / (a * a)) * (a * a - v * a - (kappa - 1) * V);
-  result[1][1] = (1 / (a * a)) * u * (kappa - 1);
-  result[1][2] = (1 / (a * a)) * (a + v * (kappa - 1));
-  result[1][3] = (1 / (a * a)) * (1 - kappa);
+  result[1][0] = (1.0 / (a * a)) * (a * a - v * a - (kappa - 1.0) * (V / 2.0));
+  result[1][1] = (1.0 / (a * a)) * u * (kappa - 1.0);
+  result[1][2] = (1.0 / (a * a)) * (a + v * (kappa - 1.0));
+  result[1][3] = (1.0 / (a * a)) * (1.0 - kappa);
 }
 void StegerWarmingNumericalFlux::T_inv_3(double result[4][4], double nx, double ny)
 {
-  result[2][0] = (1 / (a * a)) * v * a;
-  result[2][1] = (1 / (a * a)) * 0;
-  result[2][2] = (1 / (a * a)) * (-a);
-  result[2][3] = (1 / (a * a)) * 0;
+  result[2][0] = (1.0 / (a * a)) * v * a;
+  result[2][1] = (1.0 / (a * a)) * 0.0;
+  result[2][2] = (1.0 / (a * a)) * (-a);
+  result[2][3] = (1.0 / (a * a)) * 0.0;
 }
 void StegerWarmingNumericalFlux::T_inv_4(double result[4][4], double nx, double ny)
 {
-  result[3][0] = (1 / (a * a)) * (0.5 * (((kappa - 1) * V / 2) - u * a));
-  result[3][1] = (1 / (a * a)) * (a - u * (kappa - 1)) / 2;
-  result[3][2] = (1 / (a * a)) * (- (v * (kappa - 1)) / 2);
-  result[3][3] = (1 / (a * a)) * (kappa - 1) / 2;
+  result[3][0] = (1.0 / (a * a)) * (0.5 * (((kappa - 1.0) * V / 2.0) - u * a));
+  result[3][1] = (1.0 / (a * a)) * (a - u * (kappa - 1.0)) / 2.0;
+  result[3][2] = (1.0 / (a * a)) * (- (v * (kappa - 1.0)) / 2.0);
+  result[3][3] = (1.0 / (a * a)) * (kappa - 1.0) / 2.0;
 }
+
+void StegerWarmingNumericalFlux::numerical_flux_solid_wall(double result[4], double w_L[4], double nx, double ny)
+{
+  Q(q_L, w_L, nx, ny);
+  a_B = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa) + ((kappa - 1) * q_L[1] / (2 * q_L[0]));
+  double rho_B = std::pow(a_B * a_B * q_L[0] / (kappa * QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa)), (1 / (kappa - 1))) * q_L[0];
+  q_R[0] = 0;
+  q_R[1] = rho_B * a_B * a_B / kappa;
+  q_R[2] = 0;
+  q_R[3] = 0;
+  Q_inv(result, q_R, nx, ny);
+}
+  
+double StegerWarmingNumericalFlux::numerical_flux_solid_wall_i(int component, double w_L[4], double nx, double ny)
+{
+  double result[4];
+  numerical_flux_solid_wall(result, w_L, nx, ny);
+  return result[component];
+}
+
+void StegerWarmingNumericalFlux::numerical_flux_inlet(double result[4], double w_L[4], double w_B[4],
+        double nx, double ny)
+{
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+  Q(q_B, w_B, nx, ny);
+
+  // Speeds of sound.
+  a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
+  a_B = QuantityCalculator::calc_sound_speed(q_B[0], q_B[1], q_B[2], q_B[3], kappa);
+
+  if(q_L[1] / q_L[0] > a_L) {// Supersonic inlet - everything is prescribed.
+    f_1(result, q_B);
+    Q_inv(result, result, nx, ny);
+    return;
+  }
+  else {// Subsonic inlet - only rho_b, v_x, v_y are prescribed, pressure is calculated as follows. The pressure is prescribed always so that one can know if the
+    // inlet is subsonic or supersonic.
+    double a_1 = a_L + ((kappa - 1) / 2) * (q_L[1] / q_L[0] - q_B[1] / q_B[0]);
+    q_1[0] = std::pow(a_1 * a_1 * q_L[0] / (kappa * QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa)), 1 / (kappa - 1)) * q_L[0];
+    q_1[1] = q_1[0] * q_B[1] / q_B[0];
+    q_1[2] = q_1[0] * q_L[2] / q_L[0];
+    q_1[3] = QuantityCalculator::calc_energy(q_1[0], q_1[1], q_1[2], a_1 * a_1 * q_1[0] / kappa, kappa);
+    if(q_B[1] / q_B[0] < 0)
+      if(q_B[1] / q_B[0] < a_1) {
+        f_1(result, q_B);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+      else {
+        double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+        q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+        q_L_star[1] = a_l_star;
+        q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+        q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+        double first_f_1[4];
+        double second_f_1[4];
+        double third_f_1[4];
+        f_1(first_f_1, q_B);
+        f_1(second_f_1, q_L_star);
+        f_1(third_f_1, q_1);
+        for(unsigned int i = 0; i < 4; i++)
+          result[i] = first_f_1[i] + second_f_1[i] - third_f_1[i];
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+    else
+      if(q_B[1] / q_B[0] < a_1) {
+        f_1(result, q_1);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+      else {
+        double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+        q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+        q_L_star[1] = a_l_star;
+        q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+        q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+        f_1(result, q_L_star);
+        Q_inv(result, result, nx, ny);
+        return;
+      }
+  }
+}
+  
+double StegerWarmingNumericalFlux::numerical_flux_inlet_i(int component, double w_L[4], double w_B[4],
+        double nx, double ny)
+{
+  double result[4];
+  numerical_flux_inlet(result, w_L, w_B, nx, ny);
+  return result[component];
+}
+
+void StegerWarmingNumericalFlux::numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny)
+{
+  // At the beginning, rotate the states into the local coordinate system and store the left and right state
+  // so we do not have to pass it around.
+  Q(q_L, w_L, nx, ny);
+
+  double a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
+
+  if(q_L[1] / q_L[0] > a_L) {// Supersonic inlet - everything is prescribed.
+    f_1(result, q_L);
+    Q_inv(result, result, nx, ny);
+    return;
+  }
+  else {
+    this->q_B[0] = q_L[0] * std::pow(pressure / QuantityCalculator::calc_pressure(this->q_L[0], this->q_L[1], this->q_L[2], this->q_L[3], kappa), 1 / kappa);
+    this->q_B[1] = this->q_B[0] * (q_L[1] / q_L[0] + (2 / (kappa - 1)) * (a_L - std::sqrt(kappa * pressure / q_B[0])));
+    this->q_B[2] = this->q_B[0] * this->q_L[2] / this->q_L[0];
+    this->q_B[3] = QuantityCalculator::calc_energy(this->q_B[0], this->q_B[1], this->q_B[2], pressure, kappa);
+    if(q_B[1] / q_B[0] < QuantityCalculator::calc_sound_speed(this->q_B[0], this->q_B[1], this->q_B[2], this->q_B[3], kappa)) {
+      f_1(result, q_B);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+    else {
+      double a_l_star = (((kappa - 1) / (kappa + 1)) * q_L[1] / q_L[0]) + 2 * a_L / (kappa + 1);
+      q_L_star[0] = std::pow(a_l_star / a_L, 2 / (kappa - 1)) * q_L[0];
+      q_L_star[1] = a_l_star;
+      q_L_star[2] = q_L_star[0] * q_L[2] / q_L[0];
+      q_L_star[3] = QuantityCalculator::calc_energy(q_L_star[0], q_L_star[1], q_L_star[2], q_L_star[0] * a_l_star * a_l_star / kappa, kappa);
+      f_1(result, q_L_star);
+      Q_inv(result, result, nx, ny);
+      return;
+    }
+  }
+}
+  
+double StegerWarmingNumericalFlux::numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny)
+{
+  double result[4];
+  numerical_flux_outlet(result, w_L, pressure, nx, ny);
+  return result[component];
+}
+
+
+
+
 
 OsherSolomonNumericalFlux::OsherSolomonNumericalFlux(double kappa) : NumericalFlux(kappa)
 {
@@ -649,7 +821,7 @@ void OsherSolomonNumericalFlux::calculate_q_L_star()
   this->q_L_star[0] = std::pow(a_L_star / a_L, 2 / (kappa -1 )) * q_L[0];
   this->q_L_star[1] = this->q_L_star[0] * a_L_star;
   this->q_L_star[2] = this->q_1[0] * this->q_L[2] / this->q_L[0] ;
-  this->q_L_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_L_star * a_L_star * q_L_star[0] / kappa, kappa);
+  this->q_L_star[3] = QuantityCalculator::calc_energy(this->q_L_star[0], this->q_L_star[1], this->q_L_star[2], a_L_star * a_L_star * q_L_star[0] / kappa, kappa);
 }
 
 void OsherSolomonNumericalFlux::calculate_q_3()
@@ -658,7 +830,7 @@ void OsherSolomonNumericalFlux::calculate_q_3()
   this->q_3[0] = q_1[0] / (alpha * alpha);
   this->q_3[1] = this->q_3[0] * this->q_1[1] / this->q_1[0] ;
   this->q_3[2] = this->q_3[0] * this->q_R[2] / this->q_R[0] ;
-  this->q_3[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_3 * a_3 * q_3[0] / kappa, kappa);
+  this->q_3[3] = QuantityCalculator::calc_energy(this->q_3[0], this->q_3[1], this->q_3[2], a_3 * a_3 * q_3[0] / kappa, kappa);
 }
 
 void OsherSolomonNumericalFlux::calculate_q_R_star()
@@ -667,15 +839,7 @@ void OsherSolomonNumericalFlux::calculate_q_R_star()
   this->q_R_star[0] = std::pow(a_R_star / a_R, 2 / (kappa -1 )) * q_R[0];
   this->q_R_star[1] = this->q_R_star[0] * -a_R_star;
   this->q_R_star[2] = this->q_1[0] * this->q_R[2] / this->q_R[0] ;
-  this->q_R_star[3] = QuantityCalculator::calc_energy(this->q_1[0], this->q_1[1], this->q_1[2], a_R_star * a_R_star * q_R_star[0] / kappa, kappa);
-}
-
-void OsherSolomonNumericalFlux::f_1(double result[4], double state[4])
-{
-  result[0] = state[1];
-  result[1] = state[1] * state[1] / state[0] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa);
-  result[2] = state[2] * state[1] / state[0];
-  result[3] = (state[1] / state[0]) * (state[3] + QuantityCalculator::calc_pressure(state[0], state[1], state[2], state[3], kappa));
+  this->q_R_star[3] = QuantityCalculator::calc_energy(this->q_R_star[0], this->q_R_star[1], this->q_R_star[2], a_R_star * a_R_star * q_R_star[0] / kappa, kappa);
 }
 
 double OsherSolomonNumericalFlux::numerical_flux_i(int component, double w_L[4], double w_R[4],

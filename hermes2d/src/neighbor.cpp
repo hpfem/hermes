@@ -666,6 +666,14 @@ int NeighborSearch::neighbor_edge_orientation(int bounding_vert1, int bounding_v
   return 0;
 }
 
+NeighborSearch::ExtendedShapeset::ExtendedShapeset(const NeighborSearch::ExtendedShapeset & other) {
+  this->central_al = new AsmList(*other.central_al);
+  this->cnt = other.cnt;
+  this->dof = other.dof;
+  this->neighbor_al = new AsmList(*other.neighbor_al);
+  this->combine_assembly_lists();
+}
+
 NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space *space, AsmList* al)
 {
   _F_
@@ -675,6 +683,17 @@ NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist(Space 
     supported_shapes->update(this, space);
 
   return supported_shapes;
+}
+
+NeighborSearch::ExtendedShapeset* NeighborSearch::create_extended_asmlist_multicomponent(Space *space, AsmList* al)
+{
+  _F_
+  if (supported_shapes != NULL)
+    delete supported_shapes;
+  
+  supported_shapes = new ExtendedShapeset(this, al, space);
+  
+  return new ExtendedShapeset(*supported_shapes);
 }
 
 void NeighborSearch::set_quad_order(int order)

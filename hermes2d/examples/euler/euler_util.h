@@ -29,6 +29,23 @@ protected:
   double kappa;
 };
 
+class ADEStabilityCalculation
+{
+public:
+  ADEStabilityCalculation(double AdvectionRelativeConstant, double DiffusionRelativeConstant, double epsilon);
+
+  // The method in fact returns half teh length of the shortest edge.
+  double approximate_inscribed_circle_radius(Element * e);
+
+  // If the time step is necessary to decrease / possible to increase, the value time_step will be rewritten.
+  void calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step);
+  
+protected:
+  double AdvectionRelativeConstant;
+  double DiffusionRelativeConstant;
+  double epsilon;
+};
+
 class DiscontinuityDetector
 {
 public:
@@ -72,7 +89,7 @@ public:
    ~FluxLimiter();
 
   /// Do the limiting.
-  void limit_according_to_detector(std::set<int>& discontinuous_elements);
+  void limit_according_to_detector(std::set<int>& discontinuous_elements, Hermes::vector<Space *> coarse_spaces = Hermes::vector<Space *>());
 
 protected:
   /// Members.
@@ -113,6 +130,181 @@ protected:
   virtual void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result);
 
   double kappa, rho_ext, p_ext;
+};
+
+class EulerFluxes
+{
+public:
+  EulerFluxes(double kappa) : kappa(kappa) {}
+
+  template<typename Scalar>
+  Scalar A_1_0_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_0_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 1.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_0_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_0_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_0_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_0_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_0_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 1.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_0_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return 0.0;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy) {
+    return - ((rho_v_x * rho_v_x) / (rho * rho)) + 0.5 * (kappa - 1.0) * 
+            ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+  }
+
+  template<typename Scalar>
+  Scalar A_1_1_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (3. - kappa) * (rho_v_x / rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_1_1_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (1.0 - kappa) * (rho_v_y / rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_1_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return kappa - 1.;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_1_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return - rho_v_x * rho_v_y / (rho * rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_2_1_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return rho_v_y / rho;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_1_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return rho_v_x / rho;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_1_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return 0;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_2_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return - rho_v_x * rho_v_y / (rho * rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_1_2_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return rho_v_y / rho;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_2_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return rho_v_x / rho;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return 0;
+  }
+
+  template<typename Scalar>
+  Scalar A_2_2_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return - ((rho_v_y * rho_v_y) / (rho * rho)) + 0.5 * (kappa - 1.0) 
+            * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) /   (rho * rho));
+  }
+
+  template<typename Scalar>
+  Scalar A_2_2_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (1.0 - kappa) * (rho_v_x / rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_2_2_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (3.0 - kappa) * (rho_v_y / rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_2_2_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return kappa - 1.;
+  }
+
+  template<typename Scalar>
+  Scalar A_1_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (rho_v_x / rho) * (((kappa - 1.0) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (rho * rho)))
+      - (kappa * energy / rho));
+  }
+
+  template<typename Scalar>
+  Scalar A_1_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (kappa * energy / rho) - (kappa - 1.0) * rho_v_x * rho_v_x / (rho * rho)
+      - 0.5 * (kappa - 1.0) * (rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (rho * rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_1_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (1.0 - kappa) * (rho_v_x * rho_v_y) / (rho * rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_1_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return kappa * (rho_v_x / rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_2_3_0(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return - (rho_v_y * energy) / (rho * rho) - (rho_v_y / (rho * rho)) * (kappa - 1.0) 
+            * (energy - ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho))) + (rho_v_y / rho) 
+            * (kappa - 1.0) * ((rho_v_x * rho_v_x + rho_v_y * rho_v_y) / (2 * rho * rho));
+  }
+
+  template<typename Scalar>
+  Scalar A_2_3_1(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (1.0 - kappa) * (rho_v_x * rho_v_y) / (rho * rho);
+  }
+
+  template<typename Scalar>
+  Scalar A_2_3_2(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return (energy / rho) + (1 / rho) * (kappa - 1.0) * ( energy - ((rho_v_x * rho_v_x 
+            + rho_v_y * rho_v_y) / (2 * rho))) + (1.0 - kappa) * ((rho_v_y * rho_v_y) / (rho * rho));
+  }
+
+  template<typename Scalar>
+  Scalar A_2_3_3(Scalar rho, Scalar rho_v_x, Scalar rho_v_y, Scalar energy){
+    return kappa * rho_v_y / rho;
+  }
+  protected:
+    double kappa;
 };
 
 #endif

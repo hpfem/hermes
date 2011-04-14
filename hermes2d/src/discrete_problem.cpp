@@ -358,6 +358,9 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
     }
 
     trav.finish();
+
+    delete [] al;
+    delete [] meshes;
     delete [] blocks;
 
     mat->alloc();
@@ -1920,7 +1923,7 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
           new_coordinate = false;
       if(new_coordinate) {
         coordinates_processed.push_back(mfs->coordinates[coordinate_i].first);
-        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
+        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist_multicomponent(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
       }
 
       new_coordinate = true;
@@ -1929,7 +1932,7 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
           new_coordinate = false;
       if(new_coordinate) {
         coordinates_processed.push_back(mfs->coordinates[coordinate_i].second);
-        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].second]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[mfs->coordinates[coordinate_i].second], al[mfs->coordinates[coordinate_i].second]));
+        ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].second]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist_multicomponent(spaces[mfs->coordinates[coordinate_i].second], al[mfs->coordinates[coordinate_i].second]));
       }
     }
       
@@ -2011,6 +2014,12 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
         }
       }
     }
+
+    for(unsigned int ext_asms_i = 0; ext_asms_i < ext_asmlists.size(); ext_asms_i++) {
+      ext_asmlists[ext_asms_i]->free_central_al();
+      delete ext_asmlists[ext_asms_i];
+    }
+
   }
 }
 

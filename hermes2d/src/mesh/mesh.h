@@ -376,6 +376,7 @@ protected:
     // the internal representation, or the user std::string value.
     std::map<std::string, int>* conversion_table_inverse;
     friend class Space;
+    friend class Mesh;
   };
 
   class ElementMarkersConversion : public MarkersConversion

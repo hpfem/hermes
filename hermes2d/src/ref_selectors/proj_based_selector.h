@@ -59,6 +59,10 @@ namespace RefinementSelectors {
      *  \param[in] weight_aniso An error weight of ANISO-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_ANISO. */
     void set_error_weights(double weight_h = H2DRS_DEFAULT_ERR_WEIGHT_H, double weight_p = H2DRS_DEFAULT_ERR_WEIGHT_P, double weight_aniso = H2DRS_DEFAULT_ERR_WEIGHT_ANISO);
 
+    double get_error_weight_h() { return error_weight_h; };
+    double get_error_weight_p() { return error_weight_p; };
+    double get_error_weight_aniso() { return error_weight_aniso; };
+
   protected: //evaluated shape basis
     /// A transform shaped function expansions.
     /** The contents of the class can be accessed through an array index operator.

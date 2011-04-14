@@ -108,24 +108,24 @@ namespace WeakFormsMaxwell {
                                  * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
             if (gt == HERMES_AXISYM_X) {
               axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->y[i]
-                                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                                   * (u_ext[0]->val[i] * v->dy[i]);
+       		                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+                                   * u_ext[0]->val[i] * v->dy[i];
             }
             else if (gt == HERMES_AXISYM_Y) {
               axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->x[i]
-                                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                                   * (u_ext[0]->val[i] * v->dx[i]);
+ 		                   * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+                                   * u_ext[0]->val[i] * v->dx[i];
             }
           }
           planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i)
                                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           if (gt == HERMES_AXISYM_X) {
             axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i]
-                                 * (u->val[i] * v->dy[i]);
+                                 * u->val[i] * v->dy[i];
           }
           else if (gt == HERMES_AXISYM_Y) {
             axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i]
-                                 * (u->val[i] * v->dx[i]);
+                                 * u->val[i] * v->dx[i];
           }
         }
 

@@ -37,6 +37,8 @@ public:
   /// Rotates the state_vector back from the local coordinate system.
   void Q_inv(double result[4], double state_vector[4], double nx, double ny);
 
+  void f_1(double result[4], double state[4]);
+
   // Poisson adiabatic ant = c_p/c_v = 1 + R/c_v.
   double kappa;
 };
@@ -86,28 +88,38 @@ public:
   void T_inv_3(double result[4][4], double nx, double ny);
   void T_inv_4(double result[4][4], double nx, double ny);
 
-  virtual void numerical_flux_solid_wall(double result[4], double w_L[4], double nx, double ny) {};
+  virtual void numerical_flux_solid_wall(double result[4], double w_L[4], double nx, double ny);
   
-  virtual double numerical_flux_solid_wall_i(int component, double w_L[4], double nx, double ny) {return 0.0;};
+  virtual double numerical_flux_solid_wall_i(int component, double w_L[4], double nx, double ny);
 
   virtual void numerical_flux_inlet(double result[4], double w_L[4], double w_B[4],
-          double nx, double ny) {};
+          double nx, double ny);
   
   virtual double numerical_flux_inlet_i(int component, double w_L[4], double w_B[4],
-          double nx, double ny) {return 0.0;};
+          double nx, double ny);
 
-  virtual void numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny) {};
+  virtual void numerical_flux_outlet(double result[4], double w_L[4], double pressure, double nx, double ny);
   
-  virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny) {return 0.0;};
+  virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny);
 
 protected:
   // States.
   double q[4];
+  double q_1[4];
   double q_L[4];
   double q_R[4];
+  double q_L_star[4];
+  double q_R_star[4];
+  double q_B[4]; // Boundary
 
-  // Speed of sound.
+  // Speeds of sound.
   double a;
+  double a_L;
+  double a_R;
+  double a_L_star;
+  double a_R_star;
+  double a_B; // Boundary.
+
   // x-velocity, y-velocity, magnitude.
   double u, v, V;
 };
@@ -146,7 +158,6 @@ protected:
 
   void calculate_q_R_star();
 
-  void f_1(double result[4], double state[4]);
 
   // States.
   double q_L[4];
