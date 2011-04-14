@@ -1,0 +1,47 @@
+a = 1.0
+
+vertices = [
+  [ 0,  0], #0
+  [ a, 0 ], #1
+  [ 3*a, 2*a ], #2
+  [ 4*a, 2*a ], #3
+  [ 4*a, 3*a ], #4
+  [ 3*a, 3*a ], #5
+  [ 3*a, 4*a ], #6
+  [ 2*a, 4*a ], #7
+  [ 2*a, 3*a ], #8
+  [ 2*a, 2*a ], #9
+  [ a, a ], #10
+  [ 0, a ] #11
+]
+
+elements = [
+  [ 0, 1, 10, 11, 0],
+  [ 1, 2, 9, 10, 0],
+  [ 2, 3, 4, 5, 0],
+  [ 2, 5, 8, 9, 0],
+  [ 5, 6, 7, 8, 0]
+]
+
+boundaries = [
+  [ 0, 1, "Solid Wall" ],
+  [ 1, 2, "Solid Wall" ],
+  [ 2, 3, "Solid Wall" ],
+  [ 3, 4, "Outflow" ],
+  [ 4, 5, "Solid Wall" ],
+  [ 5, 6, "Solid Wall" ],
+  [ 6, 7, "Outflow" ],
+  [ 7, 8, "Solid Wall" ],
+  [ 8, 9, "Solid Wall" ],
+  [ 9, 10, "Solid Wall" ],
+  [ 10, 11, "Solid Wall" ],
+  [ 11, 0, "Inflow" ]
+]
+
+curves = [
+  [ 1, 2, 45 ],  # circular arc with central angle of 45 degrees
+  [ 9, 10, -45 ]   # circular arc with central angle of 45 degrees
+]
+
+
+

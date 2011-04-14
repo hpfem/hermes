@@ -29,6 +29,23 @@ protected:
   double kappa;
 };
 
+class ADEStabilityCalculation
+{
+public:
+  ADEStabilityCalculation(double AdvectionRelativeConstant, double DiffusionRelativeConstant, double epsilon);
+
+  // The method in fact returns half teh length of the shortest edge.
+  double approximate_inscribed_circle_radius(Element * e);
+
+  // If the time step is necessary to decrease / possible to increase, the value time_step will be rewritten.
+  void calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step);
+  
+protected:
+  double AdvectionRelativeConstant;
+  double DiffusionRelativeConstant;
+  double epsilon;
+};
+
 class DiscontinuityDetector
 {
 public:

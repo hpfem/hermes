@@ -37,28 +37,84 @@ void CFLCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, 
 
   // Determine the time step according to the CFL condition.
 
-    double min_condition = 0;
-    Element *e;
-    for_all_active_elements(e, mesh) {
-      AsmList al;
-      constant_rho_space.get_element_assembly_list(e, &al);
-      double rho = sln_vector[al.dof[0]];
-      constant_rho_v_x_space.get_element_assembly_list(e, &al);
-      double v1 = sln_vector[al.dof[0]] / rho;
-      constant_rho_v_y_space.get_element_assembly_list(e, &al);
-      double v2 = sln_vector[al.dof[0]] / rho;
-      constant_energy_space.get_element_assembly_list(e, &al);
-      double energy = sln_vector[al.dof[0]];
+  double min_condition = 0;
+  Element *e;
+  for_all_active_elements(e, mesh) {
+    AsmList al;
+    constant_rho_space.get_element_assembly_list(e, &al);
+    double rho = sln_vector[al.dof[0]];
+    constant_rho_v_x_space.get_element_assembly_list(e, &al);
+    double v1 = sln_vector[al.dof[0]] / rho;
+    constant_rho_v_y_space.get_element_assembly_list(e, &al);
+    double v2 = sln_vector[al.dof[0]] / rho;
+    constant_energy_space.get_element_assembly_list(e, &al);
+    double energy = sln_vector[al.dof[0]];
       
-      double condition = e->get_area() * CFL_number / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, kappa));
+    double condition = e->get_area() * CFL_number / (std::sqrt(v1*v1 + v2*v2) + QuantityCalculator::calc_sound_speed(rho, rho*v1, rho*v2, energy, kappa));
       
-      if(condition < min_condition || min_condition == 0.)
-        min_condition = condition;
-    }
+    if(condition < min_condition || min_condition == 0.)
+      min_condition = condition;
+  }
 
-    time_step = min_condition;
+  time_step = min_condition;
+
+  delete [] sln_vector;
 }
 
+ADEStabilityCalculation::ADEStabilityCalculation(double AdvectionRelativeConstant, double DiffusionRelativeConstant, double epsilon) 
+    : AdvectionRelativeConstant(AdvectionRelativeConstant), DiffusionRelativeConstant(DiffusionRelativeConstant), epsilon(epsilon)
+{
+}
+
+void ADEStabilityCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step)
+{
+  // Create spaces of constant functions over the given mesh.
+  L2Space constant_rho_space(mesh, 0);
+  L2Space constant_rho_v_x_space(mesh, 0);
+  L2Space constant_rho_v_y_space(mesh, 0);
+
+  scalar* sln_vector = new scalar[constant_rho_space.get_num_dofs() * 3];
+
+  OGProjection::project_global(Hermes::vector<Space*>(&constant_rho_space, &constant_rho_v_x_space, &constant_rho_v_y_space), solutions, sln_vector);
+
+  // Determine the time step according to the conditions.
+  double min_condition_advection = 0.;
+  double min_condition_diffusion = 0.;
+  Element *e;
+  for_all_active_elements(e, mesh) {
+    AsmList al;
+    constant_rho_space.get_element_assembly_list(e, &al);
+    double rho = sln_vector[al.dof[0]];
+    constant_rho_v_x_space.get_element_assembly_list(e, &al);
+    double v1 = sln_vector[al.dof[0]] / rho;
+    constant_rho_v_y_space.get_element_assembly_list(e, &al);
+    double v2 = sln_vector[al.dof[0]] / rho;
+      
+    double condition_advection = AdvectionRelativeConstant * approximate_inscribed_circle_radius(e) / std::sqrt(v1*v1 + v2*v2);
+    double condition_diffusion = DiffusionRelativeConstant * e->get_area() / epsilon;
+      
+    if(condition_advection < min_condition_advection || min_condition_advection == 0.)
+      min_condition_advection = condition_advection;
+
+    if(condition_diffusion < min_condition_diffusion || min_condition_diffusion == 0.)
+      min_condition_diffusion = condition_diffusion;
+  }
+
+  time_step = std::min(min_condition_advection, min_condition_diffusion);
+
+  delete [] sln_vector;
+}
+
+double ADEStabilityCalculation::approximate_inscribed_circle_radius(Element * e)
+{
+  double h = std::sqrt(std::pow(e->vn[(0 + 1) % e->get_num_surf()]->x - e->vn[0]->x, 2) + std::pow(e->vn[(0 + 1) % e->get_num_surf()]->y - e->vn[0]->y, 2));
+    for(int edge_i = 0; edge_i < e->get_num_surf(); edge_i++) {
+      double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->y - e->vn[edge_i]->y, 2));
+      if(edge_length < h)
+        h = edge_length;
+    }
+  return h / 2;
+}
 
 DiscontinuityDetector::DiscontinuityDetector(Hermes::vector<Space *> spaces, 
                         Hermes::vector<Solution *> solutions) : spaces(spaces), solutions(solutions)

@@ -11,13 +11,11 @@ using namespace RefinementSelectors;
 //
 // Equations: Compressible Euler equations, perfect gas state equation, advection-diffusion equation.
 //
-// Domains: various.
+// Domains: Various
 //
-// BC: Normal velocity component is zero on solid walls.
-
-//     Subsonic state prescribed on inlet and outlet.
+// BC: Various.
 //
-// IC: Constant subsonic state identical to inlet.
+// IC: Various.
 //
 // The following parameters can be changed:
 
@@ -110,7 +108,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  mloader.load("pipework.mesh", &basemesh);
+  mloader.load("domain.mesh", &basemesh);
 
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;

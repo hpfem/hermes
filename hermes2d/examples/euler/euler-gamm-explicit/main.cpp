@@ -89,8 +89,7 @@ int main(int argc, char* argv[])
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
 
   // If the FE problem is in fact a FV problem.
-  //if(P_INIT == 0)
-    //dp.set_fvm();  
+  //if(P_INIT == 0) dp.set_fvm();  
 
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
