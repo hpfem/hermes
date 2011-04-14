@@ -1,4 +1,14 @@
-// Bessel function of the first kind, order n, defined in bessel.cpp
+#include "weakform/weakform.h"
+#include "integrals/integrals_hcurl.h"
+#include "boundaryconditions/essential_bcs.h"
+#include "weakform_library/hcurl.h"
+
+using namespace WeakFormsHcurl;
+using namespace WeakFormsHcurl::VolumetricMatrixForms;
+using namespace WeakFormsHcurl::SurfaceMatrixForms;
+
+/* Exact solution */
+
 double jv(double n, double x);
 
 static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
@@ -22,10 +32,8 @@ static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
   e1 = -t11*x*t14-2.0/3.0*t18*y*t20*t23;
 }
 
-static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, scalar& e0dy)
+static void exact_sol_der(double x, double y, scalar& e1dx, scalar& e0dy)
 {
-  exact_sol_val(x,y,e0,e1);
-
   double t1 = x*x;
   double t2 = y*y;
   double t3 = t1+t2;
@@ -61,14 +69,80 @@ static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, 
   e0dy = (t11*y+2.0/3.0*t15*y-2.0/3.0*t22*y)*t6*y*t29-t32*t2*t29+t36-t47-4.0/9.0*t48*t41*t53+4.0/3.0*t57*t59*t53*y;
 }
 
-// exact solution
-scalar2 exact(double x, double y, scalar2& dx, scalar2& dy)
+class CustomExactSolution : public ExactSolutionVector
 {
-  static scalar2 ex(0.0, 0.0);
-  exact_sol(x,y, ex[0], ex[1], dx[1], dy[0]);
-  return ex;
-}
+public:
+  CustomExactSolution(Mesh* mesh) : ExactSolutionVector(mesh) {};
+  ~CustomExactSolution() {};
 
+  virtual scalar2 value(double x, double y) const {
+    scalar2 ex(0.0, 0.0);
+    exact_sol_val(x, y,  ex.val[0], ex.val[1]);
+    return ex;
+  };
+
+  virtual void derivatives (double x, double y, scalar2& dx, scalar2& dy) const {
+    scalar e1dx, e0dy;
+    exact_sol_der(x, y, e1dx, e0dy);
+    dx.val[0] = 0;
+    dx.val[1] = e1dx;
+    dy.val[0] = e0dy;
+    dy.val[1] = 0;
+    return;
+  };
+  
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(10);
+  } 
+};
+
+/* Weak forms */
+
+class CustomWeakForm : public WeakForm
+{
+public:
+  CustomWeakForm(double mu_r, double kappa) : WeakForm(1)
+  {
+    cplx ii = cplx(0.0, 1.0);
+    add_matrix_form(new DefaultLinearCurlCurl(0, 0, 1.0/mu_r));
+    add_matrix_form(new DefaultLinearMass(0, 0, -sqr(kappa)));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, -kappa*ii));
+    add_matrix_form_surf(new CustomMatrixFormSurf(0, 0));
+  };
+
+  class CustomMatrixFormSurf : public WeakForm::MatrixFormSurf
+  {
+  public:
+    CustomMatrixFormSurf(int i, int j)
+              : WeakForm::MatrixFormSurf(i, j) {}
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        double r = sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
+        double theta = atan2(e->y[i], e->x[i]);
+        if (theta < 0) theta += 2.0*M_PI;
+        double j13    = jv(-1.0/3.0, r),    j23    = jv(+2.0/3.0, r);
+        double cost   = cos(theta),         sint   = sin(theta);
+        double cos23t = cos(2.0/3.0*theta), sin23t = sin(2.0/3.0*theta);
+
+        double Etau = e->tx[i] * (cos23t*sint*j13 - 2.0/(3.0*r)*j23*(cos23t*sint + sin23t*cost)) +
+                      e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
+
+        result += wt[i] * cplx(cos23t*j23, -Etau) * ((v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
+      }
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const {
+      return Ord(10);
+    }
+  };
+};
+
+/*
 template<typename Real, typename Scalar>
 Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
 {
@@ -106,4 +180,4 @@ scalar linear_form_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *
 // Maximum polynomial order to integrate surface linear form.
 Ord linear_form_surf_ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
   {  return Ord(v->val[0].get_max_order());  }
-
+*/

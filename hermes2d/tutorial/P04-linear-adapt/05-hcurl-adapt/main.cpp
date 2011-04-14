@@ -59,16 +59,17 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double mu_r   = 1.0;
-const double kappa  = 1.0;
-const double lambda = 1.0;
-
-// Bessel functions, exact solution, and weak forms.
-#include "forms.cpp"
+const double MU_R   = 1.0;
+const double KAPPA  = 1.0;
+const double LAMBDA = 1.0;
 
 // Boundary markers.
-const int BDY_1 = 1, BDY_6 = 6;  // perfect conductor
-const int BDY_2 = 2, BDY_3 = 3, BDY_4 = 4, BDY_5 = 5; // impedance
+const std::string BDY_1 = "1", BDY_6 = "6";  // perfect conductor
+const std::string BDY_2 = "2", BDY_3 = "3", BDY_4 = "4", BDY_5 = "5"; // impedance
+
+// Bessel functions, exact solution, and weak forms.
+#include "definitions.cpp"
+
 
 int main(int argc, char* argv[])
 {
@@ -86,6 +87,10 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>(BDY_1, BDY_6), 0);
+  EssentialBCs bcs(&bc_essential);
+
+  /*
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_1, BDY_6));
   bc_types.add_bc_newton(Hermes::vector<int>(BDY_2, BDY_3, BDY_4, BDY_5));
@@ -93,21 +98,28 @@ int main(int argc, char* argv[])
   // Enter Dirichlet boundary values.
   BCValues bc_values;
   bc_values.add_zero(Hermes::vector<int>(BDY_1, BDY_6));
+  */
 
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bc_types, &bc_values, P_INIT);
+  HcurlSpace space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
+  CustomWeakForm wf(MU_R, KAPPA);
+  /*
   wf.add_matrix_form(callback(bilinear_form), HERMES_SYM);
   wf.add_matrix_form_surf(callback(bilinear_form_surf));
   wf.add_vector_form_surf(linear_form_surf, linear_form_surf_ord);
-
+  */
   // Initialize coarse and reference mesh solutions.
   Solution sln, ref_sln;
 
   // Initialize exact solution.
+  CustomExactSolution sln_exact(&mesh);
+  /*
   ExactSolution sln_exact(&mesh, exact);
+  */
 
   // Initialize refinement selector.
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -138,8 +150,7 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
     dp->assemble(matrix, rhs);
 
     // Time measurement.

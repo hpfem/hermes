@@ -43,7 +43,9 @@ public:
 #ifdef HAVE_NOX
   // Enhanced constructor.
   // For details of the parameter message_type, please see NOX_Utils.H, enum MsgType.
-  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, 
+  // http://trilinos.sandia.gov/packages/docs/r4.0/packages/nox/doc/html/parameters.html
+  // http://trilinos.sandia.gov/packages/docs/r7.0/packages/nox/doc/html/classNOX_1_1Epetra_1_1LinearSystemAztecOO.html
+  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* ls_type = "GMRES", const char* nl_dir = "Newton", 
     double ls_tolerance = 1e-8,
     const char* precond_type = "None",
     unsigned flag_absresid = 1,
@@ -52,7 +54,6 @@ public:
     double rel_resid = 1.0e-2,
     int max_iters = 10,
     double update = 1.0e-5,
-    const char* ls_type = "GMRES",
     int ls_max_iters = 800,
     int ls_sizeof_krylov_subspace = 50,
     NOX::Abstract::Vector::NormType norm_type = NOX::Abstract::Vector::TwoNorm,
@@ -106,6 +107,7 @@ public:
   
 #ifdef HAVE_TEUCHOS
   virtual void set_precond(Teuchos::RCP<Precond> &pc);
+  virtual void unset_precond();
 #else
   virtual void set_precond(Precond* pc) 
   { 

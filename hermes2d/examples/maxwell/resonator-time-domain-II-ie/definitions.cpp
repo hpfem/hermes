@@ -92,7 +92,6 @@ private:
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
-    // Member.
     double c_squared;
   };
 

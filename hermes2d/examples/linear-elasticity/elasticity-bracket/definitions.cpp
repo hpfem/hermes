@@ -1,4 +1,4 @@
-#include "weakform_library/linear_elasticity.h"
+#include "weakform_library/elasticity.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 

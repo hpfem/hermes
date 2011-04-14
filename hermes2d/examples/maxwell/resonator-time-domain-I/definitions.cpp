@@ -35,17 +35,14 @@ class CustomWeakFormWave : public WeakForm
 {
 public:
 
-  CustomWeakFormWave(double tau, double c_squared, Solution* E_prev_sln, Solution* B_prev_sln) : WeakForm(2) {
+  CustomWeakFormWave(double c_squared) : WeakForm(2) {
+    // Jacobian.
     add_matrix_form(new MatrixFormVolWave_0_1(c_squared));
     add_matrix_form(new MatrixFormVolWave_1_0);
 
+    // Residual.
     VectorFormVolWave_0* vector_form_0 = new VectorFormVolWave_0(c_squared);
-    vector_form_0->ext.push_back(B_prev_sln);
-    add_vector_form(vector_form_0);
-
     VectorFormVolWave_1* vector_form_1 = new VectorFormVolWave_1();
-    vector_form_1->ext.push_back(E_prev_sln);
-    add_vector_form(vector_form_1);
   };
 
 private:
@@ -79,7 +76,6 @@ private:
       return new MatrixFormVolWave_0_1(*this);
     }
 
-    // Member.
     double c_squared;
   };
 
@@ -125,13 +121,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[1];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
+      Func<Scalar>* sln_prev = u_ext[1];
 
       for (int i = 0; i < n; i++) {
-        Scalar sln_dx_i = sln_prev_time->dx[i] + K_sln->dx[i];
-        Scalar sln_dy_i = sln_prev_time->dy[i] + K_sln->dy[i];
-        result += wt[i] * (sln_dy_i * v->val0[i] - sln_dx_i * v->val1[i]);
+        result += wt[i] * (sln_prev->dy[i] * v->val0[i] - sln_prev->dx[i] * v->val1[i]);
       }
       return c_squared * result;
     }
@@ -163,12 +156,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      Func<Scalar>* K_sln = u_ext[0];
-      Func<Scalar>* sln_prev_time = ext->fn[0];
+      Func<Scalar>* sln_prev = u_ext[0];
       
       for (int i = 0; i < n; i++) {
-        Scalar sln_curl_i = sln_prev_time->curl[i] + K_sln->curl[i];
-        result -= wt[i] * sln_curl_i * v->val[i];
+        result -= wt[i] * sln_prev->curl[i] * v->val[i];
       }
       return result;
     }

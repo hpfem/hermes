@@ -1,0 +1,21 @@
+Lx = 4.0
+Ly = 0.5
+
+vertices = [
+  [ 0, 0 ],
+  [ Lx, 0 ],
+  [ Lx, Ly ],
+  [ 0, Ly ]
+]
+
+elements = [
+  [ 0, 1, 2, 3, "Water" ]
+]
+
+boundaries = [
+  [ 0, 1, "Bottom" ],
+  [ 1, 2, "Right" ],
+  [ 2, 3, "Top" ],
+  [ 3, 0, "Left" ]
+]
+

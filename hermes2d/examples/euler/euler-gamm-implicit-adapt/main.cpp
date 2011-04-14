@@ -19,28 +19,31 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
-const double NOX_LINEAR_TOLERANCE = 1e-2;
-const double NOX_NONLINEAR_TOLERANCE = 1e-1;
+const double NOX_LINEAR_TOLERANCE = 1e-1;
+const double NOX_NONLINEAR_TOLERANCE = 1e-2;
+unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details | NOX::Utils::LinearSolverDetails;
 
 // Shock capturing.
 bool SHOCK_CAPTURING = true;
+
 // Quantitative parameter of the discontinuity detector.
-double DISCONTINUITY_DETECTOR_PARAM = 1;
+double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY_ANISO = 2;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM_BOUNDARY_ANISO = 1;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
 const int INIT_REF_NUM_BOUNDARY_ISO = 2;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
-double time_step = 1E-3;                          // Time step.
+
+double time_step = 1E-2;                          // Time step.
 
 // Adaptivity.
-const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
+const int UNREF_FREQ = 3;                         // Every UNREF_FREQth time step the mesh is unrefined.
 int REFINEMENT_COUNT = 0;                         // Number of mesh refinements between two unrefinements.
                                                   // The mesh is not unrefined unless there has been a refinement since
                                                   // last unrefinement.
@@ -97,17 +100,15 @@ const std::string BDY_SOLID_WALL_TOP = "4";
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh basemesh;
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("GAMM-channel.mesh", &basemesh);
+  mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
-    basemesh.refine_all_elements(0, true);
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
-  basemesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
-  mesh.copy(&basemesh);
+    mesh.refine_all_elements(0, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -134,11 +135,6 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  /*
-  EulerEquationsWeakFormImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
-  */
-
   EulerEquationsWeakFormImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, PRECONDITIONING);
   
@@ -188,9 +184,15 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      int order_increase = 1;
+      // Global polynomial order increase;
+      int order_increase = 0;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
+      
+      // Report NDOFs.
+      info("ndof_coarse: %d, ndof_fine: %d.", 
+        Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
+        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces));
 
       // Project the previous time level solution onto the new fine mesh
       // in order to obtain initial vector for NOX. 
@@ -203,7 +205,7 @@ int main(int argc, char* argv[])
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
   
       // Initialize NOX solver.
-      NoxSolver solver(&dp);
+      NoxSolver solver(&dp, NOX_MESSAGE_TYPE);
       solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
       solver.disable_abs_resid();
       solver.set_conv_rel_resid(NOX_NONLINEAR_TOLERANCE);
@@ -230,11 +232,13 @@ int main(int argc, char* argv[])
         solver.get_num_lin_iters(), solver.get_achieved_tol());
       
       if(SHOCK_CAPTURING) {
-        DiscontinuityDetector discontinuity_detector(*ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+        DiscontinuityDetector discontinuity_detector(*ref_spaces, 
+						Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
 
         std::set<int> discontinuous_elements = discontinuity_detector.get_discontinuous_element_ids(DISCONTINUITY_DETECTOR_PARAM);
 
-        FluxLimiter flux_limiter(solution_vector, *ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
+        FluxLimiter flux_limiter(solution_vector, *ref_spaces,
+						Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e));
 
         flux_limiter.limit_according_to_detector(discontinuous_elements);
       }
@@ -254,9 +258,7 @@ int main(int argc, char* argv[])
 							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e)) * 100;
 
       // Report results.
-      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-        Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
-        &space_rho_v_y, &space_e)), Space::get_num_dofs(*ref_spaces), err_est_rel_total);
+      info("err_est_rel: %g%%", err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) 
@@ -285,7 +287,7 @@ int main(int argc, char* argv[])
     }
     while (done == false);
 
-    // Copy the solutions into previous time level ones.
+    // Copy the solutions into the previous time level ones.
     prev_rho.copy(&rsln_rho);
     prev_rho_v_x.copy(&rsln_rho_v_x);
     prev_rho_v_y.copy(&rsln_rho_v_y);

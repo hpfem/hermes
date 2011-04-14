@@ -21,7 +21,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) const {
-    return Ord(20);
+    return Ord(10);
   }
 };
 
@@ -31,17 +31,14 @@ class CustomWeakFormWave : public WeakForm
 {
 public:
 
-  CustomWeakFormWave(double tau, double c_squared, Solution* E_prev_sln, Solution* F_prev_sln) : WeakForm(2) {
+  CustomWeakFormWave(double c_squared) : WeakForm(2) {
+    // Jacobian.
     add_matrix_form(new MatrixFormVolWave_0_1);
     add_matrix_form(new MatrixFormVolWave_1_0(c_squared));
 
+    // Residual.
     VectorFormVolWave_0* vector_form_0 = new VectorFormVolWave_0();
-    vector_form_0->ext.push_back(F_prev_sln);
-    add_vector_form(vector_form_0);
-
     VectorFormVolWave_1* vector_form_1 = new VectorFormVolWave_1(c_squared);
-    vector_form_1->ext.push_back(E_prev_sln);
-    add_vector_form(vector_form_1);
   };
 
 private:

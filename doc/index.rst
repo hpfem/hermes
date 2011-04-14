@@ -10,9 +10,9 @@ This document is organized as follows:
 
 * Section 1 provides general information about Hermes and the computational methods it uses,
   and gives references to underlying scientific articles.
-* Section 2 explains how to use Git and Github, and how you can contribute to the project if interested.
-* Section 3 describes how to install Hermes on various hardware platforms, and how to 
+* Section 2 describes how to install Hermes on various hardware platforms, and how to 
   install matrix solver packages and various optional packages. 
+* Section 3 explains how to use Git and Github, and how you can contribute to the project if interested.
 * Section 4 contains a tutorial to Hermes2D. Please read this tutorial first even if you are 
   interested in Hermes3D or Hermes1D, since their usage is virtually the same. The tutorial 
   will walk you in small steps through the solution
@@ -45,15 +45,7 @@ and such, please report them to one of the mailing lists for
     src/web-access
     src/citing-hermes
 
-2. Collaboration
-----------------
-
-.. toctree::
-    :maxdepth: 1
-
-    src/first_pull_request
-
-3. Installation
+2. Installation
 ---------------
 
 .. toctree::
@@ -66,6 +58,14 @@ and such, please report them to one of the mailing lists for
     src/installation/matrix_solvers
     src/installation/cython_installation
     src/installation/exodusII_netcdf
+
+3. Collaboration
+----------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/first_pull_request
 
 4. Tutorial
 -----------

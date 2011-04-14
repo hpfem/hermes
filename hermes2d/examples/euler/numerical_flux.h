@@ -5,7 +5,7 @@
 class NumericalFlux
 {
 public:
-  NumericalFlux();
+  NumericalFlux(double kappa);
 
   /// Calculates all components of the flux.
   /// Stores the result in the array result.
@@ -31,12 +31,14 @@ public:
   
   virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny) = 0;
 
-protected:
   /// Rotates the state_vector into the local coordinate system.
   void Q(double result[4], double state_vector[4], double nx, double ny);
 
   /// Rotates the state_vector back from the local coordinate system.
   void Q_inv(double result[4], double state_vector[4], double nx, double ny);
+
+  // Poisson adiabatic ant = c_p/c_v = 1 + R/c_v.
+  double kappa;
 };
 
 class VijayasundaramNumericalFlux : public NumericalFlux
@@ -99,9 +101,6 @@ public:
   virtual double numerical_flux_outlet_i(int component, double w_L[4], double pressure, double nx, double ny) {return 0.0;};
 
 protected:
-  // Poisson adiabatic ant = c_p/c_v = 1 + R/c_v.
-  double kappa;
-  
   // States.
   double q[4];
   double q_L[4];
@@ -148,9 +147,6 @@ protected:
   void calculate_q_R_star();
 
   void f_1(double result[4], double state[4]);
-
-  // Poisson adiabatic ant = c_p/c_v = 1 + R/c_v.
-  double kappa;
 
   // States.
   double q_L[4];

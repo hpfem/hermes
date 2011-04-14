@@ -54,7 +54,7 @@ Scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i]);
+    result += wt[i] * u->val[i] * v->val[i];
   return result;
 }
 
@@ -63,7 +63,7 @@ Scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * e->x[i] * (u->val[i] * v->val[i]);
+    result += wt[i] * e->x[i] * u->val[i] * v->val[i];
   return result;
 }
 
@@ -72,7 +72,7 @@ Scalar int_y_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * e->y[i] * (u->val[i] * v->val[i]);
+    result += wt[i] * e->y[i] * u->val[i] * v->val[i];
   return result;
 }
 
@@ -177,7 +177,7 @@ Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->dy[i] ;
+    result += wt[i] * u->val[i] * v->dy[i];
   return result;
 }
 

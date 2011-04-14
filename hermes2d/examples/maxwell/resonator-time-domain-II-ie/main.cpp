@@ -23,7 +23,7 @@
 //      \frac{E^{n+1}}{tau}                   - F^{n+1}             = \frac{E^{n}}{tau},
 //      SPEED_OF_LIGHT**2 * curl curl E^{n+1} + \frac{F^{n+1}}{tau} = \frac{F^{n}}{tau}.
 //
-// Domain: Rectangular domain (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
+// Domain: Square (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
 //
 // BC:  E \times \nu = 0 on the boundary (perfect conductor),
 //      F \times \nu = 0 on the boundary (E \times \nu = 0 => \partial E / \partial t \times \nu = 0).
@@ -60,8 +60,7 @@ int main(int argc, char* argv[])
   // Initialize solutions.
   CustomInitialConditionWave E_sln(&mesh);
   Solution F_sln(&mesh, 0.0, 0.0);
-  Hermes::vector<Solution*> slns_time_prev(&E_sln, &F_sln);
-  Hermes::vector<Solution*> slns_time_new(&E_sln, &F_sln);
+  Hermes::vector<Solution*> slns(&E_sln, &F_sln);
 
   // Initialize the weak formulation.
   CustomWeakFormWave wf(time_step, C_SQUARED, &E_sln, &F_sln);
@@ -73,12 +72,13 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   HcurlSpace E_space(&mesh, &bcs, P_INIT);
   HcurlSpace F_space(&mesh, &bcs, P_INIT);
+  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&E_space, &F_space);
 
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&E_space, &F_space)));
+  info("ndof = %d.", Space::get_num_dofs(spaces));
 
   // Initialize the FE problem.
   bool is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&E_space, &F_space), is_linear);
+  DiscreteProblem dp(&wf, spaces, is_linear);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -98,7 +98,6 @@ int main(int argc, char* argv[])
   {
     // Perform one implicit Euler time step.
     info("Implicit Euler time step (t = %g s, time_step = %g s).", current_time, time_step);
-    bool verbose = true;
 
     // First time assemble both the stiffness matrix and right-hand side vector,
     // then just the right-hand side vector.
@@ -113,8 +112,7 @@ int main(int argc, char* argv[])
 
     // Solve the linear system and if successful, obtain the solution.
     info("Solving the matrix problem.");
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space*>(&E_space, &F_space), 
-                                                      Hermes::vector<Solution*>(&E_sln, &F_sln));
+    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), spaces, slns);
     else error ("Matrix solver failed.\n");
 
     // Visualize the solutions.
@@ -128,9 +126,6 @@ int main(int argc, char* argv[])
 
     // Update time.
     current_time += time_step;
-  
-    //View::wait(HERMES_WAIT_KEYPRESS);
-
   } while (current_time < T_FINAL);
 
   // Wait for the view to be closed.

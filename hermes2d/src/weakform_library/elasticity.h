@@ -13,19 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_LINEAR_ELASTICITY_WEAK_FORMS_H
-#define __H2D_LINEAR_ELASTICITY_WEAK_FORMS_H
+#ifndef __H2D_ELASTICITY_WEAK_FORMS_H
+#define __H2D_ELASTICITY_WEAK_FORMS_H
 
 #include "../integrals/integrals_h1.h"
 
 /* Default weak form for linear elasticity (Lame equations)
    with Dirichlet and/or zero Neumann BC
 
-   Nonzero Neumann and Newton boundary conditions can be enabled 
-   by creating a descendant and adding surface forms to it. 
+   Nonzero Neumann and Newton boundary conditions can be enabled
+   by creating a descendant and adding surface forms to it.
 */
 
-namespace Elasticity {
+namespace WeakFormsElasticity {
+
   class DefaultVolumetricMatrixFormLinear_x_x : public WeakForm::MatrixFormVol
   {
   public:

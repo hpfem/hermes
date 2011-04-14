@@ -1,6 +1,6 @@
 #include "numerical_flux.h"
 
-NumericalFlux::NumericalFlux()
+NumericalFlux::NumericalFlux(double kappa) : kappa(kappa)
 {
 }
 
@@ -24,7 +24,7 @@ void NumericalFlux::Q_inv(double result[4], double state_vector[4], double nx, d
   result[3] = state_vector[3];
 }
 
-VijayasundaramNumericalFlux::VijayasundaramNumericalFlux()
+VijayasundaramNumericalFlux::VijayasundaramNumericalFlux() : NumericalFlux(0)
 {
 }
 
@@ -41,7 +41,7 @@ double VijayasundaramNumericalFlux::numerical_flux_i(int component, double w_L[4
   return 0.0;
 }
 
-StegerWarmingNumericalFlux::StegerWarmingNumericalFlux(double kappa) : kappa(kappa) {};
+StegerWarmingNumericalFlux::StegerWarmingNumericalFlux(double kappa) : NumericalFlux(kappa) {};
 
 
 void StegerWarmingNumericalFlux::numerical_flux(double result[4], double w_L[4], double w_R[4],
@@ -252,7 +252,7 @@ void StegerWarmingNumericalFlux::T_inv_4(double result[4][4], double nx, double 
   result[3][3] = (1 / (a * a)) * (kappa - 1) / 2;
 }
 
-OsherSolomonNumericalFlux::OsherSolomonNumericalFlux(double kappa) : kappa(kappa)
+OsherSolomonNumericalFlux::OsherSolomonNumericalFlux(double kappa) : NumericalFlux(kappa)
 {
 }
 
@@ -269,10 +269,17 @@ void OsherSolomonNumericalFlux::numerical_flux(double result[4], double w_L[4], 
   // Speeds of sound.
   a_L = QuantityCalculator::calc_sound_speed(q_L[0], q_L[1], q_L[2], q_L[3], kappa);
   a_R = QuantityCalculator::calc_sound_speed(q_R[0], q_R[1], q_R[2], q_R[3], kappa);
+  
+  // Check that we can use the following.
+  double right_hand_side = 0;
+  if((q_L[2] / q_L[0]) - (q_R[2] / q_R[0]) > 0)
+    right_hand_side = (q_L[2] / q_L[0] - q_R[2] / q_R[0] > 0) / 2;
+  if(a_L + a_R + ((kappa - 1) * (q_L[1] / q_L[0] - q_R[1] / q_R[0]) / 2) <= right_hand_side)
+    error("Osher-Solomon numerical flux is not possible to construct according to the table.");
 
   // Utility numbers.
-  this->z_L = 0.5 * (kappa - 1) * q_L[1] / q_L[0] + a_L;
-  this->z_R = 0.5 * (kappa - 1) * q_R[1] / q_R[0] - a_R;
+  this->z_L = (0.5 * (kappa - 1) * q_L[1] / q_L[0]) + a_L;
+  this->z_R = (0.5 * (kappa - 1) * q_R[1] / q_R[0]) - a_R;
   this->s_L = QuantityCalculator::calc_pressure(q_L[0], q_L[1], q_L[2], q_L[3], kappa) / std::pow(q_L[0], kappa);
   this->s_R = QuantityCalculator::calc_pressure(q_R[0], q_R[1], q_R[2], q_R[3], kappa) / std::pow(q_R[0], kappa);
   this->alpha = std::pow(s_R / s_L, 1 / (2 * kappa));
