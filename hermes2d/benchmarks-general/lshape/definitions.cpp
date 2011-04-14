@@ -6,6 +6,7 @@
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
 using namespace WeakFormsH1::RightHandSides;
+using namespace WeakFormsH1::WeakForms;
 
 /*  Exact solution */
 
@@ -33,15 +34,4 @@ public:
     Ord a = Ord(20);
     return pow(r, 2.0/3.0) * sin(2.0*a/3.0 + M_PI/3);
   }
-};
-
-/* Weak forms */
-
-class CustomWeakFormPoisson : public WeakForm
-{
-public:
-    CustomWeakFormPoisson() : WeakForm(1) {
-        add_matrix_form(new DefaultLinearDiffusion(0, 0));
-        add_vector_form(new DefaultVectorFormConst(0, 0));
-    }
 };
