@@ -1,0 +1,4 @@
+Fix and enable test. The test was disabled on April 14, 2011
+because the example does not work correctly.
+
+

@@ -1,0 +1,3 @@
+The test was disabled on April 14, 2011 because
+it was failing, It needs to be fixed as soon as 
+possible and activated again.
