@@ -598,8 +598,8 @@ protected:
                                                unsigned int> >coordinates, double kappa) 
          : WeakForm::MultiComponentMatrixFormVol(coordinates), kappa(kappa) {}
 
-    void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
-               Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<double>& result) const {
+    void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, 
+               ExtData<scalar> *ext, Hermes::vector<double>& result) const {
       double result_0_0 = 0;
       double result_0_1 = 0;
       double result_0_2 = 0;
@@ -621,112 +621,125 @@ protected:
       double result_3_3 = 0;
 
       for (int i = 0;i < n;i++) {
-        result_0_0 += wt[i] * u->val[i] * v->val[i] 
-                            / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
-        result_0_1 += wt[i] * u->val[i] * v->dx[i];
-        result_0_2 += wt[i] * u->val[i] * v->dy[i];
+        result_0_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_0_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_0_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_0_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_0_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_0_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_0_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_0_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_0_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_0_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_0_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_0_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_0_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_0_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_0_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_0_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
         
-        result_1_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_1_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_1_1 += wt[i] * u->val[i] 
-                            * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
-        result_1_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_1_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_1_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_1_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_1_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_1_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-      
-        result_2_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_2_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_2_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_2_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_2_2 += wt[i] * u->val[i] 
-                            * v->val[i] 
-                            / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
-        result_2_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_2_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_2_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_2_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
+        result_1_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_1_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_1_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_1_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_1_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_1_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_1_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_1_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_1_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        
+        result_2_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_2_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_2_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_2_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_2_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_2_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_2_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_2_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_2_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
      
-        result_3_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
-                            * v->dx[i];
-        result_3_0 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
-                            * v->dy[i];
-        result_3_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
-                            * v->dx[i];
-        result_3_1 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
-        result_3_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_3_2 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
-                            * v->dy[i];
-        result_3_3 += wt[i] * u->val[i] 
-                            * v->val[i] / static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
-        result_3_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dx[i];
-        result_3_3 += wt[i] * u->val[i] 
-                            * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
-                            * v->dy[i];
+        result_3_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
+                          * v->dx[i];
+        result_3_0 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_0<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
+                          * v->dy[i];
+        result_3_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
+                          * v->dx[i];
+        result_3_1 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_1<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
+        result_3_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_3_2 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_2<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], u_ext[3]->val[i]) 
+                          * v->dy[i];
+        result_3_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_1_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dx[i];
+        result_3_3 += wt[i] * u->val[i]
+                          * (static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf))->euler_fluxes->A_2_3_3<double>(u_ext[0]->val[i], u_ext[1]->val[i], u_ext[2]->val[i], 0) 
+                          * v->dy[i];
       }
-      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_1_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_2_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_3_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
@@ -843,25 +856,25 @@ protected:
                             * u->get_val_neighbor(i)) * (v->get_val_central(i) - v->get_val_neighbor(i));
       }
 
-      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_0_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_0_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_0_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_1_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_1_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_1_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_1_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_2_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_2_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_2_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_2_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
 
-      result.push_back(result_3_0 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_1 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_2 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
-      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau());
+      result.push_back(result_3_0 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_1 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_2 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
+      result.push_back(result_3_3 * static_cast<EulerEquationsWeakFormImplicitMultiComponent*>(wf)->get_tau());
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 

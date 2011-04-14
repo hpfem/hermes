@@ -146,6 +146,7 @@ double DiscontinuityDetector::calculate_relative_flow_direction(Element* e, int 
   for(int point_i = 0; point_i < np; point_i++)
     result += jwt[point_i] * density_vel_x->val[point_i] * geom->nx[point_i] + density_vel_y->val[point_i] * geom->ny[point_i];
 
+  geom->free();
   delete geom;
   delete [] jwt;
   density_vel_x->free_fn();
@@ -241,6 +242,7 @@ void DiscontinuityDetector::calculate_jumps(Element* e, int edge_i, double resul
       result[3] += jwt[point_i] * (energy_discontinuous.get_val_central(point_i) - energy_discontinuous.get_val_neighbor(point_i));
     }
     
+    geom->free();
     delete geom;
     delete [] jwt;
     density->free_fn();
@@ -310,6 +312,7 @@ void DiscontinuityDetector::calculate_norms(Element* e, int edge_i, double resul
     result[3] = std::max(result[3], std::abs(energy->val[point_i]));
   }
 
+  geom->free();
   delete geom;
   delete [] jwt;
   

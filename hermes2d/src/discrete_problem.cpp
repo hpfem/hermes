@@ -358,6 +358,9 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
     }
 
     trav.finish();
+
+    delete [] al;
+    delete [] meshes;
     delete [] blocks;
 
     mat->alloc();
