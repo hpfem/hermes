@@ -46,14 +46,15 @@ int main(int argc, char* argv[])
   Hermes2D hermes2d;
 
   // Define nonlinear magnetic permeability via a cubic spline.
+  /*
   Hermes::vector<double> mu_inv_pts(0.0,      0.5,      0.9,      1.0,      1.1,      1.2,      1.3,   
                                     1.4,      1.6,      1.7,      1.8,      1.9,      3.0,      5.0,     10.0);
   Hermes::vector<double> mu_inv_val(1/1500.0, 1/1480.0, 1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0,  
                                     1/750.0,  1/250.0,  1/180.0,  1/175.0,  1/150.0,  1/20.0,   1/10.0,  1/5.0);
-  /* This is for debugging (iron is assumed linear with mu_r = 300.0
+  */
+  // This is for debugging (iron is assumed linear with mu_r = 300.0
   Hermes::vector<double> mu_inv_pts(0.0,      10.0);
   Hermes::vector<double> mu_inv_val(1/300.0,   1/300.0);
-  */
 
   // Create the cubic spline (and plot it for visual control). 
   double second_der_left = 0.0;
@@ -69,8 +70,10 @@ int main(int argc, char* argv[])
   info("Saving cubic spline into a Pylab file spline.dat.");
   double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
-  mu_inv_iron.plot("spline.dat", interval_extension, true);
-  mu_inv_iron.plot("spline_der.dat", interval_extension, false);
+  bool plot_derivative = false;
+  mu_inv_iron.plot("spline.dat", interval_extension, plot_derivative);
+  plot_derivative = true;
+  mu_inv_iron.plot("spline_der.dat", interval_extension, plot_derivative);
 
   // Load the mesh.
   Mesh mesh;

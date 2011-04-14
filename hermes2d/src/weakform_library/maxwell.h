@@ -31,11 +31,12 @@ namespace WeakFormsMaxwell {
     public:
       // The optional order_increase takes into account the axisymmetric part.
       DefaultLinearMagnetostatics(int i, int j, scalar coeff = 1.0,
-                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3)
-  : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
+                                  SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, 
+                                  int order_increase = 3)
+             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
       DefaultLinearMagnetostatics(int i, int j, std::string area, scalar coeff = 1.0,
                                   SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3)
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
+             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -77,48 +78,55 @@ namespace WeakFormsMaxwell {
     class DefaultJacobianNonlinearMagnetostatics : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
-                                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
+      DefaultJacobianNonlinearMagnetostatics(int i, int j, CubicSpline* spline_coeff, 
+                                             scalar const_coeff = 1.0,
+                                             SymFlag sym = HERMES_NONSYM, 
+                                             GeomType gt = HERMES_PLANAR,
                                              int order_increase = 3)
-  : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt),
-                                  order_increase(order_increase) { }
+             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff), 
+                                       const_coeff(const_coeff), gt(gt),
+                                       order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area,
-                                             CubicSpline* spline_coeff, scalar const_coeff = 1.0, SymFlag sym = HERMES_NONSYM,
-                                             GeomType gt = HERMES_PLANAR, int order_increase = 3)
-            : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt),
-                                      order_increase(order_increase) { }
+                                             CubicSpline* spline_coeff, 
+                                             scalar const_coeff = 1.0, 
+                                             SymFlag sym = HERMES_NONSYM,
+                                             GeomType gt = HERMES_PLANAR, 
+                                             int order_increase = 3)
+             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff), 
+                                       const_coeff(const_coeff), gt(gt),
+                                       order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
         scalar planar_part = 0;
         scalar axisym_part = 0;
         for (int i = 0; i < n; i++) {
           scalar B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           if (std::abs(B_i) > 1e-12) {
             planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i
-                            * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+                                 * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
+                                 * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
             if (gt == HERMES_AXISYM_X) {
               axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->y[i]
                                    * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                             * (u_ext[0]->val[i] * v->dy[i]);
-      }
+                                   * (u_ext[0]->val[i] * v->dy[i]);
+            }
             else if (gt == HERMES_AXISYM_Y) {
               axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->x[i]
                                    * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                             * (u_ext[0]->val[i] * v->dx[i]);
-      }
-    }
+                                   * (u_ext[0]->val[i] * v->dx[i]);
+            }
+          }
           planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i)
                                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           if (gt == HERMES_AXISYM_X) {
             axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i]
                                  * (u->val[i] * v->dy[i]);
-    }
+          }
           else if (gt == HERMES_AXISYM_Y) {
             axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i]
                                  * (u->val[i] * v->dx[i]);
-    }
+          }
         }
 
         return planar_part + axisym_part;
@@ -131,7 +139,7 @@ namespace WeakFormsMaxwell {
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));
           planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i
                                * (u_ext[0]->dx[i] * u->dx[i] + u_ext[0]->dy[i] * u->dy[i])
-                         * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+                               * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
           planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i)
                                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
@@ -167,10 +175,10 @@ namespace WeakFormsMaxwell {
     public:
       DefaultResidualLinearMagnetostatics(int i, scalar coeff, GeomType gt = HERMES_PLANAR,
                                           int order_increase = 3)
-  : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt), order_increase(order_increase) { }
+             : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt), order_increase(order_increase) { }
       DefaultResidualLinearMagnetostatics(int i, std::string area, scalar coeff,
                                           GeomType gt = HERMES_PLANAR, int order_increase = 3)
-  : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
+             : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -209,12 +217,17 @@ namespace WeakFormsMaxwell {
     class DefaultResidualNonlinearMagnetostatics : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, scalar const_coeff = 1.0, GeomType gt = HERMES_PLANAR,
+      DefaultResidualNonlinearMagnetostatics(int i, CubicSpline* spline_coeff, 
+                                             scalar const_coeff = 1.0, 
+                                             GeomType gt = HERMES_PLANAR,
                                              int order_increase = 3)
-  : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
-      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
+             : WeakForm::VectorFormVol(i), spline_coeff(spline_coeff), const_coeff(const_coeff), 
+                                           gt(gt), order_increase(order_increase) { }
+      DefaultResidualNonlinearMagnetostatics(int i, std::string area, CubicSpline* spline_coeff, 
+                                             scalar const_coeff = 1.0,
                                              GeomType gt = HERMES_PLANAR, int order_increase = 3)
-  : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), order_increase(order_increase) { }
+             : WeakForm::VectorFormVol(i, area), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt), 
+                                       order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -233,7 +246,7 @@ namespace WeakFormsMaxwell {
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) const {
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord planar_part = 0;
         for (int i = 0; i < n; i++) {
           Ord B_i = sqrt(sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]));

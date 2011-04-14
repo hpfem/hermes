@@ -324,9 +324,10 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultVectorFormConst(int i, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR)
-                   : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
-      DefaultVectorFormConst(int i, std::string area, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR)
-  : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
+             : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
+      DefaultVectorFormConst(int i, std::string area, scalar coeff = 1.0, 
+                             GeomType gt = HERMES_PLANAR)
+             : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
@@ -338,7 +339,7 @@ namespace WeakFormsH1 {
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) const {
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
         if (gt == HERMES_PLANAR) return int_v<Ord>(n, wt, v);
         else {
           if (gt == HERMES_AXISYM_X) return int_y_v<Ord>(n, wt, v, e);
