@@ -64,10 +64,7 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for (int i=0; i < 3; i++) mesh.refine_all_elements(2);
   for (int i=0; i < 3; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary("Bottom", 2);
-  mesh.refine_towards_boundary("Right", 2);
-  mesh.refine_towards_boundary("Top", 2);
-  mesh.refine_towards_boundary("Left", 2);
+  mesh.refine_towards_boundary(HERMES_ANY, 2);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst zero_vel_bc(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
