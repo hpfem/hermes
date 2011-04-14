@@ -818,34 +818,40 @@ static int rtb_criterion(Element* e)
 
 void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad, bool mark_as_initial)
 {
-  rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
-  rtb_aniso  = aniso;
-  rtb_tria_to_quad = tria_to_quad;
+  if(marker == HERMES_ANY)
+    for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table->begin(); it != this->boundary_markers_conversion.conversion_table->end(); it++)
+      refine_towards_boundary(it->second, depth, aniso, tria_to_quad, mark_as_initial);
 
-  // refinement: refine all elements to quad elements.
-  if (rtb_tria_to_quad)  
-    this->convert_triangles_to_quads();
+  else {
+    rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
+    rtb_aniso  = aniso;
+    rtb_tria_to_quad = tria_to_quad;
 
-  for (int i = 0; i < depth; i++)
-  {
-    int size = get_max_node_id()+1;
-    rtb_vert = new char[size];
-    memset(rtb_vert, 0, sizeof(char) * size);
+    // refinement: refine all elements to quad elements.
+    if (rtb_tria_to_quad)  
+      this->convert_triangles_to_quads();
 
-    Element* e;
-    for_all_active_elements(e, this)
-      for (unsigned int j = 0; j < e->nvert; j++) {
-        if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker)) {
-          rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
+    for (int i = 0; i < depth; i++)
+    {
+      int size = get_max_node_id()+1;
+      rtb_vert = new char[size];
+      memset(rtb_vert, 0, sizeof(char) * size);
+
+      Element* e;
+      for_all_active_elements(e, this)
+        for (unsigned int j = 0; j < e->nvert; j++) {
+          if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker)) {
+            rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
+          }
         }
-      }
 
-    refine_by_criterion(rtb_criterion, 1);
-    delete [] rtb_vert;
+      refine_by_criterion(rtb_criterion, 1);
+      delete [] rtb_vert;
+    }
+
+    if(mark_as_initial)
+      ninitial = this->get_max_element_id();
   }
-
-  if(mark_as_initial)
-    ninitial = this->get_max_element_id();
 }
 
 void Mesh::unrefine_element_id(int id)
