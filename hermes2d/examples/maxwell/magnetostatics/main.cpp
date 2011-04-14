@@ -1,7 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "function/function.h"
 
 using namespace RefinementSelectors;
 
@@ -135,14 +134,15 @@ int main(int argc, char* argv[])
   delete solver;
 
   // Visualise the solution and mesh.
-  ScalarView s_view1("Solution (vector potencial)", new WinGeom(0, 0, 350, 450));
+  ScalarView s_view1("Vector potencial", new WinGeom(0, 0, 350, 450));
+  FilterVectorPotencial vector_potencial(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
   s_view1.show_mesh(false);
-  s_view1.show(&sln);
+  s_view1.show(&vector_potencial);
 
-  ScalarView s_view2("Gradient (flux density)", new WinGeom(360, 0, 350, 450));
-  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+  ScalarView s_view2("Flux density", new WinGeom(360, 0, 350, 450));
+  FilterFluxDensity flux_density(Hermes::vector<MeshFunction *>(&sln, &sln));
   s_view2.show_mesh(false);
-  s_view2.show(&grad);
+  s_view2.show(&flux_density);
 
   OrderView o_view("Mesh", new WinGeom(720, 0, 350, 450));
   o_view.show(&space);
