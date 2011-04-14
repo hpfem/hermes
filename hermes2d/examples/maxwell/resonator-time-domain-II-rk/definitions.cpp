@@ -37,8 +37,8 @@ public:
     add_matrix_form(new MatrixFormVolWave_1_0(c_squared));
 
     // Residual.
-    VectorFormVolWave_0* vector_form_0 = new VectorFormVolWave_0();
-    VectorFormVolWave_1* vector_form_1 = new VectorFormVolWave_1(c_squared);
+    add_vector_form(new VectorFormVolWave_0());
+    add_vector_form(new VectorFormVolWave_1(c_squared));
   };
 
 private:
