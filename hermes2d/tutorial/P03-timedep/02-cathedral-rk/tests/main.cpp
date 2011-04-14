@@ -8,7 +8,7 @@
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
-const double time_step = 3e+2;                    // Time step in seconds.
+const double time_step = 1;                       // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("cathedral.mesh", &mesh);
+  mloader.load("../cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -131,11 +131,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 9.999982) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.000002) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value( 0.0, 2.0) - 9.999995) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.000002) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value( 2.0, 2.0) - 9.999982) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 0.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value( 2.0, 2.0) - 10.0) > 1E-6) success = false;
 
   if (success) {
     printf("Success!\n");
