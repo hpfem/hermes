@@ -69,7 +69,7 @@ const double rho = 8000;                          // Material density in kg / m^
 const std::string BDY_LEFT = "1";
 
 // Weak forms.
-#include "weakform_library/linear_elasticity.h"
+#include "weakform_library/elasticity.h"
 
 int main(int argc, char* argv[])
 {

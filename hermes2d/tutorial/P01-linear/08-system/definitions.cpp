@@ -1,6 +1,6 @@
 #include "weakform/weakform.h"
 #include "weakform_library/h1.h"
-#include "weakform_library/linear_elasticity.h"
+#include "weakform_library/elasticity.h"
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
@@ -17,9 +17,9 @@ public:
     double mu = E / (2*(1 + nu));
 
     // There is one multi-component and one single-component form since we want to exploit symmetry of the forms.
-    add_multicomponent_matrix_form(new Elasticity::MultiComponentDefaultVolumetricMatrixFormLinearSym(Hermes::vector<std::pair<unsigned int, unsigned int> >(make_pair(0, 0), make_pair(1, 1)), lambda, mu));
+    add_multicomponent_matrix_form(new WeakFormsElasticity::MultiComponentDefaultVolumetricMatrixFormLinearSym(Hermes::vector<std::pair<unsigned int, unsigned int> >(make_pair(0, 0), make_pair(1, 1)), lambda, mu));
 
-    add_matrix_form(new Elasticity::DefaultVolumetricMatrixFormLinear_x_y(0, 1, lambda, mu));
+    add_matrix_form(new WeakFormsElasticity::DefaultVolumetricMatrixFormLinear_x_y(0, 1, lambda, mu));
     
     // gravity loading
     add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst(1, rho_g));
