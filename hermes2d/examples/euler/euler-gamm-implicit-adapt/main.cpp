@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
       info("Assembling by DiscreteProblem, solving by NOX.");
 
       solver.set_init_sln(coeff_vec);
-      scalar* solution_vector;
+      scalar* solution_vector = NULL;
 
       if (solver.solve()) {
         solution_vector = solver.get_solution();

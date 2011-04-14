@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
-    scalar* solution_vector;
+    scalar* solution_vector = NULL;
     if(solver->solve()) {
       solution_vector = solver->get_solution();
       Solution::vector_to_solutions(solution_vector, Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
