@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   info("Coordinate (5, 0) value = %lf", sln.get_pt_value(coord_x[2], coord_y[2]));
   info("Coordinate (7, 0) value = %lf", sln.get_pt_value(coord_x[3], coord_y[3]));
 
-  double t_value[4] = {0.000471, 0.000055, 0.000028, 0.005904};
+  double t_value[4] = {0.031507, 0.012295, 0.026515, 0.153505};
   bool success = true;
 
   for (int i = 0; i < 4; i++)
