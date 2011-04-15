@@ -33,17 +33,17 @@ void HcurlSpace<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
   if (shapeset == NULL)
   {
     this->shapeset = new HcurlShapeset;
-    own_shapeset = true;
+    this->own_shapeset = true;
   }
   if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
 
   if (!hcurl_proj_ref++)
   {
-    precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+    this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
   }
 
-  proj_mat = hcurl_proj_mat;
-  chol_p   = hcurl_chol_p;
+  this->proj_mat = hcurl_proj_mat;
+  this->chol_p   = hcurl_chol_p;
 
   // set uniform poly order in elements
   if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hcurl space.");
@@ -55,7 +55,7 @@ void HcurlSpace<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 
 template<typename Scalar>
 HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+    : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -63,7 +63,7 @@ HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, 
 
 template<typename Scalar>
 HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
+    : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -77,7 +77,7 @@ HcurlSpace<Scalar>::~HcurlSpace()
     delete [] hcurl_proj_mat;
     delete [] hcurl_chol_p;
   }
-  if (own_shapeset)
+  if (this->own_shapeset)
     delete this->shapeset;
 }
 
@@ -98,7 +98,7 @@ void HcurlSpace<Scalar>::set_shapeset(Shapeset *shapeset)
   if(shapeset->get_id() < 20 && shapeset->get_id() > 9)
   {
     this->shapeset = shapeset;
-    own_shapeset = false;
+    this->own_shapeset = false;
   }
   else
     error("Wrong shapeset type in HcurlSpace<Scalar>::set_shapeset()");
@@ -119,14 +119,14 @@ void HcurlSpace<Scalar>::set_element_order(int id, int order)
 template<typename Scalar>
 void HcurlSpace<Scalar>::set_element_order_internal(int id, int order)
 {
-  assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical order is not zero", id);
-  if (id < 0 || id >= mesh->get_max_element_id())
+  assert_msg(this->mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical order is not zero", id);
+  if (id < 0 || id >= this->mesh->get_max_element_id())
     error("Invalid element id.");
-  H2D_CHECK_ORDER(order);
+  this->H2D_CHECK_ORDER(order);
 
-  resize_tables();
-  edata[id].order = order;
-  seq++;
+  this->resize_tables();
+  this->edata[id].order = order;
+  this->seq++;
 }
 
 //// dof assignment ////////////////////////////////////////////////////////////////////////////////
@@ -135,30 +135,30 @@ template<typename Scalar>
 void HcurlSpace<Scalar>::assign_edge_dofs()
 {
   Node* en;
-  for_all_edge_nodes(en, mesh)
+  for_all_edge_nodes(en, this->mesh)
   {
-    if (en->ref > 1 || en->bnd || mesh->peek_vertex_node(en->p1, en->p2) != NULL) {
-      int ndofs = get_edge_order_internal(en) + 1;
-      ndata[en->id].n = ndofs;
+    if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL) {
+      int ndofs = this->get_edge_order_internal(en) + 1;
+      this->ndata[en->id].n = ndofs;
       if (en->bnd)
-        if(essential_bcs != NULL)
-          if(essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(en->marker)) != NULL)
-            ndata[en->id].dof = H2D_CONSTRAINED_DOF;
+        if(this->essential_bcs != NULL)
+          if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker)) != NULL)
+            this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
           else {
-            ndata[en->id].dof = next_dof;
-            next_dof += ndofs * stride;
+            this->ndata[en->id].dof = this->next_dof;
+            this->next_dof += ndofs * this->stride;
           }
         else {
-          ndata[en->id].dof = next_dof;
-          next_dof += ndofs * stride;
+          this->ndata[en->id].dof = this->next_dof;
+          this->next_dof += ndofs * this->stride;
         }
       else {
-        ndata[en->id].dof = next_dof;
-        next_dof += ndofs * stride;
+        this->ndata[en->id].dof = this->next_dof;
+        this->next_dof += ndofs * this->stride;
       }
     }
     else
-      ndata[en->id].n = -1;
+      this->ndata[en->id].n = -1;
   }
 }
 
@@ -167,13 +167,13 @@ template<typename Scalar>
 void HcurlSpace<Scalar>::assign_bubble_dofs()
 {
   Element* e;
-  for_all_active_elements(e, mesh)
+  for_all_active_elements(e, this->mesh)
   {
-    shapeset->set_mode(e->get_mode());
-    ElementData* ed = &edata[e->id];
-    ed->bdof = next_dof;
-    ed->n = shapeset->get_num_bubbles(ed->order);
-    next_dof += ed->n * stride;
+    this->shapeset->set_mode(e->get_mode());
+    typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
+    ed->bdof = this->next_dof;
+    ed->n = this->shapeset->get_num_bubbles(ed->order);
+    this->next_dof += ed->n * this->stride;
   }
 }
 
@@ -183,20 +183,20 @@ template<typename Scalar>
 void HcurlSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
 {
   Node* en = e->en[surf_num];
-  NodeData* nd = &ndata[en->id];
+  typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
 
   if (nd->n >= 0) // unconstrained
   {
     if (nd->dof >= 0)
     {
       int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
-      for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-        al->add_triplet(shapeset->get_edge_index(surf_num, ori, j), dof, 1.0);
+      for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
+        al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j), dof, 1.0);
     }
     else
     {
       for (int j = 0; j < nd->n; j++)
-        al->add_triplet(shapeset->get_edge_index(surf_num, 0, j), -1, nd->edge_bc_proj[j]);
+        al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j), -1, nd->edge_bc_proj[j]);
     }
   }
   else // constrained
@@ -205,9 +205,9 @@ void HcurlSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int sur
     int ori = part < 0 ? 1 : 0;
     if (part < 0) part ^= ~0;
 
-    nd = &ndata[nd->base->id]; // ccc
-    for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-      al->add_triplet(shapeset->get_constrained_edge_index(surf_num, j, ori, part), dof, 1.0);
+    nd = &this->ndata[nd->base->id]; // ccc
+    for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
+      al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j, ori, part), dof, 1.0);
   }
 }
 
@@ -225,8 +225,8 @@ Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
   int mo = quad1d.get_max_order();
   double2* pt = quad1d.get_points(mo);
 
-  Node* vn1 = mesh->get_node(surf_pos->v1);
-  Node* vn2 = mesh->get_node(surf_pos->v2);
+  Node* vn1 = this->mesh->get_node(surf_pos->v1);
+  Node* vn2 = this->mesh->get_node(surf_pos->v2);
   double el = sqrt(sqr(vn1->x - vn2->x) + sqr(vn1->y - vn2->y));
   el *= 0.5 * (surf_pos->hi - surf_pos->lo);
 
@@ -234,18 +234,18 @@ Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
   for (int i = 0; i <= order; i++)
   {
     rhs[i] = 0.0;
-    int ii = shapeset->get_edge_index(0, 0, i);
+    int ii = this->shapeset->get_edge_index(0, 0, i);
     for (int j = 0; j < quad1d.get_num_points(mo); j++)
     {
       double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
       surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
       // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
+      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
       if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
-        rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+        rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
                 * bc->value_const * el;
       }
       // If the BC is not constant.
@@ -256,14 +256,14 @@ Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
         Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
         CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
         // Calculate.
-        rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+        rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
           * bc->value(x, y) * el;
       }
     }
   }
 
   // solve the system using a precalculated Cholesky decomposed projection matrix
-  cholsl(proj_mat, order + 1, chol_p, rhs, rhs);
+  cholsl(this->proj_mat, order + 1, this->chol_p, rhs, rhs);
   return proj;
 }
 
@@ -284,7 +284,7 @@ void HcurlSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, Edg
 {
   int j;
   EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
-  NodeData* nd;
+  typename Space<Scalar>::NodeData* nd;
 
   // on non-refined elements all we have to do is update edge nodes lying on constrained edges
   if (e->active)
@@ -293,7 +293,7 @@ void HcurlSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, Edg
     {
       if (ei[i] != NULL)
       {
-        nd = &ndata[e->en[i]->id];
+        nd = &this->ndata[e->en[i]->id];
         nd->base = ei[i]->node;
         nd->part = ei[i]->part;
         if (ei[i]->ori) nd->part ^= ~0;
@@ -314,7 +314,7 @@ void HcurlSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, Edg
         Node* mid_vn = get_mid_edge_vertex_node(e, i, j);
         if (mid_vn != NULL && mid_vn->is_constrained_vertex())
         {
-          Node* mid_en = mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
+          Node* mid_en = this->mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
           if (mid_en != NULL)
           {
             ei[i] = ei_data + i;
@@ -385,7 +385,7 @@ template<typename Scalar>
 void HcurlSpace<Scalar>::update_constraints()
 {
   Element* e;
-  for_all_base_elements(e, mesh)
+  for_all_base_elements(e, this->mesh)
     update_constrained_nodes(e, NULL, NULL, NULL, NULL);
 }
 

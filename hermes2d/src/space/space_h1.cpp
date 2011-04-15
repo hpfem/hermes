@@ -25,14 +25,14 @@ void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
   if (shapeset == NULL)
   {
     this->shapeset = new H1Shapeset;
-    own_shapeset = true;
+    this->own_shapeset = true;
   }
 
   if (!h1_proj_ref++)
     // FIXME: separate projection matrices for different shapesets
-    precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
-  proj_mat = h1_proj_mat;
-  chol_p   = h1_chol_p;
+    this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
+  this->proj_mat = h1_proj_mat;
+  this->chol_p   = h1_chol_p;
 
   // set uniform poly order in elements
   if (p_init.order_h < 1 || p_init.order_v < 1) error("P_INIT must be >=  1 in an H1 space.");
@@ -44,7 +44,7 @@ void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 
 template<typename Scalar>
 H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+    : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -52,7 +52,7 @@ H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_
 
 template<typename Scalar>
 H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-    : Space(mesh, shapeset, NULL, Ord2(p_init, p_init))
+    : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
   init(shapeset, Ord2(p_init, p_init));
@@ -67,7 +67,7 @@ H1Space<Scalar>::~H1Space()
     delete [] h1_proj_mat;
     delete [] h1_chol_p;
   }
-  if (own_shapeset)
+  if (this->own_shapeset)
     delete this->shapeset;
 }
 
@@ -77,7 +77,7 @@ void H1Space<Scalar>::set_shapeset(Shapeset *shapeset)
   if(shapeset->get_id() < 10)
   {
     this->shapeset = shapeset;
-    own_shapeset = false;
+    this->own_shapeset = false;
   }
   else
     error("Wrong shapeset type in H1Space<Scalar>::set_shapeset()");
@@ -87,7 +87,7 @@ template<typename Scalar>
 Space<Scalar>* H1Space<Scalar>::dup(Mesh* mesh, int order_increase) const
 {
   _F_
-  H1Space<Scalar>* space = new H1Space(mesh, essential_bcs, 1, shapeset);
+  H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
   space->copy_orders(this, order_increase);
   return space;
 }
@@ -109,56 +109,56 @@ void H1Space<Scalar>::assign_vertex_dofs()
 
   // loop through all elements and assign vertex, edge and bubble dofs
   Element* e;
-  for_all_active_elements(e, mesh)
+  for_all_active_elements(e, this->mesh)
   {
-    int order = get_element_order(e->id);
+    int order = this->get_element_order(e->id);
     if (order > 0)
     {
       for (unsigned int i = 0; i < e->nvert; i++)
       {
         // vertex dofs
         Node* vn = e->vn[i];
-        NodeData* nd = ndata + vn->id;
-        if (!vn->is_constrained_vertex() && nd->dof == H2D_UNASSIGNED_DOF)
+        typename Space<Scalar>::NodeData* nd = this->ndata + vn->id;
+        if (!vn->is_constrained_vertex() && nd->dof == this->H2D_UNASSIGNED_DOF)
         {
           if (nd->n == 0 || is_fixed_vertex(vn->id))
           {
-            nd->dof = H2D_CONSTRAINED_DOF;
+            nd->dof = this->H2D_CONSTRAINED_DOF;
           }
           else
           {
-            nd->dof = next_dof;
-            next_dof += stride;
+            nd->dof = this->next_dof;
+            this->next_dof += this->stride;
           }
           nd->n = 1;
         }
 
         // edge dofs
         Node* en = e->en[i];
-        nd = ndata + en->id;
-        if (nd->dof == H2D_UNASSIGNED_DOF)
+        nd = this->ndata + en->id;
+        if (nd->dof == this->H2D_UNASSIGNED_DOF)
         {
           // if the edge node is not constrained, assign it dofs
-          if (en->ref > 1 || en->bnd || mesh->peek_vertex_node(en->p1, en->p2) != NULL)
+          if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
           {
-            int ndofs = get_edge_order_internal(en) - 1;
+            int ndofs = this->get_edge_order_internal(en) - 1;
             nd->n = ndofs;
 
             if (en->bnd)
-              if(essential_bcs != NULL)
-                if(essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker)) != NULL)
-                  nd->dof = H2D_CONSTRAINED_DOF;
+              if(this->essential_bcs != NULL)
+                if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker)) != NULL)
+                  nd->dof = this->H2D_CONSTRAINED_DOF;
                 else {
-                  nd->dof = next_dof;
-                  next_dof += ndofs * stride;
+                  nd->dof = this->next_dof;
+                  this->next_dof += ndofs * this->stride;
                 }
               else {
-                nd->dof = next_dof;
-                next_dof += ndofs * stride;
+                nd->dof = this->next_dof;
+                this->next_dof += ndofs * this->stride;
               }
             else {
-              nd->dof = next_dof;
-              next_dof += ndofs * stride;
+              nd->dof = this->next_dof;
+              this->next_dof += ndofs * this->stride;
             }
           }
           else // constrained edge node
@@ -168,11 +168,11 @@ void H1Space<Scalar>::assign_vertex_dofs()
     }
 
     // bubble dofs
-    shapeset->set_mode(e->get_mode());
-    ElementData* ed = &edata[e->id];
-    ed->bdof = next_dof;
-    ed->n = order ? shapeset->get_num_bubbles(ed->order) : 0;
-    next_dof += ed->n * stride;
+    this->shapeset->set_mode(e->get_mode());
+    typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
+    ed->bdof = this->next_dof;
+    ed->n = order ? this->shapeset->get_num_bubbles(ed->order) : 0;
+    this->next_dof += ed->n * this->stride;
   }
 }
 
@@ -183,9 +183,9 @@ void H1Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scala
 {
   _F_
   Node* vn = e->vn[iv];
-  NodeData* nd = &ndata[vn->id];
-  int index = shapeset->get_vertex_index(iv);
-  if (get_element_order(e->id) == 0) return;
+  typename Space<Scalar>::NodeData* nd = &this->ndata[vn->id];
+  int index = this->shapeset->get_vertex_index(iv);
+  if (this->get_element_order(e->id) == 0) return;
 
   if (!vn->is_constrained_vertex()) // unconstrained
   {
@@ -208,22 +208,22 @@ void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_n
 {
   _F_
   Node* en = e->en[surf_num];
-  NodeData* nd = &ndata[en->id];
-  if (get_element_order(e->id) == 0) return;
+  typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
+  if (this->get_element_order(e->id) == 0) return;
 
   if (nd->n >= 0) // unconstrained
   {
     if (nd->dof >= 0)
     {
       int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
-      for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-        al->add_triplet(shapeset->get_edge_index(surf_num, ori, j+2), dof, 1.0);
+      for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
+        al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j+2), dof, 1.0);
     }
     else
     {
       for (int j = 0; j < nd->n; j++)
       {
-        al->add_triplet(shapeset->get_edge_index(surf_num, 0, j+2), -1, nd->edge_bc_proj[j+2]);
+        al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j+2), -1, nd->edge_bc_proj[j+2]);
       }
     }
   }
@@ -233,9 +233,9 @@ void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_n
     int ori = part < 0 ? 1 : 0;
     if (part < 0) part ^= ~0;
 
-    nd = &ndata[nd->base->id];
-    for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += stride)
-      al->add_triplet(shapeset->get_constrained_edge_index(surf_num, j+2, ori, part), dof, 1.0);
+    nd = &this->ndata[nd->base->id];
+    for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
+      al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j+2, ori, part), dof, 1.0);
   }
 }
 
@@ -251,7 +251,7 @@ Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 
   // Obtain linear part of the projection.
   // If the BC on this part of the boundary is constant.
-  EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
+  EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
   if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
   {
@@ -284,7 +284,7 @@ Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     for (int i = 0; i < order; i++)
     {
       rhs[i] = 0.0;
-      int ii = shapeset->get_edge_index(0, 0, i+2);
+      int ii = this->shapeset->get_edge_index(0, 0, i+2);
       for (int j = 0; j < quad1d.get_num_points(mo); j++)
       {
         double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
@@ -292,10 +292,10 @@ Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
         surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
         // If the BC on this part of the boundary is constant.
-        EssentialBoundaryCondition<Scalar> *bc = essential_bcs->get_boundary_condition(mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
+        EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
 
         if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
-          rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+          rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
                    * (bc->value_const - l);
         // If the BC is not constant.
         else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
@@ -305,14 +305,14 @@ Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
           Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
           CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
           // Calculate.
-          rhs[i] += pt[j][1] * shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+          rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
             * (bc->value(x, y) - l);
         }
       }
     }
 
     // solve the system using a precalculated Cholesky decomposed projection matrix
-    cholsl(proj_mat, order, chol_p, rhs, rhs);
+    cholsl(this->proj_mat, order, this->chol_p, rhs, rhs);
   }
 
   return proj;
@@ -322,8 +322,8 @@ Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 //// hanging nodes /////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-inline void H1Space<Scalar>::output_component(BaseComponent*& current, BaseComponent*& last, BaseComponent* min,
-                                      Node*& edge, BaseComponent*& edge_dofs)
+inline void H1Space<Scalar>::output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
+                                      Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
 {
   _F_
   // if the dof is already in the list, just add half of the other coef
@@ -334,13 +334,13 @@ inline void H1Space<Scalar>::output_component(BaseComponent*& current, BaseCompo
   }
 
   // leave space for edge node dofs if they belong in front of the current minimum dof
-  if (edge != NULL && ndata[edge->id].dof <= min->dof)
+  if (edge != NULL && this->ndata[edge->id].dof <= min->dof)
   {
     edge_dofs = current;
 
     // (reserve space only if the edge dofs are not in the list yet)
-    if (ndata[edge->id].dof != min->dof) {
-      current += ndata[edge->id].n;
+    if (this->ndata[edge->id].dof != min->dof) {
+      current += this->ndata[edge->id].n;
     }
     edge = NULL;
   }
@@ -356,17 +356,17 @@ inline void H1Space<Scalar>::output_component(BaseComponent*& current, BaseCompo
 ///
 ///
 template<typename Scalar>
-typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(BaseComponent* l1, int n1, BaseComponent* l2, int n2,
-                                               Node* edge, BaseComponent*& edge_dofs, int& ncomponents)
+typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
+                                               Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents)
 {
   _F_
   // estimate the upper bound of the result size
   int max_result = n1 + n2;
-  if (edge != NULL) max_result += ndata[edge->id].n;
+  if (edge != NULL) max_result += this->ndata[edge->id].n;
 
-  BaseComponent* result = (BaseComponent*) malloc(max_result * sizeof(BaseComponent));
-  BaseComponent* current = result;
-  BaseComponent* last = NULL;
+  typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
+  typename Space<Scalar>::BaseComponent* current = result;
+  typename Space<Scalar>::BaseComponent* last = NULL;
 
   // main loop - always output the component with smaller dof so that we get a sorted array
   int i1 = 0, i2 = 0;
@@ -386,7 +386,7 @@ typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(BaseComp
   if (edge != NULL)
   {
     edge_dofs = current;
-    current += ndata[edge->id].n;
+    current += this->ndata[edge->id].n;
   }
 
   // if we produced less components than we expected, reallocate the resulting array
@@ -394,7 +394,7 @@ typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(BaseComp
   ncomponents = current - result;
   if (ncomponents < max_result)
   {
-    BaseComponent* reallocated_result = (BaseComponent*) realloc(result, ncomponents * sizeof(BaseComponent));
+    typename Space<Scalar>::BaseComponent* reallocated_result = (typename Space<Scalar>::BaseComponent*) realloc(result, ncomponents * sizeof(typename Space<Scalar>::BaseComponent));
     if (edge_dofs != NULL)
     {
       edge_dofs = reallocated_result + (edge_dofs - result);
@@ -422,9 +422,9 @@ void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeIn
   _F_
   int j, k;
   EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
-  NodeData* nd;
+  typename Space<Scalar>::NodeData* nd;
 
-  if (get_element_order(e->id) == 0) return;
+  if (this->get_element_order(e->id) == 0) return;
 
   // on non-refined elements all we have to do is update edge nodes lying on constrained edges
   if (e->active)
@@ -433,7 +433,7 @@ void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeIn
     {
       if (ei[i] != NULL)
       {
-        nd = &ndata[e->en[i]->id];
+        nd = &this->ndata[e->en[i]->id];
         nd->base = ei[i]->node;
         nd->part = ei[i]->part;
         if (ei[i]->ori) nd->part ^= ~0;
@@ -453,7 +453,7 @@ void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeIn
         Node* mid_vn = get_mid_edge_vertex_node(e, i, j);
         if (mid_vn != NULL && mid_vn->is_constrained_vertex())
         {
-          Node* mid_en = mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
+          Node* mid_en = this->mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
           if (mid_en != NULL)
           {
             ei[i] = ei_data + i;
@@ -478,13 +478,13 @@ void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeIn
 
       Node* vn[2] = { e->vn[i], e->vn[j] }; // endpoint vertex nodes
       Node* en = ei[i]->node; // constraining edge node
-      BaseComponent *bl[2], dummy_bl[2]; // base lists of v[0] and v[1]
+      typename Space<Scalar>::BaseComponent *bl[2], dummy_bl[2]; // base lists of v[0] and v[1]
       int nc[2] = { 0, 0 }; // number of components of bl[0] and bl[1]
 
       // get baselists of vn[0] and vn[1] - pretend we have them even if they are unconstrained
       for (k = 0; k < 2; k++)
       {
-        nd = &ndata[vn[k]->id];
+        nd = &this->ndata[vn[k]->id];
         if (vn[k]->is_constrained_vertex())
         {
           bl[k] = nd->baselist;
@@ -500,18 +500,18 @@ void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeIn
       }
 
       // merge the baselists
-      BaseComponent* edge_dofs;
-      nd = &ndata[mid_vn->id];
+      typename Space<Scalar>::BaseComponent* edge_dofs;
+      nd = &this->ndata[mid_vn->id];
       nd->baselist = merge_baselists(bl[0], nc[0], bl[1], nc[1], en, edge_dofs, nd->ncomponents);
-      extra_data.push_back(nd->baselist);
+      this->extra_data.push_back(nd->baselist);
 
       // set edge node coefs to function values of the edge functions
       double mid = (ei[i]->lo + ei[i]->hi) * 0.5;
-      nd = &ndata[en->id];
+      nd = &this->ndata[en->id];
       for (k = 0; k < nd->n; k++, edge_dofs++)
       {
-        edge_dofs->dof = nd->dof + k*stride;
-        edge_dofs->coef = shapeset->get_fn_value(shapeset->get_edge_index(0, ei[i]->ori, k+2), mid, -1.0, 0);
+        edge_dofs->dof = nd->dof + k*this->stride;
+        edge_dofs->coef = this->shapeset->get_fn_value(this->shapeset->get_edge_index(0, ei[i]->ori, k+2), mid, -1.0, 0);
       }
 
       //dump_baselist(ndata[mid_vn->id]);
@@ -575,7 +575,7 @@ void H1Space<Scalar>::update_constraints()
 {
   _F_
   Element* e;
-  for_all_base_elements(e, mesh)
+  for_all_base_elements(e, this->mesh)
     update_constrained_nodes(e, NULL, NULL, NULL, NULL);
 }
 
@@ -621,9 +621,9 @@ void H1Space<Scalar>::post_assign()
   {
     Scalar* fixv = new Scalar[1];
     *fixv = fixed_vertices[i].value;
-    NodeData* nd = &ndata[fixed_vertices[i].id];
+    typename Space<Scalar>::NodeData* nd = &this->ndata[fixed_vertices[i].id];
     nd->vertex_bc_coef = fixv;
-    extra_data.push_back(fixv);
+    this->extra_data.push_back(fixv);
   }
 }
 
