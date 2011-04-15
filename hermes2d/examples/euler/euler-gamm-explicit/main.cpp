@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 1;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -57,10 +57,10 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("channel.mesh", &mesh);
+  mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2);
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(0);
   //mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
@@ -133,17 +133,30 @@ int main(int argc, char* argv[])
     }
 
     std::ofstream out("out");
-   for(int i = 0; i < matrix->get_size(); i++)
-     for(int j = 0; j < matrix->get_size(); j++)
-       if(std::abs(matrix->get(i, j)) > 1E-7)
-         out << i << ',' << j << ':' << matrix->get(i, j) << std::endl;
-   out.close();
+    for(int i = 0; i < matrix->get_size(); i++)
+      for(int j = 0; j < matrix->get_size(); j++)
+        if(std::abs(matrix->get(i, j)) > 1E-7)
+          out << i << ',' << j << ':' << matrix->get(i, j) << std::endl;
+    out.close();
  
-   std::ofstream out_rhs("out_rhs");
-   for(int i = 0; i < rhs->length(); i++)
-       if(std::abs(rhs->get(i)) > 1E-7)
-         out_rhs << i << ':' << rhs->get(i) << std::endl;
-   out_rhs.close();
+    std::ofstream out_rhs("out_rhs");
+    for(int i = 0; i < rhs->length(); i++)
+        if(std::abs(rhs->get(i)) > 1E-7)
+          out_rhs << i << ':' << rhs->get(i) << std::endl;
+    out_rhs.close();
+
+    double result_[] = {RHO_EXT, RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, RHO_EXT * V2_EXT, 
+      QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA), QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA)};
+
+    //double result_[] = {RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA)};
+
+    double* result = new double[matrix->get_size()];
+    for(int i = 0; i < matrix->get_size(); i++) {
+      result[i] = 0.0;
+      for(int j = 0; j < matrix->get_size(); j++)
+        result[i] += matrix->get(i, j) * result_[j];
+      result[i] -= rhs->get(i);
+    }
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
