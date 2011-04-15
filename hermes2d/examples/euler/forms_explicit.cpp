@@ -1571,10 +1571,10 @@ protected:
         result_3 += wt[i] * (P_minus[3]) * v->val[i];
       }
 
-      result.push_back(result_0 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_1 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_2 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_3 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
+      result.push_back(-result_0 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
+      result.push_back(-result_1 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
+      result.push_back(-result_2 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
+      result.push_back(-result_3 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
@@ -1633,100 +1633,6 @@ protected:
         result_2 -= wt[i] * v->val[i] * flux[2];
         result_3 -= wt[i] * v->val[i] * flux[3];
       }
-      result.push_back(result_0 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_1 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_2 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-      result.push_back(result_3 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-    }
-
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return v->val[0];
-    }
-
-    // Members.
-    NumericalFlux* num_flux;
-  };
-
-  class EulerEquationsLinearFormInlet : public WeakForm::MultiComponentVectorFormSurf
- {
- public:
-   EulerEquationsLinearFormInlet(Hermes::vector<unsigned int> coordinates, 
-                                 std::string marker, NumericalFlux* num_flux) : 
-       WeakForm::MultiComponentVectorFormSurf(coordinates, marker), num_flux(num_flux) {}
-
-   void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
-              ExtData<scalar> *ext, Hermes::vector<double>& result) const {
-     double result_0 = 0;
-     double result_1 = 0;
-     double result_2 = 0;
-     double result_3 = 0;
-     double w_L[4], w_B[4];
-
-     for (int i = 0;i < n;i++) {
-       // Left (inner) state from the previous time level solution.
-       w_L[0] = ext->fn[0]->val[i];
-       w_L[1] = ext->fn[1]->val[i];
-       w_L[2] = ext->fn[2]->val[i];
-       w_L[3] = ext->fn[3]->val[i];
-   
-       w_B[0] = static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->rho_ext;
-       w_B[1] = static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->rho_ext 
-                * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->v1_ext;
-       w_B[2] = static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->rho_ext 
-                * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->v2_ext;
-       w_B[3] = static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->energy_ext;
-   
-       double flux[4];
-       num_flux->numerical_flux_inlet(flux, w_L, w_B, e->nx[i], e->ny[i]);
-
-       result_0 -= wt[i] * v->val[i] * flux[0];
-       result_1 -= wt[i] * v->val[i] * flux[1];
-       result_2 -= wt[i] * v->val[i] * flux[2];
-       result_3 -= wt[i] * v->val[i] * flux[3];
-     }
-     result.push_back(result_0 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-     result.push_back(result_1 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-     result.push_back(result_2 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-     result.push_back(result_3 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
-   }
-
-   Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-     return v->val[0];
-   }
-
-   // Members.
-   NumericalFlux* num_flux;
- };
-
-  class EulerEquationsLinearFormOutlet : public WeakForm::MultiComponentVectorFormSurf
-  {
-  public:
-    EulerEquationsLinearFormOutlet(Hermes::vector<unsigned int> coordinates, 
-                                   std::string marker, NumericalFlux* num_flux) : 
-    WeakForm::MultiComponentVectorFormSurf(coordinates, marker), num_flux(num_flux) {}
-
-    void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
-               ExtData<scalar> *ext, Hermes::vector<double>& result) const {
-      double result_0 = 0;
-      double result_1 = 0;
-      double result_2 = 0;
-      double result_3 = 0;
-      double w_L[4];
-      for (int i = 0;i < n;i++) {
-        w_L[0] = ext->fn[0]->val[i];
-        w_L[1] = ext->fn[1]->val[i];
-        w_L[2] = ext->fn[2]->val[i];
-        w_L[3] = ext->fn[3]->val[i];
-
-        double flux[4];
-        num_flux->numerical_flux_outlet(flux, w_L, 
-          static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->pressure_ext, e->nx[i], e->ny[i]);
-        result_0 -= wt[i] * v->val[i] * flux[0];
-        result_1 -= wt[i] * v->val[i] * flux[1];
-        result_2 -= wt[i] * v->val[i] * flux[2];
-        result_3 -= wt[i] * v->val[i] * flux[3];
-      }
-
       result.push_back(result_0 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
       result.push_back(result_1 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());
       result.push_back(result_2 * static_cast<EulerEquationsWeakFormExplicitMultiComponentSemiImplicit*>(wf)->get_tau());

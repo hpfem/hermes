@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 1;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -135,13 +135,13 @@ int main(int argc, char* argv[])
     std::ofstream out("out");
    for(int i = 0; i < matrix->get_size(); i++)
      for(int j = 0; j < matrix->get_size(); j++)
-       if(std::abs(matrix->get(i, j)) > 1E-3)
+       if(std::abs(matrix->get(i, j)) > 1E-7)
          out << i << ',' << j << ':' << matrix->get(i, j) << std::endl;
    out.close();
  
    std::ofstream out_rhs("out_rhs");
    for(int i = 0; i < rhs->length(); i++)
-       if(std::abs(rhs->get(i)) > 1E-3)
+       if(std::abs(rhs->get(i)) > 1E-7)
          out_rhs << i << ':' << rhs->get(i) << std::endl;
    out_rhs.close();
 
