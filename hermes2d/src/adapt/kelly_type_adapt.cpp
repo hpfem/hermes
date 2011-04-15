@@ -9,13 +9,13 @@ KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
                                Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
   : Adapt<Scalar>(spaces_, norms_)
 {
-  error_estimators_surf.reserve(num);
-  error_estimators_vol.reserve(num);
+  error_estimators_surf.reserve(this->num);
+  error_estimators_vol.reserve(this->num);
 
   if (interface_scaling_fns_.size() == 0)
   {
-    interface_scaling_fns_.reserve(num);
-    for (int i = 0; i < num; i++)
+    interface_scaling_fns_.reserve(this->num);
+    for (int i = 0; i < this->num; i++)
       interface_scaling_fns_.push_back(scale_by_element_diameter);
   }
   use_aposteriori_interface_scaling = true;
@@ -31,7 +31,7 @@ template<typename Scalar>
 KellyTypeAdapt<Scalar>::KellyTypeAdapt(Space<Scalar>* space_, 
                                ProjNormType norm_, 
                                bool ignore_visited_segments_, 
-                               interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt(space_, norm_)
+                               interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt<Scalar>(space_, norm_)
 { 
   if (interface_scaling_fn_ == NULL)
     interface_scaling_fns.push_back(scale_by_element_diameter);
@@ -55,7 +55,7 @@ bool KellyTypeAdapt<Scalar>::adapt(double thr, int strat, int regularize, double
   for (int i = 0; i < this->num; i++)
     refinement_selectors.push_back(&selector);
 
-  return Adapt::adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
+  return Adapt<Scalar>::adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
 }
 
 template<typename Scalar>
@@ -92,25 +92,25 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   for (int i = 0; i < n; i++)
   {
     this->sln[i] = slns[i];
-    sln[i]->set_quad_2d(&g_quad_2d_std);
+    this->sln[i]->set_quad_2d(&g_quad_2d_std);
   }
 
-  have_coarse_solutions = true;
+  this->have_coarse_solutions = true;
   
   Stage<Scalar> stage;
 
-  num_act_elems = 0;
-  for (int i = 0; i < num; i++)
+  this->num_act_elems = 0;
+  for (int i = 0; i < this->num; i++)
   {
-    stage.meshes.push_back(sln[i]->get_mesh());
-    stage.fns.push_back(sln[i]);
+    stage.meshes.push_back(this->sln[i]->get_mesh());
+    stage.fns.push_back(this->sln[i]);
 
-    num_act_elems += stage.meshes[i]->get_num_active_elements();
+    this->num_act_elems += stage.meshes[i]->get_num_active_elements();
     int max = stage.meshes[i]->get_max_element_id();
 
-    if (errors[i] != NULL) delete [] errors[i];
-    errors[i] = new double[max];
-    memset(errors[i], 0.0, sizeof(double) * max);
+    if (this->errors[i] != NULL) delete [] this->errors[i];
+    this->errors[i] = new double[max];
+    memset(this->errors[i], 0.0, sizeof(double) * max);
   }
 /*
   for (unsigned int i = 0; i < error_estimators_vol.size(); i++)
@@ -122,18 +122,18 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   double total_norm = 0.0;
 
   bool calc_norm = false;
-  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
-      (error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
+  if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
+      (error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
 
   double *norms = NULL;
   if (calc_norm)
   {
-    norms = new double[num];
-    memset(norms, 0.0, num * sizeof(double));
+    norms = new double[this->num];
+    memset(norms, 0.0, this->num * sizeof(double));
   }
 
-  double *errors_components = new double[num];
-  memset(errors_components, 0.0, num * sizeof(double));
+  double *errors_components = new double[this->num];
+  memset(errors_components, 0.0, this->num * sizeof(double));
   this->errors_squared_sum = 0.0;
   double total_error = 0.0;
 
@@ -146,7 +146,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   // the latest assembling procedure).
   if (ignore_visited_segments)
   {
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
     {
       Element* e;
       for_all_active_elements(e, stage.meshes[i])
@@ -158,11 +158,11 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   bool multimesh = false;
 
   // Begin the multimesh traversal.
-  trav.begin(num, &(stage.meshes.front()), &(stage.fns.front()));
+  trav.begin(this->num, &(stage.meshes.front()), &(stage.fns.front()));
   while ((ee = trav.get_next_state(bnd, surf_pos)) != NULL)
   {   
     // Go through all solution components.
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
     {
       if (ee[i] == NULL)
         continue;
@@ -170,7 +170,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
       // Set maximum integration order for use in integrals, see limit_order()
       update_limit_table(ee[i]->get_mode());
 
-      RefMap *rm = sln[i]->get_refmap();
+      RefMap *rm = this->sln[i]->get_refmap();
 
       double err = 0.0;
 
@@ -227,7 +227,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
             int ns_index;
             
             dp.min_dg_mesh_seq = 0;
-            for(int j = 0; j < num; j++)
+            for(int j = 0; j < this->num; j++)
               if(stage.meshes[j]->get_seq() < dp.min_dg_mesh_seq || j == 0)
                 dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
             
@@ -334,8 +334,8 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
 
                 errors_components[i] += central_err + neighb_err;
                 total_error += central_err + neighb_err;
-                errors[i][ee[i]->id] += central_err;
-                errors[i][neighb->id] += neighb_err;
+                this->errors[i][ee[i]->id] += central_err;
+                this->errors[i][neighb->id] += neighb_err;
               }
               else
                 err += central_err;
@@ -374,14 +374,14 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
 
       if (calc_norm)
       {
-        double nrm = eval_solution_norm(error_form[i][i], rm, sln[i]);
+        double nrm = eval_solution_norm(this->error_form[i][i], rm, this->sln[i]);
         norms[i] += nrm;
         total_norm += nrm;
       }
 
       errors_components[i] += err;
       total_error += err;
-      errors[i][ee[i]->id] += err;
+      this->errors[i][ee[i]->id] += err;
 
       ee[i]->visited = true;
     }
@@ -392,31 +392,31 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   if(component_errors != NULL)
   {
     component_errors->clear();
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
     {
-      if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+      if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
         component_errors->push_back(sqrt(errors_components[i]));
-      else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+      else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
         component_errors->push_back(sqrt(errors_components[i]/norms[i]));
       else
       {
-        error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+        error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }
   }
 
   tmr.tick();
-  error_time = tmr.accumulated();
+  this->error_time = tmr.accumulated();
 
   // Make the error relative if needed.
-  if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+  if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
   {
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
     {
       Element* e;
       for_all_active_elements(e, stage.meshes[i])
-        errors[i][e->id] /= norms[i];
+        this->errors[i][e->id] /= norms[i];
     }
   }
 
@@ -425,31 +425,31 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   // Element error mask is used here, because this variable is used in the adapt()
   // function, where the processed error (sum of errors of processed element errors)
   // is matched to this variable.
-  if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
-    errors_squared_sum /= total_norm;
+  if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+    this->errors_squared_sum /= total_norm;
 
   // Prepare an ordered list of elements according to an error.
   fill_regular_queue(&(stage.meshes.front()));
-  have_errors = true;
+  this->have_errors = true;
 
   if (calc_norm)
     delete [] norms;
   delete [] errors_components;
 
   // Return error value.
-  if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+  if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
     return sqrt(total_error);
-  else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+  else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
     return sqrt(total_error / total_norm);
   else
   {
-    error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+    error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
     return -1.0;
   }
 }
 
 template<typename Scalar>
-double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt::MatrixFormVolError* form, RefMap *rm, MeshFunction<Scalar>* sln)
+double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form, RefMap *rm, MeshFunction<Scalar>* sln)
 {
   // determine the integration order
   int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -501,8 +501,8 @@ double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
 
-  Func<Ord>** oi = new Func<Ord>* [num];
-  for (int i = 0; i < num; i++)
+  Func<Ord>** oi = new Func<Ord>* [this->num];
+  for (int i = 0; i < this->num; i++)
     oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
   // Order of additional external functions.
@@ -536,9 +536,9 @@ double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<Scalar>** ui = new Func<Scalar>* [num];
+  Func<Scalar>** ui = new Func<Scalar>* [this->num];
   
-  for (int i = 0; i < num; i++)
+  for (int i = 0; i < this->num; i++)
     ui[i] = init_fn(this->sln[i], order);
   
   ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
@@ -561,8 +561,8 @@ double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<S
 {
   // determine the integration order
   int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
-  Func<Ord>** oi = new Func<Ord>* [num];
-  for (int i = 0; i < num; i++)
+  Func<Ord>** oi = new Func<Ord>* [this->num];
+  for (int i = 0; i < this->num; i++)
     oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
   // Order of additional external functions.
@@ -597,8 +597,8 @@ double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<S
     jwt[i] = pt[i][2] * tan[i][2];
 
   // function values
-  Func<Scalar>** ui = new Func<Scalar>* [num];
-  for (int i = 0; i < num; i++)
+  Func<Scalar>** ui = new Func<Scalar>* [this->num];
+  for (int i = 0; i < this->num; i++)
     ui[i] = init_fn(this->sln[i], eo);
   ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
 
@@ -624,7 +624,7 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
 {
   NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
   Hermes::vector<MeshFunction<Scalar>*> slns;
-  for (int i = 0; i < num; i++)
+  for (int i = 0; i < this->num; i++)
     slns.push_back(this->sln[i]);
   
   // Determine integration order.
@@ -646,7 +646,7 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
   // Clean up.
   if (fake_ui != NULL)
   {
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < this->num; i++)
       delete fake_ui->fn[i];
     fake_ui->free_ord();
     delete fake_ui;

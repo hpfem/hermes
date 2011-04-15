@@ -215,7 +215,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, LightArray<Node*>*>* tables[4][4];
+  std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[4][4];
 
   Element* elems[4][4];
   int cur_elem, oldest[4];
@@ -227,7 +227,7 @@ protected:
   int num_dofs;
 
   ESpaceType space_type;
-  void transform_values(int order, Node* node, int newmask, int oldmask, int np);
+  void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
 
   Scalar   cnst[2];
   Scalar   exact_mult;
