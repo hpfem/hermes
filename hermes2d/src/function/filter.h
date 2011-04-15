@@ -63,7 +63,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, LightArray<Node*>*>* tables[10];
+  std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>* tables[10];
 
   bool unimesh;
   UniData** unidata;
@@ -230,13 +230,13 @@ protected:
 /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
 /// to obtain the resulting stress measure.
 /// \brief Calculates the Von Mises stress.
-class HERMES_API VonMisesFilter : public Filter<double>
+class HERMES_API VonMisesFilter : public Filter<scalar>
 {
 public: // TODO: cylindrical coordinates
 
-  VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
+  VonMisesFilter(Hermes::vector<MeshFunction<scalar>*> solutions, double lambda, double mu,
                  int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
-  virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
+  virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
   { error("Not implemented yet"); return 0; }
 
 protected:

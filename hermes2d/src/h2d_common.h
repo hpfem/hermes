@@ -119,5 +119,12 @@ public:
 };
 
 
+#ifdef H2D_COMPLEX
+typedef std::complex<double> scalar;
+#else
+typedef double scalar;
+#endif
+
+
 #endif
 
