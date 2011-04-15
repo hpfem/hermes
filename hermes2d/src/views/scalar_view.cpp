@@ -70,6 +70,7 @@ void ScalarView<Scalar>::init()
 }
 
 #ifndef _MSC_VER
+template<typename Scalar>
 ScalarView<Scalar>::ScalarView(const char* title, WinGeom* wg) :
     View(title, wg),
     vertex_nodes(0),
@@ -387,8 +388,8 @@ template<typename Scalar>
 typename ScalarView<Scalar>::VertexNodeInfo* ScalarView<Scalar>::find_nearest_node_in_range(float x, float y, float radius)
 {
   VertexNodeInfo node_info(-1, x - radius, y); //right side of the widget
-  std::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
-  std::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
+  typename std::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
+  typename std::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
   float found_nearest_dist = -1;
   while (found_iter != vertex_nodes.end() && abs(found_iter->x - x) <= radius)
   {
@@ -460,7 +461,7 @@ void ScalarView<Scalar>::draw_vertex_nodes()
 
   //draw selected nodes
   glDisable(GL_BLEND);
-  std::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
+  typename std::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
   while (iter != vertex_nodes.end())
   {
     if (iter->selected)
@@ -601,7 +602,7 @@ void ScalarView<Scalar>::draw_element_infos_2d()
   glDisable(GL_BLEND);
 
   //draw element IDs
-  vector<ElementInfo>::const_iterator iter = element_infos.begin();
+  typename vector<ElementInfo>::const_iterator iter = element_infos.begin();
   while (iter != element_infos.end())
   {
     //check element dimension in pixels
@@ -1838,7 +1839,6 @@ const char* ScalarView<Scalar>::get_help_text() const
   "  * - increase Z scale\n"
   "  / - decrease Z scale";
 }
-template class HERMES_API ScalarView<double>;
-template class HERMES_API ScalarView<std::complex<double> >;
+template class HERMES_API ScalarView<scalar>;
 
 #endif // NOGLUT

@@ -55,7 +55,7 @@ void VectorBaseView<Scalar>::update_solution()
     coeffs[base_index + 1] = 1.0;
   Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss);
 
-  VectorView::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
+  VectorView<Scalar>::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
   update_title();
 
   delete [] coeffs;
@@ -89,7 +89,7 @@ void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
       break;
 
     default:
-      VectorView::on_special_key(key, x, y);
+      VectorView<Scalar>::on_special_key(key, x, y);
   }
 }
 

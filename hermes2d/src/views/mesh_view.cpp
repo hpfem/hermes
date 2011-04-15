@@ -50,7 +50,7 @@ MeshView::MeshView(char* title, WinGeom* wg)
 
 void MeshView::show(Mesh* mesh)
 {
-  Solution<double> sln;
+  Solution<scalar> sln;
   if (mesh == NULL) error("mesh == NULL in MeshView::show().");
   if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
   sln.set_zero(mesh);

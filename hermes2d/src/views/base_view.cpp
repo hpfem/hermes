@@ -28,23 +28,23 @@
 
 template<typename Scalar>
 BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
-        : ScalarView((char*) title, wg)
+        : ScalarView<Scalar>((char*) title, wg)
 {
   pss = NULL;
   sln = NULL;
   space = NULL;
-  show_edges = true;
+  this->show_edges = true;
   basic_title.assign(title);
 }
 
 template<typename Scalar>
 BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
-        : ScalarView(title, wg)
+        : ScalarView<Scalar>(title, wg)
 {
   pss = NULL;
   sln = NULL;
   space = NULL;
-  show_edges = true;
+  this->show_edges = true;
   basic_title.assign(title);
 }
 
@@ -118,7 +118,7 @@ void BaseView<Scalar>::on_special_key(int key, int x, int y)
       break;
 
     default:
-      ScalarView::on_special_key(key, x, y);
+      ScalarView<Scalar>::on_special_key(key, x, y);
   }
 }
 
