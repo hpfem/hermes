@@ -13,7 +13,7 @@ namespace RefinementSelectors {
   ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
           Range<int>& edge_bubble_order) :
-      OptimumSelector(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
+      OptimumSelector<Scalar>(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
       warn_uniform_orders(false),
       error_weight_h(H2DRS_DEFAULT_ERR_WEIGHT_H),
       error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P),
@@ -29,9 +29,9 @@ namespace RefinementSelectors {
           proj_matrix_cache[m][i][k] = NULL;
 
     //allocate caches
-    int max_inx = max_shape_inx[0];
+    int max_inx = this->max_shape_inx[0];
     for(int i = 1; i < H2D_NUM_MODES; i++)
-      max_inx = std::max(max_inx, max_shape_inx[i]);
+      max_inx = std::max(max_inx, this->max_shape_inx[i]);
     nonortho_rhs_cache.resize(max_inx + 1);
     ortho_rhs_cache.resize(max_inx + 1);
   }
@@ -59,7 +59,7 @@ namespace RefinementSelectors {
     bool tri = e->is_triangle();
 
     // find range of orders
-    CandsInfo info_h, info_p, info_aniso;
+    typename OptimumSelector<Scalar>::CandsInfo info_h, info_p, info_aniso;
     update_cands_info(info_h, info_p, info_aniso);
 
     // calculate squared projection errors of elements of candidates
@@ -70,9 +70,9 @@ namespace RefinementSelectors {
     double sum_err = 0.0;
     double sum_sqr_err = 0.0;
     int num_processed = 0;
-    Cand& unrefined_c = candidates[0];
-    for (unsigned i = 0; i < candidates.size(); i++) {
-      Cand& c = candidates[i];
+    typename OptimumSelector<Scalar>::Cand& unrefined_c = this->candidates[0];
+    for (unsigned i = 0; i < this->candidates.size(); i++) {
+      typename OptimumSelector<Scalar>::Cand& c = this->candidates[i];
       double error_squared = 0.0;
       if (tri) { //triangle
         switch(c.split) {
@@ -154,7 +154,7 @@ namespace RefinementSelectors {
   }
 
   template<typename Scalar>
-  void ProjBasedSelector<Scalar>::calc_projection_errors(Element* e, const CandsInfo& info_h, const CandsInfo& info_p, const CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]) {
+  void ProjBasedSelector<Scalar>::calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const  typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]) {
     assert_msg(info_h.is_empty() || (H2D_GET_H_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of H-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_h.max_quad_order), H2D_GET_V_ORDER(info_h.max_quad_order));
     assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
     assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
@@ -203,15 +203,15 @@ namespace RefinementSelectors {
     // precalculate values of shape functions
     TrfShape empty_shape_vals;
     if (!cached_shape_vals_valid[mode]) {
-      precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shape_indices[mode], max_shape_inx[mode], cached_shape_ortho_vals[mode]);
-      precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shape_indices[mode], max_shape_inx[mode], cached_shape_vals[mode]);
+      precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode]);
+      precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_vals[mode]);
       cached_shape_vals_valid[mode] = true;
 
       //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
       if (!warn_uniform_orders && mode == HERMES_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty()) {
         warn_uniform_orders = true;
-        if (cand_list == H2D_H_ISO || cand_list == H2D_H_ANISO || cand_list == H2D_P_ISO || cand_list == H2D_HP_ISO || cand_list == H2D_HP_ANISO_H) {
-          warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(cand_list));
+        if (this->cand_list == H2D_H_ISO || this->cand_list == H2D_H_ANISO || this->cand_list == H2D_P_ISO || this->cand_list == H2D_HP_ISO || this->cand_list == H2D_HP_ANISO_H) {
+          warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
         }
       }
     }
@@ -268,18 +268,18 @@ namespace RefinementSelectors {
     , double3* gip_points, int num_gip_points
     , const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals
     , std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals
-    , const CandsInfo& info
+    , const typename OptimumSelector<Scalar>::CandsInfo& info
     , CandElemProjError errors_squared
     ) {
     //allocate space
-    int max_num_shapes = next_order_shape[mode][current_max_order];
+    int max_num_shapes = this->next_order_shape[mode][this->current_max_order];
     Scalar* right_side = new Scalar[max_num_shapes];
     int* shape_inxs = new int[max_num_shapes];
     int* indx = new int[max_num_shapes]; //solver data
     double* d = new double[max_num_shapes]; //solver data
     double** proj_matrix = new_matrix<double>(max_num_shapes, max_num_shapes);
     ProjMatrixCache& proj_matrices = proj_matrix_cache[mode];
-    std::vector<ShapeInx>& full_shape_indices = shape_indices[mode];
+    std::vector<typename OptimumSelector<Scalar>::ShapeInx>& full_shape_indices = this->shape_indices[mode];
 
     //check whether ortho-svals are available
     bool ortho_svals_available = true;
@@ -287,7 +287,7 @@ namespace RefinementSelectors {
       ortho_svals_available &= !sub_ortho_svals[i]->empty();
 
     //clenup of the cache
-    for(int i = 0; i <= max_shape_inx[mode]; i++) {
+    for(int i = 0; i <= this->max_shape_inx[mode]; i++) {
       nonortho_rhs_cache[i] = ValueCacheItem<Scalar>();
       ortho_rhs_cache[i] = ValueCacheItem<Scalar>();
     }
@@ -303,7 +303,7 @@ namespace RefinementSelectors {
       int num_shapes = 0;
       unsigned int inx_shape = 0;
       while (inx_shape < full_shape_indices.size()) {
-        ShapeInx& shape = full_shape_indices[inx_shape];
+        typename OptimumSelector<Scalar>::ShapeInx& shape = full_shape_indices[inx_shape];
         if (order_h >= shape.order_h && order_v >= shape.order_v) {
           assert_msg(num_shapes < max_num_shapes, "more shapes than predicted, possible incosistency");
           shape_inxs[num_shapes] = shape.inx;

@@ -16,17 +16,17 @@ namespace RefinementSelectors {
 
   template<typename Scalar>
   H1ProjBasedSelector<Scalar>::H1ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, H1Shapeset* user_shapeset)
-    : ProjBasedSelector(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(2, H2DRS_MAX_H1_ORDER)) {}
+    : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(2, H2DRS_MAX_H1_ORDER)) {}
 
   template<typename Scalar>
   void H1ProjBasedSelector<Scalar>::set_current_order_range(Element* element) {
-    current_max_order = this->max_order;
+    this->current_max_order = this->max_order;
     int max_element_order = (20 - element->iro_cache)/2 - 1;
-    if (current_max_order == H2DRS_DEFAULT_ORDER)
-      current_max_order = max_element_order; // default
+    if (this->current_max_order == H2DRS_DEFAULT_ORDER)
+      this->current_max_order = max_element_order; // default
     else
-      current_max_order = std::min(current_max_order, max_element_order); // user specified
-    current_min_order = 1;
+      this->current_max_order = std::min(this->current_max_order, max_element_order); // user specified
+    this->current_min_order = 1;
   }
 
   template<typename Scalar>
@@ -37,7 +37,7 @@ namespace RefinementSelectors {
     while (!done && inx_trf < H2D_TRF_NUM) {
       //prepare data for processing
       const Trf& trf = trfs[inx_trf];
-      std::vector<TrfShapeExp>& trf_svals = svals[inx_trf];
+      std::vector<typename ProjBasedSelector<Scalar>::TrfShapeExp>& trf_svals = svals[inx_trf];
 
       //allocate
       trf_svals.resize(max_shape_inx + 1);
@@ -46,7 +46,7 @@ namespace RefinementSelectors {
       const int num_shapes = (int)shapes.size();
       for(int i = 0; i < num_shapes; i++) {
         int inx_shape = shapes[i].inx;
-        TrfShapeExp& shape_exp = trf_svals[inx_shape];
+        typename ProjBasedSelector<Scalar>::TrfShapeExp& shape_exp = trf_svals[inx_shape];
 
         //allocate
         shape_exp.allocate(H2D_H1FE_NUM, num_gip_points);
@@ -58,9 +58,9 @@ namespace RefinementSelectors {
           double ref_y = gip_points[k][H2D_GIP2D_Y] * trf.m[1] + trf.t[1];
 
           //for all expansions: retrieve values
-          shape_exp[H2D_H1FE_VALUE][k] = shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0);
-          shape_exp[H2D_H1FE_DX][k] = shapeset->get_dx_value(inx_shape, ref_x, ref_y, 0);
-          shape_exp[H2D_H1FE_DY][k] = shapeset->get_dy_value(inx_shape, ref_x, ref_y, 0);
+          shape_exp[H2D_H1FE_VALUE][k] = this->shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0);
+          shape_exp[H2D_H1FE_DX][k] = this->shapeset->get_dx_value(inx_shape, ref_x, ref_y, 0);
+          shape_exp[H2D_H1FE_DY][k] = this->shapeset->get_dy_value(inx_shape, ref_x, ref_y, 0);
         }
       }
 
@@ -192,12 +192,12 @@ namespace RefinementSelectors {
         double value = 0.0;
         for(int j = 0; j < num_gip_points; j++) {
           double gip_x = gip_points[j][H2D_GIP2D_X], gip_y = gip_points[j][H2D_GIP2D_Y];
-          double value0 = shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0);
-          double value1 = shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0);
-          double dx0 = shapeset->get_value(H2D_FEI_DX, shape0_inx, gip_x, gip_y, 0);
-          double dx1 = shapeset->get_value(H2D_FEI_DX, shape1_inx, gip_x, gip_y, 0);
-          double dy0 = shapeset->get_value(H2D_FEI_DY, shape0_inx, gip_x, gip_y, 0);
-          double dy1 = shapeset->get_value(H2D_FEI_DY, shape1_inx, gip_x, gip_y, 0);
+          double value0 = this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0);
+          double value1 = this->shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0);
+          double dx0 = this->shapeset->get_value(H2D_FEI_DX, shape0_inx, gip_x, gip_y, 0);
+          double dx1 = this->shapeset->get_value(H2D_FEI_DX, shape1_inx, gip_x, gip_y, 0);
+          double dy0 = this->shapeset->get_value(H2D_FEI_DY, shape0_inx, gip_x, gip_y, 0);
+          double dy1 = this->shapeset->get_value(H2D_FEI_DY, shape1_inx, gip_x, gip_y, 0);
 
           value += gip_points[j][H2D_GIP2D_W] * (value0*value1 + dx0*dx1 + dy0*dy1);
         }

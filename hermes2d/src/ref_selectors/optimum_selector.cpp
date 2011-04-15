@@ -55,7 +55,7 @@ namespace RefinementSelectors {
   OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, double conv_exp, int
           max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
           Range<int>& edge_bubble_order) :
-      Selector(max_order),
+      Selector<Scalar>(max_order),
       opt_symmetric_mesh(true),
       opt_apply_exp_dof(false),
       cand_list(cand_list),
@@ -204,7 +204,7 @@ namespace RefinementSelectors {
     if (full_eval) {
       std::vector<ShapeInx>& shapes = shape_indices[mode];
       int num = 0;
-      std::vector<ShapeInx>::const_iterator shape = shapes.begin();
+      typename std::vector<ShapeInx>::const_iterator shape = shapes.begin();
       while (shape != shapes.end()) {
         if (((int)shape->type & allowed_type_mask) != 0) {
           if ((order_h == H2DRS_ORDER_ANY || shape->order_h <= order_h) && (order_v == H2DRS_ORDER_ANY || shape->order_v <= order_v))
@@ -335,7 +335,7 @@ namespace RefinementSelectors {
 
   template<typename Scalar>
   void OptimumSelector<Scalar>::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const {
-    std::vector<Cand>::const_iterator cand = candidates.begin();
+    typename std::vector<Cand>::const_iterator cand = candidates.begin();
     while (cand != candidates.end()) {
       CandsInfo* info = NULL;
       if (cand->split == H2D_REFINEMENT_H) info = &info_h;
