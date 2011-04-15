@@ -227,9 +227,16 @@ void Linearizer::print_hash_stats()
 
 
 //// process_triangle & process_quad ///////////////////////////////////////////////////////////////
+#ifndef H2D_COMPLEX
+  #define getval(i) (val[i])
+  #define realpart(x) (x)
+#else
+  #define getval(i) (val[i].real())
+  #define realpart(x) (x.real())
+#endif
 
 void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
-                                  double* val, double* phx, double* phy, int* idx)
+                                  scalar* val, double* phx, double* phy, int* idx)
 {
   double midval[3][3];
 
@@ -243,7 +250,7 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       val = sln->get_values(ia, ib);
       if (auto_max)
         for (i = 0; i < lin_np_tri[1]; i++) {
-          double v = val[i];
+          double v = getval(i);
           if (finite(v) && fabs(v) > max) max = fabs(v);
         }
 
@@ -258,11 +265,11 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
         {
           xdisp->set_quad_order(1, H2D_FN_VAL);
           ydisp->set_quad_order(1, H2D_FN_VAL);
-          double* dx = xdisp->get_fn_values();
-          double* dy = ydisp->get_fn_values();
+          scalar* dx = xdisp->get_fn_values();
+          scalar* dy = ydisp->get_fn_values();
           for (i = 0; i < lin_np_tri[1]; i++) {
-            phx[i] += dmult*(dx[i]);
-            phy[i] += dmult*(dy[i]);
+            phx[i] += dmult*realpart(dx[i]);
+            phy[i] += dmult*realpart(dy[i]);
           }
         }
       }
@@ -294,9 +301,9 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       else
       {
         // calculate the approximate error of linearizing the normalized solution
-        double err = fabs(val[idx[0]] - midval[2][0]) +
-                     fabs(val[idx[1]] - midval[2][1]) +
-                     fabs(val[idx[2]] - midval[2][2]);
+        double err = fabs(getval(idx[0]) - midval[2][0]) +
+                     fabs(getval(idx[1]) - midval[2][1]) +
+                     fabs(getval(idx[2]) - midval[2][2]);
         split = !finite(err) || err > max*3*eps;
       }
 
@@ -311,9 +318,9 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
       if (level == 0 && !split)
       {
-        split = (fabs(val[8] - 0.5*(midval[2][0] + midval[2][1])) +
-                 fabs(val[9] - 0.5*(midval[2][1] + midval[2][2])) +
-                 fabs(val[4] - 0.5*(midval[2][2] + midval[2][0]))) > max*3*eps;
+        split = (fabs(getval(8) - 0.5*(midval[2][0] + midval[2][1])) +
+                 fabs(getval(9) - 0.5*(midval[2][1] + midval[2][2])) +
+                 fabs(getval(4) - 0.5*(midval[2][2] + midval[2][0]))) > max*3*eps;
       }
     }
 
@@ -327,9 +334,9 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
         }
 
       // obtain mid-edge vertices
-      int mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], val[idx[0]]);
-      int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], val[idx[1]]);
-      int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], val[idx[2]]);
+      int mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], getval(idx[0]));
+      int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], getval(idx[1]));
+      int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], getval(idx[2]));
 
       // recur to sub-elements
       sln->push_transform(0);
@@ -357,7 +364,7 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
 
 
 void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                              double* val, double* phx, double* phy, int* idx)
+                              scalar* val, double* phx, double* phy, int* idx)
 {
   double midval[3][5];
 
@@ -377,7 +384,7 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       val = sln->get_values(ia, ib);
       if (auto_max)
         for (i = 0; i < lin_np_quad[1]; i++) {
-          double v = val[i];
+          double v = getval(i);
           if (finite(v) && fabs(v) > max) max = fabs(v);
         }
 
@@ -392,11 +399,11 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
         {
           xdisp->set_quad_order(1, H2D_FN_VAL);
           ydisp->set_quad_order(1, H2D_FN_VAL);
-          double* dx = xdisp->get_fn_values();
-          double* dy = ydisp->get_fn_values();
+          scalar* dx = xdisp->get_fn_values();
+          scalar* dy = ydisp->get_fn_values();
           for (i = 0; i < lin_np_quad[1]; i++) {
-            phx[i] += dmult*(dx[i]);
-            phy[i] += dmult*(dy[i]);
+            phx[i] += dmult*realpart(dx[i]);
+            phy[i] += dmult*realpart(dy[i]);
           }
         }
       }
@@ -435,9 +442,9 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       else
       {
         // calculate the approximate error of linearizing the normalized solution
-        double herr = fabs(val[idx[1]] - midval[2][1]) + fabs(val[idx[3]] - midval[2][3]);
-        double verr = fabs(val[idx[0]] - midval[2][0]) + fabs(val[idx[2]] - midval[2][2]);
-        double err  = fabs(val[idx[4]] - midval[2][4]) + herr + verr;
+        double herr = fabs(getval(idx[1]) - midval[2][1]) + fabs(getval(idx[3]) - midval[2][3]);
+        double verr = fabs(getval(idx[0]) - midval[2][0]) + fabs(getval(idx[2]) - midval[2][2]);
+        double err  = fabs(getval(idx[4]) - midval[2][4]) + herr + verr;
         split = (!finite(err) || err > max*4*eps) ? 3 : 0;
 
         // decide whether to split horizontally or vertically only
@@ -466,10 +473,10 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
       if (level == 0 && !split)
       {
-        split = ((fabs(val[13] - 0.5*(midval[2][0] + midval[2][1])) +
-                  fabs(val[17] - 0.5*(midval[2][1] + midval[2][2])) +
-                  fabs(val[20] - 0.5*(midval[2][2] + midval[2][3])) +
-                  fabs(val[9]  - 0.5*(midval[2][3] + midval[2][0]))) > max*4*eps) ? 3 : 0;
+        split = ((fabs(getval(13) - 0.5*(midval[2][0] + midval[2][1])) +
+                  fabs(getval(17) - 0.5*(midval[2][1] + midval[2][2])) +
+                  fabs(getval(20) - 0.5*(midval[2][2] + midval[2][3])) +
+                  fabs(getval(9)  - 0.5*(midval[2][3] + midval[2][0]))) > max*4*eps) ? 3 : 0;
       }
     }
 
@@ -484,11 +491,11 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
 
       // obtain mid-edge and mid-element vertices
       int mid0, mid1, mid2, mid3, mid4;
-      if (split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], val[idx[0]]);
-      if (split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], val[idx[1]]);
-      if (split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], val[idx[2]]);
-      if (split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], val[idx[3]]);
-      if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], val[idx[4]]);
+      if (split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], getval(idx[0]));
+      if (split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], getval(idx[1]));
+      if (split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], getval(idx[2]));
+      if (split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], getval(idx[3]));
+      if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], getval(idx[4]));
 
       // recur to sub-elements
       if (split == 3)
@@ -642,8 +649,8 @@ void Linearizer::find_min_max()
 
 //// process_solution //////////////////////////////////////////////////////////////////////////////
 
-void Linearizer::process_solution(MeshFunction<double>* sln, int item, double eps, double max_abs,
-                                  MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double eps, double max_abs,
+                                  MeshFunction<scalar>* xdisp, MeshFunction<scalar>* ydisp, double dmult)
 {
   // sanity check
   if (sln == NULL) error("Solution is NULL in Linearizer:process_solution().");
@@ -757,10 +764,10 @@ void Linearizer::process_solution(MeshFunction<double>* sln, int item, double ep
   // Loop through all elements.
   while ((e = trav.get_next_state(NULL, NULL)) != NULL) {
     sln->set_quad_order(0, item);
-    double* val = sln->get_values(ia, ib);
+    scalar* val = sln->get_values(ia, ib);
     if (val == NULL) error("Item not defined in the solution.");
 
-    double *dx = NULL, *dy = NULL;
+    scalar *dx = NULL, *dy = NULL;
     if (disp) {
       xdisp->set_quad_order(0, H2D_FN_VAL);
       ydisp->set_quad_order(0, H2D_FN_VAL);
@@ -771,7 +778,7 @@ void Linearizer::process_solution(MeshFunction<double>* sln, int item, double ep
     int iv[4];
     for (unsigned int i = 0; i < e[0]->nvert; i++)
     {
-      double f = val[i];
+      double f = getval(i);
       if (auto_max && finite(f) && fabs(f) > max) 
         max = fabs(f);
 
@@ -779,8 +786,8 @@ void Linearizer::process_solution(MeshFunction<double>* sln, int item, double ep
       double y_disp = sln->get_refmap()->get_phys_y(0)[i];
 
       if (disp) {
-        x_disp += dmult*(dx[i]);
-        y_disp += dmult*(dy[i]);
+        x_disp += dmult*realpart(dx[i]);
+        y_disp += dmult*realpart(dy[i]);
       }
 
       iv[i] = get_vertex(-rand(), -rand(), x_disp, y_disp, f);
@@ -873,9 +880,9 @@ void Linearizer::save_data(const char* filename)
   fclose(f);
 }
 
-void Linearizer::save_solution_vtk(MeshFunction<double>* meshfn, const char* file_name, const char *quantity_name,
+void Linearizer::save_solution_vtk(MeshFunction<scalar>* meshfn, const char* file_name, const char *quantity_name,
                                    bool mode_3D, int item, double eps, double max_abs,
-                                   MeshFunction<double>* xdisp, MeshFunction<double>* ydisp,
+                                   MeshFunction<scalar>* xdisp, MeshFunction<scalar>* ydisp,
                                    double dmult)
 {
   // Create a linearizer. This class uses automatic adaptivity 

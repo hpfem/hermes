@@ -39,15 +39,10 @@ public:
   Linearizer();
   ~Linearizer();
 
-  void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0,
+  void process_solution(MeshFunction<scalar>* sln, int item = H2D_FN_VAL_0,
                         double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                        MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
+                        MeshFunction<scalar>* xdisp = NULL, MeshFunction<scalar>* ydisp = NULL,
                         double dmult = 1.0);
-
-  void process_solution(MeshFunction<std::complex<double> >* sln, int item = H2D_FN_VAL_0,
-                        double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                        MeshFunction<std::complex<double> >* xdisp = NULL, MeshFunction<std::complex<double> >* ydisp = NULL,
-                        double dmult = 1.0) { error("Not implemented yet."); return; }
 
   void lock_data() const { pthread_mutex_lock(&data_mutex); }
   void unlock_data() const { pthread_mutex_unlock(&data_mutex); }
@@ -71,10 +66,10 @@ public:
   // Loads data in a binary format.
   virtual void load_data(const char* filename);
   // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_solution_vtk(MeshFunction<double>* meshfn, const char* file_name, const char* quantity_name,
+  virtual void save_solution_vtk(MeshFunction<scalar>* meshfn, const char* file_name, const char* quantity_name,
                                  bool mode_3D = true, int item = H2D_FN_VAL_0, 
                                  double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                                 MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL,
+                                 MeshFunction<scalar>* xdisp = NULL, MeshFunction<scalar>* ydisp = NULL,
                                  double dmult = 1.0);
 
   // This function is used by save_solution_vtk().
@@ -84,13 +79,13 @@ public:
 
 protected:
 
-  MeshFunction<double>* sln;
+  MeshFunction<scalar>* sln;
   int item, ia, ib;
 
   double eps, max, cmax;
   bool auto_max;
 
-  MeshFunction<double> *xdisp, *ydisp;
+  MeshFunction<scalar> *xdisp, *ydisp;
   double dmult;
 
   double3* verts;  ///< vertices: (x, y, value) triplets
@@ -148,10 +143,10 @@ protected:
   }
 
   void process_triangle(int iv0, int iv1, int iv2, int level,
-                        double* val, double* phx, double* phy, int* indices);
+                        scalar* val, double* phx, double* phy, int* indices);
 
   void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    double* val, double* phx, double* phy, int* indices);
+                    scalar* val, double* phx, double* phy, int* indices);
 
   void process_edge(int iv1, int iv2, int marker);
   void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
@@ -212,8 +207,7 @@ public:
   Vectorizer();
   ~Vectorizer();
 
-  void process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps);
-  void process_solution(MeshFunction<std::complex<double> >* xsln, int xitem, MeshFunction<std::complex<double> >* ysln, int yitem, double eps) { error("Not implemented yet.");}
+  void process_solution(MeshFunction<scalar>* xsln, int xitem, MeshFunction<scalar>* ysln, int yitem, double eps);
 
 public: //accessors
   double4* get_vertices() const { return verts; }
@@ -233,7 +227,7 @@ public: //accessors
 
 protected:
 
-  MeshFunction<double>*xsln, *ysln;
+  MeshFunction<scalar>*xsln, *ysln;
   int xitem, yitem;
   int xia, xib, yia, yib;
   double4* verts;  ///< vertices: (x, y, xvalue, yvalue) quadruples
@@ -276,10 +270,10 @@ protected:
   }
 
   void process_triangle(int iv0, int iv1, int iv2, int level,
-                        double* xval, double* yval, double* phx, double* phy, int* indices);
+                        scalar* xval, scalar* yval, double* phx, double* phy, int* indices);
 
   void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    double* xval, double* yval, double* phx, double* phy, int* indices);
+                    scalar* xval, scalar* yval, double* phx, double* phy, int* indices);
 
   void find_min_max();
 
