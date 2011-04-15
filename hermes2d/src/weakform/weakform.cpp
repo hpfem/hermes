@@ -54,7 +54,7 @@ template<typename Scalar>
 MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
                                        std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, 
                                        Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+  Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
 {
 }
 
@@ -85,7 +85,7 @@ template<typename Scalar>
 MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
                                          Hermes::vector<MeshFunction<Scalar>*> ext, 
                                          Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
+  Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
 {
 }
 
@@ -116,7 +116,7 @@ template<typename Scalar>
 VectorFormVol<Scalar>::VectorFormVol(unsigned int i, std::string area,
                                        Hermes::vector<MeshFunction<Scalar>*> ext, 
                                        Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
+  Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
@@ -124,7 +124,7 @@ template<typename Scalar>
 VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, std::string area,
                                          Hermes::vector<MeshFunction<Scalar>*> ext, 
                                          Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
+  Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
@@ -282,7 +282,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
 
   // helper macro for iterating in a set
 #define set_for_each(myset, type) \
-  for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
+  for (typename std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
 
   // initialize the arrays meshes and fns needed by Traverse for each stage
   for (i = 0; i < stages.size(); i++)
