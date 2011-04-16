@@ -70,9 +70,12 @@ double SIGMA_A_WATER = SIGMA_T_WATER - C_WATER*SIGMA_T_WATER;  // Absorbing cros
 double SIGMA_A_IRON = SIGMA_T_IRON - C_IRON*SIGMA_T_IRON;
 
 // Materials.
-const int WATER_1 = 1;
-const int WATER_2 = 2;
-const int IRON = 3;
+const std::string WATER_1 = "1";
+const std::string WATER_2 = "2";
+const std::string IRON = "3";
+
+// Boundaries.
+const std::string ZERO_FLUX_BOUNDARY = "2";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -83,29 +86,27 @@ int main(int argc, char* argv[])
   Mesh mesh;
   ExodusIIReader mloader;
   if (!mloader.load("iron-water.e", &mesh)) error("ExodusII mesh load failed.");
-
+   
   // Perform initial uniform mesh refinement.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(WATER_2, IRON));
-  bc_types.add_bc_neumann(WATER_1); 
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(WATER_2, IRON));
-
+  
+  // Set essential boundary conditions.
+  DefaultEssentialBCConst bc_essential(ZERO_FLUX_BOUNDARY, 0.0);
+  EssentialBCs bcs(&bc_essential);
+  
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-
-  // Initialize the weak formulation
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, HERMES_SYM, WATER_1);
-  wf.add_matrix_form(bilinear_form_water, bilinear_form_ord, HERMES_SYM, WATER_2);
-  wf.add_matrix_form(bilinear_form_iron, bilinear_form_ord, HERMES_SYM, IRON);
-  wf.add_vector_form(linear_form_source, linear_form_ord, WATER_1);
-
+  H1Space space(&mesh, &bcs, P_INIT);
+  
+  // Associate element markers (here 'layers') with material properties 
+  // (diffusion coefficient, absorption cross-section, external sources).
+  Hermes::vector<std::string> layers(WATER_1, WATER_2, IRON);
+  Hermes::vector<double> D_map(D_WATER, D_WATER, D_IRON);
+  Hermes::vector<double> Sigma_a_map(SIGMA_A_WATER, SIGMA_A_WATER, SIGMA_A_IRON);
+  Hermes::vector<double> Sources_map(Q_EXT, 0.0, 0.0);
+  
+  // Initialize the weak formulation.
+  CustomWeakFormNeutronics wf(layers, D_map, Sigma_a_map, Sources_map);
+  
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
@@ -172,7 +173,7 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-	 Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
+    Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
