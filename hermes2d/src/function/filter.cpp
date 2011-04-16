@@ -528,7 +528,7 @@ void VonMisesFilter::precalculate(int order, int mask)
 
   Quad2D* quad = this->quads[this->cur_quad];
   int np = quad->get_num_points(order);
-  struct Filter<Scalar>::Node* node = new_node(H2D_FN_VAL_0, np);
+  typename Filter<scalar>::Node* node = new_node(H2D_FN_VAL_0, np);
 
   this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
   this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
