@@ -1,7 +1,8 @@
 if(NOT H2D_REAL)
     return()
 endif(NOT H2D_REAL)
-project(wave-1)
+
+project(wave-equation-wave-1)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)

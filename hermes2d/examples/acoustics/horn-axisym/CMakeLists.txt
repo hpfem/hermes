@@ -2,7 +2,7 @@ if(NOT H2D_COMPLEX)
     return()
 endif(NOT H2D_COMPLEX)
 
-project(horn-axisym)
+project(acoustics-horn-axisym)
 
 add_executable(${PROJECT_NAME} main.cpp)
 include (${hermes2d_SOURCE_DIR}/CMake.common)
