@@ -343,19 +343,13 @@ void Function<Scalar>::set_quad_2d(Quad2D* quad_2d)
   error("too many quadratures.");
 }
 
-template<>
-int Function<double>::idx2mask[6][2] =
+template<typename Scalar>
+int Function<Scalar>::idx2mask[6][2] =
 {
   { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
   { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
 };
 
-template<>
-int Function<std::complex<double> >::idx2mask[6][2] =
-{
-  { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
-  { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
-};
 
 template<typename Scalar>
 typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_points)
@@ -387,8 +381,5 @@ typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_po
 
 
 #undef H2D_Node_HRD_SIZE
-
-template class HERMES_API Function<double>;
-template class HERMES_API Function<std::complex<double> >;
 
 #endif
