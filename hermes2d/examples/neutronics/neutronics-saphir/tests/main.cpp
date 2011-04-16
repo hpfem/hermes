@@ -84,25 +84,25 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Perform initial uniform mesh refinement.
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(Hermes::vector<int>(BDY_NEUMANN));
-
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  
+  // Set essential boundary conditions.
+  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("right", "top"), 0.0);
+  EssentialBCs bcs(&bc_essential);
+  
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, P_INIT);
-
+  H1Space space(&mesh, &bcs, P_INIT);
+  
+  // Associate element markers (here 'layers') with material properties 
+  // (diffusion coefficient, absorption cross-section, external sources).
+  Hermes::vector<std::string> layers("1", "2", "3", "4", "5");
+  Hermes::vector<double> D_map(D_1, D_2, D_3, D_4, D_5);
+  Hermes::vector<double> Sigma_a_map(SIGMA_A_1, SIGMA_A_2, SIGMA_A_3, SIGMA_A_4, SIGMA_A_5);
+  Hermes::vector<double> Sources_map(Q_EXT_1, 0.0, Q_EXT_3, 0.0, 0.0);
+  
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(bilinear_form_1, bilinear_form_ord, HERMES_SYM, 1);
-  wf.add_matrix_form(bilinear_form_2, bilinear_form_ord, HERMES_SYM, 2);
-  wf.add_matrix_form(bilinear_form_3, bilinear_form_ord, HERMES_SYM, 3);
-  wf.add_matrix_form(bilinear_form_4, bilinear_form_ord, HERMES_SYM, 4);
-  wf.add_matrix_form(bilinear_form_5, bilinear_form_ord, HERMES_SYM, 5);
-  wf.add_vector_form(linear_form_1, linear_form_ord, 1);
-  wf.add_vector_form(linear_form_3, linear_form_ord, 3);
-
+  CustomWeakFormNeutronicsIronWater wf(layers, D_map, Sigma_a_map, Sources_map);
+  
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
   
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
 
   int n_dof_allowed = 670;
   printf("n_dof_actual = %d\n", ndof);
-  printf("n_dof_allowed = %d\n", n_dof_allowed);// ndofs was 656 at the time this test was created
+  printf("n_dof_allowed = %d\n", n_dof_allowed);// ndofs was 616 at the time this test was created
   if (ndof <= n_dof_allowed) {
     printf("Success!\n");
     return ERR_SUCCESS;
