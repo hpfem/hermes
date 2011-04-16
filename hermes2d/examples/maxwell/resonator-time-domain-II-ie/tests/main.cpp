@@ -2,7 +2,7 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// This test makes sure that the example "resonator-time-domain-II-ie" works correctly.
+// This test makes sure that the example "maxwell/resonator-time-domain-II-ie" works correctly.
 
 // The following parameters can be changed:
 const int P_INIT = 6;                              // Initial polynomial degree of all elements.
