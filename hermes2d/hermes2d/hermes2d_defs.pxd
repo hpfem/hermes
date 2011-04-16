@@ -6,15 +6,15 @@ cdef extern from "hermes2d.h":
     ctypedef int int3[3]
     ctypedef int int2[2]
 
-    cdef cppclass Function:
+    cdef cppclass Function[scalar]:
         pass
 
-    cdef cppclass MeshFunction(Function):
+    cdef cppclass MeshFunction[scalar](Function):
         #RefMap* get_refmap()
         #c_Mesh* get_mesh()
         scalar get_pt_value(double x, double y)
 
-    cdef cppclass Solution(MeshFunction):
+    cdef cppclass Solution[scalar](MeshFunction):
         #void set_zero(c_Mesh *m)
         #void set_const(c_Mesh *m, scalar c)
         void copy(Solution *s)
