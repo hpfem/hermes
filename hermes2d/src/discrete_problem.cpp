@@ -510,7 +510,7 @@ void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* 
     delete *it;
 
   // Delete the vector u_ext.
-  for(std::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
+  for(typename std::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
     delete *it;
 }
 
@@ -1116,7 +1116,7 @@ void DiscreteProblem<Scalar>::build_multimesh_tree(NeighborNode* root,
 }
 
 template<typename Scalar>
-void DiscreteProblem<Scalar>::insert_into_multimesh_tree(typename NeighborNode* node, 
+void DiscreteProblem<Scalar>::insert_into_multimesh_tree(NeighborNode* node, 
                       unsigned int* transformations,  
                       unsigned int transformation_count)
 {
@@ -1224,7 +1224,7 @@ void DiscreteProblem<Scalar>::update_neighbor_search(NeighborSearch<Scalar>* ns,
 }
 
 template<typename Scalar>
-typename NeighborNode* DiscreteProblem<Scalar>::find_node(unsigned int* transformations, 
+NeighborNode* DiscreteProblem<Scalar>::find_node(unsigned int* transformations, 
                                                           unsigned int transformation_count, 
                                                           NeighborNode* node)
 {
@@ -1529,8 +1529,8 @@ void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
     surf_pos.base = trav_base;
             
     // Create the extended shapeset on the union of the central element and its current neighbor.
-    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
-    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
+    typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(stage.meshes[n]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+    typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(stage.meshes[m]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1729,7 +1729,7 @@ Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, c
 {
   _F_
   if(rm->is_jacobian_const()) {
-    AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
+    typename AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
     if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
       if(assembling_caches.const_cache_fn_triangles.find(key) == assembling_caches.const_cache_fn_triangles.end())
         assembling_caches.const_cache_fn_triangles[key] = init_fn(fu, rm, order);
@@ -1742,7 +1742,7 @@ Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, c
     }
   }
   else {
-    AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, 
+    typename AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, 
                                       fu->get_transform(), fu->get_shapeset()->get_id());
     if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
       if(assembling_caches.cache_fn_triangles.find(key) == assembling_caches.cache_fn_triangles.end())
@@ -1805,14 +1805,14 @@ void DiscreteProblem<Scalar>::delete_cache()
     }
   }
   
-  for (std::map<AssemblingCaches::KeyNonConst, Func<double>*, AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_quads.begin();
+  for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_quads.begin();
        it != assembling_caches.cache_fn_quads.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
   }
   assembling_caches.cache_fn_quads.clear();
 
-  for (std::map<AssemblingCaches::KeyNonConst, Func<double>*, AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_triangles.begin();
+  for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_triangles.begin();
        it != assembling_caches.cache_fn_triangles.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
@@ -2031,11 +2031,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
 
   Scalar subs_value[4];
 
-#if !defined(H2D_COMPLEX)
   Scalar result_current_subelements = 0;
-#else
-  Scalar result_current_subelements = std::complex<double>(0, 0);
-#endif
   
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
@@ -2071,11 +2067,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
     // Relative error in tolerance.
     return result_current_subelements;
   else {
-#if !defined(H2D_COMPLEX)
     Scalar result_recursion = 0;
-#else
-    Scalar result_recursion = std::complex<double>(0, 0);
-#endif
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
@@ -2284,11 +2276,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
 
   Scalar subs_value[4];
 
-#if !defined(H2D_COMPLEX)
   Scalar result_current_subelements = 0;
-#else
-  Scalar result_current_subelements = std::complex<double>(0, 0);
-#endif
   
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
@@ -2324,11 +2312,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
     // Relative error in tolerance.
     return result_current_subelements;
   else {
-#if !defined(H2D_COMPLEX)
     Scalar result_recursion = 0;
-#else
-    Scalar result_recursion = std::complex<double>(0, 0);
-#endif
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
@@ -2531,11 +2515,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
 
   Scalar subs_value[4];
 
-#if !defined(H2D_COMPLEX)
   Scalar result_current_subelements = 0;
-#else
-  Scalar result_current_subelements = std::complex<double>(0, 0);
-#endif
   
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
@@ -2571,11 +2551,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
     // Relative error in tolerance.
     return result_current_subelements;
   else {
-#if !defined(H2D_COMPLEX)
     Scalar result_recursion = 0;
-#else
-    Scalar result_recursion = std::complex<double>(0, 0);
-#endif
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
@@ -2774,11 +2750,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
 
   Scalar subs_value[4];
 
-#if !defined(H2D_COMPLEX)
   Scalar result_current_subelements = 0;
-#else
-  Scalar result_current_subelements = std::complex<double>(0, 0);
-#endif
   
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
@@ -2814,11 +2786,7 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
     // Relative error in tolerance.
     return result_current_subelements;
   else {
-#if !defined(H2D_COMPLEX)
     Scalar result_recursion = 0;
-#else
-    Scalar result_recursion = std::complex<double>(0, 0);
-#endif
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
@@ -3197,14 +3165,14 @@ template<typename Scalar>
 DiscreteProblem<Scalar>::AssemblingCaches::~AssemblingCaches()
 {
   _F_
-  for (std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_triangles.begin();
+  for (typename std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_triangles.begin();
        it != const_cache_fn_triangles.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
   }
   const_cache_fn_triangles.clear();
 
-  for (std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_quads.begin();
+  for (typename std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_quads.begin();
        it != const_cache_fn_quads.end(); it++)
   {
     (it->second)->free_fn(); delete (it->second);
