@@ -15,6 +15,13 @@
 
 #include "h2d_common.h"
 #include "quadrature/quad_all.h"
+#include "mesh/mesh.h"
+#include "mesh/traverse.h"
+#include "mesh/refmap.h"
+#include "function/solution.h"
+#include "quadrature/limit_order.h"
+#include "integrals/integrals_h1.h"
+#include "discrete_problem.h"
 
 template<typename Scalar> class MeshFunction;
 class Transformable;
