@@ -1197,7 +1197,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
   }
 
   if(this->nodes->present(this->order)) {
-    assert(nodes->get(this->order) == cur_node);
+    assert(this->nodes->get(this->order) == this->cur_node);
     ::free(this->nodes->get(this->order));
   }
   this->nodes->add(node, this->order);

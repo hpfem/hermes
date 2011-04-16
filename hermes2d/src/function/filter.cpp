@@ -271,7 +271,7 @@ void SimpleFilter<Scalar>::precalculate(int order, int mask)
   }
 
   if(this->nodes->present(order)) {
-    assert(nodes->get(order) == this->cur_node);
+    assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
   this->nodes->add(node, order);
@@ -361,7 +361,7 @@ void DXDYFilter<Scalar>::precalculate(int order, int mask)
   }
 
   if(this->nodes->present(order)) {
-    assert(this->nodes->get(order) == cur_node);
+    assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
   this->nodes->add(node, order);
@@ -615,7 +615,7 @@ void LinearFilter<Scalar>::precalculate(int order, int mask)
   }
 
   if(this->nodes->present(order)) {
-    assert(this->nodes->get(order) == cur_node);
+    assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
   this->nodes->add(node, order);
