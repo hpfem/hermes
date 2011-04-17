@@ -129,8 +129,6 @@ Scalar vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int n_dof)
 
 void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
 
-template class SparseMatrix<double>;
-template class SparseMatrix<std::complex<double> >;
 
 template<typename Scalar>
 SparseMatrix<Scalar>::SparseMatrix()
@@ -351,6 +349,9 @@ Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
   return NULL;
 }
 
+template class SparseMatrix<double>;
+template class SparseMatrix<std::complex<double> >;
+
 template HERMES_API Vector<double>* create_vector(MatrixSolverType matrix_solver);
 template HERMES_API SparseMatrix<double>*  create_matrix(MatrixSolverType matrix_solver);
 template HERMES_API Solver<double>*  create_linear_solver(MatrixSolverType matrix_solver, 
@@ -360,3 +361,5 @@ template HERMES_API Vector<std::complex<double> >* create_vector(MatrixSolverTyp
 template HERMES_API SparseMatrix<std::complex<double> >*  create_matrix(MatrixSolverType matrix_solver);
 template HERMES_API Solver<std::complex<double> >*  create_linear_solver(MatrixSolverType matrix_solver, 
                                          Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
+
+
