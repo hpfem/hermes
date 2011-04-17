@@ -2,7 +2,7 @@
 
 using namespace RefinementSelectors;
 
-//  This test makes sure that the example "saphir" works correctly.
+//  This test makes sure that the example "neutronics/saphir" works correctly.
 
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.

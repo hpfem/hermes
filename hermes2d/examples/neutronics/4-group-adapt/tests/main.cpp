@@ -7,7 +7,7 @@
 
 using namespace RefinementSelectors;
 
-// This test makes sure that the example "neutronics-4-group-adapt" works correctly.
+// This test makes sure that the example "neutronics/4-group-adapt" works correctly.
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

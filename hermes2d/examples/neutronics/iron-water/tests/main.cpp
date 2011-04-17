@@ -2,7 +2,7 @@
 
 using namespace RefinementSelectors;
 
-//  This test makes sure that the example "iron-water" works correctly.
+//  This test makes sure that the example "neutronics/iron-water" works correctly.
 //  It is only executed if WITH_EXODUSII is set to YES
 
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.

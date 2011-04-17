@@ -1,4 +1,5 @@
-./neutronics-4-group-adapt
+rm *~ 
+./4-group-adapt
 
 if [ ! -d "res/$1" ]; then
 	mkdir "res/$1"

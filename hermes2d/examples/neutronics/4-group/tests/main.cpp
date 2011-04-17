@@ -5,7 +5,7 @@
 
 #include "hermes2d.h"
 
-// This test makes sure that example "neutronics-4-group" works correctly.
+// This test makes sure that example "neutronics/4-group" works correctly.
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
