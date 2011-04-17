@@ -68,12 +68,15 @@ double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
 }
 
 // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
-// as well as the unit normal and unit tangential vectors.
+// as well as the unit normal and unit tangential vectors. This is done using 
+// the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
 void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
                          double& y, double& n_x, double& n_y, double& t_x, double& t_y)
 {
   _F_
-  t = (t + 1) / 2.0; // nurbs curves are parametrized from 0 to 1
+  // Nurbs curves are parametrized from 0 to 1.
+  t = (t + 1) / 2.0;
+  // Straight line.
   if (nurbs == NULL)
   {
     double2 v;
@@ -87,32 +90,65 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     n_x = t_y;
     n_y = -t_x;
   }
-  else
-  {
-    double3* cp = nurbs->pt;
-    x = y = 0.0;
-    double sum = 0.0;  // sum of basis fns and weights
+  else {
+    // Circular arc.
+    if (nurbs->arc == true) {
+      double3* cp = nurbs->pt;
+      x = y = 0.0;
+      double sum = 0.0;  // sum of basis fns and weights
 
-    for (int i = 0; i < nurbs->np; i++)
-    {
-      double basis = nurbs_basis_fn(i, nurbs->degree, t, nurbs->kv);
-      sum += cp[i][2] * basis;
-      x   += cp[i][2] * basis * cp[i][0];
-      y   += cp[i][2] * basis * cp[i][1];
+      for (int i = 0; i < nurbs->np; i++)
+      {
+        double basis = nurbs_basis_fn(i, nurbs->degree, t, nurbs->kv);
+        sum += cp[i][2] * basis;
+        double x_i = cp[i][0];
+        double y_i = cp[i][1];
+        double w_i = cp[i][2];
+        x   += w_i * basis * x_i;
+        y   += w_i * basis * y_i;
+      }
+
+      x /= sum;
+      y /= sum;
+
+      if(!warning_issued) {
+        printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
+        warning_issued = true;
+      }
+      n_x = 0;
+      n_y = 0;
+      t_x = 0;
+      t_y = 0;
     }
+    // General NURBS.
+    else {
+      double3* cp = nurbs->pt;
+      x = y = 0.0;
+      double sum = 0.0;  // sum of basis fns and weights
 
-    sum = 1.0 / sum;
-    x *= sum;
-    y *= sum;
+      for (int i = 0; i < nurbs->np; i++)
+      {
+        double basis = nurbs_basis_fn(i, nurbs->degree, t, nurbs->kv);
+        sum += cp[i][2] * basis;
+        double x_i = cp[i][0];
+        double y_i = cp[i][1];
+        double w_i = cp[i][2];
+        x   += w_i * basis * x_i;
+        y   += w_i * basis * y_i;
+      }
 
-    if(!warning_issued) {
-      printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
-      warning_issued = true;
+      x /= sum;
+      y /= sum;
+
+      if(!warning_issued) {
+        printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
+        warning_issued = true;
+      }
+      n_x = 0;
+      n_y = 0;
+      t_x = 0;
+      t_y = 0;
     }
-    n_x = 0;
-    n_y = 0;
-    t_x = 0;
-    t_y = 0;
   }
 }
 
