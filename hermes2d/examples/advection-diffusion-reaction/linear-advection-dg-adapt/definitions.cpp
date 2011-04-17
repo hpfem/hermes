@@ -2,13 +2,13 @@
 #include "integrals/integrals_h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-class CustomWeakForm : public WeakForm
+class CustomWeakForm : public WeakForm<double>
 {
 public:
 
   CustomWeakForm(std::string left_bottom_bnd_part) : WeakForm(1) {
-    add_matrix_form(new MatrixFormVol(0, 0));
-    add_vector_form(new VectorFormVol(0));
+    add_matrix_form(new MatrixFormVol<double>(0, 0));
+    add_vector_form(new VectorFormVol<double>(0));
     add_matrix_form_surf(new MatrixFormSurface(0, 0));
     add_matrix_form_surf(new MatrixFormInterface(0, 0));
     add_vector_form_surf(new VectorFormSurface(0, left_bottom_bnd_part));
@@ -17,10 +17,10 @@ public:
   };
 
 private:
-  class MatrixFormVol : public WeakForm::MatrixFormVol
+  class cMatrixFormVol : public MatrixFormVol<double>
   {
   public:
-    MatrixFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j) { }
+    cMatrixFormVol(int i, int j): MatrixFormVol<double>(i, j) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -39,10 +39,10 @@ private:
     }
   };
 
-  class VectorFormVol : public WeakForm::VectorFormVol
+  class cVectorFormVol : public VectorFormVol<double>
   {
   public:
-    VectorFormVol(int i) : WeakForm::VectorFormVol(i) { }
+    cVectorFormVol(int i) : VectorFormVol<double>(i) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -66,10 +66,10 @@ private:
     }
   };
 
-  class MatrixFormSurface : public WeakForm::MatrixFormSurf
+  class MatrixFormSurface : public MatrixFormSurf<double>
   {
   public:
-    MatrixFormSurface(int i, int j) : WeakForm::MatrixFormSurf(i, j, H2D_DG_BOUNDARY_EDGE) { }
+    MatrixFormSurface(int i, int j) : MatrixFormSurf<double>(i, j, H2D_DG_BOUNDARY_EDGE) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -93,10 +93,10 @@ private:
     }
   };
 
-  class MatrixFormInterface : public WeakForm::MatrixFormSurf
+  class MatrixFormInterface : public MatrixFormSurf<double>
   {
   public:
-    MatrixFormInterface(int i, int j) : WeakForm::MatrixFormSurf(i, j, H2D_DG_INNER_EDGE) { }
+    MatrixFormInterface(int i, int j) : MatrixFormSurf<double>(i, j, H2D_DG_INNER_EDGE) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
@@ -120,10 +120,10 @@ private:
     }
   };
 
-  class VectorFormSurface : public WeakForm::VectorFormSurf
+  class VectorFormSurface : public VectorFormSurf<double>
   {
   public:
-    VectorFormSurface(int i, std::string left_bottom_bnd_part) : WeakForm::VectorFormSurf(i, H2D_DG_BOUNDARY_EDGE), left_bottom_bnd_part(left_bottom_bnd_part) { }
+    VectorFormSurface(int i, std::string left_bottom_bnd_part) : VectorFormSurf<double>(i, H2D_DG_BOUNDARY_EDGE), left_bottom_bnd_part(left_bottom_bnd_part) { }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
       double result = 0;
