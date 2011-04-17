@@ -56,10 +56,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Problem parameters.
 double L = 30;                           // Edge of square.
-double L0 = 0.75*0.5*L;                  // End of first water layer.
-double L1 = 0.5*L;                       // End of second water layer.
-double L2 = 0.75*L;                      // End of iron layer.
-double Q_EXT = 1.0;                      // Neutron source (nonzero in domain 1 only).
+double L0 = 0.75*0.5*L;                  // End of first water region.
+double L1 = 0.5*L;                       // End of second water region.
+double L2 = 0.75*L;                      // End of iron region.
+double Q_EXT = 1.0;                      // Neutron source (nonzero in region 1 only).
 double SIGMA_T_WATER = 3.33;             // Total cross-section.
 double SIGMA_T_IRON = 1.33;
 double C_WATER = 0.994;                  // Scattering ratio.
@@ -78,7 +78,7 @@ const std::string IRON = "3";
 const std::string ZERO_FLUX_BOUNDARY = "2";
 
 // Weak forms.
-#include "definitions.cpp"
+#include "weakform_library/neutronics.h"
 
 int main(int argc, char* argv[])
 {
@@ -97,15 +97,16 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
   
-  // Associate element markers (here 'layers') with material properties 
-  // (diffusion coefficient, absorption cross-section, external sources).
-  Hermes::vector<std::string> layers(WATER_1, WATER_2, IRON);
+  // Associate element markers (corresponding to physical regions) 
+  // with material properties (diffusion coefficient, absorption 
+  // cross-section, external sources).
+  Hermes::vector<std::string> regions(WATER_1, WATER_2, IRON);
   Hermes::vector<double> D_map(D_WATER, D_WATER, D_IRON);
   Hermes::vector<double> Sigma_a_map(SIGMA_A_WATER, SIGMA_A_WATER, SIGMA_A_IRON);
   Hermes::vector<double> Sources_map(Q_EXT, 0.0, 0.0);
   
-  // Initialize the weak formulation.
-  CustomWeakFormNeutronics wf(layers, D_map, Sigma_a_map, Sources_map);
+  WeakFormsNeutronDiffusion::DefaultWeakFormSimpleMonoenergetic 
+    wf(regions, D_map, Sigma_a_map, Sources_map);
   
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

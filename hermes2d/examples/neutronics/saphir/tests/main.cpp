@@ -70,11 +70,8 @@ double SIGMA_A_3 = SIGMA_T_3 - SIGMA_S_3;
 double SIGMA_A_4 = SIGMA_T_4 - SIGMA_S_4;
 double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 
-// Boundary markers.
-const int BDY_NEUMANN = 1;
-
 // Weak forms.
-#include "../definitions.cpp"
+#include "weakform_library/neutronics.h"
 
 int main(int argc, char* argv[])
 {
@@ -93,15 +90,17 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
   
-  // Associate element markers (here 'layers') with material properties 
-  // (diffusion coefficient, absorption cross-section, external sources).
-  Hermes::vector<std::string> layers("1", "2", "3", "4", "5");
+  // Associate element markers (corresponding to physical regions) 
+  // with material properties (diffusion coefficient, absorption 
+  // cross-section, external sources).
+  Hermes::vector<std::string> regions("1", "2", "3", "4", "5");
   Hermes::vector<double> D_map(D_1, D_2, D_3, D_4, D_5);
   Hermes::vector<double> Sigma_a_map(SIGMA_A_1, SIGMA_A_2, SIGMA_A_3, SIGMA_A_4, SIGMA_A_5);
   Hermes::vector<double> Sources_map(Q_EXT_1, 0.0, Q_EXT_3, 0.0, 0.0);
   
   // Initialize the weak formulation.
-  CustomWeakFormNeutronics wf(layers, D_map, Sigma_a_map, Sources_map);
+  WeakFormsNeutronDiffusion::DefaultWeakFormSimpleMonoenergetic 
+    wf(regions, D_map, Sigma_a_map, Sources_map);
   
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
