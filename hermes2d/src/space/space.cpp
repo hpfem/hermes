@@ -635,5 +635,7 @@ void Space<Scalar>::free_extra_data()
   extra_data.clear();
 }
 
+template HERMES_API class AsmList<double>;
+template HERMES_API class AsmList<std::complex<double> >;
 template HERMES_API class Space<double>;
 template HERMES_API class Space<std::complex<double> >;
