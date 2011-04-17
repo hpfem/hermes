@@ -33,3 +33,11 @@ void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, 
     zCreate_Dense_Matrix (X, m, n, (doublecomplex *) x, ldx, stype, dtype, mtype);
 }
 
+template <>
+void  SuperLUSolver<std::complex<double> >::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
+                                          double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, 
+                                          double *recip_pivot_growth, double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, 
+                                          int *info){
+  zgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, (mem_usage_t*) mem_usage, stat, info);
+}
+

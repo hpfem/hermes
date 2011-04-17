@@ -34,4 +34,10 @@ void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int
   dCreate_CompCol_Matrix (A, m, n, nnz, nzval, rowind, colptr, stype, dtype, mtype);
 }
 
+template<>
+void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<double>::scalar *x, 
+                                                          int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
+    dCreate_Dense_Matrix (X, m, n, (double*) x, ldx, stype, dtype, mtype);
+}
+
 
