@@ -5,10 +5,10 @@
 if(H2D_WITH_GLUT)
    add_subdirectory(view)
 endif(H2D_WITH_GLUT)
- add_subdirectory(shapeset)
-# add_subdirectory(integrals)
-# add_subdirectory(rcp)
-# add_subdirectory(python)
+add_subdirectory(shapeset)
+#add_subdirectory(integrals)
+add_subdirectory(rcp)
+add_subdirectory(python)
 add_subdirectory(nurbs)
 
 # Additional definitions for tests.
