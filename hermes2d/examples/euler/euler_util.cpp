@@ -158,7 +158,10 @@ std::set<int>& DiscontinuityDetector::get_discontinuous_element_ids(double thres
         double norms[4];
         calculate_norms(e, edge_i, norms);
 
-        for(unsigned int component_i = 0; component_i < 1; component_i++) {
+        // Number of component jumps tested.
+        unsigned int component_checked_number = 4;
+
+        for(unsigned int component_i = 0; component_i < component_checked_number; component_i++) {
           if(norms[component_i] < 1E-8)
             continue;
           double discontinuity_detector = jumps[component_i] / (diameter_indicator * edge_length * norms[component_i]);

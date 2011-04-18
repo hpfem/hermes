@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -99,13 +99,11 @@ int main(int argc, char* argv[])
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-
   
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
-  
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -133,6 +131,19 @@ int main(int argc, char* argv[])
       info("Assembling the right-hand side vector (only).");
       dp.assemble(NULL, rhs);
     }
+
+    std::ofstream out("out");
+   for(int i = 0; i < matrix->get_size(); i++)
+     for(int j = 0; j < matrix->get_size(); j++)
+       if(std::abs(matrix->get(i, j)) > 1E-3)
+         out << i << ',' << j << ':' << matrix->get(i, j) << std::endl;
+   out.close();
+ 
+   std::ofstream out_rhs("out_rhs");
+   for(int i = 0; i < rhs->length(); i++)
+       if(std::abs(rhs->get(i)) > 1E-3)
+         out_rhs << i << ':' << rhs->get(i) << std::endl;
+   out_rhs.close();
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
