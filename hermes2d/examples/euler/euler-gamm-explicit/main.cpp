@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -78,10 +78,10 @@ int main(int argc, char* argv[])
   InitialSolutionEulerDensityEnergy prev_e(&mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
 
   // Numerical flux.
-  StegerWarmingNumericalFlux num_flux(KAPPA); 
+  OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitMultiComponentSemiImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+  EulerEquationsWeakFormSemiImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
@@ -120,17 +120,9 @@ int main(int argc, char* argv[])
     // Set the current time step.
     wf.set_time_step(time_step);
 
-    bool rhs_only = (iteration == 1 ? false : true);
-    // Assemble stiffness matrix and rhs or just rhs.
-    if (rhs_only == false) {
-      info("Assembling the stiffness matrix and right-hand side vector.");
-      dp.assemble(matrix, rhs);
-    }
-
-    else {
-      info("Assembling the right-hand side vector (only).");
-      dp.assemble(NULL, rhs);
-    }
+    // Assemble the stiffness matrix and rhs.
+    info("Assembling the stiffness matrix and right-hand side vector.");
+    dp.assemble(matrix, rhs);
 
     std::ofstream out("out");
     for(int i = 0; i < matrix->get_size(); i++)
@@ -185,21 +177,21 @@ int main(int argc, char* argv[])
       CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh, time_step);
 
     // Visualization.
-    /*
+    
     Mach_number.reinit();
     pressure.reinit();
     entropy.reinit();
     pressure_view.show(&pressure);
     entropy_production_view.show(&entropy);
     Mach_number_view.show(&Mach_number);
-    */
     
+    /*
     s1.show(&prev_rho);
     s2.show(&prev_rho_v_x);
     s3.show(&prev_rho_v_y);
     s4.show(&prev_e);
-
-    View::wait();
+    */
+    //View::wait();
     
   }
   
