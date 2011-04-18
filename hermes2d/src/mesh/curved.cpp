@@ -76,15 +76,19 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
   _F_
   // Nurbs curves are parametrized from 0 to 1.
   t = (t + 1) / 2.0;
+
+  // Vector pointing from the start point of the edge 
+  // to the end point.
+  double2 v;
+  v[0] = e->vn[e->next_vert(edge)]->x - e->vn[edge]->x;
+  v[1] = e->vn[e->next_vert(edge)]->y - e->vn[edge]->y;
+  double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
+
   // Straight line.
   if (nurbs == NULL)
   {
-    double2 v;
-    v[0] = e->vn[e->next_vert(edge)]->x - e->vn[edge]->x;
-    v[1] = e->vn[e->next_vert(edge)]->y - e->vn[edge]->y;
     x = e->vn[edge]->x + t * v[0];
     y = e->vn[edge]->y + t * v[1];
-    double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
     t_x = v[0] / abs_v;
     t_y = v[1] / abs_v;
     n_x = t_y;
@@ -111,16 +115,64 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       x /= sum;
       y /= sum;
 
-      if(!warning_issued) {
-        printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
-        warning_issued = true;
-      }
-      n_x = 0;
-      n_y = 0;
-      t_x = 0;
-      t_y = 0;
+      // Normal and tangential vectors.
+      // FIXME; This calculation is artificial and it uses knowledge
+      // that the NURBS is a circular arc. This should be done in the 
+      // same way for all NURBS.
+
+      // End points, midpoint
+      double2 A, B, M;
+      A[0] = e->vn[edge]->x;
+      A[1] = e->vn[edge]->y;
+      B[0] = e->vn[e->next_vert(edge)]->x;
+      B[1] = e->vn[e->next_vert(edge)]->y;
+      M[0] = (A[0] + B[0])/2;
+      M[1] = (A[1] + B[1])/2;
+      
+      // Unit vector from M to center of circle S.
+      double2 w;
+      w[0] = -v[1] / abs_v;
+      w[1] = v[0] / abs_v;
+
+      // Distance L between M and center of circle S
+      // can be calculated using a right-angle triangle
+      // whose one angle is alpha/2.
+      double L = 0.5 * abs_v / tan(0.5 * nurbs->angle);
+      
+      // Center of circle.
+      double2 S;
+      S[0] = M[0] + w[0] * L;
+      S[1] = M[1] + w[1] * L;
+
+      // Calculation of radius and test.
+      double2 SA, SB;
+      SA[0] = A[0] - S[0];
+      SA[1] = A[1] - S[1];
+      SB[0] = B[0] - S[0];
+      SB[1] = B[1] - S[1];
+      double R = sqrt(sqr(SA[0]) + sqr(SA[1]));
+      double R2 = sqrt(sqr(SB[0]) + sqr(SB[1]));
+      if (std::abs(R - R2) > 1e-6) 
+        error("Internal error in nurbs_edge() - bad radius R.");
+
+      // Normal vectors to circular arc at edg eend points A, B.
+      double2 normal_A, normal_B;
+      normal_A[0] = SA[0] / R;
+      normal_A[1] = SA[1] / R;
+      normal_B[0] = SB[0] / R;
+      normal_B[1] = SB[1] / R;
+
+      // Normal vector at the point [x, y] is a linear
+      // interpolant between normal vectors at the end points.
+      n_x = normal_A[0] + t * (normal_B[0] - normal_A[0]);
+      n_y = normal_A[1] + t * (normal_B[1] - normal_A[1]);
+      
+      // Calculate tangential vectors.
+      t_x = -n_y;
+      t_y = n_x;
     }
-    // General NURBS.
+    // General NURBS. 
+    // FIXME - calculation of normal and tangential vectors needs to be added.
     else {
       double3* cp = nurbs->pt;
       x = y = 0.0;
