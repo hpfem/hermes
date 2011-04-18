@@ -24,13 +24,6 @@ using namespace RefinementSelectors;
 //     See the parameter INITIAL_CONCENTRATION_STATE.
 //
 // The following parameters can be changed.
-// Some of them are not constants to be able to change them via command line arguments:
-// The parameter SETUP_VARIANT has the following meaning:
-// 1 - Dirichlet condition (concentration production) on the inlet.
-// 2 - Dirichlet condition (concentration production) on the bottom.
-// 3 - Dirichlet condition (concentration production) on the top.
-const int SETUP_VARIANT = 0;
-
 // If set to true, GAMM channel is used, if false, a simple rectangular channel is.
 const bool GAMM_CHANNEL = false;
 
@@ -91,17 +84,6 @@ int main(int argc, char* argv[])
 
   for(unsigned int i = 0; i < INIT_REF_NUM_CONCENTRATION; i++)
     mesh_concentration.refine_all_elements();
-  switch(SETUP_VARIANT) {
-  case 0:
-    mesh_concentration.refine_towards_boundary(BDY_INLET, INIT_REF_NUM_CONCENTRATION_BDY, false);
-    break;
-  case 1:
-    mesh_concentration.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_CONCENTRATION_BDY, false);
-    break;
-  case 2:
-    mesh_concentration.refine_towards_boundary(BDY_SOLID_WALL_TOP, INIT_REF_NUM_CONCENTRATION_BDY, false);
-    break;
-  }
 
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
@@ -112,21 +94,6 @@ int main(int argc, char* argv[])
 
   // For the concentration.
   EssentialBCs bcs_concentration;
-
-  switch(SETUP_VARIANT) {
-  case 0:
-    //bcs_concentration.add_boundary_condition(new NaturalEssentialBC(Hermes::vector<std::string>(BDY_OUTLET, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP)));
-    bcs_concentration.add_boundary_condition(new DefaultEssentialBCConst(BDY_INLET, CONCENTRATION_EXT));
-    break;
-  case 1:
-    //bcs_concentration.add_boundary_condition(new NaturalEssentialBC(Hermes::vector<std::string>(BDY_OUTLET, BDY_INLET, BDY_SOLID_WALL_TOP)));
-    bcs_concentration.add_boundary_condition(new DefaultEssentialBCConst(BDY_SOLID_WALL_BOTTOM, CONCENTRATION_EXT));
-    break;
-  case 2:
-    //bcs_concentration.add_boundary_condition(new NaturalEssentialBC(Hermes::vector<std::string>(BDY_OUTLET, BDY_SOLID_WALL_BOTTOM, BDY_INLET)));
-    bcs_concentration.add_boundary_condition(new DefaultEssentialBCConst(BDY_SOLID_WALL_TOP, CONCENTRATION_EXT));
-    break;
-  }
 
   L2Space space_rho(&mesh_flow, &bcs_flow, P_INIT_FLOW);
   L2Space space_rho_v_x(&mesh_flow, &bcs_flow, P_INIT_FLOW);
@@ -154,7 +121,7 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormImplicitCoupled wf(SETUP_VARIANT, &num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+  EulerEquationsWeakFormImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, PRECONDITIONING, EPSILON);
   wf.set_time_step(time_step);
 

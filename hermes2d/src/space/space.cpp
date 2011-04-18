@@ -288,9 +288,9 @@ void Space::unrefine_all_mesh_elements(bool keep_initial_refinements)
       }
     }
 
-    order = unsigned int(order / num_sons);
-    h_order = unsigned int(h_order / num_sons);
-    v_order = unsigned int(v_order / num_sons);
+    order = (unsigned int)(order / num_sons);
+    h_order = (unsigned int)(h_order / num_sons);
+    v_order = (unsigned int)(v_order / num_sons);
 
     if(this->mesh->get_element_fast(list[i])->is_triangle())
       edata[list[i]].order = order;
