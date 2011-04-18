@@ -30,7 +30,7 @@ double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 double ADVECTION_STABILITY_CONSTANT = 1.0;
 const double DIFFUSION_STABILITY_CONSTANT = 1.0;
 
-const int P_INIT_FLOW = 0;                             // Polynomial degree for the Euler equations (for the flow).
+const int P_INIT_FLOW = 1;                             // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;                    // Polynomial degree for the concentration.
 double CFL_NUMBER = 1.0;                               // CFL value.
 int CFL_CALC_FREQ = 1;                                 // How frequently do we want to check for update of time step.
@@ -38,8 +38,8 @@ double time_step = 1E-3, util_time_step;               // Initial and utility ti
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK; // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                        // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 3;                    // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 3;           // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 4;                    // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 4;           // Number of initial uniform mesh refinements of the mesh for the concentration.
 unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 0;       // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                        // part of the boundary where the concentration is prescribed.
 // Equation parameters.
@@ -72,6 +72,9 @@ int main(int argc, char* argv[])
   H2DReader mloader;
   mloader.load("domain.mesh", &basemesh);
 
+  MeshView m;
+  m.show(&basemesh);
+  m.wait_for_close();
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;
   mesh_flow.copy(&basemesh);
@@ -227,6 +230,12 @@ int main(int argc, char* argv[])
         s3.show(&prev_rho_v_y);
         s4.show(&prev_e);
         s5.show(&prev_c);
+
+        s1.save_numbered_screenshot("density%i.bmp", iteration, true);
+        s2.save_numbered_screenshot("density_v_x%i.bmp", iteration, true);
+        s3.save_numbered_screenshot("density_v_y%i.bmp", iteration, true);
+        s4.save_numbered_screenshot("energy%i.bmp", iteration, true);
+        s5.save_numbered_screenshot("concentration%i.bmp", iteration, true);
         //s5.wait_for_close();
         
       }
