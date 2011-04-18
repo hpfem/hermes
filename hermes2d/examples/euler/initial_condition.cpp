@@ -173,3 +173,28 @@ public:
   // Value.
   double constant;
 };
+
+/* Essential boundary condition for the coupled problem. */
+
+class ConcentrationTimedepEssentialBC : public EssentialBoundaryCondition {
+public:
+  ConcentrationTimedepEssentialBC(std::string marker) 
+           : EssentialBoundaryCondition(Hermes::vector<std::string>())
+  {
+    markers.push_back(marker);
+  }
+
+  ~ConcentrationTimedepEssentialBC() {};
+
+  inline EssentialBCValueType get_value_type() const { 
+    return EssentialBoundaryCondition::BC_FUNCTION; 
+  }
+
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+  {
+    if(this->get_current_time() < 0.5)
+      return 0.0;
+    else
+      return 1.0;
+  }
+};

@@ -2242,7 +2242,7 @@ protected:
       for (int i = 0;i < n;i++)
         result += wt[i] * u->val[i] * ((density_vel_x_prev->val[i] * v->dx[i]) + (density_vel_y_prev->val[i] * v->dy[i])) / density_prev->val[i];
 
-      return result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
+      return -result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
@@ -2304,23 +2304,15 @@ protected:
 
       Scalar result = 0;
       for (int i = 0;i < n;i++)
-        result += wt[i] * (v->get_val_central(i) - v->get_val_neighbor(i)) *
+        result += 0.5 * wt[i] * (v->get_val_central(i) - v->get_val_neighbor(i)) *
                   (
                     (
                       density_vel_x_prev->get_val_central(i) * u->get_val_central(i) 
                       / density_prev->get_val_central(i)
-                      -
+                      +
                       density_vel_x_prev->get_val_neighbor(i) * u->get_val_neighbor(i) 
                       / density_prev->get_val_neighbor(i)
-                    ) * e->nx[i]
-                    + 
-                    (
-                      density_vel_y_prev->get_val_central(i) * u->get_val_central(i) 
-                      / density_prev->get_val_central(i)
-                      -
-                      density_vel_y_prev->get_val_neighbor(i) * u->get_val_neighbor(i) 
-                      / density_prev->get_val_neighbor(i)
-                    ) * e->ny[i]
+                    )
                   );
       return result * static_cast<EulerEquationsWeakFormExplicit*>(wf)->get_tau();
     }

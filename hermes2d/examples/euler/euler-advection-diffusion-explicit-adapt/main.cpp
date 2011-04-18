@@ -22,19 +22,19 @@ const bool VTK_VISUALIZATION = false;                  // Set to "true" to enabl
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Shock capturing.
-bool SHOCK_CAPTURING = true;
+bool SHOCK_CAPTURING = false;
 
 // Quantitative parameter of the discontinuity detector.
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 // Stability for the concentration part.
-double ADVECTION_STABILITY_CONSTANT = 10.0;
-const double DIFFUSION_STABILITY_CONSTANT = 10.0;
+double ADVECTION_STABILITY_CONSTANT = 1.0;
+const double DIFFUSION_STABILITY_CONSTANT = 1.0;
 
 const int P_INIT_FLOW = 0;                        // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;               // Polynomial degree for the concentration.
 double CFL_NUMBER = 1.0;                               // CFL value.
-double time_step = 1E-3, util_time_step;               // Initial and utility time step.
+double time_step = 1E-5, util_time_step;               // Initial and utility time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -64,7 +64,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.5;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
   // For the concentration.
   EssentialBCs bcs_concentration;
 
-  bcs_concentration.add_boundary_condition(new DefaultEssentialBCConst(BDY_DIRICHLET_CONCENTRATION, CONCENTRATION_EXT));
+  bcs_concentration.add_boundary_condition(new ConcentrationTimedepEssentialBC(BDY_DIRICHLET_CONCENTRATION));
   
   L2Space space_rho(&mesh_flow, P_INIT_FLOW);
   L2Space space_rho_v_x(&mesh_flow, P_INIT_FLOW);
@@ -164,17 +164,24 @@ int main(int argc, char* argv[])
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
   EntropyFilter entropy(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA, RHO_EXT, P_EXT);
 
+  /*
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-
-  //ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
+  ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
+  */
   
-  ScalarView s1("1", new WinGeom(0, 0, 600, 300));
-  ScalarView s2("2", new WinGeom(700, 0, 600, 300));
-  ScalarView s3("3", new WinGeom(0, 400, 600, 300));
-  ScalarView s4("4", new WinGeom(700, 400, 600, 300));
+  ScalarView s1("1-coarse", new WinGeom(0, 0, 600, 300));
+  ScalarView s2("2-coarse", new WinGeom(700, 0, 600, 300));
+  ScalarView s3("3-coarse", new WinGeom(0, 400, 600, 300));
+  ScalarView s4("4-coarse", new WinGeom(700, 400, 600, 300));
   ScalarView s5("Concentration", new WinGeom(350, 200, 600, 300));
+
+  ScalarView s11("1-fine", new WinGeom(0, 0, 600, 300));
+  ScalarView s21("2-fine", new WinGeom(700, 0, 600, 300));
+  ScalarView s31("3-fine", new WinGeom(0, 400, 600, 300));
+  ScalarView s41("4-fine", new WinGeom(700, 400, 600, 300));
+  ScalarView s51("Concentration", new WinGeom(350, 200, 600, 300));
 
   // Initialize refinement selector.
   L2ProjBasedSelector l2selector(CAND_LIST_FLOW, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -194,14 +201,11 @@ int main(int argc, char* argv[])
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
       REFINEMENT_COUNT = 0;
       info("Global mesh derefinement.");
-      mesh_flow.unrefine_all_elements();
-      mesh_concentration.unrefine_all_elements();
-      /*
-      space_rho.adjust_element_order(-1, P_INIT_FLOW);
-      space_rho_v_x.adjust_element_order(-1, P_INIT_FLOW);
-      space_rho_v_y.adjust_element_order(-1, P_INIT_FLOW);
-      space_e.adjust_element_order(-1, P_INIT_FLOW);
-      */
+      space_rho.unrefine_all_mesh_elements();
+      space_rho_v_x.copy_orders(&space_rho);
+      space_rho_v_y.copy_orders(&space_rho);
+      space_e.copy_orders(&space_rho);
+      space_c.unrefine_all_mesh_elements();
       space_c.adjust_element_order(-1, P_INIT_CONCENTRATION);
     }
 
@@ -213,18 +217,39 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh and setup reference space.
       int order_increase = 0;
+      if(CAND_LIST_FLOW == H2D_HP_ANISO)
+        order_increase = 1;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e, &space_c), order_increase);
-      (*ref_spaces)[4]->adjust_element_order(+1, P_INIT_CONCENTRATION);
+      if(CAND_LIST_FLOW != H2D_HP_ANISO)
+        (*ref_spaces)[4]->adjust_element_order(+1, P_INIT_CONCENTRATION);
 
       // Project the previous time level solution onto the new fine mesh.
-      info("Projecting the previous time level solution onto the new fine mesh.");
-      OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), 
-        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), matrix_solver);
+      if(as == 1) {
+        info("Projecting the previous time level solution onto the new fine mesh.");
+        OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), 
+          Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), matrix_solver);
+      }
+      else {
+        info("Projecting the previous fine mesh solution onto the new fine mesh.");
+        OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e, &rsln_c), 
+          Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), matrix_solver);
+      }
 
-      MeshView m;
-      m.show ((*ref_spaces)[0]->get_mesh());
-      m.wait_for_close();
+      s11.show(&prev_rho);
+      s21.show(&prev_rho_v_x);
+      s31.show(&prev_rho_v_y);
+      s41.show(&prev_e);
+      s51.show(&prev_c);
+
+      //s51.wait_for_keypress();
+
+      if(as > 1) {
+        delete rsln_rho.get_mesh();
+        delete rsln_rho_v_x.get_mesh();
+        delete rsln_rho_v_y.get_mesh();
+        delete rsln_e.get_mesh();
+      }
 
       // Report NDOFs.
       info("ndof_coarse: %d, ndof_fine: %d.", 
@@ -244,6 +269,8 @@ int main(int argc, char* argv[])
       // Initialize the FE problem.
       bool is_linear = true;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
+
+      wf.set_time_step(time_step);
 
       // Assemble stiffness matrix and rhs.
       info("Assembling the stiffness matrix and right-hand side vector.");
@@ -281,11 +308,11 @@ int main(int argc, char* argv[])
                      Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_H1_NORM)); 
 
       util_time_step = time_step;
-      CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh_flow, util_time_step);
+      CFL.calculate(Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), &mesh_flow, util_time_step);
 
       time_step = util_time_step;
 
-      ADES.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y), &mesh_concentration, util_time_step);
+      ADES.calculate(Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y), &mesh_concentration, util_time_step);
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -293,6 +320,20 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e, &space_c), Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_H1_NORM));
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e, &sln_c),
 							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e, &rsln_c)) * 100;
+
+      s1.show(&sln_rho);
+      s2.show(&sln_rho_v_x);
+      s3.show(&sln_rho_v_y);
+      s4.show(&sln_e);
+      s5.show(&sln_c);
+
+      s11.show(&rsln_rho);
+      s21.show(&rsln_rho_v_x);
+      s31.show(&rsln_rho_v_y);
+      s41.show(&rsln_e);
+      s51.show(&rsln_c);
+
+      //s1.wait_for_keypress();
 
       // Report results.
       info("err_est_rel: %g%%", err_est_rel_total);
@@ -323,30 +364,33 @@ int main(int argc, char* argv[])
       ord.save_orders_vtk((*ref_spaces)[4], filename);
       
       // Clean up.
-      delete adaptivity;
       delete solver;
       delete matrix;
       delete rhs;
-      if(!done)
-        for(unsigned int i = 0; i < ref_spaces->size(); i++)
-          delete (*ref_spaces)[i]->get_mesh();
-
+      delete adaptivity;
       for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i];
     }
     while (done == false);
 
-    // Copy the solutions into previous time level ones.
+    // Copy the solutions into the previous time level ones.
+
     prev_rho.copy(&rsln_rho);
     prev_rho_v_x.copy(&rsln_rho_v_x);
     prev_rho_v_y.copy(&rsln_rho_v_y);
     prev_e.copy(&rsln_e);
     prev_c.copy(&rsln_c);
+    delete rsln_rho.get_mesh();
+    delete rsln_rho_v_x.get_mesh();
+    delete rsln_rho_v_y.get_mesh();
+    delete rsln_e.get_mesh();
+    delete rsln_c.get_mesh();
 
     // Visualization.
     if((iteration - 1) % EVERY_NTH_STEP == 0) {
       // Hermes visualization.
       if(HERMES_VISUALIZATION) {
+        /*
         Mach_number.reinit();
         pressure.reinit();
         entropy.reinit();
@@ -354,7 +398,7 @@ int main(int argc, char* argv[])
         entropy_production_view.show(&entropy);
         Mach_number_view.show(&Mach_number);
         s5.show(&prev_c);
-        
+        */
         s1.show(&prev_rho);
         s2.show(&prev_rho_v_x);
         s3.show(&prev_rho_v_y);
@@ -384,10 +428,12 @@ int main(int argc, char* argv[])
     }
   }
   
+  /*
   pressure_view.close();
   entropy_production_view.close();
   Mach_number_view.close();
   s5.close();
+  */
 
   s1.close();
   s2.close();

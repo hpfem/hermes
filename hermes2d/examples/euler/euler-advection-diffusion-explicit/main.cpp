@@ -18,7 +18,7 @@
 // Visualization.
 const bool HERMES_VISUALIZATION = true;               // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;                  // Set to "true" to enable VTK output.
-const unsigned int EVERY_NTH_STEP = 10;                // Set visual output for every nth step.
+const unsigned int EVERY_NTH_STEP = 1;                // Set visual output for every nth step.
 
 // Shock capturing.
 bool SHOCK_CAPTURING = false;
@@ -27,18 +27,18 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 // Stability for the concentration part.
-double ADVECTION_STABILITY_CONSTANT = 10.0;
-const double DIFFUSION_STABILITY_CONSTANT = 10.0;
+double ADVECTION_STABILITY_CONSTANT = 1.0;
+const double DIFFUSION_STABILITY_CONSTANT = 1.0;
 
 const int P_INIT_FLOW = 1;                             // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;                    // Polynomial degree for the concentration.
-double CFL_NUMBER = 2.0;                               // CFL value.
+double CFL_NUMBER = 1.0;                               // CFL value.
 double time_step = 1E-3, util_time_step;               // Initial and utility time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK; // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                        // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 4;                    // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 4;           // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_FLOW = 2;                    // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 3;           // Number of initial uniform mesh refinements of the mesh for the concentration.
 unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 0;       // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                        // part of the boundary where the concentration is prescribed.
 // Equation parameters.
@@ -197,11 +197,6 @@ int main(int argc, char* argv[])
 
     if(util_time_step < time_step)
       time_step = util_time_step;
-
-    if(iteration % 100 == 0) {
-      CFL_NUMBER *= 2;
-      CFL.set_number(CFL_NUMBER);
-    }
 
     // Visualization.
     if((iteration - 1) % EVERY_NTH_STEP == 0) {

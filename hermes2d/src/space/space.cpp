@@ -253,6 +253,56 @@ void Space::adjust_element_order(int horizontal_order_change, int vertical_order
   assign_dofs();
 }
 
+void Space::unrefine_all_mesh_elements(bool keep_initial_refinements)
+{
+  // find inactive elements with active sons
+  std::vector<int> list;
+  Element* e;
+  for_all_inactive_elements(e, this->mesh)
+  {
+    bool found = true;
+    for (unsigned int i = 0; i < 4; i++)
+      if (e->sons[i] != NULL && 
+          (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < this->mesh->ninitial))  
+         )
+        { found = false; break; }
+
+    if (found) list.push_back(e->id);
+  }
+
+  // unrefine the found elements
+  for (unsigned int i = 0; i < list.size(); i++) {
+    unsigned int order = 0, h_order = 0, v_order = 0;
+    unsigned int num_sons = 0;
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+      if(this->mesh->get_element_fast(list[i])->sons[sons_i]->active) {
+        if(this->mesh->get_element_fast(list[i])->sons[sons_i]->is_triangle()) {
+          order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id);
+          num_sons++;
+        }
+        else {
+          h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
+          v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
+          num_sons++;
+        }
+      }
+    }
+
+    order = unsigned int(order / num_sons);
+    h_order = unsigned int(h_order / num_sons);
+    v_order = unsigned int(v_order / num_sons);
+
+    if(this->mesh->get_element_fast(list[i])->is_triangle())
+      edata[list[i]].order = order;
+    else
+      edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
+    this->mesh->unrefine_element_id(list[i]);
+  }
+
+  this->assign_dofs();
+}
+
+
 void Space::copy_orders_recurrent(Element* e, int order)
 {
   _F_
