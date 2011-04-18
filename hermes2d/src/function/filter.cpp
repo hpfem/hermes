@@ -456,7 +456,7 @@ void RealFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, doub
 };
 
 RealFilter::RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter(solutions, items)
+          : SimpleFilter<std::complex<double> >(solutions, items)
 {
 	if (solutions.size() > 1)
 		error("RealFilter only supports one MeshFunction.");
@@ -474,7 +474,7 @@ void ImagFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, doub
 };
 
 ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter(solutions, items)
+          : SimpleFilter<std::complex<double> >(solutions, items)
 {
 	if (solutions.size() > 1)
 		error("RealFilter only supports one MeshFunction.");
@@ -488,7 +488,7 @@ void AbsFilter::filter_fn(int n,  Hermes::vector<std::complex<double>*> v1, doub
 };
 
 AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter(solutions, items)
+          : SimpleFilter<std::complex<double> >(solutions, items)
 {
 		if (solutions.size() > 1)
 		error("RealFilter only supports one MeshFunction.");
@@ -507,7 +507,7 @@ void AngleFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, dou
 };
 
 AngleFilter::AngleFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-  : SimpleFilter(solutions, items)
+  : SimpleFilter<std::complex<double> >(solutions, items)
 {
 	if (solutions.size() > 1)
 		error("RealFilter only supports one MeshFunction.");
@@ -528,7 +528,7 @@ void VonMisesFilter::precalculate(int order, int mask)
 
   Quad2D* quad = this->quads[this->cur_quad];
   int np = quad->get_num_points(order);
-  typename Filter<scalar>::Node* node = new_node(H2D_FN_VAL_0, np);
+  Filter<scalar>::Node* node = new_node(H2D_FN_VAL_0, np);
 
   this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
   this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
