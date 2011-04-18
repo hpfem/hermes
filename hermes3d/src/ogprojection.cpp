@@ -14,7 +14,7 @@ void OGProjection::project_internal(Hermes::vector<Space *> spaces, WeakForm *pr
   // this is needed since spaces may have their DOFs enumerated only locally.
   int ndof = Space::assign_dofs(spaces);
 
-  // Initialize FeProblem.
+  // Initialize DiscreteProblem.
   bool is_linear = true;
   DiscreteProblem* dp = new DiscreteProblem(proj_wf, spaces, is_linear);
 

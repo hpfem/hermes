@@ -289,8 +289,8 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
 
   _F_
   // Sanity checks.
-  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in FeProblem::assemble().");
-  if (!have_spaces) error("You have to call FeProblem::set_spaces() before calling assemble().");
+  if (coeff_vec == NULL && this->is_linear == false) error("coeff_vec is NULL in DiscreteProblem::assemble().");
+  if (!have_spaces) error("You have to call DiscreteProblem::set_spaces() before calling assemble().");
   for (int i = 0; i < this->wf->neq; i++)
   {
     if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
