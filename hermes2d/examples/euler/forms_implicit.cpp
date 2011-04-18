@@ -1477,24 +1477,17 @@ protected:
 
       Scalar result = 0;
       for (int i = 0;i < n;i++)
-        result += wt[i] * v->val[i] *
-                  (
-                    (
-                      density_vel_x_prev->get_val_central(i) * concentration_prev->get_val_central(i) 
-                      / density_prev->get_val_central(i)
-                      -
-                      density_vel_x_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) 
-                      / density_prev->get_val_neighbor(i)
-                    ) * e->nx[i]
-                    + 
-                    (
-                      density_vel_y_prev->get_val_central(i) * concentration_prev->get_val_central(i) 
-                      / density_prev->get_val_central(i)
-                      -
-                      density_vel_y_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i) 
-                      / density_prev->get_val_neighbor(i)
-                    ) * e->ny[i]
-                  );
+        result += 0.5 * wt[i] * (v->get_val_central(i) - v->get_val_neighbor(i)) *
+        (
+          (
+            density_vel_x_prev->get_val_central(i) * concentration_prev->get_val_central(i)
+            / density_prev->get_val_central(i)
+            +
+            density_vel_x_prev->get_val_neighbor(i) * concentration_prev->get_val_neighbor(i)
+            / density_prev->get_val_neighbor(i)
+          )
+        );
+
       return - result * static_cast<EulerEquationsWeakFormImplicit*>(wf)->get_tau();
     }
 
