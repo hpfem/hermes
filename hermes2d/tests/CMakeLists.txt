@@ -7,8 +7,9 @@ if(H2D_WITH_GLUT)
 endif(H2D_WITH_GLUT)
  add_subdirectory(shapeset)
 # add_subdirectory(integrals)
- add_subdirectory(rcp)
- add_subdirectory(python)
+# add_subdirectory(rcp)
+# add_subdirectory(python)
+add_subdirectory(nurbs)
 
 # Additional definitions for tests.
 add_definitions(-DHERMES_REPORT_ALL -DH2D_TEST)

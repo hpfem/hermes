@@ -75,20 +75,26 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
 {
   _F_
   // Nurbs curves are parametrized from 0 to 1.
-  t = (t + 1) / 2.0;
+  t = (t + 1.0) / 2.0;
 
-  // Vector pointing from the start point of the edge 
-  // to the end point.
+  // Start point A, end point B.
+  double2 A, B;
+  A[0] = e->vn[edge]->x;
+  A[1] = e->vn[edge]->y;
+  B[0] = e->vn[e->next_vert(edge)]->x;
+  B[1] = e->vn[e->next_vert(edge)]->y;
+
+  // Vector pointing from A to B.
   double2 v;
-  v[0] = e->vn[e->next_vert(edge)]->x - e->vn[edge]->x;
-  v[1] = e->vn[e->next_vert(edge)]->y - e->vn[edge]->y;
+  v[0] = B[0] - A[0];
+  v[1] = B[1] - A[1];
   double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
 
   // Straight line.
   if (nurbs == NULL)
   {
-    x = e->vn[edge]->x + t * v[0];
-    y = e->vn[edge]->y + t * v[1];
+    x = A[0] + t * v[0];
+    y = A[1] + t * v[1];
     t_x = v[0] / abs_v;
     t_y = v[1] / abs_v;
     n_x = t_y;
@@ -116,18 +122,17 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       y /= sum;
 
       // Normal and tangential vectors.
-      // FIXME; This calculation is artificial and it uses knowledge
-      // that the NURBS is a circular arc. This should be done in the 
+      // FIXME; This calculation is artificial and it assumes that 
+      // the NURBS is a circular arc. This should be done in the 
       // same way for all NURBS.
 
-      // End points, midpoint
-      double2 A, B, M;
-      A[0] = e->vn[edge]->x;
-      A[1] = e->vn[edge]->y;
-      B[0] = e->vn[e->next_vert(edge)]->x;
-      B[1] = e->vn[e->next_vert(edge)]->y;
-      M[0] = (A[0] + B[0])/2;
-      M[1] = (A[1] + B[1])/2;
+      // End points, midpoint.
+      double2 M;
+      M[0] = (A[0] + B[0]) / 2.;
+      M[1] = (A[1] + B[1]) / 2.;
+      //printf("***** A = %g %g\n", A[0], A[1]);
+      //printf("***** B = %g %g\n", B[0], B[1]);
+      //printf("***** M = %g %g\n", M[0], M[1]);
       
       // Unit vector from M to center of circle S.
       double2 w;
@@ -137,12 +142,15 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       // Distance L between M and center of circle S
       // can be calculated using a right-angle triangle
       // whose one angle is alpha/2.
-      double L = 0.5 * abs_v / tan(0.5 * nurbs->angle);
-      
+      double alpha_rad = nurbs->angle * M_PI / 180.;
+      double L = 0.5 * abs_v / tan(0.5 * alpha_rad);
+      //printf("***** L = %g\n", L);
+    
       // Center of circle.
       double2 S;
       S[0] = M[0] + w[0] * L;
       S[1] = M[1] + w[1] * L;
+      //printf("***** S = %g %g\n", S[0], S[1]);
 
       // Calculation of radius and test.
       double2 SA, SB;
@@ -155,21 +163,72 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       if (std::abs(R - R2) > 1e-6) 
         error("Internal error in nurbs_edge() - bad radius R.");
 
-      // Normal vectors to circular arc at edg eend points A, B.
+      // Normal vectors to circular arc at edge end points A, B.
       double2 normal_A, normal_B;
       normal_A[0] = SA[0] / R;
       normal_A[1] = SA[1] / R;
       normal_B[0] = SB[0] / R;
       normal_B[1] = SB[1] / R;
+      //printf("***** normal_A = %g %g\n", normal_A[0], normal_A[1]);
+      //printf("***** normal_B = %g %g\n", normal_B[0], normal_B[1]);
 
-      // Normal vector at the point [x, y] is a linear
-      // interpolant between normal vectors at the end points.
+      // Calculate rotational matrix that transforms AS_ref = (R, 0) -> SA
+      // and SB_ref -> SB.
+      double2 SB_ref;
+      SB_ref[0] = R * cos(alpha_rad);
+      SB_ref[1] = R * sin(alpha_rad);
+      // First we need to invert the matrix [(R 0)^T, SB_ref^T].
+      double m_11, m_12, m_21, m_22;
+      m_11 = R;
+      m_12 = SB_ref[0];
+      m_21 = 0;
+      m_22 = SB_ref[1];
+      double m_det = m_11 * m_22 - m_12 * m_21;
+      double inv_11, inv_12, inv_21, inv_22;
+      inv_11 = m_22 / m_det;
+      inv_12 = -m_12 / m_det;
+      inv_21 = -m_21 / m_det;
+      inv_22 = m_11 / m_det;
+      double s_11, s_12, s_21, s_22;
+      s_11 = SA[0];
+      s_12 = SB[0];
+      s_21 = SA[1];
+      s_22 = SB[1];
+      //Rotation matrix.
+      double r_11, r_12, r_21, r_22;
+      r_11 = s_11 * inv_11 + s_12 * inv_21;
+      r_12 = s_11 * inv_12 + s_12 * inv_22;
+      r_21 = s_21 * inv_11 + s_22 * inv_21;
+      r_22 = s_21 * inv_12 + s_22 * inv_22;
+      // The desired normal vector in reference coordinates.
+      double n_x_ref = cos(alpha_rad * t);
+      double n_y_ref = sin(alpha_rad * t);
+      // Rotate it.
+      n_x = r_11 * n_x_ref + r_12 * n_y_ref;
+      n_y = r_21 * n_x_ref + r_22 * n_y_ref;
+
+      /*
+      // Calculate normal at point corresponding to the 
+      // position of parameter 't' between 0 and 1. 
       n_x = normal_A[0] + t * (normal_B[0] - normal_A[0]);
       n_y = normal_A[1] + t * (normal_B[1] - normal_A[1]);
-      
+      double size_n = sqrt(sqr(n_x) + sqr(n_y));
+      n_x /= size_n;
+      n_y /= size_n;
+      */
+
       // Calculate tangential vectors.
       t_x = -n_y;
       t_y = n_x;
+
+      // Correcting sign so that the normal points outside 
+      // if the angle is negative.
+      if (nurbs->angle < 0) {
+        n_x *= -1;
+        n_y *= -1;
+        t_x *= -1;
+        t_y *= -1;
+      }
     }
     // General NURBS. 
     // FIXME - calculation of normal and tangential vectors needs to be added.
