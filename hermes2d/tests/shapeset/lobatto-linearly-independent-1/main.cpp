@@ -19,13 +19,9 @@ int main(int argc, char* argv[])
   // We load the mesh on a (-1, 1)^2 domain.
   mloader.load("ref_square.mesh", &mesh);            
 
-  // Enter boundary markers 
-  // (If no markers are entered, default is a natural BC).
-  BCTypes bc_types;
-
   // Create an H1 space with default shapeset,
   // natural BC, and linear elements.
-  H1Space space(&mesh, &bc_types, P_INIT);
+  H1Space space(&mesh, P_INIT);
   // The type of element, mesh_mode = 4 means a rectangle element.
   int mesh_mode = 4;
   int ndof = Space::get_num_dofs(&space);

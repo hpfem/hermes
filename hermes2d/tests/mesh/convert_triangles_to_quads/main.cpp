@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     {
       printf("type : quadrangle ");
       // one quad element refined into four elements
-      element_num += 1;
+      element_num += 4;
     }
     else
     {
