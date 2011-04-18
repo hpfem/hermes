@@ -199,6 +199,8 @@ namespace RefinementSelectors {
           examined_shape++;
         }
       }
+      else
+        next_order[i] = (int)indices.size();
     }
   }
 

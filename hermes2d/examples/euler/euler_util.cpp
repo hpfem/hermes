@@ -61,6 +61,11 @@ void CFLCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, 
   delete [] sln_vector;
 }
 
+void CFLCalculation::set_number(double new_CFL_number)
+{
+  this->CFL_number = new_CFL_number;
+}
+
 ADEStabilityCalculation::ADEStabilityCalculation(double AdvectionRelativeConstant, double DiffusionRelativeConstant, double epsilon) 
     : AdvectionRelativeConstant(AdvectionRelativeConstant), DiffusionRelativeConstant(DiffusionRelativeConstant), epsilon(epsilon)
 {

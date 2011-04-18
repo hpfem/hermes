@@ -2,9 +2,7 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-using namespace Teuchos;
 using namespace RefinementSelectors;
-
 // This example solves the compressible Euler equations coupled with an advection-diffution equation
 // using a basic piecewise-constant finite volume method for the flow and continuous FEM for the concentration
 // being advected by the flow.
@@ -18,27 +16,25 @@ using namespace RefinementSelectors;
 // IC: Various.
 //
 // The following parameters can be changed:
-
 // Visualization.
-const bool HERMES_VISUALIZATION = false;          // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool HERMES_VISUALIZATION = true;               // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_VISUALIZATION = false;                  // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
-// Use of preconditioning.
-const bool PRECONDITIONING = true;
-const double NOX_LINEAR_TOLERANCE = 1E-1;
-const double NOX_NONLINEAR_TOLERANCE = 1E-1;
-unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details | NOX::Utils::LinearSolverDetails;
-
 // Shock capturing.
-bool SHOCK_CAPTURING = false;
+bool SHOCK_CAPTURING = true;
 
 // Quantitative parameter of the discontinuity detector.
-double DISCONTINUITY_DETECTOR_PARAM = 1;
+double DISCONTINUITY_DETECTOR_PARAM = 1.0;
+
+// Stability for the concentration part.
+double ADVECTION_STABILITY_CONSTANT = 10.0;
+const double DIFFUSION_STABILITY_CONSTANT = 10.0;
 
 const int P_INIT_FLOW = 0;                        // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;               // Polynomial degree for the concentration.
-double time_step = 1E-2;                          // Time step.
+double CFL_NUMBER = 1.0;                               // CFL value.
+double time_step = 1E-3, util_time_step;               // Initial and utility time step.
 
 // Adaptivity.
 const int UNREF_FREQ = 5;                         // Every UNREF_FREQth time step the mesh is unrefined.
@@ -98,7 +94,7 @@ const std::string BDY_DIRICHLET_CONCENTRATION = "Inflow";
 Hermes::vector<std::string> BDY_NATURAL_CONCENTRATION = Hermes::vector<std::string>("Outflow", "Solid Wall");
 
 // Weak forms.
-#include "../forms_implicit.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
 #include "../initial_condition.cpp"
@@ -158,8 +154,8 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL,
-    BDY_INLET, BDY_OUTLET, BDY_NATURAL_CONCENTRATION, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, PRECONDITIONING, EPSILON, true);
+  EulerEquationsWeakFormSemiImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL,
+    BDY_INLET, BDY_OUTLET, BDY_NATURAL_CONCENTRATION, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, EPSILON);
   
   wf.set_time_step(time_step);
 
@@ -172,25 +168,26 @@ int main(int argc, char* argv[])
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
 
-  ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
+  //ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
   
-  /*
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
   ScalarView s5("Concentration", new WinGeom(350, 200, 600, 300));
-  */
 
   // Initialize refinement selector.
   L2ProjBasedSelector l2selector(CAND_LIST_FLOW, CONV_EXP, H2DRS_DEFAULT_ORDER);
   H1ProjBasedSelector h1selector(CAND_LIST_CONCENTRATION, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Select preconditioner.
-  RCP<Precond> pc = rcp(new IfpackPrecond("point-relax"));
+  // Set up CFL calculation class.
+  CFLCalculation CFL(CFL_NUMBER, KAPPA);
+
+  // Set up Advection-Diffusion-Equation stability calculation class.
+  ADEStabilityCalculation ADES(ADVECTION_STABILITY_CONSTANT, DIFFUSION_STABILITY_CONSTANT, EPSILON);
 
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += time_step) {
+  for(t = 0.0; t < 100.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
     // Periodic global derefinements.
@@ -220,6 +217,15 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e, &space_c), order_increase);
       (*ref_spaces)[4]->adjust_element_order(+1, P_INIT_CONCENTRATION);
 
+      // Project the previous time level solution onto the new fine mesh.
+      info("Projecting the previous time level solution onto the new fine mesh.");
+      OGProjection::project_global(*ref_spaces, Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), 
+        Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), matrix_solver);
+
+      MeshView m;
+      m.show ((*ref_spaces)[0]->get_mesh());
+      m.wait_for_close();
+
       // Report NDOFs.
       info("ndof_coarse: %d, ndof_fine: %d.", 
         Space::get_num_dofs(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
@@ -230,33 +236,26 @@ int main(int argc, char* argv[])
       (*ref_spaces)[2]->get_mesh()->set_seq((*ref_spaces)[0]->get_mesh()->get_seq());
       (*ref_spaces)[3]->get_mesh()->set_seq((*ref_spaces)[0]->get_mesh()->get_seq());
 
-      // Project the previous time level solution onto the new fine mesh
-      // in order to obtain initial vector for NOX. 
-      info("Projecting initial solution on the FE mesh.");
-      scalar* coeff_vec = new scalar[Space::get_num_dofs(*ref_spaces)];
-      OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), coeff_vec);
+      // Set up the solver, matrix, and rhs according to the solver selection.
+      SparseMatrix* matrix = create_matrix(matrix_solver);
+      Vector* rhs = create_vector(matrix_solver);
+      Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Initialize the FE problem.
-      bool is_linear = false;
+      bool is_linear = true;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
-      
-      // Initialize NOX solver.
-      NoxSolver solver(&dp, NOX_MESSAGE_TYPE, "GMRES", "Newton", NOX_LINEAR_TOLERANCE, "None", 0, 0, 1, NOX_NONLINEAR_TOLERANCE);
-      solver.set_init_sln(coeff_vec);
-      if(PRECONDITIONING)
-        solver.set_precond(pc);
 
-      info("Assembling by DiscreteProblem, solving by NOX.");
-      if (solver.solve())
-        Solution::vector_to_solutions(solver.get_solution(), *ref_spaces, 
+      // Assemble stiffness matrix and rhs.
+      info("Assembling the stiffness matrix and right-hand side vector.");
+      dp.assemble(matrix, rhs);
+
+      // Solve the matrix problem.
+      info("Solving the matrix problem.");
+      if (solver->solve())
+        Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
           Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e, &rsln_c));
       else
-        error("NOX failed.");
-      
-      info("Number of nonlin iterations: %d (norm of residual: %g)", 
-        solver.get_num_iters(), solver.get_residual());
-      info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
-        solver.get_num_lin_iters(), solver.get_achieved_tol());
+      error ("Matrix solver failed.\n");
       
       if(SHOCK_CAPTURING) {
         Hermes::vector<Space*> flow_spaces((*ref_spaces)[0], (*ref_spaces)[1], (*ref_spaces)[2], (*ref_spaces)[3]);
@@ -280,6 +279,13 @@ int main(int argc, char* argv[])
       &space_rho_v_y, &space_e, &space_c), Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e, &rsln_c), 
                      Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e, &sln_c), matrix_solver, 
                      Hermes::vector<ProjNormType>(HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_L2_NORM, HERMES_H1_NORM)); 
+
+      util_time_step = time_step;
+      CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh_flow, util_time_step);
+
+      time_step = util_time_step;
+
+      ADES.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y), &mesh_concentration, util_time_step);
 
       // Calculate element errors and total error estimate.
       info("Calculating error estimate.");
@@ -318,10 +324,12 @@ int main(int argc, char* argv[])
       
       // Clean up.
       delete adaptivity;
+      delete solver;
+      delete matrix;
+      delete rhs;
       if(!done)
         for(unsigned int i = 0; i < ref_spaces->size(); i++)
           delete (*ref_spaces)[i]->get_mesh();
-
 
       for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i];
@@ -346,14 +354,13 @@ int main(int argc, char* argv[])
         entropy_production_view.show(&entropy);
         Mach_number_view.show(&Mach_number);
         s5.show(&prev_c);
-        /*
+        
         s1.show(&prev_rho);
         s2.show(&prev_rho_v_x);
         s3.show(&prev_rho_v_y);
         s4.show(&prev_e);
         s5.show(&prev_c);
-        */
-      }
+       }
       // Output solution in VTK format.
       if(VTK_VISUALIZATION) {
         pressure.reinit();
@@ -382,12 +389,11 @@ int main(int argc, char* argv[])
   Mach_number_view.close();
   s5.close();
 
-  /*
   s1.close();
   s2.close();
   s3.close();
   s4.close();
-  */
+  s5.close();
 
   return 0;
 }

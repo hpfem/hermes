@@ -40,7 +40,7 @@ const std::string BDY_INLET = "4";
 #include "../forms_explicit.cpp"
 
 // Initial condition.
-#include "../constant_initial_condition.cpp"
+#include "../initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {

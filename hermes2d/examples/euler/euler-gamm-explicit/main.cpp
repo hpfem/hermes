@@ -26,7 +26,7 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
 int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
@@ -50,7 +50,7 @@ const std::string BDY_SOLID_WALL_TOP = "4";
 #include "../forms_explicit.cpp"
 
 // Initial condition.
-#include "../constant_initial_condition.cpp"
+#include "../initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {

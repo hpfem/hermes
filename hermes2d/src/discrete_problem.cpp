@@ -1109,20 +1109,25 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
     }
 
   // Create neighbor psss, refmaps.
-  Hermes::vector<PrecalcShapeset *> npss;
-  Hermes::vector<PrecalcShapeset *> nspss;
-  Hermes::vector<RefMap *> nrefmap;
+  std::map<unsigned int, PrecalcShapeset *> npss;
+  std::map<unsigned int, PrecalcShapeset *> nspss;
+  std::map<unsigned int, RefMap *> nrefmap;
 
   // Initialize neighbor precalc shapesets and refmaps.      
   // This is only needed when there are matrix DG forms present.
   if(DG_matrix_forms_present)
     for (unsigned int i = 0; i < stage.idx.size(); i++) {
-      npss.push_back(new PrecalcShapeset(pss[i]->get_shapeset()));
-      npss[i]->set_quad_2d(&g_quad_2d_std);
-      nspss.push_back(new PrecalcShapeset(npss[i]));
-      nspss[i]->set_quad_2d(&g_quad_2d_std);
-      nrefmap.push_back(new RefMap());
-      nrefmap[i]->set_quad_2d(&g_quad_2d_std);
+      PrecalcShapeset* new_ps = new PrecalcShapeset(pss[i]->get_shapeset());
+      new_ps->set_quad_2d(&g_quad_2d_std);
+      npss.insert(std::pair<unsigned int, PrecalcShapeset*>(stage.idx[i], new_ps));
+
+      PrecalcShapeset* new_pss = new PrecalcShapeset(new_ps);
+      new_pss->set_quad_2d(&g_quad_2d_std);
+      nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(stage.idx[i], new_pss));
+
+      RefMap* new_rm = new RefMap();
+      new_rm->set_quad_2d(&g_quad_2d_std);
+      nrefmap.insert(std::pair<unsigned int, RefMap*>(stage.idx[i], new_rm));
     }
 
   for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
@@ -1160,12 +1165,12 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
 
   // Deinitialize neighbor pss's, refmaps.
   if(DG_matrix_forms_present) {
-    for(std::vector<PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
-      delete *it;
-    for(std::vector<PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
-      delete *it;
-    for(std::vector<RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
-      delete *it;
+    for(std::map<unsigned int, PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
+      delete it->second;
+    for(std::map<unsigned int, PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
+      delete it->second;
+    for(std::map<unsigned int, RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
+      delete it->second;
   }
 
   // Delete the neighbor_searches array.
@@ -1177,8 +1182,8 @@ void DiscreteProblem::assemble_DG_forms(WeakForm::Stage& stage,
 
 void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, WeakForm::Stage& stage, 
       SparseMatrix* mat, Vector* rhs, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
+       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
+       std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
        int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
@@ -1200,9 +1205,9 @@ void DiscreteProblem::assemble_DG_one_neighbor(bool edge_processed, unsigned int
   // For neighbor psss.
   if(DG_matrix_forms_present && !edge_processed)
     for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
-      npss[idx_i]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->get_neighbors())[neighbor_i]);
+      npss[stage.idx[idx_i]]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->get_neighbors())[neighbor_i]);
       for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_n_trans[neighbor_i]; trf_i++)
-        npss[idx_i]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_transformations[neighbor_i][trf_i]);
+        npss[stage.idx[idx_i]]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_transformations[neighbor_i][trf_i]);
     }
 
   // Also push the transformations to the slave psss and refmaps.
@@ -1792,8 +1797,8 @@ void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Sta
 void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool force_diagonal_blocks, 
        Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
-       Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, 
+       Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
+       std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
        LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, 
        SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 
@@ -1892,8 +1897,8 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
 void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& stage, 
        SparseMatrix* mat, Vector* rhs, bool force_diagonal_blocks, 
        Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss, 
-       Hermes::vector<RefMap *>& refmap, Hermes::vector<PrecalcShapeset *>& npss, 
-       Hermes::vector<PrecalcShapeset *>& nspss, Hermes::vector<RefMap *>& nrefmap, 
+       Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
+       std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
        LightArray<NeighborSearch*>& neighbor_searches, Hermes::vector<Solution *>& u_ext, 
        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList *>& al, bool bnd, 
        SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 

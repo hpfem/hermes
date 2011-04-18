@@ -335,7 +335,10 @@ protected:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) const {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      if(component_i < 4)
+        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      else
+        return Ord(5);
     }
 
     // Member.
@@ -507,7 +510,7 @@ public:
         std::string solid_wall_bottom_marker, std::string solid_wall_top_marker, 
         std::string inlet_marker, std::string outlet_marker, 
         Solution* prev_density, Solution* prev_density_vel_x, Solution* prev_density_vel_y, 
-        Solution* prev_energy, bool preconditioning, int num_of_equations = 4) :
+        Solution* prev_energy, bool preconditioning, bool fvm_only = false, int num_of_equations = 4) :
         WeakForm(num_of_equations, true), rho_ext(rho_ext), v1_ext(v1_ext), v2_ext(v2_ext), 
         pressure_ext(pressure_ext), energy_ext(QuantityCalculator::calc_energy(rho_ext, 
         rho_ext * v1_ext, rho_ext * v2_ext, pressure_ext, kappa)), euler_fluxes(new EulerFluxes(kappa))
@@ -543,14 +546,15 @@ public:
     vector_coordinates.push_back(3);
 
     if(preconditioning) {
+      /*
       EulerEquationsMatrixFormVolPreconditioning* precon_vol 
         = new EulerEquationsMatrixFormVolPreconditioning(matrix_coordinates_precon_vol, kappa);
       EulerEquationsMatrixFormSurfPreconditioning* precon_surf 
        = new EulerEquationsMatrixFormSurfPreconditioning(matrix_coordinates, kappa);
       add_multicomponent_matrix_form(precon_vol);
       add_multicomponent_matrix_form_surf(precon_surf);
-      
-      //add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates));
+      */
+      add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates_precon_vol));
     }
 
     add_multicomponent_vector_form(new EulerEquationsLinearFormTime(vector_coordinates));
@@ -577,7 +581,8 @@ public:
       vfvol_mc.at(vector_form_i)->ext.push_back(prev_energy);
     }
 
-    add_multicomponent_vector_form(new EulerEquationsLinearForm(vector_coordinates, kappa));
+    if(!fvm_only)
+      add_multicomponent_vector_form(new EulerEquationsLinearForm(vector_coordinates, kappa));
   };
 
   void set_time_step(double tau) {
@@ -906,6 +911,21 @@ protected:
       result.push_back(result_n);
       result.push_back(result_n);
       result.push_back(result_n);
+
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
+      result.push_back(result_n);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, 
@@ -913,7 +933,7 @@ protected:
       return int_u_v<Ord, Ord>(n, wt, u, v);
     }
   };
-    
+  
   class EulerEquationsLinearForm : public WeakForm::MultiComponentVectorFormVol
   {
   public:
@@ -1319,11 +1339,11 @@ public:
                     Hermes::vector<std::string> natrural_bc_concentration_markers,
                     Solution* prev_density, Solution* prev_density_vel_x, 
                     Solution* prev_density_vel_y, Solution* prev_energy, 
-                    Solution* prev_concentration, bool preconditioning, double epsilon)
+                    Solution* prev_concentration, bool preconditioning, double epsilon, bool fvm_only = false)
        : EulerEquationsWeakFormImplicitMultiComponent(num_flux, kappa, rho_ext, v1_ext, v2_ext, pressure_ext,
                                         solid_wall_marker, solid_wall_marker, inlet_marker, 
                                         outlet_marker, prev_density, prev_density_vel_x,
-                                        prev_density_vel_y, prev_energy, preconditioning, 5) {
+                                        prev_density_vel_y, prev_energy, preconditioning, fvm_only, 5) {
     if(preconditioning)
       add_matrix_form(new EulerEquationsWeakFormImplicit::EulerEquationsPreconditioning(4));
     
@@ -1368,7 +1388,7 @@ protected:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
             ExtData<Ord> *ext) const {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      return Ord(5);
     }
 
     // Member.
@@ -1403,7 +1423,7 @@ protected:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
             ExtData<Ord> *ext) const {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      return Ord(5);
     }
   };
 
@@ -1438,7 +1458,7 @@ protected:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
             ExtData<Ord> *ext) const {
-      return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+      return Ord(5);
     }
   };
 
@@ -1485,7 +1505,7 @@ protected:
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
             ExtData<Ord> *ext) const {
-      return Ord(20);
+      return Ord(5);
     }
   };
 };

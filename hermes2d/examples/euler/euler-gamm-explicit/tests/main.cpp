@@ -35,21 +35,21 @@ const std::string BDY_SOLID_WALL_BOTTOM = "3";
 const std::string BDY_SOLID_WALL_TOP = "4";
 
 // Weak forms.
-#include "../../forms_explicit.cpp"
+#include "../forms_explicit.cpp"
 
 // Initial condition.
-#include "../../constant_initial_condition.cpp"
+#include "../initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../channel.mesh", &mesh);
+  mloader.load("../GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2);
-//  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -72,11 +72,12 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA); 
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitMultiComponentSemiImplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+  EulerEquationsWeakFormExplicit wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
   bool is_linear = true;
+  
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
   
   // If the FE problem is in fact a FV problem.
@@ -104,15 +105,12 @@ int main(int argc, char* argv[])
   for(unsigned int time_iteration = 0; time_iteration < 5; time_iteration++)
   {
     bool rhs_only = (time_iteration == 0 ? false : true);
-
-    if (rhs_only == false) {
-      info("Assembling the stiffness matrix and right-hand side vector.");
-      dp.assemble(matrix, rhs);
-    }
-    else {
-      info("Assembling the right-hand side vector (only).");
-      dp.assemble(NULL, rhs);
-    }
+    // Assemble stiffness matrix and rhs or just rhs.
+    if (rhs_only == false) info("Assembling the stiffness matrix and right-hand side vector.");
+    else info("Assembling the right-hand side vector (only).");
+    // Set current time step.
+    wf.set_time_step(time_step);
+    dp.assemble(matrix, rhs, rhs_only);
 
     // Solve the matrix problem.
     info("Solving the matrix problem.");
@@ -166,88 +164,80 @@ int main(int argc, char* argv[])
   bool okay = true;
   switch(P_INIT) {
   case 0:
-    if(fabs(l2_norms[0][0] - 16) > 1E-8)
+    if(std::abs(l2_norms[0][0] - 888.0) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[0][1] - 20) > 1E-8)
+    if(std::abs(l2_norms[0][1] - 1110) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[0][2]) > 1E-8)
+    if(std::abs(l2_norms[0][2]) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[0][3] - 112.5) > 1E-8)
+    if(std::abs(l2_norms[0][3] - 6243.75) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[1][0] - 16) > 1E-8)
+    if(std::abs(l2_norms[1][0] - 887.99997637865545) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[1][1] - 20) > 1E-8)
+    if(std::abs(l2_norms[1][1] - 1109.9997956458228) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[1][2]) > 1E-8)
+    if(std::abs(l2_norms[1][2] - 3.1927018090871903e-008) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[1][3] - 112.5) > 1E-8)
+    if(std::abs(l2_norms[1][3] - 6243.7496921971369) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[2][0] - 16) > 1E-8)
+    if(std::abs(l2_norms[2][0] - 887.99993429457072) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[2][1] - 20) > 1E-8)
+    if(std::abs(l2_norms[2][1] - 1109.9994322038613) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[2][2]) > 1E-8)
+    if(std::abs(l2_norms[2][2] + 5.3556469633245445e-008) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[2][3] - 112.5) > 1E-8)
+    if(std::abs(l2_norms[2][3] - 6243.7491437826511) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[3][0] - 16) > 1E-8)
+    if(std::abs(l2_norms[3][0] - 887.99987376550200) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[3][1] - 20) > 1E-8)
+    if(std::abs(l2_norms[3][1] - 1109.9989102977672) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[3][2]) > 1E-8)
+    if(std::abs(l2_norms[3][2] + 3.6958140470412712e-007) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[3][3] - 112.5) > 1E-8)
+    if(std::abs(l2_norms[3][3] - 6243.7483549661320) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[4][0] - 16) > 1E-8)
+    if(std::abs(l2_norms[4][0] - 887.99979481320088) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[4][1] - 20) > 1E-8)
+    if(std::abs(l2_norms[4][1] - 1109.9982305630808) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[4][2]) > 1E-8)
+    if(std::abs(l2_norms[4][2] + 1.0303296924184822e-006) > 1E-8)
       okay = false;
-    if(fabs(l2_norms[4][3] - 112.5) > 1E-8)
+    if(std::abs(l2_norms[4][3] - 6243.7473260085462) > 1E-8)
       okay = false;
 
     // points
-    if(fabs(point_values[0][0] - 1.25) > 1E-8)
+    if(std::abs(point_values[0][0] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[0][1] - 1.25) > 1E-8)
+    if(std::abs(point_values[0][1] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[0][2] - 1.25) > 1E-8)
+    if(std::abs(point_values[0][2] - 1.2459744738974898) > 1E-8)
       okay = false;
-    if(fabs(point_values[1][0] - 1.25) > 1E-8)
+    if(std::abs(point_values[1][0] - 1.2499951035194972) > 1E-8)
       okay = false;
-    if(fabs(point_values[1][1] - 1.25) > 1E-8)
+    if(std::abs(point_values[1][1] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[1][2] - 1.25) > 1E-8)
+    if(std::abs(point_values[1][2] - 1.2428402692519325) > 1E-8)
       okay = false;
-    if(fabs(point_values[2][0] - 1.25) > 1E-8)
+    if(std::abs(point_values[2][0] - 1.2499864002215795) > 1E-8)
       okay = false;
-    if(fabs(point_values[2][1] - 1.25) > 1E-8)
+    if(std::abs(point_values[2][1] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[2][2] - 1.25) > 1E-8)
+    if(std::abs(point_values[2][2] - 1.2397180160697001) > 1E-8)
       okay = false;
-    if(fabs(point_values[3][0] - 1.25) > 1E-8)
+    if(std::abs(point_values[3][0] - 1.2499739085927257) > 1E-8)
       okay = false;
-    if(fabs(point_values[3][1] - 1.25) > 1E-8)
+    if(std::abs(point_values[3][1] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[3][2] - 1.25) > 1E-8)
+    if(std::abs(point_values[3][2] - 1.2366079101139087) > 1E-8)
       okay = false;
-    if(fabs(point_values[4][0] - 1.25)> 1E-8)
+    if(std::abs(point_values[4][0] - 1.2499576472516911) > 1E-8)
       okay = false;
-    if(fabs(point_values[4][1] - 1.25) > 1E-8)
+    if(std::abs(point_values[4][1] - 1.25) > 1E-8)
       okay = false;
-    if(fabs(point_values[4][2] - 1.25) > 1E-8)
+    if(std::abs(point_values[4][2] - 1.2335101392959738) > 1E-8)
       okay = false;
     break;
   }
-
-  for (int i = 0; i<5; i++)
-    for (int j=0; j<4; j++)
-      info ("l2_norms[%d][%d] = %g", i, j, l2_norms[i][j]);
-
-  for (int i = 0; i<5; i++)
-    for (int j=0; j<3; j++)
-      info ("point[%d][%d] = %g", i, j, point_values[i][j]);
 
   if (okay) {      // ndofs was 908 at the time this test was created
     printf("Success!\n");
