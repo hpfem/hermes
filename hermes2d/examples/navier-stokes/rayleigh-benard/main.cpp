@@ -10,16 +10,18 @@
 // in time via the implicit Euler method. The Newton's method is used 
 // to solve the nonlinear problem at each time step. Flow pressure can be 
 // approximated using either continuous (H1) elements or discontinuous (L2)
-// elements. 
+// elements. The L2 elements for pressure make the velocity dicreetely
+// divergence-free. 
 //
 // PDE: incompressible Navier-Stokes equations in the form
-//     \partial v / \partial t = \Delta v / Pr - (v \cdot \nabla) v - \nabla p - Ra(T)Pr(0, -T),
-//     div v = 0,
-//     \partial T / \partial t = -v \cdot \nabla T + \Delta T.
+//      \partial v / \partial t = \Delta v / Pr - (v \cdot \nabla) v - \nabla p - Ra(T)Pr(0, -T),
+//      div v = 0,
+//      \partial T / \partial t = -v \cdot \nabla T + \Delta T.
 //
-// BC: zero velocity on the boundary,
-//     prescribed constant temperature on the bottom,
-//     zero Neumann for the temperature on the rest of the boundary.
+// BC: velocity... zero on the entire boundary,
+//     temperature... constant on the bottom,
+//                    zero Neumann on vetrical edges,
+//                    Newton (heat loss) (1 / Pr) * du/dn = ALPHA_AIR * (TEMP_EXT - u) on the top edge.
 //
 // Geometry: Rectangle (0, Lx) x (0, Ly)... see the file domain.mesh.
 //
@@ -39,15 +41,17 @@ const int P_INIT_TEMP = 1;                        // Initial polynomial degree f
 const double time_step = 0.1;                     // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double Pr = 7.0;                            // Prandtl number (water around 20 degrees Celsius).
-const double Ra = 10.0;                           // Rayleigh number.
+const double Ra = 20;                             // Rayleigh number.
 const double TEMP_INIT = 20;
 const double TEMP_BOTTOM = 25;
+const double TEMP_EXT = 20;                       // External temperature above the surface of the water.
+const double ALPHA_AIR = 5.0;                     // Heat transfer coefficient between water and air on top edge.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -109,7 +113,8 @@ int main(int argc, char* argv[])
                                                              &p_prev_time, &t_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, time_step, &xvel_prev_time, &yvel_prev_time, &t_prev_time);
+  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, "Top", TEMP_EXT, ALPHA_AIR, time_step, 
+                                            &xvel_prev_time, &yvel_prev_time, &t_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
