@@ -76,6 +76,7 @@ set(SRC
        runge_kutta.cpp
        spline.cpp
        boundaryconditions/essential_bcs.cpp
+       hermes_module.cpp
        )
 
 #
