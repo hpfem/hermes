@@ -19,6 +19,7 @@
 
 #include "../function/function.h"
 #include "../function/solution.h"
+#include "../definitions.h"
 #include <string>
 
 class RefMap;
@@ -33,22 +34,6 @@ class Shapeset;
 template<typename T> class Func;
 template<typename T> class Geom;
 template<typename T> class ExtData;
-
-// Bilinear form symmetry flag, see WeakForm::add_matrix_form
-enum SymFlag
-{
-  HERMES_ANTISYM = -1,
-  HERMES_NONSYM = 0,
-  HERMES_SYM = 1
-};
-
-// Geometrical type of weak forms.
-enum GeomType
-{
-  HERMES_PLANAR = 0,         // Planar problem.
-  HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
-  HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
-};
 
 /// \brief Represents the weak formulation of a PDE problem.
 ///

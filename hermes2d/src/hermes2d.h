@@ -116,6 +116,9 @@
 #include "runge_kutta.h"
 #include "spline.h"
 #include "tables.h"
+
+#include "definitions.h"
+
 /**
 
 \mainpage
@@ -302,8 +305,5 @@ Relevant files: view.h
 
 
 */
-
-
-
 
 #endif

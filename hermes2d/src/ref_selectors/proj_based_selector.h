@@ -242,7 +242,7 @@ namespace RefinementSelectors {
     /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
     virtual void evaluate_cands_error(Element* e, Solution* rsln, double* avg_error, double* dev_error);
 
-    /// Calculates projection errors of an elements of candidates for all permitations of orders.
+    /// Calculates projection errors of an elements of candidates for all permutations of orders.
     /** Errors are not normalized and they are squared.
      *  The range of orders is defined through parameters \a info_h, \a info_h, and \a info_aniso.
      *

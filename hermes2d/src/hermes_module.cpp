@@ -16,9 +16,9 @@
 #include "hermes_module.h"
 
 void HermesModule::set_boundary(BoundaryData *boundary) {
-  if(boundary->type == ESSENTIAL)
+  if(boundary->bc_type == HERMES_ESSENTIAL)
     this->essential_boundaries.push_back(boundary);
-  else if (boundary->type == NATURAL)
+  else if (boundary->bc_type == HERMES_NATURAL)
     this->natural_boundaries.push_back(boundary);
 }
 
@@ -26,106 +26,83 @@ void HermesModule::set_material(MaterialData *material) {
   this->materials.push_back(material);
 }
 
-void HermesModule::refine_mesh(Mesh *mesh, const int refinement) {
-  for (int i = 0; i < refinement; i++)
-    this->mesh->refine_all_elements();
-}
-
 void HermesModule::solve() {
-  if (properties()->mesh()->init_ref != 0)
-    refine_mesh(this->mesh, properties()->mesh()->init_ref);
+  RefinementSelectors::Selector* selector = NULL;
+  Hermes::vector<RefinementSelectors::Selector *> selectors;
 
-  RefinementSelectors::Selector *select = NULL;
-  switch (properties()->adaptivity_type)
-  {
-    case H:
-      select = new RefinementSelectors::HOnlySelector();
-      break;
-    case P:
-      select = new RefinementSelectors::H1ProjBasedSelector(RefinementSelectors::H2D_P_ANISO,
+  if (properties()->adaptivity()->cand_list != H2D_NONE)
+    selector = new RefinementSelectors::H1ProjBasedSelector(this->properties()->adaptivity()->cand_list,
                                                             properties()->adaptivity()->conv_exp,
                                                             H2DRS_DEFAULT_ORDER);
-      break;
-    case HP:
-      select = new RefinementSelectors::H1ProjBasedSelector(RefinementSelectors::H2D_HP_ANISO,
-                                                            properties()->adaptivity()->conv_exp,
-                                                            H2DRS_DEFAULT_ORDER);
-      break;
-  }
 
-  Hermes::vector<ProjNormType> proj_norm_type;
-  Hermes::vector<RefinementSelectors::Selector *> selector;
+
   for (int i = 0; i < properties()->solution()->num_sol; i++)
   {
-      space.push_back(new H1Space(this->mesh, bcs, properties()->mesh()->init_deg)); // FIXME
-      sln.push_back(new Solution());
+      this->slns.push_back(new Solution(this->meshes.at(i)));
 
-      if (properties()->adaptivity_type != NONE)
-      {
-          proj_norm_type.push_back(properties()->adaptivity()->proj_norm_type);
-          selector.push_back(select);
-      }
+      if (properties()->adaptivity()->cand_list != H2D_NONE)
+          selectors.push_back(selector);
   }
 
   set_weakform();
 
-  SparseMatrix* matrix = create_matrix(properties()->solution()->mat_solver);;
-  Vector *rhs = create_vector(properties()->solution()->mat_solver);
-  Solver *solver = create_linear_solver(properties()->solution()->mat_solver, matrix, rhs);
+  SparseMatrix* matrix = create_matrix(properties()->solver()->mat_solver);
+  Vector *rhs = create_vector(properties()->solver()->mat_solver);
+  Solver *solver = create_linear_solver(properties()->solver()->mat_solver, matrix, rhs);
 
-  if (properties()->adaptivity_type == NONE)
+  if (properties()->adaptivity()->cand_list == H2D_NONE)
   {
 
-    DiscreteProblem dp(this->wf, this->space, true); // FIXME
+    DiscreteProblem dp(this->wf, this->spaces, this->properties()->is_linear);
     dp.assemble(matrix, rhs);
 
     if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), this->space, this->sln);
+      Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
   }
   else
   {
-    Hermes::vector<Solution *> ref_sln;
+    Hermes::vector<Solution *> ref_slns;
 
     for (int i = 0; i < properties()->adaptivity()->max_steps; i++)
     {
       for (int j = 0; j < properties()->solution()->num_sol; j++)
-           ref_sln.push_back(new Solution());
+           ref_slns.push_back(new Solution());
 
-      Hermes::vector<Space *> ref_space = *Space::construct_refined_spaces(this->space);
+      Hermes::vector<Space *> ref_spaces = *Space::construct_refined_spaces(this->spaces);
 
-      DiscreteProblem dp(this->wf, ref_space, true); // FIXME
+      DiscreteProblem dp(this->wf, ref_spaces, true); // FIXME
       dp.assemble(matrix, rhs);
 
       if (solver->solve())
-        Solution::vector_to_solutions(solver->get_solution(), ref_space, ref_sln);
+        Solution::vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
       else
         break;
 
-      OGProjection::project_global(this->space, ref_sln, this->sln, properties()->solution()->mat_solver);
+      OGProjection::project_global(this->spaces, ref_slns, this->slns, properties()->solver()->mat_solver);
 
-      Adapt adaptivity(this->space, proj_norm_type);
+      Adapt adaptivity(this->spaces, proj_norms);
 
       Hermes::vector<double> err_est_rel;
-      double error = adaptivity.calc_err_est(this->sln, ref_sln, &err_est_rel) * 100;
+      double error = adaptivity.calc_err_est(this->slns, ref_slns, &err_est_rel) * 100;
 
-      if (error < properties()->adaptivity()->tolerance || Space::get_num_dofs(this->space) >= properties()->adaptivity()->max_dofs)
+      if (error < properties()->adaptivity()->tolerance || Space::get_num_dofs(this->spaces) >= properties()->adaptivity()->max_dofs)
         break;
 
       if (i != properties()->adaptivity()->max_steps-1)
-        adaptivity.adapt(selector, properties()->adaptivity()->threshold, properties()->adaptivity()->strategy,
+        adaptivity.adapt(selectors, properties()->adaptivity()->threshold, properties()->adaptivity()->strategy,
                          properties()->adaptivity()->regularize);
 
-      for (unsigned int i = 0; i < ref_space.size(); i++)
+      for (unsigned int i = 0; i < ref_spaces.size(); i++)
       {
-        delete ref_space.at(i);
+        delete ref_spaces.at(i);
       }
 
-      ref_space.clear();
+      ref_spaces.clear();
 
-      for (unsigned int i = 0; i < ref_sln.size(); i++)
-        delete ref_sln.at(i);
+      for (unsigned int i = 0; i < ref_slns.size(); i++)
+        delete ref_slns.at(i);
 
-      ref_sln.clear();
+      ref_slns.clear();
     }
   }
 
@@ -133,16 +110,19 @@ void HermesModule::solve() {
   delete matrix;
   delete rhs;
 
-  delete select;
-  selector.clear();
+  if (this->properties()->adaptivity()->cand_list != H2D_NONE)
+  {
+    delete selector;
+    selectors.clear();
+  }
 
-  delete this->mesh;
+  this->meshes.clear();
 
-  for (unsigned int i = 0; i < this->space.size(); i++)
-      delete this->space.at(i);
-  this->space.clear();
+  for (unsigned int i = 0; i < this->spaces.size(); i++)
+      delete this->spaces.at(i);
+  this->spaces.clear();
 
-  for (unsigned int i = 0; i < this->sln.size(); i++)
-      delete this->sln.at(i);
-  this->sln.clear();
+  for (unsigned int i = 0; i < this->slns.size(); i++)
+      delete this->slns.at(i);
+  this->slns.clear();
 }

@@ -35,6 +35,7 @@ namespace RefinementSelectors {
 
   /// Predefined list of candidates. \ingroup g_selectors
   enum CandList {
+    H2D_NONE,  ///< No adaptivity. (Used only in modules.)
     H2D_P_ISO, ///< P-candidates only. Orders are modified uniformly.
     H2D_P_ANISO, ///< P-candidates only. Orders are modified non-uniformly.
     H2D_H_ISO, ///< H-candidates only. Orders are not modified.
