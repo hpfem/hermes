@@ -6,6 +6,8 @@
 
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -20,6 +22,9 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -41,8 +46,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -52,14 +56,17 @@ int main(int argc, char* argv[])
   // Initialize the solution.
   Solution sln;
 
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp.assemble(matrix, rhs);
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-  // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
-  if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else error ("Matrix solver failed.\n");
+  // Perform Newton's iteration.
+  bool verbose = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
+      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   ndof = Space::get_num_dofs(&space);
   printf("ndof = %d\n", ndof);
