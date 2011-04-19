@@ -27,8 +27,6 @@ const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -82,9 +80,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof*sizeof(scalar));
 
   // Perform Newton's iteration.
-  bool verbose = true;
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
-      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
   Solution::vector_to_solution(coeff_vec, &space, &sln);
