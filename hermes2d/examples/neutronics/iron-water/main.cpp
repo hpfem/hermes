@@ -107,7 +107,8 @@ int main(int argc, char* argv[])
   Hermes::vector<double> Sigma_a_map(SIGMA_A_WATER, SIGMA_A_WATER, SIGMA_A_IRON);
   Hermes::vector<double> Sources_map(Q_EXT, 0.0, 0.0);
   
-  WeakFormsNeutronDiffusion::DefaultWeakFormSimpleMonoenergetic 
+  // Initialize the weak formulation.
+  WeakFormsNeutronics::Diffusion::Monoenergetic::DefaultWeakFormFixedSource
     wf(regions, D_map, Sigma_a_map, Sources_map);
   
   // Initialize refinement selector.
