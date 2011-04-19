@@ -37,27 +37,31 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string OUTER_BDY = "1", STATOR_BDY = "2";
-// Voltage on the stator
+// Problem parameters.
+const double EPS0 = 8.863e-12;
 const double VOLTAGE = 50.0;
+const double EPS_MOTOR = 10.0 * EPS0;
+const double EPS_AIR = 1.0 * EPS0;
 
 // Weak forms.
 #include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
   mloader.load("../motor.mesh", &mesh);
 
   // Initialize the weak formulation.
-  WeakFormElectrostaticTutorial wf;
-  
+  CustomWeakFormPoisson wf("Motor", EPS_MOTOR, "Air", EPS_AIR);
+
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_out(OUTER_BDY, 0.0);
-  DefaultEssentialBCConst bc_stator(STATOR_BDY, VOLTAGE);
+  DefaultEssentialBCConst bc_out("Outer", 0.0);
+  DefaultEssentialBCConst bc_stator("Stator", VOLTAGE);
   EssentialBCs bcs(Hermes::vector<EssentialBoundaryCondition *>(&bc_out, &bc_stator));
 
   // Create an H1 space with default shapeset.
@@ -91,6 +95,7 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -99,19 +104,20 @@ int main(int argc, char* argv[])
 
     // Assemble reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem.
-    // If successful, obtain the solution.
-    if(solver->solve())
-        Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else
-        error ("Matrix solver failed.\n");
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
