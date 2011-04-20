@@ -2,26 +2,20 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// This example solves the Rayleigh-Benard convection problem
-// http://en.wikipedia.org/wiki/Rayleigh%E2%80%93B%C3%A9nard_convection.
-// In this problem, a steady fluid is heated from the bottom and 
-// it starts to move. The time-dependent laminar incompressible Navier-Stokes 
-// equations are coupled with a heat transfer equation and discretized 
-// in time via the implicit Euler method. The Newton's method is used 
-// to solve the nonlinear problem at each time step. Flow pressure can be 
-// approximated using either continuous (H1) elements or discontinuous (L2)
-// elements. The L2 elements for pressure make the velocity dicreetely
-// divergence-free. 
+// This example solves the classical driven lid cavity flow where the flow is 
+// inside of a box whose one edge (top) moves. The time-dependent laminar 
+// incompressible Navier-Stokes and discretized in time via the implicit Euler 
+// method. The Newton's method is used to solve the nonlinear problem at each 
+// time step. Flow pressure can be approximated using either continuous (H1) 
+// elements or discontinuous (L2) elements. The L2 elements for pressure make 
+// the velocity dicreetely divergence-free. 
 //
 // PDE: incompressible Navier-Stokes equations in the form
-//      \partial v / \partial t = \Delta v / Pr - (v \cdot \nabla) v - \nabla p - Ra(T)Pr(0, -T),
+//      \partial v / \partial t = \Delta v / Re - (v \cdot \nabla) v - \nabla p = 0,
 //      div v = 0,
-//      \partial T / \partial t = -v \cdot \nabla T + \Delta T.
 //
-// BC: velocity... zero on the entire boundary,
-//     temperature... constant on the bottom,
-//                    zero Neumann on vetrical edges,
-//                    Newton (heat loss) (1 / Pr) * du/dn = ALPHA_AIR * (TEMP_EXT - u) on the top edge.
+// BC: velocity... zero on the entire boundary except top edge where normal
+//                 component is zero and tangential is a nonzero constant.
 //
 // Geometry: Rectangle (0, Lx) x (0, Ly)... see the file domain.mesh.
 //
@@ -46,12 +40,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double Pr = 7.0;                            // Prandtl number (water around 20 degrees Celsius).
-const double Ra = 50;                             // Rayleigh number.
-const double TEMP_INIT = 20;
-const double TEMP_BOTTOM = 25;
-const double TEMP_EXT = 20;                       // External temperature above the surface of the water.
-const double ALPHA_AIR = 5.0;                     // Heat transfer coefficient between water and air on top edge.
+const double Re = 10.0;                           // Reynolds number.
+const double XVEL_TOP = 0.000;                     // Tangential velocity component on the top edge.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -66,16 +56,15 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  for (int i=0; i < 3; i++) mesh.refine_all_elements(2);
   for (int i=0; i < 3; i++) mesh.refine_all_elements();
   mesh.refine_towards_boundary(HERMES_ANY, 2);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst zero_vel_bc(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
-  EssentialBCs bcs_vel_x(&zero_vel_bc);
-  EssentialBCs bcs_vel_y(&zero_vel_bc);
-  DefaultEssentialBCConst bc_temp_bottom("Bottom", TEMP_BOTTOM);
-  EssentialBCs bcs_temp(&bc_temp_bottom);
+  DefaultEssentialBCConst zero_vel_bc_x_brl(Hermes::vector<std::string>("Bottom", "Right", "Left"), 0.0);
+  DefaultEssentialBCConst zero_vel_bc_x_top(Hermes::vector<std::string>("Top"), XVEL_TOP);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition*>(&zero_vel_bc_x_top, &zero_vel_bc_x_brl));
+  DefaultEssentialBCConst zero_vel_bc_y(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
+  EssentialBCs bcs_vel_y(&zero_vel_bc_y);
   EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
@@ -86,11 +75,10 @@ int main(int argc, char* argv[])
 #else
   H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
-  H1Space t_space(&mesh, &bcs_temp, P_INIT_TEMP);
-  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space);
+  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space);
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space, &t_space));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -104,17 +92,16 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  Solution xvel_prev_time, yvel_prev_time, p_prev_time, t_prev_time; 
+  Solution xvel_prev_time, yvel_prev_time, p_prev_time; 
   xvel_prev_time.set_zero(&mesh);
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
-  t_prev_time.set_const(&mesh, TEMP_INIT);
   Hermes::vector<Solution*> slns = Hermes::vector<Solution*>(&xvel_prev_time, &yvel_prev_time, 
-                                                             &p_prev_time, &t_prev_time);
+                                                             &p_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf = new WeakFormRayleighBenard(Pr, Ra, "Top", TEMP_EXT, ALPHA_AIR, time_step, 
-                                            &xvel_prev_time, &yvel_prev_time, &t_prev_time);
+  WeakForm* wf = new WeakFormDrivenCavity(Re, "Top", time_step, 
+                                          &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
@@ -125,13 +112,11 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
-  VectorView vview("velocity", new WinGeom(0, 0, 1000, 200));
-  ScalarView tview("temperature", new WinGeom(0, 255, 1000, 200));
-  ScalarView pview("pressure", new WinGeom(0, 485, 1000, 200));
+  VectorView vview("velocity", new WinGeom(0, 0, 400, 400));
+  ScalarView pview("pressure", new WinGeom(410, 0, 400, 400));
   //vview.set_min_max_range(0, 1.6);
   vview.fix_scale_width(80);
   pview.fix_scale_width(80);
-  tview.fix_scale_width(80);
   pview.show_mesh(true);
 
   // Project the initial condition on the FE space to obtain initial
@@ -164,7 +149,6 @@ int main(int argc, char* argv[])
     sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
-    tview.show(&t_prev_time);
 
     // Update current time.
     current_time += time_step;
