@@ -41,7 +41,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 // Problem parameters.
 const double Re = 10.0;                           // Reynolds number.
-const double XVEL_TOP = 0.000;                     // Tangential velocity component on the top edge.
+const double XVEL_TOP = 0.01;                     // Tangential velocity component on the top edge.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -56,13 +56,13 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  for (int i=0; i < 3; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(HERMES_ANY, 2);
+  for (int i=0; i < 4; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(HERMES_ANY, 4);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst zero_vel_bc_x_brl(Hermes::vector<std::string>("Bottom", "Right", "Left"), 0.0);
-  DefaultEssentialBCConst zero_vel_bc_x_top(Hermes::vector<std::string>("Top"), XVEL_TOP);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition*>(&zero_vel_bc_x_top, &zero_vel_bc_x_brl));
+  DefaultEssentialBCConst vel_bc_x_top(Hermes::vector<std::string>("Top"), XVEL_TOP);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition*>(&vel_bc_x_top, &zero_vel_bc_x_brl));
   DefaultEssentialBCConst zero_vel_bc_y(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
   EssentialBCs bcs_vel_y(&zero_vel_bc_y);
   EssentialBCs bcs_pressure;
