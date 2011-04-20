@@ -58,6 +58,16 @@ Scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
   return result;
 }
 
+// For residual forms.
+template<typename Real, typename Scalar>
+Scalar int_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u_ext->val[i] * v->val[i];
+  return result;
+}
+
 template<typename Real, typename Scalar>
 Scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
@@ -67,12 +77,32 @@ Scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
   return result;
 }
 
+// For residual forms.
+template<typename Real, typename Scalar>
+Scalar int_x_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * u_ext->val[i] * v->val[i];
+  return result;
+}
+
 template<typename Real, typename Scalar>
 Scalar int_y_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * e->y[i] * u->val[i] * v->val[i];
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename Scalar>
+Scalar int_y_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * u_ext->val[i] * v->val[i];
   return result;
 }
 
@@ -93,18 +123,16 @@ Scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   return result;
 }
-// This is the same as above but able to accept complex-valued external
-// solution instead of the basis functions 'u'.
-#ifdef H2D_COMPLEX
+
+// For residual forms.
 template<typename Real, typename Scalar>
-Scalar int_grad_u_grad_v(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
+Scalar int_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+    result += wt[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
   return result;
 }
-#endif
 
 template<typename Real, typename Scalar>
 Scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
@@ -115,12 +143,32 @@ Scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom
   return result;
 }
 
+// For residual forms.
+template<typename Real, typename Scalar>
+Scalar int_x_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
+  return result;
+}
+
 template<typename Real, typename Scalar>
 Scalar int_y_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename Scalar>
+Scalar int_y_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  Scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
   return result;
 }
 
@@ -159,18 +207,16 @@ Scalar int_u_dvdx_over_x(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<R
     result += wt[i] * ((e->x[i] > 0) ? u->val[i] * v->dx[i] / e->x[i] : 0.0);
   return result;
 }
-// This is the same as above but able to accept complex-valued external
-// solution instead of the basis functions 'u'.
-#ifdef H2D_COMPLEX
+
+// For residual forms.
 template<typename Real, typename Scalar>
-Scalar int_u_dvdx_over_x(int n, double *wt, Func<Scalar> *u, Func<Real> *v, Geom<Real> *e)
+Scalar int_u_ext_dvdx_over_x(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->dx[i] / e->x[i];
+    result += wt[i] * u_ext->val[i] * v->dx[i] / e->x[i];
   return result;
 }
-#endif
 
 template<typename Real, typename Scalar>
 Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
@@ -189,18 +235,16 @@ Scalar int_u_dvdy_over_y(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<R
     result += wt[i] * ((e->y[i] > 0) ? u->val[i] * v->dy[i] / e->y[i] : 0.0);
   return result;
 }
-// This is the same as above but able to accept complex-valued external
-// solution instead of the basis functions 'u'.
-#ifdef H2D_COMPLEX
+
+// For residual forms.
 template<typename Real, typename Scalar>
-Scalar int_u_dvdy_over_y(int n, double *wt, Func<Scalar> *u, Func<Real> *v, Geom<Real> *e)
+Scalar int_u_ext_dvdy_over_y(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * u->val[i] * v->dy[i] / e->y[i];
+    result += wt[i] * u_ext->val[i] * v->dy[i] / e->y[i];
   return result;
 }
-#endif
 
 template<typename Real, typename Scalar>
 Scalar int_dudx_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)

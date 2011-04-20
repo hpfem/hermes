@@ -13,7 +13,8 @@ using namespace WeakFormsH1::SurfaceVectorForms;
 class CustomWeakFormPoissonNewton : public WeakForm
 {
 public:
-  CustomWeakFormPoissonNewton(double lambda, double alpha, double T0, std::string bdy_heat_flux) : WeakForm(1)
+  CustomWeakFormPoissonNewton(double lambda, double alpha, double T0, std::string bdy_heat_flux) 
+        : WeakForm(1)
   {
     // Jacobian form - volumetric.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, lambda, HERMES_SYM, HERMES_AXISYM_Y));

@@ -410,29 +410,31 @@ namespace WeakFormsH1 {
     {
     public:
       DefaultResidualLinearDiffusion(int i, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR)
-  : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
+             : WeakForm::VectorFormVol(i), coeff(coeff), gt(gt) { }
       DefaultResidualLinearDiffusion(int i, std::string area, scalar coeff = 1.0, GeomType gt = HERMES_PLANAR)
-  : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
-
-      template<typename Real, typename Scalar>
-      Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        Scalar result = 0;
-        Func<Scalar>* u_prev = u_ext[0];
-        for (int i = 0; i < n; i++) {
-          result += wt[i] * coeff * (u_prev->dx[i] * v->dx[i] + u_prev->dy[i] * v->dy[i]);
-        }
-        return result;
-      }
+             : WeakForm::VectorFormVol(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
-        return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
+        scalar result = 0;
+        if (gt == HERMES_PLANAR) result = int_grad_u_ext_grad_v<double, scalar>(n, wt, u_ext[0], v);
+        else {
+          if (gt == HERMES_AXISYM_X) result = int_y_grad_u_ext_grad_v<double, scalar>(n, wt, u_ext[0], v, e);
+          else result = int_x_grad_u_ext_grad_v<double, scalar>(n, wt, u_ext[0], v, e);
+        }
+        return coeff * result;
+
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+        Ord result;
+        if (gt == HERMES_PLANAR) result = int_grad_u_ext_grad_v<Ord, Ord>(n, wt, u_ext[0], v);
+        else {
+          if (gt == HERMES_AXISYM_X) result = int_y_grad_u_ext_grad_v<Ord, Ord>(n, wt, u_ext[0], v, e);
+          else result = int_x_grad_u_ext_grad_v<Ord, Ord>(n, wt, u_ext[0], v, e);
+        }
+        return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -816,29 +818,27 @@ namespace WeakFormsH1 {
     public:
       DefaultResidualSurfConst(int i, scalar coeff = 1.0,
                                GeomType gt = HERMES_PLANAR)
-  : WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
+             : WeakForm::VectorFormSurf(i), coeff(coeff), gt(gt) { }
       DefaultResidualSurfConst(int i, std::string area, scalar coeff = 1.0,
                                GeomType gt = HERMES_PLANAR)
-  : WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
-
-      template<typename Real, typename Scalar>
-      Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[],
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        Scalar result = 0;
-        for (int i = 0; i < n; i++) {
-          result += wt[i] * u_ext[0]->val[i] * v->val[i];
-        }
-        return coeff * result;
-      }
+             : WeakForm::VectorFormSurf(i, area), coeff(coeff), gt(gt) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                    Geom<double> *e, ExtData<scalar> *ext) const {
-        return vector_form_surf<double, scalar>(n, wt, u_ext, v, e, ext);
+        scalar result = 0;
+        if (gt == HERMES_PLANAR) result = int_u_ext_v<double, scalar>(n, wt, u_ext[0], v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_ext_v<double, scalar>(n, wt, u_ext[0], v, e);
+        else result = int_x_u_ext_v<double, scalar>(n, wt, u_ext[0], v, e);
+        return coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
+        Ord result = 0;
+        if (gt == HERMES_PLANAR) result = int_u_ext_v<Ord, Ord>(n, wt, u_ext[0], v);
+        else if (gt == HERMES_AXISYM_X) result = int_y_u_ext_v<Ord, Ord>(n, wt, u_ext[0], v, e);
+        else result = int_x_u_ext_v<Ord, Ord>(n, wt, u_ext[0], v, e);
+        return coeff * result;
       }
 
       // This is to make the form usable in rk_time_step().

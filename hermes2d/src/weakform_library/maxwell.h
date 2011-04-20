@@ -225,7 +225,7 @@ namespace WeakFormsMaxwell {
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {
-        scalar planar_part = int_grad_u_grad_v<double, scalar>(n, wt, u_ext[0], v);
+        scalar planar_part = int_grad_u_ext_grad_v<double, scalar>(n, wt, u_ext[0], v);
         scalar axisym_part = 0;
         if (gt == HERMES_AXISYM_X)
           axisym_part = int_u_dvdy_over_y<double, scalar>(n, wt, u_ext[0], v, e);
@@ -237,7 +237,7 @@ namespace WeakFormsMaxwell {
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
-        Ord planar_part = int_grad_u_grad_v<Ord, Ord>(n, wt, u_ext[0], v);
+        Ord planar_part = int_grad_u_ext_grad_v<Ord, Ord>(n, wt, u_ext[0], v);
         return planar_part * Ord(order_increase);
       }
 

@@ -6,7 +6,8 @@
 // temperature on the bottom face, and a Newton-type heat flux condition on
 // all other faces.
 //
-// PDE: Laplace equation -Laplace u = 0 (y-axis is the axis of symmetry).
+// PDE: Laplace equation -div (LAMBDA grad u) = 0 (y-axis is the axis of symmetry),
+//      LAMBDA... constant.
 //
 // BC: u = T1 ... fixed temperature on Gamma_bottom,
 //     -LAMBDA * du/dn = ALPHA*(u - T0) ... heat flux on the rest of the boundary (Gamma_heat_flux).
