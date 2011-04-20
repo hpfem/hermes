@@ -4473,6 +4473,19 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
 
+    Solution a(dp->get_space(0)->get_mesh());
+    Solution b(dp->get_space(1)->get_mesh());
+
+    Solution::vector_to_solutions(coeff_vec, dp->get_spaces(), Hermes::vector<Solution*>(&a, &b));
+
+    // Visualize the solution.
+    ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
+    ScalarView view1("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
+
+    view.show(&a);
+    view1.show(&b);
+    View::wait();
+
     it++;
   }
 
