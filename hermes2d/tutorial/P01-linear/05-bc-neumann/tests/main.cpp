@@ -50,7 +50,6 @@ int main(int argc, char* argv[])
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
   int success = 1;
-  Solution sln;
   for (int p_init = 1; p_init <= 10; p_init++) {
 
     printf("********* p_init = %d *********\n", p_init);
@@ -66,9 +65,6 @@ int main(int argc, char* argv[])
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Initialize the solution.
-    Solution sln;
-
     // Initial coefficient vector for the Newton's method.  
     scalar* coeff_vec = new scalar[ndof];
     memset(coeff_vec, 0, ndof*sizeof(scalar));
@@ -77,6 +73,7 @@ int main(int argc, char* argv[])
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
+    Solution sln;
     Solution::vector_to_solution(coeff_vec, &space, &sln);
 
     double sum = 0;

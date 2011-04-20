@@ -7,7 +7,7 @@
 //  can be defined manually.
 //
 //  PDE: -d/dx(a_11(x,y)du/dx) - d/dx(a_12(x,y)du/dy) - d/dy(a_21(x,y)du/dx) - d/dy(a_22(x,y)du/dy)
-//       + a_1(x,y)du/dx + a_2(x,y)du/dy + a_0(x,y)u = rhs(x,y)
+//       + a_1(x,y)du/dx + a_2(x,y)du/dy + a_0(x,y)u - rhs(x,y) = 0.
 //
 //  Domain: arbitrary
 //
@@ -30,14 +30,14 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
 
-// Boundary markers.
-const std::string BDY_HORIZONTAL = "Boundary horizontal", BDY_VERTICAL = "Boundary vertical";
-
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Initialize boundary conditions
-  EssentialBCNonConst bc_essential(BDY_HORIZONTAL);
+  EssentialBCNonConst bc_essential("Boundary horizontal");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -60,11 +60,10 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormGeneral wf;
+  CustomWeakFormGeneral wf("Boundary horizontal");
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
@@ -77,19 +76,16 @@ int main(int argc, char* argv[])
     // Using default iteration parameters (see solver/aztecoo.h).
   }
 
-  // Initialize the solution.
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
+
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+  // Translate the resulting coefficient vector into the Solution sln.
   Solution sln;
-
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp.assemble(matrix, rhs);
-
-  // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
-  if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else
-    error ("Matrix solver failed.\n");
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Time measurement.
   cpu_time.tick();
@@ -98,6 +94,7 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
+  delete [] coeff_vec;
 
   // View the solution and mesh.
   ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));

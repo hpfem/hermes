@@ -25,14 +25,14 @@ const double T0 = 20.0;       // Outer temperature.
 const double LAMBDA = 386;    // Thermal conductivity.
 const double ALPHA = 5.0;     // Heat flux coefficient on Gamma_heat_flux.
 
-// Boundary markers.
-const std::string BDY_BOTTOM = "Bottom", BDY_HEAT_FLUX = "Heat flux";
-
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   for(int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY_BOTTOM, T1);
+  DefaultEssentialBCConst bc_essential("Bottom", T1);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -51,36 +51,33 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf(LAMBDA, ALPHA, T0, BDY_HEAT_FLUX);
+  CustomWeakFormPoissonNewton wf(LAMBDA, ALPHA, T0, "Heat flux");
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Initialize the solution.
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
+
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+  // Translate the resulting coefficient vector into the Solution sln.
   Solution sln;
-
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp.assemble(matrix, rhs);
-
-  // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
-  if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else
-    error ("Matrix solver failed.\n");
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 300, 400));
   view.show(&sln);
   ScalarView gradview("Gradient", new WinGeom(310, 0, 300, 400));
-  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+  MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), 
+                 Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for all views to be closed.
@@ -90,6 +87,7 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
+  delete [] coeff_vec;
 
   return 0;
 }

@@ -3,7 +3,7 @@
 
 // This example shows how to use non-constant Dirichlet boundary conditions.
 //
-// PDE: Poisson equation -div(LAMBDA grad u) = VOLUME_HEAT_SRC.
+// PDE: Poisson equation -div(LAMBDA grad u) - VOLUME_HEAT_SRC = 0.
 //
 // Boundary conditions: Dirichlet u(x, y) = A*x + B*y + C where the 
 //                      constants A, B, C are arbitrary constants (defined below).
@@ -63,9 +63,6 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Initialize the solution.
-  Solution sln;
-
   // Initial coefficient vector for the Newton's method.  
   scalar* coeff_vec = new scalar[ndof];
   memset(coeff_vec, 0, ndof*sizeof(scalar));
@@ -74,6 +71,7 @@ int main(int argc, char* argv[])
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
+  Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // VTK output.
