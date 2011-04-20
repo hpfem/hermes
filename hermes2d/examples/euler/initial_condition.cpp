@@ -178,8 +178,8 @@ public:
 
 class ConcentrationTimedepEssentialBC : public EssentialBoundaryCondition {
 public:
-  ConcentrationTimedepEssentialBC(std::string marker) 
-           : EssentialBoundaryCondition(Hermes::vector<std::string>())
+  ConcentrationTimedepEssentialBC(std::string marker, double constant, double startup_time) 
+           : EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), constant(constant)
   {
     markers.push_back(marker);
   }
@@ -192,9 +192,15 @@ public:
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
-    if(this->get_current_time() < 0.5)
+    if(this->get_current_time() < startup_time)
       return 0.0;
     else
-      return 1.0;
+      if(this->get_current_time() < 2 * startup_time)
+        return ((this->get_current_time() - startup_time) / startup_time) * constant;
+      else
+        return constant;
   }
+
+  double startup_time;
+  double constant;
 };

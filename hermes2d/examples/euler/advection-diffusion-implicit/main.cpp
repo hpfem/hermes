@@ -11,40 +11,44 @@ using namespace RefinementSelectors;
 //
 // Equations: Compressible Euler equations, perfect gas state equation, advection-diffusion equation.
 //
-// Domains: GAMM channel, see mesh file GAMM-channel-4-bnds.mesh
-//          a rectangular channel, see mesh file channel-4-bnds.mesh
+// Domains: Various
 //
-// BC: Normal velocity component is zero on solid walls.
-//     Subsonic state prescribed on inlet and outlet.
-//     Various conditions for the concentration.
-//     See the parameter INITIAL_CONCENTRATION_STATE.
+// BC: Various.
 //
-// IC: Constant subsonic state identical to inlet. 
-//     Various conditions for the concentration.
-//     See the parameter INITIAL_CONCENTRATION_STATE.
+// IC: Various.
 //
-// The following parameters can be changed.
-// If set to true, GAMM channel is used, if false, a simple rectangular channel is.
-const bool GAMM_CHANNEL = false;
+// The following parameters can be changed:
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
 const double NOX_LINEAR_TOLERANCE = 1e-2;
+const double NOX_NONLINEAR_TOLERANCE = 1e-1;
 
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
+// Shock capturing.
+bool SHOCK_CAPTURING = false;
+
+// Quantitative parameter of the discontinuity detector.
+double DISCONTINUITY_DETECTOR_PARAM = 1.0;
+
+// Stability for the concentration part.
+double ADVECTION_STABILITY_CONSTANT = 1.0;
+const double DIFFUSION_STABILITY_CONSTANT = 1.0;
+
 const int P_INIT_FLOW = 0;                        // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;               // Polynomial degree for the concentration.
-double time_step = 5E-2;                          // Time step.
+double CFL_NUMBER = 1.0;                               // CFL value.
+double time_step = 1E-5, util_time_step;               // Initial and utility time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 2;               // Number of initial uniform mesh refinements of the mesh for the flow.
-unsigned int INIT_REF_NUM_CONCENTRATION = 2;      // Number of initial uniform mesh refinements of the mesh for the concentration.
-unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 5;  // Number of initial mesh refinements of the mesh for the concentration towards the 
+unsigned int INIT_REF_NUM_FLOW = 3;                    // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_CONCENTRATION = 3;           // Number of initial uniform mesh refinements of the mesh for the concentration.
+unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 1;       // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                   // part of the boundary where the concentration is prescribed.
 // Equation parameters.
 const double P_EXT = 2.5;         // Exterior pressure (dimensionless).
@@ -52,14 +56,18 @@ const double RHO_EXT = 1.0;       // Inlet density (dimensionless).
 const double V1_EXT = 1.25;       // Inlet x-velocity (dimensionless).
 const double V2_EXT = 0.0;        // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;         // Kappa.
-const double CONCENTRATION_EXT = 1.0;                  // Concentration on the boundary.
+const double CONCENTRATION_EXT = 0.1;                  // Concentration on the boundary.
+const double CONCENTRATION_EXT_STARTUP_TIME = 0.0;     // Start time of the concentration on the boundary.
 
 const double EPSILON = 0.01;                           // Diffusivity.
+
 // Boundary markers.
 const std::string BDY_INLET = "1";
 const std::string BDY_OUTLET = "2";
 const std::string BDY_SOLID_WALL_BOTTOM = "3";
 const std::string BDY_SOLID_WALL_TOP = "4";
+const std::string BDY_DIRICHLET_CONCENTRATION = "3";
+Hermes::vector<std::string> BDY_NATURAL_CONCENTRATION = Hermes::vector<std::string>("4");
 
 // Weak forms.
 #include "../forms_implicit.cpp"
@@ -72,10 +80,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  if(GAMM_CHANNEL)
     mloader.load("GAMM-channel.mesh", &basemesh);
-  else
-    mloader.load("channel.mesh", &basemesh);
 
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;
@@ -85,22 +90,25 @@ int main(int argc, char* argv[])
   for(unsigned int i = 0; i < INIT_REF_NUM_CONCENTRATION; i++)
     mesh_concentration.refine_all_elements();
 
+  mesh_concentration.refine_towards_boundary(BDY_DIRICHLET_CONCENTRATION, INIT_REF_NUM_CONCENTRATION_BDY);
+  //mesh_flow.refine_towards_boundary(BDY_DIRICHLET_CONCENTRATION, INIT_REF_NUM_CONCENTRATION_BDY);
+
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
 
   // Initialize boundary condition types and spaces with default shapesets.
-  // For the flow.
-  EssentialBCs bcs_flow;
-
   // For the concentration.
   EssentialBCs bcs_concentration;
 
-  L2Space space_rho(&mesh_flow, &bcs_flow, P_INIT_FLOW);
-  L2Space space_rho_v_x(&mesh_flow, &bcs_flow, P_INIT_FLOW);
-  L2Space space_rho_v_y(&mesh_flow, &bcs_flow, P_INIT_FLOW);
-  L2Space space_e(&mesh_flow, &bcs_flow, P_INIT_FLOW);
+  bcs_concentration.add_boundary_condition(new ConcentrationTimedepEssentialBC(BDY_DIRICHLET_CONCENTRATION, CONCENTRATION_EXT, CONCENTRATION_EXT_STARTUP_TIME));
+  
+  L2Space space_rho(&mesh_flow, P_INIT_FLOW);
+  L2Space space_rho_v_x(&mesh_flow, P_INIT_FLOW);
+  L2Space space_rho_v_y(&mesh_flow, P_INIT_FLOW);
+  L2Space space_e(&mesh_flow, P_INIT_FLOW);
   // Space for concentration.
   H1Space space_c(&mesh_concentration, &bcs_concentration, P_INIT_CONCENTRATION);
+
   int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e, &space_c));
   info("ndof: %d", ndof);
 
@@ -121,8 +129,9 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, PRECONDITIONING, EPSILON);
+  EulerEquationsWeakFormImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM,
+    BDY_SOLID_WALL_TOP, BDY_INLET, BDY_OUTLET, BDY_NATURAL_CONCENTRATION, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, PRECONDITIONING, EPSILON);
+  
   wf.set_time_step(time_step);
 
   // Initialize the FE problem.
@@ -140,25 +149,30 @@ int main(int argc, char* argv[])
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
   EntropyFilter entropy(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA, RHO_EXT, P_EXT);
 
+  /*
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-
   ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
+  */
   
-  /*
   ScalarView s1("1", new WinGeom(0, 0, 600, 300));
   ScalarView s2("2", new WinGeom(700, 0, 600, 300));
   ScalarView s3("3", new WinGeom(0, 400, 600, 300));
   ScalarView s4("4", new WinGeom(700, 400, 600, 300));
   ScalarView s5("Concentration", new WinGeom(350, 200, 600, 300));
-  */
   
   // Initialize NOX solver.
   NoxSolver solver(&dp);
   solver.set_ls_tolerance(NOX_LINEAR_TOLERANCE);
   solver.disable_abs_resid();
-  solver.set_conv_rel_resid(1.00);
+  solver.set_conv_rel_resid(NOX_NONLINEAR_TOLERANCE);
+
+  // Set up CFL calculation class.
+  CFLCalculation CFL(CFL_NUMBER, KAPPA);
+
+  // Set up Advection-Diffusion-Equation stability calculation class.
+  ADEStabilityCalculation ADES(ADVECTION_STABILITY_CONSTANT, DIFFUSION_STABILITY_CONSTANT, EPSILON);
 
   // Select preconditioner.
   if(PRECONDITIONING) {
@@ -167,7 +181,7 @@ int main(int argc, char* argv[])
   }
 
   int iteration = 0; double t = 0;
-  for(t = 0.0; t < 3.0; t += time_step) {
+  for(t = 0.0; t < 100.0; t += time_step) {
     info("---- Time step %d, time %3.5f.", iteration++, t);
 
     OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e, &space_c), 
@@ -180,11 +194,22 @@ int main(int argc, char* argv[])
       Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c));
     else
       error("NOX failed.");
+    util_time_step = time_step;
+
+    CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh_flow, util_time_step);
+
+    time_step = util_time_step;
+
+    ADES.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y), &mesh_concentration, util_time_step);
+
+    if(util_time_step < time_step)
+      time_step = util_time_step;
 
     // Visualization.
     if((iteration - 1) % EVERY_NTH_STEP == 0) {
       // Hermes visualization.
       if(HERMES_VISUALIZATION) {
+        /*
         Mach_number.reinit();
         pressure.reinit();
         entropy.reinit();
@@ -192,42 +217,57 @@ int main(int argc, char* argv[])
         entropy_production_view.show(&entropy);
         Mach_number_view.show(&Mach_number);
         s5.show(&prev_c);
-        /*
+        */
         s1.show(&prev_rho);
         s2.show(&prev_rho_v_x);
         s3.show(&prev_rho_v_y);
         s4.show(&prev_e);
         s5.show(&prev_c);
+        /*
+        s1.save_numbered_screenshot("density%i.bmp", iteration, true);
+        s2.save_numbered_screenshot("density_v_x%i.bmp", iteration, true);
+        s3.save_numbered_screenshot("density_v_y%i.bmp", iteration, true);
+        s4.save_numbered_screenshot("energy%i.bmp", iteration, true);
+        s5.save_numbered_screenshot("concentration%i.bmp", iteration, true);
         */
+        //s5.wait_for_close();
+        
       }
       // Output solution in VTK format.
       if(VTK_VISUALIZATION) {
+        pressure.reinit();
+        Mach_number.reinit();
         Linearizer lin;
         char filename[40];
-        sprintf(filename, "w0-%i.vtk", iteration - 1);
-        lin.save_solution_vtk(&prev_rho, filename, "w0", false);
-        sprintf(filename, "w1-%i.vtk", iteration - 1);
-        lin.save_solution_vtk(&prev_rho_v_x, filename, "w1", false);
-        sprintf(filename, "w2-%i.vtk", iteration - 1);
-        lin.save_solution_vtk(&prev_rho_v_y, filename, "w2", false);
-        sprintf(filename, "w3-%i.vtk", iteration - 1);
-        lin.save_solution_vtk(&prev_e, filename, "w3", false);
-        sprintf(filename, "concentration-%i.vtk", iteration - 1);
-        lin.save_solution_vtk(&prev_c, filename, "concentration", false);
+        sprintf(filename, "pressure-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", false);
+        sprintf(filename, "pressure-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&pressure, filename, "Pressure", true);
+        sprintf(filename, "Mach number-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", false);
+        sprintf(filename, "Mach number-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&Mach_number, filename, "MachNumber", true);
+        sprintf(filename, "Concentration-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&prev_c, filename, "Concentration", true);
+        sprintf(filename, "Concentration-3D-%i.vtk", iteration - 1);
+        lin.save_solution_vtk(&prev_c, filename, "Concentration", true);
+ 
       }
     }
   }
+  
+  /*
   pressure_view.close();
   entropy_production_view.close();
   Mach_number_view.close();
   s5.close();
+  */
   
-  /*
   s1.close();
   s2.close();
   s3.close();
   s4.close();
-  */
+  s5.close();
 
   return 0;
 }

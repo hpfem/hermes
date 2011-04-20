@@ -61,6 +61,89 @@ void CFLCalculation::calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, 
   delete [] sln_vector;
 }
 
+void CFLCalculation::calculate_semi_implicit(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step)
+{
+  // Create spaces of constant functions over the given mesh.
+  L2Space constant_rho_space(mesh, 0);
+  L2Space constant_rho_v_x_space(mesh, 0);
+  L2Space constant_rho_v_y_space(mesh, 0);
+  L2Space constant_energy_space(mesh, 0);
+
+  scalar* sln_vector = new scalar[constant_rho_space.get_num_dofs() * 4];
+
+  OGProjection::project_global(Hermes::vector<Space*>(&constant_rho_space, &constant_rho_v_x_space, &constant_rho_v_y_space, &constant_energy_space), solutions, sln_vector);
+
+  // Determine the time step according to the CFL condition.
+
+  double min_condition = 0;
+  Element *e;
+  double w[4];
+  for_all_active_elements(e, mesh) {
+    AsmList al;
+    constant_rho_space.get_element_assembly_list(e, &al);
+    w[0] = sln_vector[al.dof[0]];
+    constant_rho_v_x_space.get_element_assembly_list(e, &al);
+    w[1] = sln_vector[al.dof[0]];
+    constant_rho_v_y_space.get_element_assembly_list(e, &al);
+    w[2] = sln_vector[al.dof[0]];
+    constant_energy_space.get_element_assembly_list(e, &al);
+    w[3] = sln_vector[al.dof[0]];
+      
+    double edge_length_max_lambda = 0.0;
+
+    for(unsigned int edge_i = 0; edge_i < e->nvert; edge_i++) {
+      // Initialization.      
+      SurfPos surf_pos;
+      surf_pos.marker = e->marker;
+      surf_pos.surf_num = edge_i;
+      int eo = solutions[1]->get_quad_2d()->get_edge_points(surf_pos.surf_num, 5);
+      Geom<double>* geom = init_geom_surf(solutions[1]->get_refmap(), &surf_pos, eo);
+      int np = solutions[1]->get_quad_2d()->get_num_points(eo);
+      
+      // Calculation of the edge length.
+      double edge_length = std::sqrt(std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->x - e->vn[edge_i]->x, 2) + std::pow(e->vn[(edge_i + 1) % e->get_num_surf()]->y - e->vn[edge_i]->y, 2));
+
+      // Calculation of the maximum eigenvalue of the matrix P.
+      double max_eigen_value = 0.0;
+      for(int point_i = 0; point_i < np; point_i++) {
+        // Transform to the local coordinates.
+        double transformed[4];
+        transformed[0] = w[0];
+        transformed[1] = geom->nx[point_i] * w[1] + geom->ny[point_i] * w[2];
+        transformed[2] = -geom->ny[point_i] * w[1] + geom->nx[point_i] * w[2];
+        transformed[3] = w[3];
+
+        // Calc sound speed.
+        double a = QuantityCalculator::calc_sound_speed(transformed[0], transformed[1], transformed[2], transformed[3], kappa);
+        
+        // Calc max eigenvalue.
+        if(transformed[1] / transformed[0] - a > max_eigen_value || point_i == 0)
+          max_eigen_value = transformed[1] / transformed[0] - a;
+        if(transformed[1] / transformed[0] > max_eigen_value)
+          max_eigen_value = transformed[1] / transformed[0];
+        if(transformed[1] / transformed[0] + a> max_eigen_value)
+          max_eigen_value = transformed[1] / transformed[0] + a;
+      }
+
+      if(edge_length * max_eigen_value > edge_length_max_lambda || edge_i == 0)
+        edge_length_max_lambda = edge_length * max_eigen_value;
+      
+      geom->free();
+      delete geom;
+    }
+
+    
+    double condition = e->get_area() * CFL_number / edge_length_max_lambda;
+      
+    if(condition < min_condition || min_condition == 0.)
+      min_condition = condition;
+  }
+
+  time_step = min_condition;
+
+  delete [] sln_vector;
+}
+
 void CFLCalculation::set_number(double new_CFL_number)
 {
   this->CFL_number = new_CFL_number;

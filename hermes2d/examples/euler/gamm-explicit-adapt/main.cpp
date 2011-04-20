@@ -19,22 +19,19 @@ using namespace RefinementSelectors;
 //
 // The following parameters can be changed:
 // Visualization.
-const bool HERMES_VISUALIZATION = false;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
+const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Shock capturing.
-bool SHOCK_CAPTURING = true;
+bool SHOCK_CAPTURING = false;
 
 // Quantitative parameter of the discontinuity detector.
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                             // Initial polynomial degree.                      
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.                       
-const int INIT_REF_NUM_BOUNDARY_ANISO = 1;        // Number of initial anisotropic mesh refinements towards the horizontal parts of the boundary.
-const int INIT_REF_NUM_BOUNDARY_ISO = 1;          // Number of initial isotropic mesh refinements towards the horizontal parts of the boundary.
-double CFL_NUMBER = 0.8;                          // CFL value.
-int CFL_CALC_FREQ = 1;                            // How frequently do we want to check for update of time step.
+const int INIT_REF_NUM = 1;                             // Number of initial uniform mesh refinements.                       
+double CFL_NUMBER = 5.0;                                // CFL value.
 double time_step = 1E-4;                          // Initial time step.
 
 // Adaptivity.
@@ -53,7 +50,7 @@ const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 2 ... refine all elements whose error is larger
                                                   //   than THRESHOLD.
                                                   // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-CandList CAND_LIST = H2D_HP_ANISO;                // Predefined list of element refinement candidates. Possible values are
+CandList CAND_LIST = H2D_H_ANISO;                // Predefined list of element refinement candidates. Possible values are
                                                   // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
                                                   // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
 const int MAX_P_ORDER = -1;                       // Maximum polynomial degree used. -1 for unlimited.
@@ -66,7 +63,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1;                        // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
@@ -102,9 +99,8 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
-    mesh.refine_all_elements(0, true);
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
+    mesh.refine_all_elements(0);
+  //mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -131,19 +127,17 @@ int main(int argc, char* argv[])
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+  EulerEquationsWeakFormSemiImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, (P_INIT == 0));
 
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
-  MachNumberFilter Mach_number_coarse(Hermes::vector<MeshFunction*>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), KAPPA);
   PressureFilter pressure(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
   EntropyFilter entropy(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA, RHO_EXT, P_EXT);
 
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
-  ScalarView Mach_number_view_coarse("Mach number - coarse", new WinGeom(0, 350, 600, 300));
-  ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 700, 600, 300));
+  ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
 
   OrderView order_view_coarse("Orders - coarse", new WinGeom(700, 350, 600, 300));
   OrderView order_view_fine("Orders - fine", new WinGeom(700, 700, 600, 300));
@@ -169,11 +163,10 @@ int main(int argc, char* argv[])
     if (iteration > 1 && iteration % UNREF_FREQ == 0 && REFINEMENT_COUNT > 0) {
       REFINEMENT_COUNT = 0;
       info("Global mesh derefinement.");
-      mesh.unrefine_all_elements();
-      space_rho.adjust_element_order(-1, P_INIT);
-      space_rho_v_x.adjust_element_order(-1, P_INIT);
-      space_rho_v_y.adjust_element_order(-1, P_INIT);
-      space_e.adjust_element_order(-1, P_INIT);
+      space_rho.unrefine_all_mesh_elements();
+      space_rho_v_x.copy_orders(&space_rho);
+      space_rho_v_y.copy_orders(&space_rho);
+      space_e.copy_orders(&space_rho);
     }
     
     // Adaptivity loop:
@@ -183,9 +176,9 @@ int main(int argc, char* argv[])
       info("---- Adaptivity step %d:", as);
 
       // Construct globally refined reference mesh and setup reference space.
-      // Global polynomial order increase;
-      int order_increase = 1;
-
+      int order_increase = 0;
+      if(CAND_LIST == H2D_HP_ANISO)
+        order_increase = 1;
       Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&space_rho, &space_rho_v_x, 
       &space_rho_v_y, &space_e), order_increase);
 
@@ -210,6 +203,7 @@ int main(int argc, char* argv[])
       info("Solving on reference mesh.");
       bool is_linear = true;
       DiscreteProblem dp(&wf, *ref_spaces, is_linear);
+      
       SparseMatrix* matrix = create_matrix(matrix_solver);
       Vector* rhs = create_vector(matrix_solver);
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -255,9 +249,7 @@ int main(int argc, char* argv[])
       double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e),
 							  Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e)) * 100;
       
-  
-      if((iteration - 1) % CFL_CALC_FREQ == 0)
-        CFL.calculate(Hermes::vector<Solution *>(&sln_rho, &sln_rho_v_x, &sln_rho_v_y, &sln_e), sln_rho.get_mesh(), time_step);
+      CFL.calculate(Hermes::vector<Solution *>(&rsln_rho, &rsln_rho_v_x, &rsln_rho_v_y, &rsln_e), rsln_rho.get_mesh(), time_step);
 
       // Report results.
       info("err_est_rel: %g%%", err_est_rel_total);
@@ -332,13 +324,11 @@ int main(int argc, char* argv[])
       // Hermes visualization.
       if(HERMES_VISUALIZATION) {
         Mach_number.reinit();
-        Mach_number_coarse.reinit();
         pressure.reinit();
         entropy.reinit();
         pressure_view.show(&pressure);
         entropy_production_view.show(&entropy);
         Mach_number_view.show(&Mach_number);
-        Mach_number_view_coarse.show(&Mach_number_coarse);
         /*
         s1.show(&prev_rho);
         s2.show(&prev_rho_v_x);
