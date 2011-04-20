@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "h2d_common.h"
-#include "integrals/integrals_h1.h"
+#include "integrals/h1.h"
 #include "quadrature/limit_order.h"
 #include "discrete_problem.h"
 #include "mesh/traverse.h"

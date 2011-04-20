@@ -1,7 +1,7 @@
 #include "weakform/weakform.h"
 #include "weakform_library/maxwell.h"
 #include "weakform_library/h1.h"
-#include "integrals/integrals_h1.h"
+#include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 #include "function/function.h"
 

@@ -16,7 +16,7 @@
 #ifndef __H2D_ELASTICITY_WEAK_FORMS_H
 #define __H2D_ELASTICITY_WEAK_FORMS_H
 
-#include "../integrals/integrals_h1.h"
+#include "../integrals/h1.h"
 
 /* Default weak form for linear elasticity (Lame equations)
    with Dirichlet and/or zero Neumann BC

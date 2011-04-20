@@ -20,10 +20,10 @@
 #include "../space/space.h"
 #include "../../../hermes_common/vector.h"
 #include "../weakform/weakform.h"
-#include "../integrals/integrals_h1.h"
-#include "../integrals/integrals_hcurl.h"
-#include "../integrals/integrals_hdiv.h"
-#include "../integrals/integrals_l2.h"
+#include "../integrals/h1.h"
+#include "../integrals/hcurl.h"
+#include "../integrals/hdiv.h"
+#include "../integrals/l2.h"
 #include "../ref_selectors/selector.h"
 
 /** \defgroup g_adapt Adaptivity
@@ -165,7 +165,7 @@ public:
     static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
 
-      error("hdiv error form not implemented yet in integrals_hdiv.h.");
+      error("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
       Scalar result = 0;

@@ -91,8 +91,8 @@ module.include.files=\
 	transform.h\
 	curved.h\
 	matrix_old.h\
-	integrals_h1.h\
-	integrals_hcurl.h\
+	h1.h\
+	hcurl.h\
 	shapeset_hc_all.h\
 	filter.h\
 	traverse.h\

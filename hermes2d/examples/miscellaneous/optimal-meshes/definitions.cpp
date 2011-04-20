@@ -1,5 +1,5 @@
 #include "weakform/weakform.h"
-#include "integrals/integrals_h1.h"
+#include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
 // Right-hand side for the 2D equation -Laplace u = f with Dirichlet BC.

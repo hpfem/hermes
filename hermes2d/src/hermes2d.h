@@ -79,10 +79,10 @@
 #include "discrete_problem.h"
 #include "function/forms.h"
 
-#include "integrals/integrals_h1.h"
-#include "integrals/integrals_hcurl.h"
-#include "integrals/integrals_hdiv.h"
-#include "integrals/integrals_l2.h"
+#include "integrals/h1.h"
+#include "integrals/hcurl.h"
+#include "integrals/hdiv.h"
+#include "integrals/l2.h"
 
 #include "function/solution.h"
 #include "function/filter.h"

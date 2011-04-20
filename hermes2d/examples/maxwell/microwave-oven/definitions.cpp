@@ -1,5 +1,5 @@
 #include "weakform/weakform.h"
-#include "integrals/integrals_hcurl.h"
+#include "integrals/hcurl.h"
 #include "boundaryconditions/essential_bcs.h"
 
 /* Weak forms */

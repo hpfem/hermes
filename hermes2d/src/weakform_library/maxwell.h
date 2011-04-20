@@ -16,7 +16,7 @@
 #ifndef __H2D_MAXWELL_WEAK_FORMS_H
 #define __H2D_MAXWELL_WEAK_FORMS_H
 
-#include "../integrals/integrals_h1.h"
+#include "../integrals/h1.h"
 
 namespace WeakFormsMaxwell {
 

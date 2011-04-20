@@ -1,5 +1,5 @@
 #include "weakform_library/elasticity.h"
-#include "integrals/integrals_h1.h"
+#include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
 class CustomWeakForm : public DefaultWeakFormLinearElasticity
