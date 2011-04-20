@@ -13,18 +13,20 @@ class CustomWeakFormPoissonNeumann : public WeakForm
 {
 public:
   CustomWeakFormPoissonNeumann(std::string mat_al, double lambda_al, 
-                        std::string mat_cu, double lambda_cu, 
-                        double vol_heat_src, std::string bdy_heat_flux, 
-                        double heat_flux) : WeakForm(1)
+                               std::string mat_cu, double lambda_cu, 
+                               double vol_heat_src, std::string bdy_heat_flux, 
+                               double heat_flux) : WeakForm(1)
   {
-    // Volumetric integrals.
+    // Jacobian forms - volumetric.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
+
+    // Residual forms - volumetric.
     add_vector_form(new DefaultResidualLinearDiffusion(0, mat_al, lambda_al));
     add_vector_form(new DefaultResidualLinearDiffusion(0, mat_cu, lambda_cu));
     add_vector_form(new DefaultVectorFormConst(0, -vol_heat_src));
     
-    // Surface integral due to the Neumann condition.
+    // Residual forms - surface.
     add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, -heat_flux));
   };
 };

@@ -42,7 +42,8 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
+  CustomWeakFormPoissonDirichlet wf("Aluminum", LAMBDA_AL, "Copper", 
+                                    LAMBDA_CU, VOLUME_HEAT_SRC);
   
   // Initialize boundary conditions.
   CustomDirichletCondition bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
