@@ -24,6 +24,9 @@ const double BDY_C_PARAM = 20.0;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -43,8 +46,6 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
-  info("ndof = %d", ndof);
 
   // Testing n_dof and correctness of solution vector
   // for p_init = 1, 2, ..., 10
@@ -54,10 +55,11 @@ int main(int argc, char* argv[])
 
     printf("********* p_init = %d *********\n", p_init);
     space.set_uniform_order(p_init);
+    int ndof = space.get_num_dofs();
+    info("ndof = %d", ndof);
 
     // Initialize the FE problem.
-    bool is_linear = true;
-    DiscreteProblem dp(&wf, &space, is_linear);
+    DiscreteProblem dp(&wf, &space);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -67,22 +69,18 @@ int main(int argc, char* argv[])
     // Initialize the solution.
     Solution sln;
 
-    // Assemble the stiffness matrix and right-hand side vector.
-    info("Assembling the stiffness matrix and right-hand side vector.");
-    bool rhsonly = false;
-    dp.assemble(matrix, rhs, rhsonly);
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof];
+    memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-    // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-    else
-      error ("Matrix solver failed.\n");
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
-    int ndof = Space::get_num_dofs(&space);
-    printf("ndof = %d\n", ndof);
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, &space, &sln);
+
     double sum = 0;
-    for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
+    for (int i=0; i < ndof; i++) sum += coeff_vec[i];
     printf("coefficient sum = %g\n", sum);
 
     // Actual test. The values of 'sum' depend on the
@@ -98,6 +96,8 @@ int main(int argc, char* argv[])
     if (p_init == 8 && fabs(sum - 65.279) > 1e-3) success = 0;
     if (p_init == 9 && fabs(sum - 68.0776) > 1e-3) success = 0;
     if (p_init == 10 && fabs(sum - 65.0863) > 1e-3) success = 0;
+
+    delete [] coeff_vec;
   }
 
   if (success == 1) {

@@ -20,10 +20,12 @@ public:
     // Volumetric integrals.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
-    add_vector_form(new DefaultVectorFormConst(0, vol_heat_src));
+    add_vector_form(new DefaultResidualLinearDiffusion(0, mat_al, lambda_al));
+    add_vector_form(new DefaultResidualLinearDiffusion(0, mat_cu, lambda_cu));
+    add_vector_form(new DefaultVectorFormConst(0, -vol_heat_src));
     
     // Surface integral due to the Neumann condition.
-    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, heat_flux));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, -heat_flux));
   };
 };
 
