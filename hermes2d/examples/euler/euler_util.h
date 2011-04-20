@@ -23,6 +23,7 @@ public:
 
   // If the time step is necessary to decrease / possible to increase, the value time_step will be rewritten.
   void calculate(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step);
+  void calculate_semi_implicit(Hermes::vector<Solution*> solutions, Mesh* mesh, double & time_step);
 
   void set_number(double new_CFL_number);
   

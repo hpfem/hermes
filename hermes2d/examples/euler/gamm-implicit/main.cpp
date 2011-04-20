@@ -26,18 +26,18 @@ using namespace RefinementSelectors;
 
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Use of preconditioning.
 const bool PRECONDITIONING = true;
-const double NOX_LINEAR_TOLERANCE = 1e-2;
-const double NOX_NONLINEAR_TOLERANCE = 1e-3;
-unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details;
+const double NOX_LINEAR_TOLERANCE = 1e-1;
+const double NOX_NONLINEAR_TOLERANCE = 1e-2;
+unsigned NOX_MESSAGE_TYPE = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::Details | NOX::Utils::LinearSolverDetails;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
-double time_step = 1E-2;                                // Time step.
+const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
+double time_step = 1E-1;                                // Time step.
 
 // Equation parameters.
 const double P_EXT = 2.5;                               // Exterior pressure (dimensionless).
@@ -66,8 +66,10 @@ int main(int argc, char* argv[])
   mloader.load("GAMM-channel.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 2);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 1);
+  for (int i = 0; i < INIT_REF_NUM; i++) 
+    mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, 1);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
@@ -139,11 +141,10 @@ int main(int argc, char* argv[])
 
     OGProjection::project_global(Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
     Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), coeff_vec);
+    
     solver.set_init_sln(coeff_vec);
 
     info("Assembling by DiscreteProblem, solving by NOX.");
-    if(iteration > 1)
-      solver.unset_precond();
     if (solver.solve())
       Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), 
       Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e));

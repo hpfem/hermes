@@ -30,33 +30,35 @@ double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 double ADVECTION_STABILITY_CONSTANT = 1.0;
 const double DIFFUSION_STABILITY_CONSTANT = 1.0;
 
-const int P_INIT_FLOW = 1;                             // Polynomial degree for the Euler equations (for the flow).
+const int P_INIT_FLOW = 0;                             // Polynomial degree for the Euler equations (for the flow).
 const int P_INIT_CONCENTRATION = 1;                    // Polynomial degree for the concentration.
 double CFL_NUMBER = 1.0;                               // CFL value.
-double time_step = 1E-3, util_time_step;               // Initial and utility time step.
+double time_step = 1E-5, util_time_step;               // Initial and utility time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK; // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                        // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-unsigned int INIT_REF_NUM_FLOW = 2;                    // Number of initial uniform mesh refinements of the mesh for the flow.
+unsigned int INIT_REF_NUM_FLOW = 3;                    // Number of initial uniform mesh refinements of the mesh for the flow.
 unsigned int INIT_REF_NUM_CONCENTRATION = 3;           // Number of initial uniform mesh refinements of the mesh for the concentration.
-unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 0;       // Number of initial mesh refinements of the mesh for the concentration towards the 
+unsigned int INIT_REF_NUM_CONCENTRATION_BDY = 1;       // Number of initial mesh refinements of the mesh for the concentration towards the 
                                                        // part of the boundary where the concentration is prescribed.
 // Equation parameters.
 const double P_EXT = 2.5;                              // Exterior pressure (dimensionless).
 const double RHO_EXT = 1.0;                            // Inlet density (dimensionless).   
-const double V1_EXT = 0.0;                             // Inlet x-velocity (dimensionless).
-const double V2_EXT = 0.25;                            // Inlet y-velocity (dimensionless).
+const double V1_EXT = 1.25;                             // Inlet x-velocity (dimensionless).
+const double V2_EXT = 0.0;                            // Inlet y-velocity (dimensionless).
 const double KAPPA = 1.4;                              // Kappa.
-const double CONCENTRATION_EXT = 1.0;                  // Concentration on the boundary.
+const double CONCENTRATION_EXT = 0.1;                  // Concentration on the boundary.
+const double CONCENTRATION_EXT_STARTUP_TIME = 0.0;     // Start time of the concentration on the boundary.
 
 const double EPSILON = 0.01;                           // Diffusivity.
 
 // Boundary markers.
-const std::string BDY_INLET = "Inflow";
-const std::string BDY_OUTLET = "Outflow";
-const std::string BDY_SOLID_WALL = "Solid Wall";
-const std::string BDY_DIRICHLET_CONCENTRATION = "Inflow";
-Hermes::vector<std::string> BDY_NATURAL_CONCENTRATION = Hermes::vector<std::string>("Outflow", "Solid Wall");
+const std::string BDY_INLET = "1";
+const std::string BDY_OUTLET = "2";
+const std::string BDY_SOLID_WALL_BOTTOM = "3";
+const std::string BDY_SOLID_WALL_TOP = "4";
+const std::string BDY_DIRICHLET_CONCENTRATION = "3";
+Hermes::vector<std::string> BDY_NATURAL_CONCENTRATION = Hermes::vector<std::string>("2", "1");
 
 // Weak forms.
 #include "../forms_explicit.cpp"
@@ -69,7 +71,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh basemesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &basemesh);
+  mloader.load("GAMM-channel.mesh", &basemesh);
 
   // Initialize the meshes.
   Mesh mesh_flow, mesh_concentration;
@@ -80,6 +82,7 @@ int main(int argc, char* argv[])
     mesh_concentration.refine_all_elements();
 
   mesh_concentration.refine_towards_boundary(BDY_DIRICHLET_CONCENTRATION, INIT_REF_NUM_CONCENTRATION_BDY);
+  mesh_flow.refine_towards_boundary(BDY_DIRICHLET_CONCENTRATION, INIT_REF_NUM_CONCENTRATION_BDY);
 
   for(unsigned int i = 0; i < INIT_REF_NUM_FLOW; i++)
     mesh_flow.refine_all_elements();
@@ -88,7 +91,8 @@ int main(int argc, char* argv[])
   // For the concentration.
   EssentialBCs bcs_concentration;
   
-  bcs_concentration.add_boundary_condition(new DefaultEssentialBCConst(BDY_DIRICHLET_CONCENTRATION, CONCENTRATION_EXT));
+  bcs_concentration.add_boundary_condition(new ConcentrationTimedepEssentialBC(BDY_DIRICHLET_CONCENTRATION, CONCENTRATION_EXT, CONCENTRATION_EXT_STARTUP_TIME));
+  bcs_concentration.add_boundary_condition(new ConcentrationTimedepEssentialBC(BDY_SOLID_WALL_TOP, 0.0, CONCENTRATION_EXT_STARTUP_TIME));
   
   L2Space space_rho(&mesh_flow, P_INIT_FLOW);
   L2Space space_rho_v_x(&mesh_flow, P_INIT_FLOW);
@@ -103,16 +107,16 @@ int main(int argc, char* argv[])
   // Initialize solutions, set initial conditions.
   InitialSolutionEulerDensity prev_rho(&mesh_flow, RHO_EXT);
   InitialSolutionEulerDensityVelX prev_rho_v_x(&mesh_flow, RHO_EXT * V1_EXT);
-  InitialSolutionEulerDensityVelY_LShape prev_rho_v_y(&mesh_flow, RHO_EXT * V2_EXT);
-  InitialSolutionEulerDensityEnergy_LShape prev_e(&mesh_flow, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, P_EXT, KAPPA);
+  InitialSolutionEulerDensityVelY prev_rho_v_y(&mesh_flow, RHO_EXT * V2_EXT);
+  InitialSolutionEulerDensityEnergy prev_e(&mesh_flow, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA));
   InitialSolutionConcentration prev_c(&mesh_concentration, 0.0);
 
   // Numerical flux.
   OsherSolomonNumericalFlux num_flux(KAPPA);
 
   // Initialize weak formulation.
-  EulerEquationsWeakFormExplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL,
-    BDY_INLET, BDY_OUTLET, BDY_NATURAL_CONCENTRATION, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, EPSILON);
+  EulerEquationsWeakFormSemiImplicitCoupled wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM,
+    BDY_SOLID_WALL_TOP, BDY_INLET, BDY_OUTLET, BDY_NATURAL_CONCENTRATION, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c, EPSILON, (P_INIT_FLOW == 0));
   
   wf.set_time_step(time_step);
 
@@ -132,7 +136,6 @@ int main(int argc, char* argv[])
   ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
   ScalarView Mach_number_view("Mach number", new WinGeom(700, 0, 600, 300));
   ScalarView entropy_production_view("Entropy estimate", new WinGeom(0, 400, 600, 300));
-
   ScalarView s5("Concentration", new WinGeom(700, 400, 600, 300));
   */
   
@@ -159,6 +162,7 @@ int main(int argc, char* argv[])
 
     // Set the current time step.
     wf.set_time_step(time_step);
+    Space::update_essential_bc_values(&space_c, t);
 
     // Assemble stiffness matrix and rhs.
     info("Assembling the stiffness matrix and right-hand side vector.");
@@ -189,7 +193,7 @@ int main(int argc, char* argv[])
 
     util_time_step = time_step;
 
-    CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh_flow, util_time_step);
+    CFL.calculate_semi_implicit(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh_flow, util_time_step);
 
     time_step = util_time_step;
 
@@ -216,12 +220,13 @@ int main(int argc, char* argv[])
         s3.show(&prev_rho_v_y);
         s4.show(&prev_e);
         s5.show(&prev_c);
-
+        /*
         s1.save_numbered_screenshot("density%i.bmp", iteration, true);
         s2.save_numbered_screenshot("density_v_x%i.bmp", iteration, true);
         s3.save_numbered_screenshot("density_v_y%i.bmp", iteration, true);
         s4.save_numbered_screenshot("energy%i.bmp", iteration, true);
         s5.save_numbered_screenshot("concentration%i.bmp", iteration, true);
+        */
         //s5.wait_for_close();
         
       }

@@ -554,7 +554,7 @@ public:
       add_multicomponent_matrix_form(precon_vol);
       add_multicomponent_matrix_form_surf(precon_surf);
       */
-      add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates_precon_vol));
+      add_multicomponent_matrix_form(new EulerEquationsMatrixFormVolPreconditioningSimple(matrix_coordinates));
     }
 
     add_multicomponent_vector_form(new EulerEquationsLinearFormTime(vector_coordinates));
@@ -907,21 +907,6 @@ protected:
                Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<double>& result) const {
       double result_n = int_u_v<double, double>(n, wt, u, v);
       
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-      result.push_back(result_n);
-
       result.push_back(result_n);
       result.push_back(result_n);
       result.push_back(result_n);
@@ -1336,7 +1321,7 @@ public:
                                         double rho_ext, double v1_ext, double v2_ext, 
                                         double pressure_ext, std::string solid_wall_marker,
                     std::string inlet_marker, std::string outlet_marker, 
-                    Hermes::vector<std::string> natrural_bc_concentration_markers,
+                    Hermes::vector<std::string> natural_bc_concentration_markers,
                     Solution* prev_density, Solution* prev_density_vel_x, 
                     Solution* prev_density_vel_y, Solution* prev_energy, 
                     Solution* prev_concentration, bool preconditioning, double epsilon, bool fvm_only = false)
@@ -1358,8 +1343,40 @@ public:
     add_vector_form(new VectorFormConcentrationDiffusion(4, epsilon));
     add_vector_form(new VectorFormConcentrationAdvection(4));
 
-    for(unsigned int i = 0;i < natrural_bc_concentration_markers.size();i++)
-      add_vector_form_surf(new VectorFormConcentrationNatural(4, natrural_bc_concentration_markers[i]));
+    for(unsigned int i = 0;i < natural_bc_concentration_markers.size();i++)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, natural_bc_concentration_markers[i]));
+    
+    add_vector_form_surf(new VectorFormConcentrationInterface (4));
+  };
+
+  EulerEquationsWeakFormImplicitCoupled(NumericalFlux* num_flux, double kappa,
+                                        double rho_ext, double v1_ext, double v2_ext, 
+                                        double pressure_ext, std::string solid_wall_marker_bottom, std::string solid_wall_marker_top,
+                    std::string inlet_marker, std::string outlet_marker, 
+                    Hermes::vector<std::string> natural_bc_concentration_markers,
+                    Solution* prev_density, Solution* prev_density_vel_x, 
+                    Solution* prev_density_vel_y, Solution* prev_energy, 
+                    Solution* prev_concentration, bool preconditioning, double epsilon, bool fvm_only = false)
+       : EulerEquationsWeakFormImplicitMultiComponent(num_flux, kappa, rho_ext, v1_ext, v2_ext, pressure_ext,
+                                        solid_wall_marker_bottom, solid_wall_marker_top, inlet_marker, 
+                                        outlet_marker, prev_density, prev_density_vel_x,
+                                        prev_density_vel_y, prev_energy, preconditioning, fvm_only, 5) {
+    if(preconditioning)
+      add_matrix_form(new EulerEquationsWeakFormImplicit::EulerEquationsPreconditioning(4));
+    
+    EulerEquationsWeakFormImplicit::EulerEquationsLinearFormTime* linear_form_time = new EulerEquationsWeakFormImplicit::EulerEquationsLinearFormTime(4);
+    linear_form_time->ext.push_back(prev_density);
+    linear_form_time->ext.push_back(prev_density_vel_x);
+    linear_form_time->ext.push_back(prev_density_vel_y);
+    linear_form_time->ext.push_back(prev_energy);
+    linear_form_time->ext.push_back(prev_concentration);
+    add_vector_form(linear_form_time);
+  
+    add_vector_form(new VectorFormConcentrationDiffusion(4, epsilon));
+    add_vector_form(new VectorFormConcentrationAdvection(4));
+
+    for(unsigned int i = 0;i < natural_bc_concentration_markers.size();i++)
+      add_vector_form_surf(new VectorFormConcentrationNatural(4, natural_bc_concentration_markers[i]));
     
     add_vector_form_surf(new VectorFormConcentrationInterface (4));
   };

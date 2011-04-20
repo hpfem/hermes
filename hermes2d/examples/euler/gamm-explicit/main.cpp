@@ -17,7 +17,7 @@
 // The following parameters can be changed:
 // Visualization.
 const bool HERMES_VISUALIZATION = true;           // Set to "true" to enable Hermes OpenGL visualization. 
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const unsigned int EVERY_NTH_STEP = 1;            // Set visual output for every nth step.
 
 // Shock capturing.
@@ -26,9 +26,8 @@ bool SHOCK_CAPTURING = false;
 double DISCONTINUITY_DETECTOR_PARAM = 1.0;
 
 const int P_INIT = 0;                                   // Initial polynomial degree.                      
-const int INIT_REF_NUM = 3;                             // Number of initial uniform mesh refinements.                       
+const int INIT_REF_NUM = 4;                             // Number of initial uniform mesh refinements.                       
 double CFL_NUMBER = 1.0;                                // CFL value.
-int CFL_CALC_FREQ = 5;                                  // How frequently do we want to check for update of time step.
 double time_step = 1E-4;                                // Initial time step.
 const MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                         // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -82,14 +81,15 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   EulerEquationsWeakFormSemiImplicitMultiComponent wf(&num_flux, KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP, 
-    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
+    BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, (P_INIT == 0));
 
   // Initialize the FE problem.
   bool is_linear = true;  
   DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
 
   // If the FE problem is in fact a FV problem.
-  //if(P_INIT == 0) dp.set_fvm();  
+  if(P_INIT == 0) 
+    dp.set_fvm();  
 
   // Filters for visualization of Mach number, pressure and entropy.
   MachNumberFilter Mach_number(Hermes::vector<MeshFunction*>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), KAPPA);
@@ -147,8 +147,7 @@ int main(int argc, char* argv[])
       flux_limiter.limit_according_to_detector(discontinuous_elements);
     }
 
-    if((iteration - 1) % CFL_CALC_FREQ == 0)
-      CFL.calculate(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh, time_step);
+    CFL.calculate_semi_implicit(Hermes::vector<Solution *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e), &mesh, time_step);
 
     // Visualization.
     
