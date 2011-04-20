@@ -138,7 +138,7 @@ protected:
 
   /// The largest sub_idx for top <= 10.
   /// FIXME: Why it is only 0x4000?
-  static const unsigned int H2D_MAX_TRN_LEVEL = 16;
+  static const unsigned int H2D_MAX_TRN_LEVEL = 15;
   static const uint64_t H2D_MAX_IDX = (1ULL << 3 * H2D_MAX_TRN_LEVEL) - 1;
 
   /// Transformation matrix stack.
