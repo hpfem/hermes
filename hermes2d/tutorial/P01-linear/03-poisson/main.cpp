@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
   delete solver;
   delete matrix;
   delete rhs;
+  delete [] coeff_vec;
 
   return 0;
 }

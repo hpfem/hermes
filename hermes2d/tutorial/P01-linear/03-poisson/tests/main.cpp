@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   ndof = Space::get_num_dofs(&space);
   printf("ndof = %d\n", ndof);
   double sum = 0;
-  for (int i=0; i < ndof; i++) sum += solver->get_solution()[i];
+  for (int i=0; i < ndof; i++) sum += coeff_vec[i];
   printf("coefficient sum = %g\n", sum);
 
   // Actual test. The values of 'sum' depend on the
