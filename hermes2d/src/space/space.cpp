@@ -276,51 +276,57 @@ void Space::unrefine_all_mesh_elements(bool keep_initial_refinements)
     unsigned int num_sons = 0;
     if (this->mesh->get_element_fast(list[i])->bsplit()) {
       num_sons = 4;
-      for (int sons_i = 0; sons_i < 4; sons_i++)
-        if(this->mesh->get_element_fast(list[i])->sons[sons_i]->active)
+      for (int sons_i = 0; sons_i < 4; sons_i++) {
+        if(this->mesh->get_element_fast(list[i])->sons[sons_i]->active) {
           if(this->mesh->get_element_fast(list[i])->sons[sons_i]->is_triangle())
             order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id);
           else {
             h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
             v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
           }
+        }
+      }
     }
-    else 
+    else {
       if (this->mesh->get_element_fast(list[i])->hsplit()) {
         num_sons = 2;
-        if(this->mesh->get_element_fast(list[i])->sons[0]->active)
+        if(this->mesh->get_element_fast(list[i])->sons[0]->active) {
           if(this->mesh->get_element_fast(list[i])->sons[0]->is_triangle())
             order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id);
           else {
             h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
             v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
           }
-        if(this->mesh->get_element_fast(list[i])->sons[1]->active)
+        }
+        if(this->mesh->get_element_fast(list[i])->sons[1]->active) {
           if(this->mesh->get_element_fast(list[i])->sons[1]->is_triangle())
             order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id);
           else {
             h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
             v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
           }
+        }
       }
       else {
         num_sons = 2;
-        if(this->mesh->get_element_fast(list[i])->sons[2]->active)
+        if(this->mesh->get_element_fast(list[i])->sons[2]->active) {
           if(this->mesh->get_element_fast(list[i])->sons[2]->is_triangle())
             order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id);
           else {
             h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
             v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
           }
-        if(this->mesh->get_element_fast(list[i])->sons[3]->active)
+        }
+        if(this->mesh->get_element_fast(list[i])->sons[3]->active) {
           if(this->mesh->get_element_fast(list[i])->sons[3]->is_triangle())
             order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id);
           else {
             h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
             v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
           }
+        }
       }
-
+    }
     order = (unsigned int)(order / num_sons);
     h_order = (unsigned int)(h_order / num_sons);
     v_order = (unsigned int)(v_order / num_sons);
