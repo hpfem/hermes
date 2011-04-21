@@ -35,19 +35,22 @@ public:
     this->bc_type = bc_type;
   };
 
-  virtual ~BoundaryData();
-
   Hermes::vector<std::string> markers;
   BCType bc_type;
 };
 
+/* BoundaryDataH1 introduces the types of boundary conditions
+   for H1 space (Dirichlet, Neumann and Newton).
+*/
 class BoundaryDataH1 : public BoundaryData {
 public:
   BoundaryDataH1(std::string marker, BCTypeH1 bc_type_h1, scalar value1, scalar value2 = 0) :
-    BoundaryData(marker, (bc_type_h1 == HERMES_DIRICHLET) ? HERMES_ESSENTIAL : HERMES_NATURAL), value1(value1), value2(value2) { }
+    BoundaryData(marker, (bc_type_h1 == HERMES_DIRICHLET) ? HERMES_ESSENTIAL : HERMES_NATURAL),
+    value1(value1), value2(value2) { }
 
   BoundaryDataH1(Hermes::vector<std::string> markers, BCTypeH1 bc_type_h1, scalar value1, scalar value2 = 0) :
-    BoundaryData(markers, (bc_type_h1 == HERMES_DIRICHLET) ? HERMES_ESSENTIAL : HERMES_NATURAL), value1(value1), value2(value2) { }
+    BoundaryData(markers, (bc_type_h1 == HERMES_DIRICHLET) ? HERMES_ESSENTIAL : HERMES_NATURAL),
+    value1(value1), value2(value2) { }
 
   BCTypeH1 bc_type_h1;
   scalar value1, value2;
@@ -64,15 +67,13 @@ public:
     this->markers = markers;
   };
 
-  virtual ~MaterialData();
-
   Hermes::vector<std::string> markers;
 };
 
 /* ModuleProperties */
 
 struct MeshProperties {
-  int init_deg;
+  int init_deg; // Initial polynomial degree
 };
 
 struct SolverProperties {
@@ -80,7 +81,7 @@ struct SolverProperties {
 };
 
 struct SolutionProperties {
-  int num_sol;
+  int num_sol; // Number of solutions
 };
 
 struct AdaptivityProperties {
@@ -97,13 +98,11 @@ struct AdaptivityProperties {
 class ModuleProperties {
 public:
   ModuleProperties();
-  virtual ~ModuleProperties();
+
+  virtual void set_default_properties() = 0;
 
   GeomType geometry;
-
   AnalysisType analysis;
-
-  bool is_linear;
 
   MeshProperties *mesh() {
     return mesh_properties;
@@ -132,17 +131,28 @@ protected:
 
 class HermesModule {
 public:
-  HermesModule() {
+  HermesModule();
+  virtual ~HermesModule() {
+    this->meshes.clear();
+
+    for (unsigned int i = 0; i < this->spaces.size(); i++)
+        delete this->spaces.at(i);
+    this->spaces.clear();
+
+    for (unsigned int i = 0; i < this->slns.size(); i++)
+        delete this->slns.at(i);
+    this->slns.clear();
   };
-  virtual ~HermesModule();
 
   virtual void set_boundary(BoundaryData *boundary);
   virtual void set_material(MaterialData *material);
 
-  virtual void set_meshes(Hermes::vector<std::string> meshes) = 0; // FIXME (Input from file.)
-  virtual void set_spaces(Hermes::vector<Space *> spaces) = 0;
-  virtual void set_proj_norms(Hermes::vector<ProjNormType *> proj_norms) = 0;
-  virtual void set_weakform() = 0;
+  virtual void set_meshes() = 0;
+  virtual void set_spaces() = 0;
+  virtual void set_boundary_conditions() = 0;
+  virtual void set_weakforms() = 0;
+
+  virtual void set_proj_norms() {};
 
   virtual void solve();
 
@@ -159,7 +169,7 @@ protected:
   Hermes::vector<BoundaryData *> essential_boundaries;
   Hermes::vector<MaterialData *> materials;
 
-  EssentialBCs *bcs;
+  EssentialBCs bcs;
   WeakForm *wf;
   Hermes::vector<Space *> spaces;
   Hermes::vector<ProjNormType> proj_norms ;
