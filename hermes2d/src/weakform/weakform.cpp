@@ -20,11 +20,23 @@
 
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 
+// One area.
 WeakForm::Form::Form(std::string area, Hermes::vector<MeshFunction *> ext, Hermes::vector<scalar> param, 
                      double scaling_factor, int u_ext_offset) :
-  area(area), ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+  ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
 {
   adapt_eval = false;
+  areas.push_back(area);
+  stage_time = 0.0;
+}
+
+// Multiple areas.
+WeakForm::Form::Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction *> ext, Hermes::vector<scalar> param, 
+                     double scaling_factor, int u_ext_offset) :
+  ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+{
+  adapt_eval = false;
+  this->areas = areas;
   stage_time = 0.0;
 }
 
@@ -58,12 +70,17 @@ WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
   return NULL;
 }
 
+// One area.
 WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
                                        std::string area, Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym) { }
+
+// Multiple areas.
+WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
+                                       Hermes::vector<std::string> areas, Hermes::vector<MeshFunction *> ext, 
+                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym) { }
 
 scalar WeakForm::MatrixFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                                        Geom<double> *e, ExtData<scalar> *ext) const
@@ -85,12 +102,17 @@ WeakForm::MatrixFormSurf* WeakForm::MatrixFormSurf::clone()
   return NULL;
 }
 
+// One area.
 WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
                                          Hermes::vector<MeshFunction *> ext, 
                                          Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j) { }
+
+// Multiple areas.
+WeakForm::MatrixFormSurf::MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
+                                         Hermes::vector<MeshFunction *> ext, 
+                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), i(i), j(j) { }
 
 scalar WeakForm::VectorFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                                       Geom<double> *e, ExtData<scalar> *ext) const
@@ -112,19 +134,29 @@ WeakForm::VectorFormVol* WeakForm::VectorFormVol::clone()
   return NULL;
 }
 
+// One area.
 WeakForm::VectorFormVol::VectorFormVol(unsigned int i, std::string area,
                                        Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i) { }
 
+// Multiple areas.
+WeakForm::VectorFormVol::VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
+                                       Hermes::vector<MeshFunction *> ext, 
+                                       Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), i(i) { }
+
+// One area.
 WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, std::string area,
                                          Hermes::vector<MeshFunction *> ext, 
                                          Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), i(i)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), i(i) { }
+
+// Multiple areas.
+WeakForm::VectorFormSurf::VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
+                                         Hermes::vector<MeshFunction *> ext, 
+                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), i(i) { }
 
 scalar WeakForm::VectorFormSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                                        Geom<double> *e, ExtData<scalar> *ext) const
@@ -146,13 +178,17 @@ WeakForm::VectorFormSurf* WeakForm::VectorFormSurf::clone()
   return NULL;
 }
 
-// Multi component.
+// Multi component, one area.
 WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, SymFlag sym,
                                        std::string area, Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
+
+// Multi component, multiple areas.
+WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, SymFlag sym,
+								   Hermes::string<std::string> areas, Hermes::vector<MeshFunction *> ext, 
+                                                                   Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
 
 WeakForm::MultiComponentMatrixFormVol* WeakForm::MultiComponentMatrixFormVol::clone()
 {
@@ -160,12 +196,18 @@ WeakForm::MultiComponentMatrixFormVol* WeakForm::MultiComponentMatrixFormVol::cl
   return NULL;
 }
 
+// One area.
 WeakForm::MultiComponentMatrixFormSurf::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, 
-                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates)
-{
-}
+								     Hermes::vector<MeshFunction *> ext, 
+								     Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+
+// Multiple areas.
+WeakForm::MultiComponentMatrixFormSurf::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, 
+								     Hermes::vector<std::string> areas,
+								     Hermes::vector<MeshFunction *> ext, 
+								     Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
 WeakForm::MultiComponentMatrixFormSurf* WeakForm::MultiComponentMatrixFormSurf::clone()
 {
@@ -173,25 +215,38 @@ WeakForm::MultiComponentMatrixFormSurf* WeakForm::MultiComponentMatrixFormSurf::
   return NULL;
 }
 
+// One area.
 WeakForm::MultiComponentVectorFormVol::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, std::string area,
                                        Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates)
-{
-}
+  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
   
+// Multiple areas.
+WeakForm::MultiComponentVectorFormVol::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, 
+								   Hermes::vector<std::string> areas,
+								   Hermes::vector<MeshFunction *> ext, 
+								   Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+
+
 WeakForm::MultiComponentVectorFormVol* WeakForm::MultiComponentVectorFormVol::clone()
 {
   error("WeakForm::VectorFormVol::clone() must be overridden.");
   return NULL;
 }
 
+// One area.
 WeakForm::MultiComponentVectorFormSurf::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area,
-                                         Hermes::vector<MeshFunction *> ext, 
-                                         Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
-  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates)
-{
-}
+								     Hermes::vector<MeshFunction *> ext, 
+								     Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+
+// Multiple areas.
+WeakForm::MultiComponentVectorFormSurf::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
+								     Hermes::vector<std::string> areas,
+								     Hermes::vector<MeshFunction *> ext, 
+								     Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
+  Form(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
 WeakForm::MultiComponentVectorFormSurf* WeakForm::MultiComponentVectorFormSurf::clone()
 {
