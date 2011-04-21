@@ -29,8 +29,7 @@ void HermesModule::set_material(MaterialData *material) {
 void HermesModule::solve() {
   Hermes2D hermes2d;
 
-  this->properties()->set_default_properties();
-
+  /*
   RefinementSelectors::Selector* selector = NULL;
   Hermes::vector<RefinementSelectors::Selector *> selectors;
 
@@ -46,12 +45,13 @@ void HermesModule::solve() {
       if (this->properties()->adaptivity()->cand_list != H2D_NONE)
           selectors.push_back(selector);
   }
+  */
+
   this->set_boundary_conditions();
   this->set_weakforms();
-
   this->set_spaces();
 
-  SparseMatrix* matrix = create_matrix(this->properties()->solver()->mat_solver);
+  SparseMatrix *matrix = create_matrix(this->properties()->solver()->mat_solver);
   Vector *rhs = create_vector(this->properties()->solver()->mat_solver);
   Solver *solver = create_linear_solver(this->properties()->solver()->mat_solver, matrix, rhs);
 
@@ -59,6 +59,7 @@ void HermesModule::solve() {
   {
     if (this->properties()->adaptivity()->cand_list == H2D_NONE)
     {
+      /*
       DiscreteProblem dp(this->wf, this->spaces);
 
       int ndof = Space::get_num_dofs(this->spaces);
@@ -77,7 +78,9 @@ void HermesModule::solve() {
         error("Newton's iteration failed.");
 
       Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
+      */
     }
+    /*
     else
     {
       info("---- Adaptivity step %d:", i);
@@ -137,15 +140,16 @@ void HermesModule::solve() {
 
       ref_slns.clear();
     }
+    */
   }
-
   delete solver;
   delete matrix;
   delete rhs;
-
+  /*
   if (this->properties()->adaptivity()->cand_list != H2D_NONE)
   {
     delete selector;
     selectors.clear();
   }
+  */
 }
