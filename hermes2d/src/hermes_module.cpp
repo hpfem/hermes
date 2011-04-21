@@ -27,70 +27,103 @@ void HermesModule::set_material(MaterialData *material) {
 }
 
 void HermesModule::solve() {
+  Hermes2D hermes2d;
+
+  this->properties()->set_default_properties();
+
   RefinementSelectors::Selector* selector = NULL;
   Hermes::vector<RefinementSelectors::Selector *> selectors;
 
-  if (properties()->adaptivity()->cand_list != H2D_NONE)
+  if (this->properties()->adaptivity()->cand_list != H2D_NONE)
     selector = new RefinementSelectors::H1ProjBasedSelector(this->properties()->adaptivity()->cand_list,
                                                             properties()->adaptivity()->conv_exp,
                                                             H2DRS_DEFAULT_ORDER);
 
-
-  for (int i = 0; i < properties()->solution()->num_sol; i++)
+  for (int i = 0; i < this->properties()->solution()->num_sol; i++)
   {
       this->slns.push_back(new Solution(this->meshes.at(i)));
 
-      if (properties()->adaptivity()->cand_list != H2D_NONE)
+      if (this->properties()->adaptivity()->cand_list != H2D_NONE)
           selectors.push_back(selector);
   }
+  this->set_boundary_conditions();
+  this->set_weakforms();
 
-  set_weakform();
+  this->set_spaces();
 
-  SparseMatrix* matrix = create_matrix(properties()->solver()->mat_solver);
-  Vector *rhs = create_vector(properties()->solver()->mat_solver);
-  Solver *solver = create_linear_solver(properties()->solver()->mat_solver, matrix, rhs);
+  SparseMatrix* matrix = create_matrix(this->properties()->solver()->mat_solver);
+  Vector *rhs = create_vector(this->properties()->solver()->mat_solver);
+  Solver *solver = create_linear_solver(this->properties()->solver()->mat_solver, matrix, rhs);
 
-  if (properties()->adaptivity()->cand_list == H2D_NONE)
+  for (int i = 0; i <= this->properties()->adaptivity()->max_steps; i++)
   {
-
-    DiscreteProblem dp(this->wf, this->spaces, this->properties()->is_linear);
-    dp.assemble(matrix, rhs);
-
-    if(solver->solve())
-      Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
-  }
-  else
-  {
-    Hermes::vector<Solution *> ref_slns;
-
-    for (int i = 0; i < properties()->adaptivity()->max_steps; i++)
+    if (this->properties()->adaptivity()->cand_list == H2D_NONE)
     {
-      for (int j = 0; j < properties()->solution()->num_sol; j++)
+      DiscreteProblem dp(this->wf, this->spaces);
+
+      int ndof = Space::get_num_dofs(this->spaces);
+      if (ndof != 0)
+        info("ndof = %d", ndof);
+      else
+      {
+        error("ndof = %d", ndof);
+        break;
+      }
+
+      scalar* coeff_vec = new scalar[ndof];
+      memset(coeff_vec, 0, ndof*sizeof(scalar));
+
+      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs))
+        error("Newton's iteration failed.");
+
+      Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
+    }
+    else
+    {
+      info("---- Adaptivity step %d:", i);
+
+      Hermes::vector<Solution *> ref_slns;
+      for (int j = 0; j < this->properties()->solution()->num_sol; j++)
            ref_slns.push_back(new Solution());
 
       Hermes::vector<Space *> ref_spaces = *Space::construct_refined_spaces(this->spaces);
 
-      DiscreteProblem dp(this->wf, ref_spaces, true); // FIXME
-      dp.assemble(matrix, rhs);
+      DiscreteProblem dp(this->wf, ref_spaces);
 
-      if (solver->solve())
-        Solution::vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
-      else
+      int ndof_ref = Space::get_num_dofs(ref_spaces);
+      if (ndof_ref == 0)
+      {
+        error("ndof_fine = %d", ndof_ref);
         break;
+      }
 
-      OGProjection::project_global(this->spaces, ref_slns, this->slns, properties()->solver()->mat_solver);
+      scalar* coeff_vec = new scalar[ndof_ref];
+      memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
-      Adapt adaptivity(this->spaces, proj_norms);
+      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs))
+      {
+        error("Newton's iteration failed.");
+        break;
+      }
+
+      Solution::vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
+
+      OGProjection::project_global(this->spaces, ref_slns, this->slns, this->properties()->solver()->mat_solver);
+
+      Adapt adaptivity(this->spaces, this->proj_norms);
 
       Hermes::vector<double> err_est_rel;
       double error = adaptivity.calc_err_est(this->slns, ref_slns, &err_est_rel) * 100;
 
-      if (error < properties()->adaptivity()->tolerance || Space::get_num_dofs(this->spaces) >= properties()->adaptivity()->max_dofs)
+      info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
+        Space::get_num_dofs(this->spaces), ndof_ref, err_est_rel);
+
+      if (error < this->properties()->adaptivity()->tolerance || Space::get_num_dofs(this->spaces) >= this->properties()->adaptivity()->max_dofs)
         break;
 
-      if (i != properties()->adaptivity()->max_steps-1)
-        adaptivity.adapt(selectors, properties()->adaptivity()->threshold, properties()->adaptivity()->strategy,
-                         properties()->adaptivity()->regularize);
+      if (i != this->properties()->adaptivity()->max_steps-1)
+        adaptivity.adapt(selectors, this->properties()->adaptivity()->threshold, this->properties()->adaptivity()->strategy,
+                         this->properties()->adaptivity()->regularize);
 
       for (unsigned int i = 0; i < ref_spaces.size(); i++)
       {
@@ -115,14 +148,4 @@ void HermesModule::solve() {
     delete selector;
     selectors.clear();
   }
-
-  this->meshes.clear();
-
-  for (unsigned int i = 0; i < this->spaces.size(); i++)
-      delete this->spaces.at(i);
-  this->spaces.clear();
-
-  for (unsigned int i = 0; i < this->slns.size(); i++)
-      delete this->slns.at(i);
-  this->slns.clear();
 }
