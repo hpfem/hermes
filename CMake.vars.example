@@ -1,13 +1,17 @@
 # This is a sample CMake.vars file for Hermes.
 #
+# NOTE: After making any change, remove the file CMakeCache.txt.
+#
 # It contains compilation options that let you customize Hermes on your 
 # system. Options set here override the default ones set in CMakeLists.txt.
 #
 # NOTE: when specifying paths, always use absolute paths (such as 
 # "/home/pavel/something" instead of "~/something").
  
-# Enable Python
-set(WITH_PYTHON YES)
+# Uncomment one or more of these lines to disable Hermes1D / Hermes2D / Hermes3D:
+# set(WITH_H1D NO)
+# set(WITH_H2D NO)
+# set(WITH_H3D NO)
 
 # Enable UMFPACK (linear solvers, this option is YES by default)
 set(WITH_UMFPACK YES)
@@ -52,8 +56,7 @@ SET(NETCDF_ROOT /opt/packages/netcdf)
 # install the Hermes library into a default directory - typically 
 #   /usr/local/lib,
 #   /usr/local/include/hermes,  
-#   /usr/local/lib/python (if WITH_PYTHON was set to YES; see also 
-#                          how to set PYTHON_INSTALL_PATH below). 
+#   /usr/local/lib/python (see also how to set PYTHON_INSTALL_PATH below). 
 # If set as follows, the library files will be installed into 
 #   /home/pavel/build/hermes/lib, 
 #   /home/pavel/build/hermes/include,
@@ -64,7 +67,7 @@ SET(NETCDF_ROOT /opt/packages/netcdf)
    set(CMAKE_INSTALL_PREFIX    /home/pavel/build/hermes)
 
 # Installation directory for Python wrappers.
-# If WITH_PYTHON =  YES, 'make install' (or 'sudo make install') will
+# Typing 'make install' (or 'sudo make install') will
 # also create Python wrappers and install them to directories shown
 # above. You may also install them into a different directory by 
 # setting PYTHON_INSTALL_PATH appropriately, or into a default place 
