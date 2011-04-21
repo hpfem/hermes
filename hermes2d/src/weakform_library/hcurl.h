@@ -30,9 +30,9 @@ namespace WeakFormsHcurl {
     {
     public:
       DefaultLinearCurlCurl(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), coeff(coeff) { }
       DefaultLinearCurlCurl(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, area, sym), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
@@ -66,9 +66,9 @@ namespace WeakFormsHcurl {
     {
     public:
       DefaultLinearMass(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-            : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), coeff(coeff) { }
       DefaultLinearMass(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-            : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff) { }
+	: WeakForm::MatrixFormVol(i, j, area, sym), coeff(coeff) { }
 
       template<typename Real, typename Scalar>
       Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,

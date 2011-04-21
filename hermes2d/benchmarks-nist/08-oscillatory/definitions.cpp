@@ -83,7 +83,7 @@ private:
   {
   public:
     CustomMatrixFormVol(int i, int j, double alpha) 
-          : WeakForm::MatrixFormVol(i, j, HERMES_SYM), alpha(alpha) { }
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

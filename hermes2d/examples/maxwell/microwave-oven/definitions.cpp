@@ -8,7 +8,7 @@ class CustomMatrixForm : public WeakForm::MatrixFormVol
 {
 public:
   CustomMatrixForm(int i, int j, double e_0, double mu_0, double mu_r, double kappa, bool align_mesh) 
-    : WeakForm::MatrixFormVol(i, j, HERMES_SYM), e_0(e_0), mu_0(mu_0), 
+    : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), e_0(e_0), mu_0(mu_0), 
       mu_r(mu_r), kappa(kappa), align_mesh(align_mesh) { }
 
   template<typename Scalar, typename Real>

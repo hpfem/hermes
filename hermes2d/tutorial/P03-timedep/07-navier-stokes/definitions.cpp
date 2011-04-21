@@ -46,7 +46,7 @@ public:
   {
   public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
-      : WeakForm::MatrixFormVol(i, j, HERMES_SYM), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
 
@@ -77,7 +77,7 @@ public:
   {
   public:
     BilinearFormNonsymVel(int i, int j, bool Stokes) 
-      : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), Stokes(Stokes) {
         adapt_eval = false;
     }
 
@@ -110,7 +110,7 @@ public:
   class BilinearFormNonsymXVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -129,7 +129,7 @@ public:
   class BilinearFormNonsymYVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -225,7 +225,7 @@ public:
   {
   public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) 
-            : WeakForm::MatrixFormVol(i, j, HERMES_SYM), Stokes(Stokes), 
+            : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), Stokes(Stokes), 
                        Reynolds(Reynolds), time_step(time_step) {
       adapt_eval = false;
     }
@@ -255,7 +255,7 @@ public:
   class BilinearFormNonsymVel_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+    BilinearFormNonsymVel_0_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
     }
 
@@ -292,7 +292,7 @@ public:
   class BilinearFormNonsymVel_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+    BilinearFormNonsymVel_0_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
     }
 
@@ -325,7 +325,7 @@ public:
   class BilinearFormNonsymVel_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+    BilinearFormNonsymVel_1_0(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
     }
 
@@ -358,7 +358,7 @@ public:
   class BilinearFormNonsymVel_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), Stokes(Stokes) {
+    BilinearFormNonsymVel_1_1(int i, int j, bool Stokes) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), Stokes(Stokes) {
       adapt_eval = false;
     }
 
@@ -395,7 +395,7 @@ public:
   class BilinearFormNonsymXVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -414,7 +414,7 @@ public:
   class BilinearFormNonsymYVelPressure : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 

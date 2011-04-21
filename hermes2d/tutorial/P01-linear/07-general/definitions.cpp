@@ -54,7 +54,7 @@ private:
   class MatrixFormVolGeneral : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormVolGeneral(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) { }
+    MatrixFormVolGeneral(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -118,9 +118,7 @@ private:
   {
   public:
     VectorFormSurfGeneral(int i, std::string area = HERMES_ANY) 
-      : WeakForm::VectorFormSurf(i, area) {
-      adapt_eval = false;
-    }
+      : WeakForm::VectorFormSurf(i, area) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {

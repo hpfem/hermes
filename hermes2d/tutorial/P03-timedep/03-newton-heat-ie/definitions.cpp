@@ -19,7 +19,7 @@ private:
   public:
     // This weak form is custom since it contains a nonlinearity in the diffusion term.
     CustomMatrixFormVolHeatTransferNonlinear(int i, int j, double alpha, double tau) 
-          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), alpha(alpha), tau(tau) { }
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), alpha(alpha), tau(tau) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

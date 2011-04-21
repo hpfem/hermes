@@ -86,7 +86,7 @@ public:
   class BilinearFormNonsymVel_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymVel_0_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -116,7 +116,7 @@ public:
   class BilinearFormNonsymVel_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymVel_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -146,7 +146,7 @@ public:
   class BilinearFormNonsymVel_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymVel_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -173,7 +173,7 @@ public:
   class BilinearFormNonsymVel_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymVel_1_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -204,7 +204,7 @@ public:
   {
   public:
     // The antisym flag is used here to generate a term in the continuity equation.
-    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -224,7 +224,7 @@ public:
   {
   public:
     // The antisym flag is used here to generate a term in the continuity equation.
-    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) {
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) {
       adapt_eval = false;
     }
 
@@ -406,7 +406,7 @@ public:
   class BilinearFormNonsymTemp_3_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymTemp_3_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymTemp_3_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -432,7 +432,7 @@ public:
   class BilinearFormNonsymTemp_3_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymTemp_3_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymTemp_3_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 
@@ -458,7 +458,7 @@ public:
   class BilinearFormNonsymTemp_3_3 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymTemp_3_3(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) {
+    BilinearFormNonsymTemp_3_3(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {
       adapt_eval = false;
     }
 

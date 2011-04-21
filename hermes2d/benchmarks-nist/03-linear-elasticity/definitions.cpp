@@ -409,7 +409,7 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) 
-      : WeakForm::MatrixFormVol(0, 0, HERMES_SYM), E(E), nu(nu) {
+      : WeakForm::MatrixFormVol(0, 0, HERMES_ANY, HERMES_SYM), E(E), nu(nu) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
@@ -436,7 +436,7 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) 
-      : WeakForm::MatrixFormVol(0, 1, HERMES_SYM), E(E), nu(nu) { 
+      : WeakForm::MatrixFormVol(0, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
     }
 
@@ -462,7 +462,7 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) 
-      : WeakForm::MatrixFormVol(1, 1, HERMES_SYM), E(E), nu(nu) { 
+      : WeakForm::MatrixFormVol(1, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }

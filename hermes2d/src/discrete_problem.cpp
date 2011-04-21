@@ -186,26 +186,26 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
   // account for over-edge calculations.
   bool is_DG = false;
   for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) {
-    if(this->wf->mfsurf[i]->area == H2D_DG_INNER_EDGE) {
+    if(this->wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
   }
   for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++) {
-    if(this->wf->vfsurf[i]->area == H2D_DG_INNER_EDGE) {
+    if(this->wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
   }
 
   for(unsigned int i = 0; i < this->wf->mfsurf_mc.size(); i++) {
-    if(this->wf->mfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+    if(this->wf->mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
   }
   for(unsigned int i = 0; i < this->wf->vfsurf_mc.size(); i++) {
-    if(this->wf->vfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+    if(this->wf->vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
       is_DG = true;
       break;
     }
@@ -542,26 +542,26 @@ void DiscreteProblem::assemble_one_stage(WeakForm::Stage& stage,
   DG_matrix_forms_present = false;
   DG_vector_forms_present = false;
   for(unsigned int i = 0; i < stage.mfsurf.size(); i++) {
-    if (stage.mfsurf[i]->area == H2D_DG_INNER_EDGE) {
+    if (stage.mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
       DG_matrix_forms_present = true;
       break;
     }
   }
   for(unsigned int i = 0; i < stage.vfsurf.size(); i++) {
-    if (stage.vfsurf[i]->area == H2D_DG_INNER_EDGE) {
+    if (stage.vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
       DG_vector_forms_present = true;
       break;
     }
   }
 
   for(unsigned int i = 0; i < stage.mfsurf_mc.size(); i++) {
-    if (stage.mfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+    if (stage.mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
       DG_matrix_forms_present = true;
       break;
     }
   }
   for(unsigned int i = 0; i < stage.vfsurf_mc.size(); i++) {
-    if (stage.vfsurf_mc[i]->area == H2D_DG_INNER_EDGE) {
+    if (stage.vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
       DG_vector_forms_present = true;
       break;
     }
@@ -720,7 +720,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       continue;
     if (fabs(mfv->scaling_factor) < 1e-12)
       continue;
-    if (mfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->area)))
+    if (mfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->areas[0])))
       continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
@@ -850,7 +850,7 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
     WeakForm::MultiComponentMatrixFormVol* mfv = stage.mfvol_mc[ww];
     if(fabs(mfv->scaling_factor) < 1e-12)
       continue;
-    if (mfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->area)))
+    if (mfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->areas[0])))
       continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
@@ -966,7 +966,7 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
       continue;
     if (fabs(vfv->scaling_factor) < 1e-12) 
       continue;
-    if (vfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->area))) 
+    if (vfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->areas[0]))) 
       continue;
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
@@ -996,7 +996,7 @@ void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stag
     WeakForm::MultiComponentVectorFormVol* vfv = stage.vfvol_mc[ww];
     if (fabs(vfv->scaling_factor) < 1e-12) 
       continue;
-    if (vfv->area != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->area))) 
+    if (vfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->areas[0]))) 
       continue;
 
     unsigned int m = vfv->coordinates[0];
@@ -1595,9 +1595,9 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
     if (isempty[m] || isempty[n]) continue;
     if (!nat[m] || !nat[n]) continue;
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
-    if (mfs->area == H2D_DG_INNER_EDGE) continue;
-    if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE 
-      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->area))) continue;
+    if (mfs->areas[0] == H2D_DG_INNER_EDGE) continue;
+    if (mfs->areas[0] != HERMES_ANY && mfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
+      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->areas[0]))) continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1662,9 +1662,9 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
 
     if (!nat[m] || !nat[n]) continue;
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
-    if (mfs->area == H2D_DG_INNER_EDGE) continue;
-    if (mfs->area != HERMES_ANY && mfs->area != H2D_DG_BOUNDARY_EDGE 
-      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->area))) continue;
+    if (mfs->areas[0] == H2D_DG_INNER_EDGE) continue;
+    if (mfs->areas[0] != HERMES_ANY && mfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
+      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->areas[0]))) continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1732,11 +1732,11 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
     int m = vfs->i;
     if (isempty[m]) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
-    if (vfs->area == H2D_DG_INNER_EDGE) continue;
-    if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE 
-        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->area))) continue;
+    if (vfs->areas[0] == H2D_DG_INNER_EDGE) continue;
+    if (vfs->areas[0] != HERMES_ANY && vfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
+        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->areas[0]))) continue;
 
-    if (vfs->area == HERMES_ANY && !nat[m]) continue;
+    if (vfs->areas[0] == HERMES_ANY && !nat[m]) continue;
 
     surf_pos.base = trav_base;
     surf_pos.space_v = spaces[m];
@@ -1769,11 +1769,11 @@ void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Sta
     WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
     unsigned int m = vfs->coordinates[0];
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
-    if (vfs->area == H2D_DG_INNER_EDGE) continue;
-    if (vfs->area != HERMES_ANY && vfs->area != H2D_DG_BOUNDARY_EDGE 
-        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->area))) continue;
+    if (vfs->areas[0] == H2D_DG_INNER_EDGE) continue;
+    if (vfs->areas[0] != HERMES_ANY && vfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
+        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->areas[0]))) continue;
 
-    if (vfs->area == HERMES_ANY && !nat[m]) continue;
+    if (vfs->areas[0] == HERMES_ANY && !nat[m]) continue;
 
     surf_pos.base = trav_base;
     surf_pos.space_v = spaces[m];
@@ -1807,7 +1807,7 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
   _F_
   for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
     WeakForm::MatrixFormSurf* mfs = stage.mfsurf[ww];
-    if (mfs->area != H2D_DG_INNER_EDGE) continue;
+    if (mfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     int m = mfs->i;
     int n = mfs->j;
 
@@ -1907,7 +1907,7 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
   _F_
   for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
     WeakForm::MultiComponentMatrixFormSurf* mfs = stage.mfsurf_mc[ww];
-    if (mfs->area != H2D_DG_INNER_EDGE) continue;
+    if (mfs->areas[0] != H2D_DG_INNER_EDGE) continue;
 
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
 
@@ -2040,7 +2040,7 @@ void DiscreteProblem::assemble_DG_vector_forms(WeakForm::Stage& stage,
 
   for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
     WeakForm::VectorFormSurf* vfs = stage.vfsurf[ww];
-    if (vfs->area != H2D_DG_INNER_EDGE) continue;
+    if (vfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     int m = vfs->i;
     if (isempty[m]) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
@@ -2065,7 +2065,7 @@ void DiscreteProblem::assemble_multicomponent_DG_vector_forms(WeakForm::Stage& s
 
   for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
     WeakForm::MultiComponentVectorFormSurf* vfs = stage.vfsurf_mc[ww];
-    if (vfs->area != H2D_DG_INNER_EDGE) continue;
+    if (vfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
             
     // Here we use the standard pss, possibly just transformed by NeighborSearch.

@@ -296,7 +296,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
   for(unsigned int component_i = 0; component_i < size; component_i++) {
     if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE) {
       MatrixFormVolL2* proj_form = new MatrixFormVolL2(component_i, component_i);
-      proj_form->area = HERMES_ANY;
+      proj_form->areas.push_back(HERMES_ANY);
       proj_form->scaling_factor = 1.0;
       proj_form->u_ext_offset = 0;
       proj_form->adapt_eval = false;
@@ -306,7 +306,7 @@ void RungeKutta::create_stage_wf(unsigned int size, double current_time, double 
     }
     if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE) {
       MatrixFormVolHCurl* proj_form = new MatrixFormVolHCurl(component_i, component_i);
-      proj_form->area = HERMES_ANY;
+      proj_form->areas.push_back(HERMES_ANY);
       proj_form->scaling_factor = 1.0;
       proj_form->u_ext_offset = 0;
       proj_form->adapt_eval = false;

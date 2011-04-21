@@ -57,7 +57,7 @@ public:
   class BilinearFormNonsymVel_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+    BilinearFormNonsymVel_0_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -85,7 +85,7 @@ public:
   class BilinearFormNonsymVel_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+    BilinearFormNonsymVel_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -112,7 +112,7 @@ public:
   class BilinearFormNonsymVel_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+    BilinearFormNonsymVel_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -137,7 +137,7 @@ public:
   class BilinearFormNonsymVel_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearFormNonsymVel_1_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+    BilinearFormNonsymVel_1_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -170,7 +170,7 @@ public:
   {
   public:
     // The antisym flag is used here to generate a term in the continuity equation.
-    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) { }
+    BilinearFormNonsymXVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -187,7 +187,7 @@ public:
   {
   public:
     // The antisym flag is used here to generate a term in the continuity equation.
-    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANTISYM) { }
+    BilinearFormNonsymYVelPressure(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_ANTISYM) { }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {

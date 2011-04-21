@@ -70,7 +70,7 @@ private:
   {
   public:
     JacobianFormNewtonEuler(int i, int j, ConstitutiveRelations* relations, double tau) 
-      : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), tau(tau), relations(relations) { }
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), tau(tau), relations(relations) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -171,12 +171,12 @@ private:
   class JacobianFormNewtonCrankNicolson : public WeakForm::MatrixFormVol
   {
   public:
-    JacobianFormNewtonCrankNicolson(int i, int j, ConstitutiveRelations* relations, double tau) : WeakForm::MatrixFormVol(i, j), tau(tau), relations(relations) {
-      sym = HERMES_NONSYM;
-    }
+    JacobianFormNewtonCrankNicolson(int i, int j, ConstitutiveRelations* relations, double tau) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), tau(tau), relations(relations) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
       std::string elem_marker = wf->get_element_markers_conversion()->get_user_marker(e->elem_marker);
       double result = 0;
       Func<double>* h_prev_newton = u_ext[0];
@@ -270,12 +270,12 @@ private:
   class JacobianFormPicardEuler : public WeakForm::MatrixFormVol
   {
   public:
-    JacobianFormPicardEuler(int i, int j, ConstitutiveRelations* relations, double tau) : WeakForm::MatrixFormVol(i, j), tau(tau), relations(relations) {
-      sym = HERMES_NONSYM;
-    }
+    JacobianFormPicardEuler(int i, int j, ConstitutiveRelations* relations, double tau) 
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), tau(tau), relations(relations) { }
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
       std::string elem_marker = wf->get_element_markers_conversion()->get_user_marker(e->elem_marker);
       double result = 0;
       Func<double>* h_prev_picard = ext->fn[0];

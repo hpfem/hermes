@@ -63,7 +63,7 @@ private:
   class CustomMatrixFormVol : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_SYM) {}
+    CustomMatrixFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -175,7 +175,7 @@ private:
         Scalar p = 0.0;
         Scalar q = 0.0;
         Scalar c = 1.0;
-        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
+        if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
           if (x == 0.0) {
             if ((y >= 0.0 && y <= 0.8)||(y >= 23.2 && y <= 24.0)) {
               p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
@@ -196,19 +196,19 @@ private:
           }
           c = static_cast<CustomWeakFormPoisson*>(wf)->c_left;
         }
-        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
+        if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
           p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
           q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
           c = static_cast<CustomWeakFormPoisson*>(wf)->c_right;
         }
 
-        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
+        if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
           p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
           q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
           c = static_cast<CustomWeakFormPoisson*>(wf)->c_bottom;
         }
 
-        if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
+        if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
           p = static_cast<CustomWeakFormPoisson*>(wf)->p_1; 
           q = static_cast<CustomWeakFormPoisson*>(wf)->q_1;
           c = static_cast<CustomWeakFormPoisson*>(wf)->c_top;
@@ -241,18 +241,18 @@ private:
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Scalar g = 1.0;
-      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
+      if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_left) {
         g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_left; 
       }
-      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
+      if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_right) {
         g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_right;
       }
 
-      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
+      if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_bottom) {
         g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_bottom;
       }
 
-      if(this->area == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
+      if(this->areas[0] == static_cast<CustomWeakFormPoisson*>(wf)->bdy_top) {
         g = static_cast<CustomWeakFormPoisson*>(wf)->g_n_top;
       }
       return g * int_v<Real>(n, wt, v);

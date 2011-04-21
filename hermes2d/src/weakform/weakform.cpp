@@ -71,14 +71,14 @@ WeakForm::MatrixFormVol* WeakForm::MatrixFormVol::clone()
 }
 
 // One area.
-WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
-                                       std::string area, Hermes::vector<MeshFunction *> ext, 
+WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, 
+                                       std::string area, SymFlag sym, Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym) { }
 
 // Multiple areas.
-WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, SymFlag sym,
-                                       Hermes::vector<std::string> areas, Hermes::vector<MeshFunction *> ext, 
+WeakForm::MatrixFormVol::MatrixFormVol(unsigned int i, unsigned int j, 
+                                       Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(areas, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym) { }
 
@@ -179,14 +179,14 @@ WeakForm::VectorFormSurf* WeakForm::VectorFormSurf::clone()
 }
 
 // Multi component, one area.
-WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, SymFlag sym,
-                                       std::string area, Hermes::vector<MeshFunction *> ext, 
+WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, 
+                                       std::string area, SymFlag sym, Hermes::vector<MeshFunction *> ext, 
                                        Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
 
 // Multi component, multiple areas.
-WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, SymFlag sym,
-								   Hermes::string<std::string> areas, Hermes::vector<MeshFunction *> ext, 
+WeakForm::MultiComponentMatrixFormVol::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, 
+								   Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction *> ext, 
                                                                    Hermes::vector<scalar> param, double scaling_factor, int u_ext_offset) : 
   Form(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
 

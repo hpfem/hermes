@@ -19,7 +19,7 @@ private:
   {
   public:
     MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau, double butcher_a_11) : 
-      WeakForm::MatrixFormVol(i, j, HERMES_NONSYM), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) { }
+      WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
@@ -140,9 +140,7 @@ private:
   {
   public:
     MatrixFormVolHeatTransfer(int i, int j, double alpha, double tau, double butcher_a_11) : 
-        WeakForm::MatrixFormVol(i, j), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) {
-      sym = HERMES_NONSYM; 
-    }
+      WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), alpha(alpha), tau(tau), butcher_a_11(butcher_a_11) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {

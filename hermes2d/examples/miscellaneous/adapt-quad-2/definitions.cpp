@@ -19,7 +19,7 @@ private:
   class MatrixFormLaplace : public WeakForm::MatrixFormVol
   {
   public:
-    MatrixFormLaplace(int i, int j, std::string area, double a = 1) : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), a(a) {}
+    MatrixFormLaplace(int i, int j, std::string area, double a = 1) : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), a(a) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

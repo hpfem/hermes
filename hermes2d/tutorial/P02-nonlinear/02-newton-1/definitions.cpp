@@ -19,7 +19,7 @@ private:
   {
   public:
     MatrixFormVolHeatTransfer(int i, int j) 
-          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM) { }
+          : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

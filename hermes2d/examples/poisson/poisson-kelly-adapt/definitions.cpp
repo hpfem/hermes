@@ -19,7 +19,7 @@ public:
   class BilinearForm : public WeakForm::MatrixFormVol
   {
   public:
-    BilinearForm(int i, int j, double EPS, std::string area) : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), EPS(EPS) {}
+    BilinearForm(int i, int j, double EPS, std::string area) : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), EPS(EPS) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
       return EPS * int_grad_u_grad_v<double, scalar>(n, wt, u, v);

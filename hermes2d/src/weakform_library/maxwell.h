@@ -33,10 +33,10 @@ namespace WeakFormsMaxwell {
       DefaultLinearMagnetostatics(int i, int j, scalar coeff = 1.0,
                                   SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR,
                                   int order_increase = 3)
-             : WeakForm::MatrixFormVol(i, j, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
+	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
       DefaultLinearMagnetostatics(int i, int j, std::string area, scalar coeff = 1.0,
                                   SymFlag sym = HERMES_SYM, GeomType gt = HERMES_PLANAR, int order_increase = 3)
-             : WeakForm::MatrixFormVol(i, j, sym, area), coeff(coeff), gt(gt), order_increase(order_increase) { }
+	: WeakForm::MatrixFormVol(i, j, area, sym), coeff(coeff), gt(gt), order_increase(order_increase) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
                            Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -83,7 +83,7 @@ namespace WeakFormsMaxwell {
                                              SymFlag sym = HERMES_NONSYM,
                                              GeomType gt = HERMES_PLANAR,
                                              int order_increase = 3)
-             : WeakForm::MatrixFormVol(i, j, sym), spline_coeff(spline_coeff),
+	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), spline_coeff(spline_coeff),
                                        const_coeff(const_coeff), gt(gt),
                                        order_increase(order_increase) { }
       DefaultJacobianNonlinearMagnetostatics(int i, int j, std::string area,
@@ -92,7 +92,7 @@ namespace WeakFormsMaxwell {
                                              SymFlag sym = HERMES_NONSYM,
                                              GeomType gt = HERMES_PLANAR,
                                              int order_increase = 3)
-             : WeakForm::MatrixFormVol(i, j, sym, area), spline_coeff(spline_coeff),
+	: WeakForm::MatrixFormVol(i, j, area, sym), spline_coeff(spline_coeff),
                                        const_coeff(const_coeff), gt(gt),
                                        order_increase(order_increase) { }
 
@@ -176,7 +176,7 @@ namespace WeakFormsMaxwell {
           : WeakForm::MatrixFormVol(i, j), gamma(gamma), vel_x(vel_x), vel_y(vel_y), vel_ang(vel_ang) { }
 
       DefaultLinearMagnetostaticsVelocity(int i, int j, std::string area, double gamma, double vel_x, double vel_y, double vel_ang = 0.0)
-          : WeakForm::MatrixFormVol(i, j, HERMES_NONSYM, area), gamma(gamma), vel_x(vel_x), vel_y(vel_y), vel_ang(vel_ang) { }
+	: WeakForm::MatrixFormVol(i, j, area, HERMES_NONSYM), gamma(gamma), vel_x(vel_x), vel_y(vel_y), vel_ang(vel_ang) { }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const {

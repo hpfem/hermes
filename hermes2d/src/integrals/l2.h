@@ -23,7 +23,12 @@
 class MatrixFormVolL2 : public WeakForm::MatrixFormVol
 {
 public:
-    MatrixFormVolL2(int i, int j, SymFlag sym = HERMES_SYM) : MatrixFormVol(i, j, sym) {}
+    // One area.
+    MatrixFormVolL2(int i, int j, std::string area = HERMES_ANY, 
+                    SymFlag sym = HERMES_SYM) : MatrixFormVol(i, j, area, sym) {}
+    // Multiple areas.
+    MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas, 
+                    SymFlag sym = HERMES_SYM) : MatrixFormVol(i, j, areas, sym) {}
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,

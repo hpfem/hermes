@@ -31,9 +31,9 @@ namespace WeakFormsElasticity {
   {
   public:
     DefaultVolumetricMatrixFormLinear_x_x(unsigned int i, unsigned int j, double lambda, double mu)
-          : WeakForm::MatrixFormVol(i, j, HERMES_SYM), lambda(lambda), mu(mu) { }
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
     DefaultVolumetricMatrixFormLinear_x_x(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-          : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
+          : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
@@ -60,9 +60,9 @@ namespace WeakFormsElasticity {
   {
   public:
     DefaultVolumetricMatrixFormLinear_x_y(unsigned int i, unsigned int j, double lambda, double mu)
-            : WeakForm::MatrixFormVol(i, j, HERMES_SYM), lambda(lambda), mu(mu) {}
+            : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) {}
     DefaultVolumetricMatrixFormLinear_x_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-          : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
+      : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
@@ -92,9 +92,9 @@ namespace WeakFormsElasticity {
   {
   public:
     DefaultVolumetricMatrixFormLinear_y_y(unsigned int i, unsigned int j, double lambda, double mu)
-            : WeakForm::MatrixFormVol(i, j, HERMES_SYM), lambda(lambda), mu(mu) { }
+      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
     DefaultVolumetricMatrixFormLinear_y_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-          : WeakForm::MatrixFormVol(i, j, HERMES_SYM, area), lambda(lambda), mu(mu) { }
+      : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
@@ -124,9 +124,9 @@ namespace WeakFormsElasticity {
   {
   public:
     MultiComponentDefaultVolumetricMatrixFormLinearSym(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, double lambda, double mu)
-          : WeakForm::MultiComponentMatrixFormVol(coordinates, HERMES_SYM), lambda(lambda), mu(mu) { }
+          : WeakForm::MultiComponentMatrixFormVol(coordinates, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
     MultiComponentDefaultVolumetricMatrixFormLinearSym(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area, double lambda, double mu)
-          : WeakForm::MultiComponentMatrixFormVol(coordinates, HERMES_SYM, area), lambda(lambda), mu(mu) { }
+      : WeakForm::MultiComponentMatrixFormVol(coordinates, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
     void matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
