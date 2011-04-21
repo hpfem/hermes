@@ -1631,7 +1631,7 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
-      if ((mfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfs->areas[ss]))
+      if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
           || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
         assemble_this_form = true;
         break;
@@ -1708,7 +1708,7 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
-      if ((mfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfs->areas[ss]))
+      if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
           || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
         assemble_this_form = true;
         break;
@@ -1789,7 +1789,7 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
-      if ((vfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfs->areas[ss]))
+      if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
           || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
         assemble_this_form = true;
         break;
@@ -1836,7 +1836,7 @@ void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Sta
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
-      if ((vfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfs->areas[ss]))
+      if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
           || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
         assemble_this_form = true;
         break;
