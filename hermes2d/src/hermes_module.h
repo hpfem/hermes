@@ -35,6 +35,8 @@ public:
     this->bc_type = bc_type;
   };
 
+  virtual ~BoundaryData() {};
+
   Hermes::vector<std::string> markers;
   BCType bc_type;
 };
@@ -52,6 +54,8 @@ public:
     BoundaryData(markers, (bc_type_h1 == HERMES_DIRICHLET) ? HERMES_ESSENTIAL : HERMES_NATURAL),
     value1(value1), value2(value2) { }
 
+  virtual ~BoundaryDataH1() {};
+
   BCTypeH1 bc_type_h1;
   scalar value1, value2;
 };
@@ -66,6 +70,8 @@ public:
   MaterialData(Hermes::vector<std::string> markers) {
     this->markers = markers;
   };
+
+  virtual ~MaterialData() {};
 
   Hermes::vector<std::string> markers;
 };
@@ -97,9 +103,13 @@ struct AdaptivityProperties {
 
 class ModuleProperties {
 public:
-  ModuleProperties();
-
-  virtual void set_default_properties() = 0;
+  ModuleProperties() {
+    mesh_properties = new MeshProperties;
+    solver_properties = new SolverProperties;
+    solution_properties = new SolutionProperties;
+    adaptivity_properties = new AdaptivityProperties;
+  };
+  virtual ~ModuleProperties() {};
 
   GeomType geometry;
   AnalysisType analysis;
@@ -120,7 +130,7 @@ public:
     return adaptivity_properties;
   }
 
-protected:
+private:
   MeshProperties *mesh_properties;
   SolverProperties *solver_properties;
   SolutionProperties *solution_properties;
@@ -131,7 +141,9 @@ protected:
 
 class HermesModule {
 public:
-  HermesModule();
+  HermesModule() {
+    module_properties = new ModuleProperties();
+  };
   virtual ~HermesModule() {
     this->meshes.clear();
 
@@ -147,7 +159,9 @@ public:
   virtual void set_boundary(BoundaryData *boundary);
   virtual void set_material(MaterialData *material);
 
+  Hermes::vector<Mesh *> meshes;
   virtual void set_meshes() = 0;
+
   virtual void set_spaces() = 0;
   virtual void set_boundary_conditions() = 0;
   virtual void set_weakforms() = 0;
@@ -156,15 +170,14 @@ public:
 
   virtual void solve();
 
-  ModuleProperties *properties() {
+  inline ModuleProperties *properties() {
     return module_properties;
-  }
+ }
 
-protected:
+private:
   ModuleProperties *module_properties;
 
-  Hermes::vector<Mesh *> meshes;
-
+protected:
   Hermes::vector<BoundaryData *> natural_boundaries;
   Hermes::vector<BoundaryData *> essential_boundaries;
   Hermes::vector<MaterialData *> materials;
