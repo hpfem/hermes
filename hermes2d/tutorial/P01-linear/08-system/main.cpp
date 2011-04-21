@@ -18,6 +18,9 @@
 // The following parameters can be changed:
 
 const int P_INIT = 6;                                      // Initial polynomial degree of all elements.
+const double NEWTON_TOL = 1e-6;                            // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                           // Maximum allowed number of Newton iterations.
+
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                            // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -37,6 +40,9 @@ const double f1  = 8e4;                                    // Surface force in y
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh, mesh1;
   H2DReader mloader;
@@ -52,14 +58,14 @@ int main(int argc, char* argv[])
   // Create x- and y- displacement space using the default H1 shapeset.
   H1Space u1_space(&mesh, &bcs, P_INIT);
   H1Space u2_space(&mesh, &bcs, P_INIT);
-  info("ndof = %d.", Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space)));
+  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&u1_space, &u2_space));
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
   CustomWeakFormLinearElasticity wf(E, nu, rho*g1, BDY_3, f0, f1);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -69,15 +75,17 @@ int main(int argc, char* argv[])
   // Initialize the solutions.
   Solution u1_sln, u2_sln;
 
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp.assemble(matrix, rhs);
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-  // Solve the linear system and if successful, obtain the solutions.
-  info("Solving the matrix problem.");
-  if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space *>(&u1_space, &u2_space), 
-                                                    Hermes::vector<Solution *>(&u1_sln, &u2_sln));
-  else error ("Matrix solver failed.\n");
+  // Perform Newton's iteration.
+  bool verbose = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
+      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&u1_space, &u2_space), Hermes::vector<Solution *>(&u1_sln, &u2_sln));
   
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
