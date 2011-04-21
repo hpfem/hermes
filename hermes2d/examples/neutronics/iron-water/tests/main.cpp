@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   Hermes::vector<double> Sources_map(Q_EXT, 0.0, 0.0);
   
   // Initialize the weak formulation.
-  WeakFormsNeutronics::Diffusion::Monoenergetic::DefaultWeakFormFixedSource
+  WeakFormsNeutronics::Monoenergetic::Diffusion::DefaultWeakFormFixedSource
     wf(regions, D_map, Sigma_a_map, Sources_map);
 
   // Initialize coarse and reference mesh solution.
