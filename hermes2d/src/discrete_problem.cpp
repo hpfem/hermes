@@ -716,12 +716,19 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
     WeakForm::MatrixFormVol* mfv = stage.mfvol[ww];
     int m = mfv->i;
     int n = mfv->j;
-    if (isempty[m] || isempty[n])
-      continue;
-    if (fabs(mfv->scaling_factor) < 1e-12)
-      continue;
-    if (mfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->areas[0])))
-      continue;
+    if (isempty[m] || isempty[n]) continue;
+    if (fabs(mfv->scaling_factor) < 1e-12) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY
+    // of if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) {
+      if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -848,10 +855,18 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
   _F_
   for (unsigned ww = 0; ww < stage.mfvol_mc.size(); ww++) {
     WeakForm::MultiComponentMatrixFormVol* mfv = stage.mfvol_mc[ww];
-    if(fabs(mfv->scaling_factor) < 1e-12)
-      continue;
-    if (mfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(mfv->areas[0])))
-      continue;
+    if(fabs(mfv->scaling_factor) < 1e-12) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY
+    // of if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) {
+      if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue;
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -962,12 +977,19 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
   for (unsigned int ww = 0; ww < stage.vfvol.size(); ww++) {
     WeakForm::VectorFormVol* vfv = stage.vfvol[ww];
     int m = vfv->i;
-    if (isempty[vfv->i]) 
-      continue;
-    if (fabs(vfv->scaling_factor) < 1e-12) 
-      continue;
-    if (vfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->areas[0]))) 
-      continue;
+    if (isempty[vfv->i]) continue;
+    if (fabs(vfv->scaling_factor) < 1e-12) continue;
+    
+    // Assemble this form only if one of its areas is HERMES_ANY
+    // of if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
+      if ((vfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       if (al[m]->dof[i] < 0) continue;
@@ -994,10 +1016,18 @@ void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stag
 
   for (unsigned int ww = 0; ww < stage.vfvol_mc.size(); ww++) {
     WeakForm::MultiComponentVectorFormVol* vfv = stage.vfvol_mc[ww];
-    if (fabs(vfv->scaling_factor) < 1e-12) 
-      continue;
-    if (vfv->areas[0] != HERMES_ANY && !(marker == element_markers_conversion->get_internal_marker(vfv->areas[0]))) 
-      continue;
+    if (fabs(vfv->scaling_factor) < 1e-12) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY
+    // of if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
+      if ((vfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     unsigned int m = vfv->coordinates[0];
 
@@ -1596,8 +1626,18 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
     if (!nat[m] || !nat[n]) continue;
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
     if (mfs->areas[0] == H2D_DG_INNER_EDGE) continue;
-    if (mfs->areas[0] != HERMES_ANY && mfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
-      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->areas[0]))) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
+    // or if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
+      if ((mfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfs->areas[ss]))
+          || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1663,8 +1703,18 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
     if (!nat[m] || !nat[n]) continue;
     if (fabs(mfs->scaling_factor) < 1e-12) continue;
     if (mfs->areas[0] == H2D_DG_INNER_EDGE) continue;
-    if (mfs->areas[0] != HERMES_ANY && mfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
-      && !(marker == boundary_markers_conversion->get_internal_marker(mfs->areas[0]))) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
+    // or if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
+      if ((mfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfs->areas[ss]))
+          || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
@@ -1673,7 +1723,8 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
     Hermes::vector<double> block_scaling_coeffs;
     for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
       if (block_weights != NULL)
-        block_scaling_coeffs.push_back(block_weights->get_A(mfs->coordinates[coordinate_i].first, mfs->coordinates[coordinate_i].second));
+        block_scaling_coeffs.push_back(block_weights->get_A(mfs->coordinates[coordinate_i].first, 
+                                                            mfs->coordinates[coordinate_i].second));
       else
         block_scaling_coeffs.push_back(1);
 
@@ -1733,8 +1784,18 @@ void DiscreteProblem::assemble_surface_vector_forms(WeakForm::Stage& stage,
     if (isempty[m]) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
     if (vfs->areas[0] == H2D_DG_INNER_EDGE) continue;
-    if (vfs->areas[0] != HERMES_ANY && vfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
-        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->areas[0]))) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
+    // or if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
+      if ((vfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfs->areas[ss]))
+          || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     if (vfs->areas[0] == HERMES_ANY && !nat[m]) continue;
 
@@ -1770,8 +1831,18 @@ void DiscreteProblem::assemble_multicomponent_surface_vector_forms(WeakForm::Sta
     unsigned int m = vfs->coordinates[0];
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
     if (vfs->areas[0] == H2D_DG_INNER_EDGE) continue;
-    if (vfs->areas[0] != HERMES_ANY && vfs->areas[0] != H2D_DG_BOUNDARY_EDGE 
-        && !(marker == boundary_markers_conversion->get_internal_marker(vfs->areas[0]))) continue;
+
+    // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
+    // or if the element marker coincides with one of the form's areas.
+    bool assemble_this_form = false;
+    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
+      if ((vfs->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfs->areas[ss]))
+          || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
+        assemble_this_form = true;
+        break;
+      }
+    }
+    if (assemble_this_form == false) continue; 
 
     if (vfs->areas[0] == HERMES_ANY && !nat[m]) continue;
 
