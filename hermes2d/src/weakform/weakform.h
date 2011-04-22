@@ -204,6 +204,13 @@ public:
                     Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
+  // Multi-component forms.
+  // The principle of functioning of multicomponent forms is as follows.
+  // The form is registered on coordinates in the vector 'coordinates', e.g. {[0,0], [0,1], [2,1]}.
+  // The method 'value' then accepts the parameter 'result', which is a vector with resulting values for
+  // the form on one coordinate. The vectors coordinates and result must have 1-1 relationship, i.e. if the
+  // form is to be registered on three different coordinates, the method value must insert 3 values for these
+  // three coordinates in the same order.
   class HERMES_API MultiComponentMatrixFormVol : public Form
   {
   public:
