@@ -3,6 +3,19 @@ Poisson Equation (03-poisson)
 
 **Git reference:** Tutorial example `03-poisson <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/03-poisson>`_. 
 
+This example shows how to solve a simple PDE that describes stationary 
+heat transfer in an object consisting of two materials (aluminum and 
+copper). The object is heated by constant volumetric heat sources
+(generated, for example, by a DC electric current). The temperature 
+on the boundary is fixed. We will learn how to:
+
+ * Define a weak formulation,
+ * initialize matrix solver,
+ * assemble and solve the matrix system,
+ * output the solution and element orders in VTK format 
+   (to be visualized, e.g., using Paraview),
+ * visualize the solution using Hermes' native OpenGL-based functionality.
+
 Model problem
 ~~~~~~~~~~~~~
 
@@ -11,57 +24,72 @@ Let us solve the Poisson equation
 .. math::
     :label: poisson1
 
-       -\Delta u = C
+       -\mbox{div}(\lambda \nabla u) - C = 0
 
-on the L-shaped domain $\Omega$ from the previous example,
+in the L-shaped domain $\Omega$ from the previous examples,
 equipped with homogeneous (zero) Dirichlet boundary conditions
 
 .. math::
     :label: poisson2
 
-       u = 0\ \ \  \mbox{on}\  \partial \Omega,
+       u = 0\ \ \  \mbox{on}\  \partial \Omega.
 
-where $C$ is a real number. The weak formulation 
+Here $u$ is the unknown temperature distribution, 
+$C$ is a real number (volumetric heat sources). The thermal conductivity $\lambda$
+is piecewise constant, with different values in Copper and Aluminum. Note that in reality,
+$\lambda$ is temperature-dependent and thus the problem is nonlinear -- we will simplify 
+our life now by assuming that the temperature does not change much, and thus 
+$\lambda$ can be considered constant.
+
+
+The weak formulation 
 is derived in the standard way, first by multiplying equation :eq:`poisson1` with a test
 function $v$, then integrating over the domain $\Omega$, and then applying the Green's
 theorem (integration by parts) to the second derivatives.
 Because of the homogeneous Dirichlet condition :eq:`poisson2`,
-the proper space for the solution is $V = H^1_0(\Omega)$. The weak formulation reads:
-Find $u \in V$ such that
+there are no surface integrals. Since the product of the two gradients 
+in the volumetric weak form needs to be integrable for all $u$ and $v$ in $V$, 
+the proper space for the solution is $V = H^1_0(\Omega)$. The weak formulation 
+reads: Find $u \in V$ such that
 
 .. math::
     :label: poissonweak
 
-         \int_\Omega \nabla u \cdot \nabla v \;\mbox{d\bfx} = C \int_\Omega v \;\mbox{d\bfx} \ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - C \int_\Omega v \;\mbox{d\bfx} = 0\ \ \ \mbox{for all}\ v \in V.
 
-Equation :eq:`poissonweak` has the standard form $a(u,v) = l(v)$. 
+Equation :eq:`poissonweak` can be written in the form $a(u,v) - l(v) = 0$ where
+$a$ is a bilinear (matrix) form and $l$ is a linear (vector) form.
 
 Defining weak forms
 ~~~~~~~~~~~~~~~~~~~
 
-The bilinear form $a(u,v)$ and the linear form $l(v)$ are defined using the following
-callbacks::
+For the sake of consistency of linear and nonlinear problems, and other benefits that 
+will be discussed later, **Hermes always assumes that the problem is nonlinear**.
+The weak formulation consists of a Jacobian (matrix) form $J(u, v)$ and a residual
+(vector) form $F(u)$, where $F(u) = 0$ is the equation (or equation system) to be solved 
+and $J = DF/Du$. For linear problems the Jacobian matrix is the same as the 
+stiffness matrix. The weak formulation is a class that is derived from an abstract 
+class WeakForm::
 
-    // Return the value \int \nabla u \cdot \nabla v dx.
-    template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    class CustomWeakFormPoisson : public WeakForm
     {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++) result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-      return result;
-    }
-   
-    // Return the value C \int v dx.
-    template<typename Real, typename Scalar>
-    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++) result += wt[i] * (v->val[i]);
-      return C * result;
-    }
+    public:
+      CustomWeakFormPoisson(std::string mat_al, double lambda_al,
+			    std::string mat_cu, double lambda_cu,
+			    double vol_heat_src) : WeakForm(1)
+      {
+	// Jacobian forms - volumetric.
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
 
-These callbacks are called by Hermes for each element during the assembly and they must return the 
-values of the bilinear and linear forms for the given arguments. 
+	// Residual forms - volumetric.
+	add_vector_form(new DefaultResidualLinearDiffusion(0, mat_al, lambda_al));
+	add_vector_form(new DefaultResidualLinearDiffusion(0, mat_cu, lambda_cu));
+	add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
+      };
+    };
+
+TUTORIAL UPGRADE PAUSED HERE AND WILL CONTINUE SOON.
 
 Arguments of weak forms
 ~~~~~~~~~~~~~~~~~~~~~~~

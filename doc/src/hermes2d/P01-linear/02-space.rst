@@ -51,28 +51,29 @@ Up to some comments, the following is the complete
 `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/02-space/main.cpp>`_ file
 of the example 02-space::
 
-    #include "hermes2d.h"
-    int P_INIT = 3;
+
+    const int P_INIT = 3;
+
     int main(int argc, char* argv[])
     {
       // Load the mesh.
       Mesh mesh;
       H2DReader mloader;
-      mloader.load("domain.mesh", &mesh);
+      mloader.load("domain.mesh", &mesh);            // original L-shape domain
 
-      // Enter boundary markers.
-      // (If no markers are entered, default is a natural BC).
-      BCTypes bc_types;
-
-      // Enter Dirichlet boundary values (default is zero).
-      BCValues bc_values;
+      // Refine all elements (optional).
+      mesh.refine_all_elements();
 
       // Create an H1 space with default shapeset and natural BC.
-      H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+      H1Space space(&mesh, P_INIT);
 
       // View FE basis functions.
       BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
+      bview.fix_scale_width(50);
       bview.show(&space);
+
+      // Practice some keyboard and mouse controls.
+      printf("%s", text);
 
       // Wait for the view to be closed.
       View::wait();
@@ -82,17 +83,21 @@ of the example 02-space::
 Initializing a Space
 ~~~~~~~~~~~~~~~~~~~~
 
-An instance of H1Space is initialized with four arguments: 
+An instance of H1Space is initialized with two or three arguments: 
 
 * Pointer to a mesh. 
-* Pointer to class BCTypes that links boundary markers to boundary condition types.
-  If a marker is not linked to any type, then the default is Neumann. This does not 
-  really matter in this example since no PDE is solved. Usage of the BCTypes class 
-  will be explained in more detail in the tutorial examples 04, 05 and 06. 
-* Pointer to class BCValues that provides values of Dirichlet boundary conditions. 
-  Again this does not matter in this example since no PDE is solved, and details will
-  be given in the tutorial examples 04, 05 and 06.
+* Pointer to the EssentialBCs class (if essential boundary 
+  conditions are used). This will be illustrated in the next 
+  example 03-poisson.
 * Uniform initial polynomial degree of all mesh elements.
+
+For reference, by *essential* boundary conditions we mean conditions 
+that remove degrees of freedom from the boundary, such as Dirichlet 
+conditions for $H^1$ problems of perfect conductor conditions in the
+space H(curl). Boundary conditions that leave the solution 
+values on the boundary unknown are called *natural*. These are 
+for example Neumann or Newton (Robin) conditions in $H^1$ or 
+impedance conditions in H(curl).
 
 Setting element orders individually
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
