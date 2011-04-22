@@ -23,7 +23,7 @@ public:
     add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, -alpha / (heatcap * rho)));
 
     // Residual - volumetric.
-    add_vector_form(new DefaultResidualLinearDiffusion(0, -lambda / (heatcap * rho)));
+    add_vector_form(new DefaultResidualLinearDiffusion(0, HERMES_ANY, -lambda / (heatcap * rho)));
 
     // Residual - surface.
     add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap,

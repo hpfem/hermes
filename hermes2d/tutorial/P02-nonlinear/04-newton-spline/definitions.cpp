@@ -17,8 +17,8 @@ public:
     // Jacobian.
     add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0, HERMES_ANY, cspline));
     // Residual.
-    add_vector_form(new DefaultResidualNonlinearDiffusion(0, cspline));
-    add_vector_form(new DefaultVectorFormConst(0, -heat_src));
+    add_vector_form(new DefaultResidualNonlinearDiffusion(0, HERMES_ANY, cspline));
+    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -heat_src));
   };
 };
 

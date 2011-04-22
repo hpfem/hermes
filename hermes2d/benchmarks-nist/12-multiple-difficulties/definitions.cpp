@@ -13,14 +13,14 @@ using namespace WeakFormsH1::RightHandSides;
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double alpha_p, double x_p, double y_p, double alpha_w, double x_w, 
+  CustomRightHandSide(double alpha_p, double x_p, double y_p, double alpha_w, double x_w,
                       double y_w, double omega_c, double r_0, double epsilon)
     : DefaultNonConstRightHandSide(),
-      alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w), 
+      alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w),
       omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
   double value(double x, double y) const {
-    //For more elegant form please execute file "generate_rhs.py" 
+    //For more elegant form please execute file "generate_rhs.py"
 
     double a_P = (-alpha_p * pow((x - x_p), 2) - alpha_p * pow((y - y_p), 2));
 
@@ -33,9 +33,9 @@ public:
     double g_W = (alpha_w * c_W - (alpha_w * r_0));
 
     return -(4 * exp(a_P) * alpha_p * (alpha_p * (x - x_p) * (x - x_p) + alpha_p * (y - y_p) * (y - y_p) - 1)
-           + ((alpha_w/(c_W * f_W)) - (d_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((alpha_w * d_W * g_W)/((a_W + b_W) * pow(f_W, 2))) 
+           + ((alpha_w/(c_W * f_W)) - (d_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((alpha_w * d_W * g_W)/((a_W + b_W) * pow(f_W, 2)))
            + (alpha_w/(c_W * f_W)) - (e_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((alpha_w * e_W * g_W)/((a_W + b_W) * pow(f_W, 2))))
-	     + (1.0 / epsilon) * (1.0 / epsilon) * exp(-(1 + y) / epsilon));  
+       + (1.0 / epsilon) * (1.0 / epsilon) * exp(-(1 + y) / epsilon));
   }
 
   virtual Ord ord(Ord x, Ord y) const {
@@ -50,9 +50,9 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha_p, double x_p, double y_p, double alpha_w, 
+  CustomExactSolution(Mesh* mesh, double alpha_p, double x_p, double y_p, double alpha_w,
                   double x_w, double y_w, double omega_c, double r_0, double epsilon)
-    : ExactSolutionScalar(mesh), alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), 
+    : ExactSolutionScalar(mesh), alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w),
       x_w(x_w), y_w(y_w), omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
   double get_angle(double y, double x) const {
@@ -88,14 +88,14 @@ public:
     double f_W = (pow(alpha_w * c_W - (alpha_w * r_0), 2) + 1.0);
 
     dx = -exp(a_P) * (2 * alpha_p * (x - x_p))
-         + (((ALPHA_C* x* sin(ALPHA_C * get_angle(y,x)) *b_C)/a_C) 
+         + (((ALPHA_C* x* sin(ALPHA_C * get_angle(y,x)) *b_C)/a_C)
          - ((ALPHA_C *y *cos(ALPHA_C * get_angle(y, x)) * c_C)/(pow(x, 2.0) *d_C)))
          + (d_W / (c_W * f_W));
     dy = -exp(a_P) * (2 * alpha_p * (y - y_p))
-         + (((ALPHA_C* cos(ALPHA_C* get_angle(y, x)) *c_C)/(x * d_C)) 
+         + (((ALPHA_C* cos(ALPHA_C* get_angle(y, x)) *c_C)/(x * d_C))
          + ((ALPHA_C* y* sin(ALPHA_C* get_angle(y, x)) *b_C)/a_C))
          + (e_W / (c_W * f_W))
-         + (-1) * (1.0 / epsilon) * exp(-(1 + y) / epsilon); 
+         + (-1) * (1.0 / epsilon) * exp(-(1 + y) / epsilon);
   };
 
   virtual Ord ord(Ord x, Ord y) const {
@@ -113,7 +113,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
   };
 };
 

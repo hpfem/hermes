@@ -14,10 +14,10 @@ using namespace WeakFormsH1::RightHandSides;
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
+  CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero)
     : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
-  virtual double value(double x, double y) const {  
+  virtual double value(double x, double y) const {
     double a = pow(x - x_loc, 2);
     double b = pow(y - y_loc, 2);
     double c = sqrt(a + b);
@@ -26,14 +26,14 @@ public:
     double f = (pow(alpha*c - (alpha * r_zero), 2) + 1.0);
     double g = (alpha * c - (alpha * r_zero));
 
-    return -(((alpha/(c * f)) - (d/(2 * pow(a + b, 1.5) * f)) 
-           - ((alpha * d * g)/((a + b) * pow(f, 2))) + 
-	      (alpha/(c * f)) - (e/(2 * pow(a + b, 1.5) * f)) 
+    return -(((alpha/(c * f)) - (d/(2 * pow(a + b, 1.5) * f))
+           - ((alpha * d * g)/((a + b) * pow(f, 2))) +
+        (alpha/(c * f)) - (e/(2 * pow(a + b, 1.5) * f))
            - ((alpha * e * g)/((a + b) * pow(f, 2)))));
   }
 
   virtual Ord ord (Ord x, Ord y) const {
-    return Ord(8);  
+    return Ord(8);
   }
   double alpha, x_loc, y_loc, r_zero;
 };
@@ -43,9 +43,9 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double 
-                      y_loc, double r_zero) 
-             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), 
+  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double
+                      y_loc, double r_zero)
+             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc),
                                    y_loc(y_loc), r_zero(r_zero) { }
 
   virtual scalar value(double x, double y) const {
@@ -65,7 +65,7 @@ public:
   };
 
   virtual Ord ord (Ord x, Ord y) const {
-    return Ord(8);  
+    return Ord(8);
   }
 
   double alpha, x_loc, y_loc, r_zero;
@@ -79,7 +79,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
   };
 };
 
@@ -92,21 +92,21 @@ public:
   {
     this->form = problem_wf->mfvol[0];
   }
-  
+
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
                         Func<scalar> *u, Func<scalar> *v, Geom<double> *e,
-                        ExtData<scalar> *ext) const 
+                        ExtData<scalar> *ext) const
   {
     return this->form->value(n, wt, u_ext, u, v, e, ext);
   }
 
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                   Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
-                  ExtData<Ord> *ext) const 
+                  ExtData<Ord> *ext) const
   {
     return this->form->ord(n, wt, u_ext, u, v, e, ext);
   }
-    
+
 private:
   WeakForm::MatrixFormVol* form;
 };
@@ -117,29 +117,29 @@ class ResidualErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
 {
 public:
   ResidualErrorForm(CustomRightHandSide* rhs) : ErrorEstimatorForm(0), rhs(rhs) {};
-  
+
   scalar residual_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Geom<double> *e, ExtData<scalar> *ext) const
   {
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     scalar result = 0.;
-    
+
     for (int i = 0; i < n; i++)
       result += wt[i] * sqr(rhs->value(e->x[i], e->y[i]) - u->laplace[i] );
-    
+
     return result * sqr(e->diam);
 #else
     error("Define H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h if you want to use second derivatives of shape functions in weak forms.");
 #endif
   }
-  
+
   Ord residual_estimator(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Geom<Ord> *e, ExtData<Ord> *ext) const
   {
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
     Ord result = 0.;
-    
+
     for (int i = 0; i < n; i++)
       result += wt[i] * sqr(rhs->ord(e->x[i], e->y[i]) - u->laplace[i] );
-    
+
     return result * sqr(e->diam);
 #else
     error("Define H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h if you want to use second derivatives of shape functions in weak forms.");
@@ -148,21 +148,21 @@ public:
 
   virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
               Func<scalar> *u, Geom<double> *e,
-              ExtData<scalar> *ext) const 
+              ExtData<scalar> *ext) const
   {
     return residual_estimator(n, wt, u_ext, u, e, ext);
   }
-  
+
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
-                    ExtData<Ord> *ext) const 
+                    ExtData<Ord> *ext) const
   {
     return residual_estimator(n, wt, u_ext, u, e, ext);
   }
-  
-private:  
+
+private:
   CustomRightHandSide* rhs;
-  
+
 };
 
 // Linear form for the interface error estimator.
@@ -170,7 +170,7 @@ class InterfaceErrorForm : public KellyTypeAdapt::ErrorEstimatorForm
 {
 public:
   InterfaceErrorForm() : ErrorEstimatorForm(0, H2D_DG_INNER_EDGE) {};
-  
+
   template<typename Real, typename Scalar>
   Scalar interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Geom<Real> *e, ExtData<Scalar> *ext) const
   {
@@ -187,11 +187,11 @@ public:
   {
     return interface_estimator<double, scalar>(n, wt, u_ext, u, e, ext);
   }
-  
+
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
                     Func<Ord> *u, Geom<Ord> *e,
                     ExtData<Ord> *ext) const
   {
     return interface_estimator<Ord, Ord>(n, wt, u_ext, u, e, ext);
-  }  
+  }
 };

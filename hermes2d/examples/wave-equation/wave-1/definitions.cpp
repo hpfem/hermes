@@ -35,7 +35,7 @@ public:
   CustomWeakFormWave(double tau, double c_squared, Solution* u_prev_sln,
                      Solution* v_prev_sln) : WeakForm(2) {
     // Volumetric matrix forms.
-    add_matrix_form(new DefaultLinearMass(0, 1, 1.0, HERMES_NONSYM));
+    add_matrix_form(new DefaultLinearMass(0, 1, HERMES_ANY, 1.0, HERMES_NONSYM));
     add_matrix_form(new DefaultLinearDiffusion(1, 0, HERMES_ANY, -c_squared, HERMES_NONSYM));
 
     // Volumetric surface forms.
