@@ -11,7 +11,7 @@ handles numerical quadrature since this is both very important
 for higher-order finite element methods and very different 
 from standard low-order FEM codes. At the end of this 
 chapter you will learn how to solve systems of equations and 
-time-dependent problems. 
+axisymmetric 3D problems. 
 
 .. toctree::
    :maxdepth: 2
@@ -24,6 +24,7 @@ time-dependent problems.
    P01-linear/07-general
    P01-linear/08-system
    P01-linear/filters
+   P01-linear/09-axisym
 
 
 

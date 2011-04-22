@@ -5,13 +5,13 @@ Finite Element Mesh (01-mesh)
 
 Every finite element computation starts with partitioning the domain
 into a finite element mesh. Hermes uses (possibly curvilinear) triangles and 
-quadrilaterals that can be combined in one mesh. This is very useful since 
+quadrilaterals that can be combined. This is very useful since 
 triangular elements are best for approximating isotropic solutions (solutions 
 that have similar behavior in all spatial directions) while quads are much 
 better at approximating anisotropies such as boundary layers.
  
 In contrast to traditional non-adaptive low-order finite element codes 
-that require fine initial meshes, in Hermes it usually suffices to create 
+that require fine initial meshes, in Hermes it often suffices to create 
 an extremely coarse initial mesh by hand and use a variety of built-in 
 functions for a-priori mesh refinement. In most cases, automatic adaptivity 
 then takes care of the rest successfully. Of course, Hermes can also accept 
@@ -20,35 +20,22 @@ fine meshes created automatically by external mesh generation packages.
 Hermes2D mesh file format
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The domain in this example is defined via four macroelements -- two
-quadrilaterals and two curvilinear triangles, see the file 
-`domain.mesh <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/01-mesh/domain.mesh>`_. 
-
+This tutorial example assumes an L-shaped domain consisting of two materials (Copper and Aluminum),
+that is initially split into four elements - two quadrilaterals and two curvilinear triangles:
 
 .. image:: 01-mesh/simplemesh.png
    :align: center
-   :width: 400
-   :height: 400
+   :width: 512
    :alt: Sample finite element mesh.
 
-The generic Hermes mesh file consists of variable assignments. Each variable can hold a real number, 
-list of real numbers, or list of lists. The following are all valid definitions in 
-the Hermes mesh file format::
+The mesh file `domain.mesh <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/01-mesh/domain.mesh>`_ 
+looks as follows::
 
-    # comments start with a hash
-    var = 5.0 + cos(pi)                      # number
-    list = [ 1, 2, 3, 4, var ]               # list
-    pairs = [ [1, 2], [1, var], [0, list] ]  # list of lists
-
-Every mesh file must contain at least the variables ``vertices``, ``elements``
-and ``boundaries``. The variable ``vertices`` defines the coordinates
-of all mesh vertices (in any order). For the above geometry it looks like this::
-
-    a = 1.0  # size of the mesh
+    a = 1.0
     b = sqrt(2)/2
 
     vertices = [
-      [ 0, -a ],    # vertex 0
+      [ 0,  -a],    # vertex 0
       [ a, -a ],    # vertex 1
       [ -a, 0 ],    # vertex 2
       [ 0, 0 ],     # vertex 3
@@ -58,28 +45,12 @@ of all mesh vertices (in any order). For the above geometry it looks like this::
       [ a*b, a*b ]  # vertex 7
     ]
 
-The variable ``elements`` defines all elements in the mesh via zero-based indices of their vertices in counter-clockwise order, plus an extra string denoting the element's material marker. Element markers make it possible to use different equation parameters in subdomains. In Hermes one can assign different weak forms to those subdomains, or access the element and boundary markers from inside of weak forms::
-
     elements = [
-      [ 0, 1, 4, 3, "Iron" ]    # quad 0
-      [ 3, 4, 7, "Iron" ],      # tri 1
-      [ 3, 7, 6, "Copper" ],    # tri 2
-      [ 2, 3, 6, 5, "Copper" ]  # quad 3
+      [ 0, 1, 4, 3, "Copper"  ],   # quad 0
+      [ 3, 4, 7,    "Copper"  ],   # tri 1
+      [ 3, 7, 6,    "Aluminum" ],  # tri 2
+      [ 2, 3, 6, 5, "Aluminum" ]   # quad 3
     ]
-
-If nonnegative integer markers are used, they do not have to be in apostrophes::
-
-    elements = [
-      [ 0, 1, 4, 3, 0 ],  # quad 0
-      [ 3, 4, 7, 0 ],     # tri 1
-      [ 3, 7, 6, 1 ],     # tri 2
-      [ 2, 3, 6, 5, 1 ]   # quad 3
-    ]
-
-
-The last mandatory variable, ``boundaries``, defines boundary markers for all
-boundary edges. An edge is identified by three numbers: two vertex indices and 
-its marker. For the above geometry, we have::
 
     boundaries = [
       [ 0, 1, "Bottom" ],
@@ -92,52 +63,95 @@ its marker. For the above geometry, we have::
       [ 5, 2, "Left" ]
     ]
 
-If we wanted to use positive integers, we could do::
-
-    boundaries = [
-      [ 0, 1, 1 ],
-      [ 1, 4, 2 ],
-      [ 3, 0, 4 ],
-      [ 4, 7, 2 ],
-      [ 7, 6, 2 ],
-      [ 2, 3, 4 ],
-      [ 6, 5, 2 ],
-      [ 5, 2, 3 ]
+    curves = [
+      [ 4, 7, 45 ],  # circular arc with central angle of 45 degrees
+      [ 7, 6, 45 ]   # circular arc with central angle of 45 degrees
     ]
 
-Note that boundary markers cannot be zeros or negative integers. Negative
+In the following we will use this example to explain the structure of
+Hermes mesh files.
+
+Variables
+~~~~~~~~~
+
+Hermes mesh file consists of variables. Each variable can hold a real 
+number, list of real numbers, or list of lists. The following are all 
+valid definitions::
+
+    # comments (starting with a hash)
+    var = 5.0 + cos(pi)                      # number
+    list = [ 1, 2, 3, 4, var ]               # list
+    pairs = [ [1, 2], [1, var], [0, list] ]  # list of lists
+
+Vertices 
+~~~~~~~~
+
+The variable ``vertices`` defines the coordinates of all mesh vertices 
+(in any order). 
+
+Elements
+~~~~~~~~
+
+The variable ``elements`` defines all elements in the mesh via zero-based indices 
+of their vertices in counter-clockwise order, plus an extra string (or nonnegative integer) 
+denoting the element's material marker. Material markers make it possible to use
+different weak forms in subdomains. This is useful when the domain consists of 
+multiple materials, but it is also possible to assign completely different physical 
+processes to subdomains in this way. The user can access the element and boundary 
+markers from inside of weak forms. Integer markers do not have to be in apostrophes.
+
+Boundaries
+~~~~~~~~~~
+
+The last mandatory variable, ``boundaries``, defines boundary markers for all
+boundary edges. An edge is identified by a triplet: two vertex indices and 
+a marker (either string or a positive integer).
+
+Note: boundary markers cannot be zeros or negative integers. Negative
 integers can be used to identify internal edges for the purpose of 
 making them curved. However, it is recommended not to overuse curved edges
 since this increases the cost of numerical integration, and thus curved
 elements add to computing time.
 
 For historical reasons, some (mostly older) Hermes examples still use 
-integer markers, but the trend is to use strings that are more verbose
-and user-friendly. The strings are converted to integers by Hermes 
+integer markers, but the trend is to use strings that make the mesh files 
+easier to read. String markers are converted to integers by Hermes 
 internally. 
 
-Finally, the mesh file can also include the variable ``curves`` that lists all
-curved edges. Each curved edge is described by one Non-Uniform Rational B-Spline (NURBS)
-defined via its degree, control points and knot vector. 
+Curves (Circular arcs and general NURBS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-NURBS curves
-~~~~~~~~~~~~
+The mesh file can also include the variable ``curves`` that lists all
+curved edges. Each curved edge is described by one Non-Uniform Rational 
+B-Spline (NURBS) defined via its degree, control points and knot vector. 
+For an explanation of NURBS see, e.g., the `Wikipedia NURBS page 
+<http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline>`_
 
-The most common type of curved boundary is a circular arc.
+The most common type of curved boundary is a circular arc which is defined
+via two vertex indices and central angle. For the treatment of full-featured 
+NURBS boundaries see example `P10-miscellaneous/35-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/P10-miscellaneous/35-nurbs.html>`_. 
 
-Circular arcs
-~~~~~~~~~~~~~
+Initial refinements
+~~~~~~~~~~~~~~~~~~~
 
-Circular arcs are very easy to define. For the above example, we have::
+Finally, the mesh file can also contain the variable ``refinements`` where 
+the user can specify initial mesh refinements. The following code snippet
+is not relevant for this example but let us show it for illustration 
+purposes anyway::
 
-    curves =
-    [
-      [ 4, 7, 45 ],  # circular arc with central angle of 45 degrees
-      [ 7, 6, 45 ]   # circular arc with central angle of 45 degrees
+    refinements = [
+      [ 4,  0 ],
+      [ 5,  0 ],
+      [ 7,  1 ],
+      [ 10, 1 ],
+      [ 15, 2 ]
     ]
 
-For the treatment of full-featured NURBS
-boundaries see example `P10-miscellaneous/35-nurbs <http://hpfem.org/hermes/doc/src/hermes2d/P10-miscellaneous/35-nurbs.html>`_. 
+Based on this list, Hermes would refine elements 4 and 5 uniformly, elements 7 and 10 
+in the horizontal direction (with respect to the reference coordinate system), and element 
+15 vertically. Multiple nested refinements can be done to an element, but one has to 
+be careful to have the element IDs of the newly generated elements right. The MeshView
+class is a great help for this.
 
 Loading meshes in Hermes2D format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
