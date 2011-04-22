@@ -18,21 +18,21 @@ This document is organized as follows:
   will walk you in small steps through the solution
   of linear, nonlinear, and time-dependent problems from various engineering and scientific areas, 
   using higher-order elements and adaptivity algorithms, and solving multiphysics coupled problems. 
-* Section 5 shows how Hermes performs on numerous benchmarks with known exact solution. Many 
+* Section 5 shows how Hermes performs on numerous benchmarks with known exact solutions. Many 
   of them come from the National Institute for Standards and Technology (NIST). Benchmarks 
-  like this are an excellent tool to assess the performance of a finite element code.
+  like this are great for assessing the performance of a finite element code.
 * Section 6 presents examples from various application areas such as acoustics, fluid and solid
   mechanics, electromagnetics, neutronics, quantum chemistry, ground-water flow, and others. 
 * Section 7 describes the usage of Hermes3D. Since it is very similar to Hermes2D, 
-  we mostly concentrate on their differences.
-* Section 8 shows how to use Hermes1D. Again, the usage is very similar to Hermes2D
-  so we focus on their differences.
+  we mostly focus on their differences.
+* Section 8 shows how to use Hermes1D. Again, we mainly point out where it differs
+  from Hermes2D.
 
 This document is under continuous development. If you find bugs, typos, dead links 
 and such, please report them to one of the mailing lists for 
 `Hermes1D <http://groups.google.com/group/hermes1d/>`_,
 `Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
-`Hermes3D <http://groups.google.com/group/hermes3d/>`_. 
+`Hermes3D <http://groups.google.com/group/hermes3d/>`_ -- thanks!
 
 1. Introduction
 ---------------
