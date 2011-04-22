@@ -12,10 +12,10 @@ using namespace WeakFormsH1::VolumetricVectorForms;
 class CustomWeakFormHeatTransferNewton : public WeakForm
 {
 public:
-  CustomWeakFormHeatTransferNewton(CubicSpline* cspline, double heat_src) 
+  CustomWeakFormHeatTransferNewton(CubicSpline* cspline, double heat_src)
         : WeakForm(1) {
     // Jacobian.
-    add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0, cspline));
+    add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0));
     // Residual.
     add_vector_form(new DefaultResidualNonlinearDiffusion(0, cspline));
     add_vector_form(new DefaultVectorFormConst(0, -heat_src));
@@ -47,7 +47,7 @@ public:
 
 class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  CustomEssentialBCNonConst(std::string marker) 
+  CustomEssentialBCNonConst(std::string marker)
            : EssentialBoundaryCondition(Hermes::vector<std::string>())
   {
     markers.push_back(marker);
@@ -55,8 +55,8 @@ public:
 
   ~CustomEssentialBCNonConst() {};
 
-  inline EssentialBCValueType get_value_type() const { 
-    return EssentialBoundaryCondition::BC_FUNCTION; 
+  inline EssentialBCValueType get_value_type() const {
+    return EssentialBoundaryCondition::BC_FUNCTION;
   }
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
