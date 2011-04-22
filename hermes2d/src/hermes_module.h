@@ -156,17 +156,18 @@ public:
     this->slns.clear();
   };
 
-  virtual void set_mesh(Mesh *mesh);
+  virtual void add_mesh(Mesh *mesh);
   virtual Mesh *get_mesh(int index);
 
-  virtual void set_boundary(BoundaryData *boundary);
-  virtual void set_material(MaterialData *material);
+  virtual void add_boundary(BoundaryData *boundary);
+  virtual void add_material(MaterialData *material);
 
-  virtual void set_spaces() = 0;
-  virtual void set_boundary_conditions() = 0;
+  virtual void add_weakform(WeakForm *wf);
   virtual void set_weakforms() = 0;
+  virtual void add_space(Space *space);
+  virtual void set_spaces() = 0;
 
-  virtual void set_proj_norms() {};
+  virtual void add_proj_norm(ProjNormType *set_proj_norm) {};
 
   virtual void solve();
 
@@ -187,8 +188,7 @@ protected:
   EssentialBCs bcs;
   WeakForm *wf;
   Hermes::vector<Space *> spaces;
-  Hermes::vector<ProjNormType> proj_norms ;
-  DiscreteProblem *dp;
+  Hermes::vector<ProjNormType> proj_norms;
   Hermes::vector<Solution *> slns;
 };
 #endif

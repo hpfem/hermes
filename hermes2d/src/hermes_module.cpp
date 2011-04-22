@@ -15,7 +15,7 @@
 
 #include "hermes_module.h"
 
-void HermesModule::set_mesh(Mesh *mesh) {
+void HermesModule::add_mesh(Mesh *mesh) {
   this->meshes.push_back(mesh);
   printf("Nodes: %d\n", this->meshes.at(0)->get_num_nodes());
 }
@@ -24,15 +24,23 @@ Mesh *HermesModule::get_mesh(int index) {
   return this->meshes.at(index);
 }
 
-void HermesModule::set_boundary(BoundaryData *boundary) {
+void HermesModule::add_boundary(BoundaryData *boundary) {
   if(boundary->bc_type == HERMES_ESSENTIAL)
     this->essential_boundaries.push_back(boundary);
   else if (boundary->bc_type == HERMES_NATURAL)
     this->natural_boundaries.push_back(boundary);
 }
 
-void HermesModule::set_material(MaterialData *material) {
+void HermesModule::add_material(MaterialData *material) {
   this->materials.push_back(material);
+}
+
+void HermesModule::add_weakform(WeakForm *wf) {
+  this->wf = dynamic_cast<WeakForm *>(wf);
+}
+
+void HermesModule::add_space(Space *space) {
+  this->spaces.push_back(dynamic_cast<Space *>(space));
 }
 
 void HermesModule::solve() {
@@ -56,7 +64,6 @@ void HermesModule::solve() {
   }
   */
 
-  this->set_boundary_conditions();
   this->set_weakforms();
   this->set_spaces();
 
@@ -64,33 +71,28 @@ void HermesModule::solve() {
   Vector *rhs = create_vector(this->properties()->solver()->mat_solver);
   Solver *solver = create_linear_solver(this->properties()->solver()->mat_solver, matrix, rhs);
 
-  for (int i = 0; i <= this->properties()->adaptivity()->max_steps; i++)
+  if (this->properties()->adaptivity()->cand_list == H2D_NONE)
   {
-    if (this->properties()->adaptivity()->cand_list == H2D_NONE)
-    {
-      /*
-      DiscreteProblem dp(this->wf, this->spaces);
+    DiscreteProblem dp(this->wf, this->spaces);
 
-      int ndof = Space::get_num_dofs(this->spaces);
-      if (ndof != 0)
-        info("ndof = %d", ndof);
-      else
-      {
-        error("ndof = %d", ndof);
-        break;
-      }
-
-      scalar* coeff_vec = new scalar[ndof];
-      memset(coeff_vec, 0, ndof*sizeof(scalar));
-
-      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs))
-        error("Newton's iteration failed.");
-
-      Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
-      */
-    }
-    /*
+    int ndof = Space::get_num_dofs(this->spaces);
+    if (ndof != 0)
+      info("ndof = %d", ndof);
     else
+      error("ndof = %d", ndof);
+
+    scalar* coeff_vec = new scalar[ndof];
+    memset(coeff_vec, 0, ndof*sizeof(scalar));
+
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs))
+      error("Newton's iteration failed.");
+
+    Solution::vector_to_solutions(solver->get_solution(), this->spaces, this->slns);
+  }
+  /*
+  else
+  {
+    for (int i = 0; i <= this->properties()->adaptivity()->max_steps; i++)
     {
       info("---- Adaptivity step %d:", i);
 
@@ -149,8 +151,8 @@ void HermesModule::solve() {
 
       ref_slns.clear();
     }
-    */
   }
+  */
   delete solver;
   delete matrix;
   delete rhs;
