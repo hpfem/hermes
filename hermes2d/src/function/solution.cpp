@@ -1040,8 +1040,8 @@ void Solution<Scalar>::precalculate(int order, int mask)
   struct Function<Scalar>::Node* node = NULL;
   Quad2D* quad = this->quads[this->cur_quad];
   quad->set_mode(this->mode);
-  H2D_CHECK_ORDER(quad, this->order);
-  int np = quad->get_num_points(this->order);
+  this->H2D_CHECK_ORDER(quad, order);
+  int np = quad->get_num_points(order);
 
   if (sln_type == HERMES_SLN)
   {
@@ -1071,7 +1071,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
     Scalar* x = new Scalar[np];
     Scalar* y = new Scalar[np];
     Scalar* tx = new Scalar[np];
-    double3* pt = quad->get_points(this->order);
+    double3* pt = quad->get_points(order);
     for (i = 0; i < np; i++)
     {
       x[i] = pt[i][0] * this->ctm->m[0] + this->ctm->t[0];
@@ -1116,7 +1116,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
 
     // transform gradient or vector solution, if required
     if (transform)
-      transform_values(this->order, node, newmask, oldmask, np);
+      transform_values(order, node, newmask, oldmask, np);
   }
   else if (sln_type == HERMES_EXACT)
   {
@@ -1125,8 +1125,8 @@ void Solution<Scalar>::precalculate(int order, int mask)
     node = new_node(mask = H2D_FN_DEFAULT, np);
 
     this->update_refmap();
-    double* x = this->refmap->get_phys_x(this->order);
-    double* y = this->refmap->get_phys_y(this->order);
+    double* x = this->refmap->get_phys_x(order);
+    double* y = this->refmap->get_phys_y(order);
 
     // evaluate the exact solution
     if (this->num_components == 1)
@@ -1137,7 +1137,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
         double2x2 *mat, *m;
         int mstep = 0;
         mat = this->refmap->get_const_inv_ref_map();
-        if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(this->order); mstep = 1; }
+        if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(order); mstep = 1; }
 
         for (i = 0, m = mat; i < np; i++, m += mstep)
         {
@@ -1196,11 +1196,11 @@ void Solution<Scalar>::precalculate(int order, int mask)
           "the solution on its right-hand side.");
   }
 
-  if(this->nodes->present(this->order)) {
-    assert(this->nodes->get(this->order) == this->cur_node);
-    ::free(this->nodes->get(this->order));
+  if(this->nodes->present(order)) {
+    assert(this->nodes->get(order) == this->cur_node);
+    ::free(this->nodes->get(order));
   }
-  this->nodes->add(node, this->order);
+  this->nodes->add(node, order);
   this->cur_node = node;
 }
 
