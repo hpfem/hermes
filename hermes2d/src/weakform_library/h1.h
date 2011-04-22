@@ -76,19 +76,26 @@ namespace WeakFormsH1 {
     class DefaultJacobianNonlinearDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area = HERMES_ANY, CubicSpline* spline_coeff = NULL,
+      DefaultJacobianNonlinearDiffusion(int i, int j, std::string area = HERMES_ANY, CubicSpline* c_spline = NULL,
                                         scalar const_coeff = 1.0, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormVol(i, j, area, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) {
-        if (spline_coeff == NULL)
-          spline_coeff = new CubicSpline(Hermes::vector<double>(-1.0e10, 1.0e10), Hermes::vector<double>(0.0, 0.0), 0.0, 0.0);
-
-        //#include "spline.h"
-        //spline_coeff->plot("spline.dat", 30);
+        : WeakForm::MatrixFormVol(i, j, area, sym), spline_coeff(c_spline), const_coeff(const_coeff), gt(gt) {
+        if (c_spline == NULL) {
+          double bc_left = 0.0;
+          double bc_right = 0.0;
+          bool first_der_left = true;
+          bool first_der_right = true;
+          bool extrapolate_der_left = false;
+          bool extrapolate_der_right = false;
+          Hermes::vector<double> points(-1.0e10, 1.0e10);
+          Hermes::vector<double> values(1.0, 1.0);
+          this->spline_coeff = new CubicSpline(points, values, bc_left, bc_right, first_der_left, 
+                                               first_der_right, extrapolate_der_left, extrapolate_der_right);
+        }
       };
 
-      DefaultJacobianNonlinearDiffusion(int i, int j, Hermes::vector<std::string> areas, CubicSpline* spline_coeff, scalar const_coeff = 1.0,
+      DefaultJacobianNonlinearDiffusion(int i, int j, Hermes::vector<std::string> areas, CubicSpline* c_spline, scalar const_coeff = 1.0,
                                         SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormVol(i, j, areas, sym), spline_coeff(spline_coeff), const_coeff(const_coeff), gt(gt) { }
+        : WeakForm::MatrixFormVol(i, j, areas, sym), spline_coeff(c_spline), const_coeff(const_coeff), gt(gt) { }
 
       ~DefaultJacobianNonlinearDiffusion() {
         delete spline_coeff;
@@ -114,6 +121,7 @@ namespace WeakFormsH1 {
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
               Geom<Ord> *e, ExtData<Ord> *ext) const {
+
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       }
 

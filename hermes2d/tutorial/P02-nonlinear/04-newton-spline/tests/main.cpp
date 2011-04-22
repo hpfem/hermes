@@ -49,8 +49,6 @@ int main(int argc, char* argv[])
   bool extrapolate_der_right = true;
   CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
                  extrapolate_der_left, extrapolate_der_right);
-  bool success0 = cs.calculate_coeffs(); 
-  if (!success0) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
   double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.

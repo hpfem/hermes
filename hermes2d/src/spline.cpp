@@ -22,7 +22,11 @@ CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
                          bool extrapolate_der_left, bool extrapolate_der_right) 
   : points(points), values(values), bc_left(bc_left), bc_right(bc_right), 
     first_der_left(first_der_left), first_der_right(first_der_right),
-    extrapolate_der_left(extrapolate_der_left), extrapolate_der_right(extrapolate_der_right) { }
+    extrapolate_der_left(extrapolate_der_left), extrapolate_der_right(extrapolate_der_right) 
+    { 
+      bool success = this->calculate_coeffs(); 
+      if (!success) error("There was a problem constructing a cubic spline.");
+    }
 
 double CubicSpline::get_value(double x_in) 
 {  

@@ -56,16 +56,14 @@ int main(int argc, char* argv[])
   */
 
   // Create the cubic spline (and plot it for visual control). 
-  double second_der_left = 0.0;
-  double second_der_right = 0.0;
+  double bc_left = 0.0;
+  double bc_right = 0.0;
   bool first_der_left = false;
   bool first_der_right = false;
   bool extrapolate_der_left = false;
   bool extrapolate_der_right = false;
-  CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, 0.0, 0.0, first_der_left, first_der_right,
+  CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, bc_left, bc_right, first_der_left, first_der_right,
                           extrapolate_der_left, extrapolate_der_right);
-  bool success = mu_inv_iron.calculate_coeffs(); 
-  if (!success) error("There was a problem constructing a cubic spline.");
   info("Saving cubic spline into a Pylab file spline.dat.");
   double interval_extension = 1.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
