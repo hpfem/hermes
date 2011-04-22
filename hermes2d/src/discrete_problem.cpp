@@ -884,7 +884,7 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
     if(mfv->sym)
       for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
         if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
-          error("Symmetrical multicomponent forms need to take both basis function from one space.");
+          error("Symmetric multicomponent forms must take both the basis function and the test function from the same space.");
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
       spss[m]->set_active_shape(al[m]->idx[i]);

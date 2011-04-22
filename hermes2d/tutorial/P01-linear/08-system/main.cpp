@@ -9,11 +9,11 @@
 //
 // PDE: Lame equations of linear elasticity.
 //
-// BC: du_1/dn = f0 on Gamma_3 (top edge),
-//     du_2/dn = f1 on Gamma_3 (top edge),
-//     u_1 = 0 and u_2 = 0 on Gamma_1 (bottom edge),
-//     du_1/dn = 0 on Gamma_2, Gamma_4, Gamma_5 (rest of boundary),
-//     du_2/dn = 0 on Gamma_2, Gamma_4, Gamma_5 (rest of boundary).
+// BC: du_1/dn = f0 on Gamma_top (top edge),
+//     du_2/dn = f1 on Gamma_top (top edge),
+//     u_1 = 0 and u_2 = 0 on Gamma_bottom (bottom edge),
+//     du_1/dn = 0 on Gamma_rest (rest of boundary),
+//     du_2/dn = 0 on Gamma_rest (rest of boundary).
 //
 // The following parameters can be changed:
 
@@ -24,16 +24,13 @@ const int NEWTON_MAX_ITER = 100;                           // Maximum allowed nu
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                            // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_1 = "1", BDY_3 = "3";
-
 // Problem parameters.
 const double E  = 200e9;                                   // Young modulus (steel).
 const double nu = 0.3;                                     // Poisson ratio.
 const double rho = 8000.0;                                 // Density.
 const double g1 = -9.81;                                   // Gravitational acceleration.
 const double f0  = 0;                                      // Surface force in x-direction.
-const double f1  = 8e4;                                    // Surface force in y-direction.
+const double f1  = 0; //8e4;                                    // Surface force in y-direction.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -52,7 +49,7 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst zero_disp(BDY_1, 0.0);
+  DefaultEssentialBCConst zero_disp("Bottom", 0.0);
   EssentialBCs bcs(&zero_disp);
 
   // Create x- and y- displacement space using the default H1 shapeset.
@@ -62,7 +59,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormLinearElasticity wf(E, nu, rho*g1, BDY_3, f0, f1);
+  CustomWeakFormLinearElasticity wf(E, nu, rho*g1, "Top", f0, f1);
 
   // Initialize the FE problem.
   DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u1_space, &u2_space));
@@ -85,7 +82,8 @@ int main(int argc, char* argv[])
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
-  Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&u1_space, &u2_space), Hermes::vector<Solution *>(&u1_sln, &u2_sln));
+  Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&u1_space, &u2_space), 
+                                Hermes::vector<Solution *>(&u1_sln, &u2_sln));
   
   // Visualize the solution.
   ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));

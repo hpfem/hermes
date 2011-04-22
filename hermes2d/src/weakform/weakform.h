@@ -201,7 +201,7 @@ public:
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const;
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
-                      Geom<Ord> *e, ExtData<Ord> *ext) const;
+                    Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
   class HERMES_API MultiComponentMatrixFormVol : public Form
@@ -226,7 +226,7 @@ public:
     int sym;
 
     virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                         Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
+                       Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const = 0;
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                     Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
   };

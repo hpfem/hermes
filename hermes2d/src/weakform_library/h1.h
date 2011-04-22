@@ -809,16 +809,16 @@ namespace WeakFormsH1 {
         GeomType gt;
     };
 
-    class MultiComponentDefaultVectorFormSurf : public WeakForm::MultiComponentVectorFormSurf
+    class DefaultMultiComponentVectorFormSurf : public WeakForm::MultiComponentVectorFormSurf
     {
     public:
-      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates,
+      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
                                           Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR)
       : WeakForm::MultiComponentVectorFormSurf(coordinates), coeffs(coeffs), gt(gt) { }
-      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area,
+      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area,
                                           Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR)
       : WeakForm::MultiComponentVectorFormSurf(coordinates, area), coeffs(coeffs), gt(gt) { }
-      MultiComponentDefaultVectorFormSurf(Hermes::vector<unsigned int> coordinates, Hermes::vector<std::string> areas,
+      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, Hermes::vector<std::string> areas,
                                           Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR)
       : WeakForm::MultiComponentVectorFormSurf(coordinates, areas), coeffs(coeffs), gt(gt) { }
 
@@ -851,7 +851,7 @@ namespace WeakFormsH1 {
       /*
       // This is to make the form usable in rk_time_step().
       virtual WeakForm::VectorFormSurf* clone() {
-        return new MultiComponentDefaultVectorFormSurf(*this);
+        return new DefaultMultiComponentVectorFormSurf(*this);
       }
       */
 
