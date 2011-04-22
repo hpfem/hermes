@@ -10,15 +10,15 @@ using namespace WeakFormsH1::SurfaceMatrixForms;
 class CustomWeakFormHeatRK1 : public WeakForm
 {
 public:
-  CustomWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
-                        double time_step, double* current_time_ptr, double temp_init, double t_final, 
+  CustomWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
+                        double time_step, double* current_time_ptr, double temp_init, double t_final,
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    // Contribution of the time derivative term. 
-    add_matrix_form(new DefaultLinearMass(0, 0, 1.0 / time_step));
+    // Contribution of the time derivative term.
+    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, 1.0 / time_step));
 
     // Contribution of the diffusion term.
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, lambda / (rho * heatcap)));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, lambda / (rho * heatcap)));
 
     // Right-hand side volumetric vector form.
     CustomVectorFormVol* vec_form_vol = new CustomVectorFormVol(0, time_step);
@@ -27,7 +27,7 @@ public:
 
     add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha / (rho * heatcap)));
 
-    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_air, alpha, rho, heatcap, 
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_air, alpha, rho, heatcap,
                          current_time_ptr, temp_init, t_final));
   };
 
@@ -36,7 +36,7 @@ private:
   class CustomVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    CustomVectorFormVol(int i, double time_step) 
+    CustomVectorFormVol(int i, double time_step)
       : WeakForm::VectorFormVol(i), time_step(time_step) { }
 
     template<typename Real, typename Scalar>
@@ -60,9 +60,9 @@ private:
   class CustomVectorFormSurf : public WeakForm::VectorFormSurf
   {
   public:
-    CustomVectorFormSurf(int i, std::string area, double alpha, double rho, double heatcap, 
-                                double* current_time_ptr, double temp_init, double t_final) 
-      : WeakForm::VectorFormSurf(i, area), alpha(alpha), rho(rho), heatcap(heatcap), current_time_ptr(current_time_ptr), 
+    CustomVectorFormSurf(int i, std::string area, double alpha, double rho, double heatcap,
+                                double* current_time_ptr, double temp_init, double t_final)
+      : WeakForm::VectorFormSurf(i, area), alpha(alpha), rho(rho), heatcap(heatcap), current_time_ptr(current_time_ptr),
                                  temp_init(temp_init), t_final(t_final) { }
 
     template<typename Real, typename Scalar>

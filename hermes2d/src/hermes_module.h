@@ -156,11 +156,11 @@ public:
     this->slns.clear();
   };
 
+  virtual void set_mesh(Mesh *mesh);
+  virtual Mesh *get_mesh(int index);
+
   virtual void set_boundary(BoundaryData *boundary);
   virtual void set_material(MaterialData *material);
-
-  Hermes::vector<Mesh *> meshes;
-  virtual void set_meshes() = 0;
 
   virtual void set_spaces() = 0;
   virtual void set_boundary_conditions() = 0;
@@ -178,6 +178,8 @@ private:
   ModuleProperties *module_properties;
 
 protected:
+  Hermes::vector<Mesh *> meshes;
+
   Hermes::vector<BoundaryData *> natural_boundaries;
   Hermes::vector<BoundaryData *> essential_boundaries;
   Hermes::vector<MaterialData *> materials;

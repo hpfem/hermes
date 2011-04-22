@@ -15,6 +15,15 @@
 
 #include "hermes_module.h"
 
+void HermesModule::set_mesh(Mesh *mesh) {
+  this->meshes.push_back(mesh);
+  printf("Nodes: %d\n", this->meshes.at(0)->get_num_nodes());
+}
+
+Mesh *HermesModule::get_mesh(int index) {
+  return this->meshes.at(index);
+}
+
 void HermesModule::set_boundary(BoundaryData *boundary) {
   if(boundary->bc_type == HERMES_ESSENTIAL)
     this->essential_boundaries.push_back(boundary);

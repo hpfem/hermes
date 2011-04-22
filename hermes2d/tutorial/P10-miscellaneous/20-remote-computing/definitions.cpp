@@ -10,11 +10,11 @@ using namespace WeakFormsH1::SurfaceMatrixForms;
 class CustomWeakFormHeatRK1 : public WeakForm
 {
 public:
-  CustomWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho, 
-                        double time_step, double* current_time_ptr, double temp_init, double t_final, 
+  CustomWeakFormHeatRK1(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
+                        double time_step, double* current_time_ptr, double temp_init, double t_final,
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, lambda));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, lambda));
     add_matrix_form(new DefaultLinearMass(0, 0, heatcap * rho / time_step));
     CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
@@ -29,7 +29,7 @@ private:
   class CustomVectorFormVolHeatRK1 : public WeakForm::VectorFormVol
   {
   public:
-    CustomVectorFormVolHeatRK1(int i, double heatcap, double rho, double time_step) 
+    CustomVectorFormVolHeatRK1(int i, double heatcap, double rho, double time_step)
       : WeakForm::VectorFormVol(i), heatcap(heatcap), rho(rho), time_step(time_step) { }
 
     template<typename Real, typename Scalar>
@@ -55,9 +55,9 @@ private:
   private:
       double h;
   public:
-    CustomVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda, 
-                                double* current_time_ptr, double temp_init, double t_final) 
-      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr), 
+    CustomVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda,
+                                double* current_time_ptr, double temp_init, double t_final)
+      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr),
                                  temp_init(temp_init), t_final(t_final) { }
 
     template<typename Real, typename Scalar>

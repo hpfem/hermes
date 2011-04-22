@@ -42,7 +42,7 @@ public:
   double ddxx(double x) {
     return -K*K*(exp(K*x) + exp(-K*x))/(exp(K) + exp(-K));
   }
-  
+
   double K;
 };
 
@@ -51,14 +51,14 @@ public:
 class CustomRightHandSide1: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide1(double K, double d_u, double sigma) 
+  CustomRightHandSide1(double K, double d_u, double sigma)
     : DefaultNonConstRightHandSide(), d_u(d_u), sigma(sigma) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
 
   virtual scalar value(double x, double y) const {
-    double Laplace_u = cef1->ddxx(x) * cef1->val(y) 
+    double Laplace_u = cef1->ddxx(x) * cef1->val(y)
                        + cef1->val(x) * cef1->ddxx(y);
     double u = cef1->val(x) * cef1->val(y);
     double v = cef2->val(x) * cef2->val(y);
@@ -79,14 +79,14 @@ public:
 class CustomRightHandSide2: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide2(double K, double d_v) 
+  CustomRightHandSide2(double K, double d_v)
     : DefaultNonConstRightHandSide(), d_v(d_v) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
 
   virtual scalar value(double x, double y) const {
-    double Laplace_v = cef2->ddxx(x) * cef2->val(y) 
+    double Laplace_v = cef2->ddxx(x) * cef2->val(y)
                        + cef2->val(x) * cef2->ddxx(y);
     double u = cef1->val(x) * cef1->val(y);
     double v = cef2->val(x) * cef2->val(y);
@@ -109,7 +109,7 @@ public:
 class ExactSolutionFitzHughNagumo1 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionFitzHughNagumo1(Mesh* mesh) 
+  ExactSolutionFitzHughNagumo1(Mesh* mesh)
        : ExactSolutionScalar(mesh) {
     cef1 = new CustomExactFunction1();
   }
@@ -137,7 +137,7 @@ public:
 class ExactSolutionFitzHughNagumo2 : public ExactSolutionScalar
 {
 public:
-  ExactSolutionFitzHughNagumo2(Mesh* mesh, double K) 
+  ExactSolutionFitzHughNagumo2(Mesh* mesh, double K)
        : ExactSolutionScalar(mesh) {
     cef2 = new CustomExactFunction2(K);
   }
@@ -168,13 +168,13 @@ class WeakFormFitzHughNagumo : public WeakForm
 public:
   WeakFormFitzHughNagumo(CustomRightHandSide1* rhs_1, CustomRightHandSide2* rhs_2)
           : WeakForm(2) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, D_u * D_u));
+    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, D_u * D_u));
     add_matrix_form(new DefaultLinearMass(0, 0, -1.0));
     add_matrix_form(new DefaultLinearMass(0, 1, rhs_1->sigma, HERMES_NONSYM));
-    add_matrix_form(new DefaultLinearMass(1, 0, -1.0, HERMES_NONSYM));     
-    add_matrix_form(new DefaultLinearDiffusion(1, 1, D_v * D_v));
+    add_matrix_form(new DefaultLinearMass(1, 0, -1.0, HERMES_NONSYM));
+    add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, D_v * D_v));
     add_matrix_form(new DefaultLinearMass(1, 1, 1.0));
-    
+
 
     add_vector_form(new DefaultVectorFormNonConst(0, rhs_1));
     add_vector_form(new DefaultVectorFormNonConst(1, rhs_2));
