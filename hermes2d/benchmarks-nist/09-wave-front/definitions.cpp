@@ -14,10 +14,10 @@ using namespace WeakFormsH1::RightHandSides;
 class CustomRightHandSide: public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero) 
+  CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero)
     : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
-  virtual double value(double x, double y) const {  
+  virtual double value(double x, double y) const {
     double a = pow(x - x_loc, 2);
     double b = pow(y - y_loc, 2);
     double c = sqrt(a + b);
@@ -26,14 +26,14 @@ public:
     double f = (pow(alpha*c - (alpha * r_zero), 2) + 1.0);
     double g = (alpha * c - (alpha * r_zero));
 
-    return -(((alpha/(c * f)) - (d/(2 * pow(a + b, 1.5) * f)) 
-           - ((alpha * d * g)/((a + b) * pow(f, 2))) + 
-	      (alpha/(c * f)) - (e/(2 * pow(a + b, 1.5) * f)) 
+    return -(((alpha/(c * f)) - (d/(2 * pow(a + b, 1.5) * f))
+           - ((alpha * d * g)/((a + b) * pow(f, 2))) +
+        (alpha/(c * f)) - (e/(2 * pow(a + b, 1.5) * f))
            - ((alpha * e * g)/((a + b) * pow(f, 2)))));
   }
 
   virtual Ord ord (Ord x, Ord y) const {
-    return Ord(8);  
+    return Ord(8);
   }
   double alpha, x_loc, y_loc, r_zero;
 };
@@ -44,9 +44,9 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double 
-                      y_loc, double r_zero) 
-             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), 
+  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double
+                      y_loc, double r_zero)
+             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc),
                                    y_loc(y_loc), r_zero(r_zero) { }
 
   virtual scalar value(double x, double y) const {
@@ -66,7 +66,7 @@ public:
   };
 
   virtual Ord ord (Ord x, Ord y) const {
-    return Ord(8);  
+    return Ord(8);
   }
 
   double alpha, x_loc, y_loc, r_zero;
@@ -79,7 +79,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
   };
 };
 

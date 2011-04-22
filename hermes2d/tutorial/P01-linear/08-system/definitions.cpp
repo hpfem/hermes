@@ -9,8 +9,8 @@ using namespace std;
 class CustomWeakFormLinearElasticity : public WeakForm
 {
 public:
-  CustomWeakFormLinearElasticity(double E, double nu, double rho_g, 
-                                 std::string non_zero_neumann_bnd, double f0, double f1) 
+  CustomWeakFormLinearElasticity(double E, double nu, double rho_g,
+                                 std::string non_zero_neumann_bnd, double f0, double f1)
             : WeakForm(2)
   {
     double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));
@@ -19,10 +19,10 @@ public:
     // Jacobian matrix.
     // There is one multi-component and one single-component form since we want to exploit symmetry of the forms.
     add_multicomponent_matrix_form(new WeakFormsElasticity::DefaultMultiComponentVolumetricMatrixFormLinearSym(
-         Hermes::vector<std::pair<unsigned int, unsigned int> >(make_pair(0, 0), make_pair(1, 1)), lambda, mu));
+         Hermes::vector<std::pair<unsigned int, unsigned int> >(make_pair(0, 0), make_pair(1, 1)), HERMES_ANY, lambda, mu));
 
     add_matrix_form(new WeakFormsElasticity::DefaultVolumetricMatrixFormLinear_x_y(0, 1, lambda, mu));
-    
+
     // Residual.
     add_multicomponent_vector_form(new WeakFormsElasticity::DefaultMultiComponentVolumetricResidualFormLinearSym(
          Hermes::vector<unsigned int>(0, 1), lambda, mu));
@@ -30,7 +30,7 @@ public:
     add_vector_form(new WeakFormsElasticity::DefaultVolumetricResidualFormLinear_x_y(0, lambda, mu));
 
     // Gravity loading.
-    add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst(1, -rho_g));
+    add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst(1, HERMES_ANY, -rho_g));
 
     // External forces.
     add_multicomponent_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultMultiComponentVectorFormSurf(

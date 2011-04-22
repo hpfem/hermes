@@ -23,7 +23,7 @@ public:
     add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_heat_flux, alpha, HERMES_AXISYM_Y));
 
     // Residual forms - volumetric.
-    add_vector_form(new DefaultResidualLinearDiffusion(0, lambda, HERMES_AXISYM_Y));
+    add_vector_form(new DefaultResidualLinearDiffusion(0, HERMES_ANY, lambda, HERMES_AXISYM_Y));
 
     // Residual form - surface.
     add_vector_form_surf(new DefaultResidualSurfConst(0, bdy_heat_flux, alpha, HERMES_AXISYM_Y));

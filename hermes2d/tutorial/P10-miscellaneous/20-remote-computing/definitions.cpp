@@ -15,7 +15,7 @@ public:
                         Solution* prev_time_sln) : WeakForm(1)
   {
     add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, lambda));
-    add_matrix_form(new DefaultLinearMass(0, 0, heatcap * rho / time_step));
+    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, heatcap * rho / time_step));
     CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);

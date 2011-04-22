@@ -51,6 +51,6 @@ class CustomWeakFormPoisson : public WeakForm
 public:
     CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
         add_matrix_form(new DefaultLinearDiffusion(0, 0));
-        add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+        add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
     }
 };

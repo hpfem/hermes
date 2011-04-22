@@ -9,39 +9,39 @@ using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
 
 // This example makes sure that normal and tangential vectors to circular
-// arcs nurbs are calculated correctly. 
+// arcs nurbs are calculated correctly.
 //
 // NOTE: This test strongly depends on the concrete geometry (domain.mesh).
 // When changing the geometry, also change the interior of the value() method
 // of the CustomEssentialBCNonConst classes below.
 //
-// Domain: A square inscribed into the unit circle, with 
-// two curved edges - see file domain.mesh. 
+// Domain: A square inscribed into the unit circle, with
+// two curved edges - see file domain.mesh.
 
 const int P_INIT = 6;                             // Initial polynomial degree of all elements.
 const double TOLERANCE = 1e-1;                    // Tolerance for the match of normal and tangential
-                                                  // vectors. 
+                                                  // vectors.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // This variable is global since it could not be changed being local data in the const method value() below.
-bool SUCCESS = true; 
+bool SUCCESS = true;
 
-// Custom class for essential boundary conditions that 
+// Custom class for essential boundary conditions that
 // tests the normal and tangential vectors on the right edge.
 class CustomEssentialBCNonConstRight : public EssentialBoundaryCondition {
 public:
-  CustomEssentialBCNonConstRight(std::string marker) 
+  CustomEssentialBCNonConstRight(std::string marker)
            : EssentialBoundaryCondition(marker) { }
 
   ~CustomEssentialBCNonConstRight() {};
 
-  inline EssentialBCValueType get_value_type() const { 
-    return EssentialBoundaryCondition::BC_FUNCTION; 
+  inline EssentialBCValueType get_value_type() const {
+    return EssentialBoundaryCondition::BC_FUNCTION;
   }
 
-  // This function also checks correctness of normal and tangential vectors for 
+  // This function also checks correctness of normal and tangential vectors for
   // each boundary point that comes here.
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
@@ -54,9 +54,9 @@ public:
     double t_y_test = x;
     if (std::abs(n_x_test - n_x) > TOLERANCE || std::abs(n_y_test - n_y) > TOLERANCE ||
         std::abs(t_x_test - t_x) > TOLERANCE || std::abs(t_y_test - t_y) > TOLERANCE) {
-      printf("Bdy point: [%g, %g], Hermes normal: (%g, %g), correct_normal: (%g, %g)\n", 
+      printf("Bdy point: [%g, %g], Hermes normal: (%g, %g), correct_normal: (%g, %g)\n",
              x, y, n_x, n_y, n_x_test, n_y_test);
-      printf("                     Hermes tangent: (%g, %g), correct_tangent: (%g, %g)\n", 
+      printf("                     Hermes tangent: (%g, %g), correct_tangent: (%g, %g)\n",
              t_x, t_y, t_x_test, t_y_test);
       SUCCESS = false;
     }
@@ -65,20 +65,20 @@ public:
   }
 };
 
-// Custom class for essential boundary conditions that 
+// Custom class for essential boundary conditions that
 // tests the normal and tangential vectors on the left edge.
 class CustomEssentialBCNonConstLeft : public EssentialBoundaryCondition {
 public:
-  CustomEssentialBCNonConstLeft(std::string marker) 
+  CustomEssentialBCNonConstLeft(std::string marker)
            : EssentialBoundaryCondition(marker) { }
 
   ~CustomEssentialBCNonConstLeft() {};
 
-  inline EssentialBCValueType get_value_type() const { 
-    return EssentialBoundaryCondition::BC_FUNCTION; 
+  inline EssentialBCValueType get_value_type() const {
+    return EssentialBoundaryCondition::BC_FUNCTION;
   }
 
-  // This function also checks correctness of normal and tangential vectors for 
+  // This function also checks correctness of normal and tangential vectors for
   // each boundary point that comes here.
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
@@ -91,9 +91,9 @@ public:
     double t_y_test = -(x + sqrt(2.0));
     if (std::abs(n_x_test - n_x) > TOLERANCE || std::abs(n_y_test - n_y) > TOLERANCE ||
         std::abs(t_x_test - t_x) > TOLERANCE || std::abs(t_y_test - t_y) > TOLERANCE) {
-      printf("Bdy point: [%g, %g], Hermes normal: (%g, %g), correct_normal: (%g, %g)\n", 
+      printf("Bdy point: [%g, %g], Hermes normal: (%g, %g), correct_normal: (%g, %g)\n",
              x, y, n_x, n_y, n_x_test, n_y_test);
-      printf("                                  Hermes tangent: (%g, %g), correct_tangent: (%g, %g)\n", 
+      printf("                                  Hermes tangent: (%g, %g), correct_tangent: (%g, %g)\n",
              t_x, t_y, t_x_test, t_y_test);
       SUCCESS = false;
     }
@@ -109,7 +109,7 @@ public:
   CustomWeakFormPoisson(double rhs_const) : WeakForm(1)
   {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, rhs_const));
+    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, rhs_const));
   };
 };
 

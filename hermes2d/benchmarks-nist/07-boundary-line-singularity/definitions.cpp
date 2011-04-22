@@ -17,7 +17,7 @@ public:
   CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
 
   virtual double value(double x, double y) const {
-    return - alpha * (alpha - 1.) * pow(x, alpha - 2.); 
+    return - alpha * (alpha - 1.) * pow(x, alpha - 2.);
   }
 
   virtual Ord ord(Ord x, Ord y) const {
@@ -32,7 +32,7 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha) 
+  CustomExactSolution(Mesh* mesh, double alpha)
         : ExactSolutionScalar(mesh), alpha(alpha) {};
 
   virtual scalar value(double x, double y) const {
@@ -58,7 +58,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
   };
 };
 
