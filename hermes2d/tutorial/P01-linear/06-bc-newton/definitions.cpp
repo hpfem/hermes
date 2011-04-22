@@ -13,10 +13,10 @@ using namespace WeakFormsH1::SurfaceVectorForms;
 class CustomWeakFormPoissonNewton : public WeakForm
 {
 public:
-  CustomWeakFormPoissonNewton(std::string mat_al, double lambda_al, 
-                              std::string mat_cu, double lambda_cu, 
-                              double vol_heat_src, std::string bdy_heat_flux, 
-			      double alpha, double t_exterior) : WeakForm(1)
+  CustomWeakFormPoissonNewton(std::string mat_al, double lambda_al,
+                              std::string mat_cu, double lambda_cu,
+                              double vol_heat_src, std::string bdy_heat_flux,
+            double alpha, double t_exterior) : WeakForm(1)
   {
     // Jacobian forms - volumetric.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
@@ -28,7 +28,7 @@ public:
     // Residual forms - volumetric.
     add_vector_form(new DefaultResidualLinearDiffusion(0, mat_al, lambda_al));
     add_vector_form(new DefaultResidualLinearDiffusion(0, mat_cu, lambda_cu));
-    add_vector_form(new DefaultVectorFormConst(0, -vol_heat_src));
+    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
 
     // Residual forms - surface.
     add_vector_form_surf(new DefaultResidualSurfConst(0, bdy_heat_flux, alpha));
@@ -40,7 +40,7 @@ public:
 
 class CustomDirichletCondition : public EssentialBoundaryCondition {
 public:
-  CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C) 
+  CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C)
     : EssentialBoundaryCondition(markers), A(A), B(B), C(C) { }
 
   ~CustomDirichletCondition() {};

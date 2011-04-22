@@ -25,15 +25,15 @@ public:
 class CustomRightHandSide : public DefaultNonConstRightHandSide
 {
 public:
-  CustomRightHandSide(double k, double alpha) 
+  CustomRightHandSide(double k, double alpha)
     : DefaultNonConstRightHandSide(), k(k), alpha(alpha) {
     cef = new CustomExactFunction(k, alpha);
   };
 
   virtual double value(double x, double y) const {
     if (x < 0) return cef->fn(x, y) * k * k;
-    else return cef->fn(x, y) * k * k 
-                - alpha *(alpha - 1) * pow(x, alpha - 2.) 
+    else return cef->fn(x, y) * k * k
+                - alpha *(alpha - 1) * pow(x, alpha - 2.)
                 - k * k * pow(x, alpha);
   }
 
@@ -43,7 +43,7 @@ public:
 
   ~CustomRightHandSide() { delete cef; }
 
-  CustomExactFunction* cef; 
+  CustomExactFunction* cef;
   double k, alpha;
 };
 
@@ -52,7 +52,7 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double k, double alpha) 
+  CustomExactSolution(Mesh* mesh, double k, double alpha)
     : ExactSolutionScalar(mesh), k(k), alpha(alpha) {
     cef = new CustomExactFunction(k, alpha);
   };
@@ -73,7 +73,7 @@ public:
 
   ~CustomExactSolution() { delete cef; }
 
-  CustomExactFunction* cef; 
+  CustomExactFunction* cef;
   double k, alpha;
 };
 
@@ -84,7 +84,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
   };
 };
 

@@ -18,7 +18,7 @@ public:
                 y_vel_previous_time(y_vel_previous_time) {
     /* Jacobian terms - first velocity equation */
     // Time derivative in the first velocity equation.
-    add_matrix_form(new DefaultLinearMass(0, 0, 1./time_step));
+    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, 1./time_step));
     // Laplacian divided by Re in the first velocity equation.
     add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, 1./Re));
     // First part of the convective term in the first velocity equation.
@@ -30,7 +30,7 @@ public:
 
     /* Jacobian terms - second velocity equation, continuity equation */
     // Time derivative in the second velocity equation.
-    add_matrix_form(new DefaultLinearMass(1, 1, 1./time_step));
+    add_matrix_form(new DefaultLinearMass(1, 1, HERMES_ANY, 1./time_step));
     // Laplacian divided by Re in the second velocity equation.
     add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, 1./Re));
     // First part of the convective term in the second velocity equation.
@@ -69,7 +69,6 @@ public:
                      + u->val[i] * xvel_prev_newton->dx[i]) * v->val[i];
       return result;
     }
-
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
                     ExtData<Ord> *ext) const {
     Ord result = 0;

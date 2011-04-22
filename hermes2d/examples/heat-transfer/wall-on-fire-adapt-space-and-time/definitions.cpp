@@ -37,7 +37,7 @@ class CustomWeakFormHeatRK : public WeakForm
 {
 public:
   CustomWeakFormHeatRK(std::string bdy_fire, std::string bdy_air,
-                       double alpha_fire, double alpha_air, double rho, double heatcap, 
+                       double alpha_fire, double alpha_air, double rho, double heatcap,
                        double temp_ext_air, double temp_init, double* current_time_ptr) : WeakForm(1)
   {
     // Jacobian - volumetric part.
@@ -51,13 +51,13 @@ public:
     add_vector_form(new CustomFormResidualVol(0, rho, heatcap));
 
     // Surface residual - bottom boundary.
-    CustomFormResidualSurfFire* vec_form_surf_1 
+    CustomFormResidualSurfFire* vec_form_surf_1
       = new CustomFormResidualSurfFire(0, bdy_fire, alpha_fire, rho, heatcap, current_time_ptr);
     add_vector_form_surf(vec_form_surf_1);
 
     // Surface residual - top boundary.
-    add_vector_form_surf(new DefaultResidualSurfConst(0, -alpha_air / (rho*heatcap)));
-    add_vector_form_surf(new DefaultVectorFormSurf(0, alpha_air* temp_ext_air / (rho*heatcap)));
+    add_vector_form_surf(new DefaultResidualSurfConst(0, HERMES_ANY, -alpha_air / (rho*heatcap)));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, HERMES_ANY, alpha_air* temp_ext_air / (rho*heatcap)));
   };
 
 private:
@@ -65,14 +65,14 @@ private:
   class CustomJacobianVol : public WeakForm::MatrixFormVol
   {
   public:
-    CustomJacobianVol(int i, int j, double rho, double heatcap) 
+    CustomJacobianVol(int i, int j, double rho, double heatcap)
       : WeakForm::MatrixFormVol(i, j), rho(rho), heatcap(heatcap) { }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e,
                          ExtData<scalar> *ext) const {
       scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * lambda(e->x[i], e->y[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);		       
+        result += wt[i] * lambda(e->x[i], e->y[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       }
 
       return -result / heatcap / rho;
@@ -95,16 +95,16 @@ private:
   class CustomFormResidualVol : public WeakForm::VectorFormVol
   {
   public:
-    CustomFormResidualVol(int i, double rho, double heatcap) 
+    CustomFormResidualVol(int i, double rho, double heatcap)
       : WeakForm::VectorFormVol(i), rho(rho), heatcap(heatcap) { }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e,
                          ExtData<scalar> *ext) const {
       Func<scalar>* u_prev_newton = u_ext[0];
       scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * lambda(e->x[i], e->y[i]) 
-                        * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i]);		       
+        result += wt[i] * lambda(e->x[i], e->y[i])
+                        * (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i]);
       }
 
       return -result / heatcap / rho;
@@ -128,25 +128,25 @@ private:
   class CustomFormResidualSurfFire : public WeakForm::VectorFormSurf
   {
   public:
-    CustomFormResidualSurfFire(int i, std::string area, double alpha_fire, double rho, 
-                               double heatcap, double* current_time_ptr) 
-      : WeakForm::VectorFormSurf(i, area), alpha_fire(alpha_fire), rho(rho), 
-	                         heatcap(heatcap), current_time_ptr(current_time_ptr) { }
+    CustomFormResidualSurfFire(int i, std::string area, double alpha_fire, double rho,
+                               double heatcap, double* current_time_ptr)
+      : WeakForm::VectorFormSurf(i, area), alpha_fire(alpha_fire), rho(rho),
+                           heatcap(heatcap), current_time_ptr(current_time_ptr) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+    Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                             Geom<Real> *e, ExtData<Scalar> *ext) const {
       Func<Scalar>* sln_prev = u_ext[0];
 
       Scalar result = 0;
       for (int i = 0; i < n; i++) {
-        result += wt[i] * (T_fire(e->x[i], *current_time_ptr) - sln_prev->val[i]) * v->val[i];		       
+        result += wt[i] * (T_fire(e->x[i], *current_time_ptr) - sln_prev->val[i]) * v->val[i];
       }
 
       return result / heatcap / rho * alpha_fire;
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e,
                          ExtData<scalar> *ext) const {
         return vector_form_surf<double, scalar>(n, wt, u_ext, v, e, ext);
     }

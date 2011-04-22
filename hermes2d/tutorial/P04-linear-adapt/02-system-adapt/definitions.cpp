@@ -169,14 +169,14 @@ public:
   WeakFormFitzHughNagumo(CustomRightHandSide1* rhs_1, CustomRightHandSide2* rhs_2)
           : WeakForm(2) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, D_u * D_u));
-    add_matrix_form(new DefaultLinearMass(0, 0, -1.0));
-    add_matrix_form(new DefaultLinearMass(0, 1, rhs_1->sigma, HERMES_NONSYM));
-    add_matrix_form(new DefaultLinearMass(1, 0, -1.0, HERMES_NONSYM));
+    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, -1.0));
+    add_matrix_form(new DefaultLinearMass(0, 1, HERMES_ANY, rhs_1->sigma, HERMES_NONSYM));
+    add_matrix_form(new DefaultLinearMass(1, 0, HERMES_ANY, -1.0, HERMES_NONSYM));
     add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, D_v * D_v));
-    add_matrix_form(new DefaultLinearMass(1, 1, 1.0));
+    add_matrix_form(new DefaultLinearMass(1, 1, HERMES_ANY, 1.0));
 
 
-    add_vector_form(new DefaultVectorFormNonConst(0, rhs_1));
-    add_vector_form(new DefaultVectorFormNonConst(1, rhs_2));
+    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs_1));
+    add_vector_form(new DefaultVectorFormNonConst(1, HERMES_ANY, rhs_2));
   }
 };
