@@ -1,5 +1,5 @@
-#add_subdirectory(richards-basic) TODO: Convert to new forms.
-add_subdirectory(richards-capillary-barrier-adapt)
-#add_subdirectory(richards-capillary-barrier-rk) TODO: Convert to new forms.
-#add_subdirectory(richards-seepage-adapt) TODO: Convert to new forms.
-#add_subdirectory(richards-tracy-adapt) TODO: Convert to new forms.
+#add_subdirectory(basic) TODO: Convert to new forms.
+add_subdirectory(capillary-barrier-adapt)
+#add_subdirectory(capillary-barrier-rk) TODO: Convert to new forms.
+#add_subdirectory(seepage-adapt) TODO: Convert to new forms.
+#add_subdirectory(tracy-adapt) TODO: Convert to new forms.

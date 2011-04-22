@@ -861,7 +861,8 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) {
-      if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
+      if ((mfv->areas[ss] == HERMES_ANY) || 
+          (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
         assemble_this_form = true;
         break;
       }
@@ -873,7 +874,8 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
     Hermes::vector<double> block_scaling_coeffs;
     for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
       if (block_weights != NULL)
-        block_scaling_coeffs.push_back(block_weights->get_A(mfv->coordinates[coordinate_i].first, mfv->coordinates[coordinate_i].second));
+        block_scaling_coeffs.push_back(block_weights->get_A(mfv->coordinates[coordinate_i].first, 
+                                       mfv->coordinates[coordinate_i].second));
       else
         block_scaling_coeffs.push_back(1);
 
@@ -900,7 +902,8 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 Hermes::vector<scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
+                              -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
               }
           }
           else if (mat != NULL) {
@@ -928,7 +931,8 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 Hermes::vector<scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
+                           -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
               }
           }
           else {
@@ -939,9 +943,11 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
                   if(mfv->sym == HERMES_SYM)
-                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], - result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], 
+                             - result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                   else
-                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], result[coordinate_i] 
+                             * al[n]->coef[j] * al[m]->coef[i]);
               }
             }
             else if (mat != NULL) {
@@ -949,11 +955,13 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
                 Hermes::vector<scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
                 for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
-                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
-                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
+                           al[mfv->coordinates[coordinate_i].second]->dof[j],
+                           result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                   if(i != j)
-                    mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], al[mfv->coordinates[coordinate_i].second]->dof[i],
-                    result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], 
+                             al[mfv->coordinates[coordinate_i].second]->dof[i],
+                             result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
               }
             }
@@ -984,7 +992,8 @@ void DiscreteProblem::assemble_volume_vector_forms(WeakForm::Stage& stage,
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
-      if ((vfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
+      if ((vfv->areas[ss] == HERMES_ANY) || 
+          (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
         assemble_this_form = true;
         break;
       }
@@ -1022,7 +1031,8 @@ void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stag
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
     for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
-      if ((vfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
+      if ((vfv->areas[ss] == HERMES_ANY) || 
+          (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
         assemble_this_form = true;
         break;
       }
@@ -1042,7 +1052,8 @@ void DiscreteProblem::assemble_multicomponent_volume_vector_forms(WeakForm::Stag
         Hermes::vector<scalar> result;
         eval_form(vfv, u_ext, spss[m], refmap[m], result);
         for(unsigned int coordinate_i = 0; coordinate_i < vfv->coordinates.size(); coordinate_i++)
-          rhs->add(al[vfv->coordinates[coordinate_i]]->dof[i], result[coordinate_i] * al[vfv->coordinates[coordinate_i]]->coef[i]);
+          rhs->add(al[vfv->coordinates[coordinate_i]]->dof[i], result[coordinate_i] 
+                   * al[vfv->coordinates[coordinate_i]]->coef[i]);
       }
     }
   }
@@ -4544,6 +4555,7 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     // Add \deltaY^{n+1} to Y^n.
     for (int i = 0; i < ndof; i++) coeff_vec[i] += damping_coeff * solver->get_solution()[i];
 
+    /*
     Solution a(dp->get_space(0)->get_mesh());
     Solution b(dp->get_space(1)->get_mesh());
 
@@ -4556,6 +4568,7 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     view.show(&a);
     view1.show(&b);
     View::wait();
+    */
 
     it++;
   }

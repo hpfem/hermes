@@ -100,8 +100,7 @@ int main(int argc, char* argv[])
                                   MAT_COPPER, MU_VACUUM, CURRENT_DENSITY, order_inc);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -135,7 +134,8 @@ int main(int argc, char* argv[])
 
   // Visualise the solution and mesh.
   ScalarView s_view1("Vector potencial", new WinGeom(0, 0, 350, 450));
-  FilterVectorPotencial vector_potencial(Hermes::vector<MeshFunction *>(&sln, &sln), Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
+  FilterVectorPotencial vector_potencial(Hermes::vector<MeshFunction *>(&sln, &sln), 
+                                         Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
   s_view1.show_mesh(false);
   s_view1.show(&vector_potencial);
 
