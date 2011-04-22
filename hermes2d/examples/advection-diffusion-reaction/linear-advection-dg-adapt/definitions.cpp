@@ -7,8 +7,8 @@ class CustomWeakForm : public WeakForm<double>
 public:
 
   CustomWeakForm(std::string left_bottom_bnd_part) : WeakForm<double>(1) {
-    add_matrix_form(new MatrixFormVol<double>(0, 0));
-    add_vector_form(new VectorFormVol<double>(0));
+    add_matrix_form(new cMatrixFormVol(0, 0));
+    add_vector_form(new cVectorFormVol(0));
     add_matrix_form_surf(new MatrixFormSurface(0, 0));
     add_matrix_form_surf(new MatrixFormInterface(0, 0));
     add_vector_form_surf(new VectorFormSurface(0, left_bottom_bnd_part));
