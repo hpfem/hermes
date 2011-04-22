@@ -1,4 +1,4 @@
-R0 = 0.05  # inner radius
+R0 = 0.05 # inner radius
 a = 0.2   # wall thickness
 b = 0.4   # height
 

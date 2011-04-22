@@ -3,7 +3,7 @@
 
 // This example shows how to solve exisymmetric problems. The domain of interest
 // is a hollow cylinder whose axis is aligned with the y-axis. It has fixed
-// temperature on the bottom face, and a Newton-type heat flux condition on
+// temperature on the bottom face, and a radiation (Newton) condition on
 // all other faces.
 //
 // PDE: Laplace equation -div (LAMBDA grad u) = 0 (y-axis is the axis of symmetry),
@@ -21,10 +21,10 @@ const int INIT_REF_NUM = 2;                       // Number of initial uniform m
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 // Problem parameters.
-const double T1 = 30.0;       // Prescribed temperature on Gamma_bottom.
-const double T0 = 20.0;       // Outer temperature.
+const double T1 = 100.0;      // Prescribed temperature on Gamma_bottom.
+const double T0 = 0.0;        // Outer temperature.
 const double LAMBDA = 386;    // Thermal conductivity.
-const double ALPHA = 5.0;     // Heat flux coefficient on Gamma_heat_flux.
+const double ALPHA = 20.0;    // Heat flux coefficient on Gamma_heat_flux.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -75,11 +75,11 @@ int main(int argc, char* argv[])
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 300, 400));
-  view.show(&sln);
+  view.show(&sln, HERMES_EPS_HIGH);
   ScalarView gradview("Gradient", new WinGeom(310, 0, 300, 400));
   MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), 
                  Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
-  gradview.show(&grad);
+  gradview.show(&grad, HERMES_EPS_VERYHIGH);
 
   // Wait for all views to be closed.
   View::wait();
