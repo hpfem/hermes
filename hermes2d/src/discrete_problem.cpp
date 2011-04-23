@@ -2076,28 +2076,24 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
         if (ext_asmlist_u->dof[j] < 0) {
           if (rhs != NULL && this->is_linear) {
             // Evaluate the form with the activated discontinuous shape functions.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
-              Hermes::vector<scalar> result;
-              eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
-                                      &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
-                                      stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
-              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-                rhs->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] 
-                * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-                * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
-            }
+            Hermes::vector<scalar> result;
+            eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
+                                    &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
+                                    stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+            for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+              rhs->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] 
+              * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+              * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
           }
         }
         else if (mat != NULL) {
-          if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-              Hermes::vector<scalar> result;
-              eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
-              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-                mat->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], ext_asmlists[mfs->coordinates[coordinate_i].second]->dof[j],
-                result[coordinate_i] * block_scaling_coeffs[coordinate_i] 
-                * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-                * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
-          }
+          Hermes::vector<scalar> result;
+          eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+          for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
+            mat->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], ext_asmlists[mfs->coordinates[coordinate_i].second]->dof[j],
+            result[coordinate_i] * block_scaling_coeffs[coordinate_i] 
+            * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+            * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
         }
       }
     }
