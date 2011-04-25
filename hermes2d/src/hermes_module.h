@@ -84,6 +84,8 @@ struct MeshProperties {
 
 struct SolverProperties {
   MatrixSolverType mat_solver;
+  double newton_tol;
+  int newton_max_iter;
 };
 
 struct SolutionProperties {
@@ -145,6 +147,8 @@ public:
     module_properties = new ModuleProperties();
   };
   virtual ~HermesModule() {
+    delete module_properties;
+
     this->meshes.clear();
 
     for (unsigned int i = 0; i < this->spaces.size(); i++)
@@ -162,9 +166,8 @@ public:
   virtual void add_boundary(BoundaryData *boundary);
   virtual void add_material(MaterialData *material);
 
-  virtual void add_weakform(WeakForm *wf);
   virtual void set_weakforms() = 0;
-  virtual void add_space(Space *space);
+  virtual Space *get_space(int index);
   virtual void set_spaces() = 0;
 
   virtual void add_proj_norm(ProjNormType *set_proj_norm) {};
@@ -181,8 +184,7 @@ private:
 protected:
   Hermes::vector<Mesh *> meshes;
 
-  Hermes::vector<BoundaryData *> natural_boundaries;
-  Hermes::vector<BoundaryData *> essential_boundaries;
+  Hermes::vector<BoundaryData *> boundaries;
   Hermes::vector<MaterialData *> materials;
 
   EssentialBCs bcs;
@@ -191,4 +193,5 @@ protected:
   Hermes::vector<ProjNormType> proj_norms;
   Hermes::vector<Solution *> slns;
 };
+
 #endif

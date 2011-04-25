@@ -17,7 +17,6 @@
 
 void HermesModule::add_mesh(Mesh *mesh) {
   this->meshes.push_back(mesh);
-  printf("Nodes: %d\n", this->meshes.at(0)->get_num_nodes());
 }
 
 Mesh *HermesModule::get_mesh(int index) {
@@ -25,22 +24,15 @@ Mesh *HermesModule::get_mesh(int index) {
 }
 
 void HermesModule::add_boundary(BoundaryData *boundary) {
-  if(boundary->bc_type == HERMES_ESSENTIAL)
-    this->essential_boundaries.push_back(boundary);
-  else if (boundary->bc_type == HERMES_NATURAL)
-    this->natural_boundaries.push_back(boundary);
+  this->boundaries.push_back(boundary);
 }
 
 void HermesModule::add_material(MaterialData *material) {
   this->materials.push_back(material);
 }
 
-void HermesModule::add_weakform(WeakForm *wf) {
-  this->wf = dynamic_cast<WeakForm *>(wf);
-}
-
-void HermesModule::add_space(Space *space) {
-  this->spaces.push_back(dynamic_cast<Space *>(space));
+Space *HermesModule::get_space(int index) {
+  return this->spaces.at(index);
 }
 
 void HermesModule::solve() {
@@ -73,13 +65,13 @@ void HermesModule::solve() {
 
   if (this->properties()->adaptivity()->cand_list == H2D_NONE)
   {
-    DiscreteProblem dp(this->wf, this->spaces);
-
-    int ndof = Space::get_num_dofs(this->spaces);
+    int ndof = Space::get_num_dofs(this->get_space(0)); // FIXME
     if (ndof != 0)
       info("ndof = %d", ndof);
     else
       error("ndof = %d", ndof);
+
+    DiscreteProblem dp(wf, this->spaces);
 
     scalar* coeff_vec = new scalar[ndof];
     memset(coeff_vec, 0, ndof*sizeof(scalar));

@@ -22,22 +22,22 @@
   class DefaultFunction
   {
   public:
-    DefaultFunction() 
+    DefaultFunction()
     {
       this->is_constant = false;
       this->const_value = -9999;
-    } 
-    DefaultFunction(scalar value) 
-    { 
+    }
+    DefaultFunction(scalar value)
+    {
       this->is_constant = true;
       this->const_value = value;
     };
 
-    virtual scalar value(double x, double y) const 
-    { 
+    virtual scalar value(double x, double y) const
+    {
       return const_value;
     };
-    virtual Ord ord(Ord x, Ord y) const 
+    virtual Ord ord(Ord x, Ord y) const
     {
     return Ord(0);
     };
@@ -59,19 +59,19 @@ namespace WeakFormsH1 {
     class DefaultMatrixFormVol : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultMatrixFormVol(int i, int j, std::string area = HERMES_ANY, 
+      DefaultMatrixFormVol(int i, int j, std::string area = HERMES_ANY,
                            scalar const_coeff = 1.0, DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                            SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormVol(i, j, area, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+        : WeakForm::MatrixFormVol(i, j, area, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
-      DefaultMatrixFormVol(int i, int j, Hermes::vector<std::string> areas, 
+      DefaultMatrixFormVol(int i, int j, Hermes::vector<std::string> areas,
                             scalar const_coeff, DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                             SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormVol(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+        : WeakForm::MatrixFormVol(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -84,48 +84,48 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
         }
 
-	return const_coeff * result;
+  return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                       Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -148,7 +148,7 @@ namespace WeakFormsH1 {
     class DefaultJacobianDiffusion : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianDiffusion(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
+      DefaultJacobianDiffusion(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                                CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
                                SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
         : WeakForm::MatrixFormVol(i, j, area, sym), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -157,11 +157,11 @@ namespace WeakFormsH1 {
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       };
 
-    DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0, 
-                             CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, 
+    DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
+                             CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
                              SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormVol(i, j, areas, sym), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt) 
-      { 
+        : WeakForm::MatrixFormVol(i, j, areas, sym), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
+      {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -171,7 +171,7 @@ namespace WeakFormsH1 {
       };
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+                   Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
       {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
@@ -188,16 +188,16 @@ namespace WeakFormsH1 {
               result += wt[i] * e->y[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] *
                         (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
                         + const_coeff*spline_coeff->get_value(u_ext[0]->val[i])
-			   * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
-	    }
+         * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
+      for (int i = 0; i < n; i++) {
               result += wt[i] * e->x[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] *
                         (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
                         + const_coeff*spline_coeff->get_value(u_ext[0]->val[i])
-		           * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
-	    }
+               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+      }
           }
         }
 
@@ -205,7 +205,7 @@ namespace WeakFormsH1 {
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) const 
+              Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
@@ -215,22 +215,22 @@ namespace WeakFormsH1 {
                       + const_coeff*spline_coeff->get_value(u_ext[0]->val[i])
                                      * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
           }
-        } 
+        }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
+      for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] *
                         (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
                         + const_coeff*spline_coeff->get_value(u_ext[0]->val[i])
-				     * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
-	    }
+             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+      }
           }
           else {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->x[i] * (const_coeff*spline_coeff->get_derivative(u_ext[0]->val[i]) * u->val[i] *
                         (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
                         + const_coeff*spline_coeff->get_value(u_ext[0]->val[i])
-		                     * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+                         * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
         }
@@ -260,8 +260,8 @@ namespace WeakFormsH1 {
     class DefaultJacobianAdvection : public WeakForm::MatrixFormVol
     {
     public:
-      DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
-                               CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE, 
+      DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
+                               CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE,
                                CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR)
         : WeakForm::MatrixFormVol(i, j, area, HERMES_NONSYM), const_coeff(const_coeff), spline_coeff1(c_spline1),
                                   spline_coeff2(c_spline2), gt(gt)
@@ -273,13 +273,13 @@ namespace WeakFormsH1 {
         if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
       }
 
-     DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0, 
-                              CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE, 
+     DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
+                              CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE,
                               CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE,
                               GeomType gt = HERMES_PLANAR)
        : WeakForm::MatrixFormVol(i, j, areas, HERMES_NONSYM), const_coeff(const_coeff), spline_coeff1(spline_coeff1),
-                           spline_coeff2(spline_coeff2), gt(gt) 
-     { 
+                           spline_coeff2(spline_coeff2), gt(gt)
+     {
        if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
 
        // If spline1 == HERMES_DEFAULT_SPLINE or spline2 == HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -340,16 +340,16 @@ namespace WeakFormsH1 {
       DefaultVectorFormVol(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                            DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                            GeomType gt = HERMES_PLANAR)
-             : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+             : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
       DefaultVectorFormVol(int i, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
                            DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                            GeomType gt = HERMES_PLANAR)
-             : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+             : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -362,47 +362,47 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	        for (int i = 0; i < n; i++) {
-	          result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	        }
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+          }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	          for (int i = 0; i < n; i++) {
-  	            result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	          }
+            for (int i = 0; i < n; i++) {
+                result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+            }
           }
           else {
-	          for (int i = 0; i < n; i++) {
-  	            result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	          }
+            for (int i = 0; i < n; i++) {
+                result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+            }
           }
         }
-	      return const_coeff * result;
+        return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -427,16 +427,16 @@ namespace WeakFormsH1 {
       DefaultResidualVol(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                            DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                            GeomType gt = HERMES_PLANAR)
-             : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+             : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
       DefaultResidualVol(int i, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
                            DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                            GeomType gt = HERMES_PLANAR)
-             : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+             : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -449,47 +449,47 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	        for (int i = 0; i < n; i++) {
-	          result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	        }
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+          }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	          for (int i = 0; i < n; i++) {
-  	            result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	          }
+            for (int i = 0; i < n; i++) {
+                result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+            }
           }
           else {
-	          for (int i = 0; i < n; i++) {
-  	            result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	          }
+            for (int i = 0; i < n; i++) {
+                result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+            }
           }
         }
-	      return const_coeff * result;
+        return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -512,7 +512,7 @@ namespace WeakFormsH1 {
     class DefaultResidualDiffusion : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
+      DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                                CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
                                GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -521,10 +521,10 @@ namespace WeakFormsH1 {
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       };
 
-      DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, scalar const_coeff, CubicSpline* c_spline,
-                               GeomType gt = HERMES_PLANAR)
-        : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt) 
-      { 
+      DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, scalar const_coeff,
+                               CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR)
+        : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
+      {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -546,27 +546,27 @@ namespace WeakFormsH1 {
       }
 
       virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                           Geom<double> *e, ExtData<scalar> *ext) const 
+                           Geom<double> *e, ExtData<scalar> *ext) const
       {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          } 
+            result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i])
+                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+          }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	          for (int i = 0; i < n; i++) {
-                    result += wt[i] * e->y[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                            * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	          }
+            for (int i = 0; i < n; i++) {
+                    result += wt[i] * e->y[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i])
+                              * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+            }
           }
           else {
-	          for (int i = 0; i < n; i++) {
-                    result += wt[i] * e->x[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                            * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	          }
+            for (int i = 0; i < n; i++) {
+                    result += wt[i] * e->x[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i])
+                              * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+            }
           }
         }
 
@@ -578,7 +578,7 @@ namespace WeakFormsH1 {
         Ord result = 0;
         // Planar base.
         for (int i = 0; i < n; i++) {
-          result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
+          result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i])
                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         }
         if (gt != HERMES_PLANAR) result = result * Ord(1);
@@ -605,7 +605,7 @@ namespace WeakFormsH1 {
     class DefaultResidualAdvection : public WeakForm::VectorFormVol
     {
     public:
-      DefaultResidualAdvection(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
+      DefaultResidualAdvection(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                                CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE,
                                CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), spline_coeff1(c_spline1), spline_coeff2(c_spline2), gt(gt)
@@ -616,12 +616,12 @@ namespace WeakFormsH1 {
         if (c_spline1 == HERMES_DEFAULT_SPLINE) this->spline_coeff1 = new CubicSpline(1.0);
         if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
       }
-      DefaultResidualAdvection(int i, Hermes::vector<std::string> areas, scalar const_coeff = 1.0, 
+      DefaultResidualAdvection(int i, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
                                CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE,
                                CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR)
-        : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), spline_coeff1(spline_coeff1), 
-                                             spline_coeff2(spline_coeff2), gt(gt) 
-      { 
+        : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), spline_coeff1(spline_coeff1),
+                                             spline_coeff2(spline_coeff2), gt(gt)
+      {
         if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
 
         // If spline1 == HERMES_DEFAULT_SPLINE or spline2 == HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -678,19 +678,19 @@ namespace WeakFormsH1 {
     class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultMatrixFormSurf(int i, int j, std::string area = HERMES_ANY, 
+      DefaultMatrixFormSurf(int i, int j, std::string area = HERMES_ANY,
                             scalar const_coeff = 1.0, DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                             GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormSurf(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+        : WeakForm::MatrixFormSurf(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
-      DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas, 
+      DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
                             scalar const_coeff, DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                             GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormSurf(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt) 
-      { 
+        : WeakForm::MatrixFormSurf(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -703,48 +703,48 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
         }
 
-	return const_coeff * result;
+  return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                       Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -758,7 +758,7 @@ namespace WeakFormsH1 {
         GeomType gt;
     };
 
-    /* Default surface matrix form \int_{area} const_coeff * spline_coeff'(u_ext[0]) * u_ext[0] * u * v 
+    /* Default surface matrix form \int_{area} const_coeff * spline_coeff'(u_ext[0]) * u_ext[0] * u * v
        + const_coeff * spline_coeff(u_ext[0]) * u * v dS
        spline_coeff... non-constant parameter given by a spline
     */
@@ -766,7 +766,7 @@ namespace WeakFormsH1 {
     class DefaultJacobianFormSurf : public WeakForm::MatrixFormSurf
     {
     public:
-      DefaultJacobianFormSurf(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
+      DefaultJacobianFormSurf(int i, int j, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                               CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
                               GeomType gt = HERMES_PLANAR)
         : WeakForm::MatrixFormSurf(i, j, area), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -774,11 +774,11 @@ namespace WeakFormsH1 {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
-      DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0, 
+      DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
                               CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
                               GeomType gt = HERMES_PLANAR)
-        : WeakForm::MatrixFormSurf(i, j, areas), const_coeff(const_coeff), spline_coeff(spline_coeff), gt(gt) 
-      { 
+        : WeakForm::MatrixFormSurf(i, j, areas), const_coeff(const_coeff), spline_coeff(spline_coeff), gt(gt)
+      {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -835,7 +835,7 @@ namespace WeakFormsH1 {
                             DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                             GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormSurf(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
-      { 
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -843,7 +843,7 @@ namespace WeakFormsH1 {
                             DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                             GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormSurf(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
-      { 
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -856,48 +856,48 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+      }
           }
         }
 
-	return const_coeff * result;
+  return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -971,7 +971,7 @@ namespace WeakFormsH1 {
                           DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                           GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormSurf(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
-      { 
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -979,7 +979,7 @@ namespace WeakFormsH1 {
                           DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
                           GeomType gt = HERMES_PLANAR)
         : WeakForm::VectorFormSurf(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
-      { 
+      {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
       }
@@ -992,48 +992,48 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
         }
 
-	return const_coeff * result;
+  return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	  }
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+    }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+      for (int i = 0; i < n; i++) {
+          result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+      }
           }
         }
 
-	return result;
+  return result;
       }
 
       // This is to make the form usable in rk_time_step().
@@ -1049,17 +1049,17 @@ namespace WeakFormsH1 {
   }
 
   namespace WeakForms {
-    
+
 /* Default weak form for the Laplace equation -Laplace u = 0. */
 
     class DefaultWeakFormLaplace : public WeakForm
     {
     public:
-      DefaultWeakFormLaplace(std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
-                             GeomType gt = HERMES_PLANAR) 
+      DefaultWeakFormLaplace(std::string area = HERMES_ANY, scalar const_coeff = 1.0,
+                             GeomType gt = HERMES_PLANAR)
         : WeakForm(), area(area), const_coeff(const_coeff), gt(gt)
       {
-        add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff, 
+        add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff,
                                                                             HERMES_DEFAULT_SPLINE, HERMES_SYM, gt));
       };
 
