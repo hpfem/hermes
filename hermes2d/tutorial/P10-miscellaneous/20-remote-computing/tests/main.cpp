@@ -16,22 +16,22 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double TEMP_INIT = 10;     // Temperature of the ground (also initial temperature).
 const double ALPHA = 10;         // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;       // Thermal conductivity of the material.
-const double HEATCAP = 1e6;      // Heat capacity.
+const double LAMBDA = 1e2;       // Thermal conductivity of the material.
+const double HEATCAP = 1e2;      // Heat capacity.
 const double RHO = 3000;         // Material density.
 const double T_FINAL = 18000;    // Length of time interval (24 hours) in seconds.
 
 // Global time variable.
 double current_time = 0;
 
-// Boundary markers.
-const std::string BDY_GROUND = "1", BDY_AIR = "2";
-
 // Weak forms.
 #include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -39,10 +39,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary air", INIT_REF_NUM_BDY);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst essential_bc(BDY_GROUND, TEMP_INIT);
+  DefaultEssentialBCConst essential_bc("Boundary ground", TEMP_INIT);
   EssentialBCs bcs(&essential_bc);
 
   // Initialize an H1 space with default shepeset.
@@ -54,17 +54,20 @@ int main(int argc, char* argv[])
   Solution tsln(&mesh, TEMP_INIT);
 
   // Initialize weak formulation.
-  CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+  CustomWeakFormHeatRK1 wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
                            &current_time, TEMP_INIT, T_FINAL, &tsln);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
@@ -76,28 +79,18 @@ int main(int argc, char* argv[])
 
   // Time stepping:
   int nsteps = (int)(T_FINAL/time_step + 0.5);
+  bool jacobian_changed = true;
   for(int ts = 1; ts <= nsteps; ts++)
   {
     info("---- Time step %d, time %3.5f", ts, current_time);
 
-    // First time assemble both the stiffness matrix and right-hand side vector,
-    // then just the right-hand side vector.
-    wf.set_current_time(current_time);
-    if (ts == 1) {
-      info("Assembling the stiffness matrix and right-hand side vector.");
-      dp.assemble(matrix, rhs);
-    }
-    else {
-      info("Assembling the right-hand side vector (only).");
-      dp.assemble(NULL, rhs);
-    }
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        jacobian_changed)) error("Newton's iteration failed.");
+    jacobian_changed = false;
 
-    // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
-    else 
-      error ("Matrix solver failed.\n");
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, &space, &tsln);
 
     if (ts % OUTPUT_FREQUENCY == 0) {
       Linearizer lin;

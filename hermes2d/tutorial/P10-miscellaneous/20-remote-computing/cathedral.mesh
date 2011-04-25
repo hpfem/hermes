@@ -35,21 +35,21 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 1 ],
-  [ 2, 3, 1 ],
-  [ 3, 7, 2 ],
-  [ 7, 12, 2 ],
-  [ 12, 14, 2 ],
-  [ 14, 11, 2 ],
-  [ 11, 6, 2 ],
-  [ 6, 10, 2 ],
-  [ 10, 5, 2 ],
-  [ 5, 9, 2 ],
-  [ 9, 13, 2 ],
-  [ 13, 8, 2 ],
-  [ 8, 4, 2 ],
-  [ 4, 0, 2 ]
+  [ 0, 1, "Boundary ground" ],
+  [ 1, 2, "Boundary ground" ],
+  [ 2, 3, "Boundary ground" ],
+  [ 3, 7, "Boundary air" ],
+  [ 7, 12, "Boundary air" ],
+  [ 12, 14, "Boundary air" ],
+  [ 14, 11, "Boundary air" ],
+  [ 11, 6, "Boundary air" ],
+  [ 6, 10, "Boundary air" ],
+  [ 10, 5, "Boundary air" ],
+  [ 5, 9, "Boundary air" ],
+  [ 9, 13, "Boundary air" ],
+  [ 13, 8, "Boundary air" ],
+  [ 8, 4, "Boundary air" ],
+  [ 4, 0, "Boundary air" ]
 ]
 
 
