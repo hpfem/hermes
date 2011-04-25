@@ -362,24 +362,23 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	  }
+	        for (int i = 0; i < n; i++) {
+	          result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+	        }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	    }
+	          for (int i = 0; i < n; i++) {
+  	            result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+	          }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
-	    }
+	          for (int i = 0; i < n; i++) {
+  	            result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * v->val[i];
+	          }
           }
         }
-
-	return const_coeff * result;
+	      return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
@@ -450,24 +449,23 @@ namespace WeakFormsH1 {
                            Geom<double> *e, ExtData<scalar> *ext) const {
         scalar result = 0;
         if (gt == HERMES_PLANAR) {
-	  for (int i = 0; i < n; i++) {
-	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	  }
+	        for (int i = 0; i < n; i++) {
+	          result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	        }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+	          for (int i = 0; i < n; i++) {
+  	            result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	          }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
-	    }
+	          for (int i = 0; i < n; i++) {
+  	            result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	          }
           }
         }
-
-	return const_coeff * result;
+	      return const_coeff * result;
       }
 
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
@@ -559,16 +557,16 @@ namespace WeakFormsH1 {
         }
         else {
           if (gt == HERMES_AXISYM_X) {
-	    for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	    }
+	          for (int i = 0; i < n; i++) {
+                    result += wt[i] * e->y[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
+	                            * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+	          }
           }
           else {
-	    for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	    }
+	          for (int i = 0; i < n; i++) {
+                    result += wt[i] * e->x[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
+	                            * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+	          }
           }
         }
 

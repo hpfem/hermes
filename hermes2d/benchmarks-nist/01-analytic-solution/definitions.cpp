@@ -79,7 +79,7 @@ public:
 
     // Residual.
     add_vector_form(new DefaultResidualDiffusion(0));
-    add_vector_form(new DefaultResidualVol(0, HERMES_ANY, -1.0, rhs));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -1.0, rhs));
   };
 };
 
