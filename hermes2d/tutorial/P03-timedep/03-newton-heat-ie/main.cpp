@@ -90,16 +90,16 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
+  bool jacobian_changed = true;
   do 
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
 
     // Perform Newton's iteration.
     bool verbose = true;
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-		      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {
-      error("Newton's iteration failed.");
-    }
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+	NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    jacobian_changed = false;
 
     // Update previous time level solution.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);

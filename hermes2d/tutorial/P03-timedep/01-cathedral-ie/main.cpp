@@ -98,7 +98,8 @@ int main(int argc, char* argv[])
     info("---- Time step %d, time %3.5f s", ts, current_time);
 
     // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed)) error("Newton's iteration failed.");
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        jacobian_changed)) error("Newton's iteration failed.");
     jacobian_changed = false;
 
     // Translate the resulting coefficient vector into the Solution sln.
