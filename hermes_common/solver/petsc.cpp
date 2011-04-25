@@ -28,6 +28,17 @@ static int num_petsc_objects = 0;
 
 CommandLineArgs cmd_line_args;
 
+inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[]){
+  VecGetValues(x, ni, ix, y);
+}
+
+void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],double y[]){
+  PetscScalar *py=new PetscScalar[ni];
+  VecGetValues(x, ni, ix, py);
+  for (int i=0;i<ni;i++) y[i]=py[i].real();
+  delete [] py;
+}
+
 int remove_petsc_object()
 {
   _F_  
@@ -411,7 +422,7 @@ void PetscVector<Scalar>::extract(Scalar *v) const {
 #ifdef WITH_PETSC
   int *idx = new int [this->size];
   for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
-  VecGetValues(vec, this->size, idx, (PetscScalar *) v);
+  vec_get_value(vec, this->size, idx, v);
   delete [] idx;
 #endif
 }
@@ -534,7 +545,7 @@ bool PetscLinearSolver<Scalar>::solve() {
   for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
   // copy solution to the output solution vector
-  VecGetValues(x, m->size, idx, (PetscScalar *) this->sln);
+  vec_get_value(x, m->size, idx, this->sln);
   delete [] idx;
 
   KSPDestroy(ksp);
