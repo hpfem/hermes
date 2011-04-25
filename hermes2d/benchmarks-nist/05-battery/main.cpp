@@ -4,7 +4,7 @@
 
 using namespace RefinementSelectors;
 
-//  This is the fifth in the series of NIST benchmarks, with unknown exact solution.
+//  This is the fifth in the series of NIST benchmarks with unknown exact solution.
 //
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.

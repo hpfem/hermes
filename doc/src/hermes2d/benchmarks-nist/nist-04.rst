@@ -15,9 +15,9 @@ Equation solved: Poisson equation
 
        -\Delta u = f.
 
-Domain of interest: Square $(0, 1)^2$.
+Domain of interest: Unit Square $(0, 1)^2$.
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -26,21 +26,25 @@ Exact solution
 
     u(x,y) = e^{-\alpha ((x - x_{loc})^{2} + (y - y_{loc})^{2})}
 
-where $(x_{loc}, y_{loc})$ is the location of the peak, 
+
+where $(x_{loc}, y_{loc})$ is the location of the peak, and 
 $\alpha$ determines the strength of the peak. 
 
-Right-hand side: Obtained by inserting the exact solution into the equation.
+Right-hand side: Obtained by inserting the exact solution into the latter equation.
 The corresponding code snippet is shown below::
 
-    template<typename Real>
-    Real rhs(Real x, Real y)
     {
-      Real a = (-ALPHA * pow((x - X_LOC), 2) - ALPHA*pow((y - Y_LOC), 2));
-      Real b = (2 * ALPHA * x - ALPHA);
-      Real c = (2 * ALPHA * y - ALPHA);
+    public:
+      CustomRightHandSide(double alpha, double x_loc, double y_loc)
+        : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc) {};
 
-      return exp(a) * pow(b,2) - 2 * ALPHA * exp(a) + exp(a) * pow(c,2) - 2 * ALPHA * exp(a);
+      virtual double value(double x, double y) const {
+        double a_P = (-alpha * pow((x - x_loc), 2) - alpha * pow((y - y_loc), 2));
+
+        return -(4 * exp(a_P) * alpha * (alpha * (x - x_loc) * (x - x_loc)
+                                      + alpha * (y - y_loc) * (y - y_loc) - 1));
     }
+
 
 Sample solution
 ~~~~~~~~~~~~~~~
