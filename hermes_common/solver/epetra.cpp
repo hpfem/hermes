@@ -241,6 +241,7 @@ void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, st
     double v_r = std::real<double>(v);
     int n_to_pass = n;
     int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
+    if (ierr != 0) error("Failed to insert into Epetra matrix");
     assert(ierr == 0);
     double v_i = std::imag<double>(v);
     ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);

@@ -318,6 +318,7 @@ bool NoxSolver<Scalar>::set_init_sln(EpetraVector<Scalar> *ic)
 #endif
 }
 
+#ifdef HAVE_NOX
 template<>
 void NoxSolver<double>::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver){
        const NOX::Epetra::Group &f_grp =
@@ -340,6 +341,7 @@ void NoxSolver<std::complex<double> >::get_final_solution(Teuchos::RCP<NOX::Solv
        this->sln = new std::complex<double>[n];
        memset(this->sln, 0, n * sizeof(std::complex<double>));
 }
+#endif
 
 template<typename Scalar>
 bool NoxSolver<Scalar>::solve()

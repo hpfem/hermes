@@ -191,13 +191,15 @@ void PetscMatrix<Scalar>::zero() {
 #endif
 }
 
-PetscScalar to_petsc(double x){  //unused
+#ifdef WITH_PETSC
+inline PetscScalar to_petsc(double x){  //unused
   return std::complex<double>(x,0);
 }
 
-PetscScalar to_petsc(std::complex<double> x){  //unused
+inline PetscScalar to_petsc(std::complex<double> x){  //unused
   return x;
 }
+#endif
 
 template<typename Scalar>
 void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {

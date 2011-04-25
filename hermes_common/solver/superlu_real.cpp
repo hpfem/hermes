@@ -17,6 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#ifdef WITH_SUPERLU
 #include"superlu.h"
 #include <slu_ddefs.h>
 
@@ -39,5 +40,6 @@ void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, S
                                                           int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype){
     dCreate_Dense_Matrix (X, m, n, (double*) x, ldx, stype, dtype, mtype);
 }
+#endif
 
 

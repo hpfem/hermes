@@ -33,9 +33,6 @@
   #ifdef WITH_MPI
     #include <mpi.h>
   #endif
-#endif
-
-template <typename Scalar> class MumpsSolver;
 
 template <typename Scalar> struct mumps_type;
 
@@ -49,6 +46,9 @@ struct mumps_type<double>{
   typedef DMUMPS_STRUC_C mumps_struct;
   typedef double mumps_scalar;
 };
+#endif
+
+template <typename Scalar> class MumpsSolver;
 
 
 template <typename Scalar>
@@ -87,7 +87,9 @@ protected:
   unsigned int nnz;          // Number of non-zero elements. 
   int *irn;         // Row indices.
   int *jcn;         // Column indices.
+#ifdef WITH_MUMPS
   typename mumps_type<Scalar>::mumps_scalar *Ax; // Matrix entries (column-wise).
+#endif
   int *Ai;          // Row indices of values in Ax.
   unsigned int *Ap;          // Index to Ax/Ai, where each column starts.
 
@@ -132,7 +134,9 @@ protected:
 template <typename Scalar>
 class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
 private:
+#ifdef WITH_MUMPS
   void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
+#endif
 public:
   MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
   virtual ~MumpsSolver();

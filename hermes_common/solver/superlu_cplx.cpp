@@ -17,6 +17,7 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#ifdef WITH_SUPERLU
 #include"superlu.h"
 #include <slu_zdefs.h>
 
@@ -40,4 +41,5 @@ void  SuperLUSolver<std::complex<double> >::solver_driver (superlu_options_t *op
                                           int *info){
   zgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, (mem_usage_t*) mem_usage, stat, info);
 }
+#endif
 

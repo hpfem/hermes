@@ -530,8 +530,10 @@ bool SuperLUSolver<Scalar>::check_status(unsigned int info)
   
 template<typename Scalar>
 SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
-  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), 
-      local_Ai(NULL), local_Ap(NULL), local_Ax(NULL), local_rhs(NULL)
+  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
+#ifdef WITH_SUPERLU  
+      ,local_Ax(NULL),local_rhs(NULL)
+#endif
 {
   _F_
 #ifdef WITH_SUPERLU
@@ -590,21 +592,24 @@ SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Sca
 }
 
 
-SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b){
+#ifdef WITH_SUPERLU
+inline SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b){
   a.r=b.real();
   a.i=b.imag();
   return a;
 }
 
-SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b){
+inline SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b){
   a=b;
   return a;
 }
+#endif
 
 template<typename Scalar>
 SuperLUSolver<Scalar>::~SuperLUSolver()
 {
   _F_
+#ifdef WITH_SUPERLU
   free_factorization_data();
   free_matrix();
   free_rhs();
@@ -613,6 +618,7 @@ SuperLUSolver<Scalar>::~SuperLUSolver()
   if (local_Ap)  delete [] local_Ap;
   if (local_Ax)  delete [] local_Ax;
   if (local_rhs) delete [] local_rhs;
+#endif
 }
 
 template<typename Scalar>

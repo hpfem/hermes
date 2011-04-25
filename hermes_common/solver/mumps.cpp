@@ -65,6 +65,7 @@ static int find_position(int *Ai, int Alen, int idx) {
 template<typename Scalar>
 MumpsMatrix<Scalar>::MumpsMatrix()
 {
+#ifdef WITH_MUMPS
   _F_
   nnz = 0;
   this->size = 0;
@@ -73,6 +74,9 @@ MumpsMatrix<Scalar>::MumpsMatrix()
   Ax = NULL;
   Ap = NULL;
   Ai = NULL;
+#else
+  error(MUMPS_NOT_COMPILED);
+#endif
 }
 
 template<typename Scalar>
@@ -85,6 +89,7 @@ MumpsMatrix<Scalar>::~MumpsMatrix()
 template<typename Scalar>
 void MumpsMatrix<Scalar>::alloc()
 {
+#ifdef WITH_MUMPS
   _F_
   assert(this->pages != NULL);
 
@@ -118,11 +123,15 @@ void MumpsMatrix<Scalar>::alloc()
     irn[i] = 1;
     jcn[i] = 1;
   }  
+#else
+  error(MUMPS_NOT_COMPILED);
+#endif
 }
 
 template<typename Scalar>
 void MumpsMatrix<Scalar>::free()
 {
+#ifdef WITH_MUMPS
   _F_
   nnz = 0;
   delete[] Ap; Ap = NULL;
@@ -130,15 +139,21 @@ void MumpsMatrix<Scalar>::free()
   delete[] Ax; Ax = NULL;
   delete[] irn; irn = NULL;
   delete[] jcn; jcn = NULL;
+#else
+  error(MUMPS_NOT_COMPILED);
+#endif
 }
 
+#ifdef WITH_MUMPS
 inline double mumps_to_scalar(double x){return x;}
 inline std::complex<double> mumps_to_scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r,x.i);}
+#endif
 
 template<typename Scalar>
 Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
+#ifdef WITH_MUMPS
   // Find m-th row in the n-th column.
   int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
   // Return 0 if the entry has not been found.
@@ -146,25 +161,33 @@ Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
   // Otherwise, add offset to the n-th column and return the value.
   if (mid >= 0) mid += Ap[n];
   return mumps_to_scalar(Ax[mid]);
+#else
+  return 0;
+#endif
 }
 
 template<typename Scalar>
 void MumpsMatrix<Scalar>::zero()
 {
   _F_
+#ifdef WITH_MUMPS
   memset(Ax, 0, sizeof(Scalar) * Ap[this->size]);
+#endif
 }
 
+#ifdef WITH_MUMPS
 inline ZMUMPS_COMPLEX& operator+=(ZMUMPS_COMPLEX &a,std::complex<double> b){
   a.r+=b.real();
   a.i+=b.imag();
   return a;
 }
+#endif
 
 template<typename Scalar>
 void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
 {
   _F_
+#ifdef WITH_MUMPS
   // WARNING: The additional condition v != 0.0 used in (Umfpack)Matrix<Scalar>
   //          produced an error in neutronics-2-group-adapt (although tutorial-07
   //          ran well).
@@ -178,6 +201,7 @@ void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
   Ax[pos] += v;
   irn[pos] = m + 1;  // MUMPS is indexing from 1
   jcn[pos] = n + 1;
+#endif
 }
 
 template<typename Scalar>
@@ -206,6 +230,7 @@ template<typename Scalar>
 bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
+#ifdef WITH_MUMPS
   // TODO
   switch (fmt) 
   {
@@ -248,6 +273,9 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
     default:
       return false;
   }
+#else
+  return false;
+#endif
 }
 
 template<typename Scalar>
@@ -300,15 +328,18 @@ void MumpsMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, MumpsMatrix<Sca
   }
 }
 
+#ifdef WITH_MUMPS
 inline ZMUMPS_COMPLEX& operator+=(ZMUMPS_COMPLEX &a,ZMUMPS_COMPLEX b){
   a.r+=b.r;
   a.i+=b.i;
   return a;
 }
+#endif
 
 template<typename Scalar>
 void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatrix<Scalar>* mat){
   _F_
+#ifdef WITH_MUMPS
   int idx;
   for (unsigned int col=0;col<mat->get_size();col++){
     for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++){
@@ -318,11 +349,14 @@ void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatr
       Ax[idx]+=mat->Ax[n];
     }
   }
+#endif
 }
 
   // Applies the matrix to vector_in and saves result to vector_out.
 template<typename Scalar>
 void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
+  _F_
+#ifdef WITH_MUMPS
   for(unsigned int i=0;i<this->size;i++){
     vector_out[i]=0;
   }
@@ -331,18 +365,24 @@ void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector
     a=mumps_to_scalar(Ax[i]);
     vector_out[jcn[i]]+=vector_in[irn[i]]*a;
   }
+#endif
 }
   // Multiplies matrix with a Scalar.
 template<>
 void MumpsMatrix<double>::multiply_with_scalar(double value){
+  _F_
+#ifdef WITH_MUMPS
   int n=nnz;
   for(int i=0;i<n;i++){
     Ax[i]=Ax[i]*value;
   }
+#endif
 }
 
 template<>
 void MumpsMatrix<std::complex<double> >::multiply_with_scalar(std::complex<double> value){
+  _F_
+#ifdef WITH_MUMPS
   int n=nnz;
   std::complex<double> a;
   for(int i=0;i<n;i++){
@@ -351,8 +391,10 @@ void MumpsMatrix<std::complex<double> >::multiply_with_scalar(std::complex<doubl
     Ax[i].r=a.real();
     Ax[i].i=a.imag();
   }
+#endif
 }
 
+#ifdef WITH_MUMPS
 inline void mumps_assign_scalar(ZMUMPS_COMPLEX & a,std::complex<double> b){
   a.r=b.real();
   a.i=b.imag();
@@ -361,10 +403,12 @@ inline void mumps_assign_scalar(ZMUMPS_COMPLEX & a,std::complex<double> b){
 inline void mumps_assign_scalar(double & a,double b){
   a=b;
 }
+#endif
 
   // Creates matrix using size, nnz, and the three arrays.
 template<typename Scalar>
 void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
+#ifdef WITH_MUMPS
   this->nnz = nnz;
   this->size = size;
   this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
@@ -383,10 +427,12 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
     this->Ai[i] = ai[i];
     irn[i]=ai[i];
   } 
+#endif
 }
   // Duplicates a matrix (including allocation).
 template<typename Scalar>
 MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
+#ifdef WITH_MUMPS
   MumpsMatrix<Scalar> * nmat=new MumpsMatrix<Scalar>();
 
   nmat->nnz = nnz;
@@ -406,6 +452,9 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate(){
     nmat->Ap[i]=Ap[i];
   }
   return nmat;
+#else
+  return NULL;
+#endif
 }
 
 // MumpsVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////

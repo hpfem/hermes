@@ -19,7 +19,10 @@
 
 #include "aztecoo.h"
 #include "../callstack.h"
+
+#ifdef HAVE_AZTECOO
 #include <Komplex_LinearProblem.h>
+#endif
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
