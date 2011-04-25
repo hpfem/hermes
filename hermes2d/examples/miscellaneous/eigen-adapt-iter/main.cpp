@@ -3,6 +3,9 @@
 #include <stdio.h>
 
 using namespace RefinementSelectors;
+using Teuchos::RCP;
+using Teuchos::rcp;
+using Hermes::EigenSolver;
 
 //  This example shows how one can perform adaptivity to a selected eigenfunction
 //  without calling the eigensolver again in each adaptivity step. The eigensolver 
@@ -30,11 +33,11 @@ int TARGET_EIGENFUNCTION = 2;                     // Desired eigenfunction: 1 fo
 
 int DIMENSION_SUBSPACE = 3;              	  // Dimension of the subspace to use, it should be greater or equal 
                                                   // to TARGET_EIGENFUNCTION.
-int ITERATIVE_METHOD = 3;                         // 1 = Newton, 2 = Picard, 3 = Eigensolver.
+int ITERATIVE_METHOD = 1;                         // 1 = Newton, 2 = Picard, 3 = Eigensolver.
 
 bool RECONSTRUCTION_ON = true;                    // Use eigenfunction reconstruction.
 
-int DIMENSION_TARGET_EIGENSPACE = 1;              // Dimension of the target eigenspace.
+int DIMENSION_TARGET_EIGENSPACE = 2;              // Dimension of the target eigenspace.
 
 int FIRST_INDEX_EIGENSPACE = 2;                   // Index of the first eigenfunction in the target eigenspace.
 
@@ -79,7 +82,7 @@ const double NEWTON_TOL = 1e-3;
 const int NEWTON_MAX_ITER = 10;
 const double PICARD_TOL = 1e-3;
 const int PICARD_MAX_ITER = 1000;
-const int USE_ORTHO = 0;
+const int USE_ORTHO = 1;
 const int USE_SHIFT = 0;
 
 // Boundary markers.
@@ -127,32 +130,28 @@ int main(int argc, char* argv[])
   // Initialize matrices and matrix solver.
   SparseMatrix* matrix_S = create_matrix(matrix_solver);
   SparseMatrix* matrix_M = create_matrix(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix_S);
+  //Solver* solver = create_linear_solver(matrix_solver, matrix_S);
 
-  // Assemble matrices S and M on coarse mesh.
-  info("Assembling matrices S and M on coarse mesh.");
+  // Assemble the matrices.
   bool is_linear = true;
   DiscreteProblem dp_S(&wf_S, &space, is_linear);
   dp_S.assemble(matrix_S);
   DiscreteProblem dp_M(&wf_M, &space, is_linear);
   dp_M.assemble(matrix_M);
-  
-  // Write matrix_S in MatrixMarket format.
-  write_matrix_mm("mat_S.mtx", matrix_S);
 
-  // Write matrix_M in MatrixMarket format.
-  write_matrix_mm("mat_M.mtx", matrix_M);
+  // Initialize matrices.
+  RCP<SparseMatrix> matrix_rcp_S = rcp(matrix_S);
+  RCP<SparseMatrix> matrix_rcp_M = rcp(matrix_M);
 
-  // Call Python eigensolver. Solution will be written to "eivecs.dat".
-  info("Calling Pysparse.");
-  char call_cmd[255];
-  // Compute the approximation of all discrete eigenfunctions corresponding to the eigenvlaue of the target eigenfunction
-  sprintf(call_cmd, "python solveGenEigenFromMtx.py mat_S.mtx mat_M.mtx %g %d %g %d", 
-	  PYSPARSE_TARGET_VALUE, DIMENSION_SUBSPACE, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
-  system(call_cmd);
+  EigenSolver es(matrix_rcp_S, matrix_rcp_M);
+  info("Calling Pysparse...");
+  es.solve(DIMENSION_SUBSPACE, PYSPARSE_TARGET_VALUE, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
   info("Pysparse finished.");
+  es.print_eigenvalues();
 
+  
   // Initialize subspace - coefficients for all computed eigenfunctions
+  double* coeff_vec = new double[ndof];
   double** coeff_space = new double*[DIMENSION_SUBSPACE];
   for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
     coeff_space[i] = new double[ndof];
@@ -160,26 +159,21 @@ int main(int argc, char* argv[])
 
   // Read solution vectors from file and visualize it.
   double* eigenval =new double[DIMENSION_SUBSPACE];
-  FILE *file = fopen("eivecs.dat", "r");
-  char line [64];                  // Maximum line size.
-  fgets(line, sizeof line, file);  // ndof
-  int n = atoi(line);            
-  if (n != ndof) error("Mismatched ndof in the eigensolver output file.");  
-  fgets(line, sizeof line, file);  // Number of eigenvectors in the file.
-  int neig = atoi(line);
-  if (neig != DIMENSION_SUBSPACE) error("Mismatched number of eigenvectors in the eigensolver output file.");  
+  
+  int neig = es.get_n_eigs();
+  //if (neig != DIMENSION_SUBSPACE) error("Mismatched number of eigenvectors in the eigensolver output file.");  
   for (int ieig = 0; ieig < neig; ieig++) {
     // Get next eigenvalue from the file
-    fgets(line, sizeof line, file);  // eigenval
-    eigenval[ieig] = atof(line);          
-    for (int i = 0; i < ndof; i++) {  
-      fgets(line, sizeof line, file);
-      coeff_space[ieig][i] = atof(line);
+    eigenval[ieig] = es.get_eigenvalue(ieig);         
+    int n;
+    es.get_eigenvector(ieig, &coeff_vec, &n);
+    for (int i = 0; i < ndof; i++){
+      coeff_space[ieig][i] = coeff_vec[i];
     }
     // Normalize the eigenvector.
     normalize((UMFPackMatrix*)matrix_M, coeff_space[ieig], ndof);
   }
-  fclose(file);
+  //fclose(file);
 
   // Retrieve desired eigenvalue.
   double lambda = eigenval[TARGET_EIGENFUNCTION-1];
@@ -196,6 +190,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
     delete [] coeff_space[i];
   }
+  delete [] coeff_vec;
 
   // Visualize the eigenfunction.
   info("Plotting initial eigenfunction on coarse mesh.");
@@ -274,9 +269,20 @@ int main(int argc, char* argv[])
 
     if (ITERATIVE_METHOD == 1) {
       // Newton's method on the reference mesh.
+      lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[0], ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[0], ndof_ref);
+      // Newton's method on the reference mesh for the first eigenfunction in the eigenspace.
       if(!solve_newton_eigen(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
-	  		     coeff_space_ref[TARGET_EIGENFUNCTION-1], lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
+	  		     coeff_space_ref[0], lambda, matrix_solver, NEWTON_TOL, NEWTON_MAX_ITER))
         error("Newton's method failed.");
+      for (int i = 1; i < DIMENSION_SUBSPACE; i++) {  
+        lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[i], ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[i], ndof_ref);
+        if(!solve_newton_eigen_ortho(ref_space, (UMFPackMatrix*)matrix_S_ref, (UMFPackMatrix*)matrix_M_ref, 
+	  		     coeff_space_ref[i], lambda, matrix_solver, PICARD_TOL, PICARD_MAX_ITER,USE_ORTHO,
+                             coeff_space_ref,i,DIMENSION_SUBSPACE))
+          error("Newton's method failed.");
+      }
     }
     else if (ITERATIVE_METHOD == 2) {
       lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_space_ref[0], ndof_ref)
@@ -295,6 +301,33 @@ int main(int argc, char* argv[])
       }
     }
     else {
+        // Initialize matrices.
+        /*RCP<SparseMatrix> matrix_rcp_S = rcp(matrix_S_ref);
+        RCP<SparseMatrix> matrix_rcp_M = rcp(matrix_M_ref);
+
+        EigenSolver es(matrix_rcp_S, matrix_rcp_M);
+        info("Calling Pysparse...");
+        es.solve(DIMENSION_SUBSPACE, PYSPARSE_TARGET_VALUE, PYSPARSE_TOL, PYSPARSE_MAX_ITER);
+        info("Pysparse finished.");
+        es.print_eigenvalues();
+        // Read solution vectors from file and visualize it.
+        double* coeff_vec_tmp = new double[ndof_ref];
+        double* eigenval =new double[DIMENSION_SUBSPACE];
+        int neig = es.get_n_eigs(); 
+        for (int ieig = 0; ieig < neig; ieig++) {
+          info("ieig: %d", ieig);
+          // Get next eigenvalue from the file
+          eigenval[ieig] = es.get_eigenvalue(ieig);  
+          int n;
+          es.get_eigenvector(ieig, &coeff_vec_tmp, &n);
+          for (int i = 0; i < ndof_ref; i++){
+            coeff_space_ref[ieig][i] = coeff_vec_tmp[i];
+          }
+          // Normalize the eigenvector.
+          normalize((UMFPackMatrix*)matrix_M_ref, coeff_space_ref[ieig], ndof_ref);
+        }
+        delete [] coeff_vec_tmp;*/
+        
         // Write matrix_S in MatrixMarket format.
         write_matrix_mm("mat_S.mtx", matrix_S_ref);
 
@@ -338,7 +371,6 @@ int main(int argc, char* argv[])
     for (int i = 0; i < DIMENSION_SUBSPACE; i++) { 
       Solution::vector_to_solution(coeff_space_ref[i], ref_space, &ref_sln_space[i]);
     }
-
     // Perform eigenfunction reconstruction.
     if (RECONSTRUCTION_ON == false) { 
       Solution::vector_to_solution(coeff_space_ref[TARGET_EIGENFUNCTION-1], ref_space, &ref_sln);
@@ -355,10 +387,6 @@ int main(int argc, char* argv[])
           coeff_vec_rec[j] += inners[i] * coeff_space_ref[FIRST_INDEX_EIGENSPACE-1+i][j];
         }
       }
-      normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_rec, ndof_ref);
-      lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_rec, ndof_ref)
-             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_rec, ndof_ref);
-      info("Reconstructed eigenvalue lambda: %.12f", lambda);
       Solution::vector_to_solution(coeff_vec_rec, ref_space, &ref_sln);
       delete [] coeff_vec_rec;
       delete [] inners;
