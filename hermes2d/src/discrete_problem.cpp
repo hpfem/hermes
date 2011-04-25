@@ -382,14 +382,12 @@ void DiscreteProblem::create_sparse_structure(SparseMatrix* mat, Vector* rhs,
 
 // Light version for linear problems.
 // The Table is here for optional weighting of matrix blocks in systems.
-void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs,
-                               bool force_diagonal_blocks, Table* block_weights)
+void DiscreteProblem::assemble(SparseMatrix* mat, Vector* rhs, bool force_diagonal_blocks, 
+                               bool add_dir_lift, Table* block_weights)
 {
   _F_
   scalar* coeff_vec = NULL;
-  bool add_dir_lift = false;
-  assemble(coeff_vec, mat, rhs, force_diagonal_blocks, 
-           add_dir_lift, block_weights);
+  assemble(coeff_vec, mat, rhs, force_diagonal_blocks, add_dir_lift, block_weights);
 }
 
 
@@ -419,7 +417,11 @@ void DiscreteProblem::convert_coeff_vec(scalar* coeff_vec, Hermes::vector<Soluti
       u_ext.push_back(external_solution_i);
     }
   }
-  else for (unsigned int i = 0; i < wf->get_neq(); i++) u_ext.push_back(NULL);
+  else {
+    for (unsigned int i = 0; i < wf->get_neq(); i++) {
+      u_ext.push_back(new Solution(spaces[i]->get_mesh(), 0.0));
+    }
+  }
 }
 
 void DiscreteProblem::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss) 

@@ -133,10 +133,10 @@ public:
 		bool force_diagonal_blocks = false, bool add_dir_lift = true, 
                 Table* block_weights = NULL);
 
-  /// Assembling for linear problems. Same as the previous functions, but
-  /// does not need the coeff_vector.
-  void assemble(SparseMatrix* mat, Vector* rhs = NULL, 
-                bool force_diagonal_blocks = false, Table* block_weights = NULL);
+  /// Light version passing NULL for the coefficient vector. External solutions 
+  /// are initialized with zeros.
+  void assemble(SparseMatrix* mat, Vector* rhs = NULL, bool force_diagonal_blocks = false, 
+                bool add_dir_lift = false, Table* block_weights = NULL);
 
   /// Assemble one stage.
   void assemble_one_stage(WeakForm::Stage& stage, 
