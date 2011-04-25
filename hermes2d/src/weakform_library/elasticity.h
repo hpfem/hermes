@@ -259,14 +259,14 @@ namespace WeakFormsElasticity {
 
   /* Multicomponent version */
 
-  class DefaultMultiComponentVolumetricMatrixFormLinearSym 
+  class DefaultJacobianElasticity_00_11 
     : public WeakForm::MultiComponentMatrixFormVol
   {
   public:
-    DefaultMultiComponentVolumetricMatrixFormLinearSym(
+    DefaultJacobianElasticity_00_11(
       Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, double lambda, double mu)
       : WeakForm::MultiComponentMatrixFormVol(coordinates, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
-    DefaultMultiComponentVolumetricMatrixFormLinearSym(
+    DefaultJacobianElasticity_00_11(
       Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area, double lambda, double mu)
       : WeakForm::MultiComponentMatrixFormVol(coordinates, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
@@ -304,13 +304,13 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 
-  class DefaultMultiComponentVolumetricResidualFormLinearSym : public WeakForm::MultiComponentVectorFormVol
+  class DefaultResidualElasticity_00_11 : public WeakForm::MultiComponentVectorFormVol
   {
   public:
-    DefaultMultiComponentVolumetricResidualFormLinearSym(
+    DefaultResidualElasticity_00_11(
       Hermes::vector<unsigned int> coordinates, double lambda, double mu)
       : WeakForm::MultiComponentVectorFormVol(coordinates), lambda(lambda), mu(mu) { }
-    DefaultMultiComponentVolumetricResidualFormLinearSym(
+    DefaultResidualElasticity_00_11(
       Hermes::vector<unsigned int> coordinates, std::string area, double lambda, double mu)
       : WeakForm::MultiComponentVectorFormVol(coordinates, area), lambda(lambda), mu(mu) { }
 
