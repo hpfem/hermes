@@ -1,4 +1,4 @@
 rm *~ 
-./schroedinger-eigen-iter
+./eigen-adapt-iter
 python plot_graph.py &
 

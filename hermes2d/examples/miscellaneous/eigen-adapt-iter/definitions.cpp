@@ -253,6 +253,102 @@ bool solve_newton_eigen(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMa
   return success;
 }
 
+bool solve_newton_eigen_ortho(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMFPackMatrix* matrix_M_ref, 
+                        double* coeff_vec_ref, double &lambda, MatrixSolverType matrix_solver,
+                        double newton_tol, int newton_max_iter, int use_ortho, double** coeff_space_ortho_ref, int index, int dim_space)
+{
+  Hermes2D hermes2D;
+
+  ScalarView sview("", new WinGeom(0, 0, 440, 350));
+  OrderView oview("", new WinGeom(450, 0, 410, 350));
+  int ndof_ref = matrix_M_ref->get_size();
+  double newton_err_rel;
+  UMFPackMatrix* matrix_augm = new UMFPackMatrix();  
+  UMFPackVector* vector_augm = new UMFPackVector(ndof_ref+1);
+  Solver* solver_augm = create_linear_solver(matrix_solver, matrix_augm, vector_augm);
+  Solution ref_sln_prev;
+  Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_prev);
+  bool success = true;
+  double inner;
+  int it = 1;
+  do {
+    // Check the number of iterations.
+    if (it >= newton_max_iter) {
+      success = false;
+      info("Newton's iteration not successful, returning false.");
+      break;
+    }
+
+    // Normalize the eigenvector.
+    //normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+    //info("Eigenvector mass product: %g", calc_mass_product((UMFPackMatrix*)matrix_M_ref, 
+    //                                     coeff_vec_ref, ndof_ref));
+
+    // Create the augmented matrix and vector for Newton.
+    //info("Creating augmented matrix and vector on reference mesh.");
+    create_augmented_linear_system(matrix_S_ref, matrix_M_ref, coeff_vec_ref, lambda, 
+                                   matrix_augm, vector_augm);
+
+    // Solve the augmented matrix problem.
+    //info("Solving augmented problem on reference mesh.");
+    if(!solver_augm->solve()) {
+      info("Matrix solver failed.\n");
+      success = false;
+      break;
+    }
+    double* increment = solver_augm->get_solution();
+
+    // Update the eigenfunction and eigenvalue.
+    //info("Updating reference solution.");
+    for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] += increment[i];
+    lambda += increment[ndof_ref];
+
+    // orthogonalize
+    if (use_ortho == 1) {
+      for (int j=0; j<index; j++){
+        inner = calc_inner_product((UMFPackMatrix*)matrix_M_ref, coeff_space_ortho_ref[j], coeff_vec_ref, ndof_ref);
+        for (int i=0; i<ndof_ref; i++) coeff_vec_ref[i] = coeff_vec_ref[i] - inner * coeff_space_ortho_ref[j][i];
+      }
+    }
+   
+    // Normalize
+    normalize((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
+    // Update the eigenvalue.
+    lambda = calc_mass_product((UMFPackMatrix*)matrix_S_ref, coeff_vec_ref, ndof_ref)
+             / calc_mass_product((UMFPackMatrix*)matrix_M_ref, coeff_vec_ref, ndof_ref);
+
+    // Calculate relative error of the increment.
+    Solution ref_sln_new;
+    Solution::vector_to_solution(coeff_vec_ref, ref_space, &ref_sln_new);
+    //newton_err_rel = calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+    newton_err_rel = hermes2D.calc_rel_error(&ref_sln_prev, &ref_sln_new, HERMES_H1_NORM) * 100;
+
+    // Updating reference solution.
+    ref_sln_prev.copy(&ref_sln_new);
+
+    // Debug.
+    //char title1[100];
+    //sprintf(title1, "Newton's iteration %d", it);
+    //sview.set_title(title1);
+    //sview.show(&ref_sln_prev);
+    //View::wait(HERMES_WAIT_KEYPRESS);
+
+    info("---- Newton iter %d, ndof %d, eigenvalue: %.12f, newton_err_rel %g%%", 
+         it++, ndof_ref, lambda, newton_err_rel);
+    //info("Eigenvalue increment: %.12f", increment[ndof_ref]);
+    //info("Eigenvalue: %.12f", lambda);
+  }
+  while (newton_err_rel > newton_tol);
+
+  // Clean up.
+  delete matrix_augm;
+  delete vector_augm;
+  delete solver_augm;
+
+  return success;
+}
+
 // This method always converges to the eigenvalue closest to the value of the argument lambda. 
 // This is possible because the spectrum of the problem is shifted in such a way that the sought 
 // eigenvalue comes to be very close to the origin where the method tends to converge.
