@@ -667,6 +667,8 @@ protected:
     LightArray<Func<Ord>*> cache_fn_ord;
   };
   AssemblingCaches assembling_caches;
+
+  friend class Hermes2D;
 };
 
 
