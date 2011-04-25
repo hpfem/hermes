@@ -59,9 +59,6 @@ const int NDOF_STOP = 100000;                     // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -79,7 +76,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), 0.0);
+  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -148,9 +145,6 @@ int main(int argc, char* argv[])
 
     // Time measurement.
     cpu_time.tick();
-
-    // Time measurement.
-    cpu_time.tick(HERMES_SKIP);
 
     EigenSolver es(matrix_left, matrix_right);
     info("Calling Pysparse...");

@@ -70,8 +70,10 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
     // FIXME - memory leak - create Projection class and encapsulate this function project_global(...)
     // maybe in more general form
     found[i] = 1;
-    proj_wf->add_matrix_form(new ProjectionMatrixVolForm(i, i, norm));
-    proj_wf->add_vector_form(new ProjectionVectorVolForm(i, source_meshfns[i], norm));
+    // Jacobian.
+    proj_wf->add_matrix_form(new ProjectionMatrixFormVol(i, i, norm));
+    // Residual.
+    proj_wf->add_vector_form(new ProjectionVectorFormVol(i, source_meshfns[i], norm));
   }
   for (int i=0; i < n; i++)
   {
