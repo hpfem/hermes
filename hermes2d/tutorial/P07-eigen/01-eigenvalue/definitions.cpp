@@ -12,7 +12,7 @@ class WeakFormEigenLeft : public WeakForm
 {
 public:
   WeakFormEigenLeft() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
     add_matrix_form(new MatrixFormPotential(0, 0));
   };
 
@@ -50,6 +50,6 @@ class WeakFormEigenRight : public WeakForm
 {
 public:
   WeakFormEigenRight() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearMass(0, 0));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0));
   };
 };

@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
     DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 

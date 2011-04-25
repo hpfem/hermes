@@ -15,7 +15,7 @@ public:
     matrix_form->ext.push_back(prev_iter_sln);
     add_matrix_form(matrix_form);
 
-    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, heat_src));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, heat_src));
   };
 
 private:

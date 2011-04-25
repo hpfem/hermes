@@ -17,13 +17,13 @@ public:
                        double* current_time_ptr, double temp_init, double t_final) : WeakForm(1)
   {
     // Jacobian volumetric part.
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, -lambda / (heatcap * rho)));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, -lambda / (heatcap * rho)));
 
     // Jacobian surface part.
     add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, -alpha / (heatcap * rho)));
 
     // Residual - volumetric.
-    add_vector_form(new DefaultResidualLinearDiffusion(0, HERMES_ANY, -lambda / (heatcap * rho)));
+    add_vector_form(new DefaultResidualDiffusion(0, HERMES_ANY, -lambda / (heatcap * rho)));
 
     // Residual - surface.
     add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap,

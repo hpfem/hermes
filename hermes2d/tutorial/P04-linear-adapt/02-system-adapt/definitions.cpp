@@ -3,12 +3,8 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-//using namespace Laplace;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-//using namespace WeakFormsH1::SurfaceMatrixForms;
-//using namespace WeakFormsH1::SurfaceVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Custom function that is used in the exact solution and in right-hand side */
 
@@ -48,11 +44,11 @@ public:
 
 /* Right-hand side */
 
-class CustomRightHandSide1: public DefaultNonConstRightHandSide
+class CustomRightHandSide1: public DefaultFunction
 {
 public:
   CustomRightHandSide1(double K, double d_u, double sigma)
-    : DefaultNonConstRightHandSide(), d_u(d_u), sigma(sigma) {
+    : DefaultFunction(), d_u(d_u), sigma(sigma) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
@@ -76,11 +72,11 @@ public:
   double d_u, sigma;
 };
 
-class CustomRightHandSide2: public DefaultNonConstRightHandSide
+class CustomRightHandSide2: public DefaultFunction
 {
 public:
   CustomRightHandSide2(double K, double d_v)
-    : DefaultNonConstRightHandSide(), d_v(d_v) {
+    : DefaultFunction(), d_v(d_v) {
     cef1 = new CustomExactFunction1();
     cef2 = new CustomExactFunction2(K);
   };
@@ -163,20 +159,25 @@ public:
 
 /* Weak forms */
 
+
+
 class WeakFormFitzHughNagumo : public WeakForm
 {
 public:
   WeakFormFitzHughNagumo(CustomRightHandSide1* rhs_1, CustomRightHandSide2* rhs_2)
           : WeakForm(2) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, D_u * D_u));
-    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, -1.0));
-    add_matrix_form(new DefaultLinearMass(0, 1, HERMES_ANY, rhs_1->sigma, HERMES_NONSYM));
-    add_matrix_form(new DefaultLinearMass(1, 0, HERMES_ANY, -1.0, HERMES_NONSYM));
-    add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, D_v * D_v));
-    add_matrix_form(new DefaultLinearMass(1, 1, HERMES_ANY, 1.0));
+    // Jacobian.
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, D_u * D_u));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, HERMES_ANY, -1.0));
+    add_matrix_form(new DefaultMatrixFormVol(0, 1, HERMES_ANY, rhs_1->sigma, HERMES_DEFAULT_FUNCTION, HERMES_NONSYM));
+    add_matrix_form(new DefaultMatrixFormVol(1, 0, HERMES_ANY, -1.0, HERMES_DEFAULT_FUNCTION, HERMES_NONSYM));
+    add_matrix_form(new DefaultJacobianDiffusion(1, 1, HERMES_ANY, D_v * D_v));
+    add_matrix_form(new DefaultMatrixFormVol(1, 1, HERMES_ANY, 1.0));
 
-
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs_1));
-    add_vector_form(new DefaultVectorFormNonConst(1, HERMES_ANY, rhs_2));
+    // Residual.
+    /*
+    add_vector_form(new CustomResidual_0(0, HERMES_ANY, D_u * D_u, rhs_1->sigma, rhs_1));
+    add_vector_form(new CustomResidual_1(0, HERMES_ANY, D_v * D_v, rhs_2));
+    */
   }
 };

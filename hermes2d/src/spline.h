@@ -27,7 +27,7 @@ public:
               bool first_der_left = true, bool first_der_right = true,
               bool extend_der_left = true, bool extend_der_right = true);
   /// Constructor (trivial constant case).
- CubicSpline(double const_value) : is_constant(true), const_value(const_value) { };
+  CubicSpline(double const_value) : is_constant(true), const_value(const_value) { };
 
   /// Destructor.
   ~CubicSpline() { 
@@ -80,7 +80,7 @@ protected:
   bool is_constant;
 
   /// Value for constant spline.
-  scalar const_value;
+  double const_value;
 
   /// Uses a bisection method to locale interval where a given point lies.
   /// Returns false if point lies outside.

@@ -14,11 +14,17 @@ public:
   : WeakForm(1) {
     scalar ii =  cplx(0.0, 1.0);
 
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_air,  1.0/mu_air));
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_iron, 1.0/mu_iron));
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_wire, 1.0/mu_wire));
-    add_matrix_form(new DefaultLinearMass(0, 0, mat_iron, ii * omega * gamma_iron));
+    // Jacobian.
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, mat_air,  1.0/mu_air));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, mat_iron, 1.0/mu_iron));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, mat_wire, 1.0/mu_wire));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, mat_iron, ii * omega * gamma_iron));
 
-    add_vector_form(new DefaultVectorFormConst(0, mat_wire, j_ext));
+    // Residual.
+    add_vector_form(new DefaultResidualDiffusion(0, mat_air, 1.0/mu_air));
+    add_vector_form(new DefaultResidualDiffusion(0, mat_iron, 1.0/mu_iron));
+    add_vector_form(new DefaultResidualDiffusion(0, mat_wire, 1.0/mu_wire));
+    add_vector_form(new DefaultVectorFormVol(0, mat_wire, -j_ext));
+    add_vector_form(new DefaultResidualVol(0, mat_iron, ii * omega * gamma_iron));
   };
 };

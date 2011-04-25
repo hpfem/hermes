@@ -67,20 +67,14 @@ const double J_EXT = 1e6;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
 
-// Boundary markers.
-const std::string BDY_NEUMANN = "Neumann";
-const std::string BDY_DIRICHLET = "Dirichlet";
-
-// Materials markers.
-const std::string MAT_AIR = "Air";
-const std::string MAT_IRON = "Iron";
-const std::string MAT_WIRE = "Wire";
-
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -103,8 +97,8 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakFormMagnetics wf(MAT_AIR, MU_0, MAT_IRON, MU_IRON, GAMMA_IRON, 
-                             MAT_WIRE, MU_0, scalar(J_EXT, 0.0), OMEGA);
+  CustomWeakFormMagnetics wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON, 
+                             "Wire", MU_0, scalar(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -139,24 +133,30 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Assemble the reference problem.
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-      
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
   
-    // Time measurement.
-    cpu_time.tick();
-
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
@@ -192,6 +192,8 @@ int main(int argc, char* argv[])
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
+    // Clean up.
+    delete [] coeff_vec;
     delete adaptivity;
     if (done == false)
       delete ref_space->get_mesh();

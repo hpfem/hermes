@@ -32,7 +32,9 @@ CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
 double CubicSpline::get_value(double x_in) 
 {  
   // For constant case.
-  if (this->is_constant) return this->const_value;
+  if (this->is_constant) {
+    return this->const_value;
+  }
 
   // For general case.
   int m = -1;

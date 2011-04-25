@@ -4476,8 +4476,8 @@ double Hermes2D::get_l2_norm(Vector* vec) const
 }
 
 bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-                            Vector* rhs, double newton_tol, int newton_max_iter, bool verbose,
-                            bool residual_as_function,
+                            Vector* rhs, bool jacobian_changed, double newton_tol, int newton_max_iter, 
+                            bool verbose, bool residual_as_function,
                             double damping_coeff, double max_allowed_residual_norm) const
 {
   // Prepare solutions for measuring residual norm.
@@ -4538,8 +4538,8 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
     // of iteration has been reached, then quit.
     if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
 
-    // Assemble the Jacobian matrix.
-    dp->assemble(coeff_vec, matrix, NULL); // NULL = we do not want the rhs.
+    // If Jacobian changed, assemble the matrix.
+    if (jacobian_changed) dp->assemble(coeff_vec, matrix, NULL); // NULL = we do not want the rhs.
 
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).

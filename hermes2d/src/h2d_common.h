@@ -105,7 +105,8 @@ public:
   double get_l2_norm(Vector* vec) const;
 
   bool solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solver, SparseMatrix* matrix,
-		    Vector* rhs, double NEWTON_TOL = 1e-8, int NEWTON_MAX_ITER = 100, bool verbose = false,
+		    Vector* rhs, bool jacobian_changed = true, double NEWTON_TOL = 1e-8, 
+                    int NEWTON_MAX_ITER = 100, bool verbose = false,
                     bool residual_as_function = false,
                     double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
 

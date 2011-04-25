@@ -4,12 +4,12 @@
 
 /* Essential boundary conditions */
 
-class EssentialBCNonConst : public EssentialBoundaryCondition {
+class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) 
+  CustomEssentialBCNonConst(std::string marker) 
            : EssentialBoundaryCondition(Hermes::vector<std::string>(marker)) { }
 
-  ~EssentialBCNonConst() {};
+  ~CustomEssentialBCNonConst() {};
 
   inline EssentialBCValueType get_value_type() const 
          { return EssentialBoundaryCondition::BC_FUNCTION; }

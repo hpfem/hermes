@@ -26,9 +26,6 @@ const double TARGET_VALUE = 2.0;                  // PySparse parameter: Eigenva
 const double TOL = 1e-10;                         // Pysparse parameter: Error tolerance.
 const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
 
-// Boundary markers.
-const std::string BDY = "Zero Dirichlet";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -45,7 +42,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DefaultEssentialBCConst bc_essential(BDY, 0.0);
+  DefaultEssentialBCConst bc_essential("Zero Dirichlet", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -62,10 +59,9 @@ int main(int argc, char* argv[])
   RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
 
   // Assemble the matrices.
-  bool is_linear = true;
-  DiscreteProblem dp_left(&wf_left, &space, is_linear);
+  DiscreteProblem dp_left(&wf_left, &space);
   dp_left.assemble(matrix_left.get());
-  DiscreteProblem dp_right(&wf_right, &space, is_linear);
+  DiscreteProblem dp_right(&wf_right, &space);
   dp_right.assemble(matrix_right.get());
 
   EigenSolver es(matrix_left, matrix_right);

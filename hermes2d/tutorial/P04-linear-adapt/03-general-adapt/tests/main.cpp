@@ -39,28 +39,6 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Problem parameters.
-double a_11(double x, double y) { if (y > 0) return 1 + x*x + y*y; else return 1;}
-double a_22(double x, double y) { if (y > 0) return 1; else return 1 + x*x + y*y;}
-double a_12(double x, double y) { return 1; }
-double a_21(double x, double y) { return 1;}
-double a_1(double x, double y) { return 0.0;}
-double a_2(double x, double y) { return 0.0;}
-double a_0(double x, double y) { return 0.0;}
-double rhs(double x, double y) { return 1 + x*x + y*y;}
-double g_D(double x, double y) { return -cos(M_PI*x);}
-double g_N(double x, double y) { return 0;}
-
-// Boundary markers.
-const std::string BDY_HORIZONTAL = "Boundary horizontal";
-const std::string BDY_VERTICAL = "Boundary vertical";
-
-// Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(double x, double y)
-{
-  return g_D(x, y);
-}
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -79,14 +57,14 @@ int main(int argc, char* argv[])
   mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  CustomEssentialBCNonConst bc_essential(BDY_HORIZONTAL);
+  CustomEssentialBCNonConst bc_essential("Boundary horizontal");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation.
-  CustomWeakFormGeneral wf;
+  CustomWeakFormGeneral wf("Boundary vertical");
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;

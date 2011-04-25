@@ -81,14 +81,14 @@ const double LAMBDA = 1;
 const double KAPPA = 1;
 const double K = 100;
 
-// Boundary markers.
-const std::string OUTER_BDY = "1";
-
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -97,13 +97,13 @@ int main(int argc, char* argv[])
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &u_mesh);
-  if (MULTI == false) u_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
+  if (MULTI == false) u_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
 
   // Create initial mesh (master mesh).
   v_mesh.copy(&u_mesh);
 
   // Initial mesh refinements in the v_mesh towards the boundary.
-  if (MULTI == true) v_mesh.refine_towards_boundary(OUTER_BDY, INIT_REF_BDY);
+  if (MULTI == true) v_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
 
   // Set exact solutions.
   ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
@@ -117,9 +117,9 @@ int main(int argc, char* argv[])
   WeakFormFitzHughNagumo wf(&rhs_1, &rhs_2);
   
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_u(OUTER_BDY, 0.0);
+  DefaultEssentialBCConst bc_u("Outer", 0.0);
   EssentialBCs bcs_u(&bc_u);
-  DefaultEssentialBCConst bc_v(OUTER_BDY, 0.0);
+  DefaultEssentialBCConst bc_v("Outer", 0.0);
   EssentialBCs bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.
@@ -154,28 +154,30 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = 
       Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    int ndof_ref = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces);
     dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
     
-    // Solve the linear system of the reference problem. If successful, obtain the solutions.
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces, 
-                                            Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
-    else error ("Matrix solver failed.\n");
-  
-    // Time measurement.
-    cpu_time.tick();
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
@@ -183,6 +185,8 @@ int main(int argc, char* argv[])
                                  Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
                                  Hermes::vector<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
+    cpu_time.tick();
+
     // View the coarse mesh solution and polynomial orders.
     s_view_0.show(&u_sln); 
     o_view_0.show(&u_space);
@@ -243,6 +247,7 @@ int main(int argc, char* argv[])
     if (Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;

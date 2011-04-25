@@ -49,7 +49,7 @@ namespace WeakFormsNeutronDiffusion
           add_matrix_form(new DefaultLinearMass(0, 0, regions[i], Sigma_a_map[i], HERMES_SYM));
           
           // Sources.
-          add_vector_form(new DefaultVectorFormConst(0, regions[i], Q_map[i]));
+          add_vector_form(new DefaultVectorFormVol(0, regions[i], Q_map[i]));
         }
       }
   };

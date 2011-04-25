@@ -15,10 +15,10 @@ public:
   CustomWeakFormHeatTransferNewton(CubicSpline* cspline, double heat_src)
         : WeakForm(1) {
     // Jacobian.
-    add_matrix_form(new DefaultJacobianNonlinearDiffusion(0, 0, HERMES_ANY, cspline));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, 1.0, cspline));
     // Residual.
-    add_vector_form(new DefaultResidualNonlinearDiffusion(0, HERMES_ANY, cspline));
-    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -heat_src));
+    add_vector_form(new DefaultResidualDiffusion(0, HERMES_ANY, 1.0, cspline));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -heat_src));
   };
 };
 

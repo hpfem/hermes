@@ -417,6 +417,94 @@ namespace WeakFormsH1 {
         GeomType gt;
     };
 
+    /* Default volumetric vector form \int_{area} const_coeff * function_coeff(x, y) * u_ext[0] * v d\bfx
+       const_coeff... constant number
+       function_coeff... (generally nonconstant) function of x, y
+    */
+
+    class DefaultResidualVol : public WeakForm::VectorFormVol
+    {
+    public:
+      DefaultResidualVol(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
+                           DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
+                           GeomType gt = HERMES_PLANAR)
+             : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), function_coeff(function_coeff), gt(gt) 
+      { 
+        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
+        if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+      }
+      DefaultResidualVol(int i, Hermes::vector<std::string> areas, scalar const_coeff = 1.0,
+                           DefaultFunction* f_coeff = HERMES_DEFAULT_FUNCTION,
+                           GeomType gt = HERMES_PLANAR)
+             : WeakForm::VectorFormVol(i, areas), const_coeff(const_coeff), function_coeff(function_coeff), gt(gt) 
+      { 
+        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
+        if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+      }
+
+      ~DefaultResidualVol() {
+        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+      };
+
+      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                           Geom<double> *e, ExtData<scalar> *ext) const {
+        scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+	  for (int i = 0; i < n; i++) {
+	    result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	  }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+	    for (int i = 0; i < n; i++) {
+  	      result += wt[i] * e->y[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	    }
+          }
+          else {
+	    for (int i = 0; i < n; i++) {
+  	      result += wt[i] * e->x[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	    }
+          }
+        }
+
+	return const_coeff * result;
+      }
+
+      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
+        Ord result = 0;
+        if (gt == HERMES_PLANAR) {
+	  for (int i = 0; i < n; i++) {
+	    result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	  }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+	    for (int i = 0; i < n; i++) {
+  	      result += wt[i] * e->y[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	    }
+          }
+          else {
+	    for (int i = 0; i < n; i++) {
+  	      result += wt[i] * e->x[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[0]->val[i] * v->val[i];
+	    }
+          }
+        }
+
+	return result;
+      }
+
+      // This is to make the form usable in rk_time_step().
+      virtual WeakForm::VectorFormVol* clone() {
+        return new DefaultResidualVol(*this);
+      }
+
+      private:
+        scalar const_coeff;
+        DefaultFunction* function_coeff;
+        GeomType gt;
+    };
+
     /* Default volumetric vector form \int_{area} const_coeff * spline_coeff(u_ext[0]) *
        \nabla u_ext[0] \cdot \nabla v d\bfx
        const_coeff... constant number
@@ -490,26 +578,12 @@ namespace WeakFormsH1 {
       virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                       Geom<Ord> *e, ExtData<Ord> *ext) const {
         Ord result = 0;
-        if (gt == HERMES_PLANAR) {
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                    * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-          }
-        }               
-        else {
-          if (gt == HERMES_AXISYM_X) {
-            for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	    }
-          }
-          else {
-	    for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
-	                      * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
-	    }
-          }
+        // Planar base.
+        for (int i = 0; i < n; i++) {
+          result += wt[i] * const_coeff * spline_coeff->get_value(u_ext[0]->val[i]) 
+                   * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
         }
+        if (gt != HERMES_PLANAR) result = result * Ord(1);
 
         return result;
       }
