@@ -85,7 +85,8 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration.
   bool verbose = true;
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
+  bool jacobian_changed = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
