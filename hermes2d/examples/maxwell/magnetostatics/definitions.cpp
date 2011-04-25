@@ -20,37 +20,16 @@ public:
                                double current_density, int order_inc = 3) 
     : WeakForm(1) {
 
-    /* AXISYM LINEAR
     // Jacobian.
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_air, 1.0, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_copper, 1.0, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_iron_1, 1/300.,  
-                                                               HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_iron_2, 1/300., 
-                                                               HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-
+    add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_air, material_copper),
+						      1.0, HERMES_DEFAULT_SPLINE, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
+    add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_iron_1, material_iron_2), 
+                                                      1.0, mu_inv_iron, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
     // Residual.
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_air, 1.0, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_copper, 1.0, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_iron_1, 1/300., HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_iron_2, 1/300., HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultVectorFormConst(0, material_copper, -current_density * mu_vacuum, HERMES_PLANAR));
-    */
-
-    // AXISYM NONLINEAR
-    // Jacobian.
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_air, 1.0, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultLinearMagnetostatics(0, 0, material_copper, 1.0, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultJacobianNonlinearMagnetostatics(0, 0, material_iron_1, mu_inv_iron, 1.0, 
-                                                               HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultJacobianNonlinearMagnetostatics(0, 0, material_iron_2, mu_inv_iron, 1.0, 
-                                                               HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-
-    // Residual.
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_air, 1.0, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualLinearMagnetostatics(0, material_copper, 1.0, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, material_iron_1, mu_inv_iron, 1.0, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualNonlinearMagnetostatics(0, material_iron_2, mu_inv_iron, 1.0, HERMES_AXISYM_Y, order_inc));
+    add_vector_form(new DefaultResidualMagnetostatics(0, Hermes::vector<std::string>(material_air, material_copper),
+                                                      1.0, HERMES_DEFAULT_SPLINE, HERMES_AXISYM_Y, order_inc));
+    add_vector_form(new DefaultResidualMagnetostatics(0, Hermes::vector<std::string>(material_iron_1, material_iron_2), 
+                                                      1.0, mu_inv_iron, HERMES_AXISYM_Y, order_inc));
     add_vector_form(new DefaultVectorFormConst(0, material_copper, -current_density * mu_vacuum, HERMES_PLANAR));
    };
 };

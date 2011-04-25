@@ -18,7 +18,7 @@
 // The following parameters can be changed:
 
 const int P_INIT = 6;                                      // Initial polynomial degree of all elements.
-const double NEWTON_TOL = 1e-6;                            // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-8;                            // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                           // Maximum allowed number of Newton iterations.
 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;           // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -30,7 +30,7 @@ const double nu = 0.3;                                     // Poisson ratio.
 const double rho = 8000.0;                                 // Density.
 const double g1 = -9.81;                                   // Gravitational acceleration.
 const double f0  = 0;                                      // Surface force in x-direction.
-const double f1  = 0; //8e4;                                    // Surface force in y-direction.
+const double f1  = 8e4;                                    // Surface force in y-direction.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -69,9 +69,6 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Initialize the solutions.
-  Solution u1_sln, u2_sln;
-
   // Initial coefficient vector for the Newton's method.  
   scalar* coeff_vec = new scalar[ndof];
   memset(coeff_vec, 0, ndof*sizeof(scalar));
@@ -82,6 +79,7 @@ int main(int argc, char* argv[])
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
+  Solution u1_sln, u2_sln;
   Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&u1_space, &u2_space), 
                                 Hermes::vector<Solution *>(&u1_sln, &u2_sln));
   
@@ -97,6 +95,7 @@ int main(int argc, char* argv[])
   View::wait();
 
   // Clean up.
+  delete [] coeff_vec;
   delete solver;
   delete matrix;
   delete rhs;

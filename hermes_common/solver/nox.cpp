@@ -117,7 +117,7 @@ bool NoxProblemInterface::computeF(const Epetra_Vector &x, Epetra_Vector &f, Fil
   delete [] coeff_vec;
 
 #ifndef HERMES_COMMON_COMPLEX
-  for(int i = 0; i < rhs.length(); i++)
+  for(unsigned int i = 0; i < rhs.length(); i++)
     f.ReplaceGlobalValue(0, i, rhs.get(i));
 #endif
 

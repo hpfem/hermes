@@ -7,10 +7,7 @@
 class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
   EssentialBCNonConst(std::string marker) 
-           : EssentialBoundaryCondition(Hermes::vector<std::string>())
-  {
-    markers.push_back(marker);
-  }
+           : EssentialBoundaryCondition(Hermes::vector<std::string>(marker)) { }
 
   ~EssentialBCNonConst() {};
 

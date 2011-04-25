@@ -17,17 +17,22 @@ public:
         : WeakForm(1)
   {
     // Jacobian form - volumetric.
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, lambda, HERMES_SYM, HERMES_AXISYM_Y));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, lambda, HERMES_DEFAULT_SPLINE,
+                                                 HERMES_SYM, HERMES_AXISYM_Y));
 
     // Jacobian form - surface.
-    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_heat_flux, alpha, HERMES_AXISYM_Y));
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_heat_flux, alpha, HERMES_DEFAULT_FUNCTION, 
+                                                   HERMES_AXISYM_Y));
 
     // Residual forms - volumetric.
-    add_vector_form(new DefaultResidualLinearDiffusion(0, HERMES_ANY, lambda, HERMES_AXISYM_Y));
+    add_vector_form(new DefaultResidualDiffusion(0, HERMES_ANY, lambda, HERMES_DEFAULT_SPLINE, 
+                                                 HERMES_AXISYM_Y));
 
     // Residual form - surface.
-    add_vector_form_surf(new DefaultResidualSurfConst(0, bdy_heat_flux, alpha, HERMES_AXISYM_Y));
-    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, -alpha * T0, HERMES_AXISYM_Y));
+    add_vector_form_surf(new DefaultResidualSurf(0, bdy_heat_flux, alpha, HERMES_DEFAULT_FUNCTION, 
+                                                 HERMES_AXISYM_Y));
+    add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, -alpha * T0, HERMES_DEFAULT_FUNCTION, 
+                                                   HERMES_AXISYM_Y));
   };
 };
 

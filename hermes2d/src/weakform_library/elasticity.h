@@ -27,12 +27,15 @@
 
 namespace WeakFormsElasticity {
 
-  class DefaultVolumetricMatrixFormLinear_x_x : public WeakForm::MatrixFormVol
+  /* Single-component version -- to be used for multimesh assembling */
+
+  class DefaultJacobianElasticity_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    DefaultVolumetricMatrixFormLinear_x_x(unsigned int i, unsigned int j, double lambda, double mu)
+    DefaultJacobianElasticity_0_0(unsigned int i, unsigned int j, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
-    DefaultVolumetricMatrixFormLinear_x_x(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+    DefaultJacobianElasticity_0_0(unsigned int i, unsigned int j, 
+                                          std::string area, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
@@ -48,7 +51,7 @@ namespace WeakFormsElasticity {
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext) const {
+                    Geom<Ord> *e, ExtData<Ord> *ext) const {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -56,12 +59,13 @@ namespace WeakFormsElasticity {
       double lambda, mu;
   };
 
-  class DefaultVolumetricMatrixFormLinear_x_y : public WeakForm::MatrixFormVol
+  class DefaultJacobianElasticity_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    DefaultVolumetricMatrixFormLinear_x_y(unsigned int i, unsigned int j, double lambda, double mu)
+    DefaultJacobianElasticity_0_1(unsigned int i, unsigned int j, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) {}
-    DefaultVolumetricMatrixFormLinear_x_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+    DefaultJacobianElasticity_0_1(unsigned int i, unsigned int j, 
+                                          std::string area, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
@@ -88,27 +92,31 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 
-  class DefaultVolumetricResidualFormLinear_x_y : public WeakForm::VectorFormVol
+  class DefaultResidualElasticity_0_0 : public WeakForm::VectorFormVol
   {
   public:
-    DefaultVolumetricResidualFormLinear_x_y(unsigned int i, double lambda, double mu)
+    DefaultResidualElasticity_0_0(unsigned int i, double lambda, double mu)
       : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
-    DefaultVolumetricResidualFormLinear_x_y(unsigned int i, std::string area, double lambda, double mu)
+    DefaultResidualElasticity_0_0(unsigned int i, std::string area, 
+                                            double lambda, double mu)
       : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
-    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const
     {
-      return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[1], v) +
-                 mu * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[1], v);
+      return (2*mu + lambda) * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
+                 mu * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const
     {
       return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                    Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
@@ -117,12 +125,112 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 
-  class DefaultVolumetricMatrixFormLinear_y_y : public WeakForm::MatrixFormVol
+  class DefaultResidualElasticity_0_1 : public WeakForm::VectorFormVol
   {
   public:
-    DefaultVolumetricMatrixFormLinear_y_y(unsigned int i, unsigned int j, double lambda, double mu)
+    DefaultResidualElasticity_0_1(unsigned int i, double lambda, double mu)
+      : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
+    DefaultResidualElasticity_0_1(unsigned int i, std::string area, 
+                                            double lambda, double mu)
+      : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const
+    {
+      return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[1], v) +
+                 mu * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[1], v);
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const
+    {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                    Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+
+  private:
+    double lambda, mu;
+  };
+
+  class DefaultResidualElasticity_1_0 : public WeakForm::VectorFormVol
+  {
+  public:
+    DefaultResidualElasticity_1_0(unsigned int i, double lambda, double mu)
+      : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
+    DefaultResidualElasticity_1_0(unsigned int i, std::string area, 
+                                            double lambda, double mu)
+      : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const
+    {
+      return mu * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
+             lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const
+    {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                    Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+
+  private:
+    double lambda, mu;
+  };
+
+  class DefaultResidualElasticity_1_1 : public WeakForm::VectorFormVol
+  {
+  public:
+    DefaultResidualElasticity_1_1(unsigned int i, double lambda, double mu)
+      : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
+    DefaultResidualElasticity_1_1(unsigned int i, std::string area, 
+                                            double lambda, double mu)
+      : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
+
+    template<typename Real, typename Scalar>
+    Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
+                       Geom<Real> *e, ExtData<Scalar> *ext) const
+    {
+      return (2*mu + lambda) * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[1], v) +
+                 mu * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[1], v);
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<scalar> *ext) const
+    {
+      return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+                    Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    }
+
+  private:
+    double lambda, mu;
+  };
+
+  class DefaultJacobianElasticity_1_1 : public WeakForm::MatrixFormVol
+  {
+  public:
+    DefaultJacobianElasticity_1_1(unsigned int i, unsigned int j, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) { }
-    DefaultVolumetricMatrixFormLinear_y_y(unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+    DefaultJacobianElasticity_1_1(unsigned int i, unsigned int j, 
+                                          std::string area, double lambda, double mu)
       : WeakForm::MatrixFormVol(i, j, area, HERMES_SYM), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
@@ -149,7 +257,10 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 
-  class DefaultMultiComponentVolumetricMatrixFormLinearSym : public WeakForm::MultiComponentMatrixFormVol
+  /* Multicomponent version */
+
+  class DefaultMultiComponentVolumetricMatrixFormLinearSym 
+    : public WeakForm::MultiComponentMatrixFormVol
   {
   public:
     DefaultMultiComponentVolumetricMatrixFormLinearSym(

@@ -21,17 +21,21 @@
 class HERMES_API CubicSpline
 {
 public:
-  /// Constructor.
+  /// Constructor (general case).
   CubicSpline(std::vector<double> points, std::vector<double> values, 
               double bc_left, double bc_right, 
               bool first_der_left = true, bool first_der_right = true,
               bool extend_der_left = true, bool extend_der_right = true);
+  /// Constructor (trivial constant case).
+ CubicSpline(double const_value) : is_constant(true), const_value(const_value) { };
 
   /// Destructor.
   ~CubicSpline() { 
-    delete [] coeffs;
-    points.clear();
-    values.clear();
+    if (is_constant == false) {
+      if (coeffs != NULL) delete [] coeffs;
+      points.clear();
+      values.clear();
+    }
   };
 
   /// Calculates coefficients.
@@ -50,9 +54,6 @@ public:
   /// For order calculation in Hermes.
   Ord get_value(Ord x_in) {return Ord(3);};
 
-  /// Gets value at a point that lies in interval 'm'.
-  double get_value_from_interval(double x_in, int m);
-
   /// Get first derivative at a given point.
   double get_derivative(double x_in);
 #ifdef H2D_COMPLEX
@@ -66,9 +67,6 @@ public:
   /// For order calculation in Hermes.
   Ord get_derivative(Ord x_in) {return Ord(2);};
 
-  /// Gets derivative at a point that lies in interval 'm'.
-  double get_derivative_from_interval(double x_in, int m);
-
   /// Plots the spline in format for Pylab (just pairs 
   /// x-coordinate and value per line). The interval of definition 
   /// of the spline will be extended by "extension" both to the left 
@@ -78,6 +76,12 @@ public:
   void plot(const char* filename, double extension, bool plot_derivative = false, int subdiv = 50);
 
 protected:
+  /// Flag indicating whether the spline is constant (simplified evaluation).
+  bool is_constant;
+
+  /// Value for constant spline.
+  scalar const_value;
+
   /// Uses a bisection method to locale interval where a given point lies.
   /// Returns false if point lies outside.
   bool find_interval(double x_in, int& m);
@@ -113,6 +117,12 @@ protected:
 
   /// A set of four coefficients a, b, c, d for an elementary cubic spline.
   SplineCoeff* coeffs;
+
+  /// Gets derivative at a point that lies in interval 'm'.
+  double get_derivative_from_interval(double x_in, int m);
+
+  /// Gets value at a point that lies in interval 'm'.
+  double get_value_from_interval(double x_in, int m);
 };
 
 #endif

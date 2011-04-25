@@ -139,6 +139,14 @@ enum ProjNormType
   HERMES_UNSET_NORM
 };
 
+// Splines.
+// (In weak forms, NULL spline is translated into a constant spline with value 1.0.)
+#define HERMES_DEFAULT_SPLINE      NULL
+
+// Functions.
+// (In weak forms, NULL function is translated into a constant function with value 1.0.)
+#define HERMES_DEFAULT_FUNCTION    NULL
+
 #ifdef HERMES_COMMON_COMPLEX
 
   #include <complex>
