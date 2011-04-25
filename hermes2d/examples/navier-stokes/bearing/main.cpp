@@ -160,10 +160,7 @@ int main(int argc, char* argv[])
     wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
-  bool is_linear;
-  if (NEWTON) is_linear = false;
-  else is_linear = true;
-  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -207,7 +204,8 @@ int main(int argc, char* argv[])
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+      bool jacobian_changed = true;
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
