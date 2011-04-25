@@ -40,7 +40,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double Re = 10.0;                           // Reynolds number.
+const double Re = 1.0;                            // Reynolds number.
 const double XVEL_TOP = 0.01;                     // Tangential velocity component on the top edge.
 
 // Weak forms.
@@ -137,7 +137,8 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration.
     info("Solving nonlinear problem:");
     bool verbose = true;
-    if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+    bool jacobian_changed = true;
+    if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
         NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solutions.

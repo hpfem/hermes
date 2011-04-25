@@ -22,12 +22,12 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 int PARAM = 3;         // PARAM determines which parameter values you wish to use 
-                       //            for the steepness and location of the wave front. 
-                       // #| name   |   ALPHA | X_LOC	| Y_LOC | R_ZERO
-                       // 0: mild		    20      -0.05  -0.05    0.7
-                       // 1: steep      1000    -0.05  -0.05    0.7
-                       // 2: asymmetric 1000     1.5    0.25    0.92
-                       // 3: well       50       0.5    0.5     0.25
+                       // for the steepness and location of the wave front. 
+                       //  | name       | ALPHA | X_LOC	| Y_LOC | R_ZERO
+                       // 0: mild         20      -0.05   -0.05    0.7
+                       // 1: steep        1000    -0.05   -0.05    0.7
+                       // 2: asymmetric   1000     1.5     0.25    0.92
+                       // 3: well         50       0.5     0.5     0.25
 
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.

@@ -1,9 +1,12 @@
 NIST-07 (Boundary Line Singularity)
-------------------
+-----------------------------------
 
 **Git reference:** Benchmark `nist-07 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-07>`_.
 
-This is a singularity problem with a solution that is singular along the left boundary.
+Many papers on testing adaptive algorithms use a 1D example with a singularity of the form $x^{\alpha}$
+at the left endpoint of the domain. This can be extended to 2D by simply making the solution be
+constant in $y$.
+
 
 Model problem
 ~~~~~~~~~~~~~
@@ -15,9 +18,9 @@ Equation solved: Poisson equation
 
        -\Delta u = f.
 
-Domain of interest: Square $(0, 1)^2$.
+Domain of interest: Unit Square $(0, 1)^2$
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -31,11 +34,14 @@ where $\alpha \geq 0.5$ determines the strength of the singularity.
 Right-hand side: Obtained by inserting the exact solution into the equation.
 The corresponding code snippet is shown below::
 
-    template<typename Real>
-    Real rhs(Real x, Real y)
     {
-      return (-0.24/(pow(x, 1.4)));
-    }
+    public:
+      CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
+
+      virtual double value(double x, double y) const {
+        return - alpha * (alpha - 1.) * pow(x, alpha - 2.);
+    } 
+
 
 Sample solution
 ~~~~~~~~~~~~~~~

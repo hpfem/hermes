@@ -22,7 +22,7 @@ using namespace Teuchos;
 
 const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
-const bool JFNK = true;                          // true = Jacobian-free method (for NOX),
+const bool TRILINOS_JFNK = true;                  // true = Jacobian-free method (for NOX),
                                                   // false = Newton (for NOX).
 const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
                                                   // default ML preconditioner in case of Newton.
@@ -85,14 +85,11 @@ int main(int argc, char **argv)
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
-  info("---- Assembling by DiscreteProblem, solving by %s:", MatrixSolverNames[matrix_solver].c_str());
+  info("---- Assembling by DiscreteProblem, solving by %s:", 
+       MatrixSolverNames[matrix_solver].c_str());
 
-  // Initialize the solution.
-  Solution sln1;
-  
   // Initialize the linear discrete problem.
-  bool is_linear = true;
-  DiscreteProblem dp1(&wf1, &space, is_linear);
+  DiscreteProblem dp1(&wf1, &space);
     
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -109,28 +106,24 @@ int main(int argc, char **argv)
   // Begin time measurement of assembly.
   cpu_time.tick(HERMES_SKIP);
 
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp1.assemble(matrix, rhs);
-  
-  // Record assembly time.
-  double time1 = cpu_time.tick().last();
-  cpu_time.reset();
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-  // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
-  if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln1);
-  else
-    error ("Matrix solver failed.\n");
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, &dp1, solver, matrix, rhs)) error("Newton's iteration failed.");
 
-  // CPU time needed by UMFpack to solve the matrix problem.
-  double time2 = cpu_time.tick().last();
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution sln1;
+  Solution::vector_to_solution(coeff_vec, &space, &sln1);
+
+  // CPU time measurement.
+  double time = cpu_time.tick().last();
 
   // Calculate errors.
   double rel_err_1 = hermes2d.calc_rel_error(&sln1, &exact, HERMES_H1_NORM) * 100;
-  info("Assembly time: %g s, matrix solver time: %g s.", time1, time2);
-  info("Xxact H1 error: %g%%.", rel_err_1);
+  info("CPU time: %g s.", time);
+  info("Exact H1 error: %g%%.", rel_err_1);
 
   delete(matrix);
   delete(rhs);
@@ -147,25 +140,16 @@ int main(int argc, char **argv)
   info("---- Assembling by DiscreteProblem, solving by NOX:");
 
   // Initialize the weak formulation for Trilinos.
-  bool is_matrix_free = JFNK;
-  WeakFormPoissonNox wf2(is_matrix_free);
+  WeakFormPoisson wf2(TRILINOS_JFNK);
   
   // Initialize DiscreteProblem.
-  is_linear = false;
-  DiscreteProblem dp2(&wf2, &space, is_linear);
+  DiscreteProblem dp2(&wf2, &space);
   
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
 
   // Set initial vector for NOX.
-  info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[ndof];
-  Solution* init_sln = new Solution(&mesh, 0.0);
-  OGProjection::project_global(&space, init_sln, coeff_vec);
-  delete init_sln;
-  
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
   
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
@@ -180,7 +164,7 @@ int main(int argc, char **argv)
   RCP<Precond> pc = rcp(new MlPrecond("sa"));
   if (PRECOND)
   {
-    if (JFNK) nox_solver.set_precond(pc);
+    if (TRILINOS_JFNK) nox_solver.set_precond(pc);
     else nox_solver.set_precond("ML");
   }
 
@@ -198,7 +182,7 @@ int main(int argc, char **argv)
   else error("NOX failed");
 
   // CPU time needed by NOX.
-  time2 = cpu_time.tick().last();
+  time = cpu_time.tick().last();
 
   // Show the NOX solution.
   ScalarView view2("Solution 2", new WinGeom(450, 0, 460, 350));
@@ -207,7 +191,7 @@ int main(int argc, char **argv)
 
   // Calculate errors.
   double rel_err_2 = hermes2d.calc_rel_error(&sln2, &exact, HERMES_H1_NORM) * 100;
-  info("Projection time: %g s, NOX assembly/solution time: %g s.", proj_time, time2);
+  info("CPU time: %g s.", time);
   info("Exact H1 error: %g%%.", rel_err_2);
  
   // Wait for all views to be closed.

@@ -128,10 +128,9 @@ int main(int argc, char* argv[])
     Solver* solver = create_linear_solver(matrix_solver, matrix_left.get());
 
     // Assemble the matrices on reference mesh.
-    bool is_linear = true;
-    DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space, is_linear);
+    DiscreteProblem* dp_left = new DiscreteProblem(&wf_left, ref_space);
     dp_left->assemble(matrix_left.get());
-    DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space, is_linear);
+    DiscreteProblem* dp_right = new DiscreteProblem(&wf_right, ref_space);
     dp_right->assemble(matrix_right.get());
 
     // Time measurement.

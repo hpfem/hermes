@@ -142,8 +142,9 @@ int main(int argc, char* argv[])
       // Newton's loop on the coarse mesh.
       info("Solving on coarse mesh:");
       bool verbose = true;
+      bool jacobian_changed = true;
       if (!hermes2d.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
-          NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+	  jacobian_changed, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
       Solution::vector_to_solution(coeff_vec_coarse, &space, &sln);
 
       // Cleanup after the Newton loop on the coarse mesh.
@@ -188,7 +189,7 @@ int main(int argc, char* argv[])
       info("Solving on fine mesh:");
       bool verbose = true;
       if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
-	  	        NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+	  jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Store the result in ref_sln.
       Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);

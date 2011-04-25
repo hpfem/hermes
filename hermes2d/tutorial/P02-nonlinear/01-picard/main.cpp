@@ -8,9 +8,9 @@ using namespace RefinementSelectors;
 //  This example uses the Picard's method to solve a nonlinear problem.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, -div[lambda(u)grad u] = heat_src
+//  conductivity, -div[lambda(u)grad u] - heat_src = 0
 //
-//  Picard's linearization: -div[lambda(u^n)grad u^{n+1}] = heat_src
+//  Picard's linearization: -div[lambda(u^n)grad u^{n+1}] - heat_src = 0
 //
 //  lambda(u)... nonlinear function, see file definitions.cpp,
 //  heat_src... constant.
@@ -33,9 +33,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double HEAT_SRC = 1.0;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -51,10 +48,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential(BDY_DIRICHLET, 0.0);
+  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

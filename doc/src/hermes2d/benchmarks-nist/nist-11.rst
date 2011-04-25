@@ -1,10 +1,11 @@
 NIST-11 (Intersecting Interfaces)
-------------------
+---------------------------------
 
 **Git reference:** Benchmark `nist-11 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-11>`_.
 
-The solution to this elliptic problems contains a severe singularity that poses a challenge to 
-adaptive methods. 
+The solution to this problem has a discontinuous derivative along the interfaces, and an infinite 
+derivative at the origin that posses a challenge to adaptive algorithms. 
+ 
 
 Model problem
 ~~~~~~~~~~~~~
@@ -15,70 +16,90 @@ Equation solved:
 
        -\nabla \cdot (a(x,y) \nabla u) = 0,
 
-where the parameter $a$ is piecewise-constant, $a(x,y) = R$ in the first and third quadrants and $a(x,y) = 1$ 
+Parameter $a$ is piecewise constant, $a(x,y) = R$ in the first and third quadrants, and $a(x,y) = 1$ 
 in the remaining two quadrants. 
 
-Domain of interest: Square $(-1, 1)^2$.
+Domain of interest: $(-1, 1)^2$.
 
-Right-hand side: $f(x,y) = 0$.
-
-Boundary conditions: Dirichlet given by exact solution. 
+Boundary conditions: Dirichlet, given by exact solution. 
 
 Exact solution
 ~~~~~~~~~~~~~~
 
 Quite complicated, see the code below::
 
-    // Problem constants.
-    const double R = 161.4476387975881;      // Equation parameter.
-    const double TAU = 0.1;                  // Equation parameter.
-    const double RHO = M_PI/4.;              // Equation parameter
-    const double SIGMA = -14.92256510455152; // Equation parameter
-
-    // Exact solution.
-    static double fn(double x, double y)
     {
-      double theta = atan2(y,x);
-      if (theta < 0) theta = theta + 2.*M_PI;
-      double r = sqrt(x*x + y*y);
+    public:
+      CustomExactSolution(Mesh* mesh, double sigma, double tau, double rho)
+          : ExactSolutionScalar(mesh), sigma(sigma), tau(tau), rho(rho) {
+      };
 
-      double mu;
-      if (theta <= M_PI/2.) {
-        mu = cos((M_PI/2. - SIGMA)*TAU) * cos((theta - M_PI/2. + RHO)*TAU);
-      }
-      else {
-        if (theta <= M_PI) {
-          mu = cos(RHO*TAU) * cos((theta - M_PI + SIGMA)*TAU);
-        }
-        else {
-          if (theta <= 3.*M_PI/2.) {
-            mu = cos(SIGMA*TAU) * cos((theta - M_PI - RHO)*TAU);
-          }
-          else {
-            mu = cos((M_PI/2. - RHO)*TAU) * cos((theta - 3.*M_PI/2. - SIGMA)*TAU);
-          }
-        }
-      }
+      virtual double value(double x, double y) const {
+        double theta = atan2(y,x);
+        if (theta < 0) theta = theta + 2.*M_PI;
+        double r = sqrt(x*x + y*y);
+        double mu;
 
-      return pow(r, TAU) * mu;
-    }
+        if (theta <= M_PI/2.)
+        mu = cos((M_PI/2. - sigma)*tau) * cos((theta - M_PI/2. + rho)*tau);
+        else if (theta <= M_PI)
+        mu = cos(rho*tau) * cos((theta - M_PI + sigma)*tau);
+        else if (theta <= 3.*M_PI/2.)
+        mu = cos(sigma*tau) * cos((theta - M_PI - rho)*tau);
+        else
+        mu = cos((M_PI/2. - rho)*tau) * cos((theta - 3.*M_PI/2. - sigma)*tau);
+
+        return pow(r, tau) * mu;
+      };
+
+      virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+        double theta = atan2(y,x);
+        if (theta < 0) theta = theta + 2*M_PI;
+        double r = sqrt(x*x + y*y);
+
+        // x-derivative
+        if (theta <= M_PI/2.)
+        dx = tau*x*pow(r, (2.*(-1 + tau/2.))) * cos((M_PI/2. - sigma)*tau) * cos(tau*(-M_PI/2. + rho + theta))
+          + (tau*y*pow(r, tau)*cos((M_PI/2. - sigma)*tau) * sin(tau*(-M_PI/2. + rho + theta))/(r*r));
+        else if (theta <= M_PI)
+        dx = tau*x * pow(r, (2.*(-1 + tau/2.))) * cos(rho*tau) * cos(tau*(-M_PI + sigma + theta))
+          + (tau*y * pow(r, tau) * cos(rho*tau) * sin(tau*(-M_PI + sigma + theta))/(r*r));
+        else if (theta <= 3.*M_PI/2.)
+        dx = tau*x * pow(r, (2.*(-1 + tau/2.))) * cos(sigma*tau) * cos(tau*(-M_PI - rho + theta))
+          + (tau*y * pow(r, tau) * cos(sigma*tau) * sin(tau*(-M_PI - rho + theta))/(r*r));
+        else
+        dx = tau*x* pow(r, (2*(-1 + tau/2.))) * cos((M_PI/2. - rho)*tau) * cos(tau*(-3.*M_PI/2. - sigma + theta))
+          + (tau*y*pow(r, tau) * cos((M_PI/2. - rho)*tau) * sin(tau*(-3.*M_PI/2. - sigma + theta))/(r*r));
+
+        // y-derivative
+        if (theta <= M_PI/2.)
+        dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos((M_PI/2. - sigma)*tau) * cos(tau*(-M_PI/2. + rho + theta))
+          - (tau * pow(r, tau) * cos((M_PI/2. - sigma)*tau) *sin(tau*(-M_PI/2. + rho + theta))*x/(r*r));
+        else if (theta <= M_PI)
+        dy = tau*y* pow(r, (2*(-1 + tau/2.))) * cos(rho*tau) * cos(tau*(-M_PI + sigma + theta))
+          - (tau * pow(r, tau) * cos(rho*tau) * sin(tau*(-M_PI + sigma + theta))*x/(r*r));
+        else if (theta <= 3.*M_PI/2.)
+        dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos(sigma*tau) * cos(tau*(-M_PI - rho + theta))
+          - (tau * pow(r, tau) * cos(sigma*tau) * sin(tau*(-M_PI - rho + theta))*x/(r*r));
+        else
+        dy = tau*y * pow(r, (2*(-1 + tau/2.))) * cos((M_PI/2. - rho)*tau) * cos(tau*(-3.*M_PI/2. - sigma + theta))
+           - (tau * pow(r, tau) * cos((M_PI/2. - rho)*tau) * sin(tau*((-3.*M_PI)/2. - sigma + theta))*x/(r*r));
+
+      };
+
 
 Weak forms
 ~~~~~~~~~~
 
 ::
 
-    // Weak forms
-    template<typename Real, typename Scalar>
-    Scalar bilinear_form_I_III(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      return R*int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-    }
-
-    template<typename Real, typename Scalar>
-    Scalar bilinear_form_II_IV(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return 1.*int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
+    public:
+      CustomWeakFormPoisson(std::string area_1, double r, std::string area_2) : WeakForm(1)
+      {
+        add_matrix_form(new DefaultLinearDiffusion(0, 0, area_1, r));
+        add_matrix_form(new DefaultLinearDiffusion(0, 0, area_2));
+      };
     }
 
 

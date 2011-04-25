@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
+  bool jacobian_changed = true;
   do {
     // Set current time for the time-dependent rhs.
     wf1.set_current_time(current_time);
@@ -97,19 +98,21 @@ int main(int argc, char* argv[])
 
     // Perform Newton's iteration for sdirk_stage_sol.
     bool verbose = true;
-    if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix,
-                        rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's iteration did not converge.");
+    // FIXME: One should use two different matrices for the two stages,
+    // and not re-assemble them in every time step.
+    if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix, rhs,
+	jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+      error("Newton's iteration did not converge.");
 
-      // Convert the vector coeff_vec1 into a Solution.
-      Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
+    // Convert the vector coeff_vec1 into a Solution.
+    Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
 
-    if (!hermes2d.solve_newton(coeff_vec2, &dp2, solver, matrix,
-                        rhs, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-        error("Newton's iteration did not converge.");
+    if (!hermes2d.solve_newton(coeff_vec2, &dp2, solver, matrix, rhs,
+        jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+      error("Newton's iteration did not converge.");
 
-      // Translate Y2 into a Solution.
-      Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
+    // Translate Y2 into a Solution.
+    Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
 
     // Update time.
     current_time += time_step;

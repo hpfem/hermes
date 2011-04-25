@@ -1,10 +1,11 @@
 NIST-01 (Analytic Solution)
-------------------
+---------------------------
 
 **Git reference:** Benchmark `nist-01 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-01>`_.
 
-This is a well behaved problem with a smooth solution that is suitable for testing 
-adaptive algorithm where adaptivity isn't really needed.
+The purpose of this benchmark is to observe how an adaptive algorithm behaves in a context where 
+adaptivity isn’t really needed (smooth solution). 
+
 
 Model problem
 ~~~~~~~~~~~~~
@@ -12,13 +13,13 @@ Model problem
 Equation solved: Poisson equation 
 
 .. math::
-    :label: line-sing
+    :label: NIST-1
 
        -\Delta u = f.
 
-Domain of interest: Square $(0, 1)^2$.
+Domain of interest: Unit Square $(0, 1)^2$.
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -27,24 +28,29 @@ Exact solution
 
     u(x,y) = 2^{4p}x^{p}(1-x)^{p}y^{p}(1-y)^p
 
-where $p$ determines the degree of the polynomial solution. 
+where parameter $p$ determines the degree of the polynomial solution. 
 
-Right-hand side: Obtained by inserting the exact solution into the equation.
+Right-hand side: Obtained by inserting the exact solution into the latter equation.
 The corresponding code snippet is shown below::
 
-    template<typename Real>
-    Real rhs(Real x, Real y)
     {
-      Real a = pow(2.0, 4.0*EXACT_SOL_P);
-      Real b = pow(x-1.0, 8.0);
-      Real c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
-      Real d = pow(y-1.0, EXACT_SOL_P);
-      Real e = pow(y-1.0, 8.0);
-      Real f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
-      Real g = pow(x-1.0, EXACT_SOL_P);
+    public:
+      CustomRightHandSide(double pol_deg)
+        : DefaultNonConstRightHandSide(), pol_deg(pol_deg) {};
 
-      return EXACT_SOL_P*a*pow(x, 8.0)*b*c*pow(y, EXACT_SOL_P)*d + EXACT_SOL_P*a*pow(y, 8.0)*e*f*pow(x,EXACT_SOL_P)*g;
+      virtual double value(double x, double y) const {
+        double a = pow(2.0, 4.0*pol_deg);
+        double b = pow(x-1.0, 8.0);
+        double c = (38.0*pow(x, 2.0) - 38.0*x + 9.0);
+        double d = pow(y-1.0, pol_deg);
+        double e = pow(y-1.0, 8.0);
+        double f = (38.0*pow(y, 2.0) - 38.0*y + 9.0);
+        double g = pow(x-1.0, pol_deg);
+
+        return -(pol_deg*a*pow(x, 8.0)*b*c*pow(y, pol_deg)*d
+             + pol_deg*a*pow(y, 8.0)*e*f*pow(x, pol_deg)*g);
     }
+
 
 Sample solution
 ~~~~~~~~~~~~~~~

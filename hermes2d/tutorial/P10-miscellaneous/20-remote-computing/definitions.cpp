@@ -3,9 +3,10 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1::VolumetricVectorForms;
 using namespace WeakFormsH1::SurfaceMatrixForms;
+using namespace WeakFormsH1::SurfaceVectorForms;
 
 class CustomWeakFormHeatRK1 : public WeakForm
 {
@@ -14,28 +15,41 @@ public:
                         double time_step, double* current_time_ptr, double temp_init, double t_final,
                         Solution* prev_time_sln) : WeakForm(1)
   {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, lambda));
-    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, heatcap * rho / time_step));
-    CustomVectorFormVolHeatRK1* vec_form_vol = new CustomVectorFormVolHeatRK1(0, heatcap, rho, time_step);
+    /* Jacobian */
+    // Contribution of the time derivative term.
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, HERMES_ANY, 1.0 / time_step));
+    // Contribution of the diffusion term.
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, lambda / (rho * heatcap)));
+    // Contribution of the Newton boundary condition.
+    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha / (rho * heatcap)));
+
+    // Residual.
+    // Contribution of the time derivative term.
+    add_vector_form(new DefaultResidualVol(0, HERMES_ANY, 1.0 / time_step));
+    // Contribution of the diffusion term.
+    add_vector_form(new DefaultResidualDiffusion(0, HERMES_ANY, lambda / (rho * heatcap)));
+    CustomVectorFormVol* vec_form_vol = new CustomVectorFormVol(0, time_step);
     vec_form_vol->ext.push_back(prev_time_sln);
     add_vector_form(vec_form_vol);
-
-    add_matrix_form_surf(new DefaultMatrixFormSurf(0, 0, bdy_air, alpha * lambda));
-    add_vector_form_surf(new CustomVectorFormSurfHeatRK1(0, bdy_air, alpha, lambda, current_time_ptr, temp_init, t_final));
+    // Contribution of the Newton boundary condition.
+    add_vector_form_surf(new DefaultResidualSurf(0, bdy_air, alpha / (rho * heatcap)));
+    // Contribution of the Newton boundary condition.
+    add_vector_form_surf(new CustomVectorFormSurf(0, bdy_air, alpha, rho, heatcap,
+                         current_time_ptr, temp_init, t_final));
   };
 
 private:
   // This form is custom since it contains previous time-level solution.
-  class CustomVectorFormVolHeatRK1 : public WeakForm::VectorFormVol
+  class CustomVectorFormVol : public WeakForm::VectorFormVol
   {
   public:
-    CustomVectorFormVolHeatRK1(int i, double heatcap, double rho, double time_step)
-      : WeakForm::VectorFormVol(i), heatcap(heatcap), rho(rho), time_step(time_step) { }
+    CustomVectorFormVol(int i, double time_step)
+      : WeakForm::VectorFormVol(i), time_step(time_step) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Func<Real>* temp_prev_time = ext->fn[0];
-      return heatcap * rho * int_u_v<Real, Scalar>(n, wt, temp_prev_time, v) / time_step;
+      return -int_u_v<Real, Scalar>(n, wt, temp_prev_time, v) / time_step;
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -46,23 +60,21 @@ private:
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
-    double alpha, heatcap, rho, time_step;
+    double time_step;
   };
 
   // This form is custom since it contains time-dependent exterior temperature.
-  class CustomVectorFormSurfHeatRK1 : public WeakForm::VectorFormSurf
+  class CustomVectorFormSurf : public WeakForm::VectorFormSurf
   {
-  private:
-      double h;
   public:
-    CustomVectorFormSurfHeatRK1(int i, std::string area, double alpha, double lambda,
+    CustomVectorFormSurf(int i, std::string area, double alpha, double rho, double heatcap,
                                 double* current_time_ptr, double temp_init, double t_final)
-      : WeakForm::VectorFormSurf(i, area), alpha(alpha), lambda(lambda), current_time_ptr(current_time_ptr),
+      : WeakForm::VectorFormSurf(i, area), alpha(alpha), rho(rho), heatcap(heatcap), current_time_ptr(current_time_ptr),
                                  temp_init(temp_init), t_final(t_final) { }
 
     template<typename Real, typename Scalar>
     Scalar vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      return lambda * alpha * temp_ext(*current_time_ptr + time_step) * int_v<Real>(n, wt, v);
+      return -alpha / (rho * heatcap) * temp_ext(*current_time_ptr + time_step) * int_v<Real>(n, wt, v);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -79,7 +91,7 @@ private:
       return temp_init + 10. * sin(2*M_PI*t/t_final);
     }
 
-    double alpha, lambda, *current_time_ptr, temp_init, t_final;
+    double alpha, rho, heatcap, *current_time_ptr, temp_init, t_final;
   };
 };
 

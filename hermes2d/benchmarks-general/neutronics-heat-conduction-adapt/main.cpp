@@ -302,7 +302,9 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   info("Newton's solve on the initial coarse meshes.");
   bool verbose = true;
-  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+  bool jacobian_changed = true;
+  if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+                    jacobian_changed, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
     error("Newton's iteration failed.");
   
   // Translate the resulting coefficient vector into the actual solutions. 
@@ -352,7 +354,8 @@ int main(int argc, char* argv[])
           // Perform Newton's iteration.
           info("Newton's solve on globally derefined meshes.");
           bool verbose = true;
-          if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+          if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse,
+              jacobian_changed, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
             error("Newton's iteration failed.");
           
           // Translate the resulting coefficient vector into the actual solutions. 
@@ -423,7 +426,8 @@ int main(int argc, char* argv[])
       // Perform Newton's iteration.
       info("Newton's solve on fine meshes.");
       bool verbose = true;
-      if (!solve_newton(coeff_vec, &dp, solver_fine, matrix_fine, rhs_fine, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
+      if (!solve_newton(coeff_vec, &dp, solver_fine, matrix_fine, rhs_fine, jacobian_changed, 
+          NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) 
         error("Newton's iteration failed.");
             
       // Translate the resulting coefficient vector into the actual solutions. 
@@ -443,7 +447,8 @@ int main(int argc, char* argv[])
         // Perform Newton's iteration.
         info("Newton's solve on coarse meshes.");
         bool verbose = true;
-        if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
+        if (!solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, 
+            rhs_coarse, jacobian_changed, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) 
           error("Newton's iteration failed.");
         
         // Translate the resulting coefficient vector into the actual solutions. 

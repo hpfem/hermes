@@ -105,7 +105,8 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration.
     info("Solving nonlinear problem:");
     bool verbose = true;
-    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+    bool jacobian_changed = true;
+    if (!solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
         NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solution.

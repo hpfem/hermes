@@ -13,13 +13,13 @@
 //      OpenGL processing. After fetching the file, you can use the methods
 //      ScalarView::Linearizer::load_data() and ScalarView::show_linearizer_data()
 //      on your local machine.
-//  The underlying model for computation is the tutorial example 09-timedep. 
+//  The underlying model for computation is the tutorial example P03-timedep/01-cathedral-ie. 
 
 int OUTPUT_FREQUENCY = 20;                        // Number of time steps between saving data.
 
-const int P_INIT = 4;                             // Polynomial degree of all mesh elements.
+const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
 const double time_step = 300.0;                   // Time step in seconds.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -27,22 +27,19 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double TEMP_INIT = 10;     // Temperature of the ground (also initial temperature).
 const double ALPHA = 10;         // Heat flux coefficient for Newton's boundary condition.
-const double LAMBDA = 1e5;       // Thermal conductivity of the material.
-const double HEATCAP = 1e6;      // Heat capacity.
+const double LAMBDA = 1e2;       // Thermal conductivity of the material.
+const double HEATCAP = 1e2;      // Heat capacity.
 const double RHO = 3000;         // Material density.
-const double T_FINAL = 18000;    // Length of time interval (24 hours) in seconds.
-
-// Global time variable.
-double current_time = 0;
-
-// Boundary markers.
-const std::string BDY_GROUND = "1", BDY_AIR = "2";
+const double T_FINAL = 18000;    // Length of time interval in seconds.
 
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -50,10 +47,19 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_AIR, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary air", INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary ground", INIT_REF_NUM_BDY);
+
+  // Previous time level solution (initialized by the external temperature).
+  Solution tsln(&mesh, TEMP_INIT);
+
+  // Initialize the weak formulation.
+  double current_time = 0;
+  CustomWeakFormHeatRK1 wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+                           &current_time, TEMP_INIT, T_FINAL, &tsln);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst essential_bc(BDY_GROUND, TEMP_INIT);
+  DefaultEssentialBCConst essential_bc("Boundary ground", TEMP_INIT);
   EssentialBCs bcs(&essential_bc);
 
   // Initialize an H1 space with default shepeset.
@@ -61,21 +67,18 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(&space);
   info("ndof = %d.", ndof);
 
-  // Initialize and set the initial condition.
-  Solution tsln(&mesh, TEMP_INIT);
-
-  // Initialize weak formulation.
-  CustomWeakFormHeatRK1 wf(BDY_AIR, ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
-                           &current_time, TEMP_INIT, T_FINAL, &tsln);
-
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
   // Initialize views.
   ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
@@ -87,28 +90,18 @@ int main(int argc, char* argv[])
 
   // Time stepping:
   int nsteps = (int)(T_FINAL/time_step + 0.5);
+  bool jacobian_changed = true;
   for(int ts = 1; ts <= nsteps; ts++)
   {
     info("---- Time step %d, time %3.5f", ts, current_time);
 
-    // First time assemble both the stiffness matrix and right-hand side vector,
-    // then just the right-hand side vector.
-    wf.set_current_time(current_time);
-    if (ts == 1) {
-      info("Assembling the stiffness matrix and right-hand side vector.");
-      dp.assemble(matrix, rhs);
-    }
-    else {
-      info("Assembling the right-hand side vector (only).");
-      dp.assemble(NULL, rhs);
-    }
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+        jacobian_changed)) error("Newton's iteration failed.");
+    jacobian_changed = false;
 
-    // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &tsln);
-    else 
-      error ("Matrix solver failed.\n");
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, &space, &tsln);
 
     if (ts % OUTPUT_FREQUENCY == 0) {
       Linearizer lin;
@@ -141,7 +134,8 @@ int main(int argc, char* argv[])
   info("Visualizing Linearizer data from file tsln_40.lin.");
 
   // First use ScalarView to read and show the Linearizer data.
-  ScalarView sview_1("Saved Linearizer data", new WinGeom(0, 0, 450, 600));
+  WinGeom* win_geom_1 = new WinGeom(0, 0, 450, 600);
+  ScalarView sview_1("Saved Linearizer data", win_geom_1);
   sview_1.lin.load_data("tsln_40.lin");
   sview_1.set_min_max_range(0,20);
   sview_1.fix_scale_width(3);
@@ -151,7 +145,8 @@ int main(int argc, char* argv[])
 
   Solution sln_from_file;
   sln_from_file.load("tsln_60.dat");
-  ScalarView sview_2("Saved Solution data", new WinGeom(460, 0, 450, 600));
+  WinGeom* win_geom_2 = new WinGeom(460, 0, 450, 600);
+  ScalarView sview_2("Saved Solution data", win_geom_2);
   sview_2.set_min_max_range(0,20);
   sview_2.fix_scale_width(3);
   sview_2.show(&sln_from_file);

@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
+  bool jacobian_changed = true;
   do 
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
@@ -118,27 +119,34 @@ int main(int argc, char* argv[])
     int it = 1;
     while (1)
     {
-      dp.assemble(coeff_vec, matrix, rhs, false);
-      
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      rhs->change_sign();
+      // First calculate the residual vector only.
+      dp.assemble(coeff_vec, NULL, rhs, false);
       
       // Calculate the l2-norm of residual vector.
       double res_l2_norm = get_l2_norm(rhs);
 
-      // Info for user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(Hermes::vector<Space *>(&tspace, &cspace)), res_l2_norm);
+      // Info for the user.
+      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
+           Space::get_num_dofs(Hermes::vector<Space *>(&tspace, &cspace)), res_l2_norm);
 
       // If l2 norm of the residual vector is within tolerance, or the maximum number 
       // of iteration has been reached, then quit.
       if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
 
-      // Solve the linear system and if successful, obtain the solutions.
-      if(!solver->solve())
-        error ("Matrix solver failed.\n");
+      // Assemble the Jacobian matrix.
+      if (jacobian_changed) {
+        dp.assemble(coeff_vec, matrix, NULL, false);
+        jacobian_changed = false;
+      }
 
-        // Add \deltaY^{n+1} to Y^n.
+      // Multiply the residual vector with -1 since the matrix 
+      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+      rhs->change_sign();
+
+      // Solve the linear system and if successful, obtain the solutions.
+      if(!solver->solve()) error ("Matrix solver failed.\n");
+
+      // Add \deltaY^{n+1} to Y^n.
       for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
       
       if (it >= NEWTON_MAX_ITER)

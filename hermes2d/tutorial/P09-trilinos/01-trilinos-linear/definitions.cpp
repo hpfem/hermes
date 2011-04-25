@@ -32,21 +32,13 @@ public:
 class WeakFormPoisson : public WeakForm
 {
 public:
-  WeakFormPoisson() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, -4.0));
-  };
-};
-
-/* Weak forms for NOX */
-
-class WeakFormPoissonNox : public WeakForm
-{
-public:
-  WeakFormPoissonNox(bool is_matfree) : WeakForm(1) {
+  WeakFormPoisson(bool is_matfree = false) : WeakForm(1) {
     this->is_matfree = is_matfree;
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultResidualLinearDiffusion(0));
-    add_vector_form(new DefaultVectorFormConst(0, 4.0));
+    // Jacobian.
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+    // Residual.
+    add_vector_form(new DefaultResidualDiffusion(0));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 4.0));
   };
 };
+

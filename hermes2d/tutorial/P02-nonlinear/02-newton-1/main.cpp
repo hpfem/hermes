@@ -64,8 +64,7 @@ int main(int argc, char* argv[])
   info("ndof: %d", ndof);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -85,7 +84,8 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration.
   bool verbose = true;
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
+  bool jacobian_changed = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
       NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.

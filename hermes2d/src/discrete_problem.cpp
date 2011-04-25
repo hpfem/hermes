@@ -30,15 +30,15 @@
 #include "views/base_view.h"
 #include "boundaryconditions/essential_bcs.h"
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, 
-         bool is_linear) : wf(wf), is_linear(is_linear), wf_seq(-1), spaces(spaces)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces) 
+  : wf(wf), is_linear(false), wf_seq(-1), spaces(spaces)
 {
   _F_
   init();
 }
 
-DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space, bool is_linear)
-   : wf(wf), is_linear(is_linear), wf_seq(-1)
+DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space)
+   : wf(wf), is_linear(false), wf_seq(-1)
 {
   _F_
   spaces.push_back(space);
@@ -4567,27 +4567,34 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
 
 // Perform Picard's iteration.
 bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                  MatrixSolverType matrix_solver, double picard_tol,
-                  int picard_max_iter, bool verbose) const
+                            MatrixSolverType matrix_solver, double picard_tol,
+                            int picard_max_iter, bool verbose) const
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(wf, space, is_linear);
+  DiscreteProblem dp(wf, space);
+
+  // Initial coefficient vector for the Newton's method.  
+  int ndof = Space::get_num_dofs(space);
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
   int iter_count = 0;
   while (true) {
-    // Assemble the stiffness matrix and right-hand side.
-    dp.assemble(matrix, rhs);
+    // Perform Newton's iteration to solve the linear problem.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) 
+        error("Newton's iteration failed.");
 
-    // Solve the linear system and if successful, obtain the solution.
+    // Translate the resulting coefficient vector into the Solution sln.
     Solution sln_new;
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), space, &sln_new);
-    else error ("Matrix solver failed.\n");
+    Solution::vector_to_solution(coeff_vec, space, &sln_new);
 
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
                        / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
@@ -4597,6 +4604,7 @@ bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
     // Stopping criterion.
     if (rel_error < picard_tol) {
       sln_prev_iter->copy(&sln_new);
+      delete [] coeff_vec;
       delete matrix;
       delete rhs;
       delete solver;
