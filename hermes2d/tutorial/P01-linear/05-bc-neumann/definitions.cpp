@@ -24,7 +24,7 @@ public:
     // Residual forms - volumetric.
     add_vector_form(new DefaultResidualDiffusion(0, mat_al, lambda_al));
     add_vector_form(new DefaultResidualDiffusion(0, mat_cu, lambda_cu));
-    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -vol_heat_src));
 
     // Residual forms - surface.
     add_vector_form_surf(new DefaultVectorFormSurf(0, bdy_heat_flux, -heat_flux));
