@@ -3,8 +3,9 @@ NIST-10 (Interior Line Singularity)
 
 **Git reference:** Benchmark `nist-10 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-10>`_.
 
-This is another example with anisotropic solution that is suitable for testing 
-anisotropic element refinements.
+This example is an extension of Boundary Line Singularity (NIST-07) with an anisotropic solution to allow 
+for a sloped line so that the singularity does not necessarily coincide with element edges. 
+
 
 Model problem
 ~~~~~~~~~~~~~
@@ -16,10 +17,9 @@ Equation solved: Poisson equation
 
        -\Delta u = f.
 
-Domain of interest: Square $(-1, 1)^2$.
+Domain of interest: $(-1, 1)^2$.
 
-Boundary conditions: Zero Neumann on left edge, Dirichlet given by the 
-exact solution on the rest of the boundary.
+Boundary conditions: Dirichlet, given by exact solution. 
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -34,10 +34,18 @@ where $K$ and $\alpha$ are real constants.
 Right-hand side: Obtained by inserting the exact solution into the equation.
 The corresponding code snippet is shown below::
 
-    scalar rhs(scalar x, scalar y)
     {
-      if (x < 0) return fn(x, y)*K*K;
-      else return fn(x, y)*K*K-ALPHA*(ALPHA-1)*pow(x, ALPHA - 2.) - K*K*pow(x, ALPHA);
+    public:
+      CustomRightHandSide(double k, double alpha)
+        : DefaultNonConstRightHandSide(), k(k), alpha(alpha) {
+        cef = new CustomExactFunction(k, alpha);
+    };
+
+    virtual double value(double x, double y) const {
+      if (x < 0) return cef->fn(x, y) * k * k;
+      else return cef->fn(x, y) * k * k
+                  - alpha *(alpha - 1) * pow(x, alpha - 2.)
+                  - k * k * pow(x, alpha);
     }
 
 Sample solution

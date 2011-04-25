@@ -1,25 +1,26 @@
 NIST-08 (Oscillatory)
-------------------
+---------------------
 
 **Git reference:** Benchmark `nist-08 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-08>`_.
 
-This is a wave function that satisfies a Schrodinger equation model of two 
-interacting atoms with highly oscillatory near the origin.
+This problem is inspired by the wave function that satisfies a Shrodinger equation model of two
+interacting atoms. It is highly oscillatory near the origin, with the wavelength decreasing closer
+to the origin. 
 
 Model problem
 ~~~~~~~~~~~~~
 
-Equation solved: 
+Equation solved: Hemholtz equation
 
 .. math::
 
        -\nabla^{2} u - \frac{1}{(\alpha + r)^{4}} u = f.
 
-where $r = \sqrt{x^{2} + y^{2}}$, $\alpha = \frac{1}{N \pi}$ determines the number of oscillations.
+where $r = \sqrt{x^{2} + y^{2}}$. The number of oscillations, $N$, is determined by the parameter $\alpha = \frac{1}{N \pi}$ 
 
-Domain of interest: Square $(0, 1)^2$.
+Domain of interest: Unit Square $(0, 1)^2$.
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -31,11 +32,29 @@ Exact solution
 Right-hand side: Obtained by inserting the exact solution into the equation.
 The corresponding code snippet is shown below::
 
-    template<typename Real>
-    Real rhs(Real x, Real y)
     {
-      return -sin(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4) + 2*cos(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(1.0/2.0))) + pow(x,2)*sin(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2))) + pow(y,2)*sin(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2))) - pow(x,2)*cos(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0))) - pow(y,2)*cos(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0))) - 2*pow(x,2)*cos(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2))) - 2*pow(y,2)*cos(1.0/(ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((ALPHA + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2)));
-    }
+    public:
+      CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
+
+      virtual scalar value(double x, double y) const {
+          return -sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)
+                 + 2*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(1.0/2.0)))
+                 + pow(x,2)*sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2)))
+                 + pow(y,2)*sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),4)*(pow(x,2) + pow(y,2)))
+                 - pow(x,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0)))
+                 - pow(y,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),2)*pow((pow(x,2) + pow(y,2)),(3.0/2.0)))
+                 - 2*pow(x,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2)))
+                 - 2*pow(y,2)*cos(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/(pow((alpha
+                 + pow((pow(x,2) + pow(y,2)),(1.0/2.0))),3)*(pow(x,2) + pow(y,2)));
+      }
+
 
 Sample solution
 ~~~~~~~~~~~~~~~

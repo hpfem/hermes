@@ -1,10 +1,9 @@
 NIST-02 (Reentrant Corner)
-------------------
+--------------------------
 
 **Git reference:** Benchmark `nist-02 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-02>`_.
 
-This is a standard benchmark for adaptive FEM algorithms.The exact solution is smooth
-but contains singular gradient in a re-entrant corner.
+This is a reentrant corner problem causing a singularity in the solution. 
 
 Model problem
 ~~~~~~~~~~~~~
@@ -12,13 +11,13 @@ Model problem
 Equation solved: Laplace equation 
 
 .. math::
-    :label: nist-2
+    :label: NIST-2
 
        -\Delta u = 0.
 
-Domain of interest: Square $(-1, 1)^2$ with a section removed from the clockwise side of positive $x$ axis.
+Domain of interest: $(-1, 1)^2$ with a section removed from the clockwise side of the positive $x$ axis.
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -27,23 +26,24 @@ Exact solution
 
     u(x, y) = r^{\alpha}\sin(\alpha \theta)
 
-where $\alpha = \pi / \omega$, $r = \sqrt{x^2+y^2}$ and $\theta = tan^{-1}(y/x)$, here $\omega$ determines 
+
+where $\alpha = \pi / \omega$, $r = \sqrt{x^2+y^2}$, and $\theta = tan^{-1}(y/x)$. Here $\omega$ determines 
 the angle of the re-entrant corner. 
 
 Material parameters
 ~~~~~~~~~~~~~~~~~~~
-This benchmark has four different versions, use the global variable PROB_PARAM below to switch among them.
+This benchmark has four different versions, we use the global variable PARAM (below) to switch among them.
 
 ::
 
-    // PROB_PARAM determines which parameter values you wish to use for the
-    // strength of the singularity in the current Reentrant Corner problem.
-    // PROB_PARAM      strength         OMEGA             ALPHA
-    //     0              1             5*Pi/4             4/5
-    //     1              2             3*Pi/2             2/3
-    //     2              3             7*Pi/4             4/7
-    //     3              4             2*Pi               1/2
-    int PROB_PARAM = 1;      
+    int PARAM = 1;     // PARAM determines which parameter values you wish to use for the strength of the singularity in
+                       // the current (nist-2) Reentrant Corner problem.
+                       // PARAM      strength         OMEGA            ALPHA
+                       // 0:            1             5*Pi/4           4/5
+                       // 1:            2             3*Pi/2           2/3
+                       // 2:            3             7*Pi/4           4/7
+                       // 3:            4             2*Pi             1/2
+
 
 Sample solution
 ~~~~~~~~~~~~~~~

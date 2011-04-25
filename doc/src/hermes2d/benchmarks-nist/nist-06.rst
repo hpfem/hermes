@@ -1,22 +1,23 @@
 NIST-06 (Boundary Layer)
------------------
+------------------------
 
 **Git reference:** Benchmark `nist-06 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-06>`_.
 
-This problem has an boundary layer along the right and top sides of the domain.
+This example is a singularly perturbed problem that exhibits a boundary layer along the right 
+and top sides of the domain. 
 
 Model problem
 ~~~~~~~~~~~~~
 
-Equation solved: Convection-diffusion equation with first order terms. 
+Equation solved: Convection-diffusion equation with first order terms.
 
 .. math::
 
        -\epsilon \nabla^{2} u + 2\frac{\partial u}{\partial x} + \frac{\partial u}{\partial y}= f.
 
-Domain of interest: Square $(-1, 1)^2$.
+Domain of interest: $(-1, 1)^2$.
 
-Boundary conditions: Dirichlet given by the exact solution.
+Boundary conditions: Dirichlet, given by exact solution.
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -27,21 +28,24 @@ Exact solution
 
 where $\epsilon$ determines the strength of the boundary layer. 
 
-Right-hand side: Obtained by inserting the exact solution into the equation.
+Right-hand side: Obtained by inserting the exact solution into the latter equation.
 The corresponding code snippet is shown below::
 
-    template<typename Real>
-    Real rhs(Real x, Real y)
     {
-      return -EPSILON*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/EPSILON))*(1 - exp(-(1 - y)/EPSILON))*cos(M_PI*(x + y)) + 
-             2*M_PI*(1 - exp(-(1 - x)/EPSILON))*exp(-(1 - y)/EPSILON)*sin(M_PI*(x + y))/EPSILON + 
-             2*M_PI*(1 - exp(-(1 - y)/EPSILON))*exp(-(1 - x)/EPSILON)*sin(M_PI*(x + y))/EPSILON - 
-             (1 - exp(-(1 - y)/EPSILON))*cos(M_PI*(x + y))*exp(-(1 - x)/EPSILON)/pow(EPSILON,2) - 
-             (1 - exp(-(1 - x)/EPSILON))*cos(M_PI*(x + y))*exp(-(1 - y)/EPSILON)/pow(EPSILON,2)) 
-             - 3*M_PI*(1 - exp(-(1 - x)/EPSILON))*(1 - exp(-(1 - y)/EPSILON))*sin(M_PI*(x + y)) - 
-             2*(1 - exp(-(1 - y)/EPSILON))*cos(M_PI*(x + y))*exp(-(1 - x)/EPSILON)/EPSILON - 
-             (1 - exp(-(1 - x)/EPSILON))*cos(M_PI*(x + y))*exp(-(1 - y)/EPSILON)/EPSILON;
-    }
+    public:
+      CustomRightHandSide(double epsilon) : DefaultNonConstRightHandSide(), epsilon(epsilon) {};
+
+      virtual double value(double x, double y) const{
+        return -epsilon*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))
+           + 2*M_PI*(1 - exp(-(1 - x)/epsilon))*exp(-(1 - y)/epsilon)*sin(M_PI*(x + y))/epsilon
+           + 2*M_PI*(1 - exp(-(1 - y)/epsilon))*exp(-(1 - x)/epsilon)*sin(M_PI*(x + y))/epsilon
+           - (1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/pow(epsilon,2)
+           - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/pow(epsilon,2))
+           - 3*M_PI*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*sin(M_PI*(x + y))
+           - 2*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - x)/epsilon)/epsilon
+           - (1 - exp(-(1 - x)/epsilon))*cos(M_PI*(x + y))*exp(-(1 - y)/epsilon)/epsilon;
+      }
+
 
 Sample solution
 ~~~~~~~~~~~~~~~

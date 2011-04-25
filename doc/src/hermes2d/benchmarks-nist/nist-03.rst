@@ -1,14 +1,15 @@
 NIST-03 (Linear Elasticity)
-------------------
+---------------------------
 
 **Git reference:** Benchmark `nist-03 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-03>`_.
 
-This is a coupled system of two equations with a mixed derivative for linear elasticity in the coupling term.
+This problem is a coupled system of two equations with a mixed derivative in the coupling term 
+(Lame equations); the context of the problem comes from the subject of linear elasticity. 
 
 Model problem
 ~~~~~~~~~~~~~
 
-Equation solved: Linear elasticity coupled system of two equations
+Equation solved: Coupled system of two equations
 
 .. math::
 
@@ -22,9 +23,9 @@ Equation solved: Linear elasticity coupled system of two equations
 
 where $F_{x} = F_{y} = 0$, $u$ and $v$ are the $x$ and $y$ displacements, $E$ is Young's Modulus, and $\nu$ is Poisson's ratio.
 
-Domain of interest: Square $(-1, 1)^2$ with a slit from $(0, 0)$ to $(1, 0)$.
+Domain of interest: $(-1, 1)^2$ with a slit from $(0, 0)$ to $(1, 0)$.
 
-Boundary conditions: Dirichlet given by exact solution. 
+Boundary conditions: Dirichlet, given by exact solution. 
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -38,7 +39,7 @@ Known exact solution for mode 1:
 
     v(x, y) = \frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))sin(\lambda \theta) + \lambda sin((\lambda - 2) \theta)].
 
-here \lambda = 0.5444837367825, Q = 0.5430755788367.
+here \lambda = 0.5444837367825, and Q = 0.5430755788367.
 
 Known exact solution for mode 2: 
 
@@ -50,8 +51,8 @@ Known exact solution for mode 2:
 
     v(x, y) = -\frac{1}{2G} r^{\lambda}[(k + Q(\lambda + 1))cos(\lambda \theta) + \lambda cos((\lambda - 2) \theta)].
 
-here \lambda = 0.9085291898461, Q = -0.2189232362488.
-Both in mode 1 and mode 2, $k = 3 - 4 \nu$, $G = E / (2(1 + \nu))$.
+here \lambda = 0.9085291898461, and Q = -0.2189232362488.
+Both in mode 1 and mode 2, $k = 3 - 4 \nu$, and $G = E / (2(1 + \nu))$.
 
 Sample solution
 ~~~~~~~~~~~~~~~

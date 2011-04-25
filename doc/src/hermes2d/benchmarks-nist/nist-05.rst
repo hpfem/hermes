@@ -1,4 +1,4 @@
-NIST-05 (Battery)
+NIST-05 (Battery):
 ------------------
 
 **Git reference:** Benchmark `nist-05 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-05>`_.
@@ -6,8 +6,10 @@ NIST-05 (Battery)
 Model problem
 ~~~~~~~~~~~~~
 
-This is a heat conduction problem in a nonhomogeneous material. It comes with an anisotropic solution and
-multiple singularities. The following sketch shows the geometry and different materials:
+This problem models heat conduction in a battery with nonhomogeneous materials. The solution has multiple 
+point singularities in the interior of the domain. The domain is the rectangle shown in the following figure; 
+the numbered regions indicate the areas of different material constants.
+
 
 .. image:: nist-05/battery_domain.png
    :align: center
@@ -21,7 +23,7 @@ Equation solved:
     -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
     -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f(x, y).
 
-Boundary conditions are zero Neumann on left edge, Newton on the rest of the boundary:
+Boundary conditions: Zero Neumann on left edge, and Newton on the rest of the boundary:
 
 .. math::
 
@@ -40,9 +42,9 @@ Boundary conditions are zero Neumann on left edge, Newton on the rest of the bou
     p(x, y)\frac{\partial u}{\partial x}\nu_1 + q(x, y)\frac{\partial u}{\partial y}\nu_2 + c(x, y)u = g_{bottom}(x, y) \ \mbox{on} \ \Gamma_{bottom}.
 
 
-Here $p(x, y)$, $q(x, y)$ and the right hand side $f(x, y)$ are constant coefficient functions in different materials.
+Here $p(x, y)$, $q(x, y)$, and the right hand side $f(x, y)$ are constant coefficient functions in different materials.
 
-Domain of interest: Square $(0, 8.4) \times (0, 24)$.
+Domain of interest: $(0, 8.4) \times (0, 24)$.
 
 Exact solution: Unknown. 
 

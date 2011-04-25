@@ -3,12 +3,12 @@
 Benchmarks (12 Problems from NIST Report NISTIR 7668)
 =====================================================
 
-This section contains dozen benchmarks with known exact solutions 
-from Bill's Mitchell  
+This section contains a dozen benchmark problems with known exact solutions 
+from Bill Mitchell's  
 `NIST report 7668 <http://math.nist.gov/~WMitchell/papers/easpaper.pdf>`_.
-These benchmarks are all "simple" elliptic equations in simple 
-geometries, and they exhibit various difficulties that pose 
-problems to adaptivity algorithms.
+The benchmarks are all "simple" elliptic equations in simple 
+geometries that exhibit various difficulties that pose 
+challanges to adaptive algorithms.
 
 .. toctree::
    :maxdepth: 2

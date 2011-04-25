@@ -22,12 +22,12 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 int PARAM = 1;         // PARAM determines which parameter values you wish to use for the strength of the singularity in
-                       // the current (nist-2)  Reentrant Corner problem.
-                       //       strength      OMEGA             ALPHA
-                       // 0:    1             5*Pi/4            4/5
-                       // 1:    2             3*Pi/2            2/3
-                       // 2:    3             7*Pi/4            4/7
-                       // 3:    4             2*Pi              1/2
+                       // the current (nist-2) Reentrant Corner problem.
+                       // PARAM      strength         OMEGA            ALPHA
+                       // 0:   		1             5*Pi/4           4/5
+                       // 1:    	2             3*Pi/2           2/3
+                       // 2:            3             7*Pi/4           4/7
+                       // 3:            4             2*Pi             1/2
 
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.

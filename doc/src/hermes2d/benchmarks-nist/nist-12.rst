@@ -1,61 +1,59 @@
 NIST-12 (Multiple Difficulties)
-------------------
+-------------------------------
 
 **Git reference:** Benchmark `nist-12 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/benchmarks/nist-12>`_.
 
 
-The solution to this elliptic problems contains four difficulties of different strengths into the same problem
-(nist-2, nist-4, nist-6 and nist-9).
+This problem combines four difficulties of different strengths into the same problem by combining 
+some of the features of the other test problems (reentrant corner, sharp peak, etc).
 
 
 Model problem
 ~~~~~~~~~~~~~
 
-Equation solved:
+Equation solved: Poisson equation
 
 .. math::
-    :label: Poisson
+    :label: NIST 12
 
        -\Delta u = f.
 
-Domain of interest: L-shaped domain $(-1,1) \times (-1,1)$ \ $(0,1) \times (-1,0)$.
+Domain of interest: L-shaped domain $(-1,1) \times (-1,1)$ \\ $(0,1) \times (-1,0)$.
+
+Boundary conditions: Dirichlet, given by exact solution.
 
 Right-hand side
 ~~~~~~~~~~~~~~~
 
-Quite complicated, see the code below::
+Quite complicated, see below::
 
-    // Problem parameters.                      
-    const double OMEGA_C = 3.0 * M_PI / 2.0;
+    {
+    public:
+      CustomRightHandSide(double alpha_p, double x_p, double y_p, double alpha_w, double x_w,
+                          double y_w, double omega_c, double r_0, double epsilon)
+        : DefaultNonConstRightHandSide(),
+          alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w),
+          omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
-    const double X_W = 0.0;
-    const double Y_W = -3.0 / 4.0;
-    const double R_0 = 3.0 / 4.0;
-    const double ALPHA_W = 200.0;
+      double value(double x, double y) const {
+        //For more elegant form please execute file "generate_rhs.py" 
 
-    const double X_P = -sqrt(5.0) / 4.0;
-    const double Y_P = -1.0 / 4.0;
-    const double ALPHA_P = 1000.0;
+        double a_P = (-alpha_p * pow((x - x_p), 2) - alpha_p * pow((y - y_p), 2));
 
-    const double EPSILON = 1.0 / 100.0;
+        double a_W = pow(x - x_w, 2);
+        double b_W = pow(y - y_w, 2);
+        double c_W = sqrt(a_W + b_W);
+        double d_W = ((alpha_w * x - (alpha_w * x_w)) * (2 * x - (2 * x_w)));
+        double e_W = ((alpha_w * y - (alpha_w * y_w)) * (2 * y - (2 * y_w)));
+        double f_W = (pow(alpha_w * c_W - (alpha_w * r_0), 2) + 1.0);
+        double g_W = (alpha_w * c_W - (alpha_w * r_0));
 
-    Real a_P = (-ALPHA_P * pow((x - X_P), 2) - ALPHA_P * pow((y - Y_P), 2));
+        return -(4 * exp(a_P) * alpha_p * (alpha_p * (x - x_p) * (x - x_p) + alpha_p * (y - y_p) * (y - y_p) - 1)
+               + ((alpha_w/(c_W * f_W)) - (d_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((alpha_w * d_W * g_W)/((a_W + b_W) * pow(f_W, 2)))
+               + (alpha_w/(c_W * f_W)) - (e_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((alpha_w * e_W * g_W)/((a_W + b_W) * pow(f_W, 2))))
+               + (1.0 / epsilon) * (1.0 / epsilon) * exp(-(1 + y) / epsilon));
+      }
 
-    Real a_W = pow(x - X_W, 2);
-    Real b_W = pow(y - Y_W, 2);
-    Real c_W = sqrt(a_W + b_W);
-    Real d_W = ((ALPHA_W * x - (ALPHA_W * X_W)) * (2 * x - (2 * X_W)));
-    Real e_W = ((ALPHA_W * y - (ALPHA_W * Y_W)) * (2 * y - (2 * Y_W)));
-    Real f_W = (pow(ALPHA_W * c_W - (ALPHA_W * R_0), 2) + 1.0);
-    Real g_W = (ALPHA_W * c_W - (ALPHA_W * R_0));
-
-    return 4 * exp(a_P) * ALPHA_P * (ALPHA_P * (x - X_P) * (x - X_P) + ALPHA_P * (y - Y_P) * (y - Y_P) - 1)
-           + ((ALPHA_W/(c_W * f_W)) - (d_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((ALPHA_W * d_W * g_W)/((a_W + b_W) * pow(f_W, 2)))
-           + (ALPHA_W/(c_W * f_W)) - (e_W/(2 * pow(a_W + b_W, 1.5) * f_W)) - ((ALPHA_W * e_W * g_W)/((a_W + b_W) * pow(f_W, 2))))
-           + (1.0 / EPSILON) * (1.0 / EPSILON) * exp(-(1 + y) / EPSILON);
-
-
-Boundary conditions: Dirichlet given by exact solution. 
 
 Exact solution
 ~~~~~~~~~~~~~~
@@ -67,21 +65,21 @@ Exact solution
               + tan^{-1}(\alpha_{W} (r_{W} - r_{0}))  
               + e^{-(1 - y) / \epsilon}.
 
-where $\alpha_C = \pi / \omega_C$, $r = \sqrt{x^2+y^2}$ and $\theta = tan^{-1}(y/x)$, here $\omega_C$ determines
+where $\alpha_C = \pi / \omega_C$, $r = \sqrt{x^2+y^2}$ and $\theta = tan^{-1}(y/x)$.  Here $\omega_C$ determines
 the angle of the re-entrant corner. \
 
-$(x_{P}, y_{P})$ is the location of the peak, $\alpha$ determines the strength of the peak. \
+$(x_{P}, y_{P})$ is the location of the peak, $\alpha$ determines the strength of the peak, \
 
-$r_{W} = \sqrt{(x - x_{W})^{2} + (y - y_{W})^{2}}$, here $(x_{W}, y_{W})$ is the center of the circular wave front,
+and $r_{W} = \sqrt{(x - x_{W})^{2} + (y - y_{W})^{2}}$. Here $(x_{W}, y_{W})$ is the center of the circular wave front.
 $r_{0}$ is the distance from the wave front to the center of the circle, and $\alpha_W$ gives the steepness of the wave front. \
 
-$\epsilon$ determines the strength of the boundary layer, the boundary layer was placed on $y = -1$.
+Last but not least, $\epsilon$ determines the strength of the boundary layer; the boundary layer was placed at $y = -1$.
 
 Sample solution
 ~~~~~~~~~~~~~~~
 
-Solution for $\omega_C = 3 \pi /2$, $(x_{W}, y_{W}) = (0, -3/4)$, $r_{0} = 3/4$, 
-$\alpha_{W} = 200$, $(x_{P}, y_{P}) = (\sqrt{5} / 4, -1/4)$, $\epsilon = 1/100$:
+Solution for $\omega_C = 3 \pi /2$,  $(x_{W}, y_{W}) = (0, -3/4)$,  $r_{0} = 3/4$, 
+$\alpha_{W} = 200$,  $(x_{P}, y_{P}) = (\sqrt{5} / 4, -1/4)$,  $\epsilon = 1/100$:
 
 .. image:: nist-12/solution.png
    :align: center
