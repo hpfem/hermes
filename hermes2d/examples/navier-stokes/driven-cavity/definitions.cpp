@@ -18,9 +18,9 @@ public:
                 y_vel_previous_time(y_vel_previous_time) {
     /* Jacobian terms - first velocity equation */
     // Time derivative in the first velocity equation.
-    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, 1./time_step));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, HERMES_ANY, 1./time_step));
     // Laplacian divided by Re in the first velocity equation.
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, 1./Re));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, 1./Re));
     // First part of the convective term in the first velocity equation.
     add_matrix_form(new BilinearFormNonsymVel_0_0(0, 0));
     // Second part of the convective term in the first velocity equation.
@@ -30,9 +30,9 @@ public:
 
     /* Jacobian terms - second velocity equation, continuity equation */
     // Time derivative in the second velocity equation.
-    add_matrix_form(new DefaultLinearMass(1, 1, HERMES_ANY, 1./time_step));
+    add_matrix_form(new DefaultMatrixFormVol(1, 1, HERMES_ANY, 1./time_step));
     // Laplacian divided by Re in the second velocity equation.
-    add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, 1./Re));
+    add_matrix_form(new DefaultJacobianDiffusion(1, 1, HERMES_ANY, 1./Re));
     // First part of the convective term in the second velocity equation.
     add_matrix_form(new BilinearFormNonsymVel_1_0(1, 0));
     // Second part of the convective term in the second velocity equation.
@@ -43,11 +43,11 @@ public:
     /* Residual - volumetric */
     // First velocity equation.
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Re, time_step);
-    F_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time);
+    F_0->ext.push_back(x_vel_previous_time);
     add_vector_form(F_0);
     // Second velocity equation.
     VectorFormNS_1* F_1 = new VectorFormNS_1(1, Re, time_step);
-    F_1->ext = Hermes::vector<MeshFunction*>(y_vel_previous_time);
+    F_1->ext.push_back(y_vel_previous_time);
     add_vector_form(F_1);
     // Continuity equation.
     VectorFormNS_2* F_2 = new VectorFormNS_2(2);
@@ -213,15 +213,18 @@ public:
       Func<scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++) {
         result += wt[i] * (
-           (xvel_prev_newton->val[i] - xvel_prev_time->val[i]) / time_step
+                             (xvel_prev_newton->val[i] - xvel_prev_time->val[i]) / time_step
                              + xvel_prev_newton->val[i] * xvel_prev_newton->dx[i]
-           + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]
-         ) * v->val[i];
+                             + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]
+			   ) * v->val[i];
       }
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Re
-         - p_prev_newton->val[i] * v->dx[i]);
+        result += wt[i] * ( 
+                            (xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Re
+                            - p_prev_newton->val[i] * v->dx[i]
+			    );
       }
+
       return result;
     }
 
@@ -231,13 +234,19 @@ public:
       Func<Ord>* xvel_prev_newton = u_ext[0];
       Func<Ord>* yvel_prev_newton = u_ext[1];
       Func<Ord>* p_prev_newton = u_ext[2];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Re
-                          - (p_prev_newton->val[i] * v->dx[i]));
-      for (int i = 0; i < n; i++)
-        result += wt[i] * ((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step
-                          + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i]
-                          + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * (
+                            (xvel_prev_newton->val[i] - xvel_prev_time->val[i]) / time_step
+                             + xvel_prev_newton->val[i] * xvel_prev_newton->dx[i]
+                             + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]
+			   ) * v->val[i];
+      }
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * (
+                            (xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Re
+                            - p_prev_newton->val[i] * v->dx[i]
+			   );
+      }
       return result;
     }
   protected:
@@ -258,14 +267,17 @@ public:
       Func<scalar>* yvel_prev_newton = u_ext[1];
       Func<scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++) {
-        result += wt[i] * (  (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) / time_step
+        result += wt[i] * (  
+                             (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) / time_step
                               + xvel_prev_newton->val[i] * yvel_prev_newton->dx[i]
-            + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]
-                          ) * v->val[i];
+                              + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]
+			     ) * v->val[i];
       }
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Re
-                          - (p_prev_newton->val[i] * v->dy[i]));
+        result += wt[i] * (
+                            (yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Re
+                            - p_prev_newton->val[i] * v->dy[i]
+			   );
       }
       return result;
     }
@@ -277,14 +289,17 @@ public:
       Func<Ord>* yvel_prev_newton = u_ext[1];
       Func<Ord>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++) {
-        result += wt[i] * (  (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) / time_step
+        result += wt[i] * (
+                             (yvel_prev_newton->val[i] - yvel_prev_time->val[i]) / time_step
                               + xvel_prev_newton->val[i] * yvel_prev_newton->dx[i]
-            + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]
-                          ) * v->val[i];
+                              + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]
+			  ) * v->val[i];
       }
       for (int i = 0; i < n; i++) {
-        result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Re
-                          - (p_prev_newton->val[i] * v->dy[i]));
+        result += wt[i] * (
+                            (yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Re
+                            - p_prev_newton->val[i] * v->dy[i]
+			   );
       }
       return result;
     }

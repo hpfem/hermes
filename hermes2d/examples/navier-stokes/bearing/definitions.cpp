@@ -189,6 +189,7 @@ public:
                    Solution* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
                    Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), 
                    y_vel_previous_time(y_vel_previous_time) {
+    // Jacobian
     BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_0);
     BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
@@ -209,11 +210,12 @@ public:
     BilinearFormNonsymYVelPressure* nonsym_vely_pressure_form = new BilinearFormNonsymYVelPressure(1, 2);
     add_matrix_form(nonsym_vely_pressure_form);
     
+    // Residual.
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
-    F_0->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    F_0->ext.push_back(x_vel_previous_time);
     add_vector_form(F_0);
     VectorFormNS_1* F_1 = new VectorFormNS_1(1, Stokes, Reynolds, time_step);
-    F_1->ext = Hermes::vector<MeshFunction*>(x_vel_previous_time, y_vel_previous_time);
+    F_1->ext.push_back(y_vel_previous_time);
     add_vector_form(F_1);
     VectorFormNS_2* F_2 = new VectorFormNS_2(2);
     add_vector_form(F_2);
@@ -440,7 +442,6 @@ public:
                          ExtData<scalar> *ext) const {
       scalar result = 0;
       Func<scalar>* xvel_prev_time = ext->fn[0];  
-      Func<scalar>* yvel_prev_time = ext->fn[1];
       Func<scalar>* xvel_prev_newton = u_ext[0];  
       Func<scalar>* yvel_prev_newton = u_ext[1];  
       Func<scalar>* p_prev_newton = u_ext[2];
@@ -458,7 +459,6 @@ public:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
-      Func<Ord>* yvel_prev_time = ext->fn[1];
       Func<Ord>* xvel_prev_newton = u_ext[0];  
       Func<Ord>* yvel_prev_newton = u_ext[1];  
       Func<Ord>* p_prev_newton = u_ext[2];
@@ -489,8 +489,7 @@ public:
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, 
                          ExtData<scalar> *ext) const {
       scalar result = 0;
-      Func<scalar>* xvel_prev_time = ext->fn[0];  
-      Func<scalar>* yvel_prev_time = ext->fn[1];
+      Func<scalar>* yvel_prev_time = ext->fn[0];
       Func<scalar>* xvel_prev_newton = u_ext[0];  
       Func<scalar>* yvel_prev_newton = u_ext[1];  
       Func<scalar>* p_prev_newton = u_ext[2];
@@ -506,9 +505,8 @@ public:
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      Ord result = 0;
-      Func<Ord>* xvel_prev_time = ext->fn[0];  
-      Func<Ord>* yvel_prev_time = ext->fn[1];
+      Ord result = 0;  
+      Func<Ord>* yvel_prev_time = ext->fn[0];
       Func<Ord>* xvel_prev_newton = u_ext[0];  
       Func<Ord>* yvel_prev_newton = u_ext[1];  
       Func<Ord>* p_prev_newton = u_ext[2];
@@ -517,7 +515,7 @@ public:
                   - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
+          result += wt[i] * (((yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step )
                             + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] 
                             + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
       return result;
