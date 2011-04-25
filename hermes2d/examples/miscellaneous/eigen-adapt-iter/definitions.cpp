@@ -11,7 +11,7 @@ class WeakFormS : public WeakForm
 {
 public:
   WeakFormS() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
   };
 };
 
@@ -19,7 +19,7 @@ class WeakFormM : public WeakForm
 {
 public:
   WeakFormM() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearMass(0, 0));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0));
   };
 };
 

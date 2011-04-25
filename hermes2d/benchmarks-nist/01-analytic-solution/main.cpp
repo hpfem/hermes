@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
 //
-//  PDE: -Laplace u = f.
+//  PDE: -Laplace u - f = 0.
 //
 //  Known exact solution; pow(2, 4*p) * pow(x, p) * pow(1-x, p) * pow(y, p) * pow(1-y, p).
 //  See functions fn() and fndd() in "exact_solution.cpp".
@@ -56,9 +56,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 double EXACT_SOL_P = 10;                          // The exact solution is a polynomial of degree 2*EXACT_SOL_P in the x-direction
                                                   // as well as in the y-direction. 
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -86,7 +83,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&rhs);
   
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -117,28 +114,30 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Set up the solver, matrix, and rhs according to the solver selection.
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble the reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
     Solution ref_sln;
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
-
-    // Time measurement.
-    cpu_time.tick();
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
@@ -188,6 +187,7 @@ int main(int argc, char* argv[])
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
