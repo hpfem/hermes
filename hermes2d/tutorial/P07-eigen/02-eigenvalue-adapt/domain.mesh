@@ -1,10 +1,11 @@
 # size of of the mesh
 a =  3.1415926535897931
+
 vertices = [
   [ 0, 0 ],    # vertex 0
   [ a, 0 ],    # vertex 1
   [ a, a ],    # vertex 2
-  [ 0, a ]    # vertex 3
+  [ 0, a ]     # vertex 3
 ]
 
 elements = [
@@ -12,9 +13,9 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 2 ],
-  [ 2, 3, 3 ],
-  [ 3, 0, 4 ]
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 3, "Bdy" ],
+  [ 3, 0, "Bdy" ]
 ]
 

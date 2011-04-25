@@ -13,9 +13,9 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, "Zero Dirichlet" ],
-  [ 1, 2, "Zero Dirichlet" ],
-  [ 2, 3, "Zero Dirichlet" ],
-  [ 3, 0, "Zero Dirichlet" ]
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 3, "Bdy" ],
+  [ 3, 0, "Bdy" ]
 ]
 
