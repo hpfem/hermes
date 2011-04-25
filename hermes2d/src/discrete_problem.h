@@ -53,8 +53,8 @@ friend class KellyTypeAdapt;
 
 public:
   /// Constructors.
-  DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces, bool is_linear = false);
-  DiscreteProblem(WeakForm* wf, Space* space, bool is_linear = false);
+  DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces);
+  DiscreteProblem(WeakForm* wf, Space* space);
 
   /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
   DiscreteProblem() : wf(NULL), pss(NULL) {num_user_pss = 0; sp_seq = NULL;}
