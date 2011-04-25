@@ -45,9 +45,9 @@ int main(int argc, char* argv[])
   Hermes2D hermes2d;
 
   // Define nonlinear magnetic permeability via a cubic spline.
-  Hermes::vector<double> mu_inv_pts(0.0,      0.5,      0.9,      1.0,      1.1,      1.2,      1.3,   
+  Hermes::vector<double> mu_inv_pts(0.0,      0.5,      0.9,      1.0,      1.1,      1.2,      1.3,
                                     1.4,      1.6,      1.7,      1.8,      1.9,      3.0,      5.0,     10.0);
-  Hermes::vector<double> mu_inv_val(1/1500.0, 1/1480.0, 1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0,  
+  Hermes::vector<double> mu_inv_val(1/1500.0, 1/1480.0, 1/1440.0, 1/1400.0, 1/1300.0, 1/1150.0, 1/950.0,
                                     1/750.0,  1/250.0,  1/180.0,  1/175.0,  1/150.0,  1/20.0,   1/10.0,  1/5.0);
   /*
   // This is for debugging (iron is assumed linear with mu_r = 300.0
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   Hermes::vector<double> mu_inv_val(1/300.0,   1/300.0);
   */
 
-  // Create the cubic spline (and plot it for visual control). 
+  // Create the cubic spline (and plot it for visual control).
   double bc_left = 0.0;
   double bc_right = 0.0;
   bool first_der_left = false;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   CubicSpline mu_inv_iron(mu_inv_pts, mu_inv_val, bc_left, bc_right, first_der_left, first_der_right,
                           extrapolate_der_left, extrapolate_der_right);
   info("Saving cubic spline into a Pylab file spline.dat.");
-  double interval_extension = 1.0; // The interval of definition of the spline will be 
+  double interval_extension = 1.0; // The interval of definition of the spline will be
                                    // extended by "interval_extension" on both sides.
   bool plot_derivative = false;
   mu_inv_iron.plot("spline.dat", interval_extension, plot_derivative);
@@ -92,9 +92,9 @@ int main(int argc, char* argv[])
   info("ndof: %d", Space::get_num_dofs(&space));
 
   // Initialize the weak formulation
-  int order_inc = 3; // This determines the increase of integration order 
+  int order_inc = 3; // This determines the increase of integration order
                      // for the axisymmetric term containing 1/r. Default is 3.
-  CustomWeakFormMagnetostatics wf(MAT_IRON_1, MAT_IRON_2, &mu_inv_iron, MAT_AIR, 
+  CustomWeakFormMagnetostatics wf(MAT_IRON_1, MAT_IRON_2, &mu_inv_iron, MAT_AIR,
                                   MAT_COPPER, MU_VACUUM, CURRENT_DENSITY, order_inc);
 
   // Initialize the FE problem.
@@ -108,17 +108,18 @@ int main(int argc, char* argv[])
   // Initialize the solution.
   Solution sln(&mesh, INIT_COND);
 
-  // Project the initial condition on the FE space to obtain initial 
+  // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  OGProjection::project_global(&space, &sln, coeff_vec, matrix_solver); 
+  OGProjection::project_global(&space, &sln, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration.
   bool verbose = true;
   bool residual_as_function = false;
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-			     NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function, 
+  bool jacobian_changed = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+           NEWTON_TOL, NEWTON_MAX_ITER, verbose, residual_as_function,
                              NEWTON_DAMPING)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
@@ -132,7 +133,7 @@ int main(int argc, char* argv[])
 
   // Visualise the solution and mesh.
   ScalarView s_view1("Vector potencial", new WinGeom(0, 0, 350, 450));
-  FilterVectorPotencial vector_potencial(Hermes::vector<MeshFunction *>(&sln, &sln), 
+  FilterVectorPotencial vector_potencial(Hermes::vector<MeshFunction *>(&sln, &sln),
                                          Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
   s_view1.show_mesh(false);
   s_view1.show(&vector_potencial);
