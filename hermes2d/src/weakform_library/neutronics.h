@@ -42,14 +42,19 @@ namespace WeakFormsNeutronDiffusion
         
         for (unsigned int i = 0; i < regions.size(); i++)
         {
+          /* Jacobian */
           // Diffusion.
           add_matrix_form(new DefaultJacobianDiffusion(0, 0, regions[i], D_map[i], HERMES_DEFAULT_SPLINE, HERMES_SYM));
-        
           // Absorption.
           add_matrix_form(new DefaultMatrixFormVol(0, 0, regions[i], Sigma_a_map[i], HERMES_DEFAULT_FUNCTION, HERMES_SYM));
           
+          /* Residual */
+          // Diffusion.
+          add_vector_form(new DefaultResidualDiffusion(0, regions[i], D_map[i]));
+          // Absorption.
+          add_vector_form(new DefaultResidualVol(0, regions[i], Sigma_a_map[i]));
           // Sources.
-          add_vector_form(new DefaultVectorFormVol(0, regions[i], Q_map[i]));
+          add_vector_form(new DefaultVectorFormVol(0, regions[i], -Q_map[i]));
         }
       }
   };
