@@ -4,7 +4,7 @@
 // This example illustrates how to use full-featured NURBS. Simplified
 // format is enabled for circular arcs (see example 03-poisson). 
 //
-// PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
+// PDE: Poisson equation -Laplace u - CONST_F = 0 with homogeneous (zero)
 //      Dirichlet boundary conditions.
 //
 // Domain: Rectangle (0, 2) x (0, 1) where the upper edge is a NURBS
@@ -23,9 +23,6 @@ const int INIT_REF_NUM = 2;                       // Number of initial uniform m
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_MARKER = "1";
-
 // Problem parameters.
 const double CONST_F = 1.0;  
 
@@ -34,6 +31,9 @@ const double CONST_F = 1.0;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential(BDY_MARKER, 0.0);
+  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -62,19 +62,16 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-   // Initialize the solution.
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
+
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+  // Translate the resulting coefficient vector into the Solution sln.
   Solution sln;
-
-  // Assemble the stiffness matrix and right-hand side vector.
-  info("Assembling the stiffness matrix and right-hand side vector.");
-  dp.assemble(matrix, rhs);
-
-  // Solve the linear system and if successful, obtain the solution.
-  info("Solving the matrix problem.");
-  if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-  else
-    error ("Matrix solver failed.\n");
+  Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Visualize the solution.
   ScalarView view("Solution", new WinGeom(0, 0, 800, 350));
