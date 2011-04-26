@@ -14,7 +14,7 @@ const int INIT_BDY_REF_NUM = 4;                   // Number of initial refinemen
 const int P_INIT = 2;                             // Initial polynomial degree.
 const double time_step = 0.2;                           // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -62,8 +62,7 @@ int main(int argc, char* argv[])
   OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -73,7 +72,7 @@ int main(int argc, char* argv[])
   // Time stepping loop:
   double current_time = 0.0; int ts = 1;
   bool jacobian_changed = true;
-  do 
+  do
   {
     info("---- Time step %d, t = %g s.", ts, current_time); ts++;
 
@@ -93,7 +92,7 @@ int main(int argc, char* argv[])
     // Show the new time level solution.
     char title[100];
     sprintf(title, "Solution, t = %g", current_time);
-  } 
+  }
   while (current_time < T_FINAL);
 
   // Cleanup.
@@ -101,7 +100,7 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
   delete solver;
-  
+
   ndof = Space::get_num_dofs(&space);
   info("Coordinate (-10, -10) value = %lf", u_prev_time.get_pt_value(-10.0, -10.0));
   info("Coordinate ( -6,  -6) value = %lf", u_prev_time.get_pt_value(-6.0, -6.0));

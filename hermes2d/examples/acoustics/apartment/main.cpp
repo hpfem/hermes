@@ -13,7 +13,7 @@ using namespace RefinementSelectors;
 //
 //  Domain: Axisymmetric geometry of a horn, see mesh file domain.mesh.
 //
-//  BC: Prescribed pressure on the bottom edge, 
+//  BC: Prescribed pressure on the bottom edge,
 //      zero Neumann on the walls and on the axis of symmetry,
 //      Newton matched boundary at outlet 1/rho dp/dn = j omega p / (rho c)
 //
@@ -49,7 +49,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
-                                                  // by the other solvers). 
+                                                  // by the other solvers).
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers).
@@ -75,6 +75,8 @@ const std::string BDY_DIRICHLET = "Source";
 
 int main(int argc, char* argv[])
 {
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -114,22 +116,22 @@ int main(int argc, char* argv[])
   sview.show_mesh(false);
   sview.fix_scale_width(50);
   OrderView  oview("Polynomial orders", new WinGeom(610, 0, 600, 350));
-  
+
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-  
+
   if (matrix_solver == SOLVER_AZTECOO) {
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
     ((AztecOOSolver*) solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
   }
-  
+
   // Adaptivity loop:
-  int as = 1; 
+  int as = 1;
   bool done = false;
   do
   {
@@ -137,39 +139,43 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-      
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
-  
-    // Time measurement.
-    cpu_time.tick();
+
+    // Initial coefficient vector for the Newton's method.
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
-   
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+
+    // Time measurement.
+    cpu_time.tick();
+
     // View the coarse mesh solution and polynomial orders.
     sview.show(&sln);
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
+    info("Calculating error estimate.");
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
       Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
@@ -183,7 +189,7 @@ int main(int argc, char* argv[])
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
@@ -195,19 +201,19 @@ int main(int argc, char* argv[])
       delete ref_space->get_mesh();
     delete ref_space;
     delete dp;
-    
+
     // Increase counter.
     as++;
   }
   while (done == false);
-  
+
   verbose("Total running time: %g s", cpu_time.accumulated());
-  
+
   // Clean up.
   delete solver;
   delete matrix;
   delete rhs;
-  
+
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
   sview.show(&ref_sln);

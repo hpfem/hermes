@@ -6,14 +6,14 @@
 using namespace RefinementSelectors;
 
 //  This example is the same as 03-newton-heat-ie and 03-newton-heat-sdirk22
-//  except that time discretization is performed using arbitrary (explicit 
-//  or implicit, low-order or higher-order) Runge-Kutta methods entered via 
-//  their Butcher's tables. As opposed to examples 03 and 04, approximation 
+//  except that time discretization is performed using arbitrary (explicit
+//  or implicit, low-order or higher-order) Runge-Kutta methods entered via
+//  their Butcher's tables. As opposed to examples 03 and 04, approximation
 //  of the time derivative is not part of the weak formulation.
 //
 //  For a list of available R-K methods see the file hermes_common/tables.h.
 //
-//  The function rk_time_step() needs more optimisation, see a todo list at 
+//  The function rk_time_step() needs more optimisation, see a todo list at
 //  the beginning of file src/runge-kutta.H.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
@@ -36,21 +36,21 @@ const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.
 // Explicit methods:
 //   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
-// Implicit methods: 
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
-//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+// Implicit methods:
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4,
 //   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
 // Embedded explicit methods:
 //   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
 //   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
 // Embedded implicit methods:
-//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
-//   Implicit_DIRK_ISMAIL_7_45_embedded. 
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded,
+//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
+//   Implicit_DIRK_ISMAIL_7_45_embedded.
 ButcherTableType butcher_table_type = Implicit_RK_1;
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
@@ -97,8 +97,7 @@ int main(int argc, char* argv[])
   Solution sln_time_new(&mesh);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
@@ -110,10 +109,10 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
-  do 
+  do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
+    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).",
          current_time, time_step, bt.get_size());
     bool verbose = true;
     Hermes::vector<Solution*> slns_time_prev;
@@ -140,7 +139,7 @@ int main(int argc, char* argv[])
 
     // Increase counter of time steps.
     ts++;
-  } 
+  }
   while (current_time < T_FINAL);
 
   // Wait for all views to be closed.
