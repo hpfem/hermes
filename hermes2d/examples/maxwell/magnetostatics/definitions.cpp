@@ -14,23 +14,23 @@ using namespace WeakFormsH1::VolumetricVectorForms;
 class CustomWeakFormMagnetostatics : public WeakForm
 {
 public:
-  CustomWeakFormMagnetostatics(std::string material_iron_1, std::string material_iron_2, 
+  CustomWeakFormMagnetostatics(std::string material_iron_1, std::string material_iron_2,
                                CubicSpline* mu_inv_iron, std::string material_air,
-                               std::string material_copper, double mu_vacuum, 
-                               double current_density, int order_inc = 3) 
+                               std::string material_copper, double mu_vacuum,
+                               double current_density, int order_inc = 3)
     : WeakForm(1) {
 
     // Jacobian.
     add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_air, material_copper),
-						      1.0, HERMES_DEFAULT_SPLINE, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
-    add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_iron_1, material_iron_2), 
+                  1.0, HERMES_DEFAULT_SPLINE, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
+    add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_iron_1, material_iron_2),
                                                       1.0, mu_inv_iron, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
     // Residual.
     add_vector_form(new DefaultResidualMagnetostatics(0, Hermes::vector<std::string>(material_air, material_copper),
                                                       1.0, HERMES_DEFAULT_SPLINE, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultResidualMagnetostatics(0, Hermes::vector<std::string>(material_iron_1, material_iron_2), 
+    add_vector_form(new DefaultResidualMagnetostatics(0, Hermes::vector<std::string>(material_iron_1, material_iron_2),
                                                       1.0, mu_inv_iron, HERMES_AXISYM_Y, order_inc));
-    add_vector_form(new DefaultVectorFormConst(0, material_copper, -current_density * mu_vacuum, HERMES_PLANAR));
+    add_vector_form(new DefaultVectorFormVol(0, material_copper, -current_density * mu_vacuum));
    };
 };
 
