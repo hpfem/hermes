@@ -88,8 +88,7 @@ int main(int argc, char* argv[])
   WeakFormHeatTransferNewton wf;
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, &space, is_linear);
+  DiscreteProblem dp_coarse(&wf, &space);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix_coarse = create_matrix(matrix_solver);
@@ -114,19 +113,19 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
 
-  // Project the initial condition on the FE space to obtain initial 
+  // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   info("Projecting initial condition to obtain initial vector on the coarse mesh.");
   scalar* coeff_vec_coarse = new scalar[Space::get_num_dofs(&space)] ;
   InitialSolutionHeatTransfer init_sln(&mesh);
-  OGProjection::project_global(&space, &init_sln, coeff_vec_coarse, matrix_solver); 
+  OGProjection::project_global(&space, &init_sln, coeff_vec_coarse, matrix_solver);
 
-  // Newton's loop on the coarse mesh. This is needed to obtain a good 
+  // Newton's loop on the coarse mesh. This is needed to obtain a good
   // starting point for the Newton's method on the reference mesh.
   info("Solving on coarse mesh:");
   bool verbose = true;
   bool jacobian_changed = true;
-  if (!hermes2d.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse, 
+  if (!hermes2d.solve_newton(coeff_vec_coarse, &dp_coarse, solver_coarse, matrix_coarse, rhs_coarse,
       jacobian_changed, NEWTON_TOL_COARSE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
@@ -139,7 +138,7 @@ int main(int argc, char* argv[])
   delete [] coeff_vec_coarse;
 
   // Adaptivity loop:
-  int as = 1; 
+  int as = 1;
   bool done = false;
   do
   {
@@ -149,7 +148,7 @@ int main(int argc, char* argv[])
     Space* ref_space = Space::construct_refined_space(&space);
 
     // Initialize discrete problem on the reference mesh.
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -158,13 +157,13 @@ int main(int argc, char* argv[])
 
     // Calculate initial coefficient vector on the reference mesh.
     scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
-    if (as == 1) 
+    if (as == 1)
     {
       // In the first step, project the coarse mesh solution.
       info("Projecting coarse mesh solution to obtain initial vector on new fine mesh.");
       OGProjection::project_global(ref_space, &sln, coeff_vec, matrix_solver);
     }
-    else 
+    else
     {
       // In all other steps, project the previous fine mesh solution.
       info("Projecting previous fine mesh solution to obtain initial vector on new fine mesh.");
@@ -176,8 +175,8 @@ int main(int argc, char* argv[])
 
     // Newton's loop on the fine mesh.
     info("Solving on fine mesh:");
-    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
-	jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs,
+  jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution ref_sln.
     Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
@@ -185,16 +184,16 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution on the coarse mesh.
     if (as > 1) {
       info("Projecting reference solution on new coarse mesh for error calculation.");
-      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+      OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
     }
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
+    info("Calculating error estimate.");
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
       Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
@@ -212,12 +211,12 @@ int main(int argc, char* argv[])
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting the coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (Space::get_num_dofs(&space) >= NDOF_STOP) 
+      if (Space::get_num_dofs(&space) >= NDOF_STOP)
       {
         done = true;
         break;

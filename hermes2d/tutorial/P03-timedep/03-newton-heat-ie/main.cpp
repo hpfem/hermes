@@ -28,7 +28,7 @@ const int P_INIT = 2;                             // Initial polynomial degree.
 const double time_step = 0.2;                           // Time step.
 const double T_FINAL = 5.0;                       // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const int NEWTON_MAX_ITER = 200;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
@@ -97,8 +97,7 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration.
     bool verbose = true;
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-  NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-    jacobian_changed = false;
+                               NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solution.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
