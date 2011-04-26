@@ -5,7 +5,6 @@
 
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 using namespace WeakFormsH1::WeakForms;
 
 /*  Exact solution */

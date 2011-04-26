@@ -19,9 +19,9 @@ public:
                 y_vel_previous_time(y_vel_previous_time), temp_previous_time(temp_previous_time) {
     /* Jacobian terms - first velocity equation */
     // Time derivative in the first velocity equation.
-    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, 1./time_step));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, HERMES_ANY, 1./time_step));
     // Laplacian divided by Pr in the first velocity equation.
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, HERMES_ANY, 1./Pr));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, 1./Pr));
     // First part of the convective term in the first velocity equation.
     BilinearFormNonsymVel_0_0* nonsym_vel_form_0_0 = new BilinearFormNonsymVel_0_0(0, 0);
     add_matrix_form(nonsym_vel_form_0_0);
@@ -34,9 +34,9 @@ public:
 
     /* Jacobian terms - second velocity equation, continuity equation */
     // Time derivative in the second velocity equation.
-    add_matrix_form(new DefaultLinearMass(1, 1, HERMES_ANY, 1./time_step));
+    add_matrix_form(new DefaultMatrixFormVol(1, 1, HERMES_ANY, 1./time_step));
     // Laplacian divided by Pr in the second velocity equation.
-    add_matrix_form(new DefaultLinearDiffusion(1, 1, HERMES_ANY, 1./Pr));
+    add_matrix_form(new DefaultJacobianDiffusion(1, 1, HERMES_ANY, 1./Pr));
     // First part of the convective term in the second velocity equation.
     BilinearFormNonsymVel_1_0* nonsym_vel_form_1_0 = new BilinearFormNonsymVel_1_0(1, 0);
     add_matrix_form(nonsym_vel_form_1_0);
@@ -47,13 +47,13 @@ public:
     BilinearFormNonsymYVelPressure* nonsym_vely_pressure_form = new BilinearFormNonsymYVelPressure(1, 2);
     add_matrix_form(nonsym_vely_pressure_form);
     // Temperature term in the second velocity equation.
-    add_matrix_form(new DefaultLinearMass(1, 3, HERMES_ANY, Ra * Pr));
+    add_matrix_form(new DefaultMatrixFormVol(1, 3, HERMES_ANY, Ra * Pr));
 
     /* Jacobian terms - temperature equation */
     // Time derivative in the temperature equation.
-    add_matrix_form(new DefaultLinearMass(3, 3, HERMES_ANY, 1./time_step));
+    add_matrix_form(new DefaultMatrixFormVol(3, 3, HERMES_ANY, 1./time_step));
     // Laplacian in the temperature equation.
-    add_matrix_form(new DefaultLinearDiffusion(3, 3));
+    add_matrix_form(new DefaultJacobianDiffusion(3, 3));
     // First part of temperature advection term.
     add_matrix_form(new BilinearFormNonsymTemp_3_0(3, 0));
     // Second part of temperature advection term.

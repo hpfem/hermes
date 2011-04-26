@@ -5,7 +5,6 @@
 
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Exact solution */
 
@@ -36,10 +35,10 @@ public:
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(), coeff1(coeff1) { }
+  CustomRightHandSide(double coeff1) : DefaultFunction(), coeff1(coeff1) { }
 
   virtual scalar value(double x, double y) const {
     double t2 = sqr(y + 0.25) + sqr(x - 1.25);
@@ -65,8 +64,8 @@ class CustomWeakFormPoisson : public WeakForm
 {
 public:
   CustomWeakFormPoisson(double slope) : WeakForm(1) {
-      add_matrix_form(new DefaultLinearDiffusion(0, 0));
-      add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, new CustomRightHandSide(-slope)));
+      add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+      add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, new CustomRightHandSide(-slope)));
   }
 };
 

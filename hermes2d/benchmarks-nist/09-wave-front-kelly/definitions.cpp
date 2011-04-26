@@ -4,18 +4,16 @@
 #include "weakform_library/h1.h"
 #include "adapt/kelly_type_adapt.h"
 
-using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
   CustomRightHandSide(double alpha, double x_loc, double y_loc, double r_zero)
-    : DefaultNonConstRightHandSide(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
+    : DefaultFunction(), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { };
 
   virtual double value(double x, double y) const {
     double a = pow(x - x_loc, 2);
@@ -77,9 +75,9 @@ public:
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
+  CustomWeakFormPoisson(DefaultFunction* rhs) : WeakForm(1) {
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
   };
 };
 

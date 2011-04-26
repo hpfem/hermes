@@ -237,8 +237,7 @@ int main(int argc, char* argv[])
       OGProjection::project_global(*ref_spaces, Hermes::vector<MeshFunction *>(&prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e, &prev_c), coeff_vec);
 
       // Initialize the FE problem.
-      bool is_linear = false;
-      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
+      DiscreteProblem dp(&wf, *ref_spaces);
       
       // Initialize NOX solver.
       NoxSolver solver(&dp, NOX_MESSAGE_TYPE, "GMRES", "Newton", NOX_LINEAR_TOLERANCE, "None", 0, 0, 1, NOX_NONLINEAR_TOLERANCE);

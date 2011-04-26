@@ -118,8 +118,7 @@ int main(int argc, char* args[])
     info("Solving on reference mesh.");
 
 	  // Initialize the FE problem.
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
     
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);

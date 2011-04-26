@@ -155,8 +155,7 @@ int main(int argc, char* argv[])
 
     // Assemble the discrete problem.
     info("Solving.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, &space);
     dp->assemble(matrix, rhs_vec);
 
     // Time measurement.

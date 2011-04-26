@@ -90,8 +90,7 @@ int main(int argc, char* argv[])
   // NON-ADAPTIVE VERSION
   
   // Initialize the linear problem.
-  bool is_linear = true;
-  DiscreteProblem* dp = new DiscreteProblem(&wf, &space, is_linear);
+  DiscreteProblem* dp = new DiscreteProblem(&wf, &space);
 
   // Select matrix solver.
   SparseMatrix* matrix = create_matrix(matrix_solver);

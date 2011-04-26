@@ -31,14 +31,14 @@
 #include "boundaryconditions/essential_bcs.h"
 
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Hermes::vector<Space *> spaces) 
-  : wf(wf), is_linear(false), wf_seq(-1), spaces(spaces)
+  : wf(wf), wf_seq(-1), spaces(spaces)
 {
   _F_
   init();
 }
 
 DiscreteProblem::DiscreteProblem(WeakForm* wf, Space* space)
-   : wf(wf), is_linear(false), wf_seq(-1)
+   : wf(wf), wf_seq(-1)
 {
   _F_
   spaces.push_back(space);
@@ -748,8 +748,7 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
     local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
 
     for (unsigned int i = 0; i < al[m]->cnt; i++) {
-      if (!tra && al[m]->dof[i] < 0) 
-        continue;
+      if (!tra && al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
         
       // Unsymmetric block.
@@ -757,64 +756,38 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
         for (unsigned int j = 0; j < al[n]->cnt; j++) {
           pss[n]->set_active_shape(al[n]->idx[j]);
           
-          if (al[n]->dof[j] < 0) {
-          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-          if (rhs != NULL && this->is_linear) {
+          if (al[n]->dof[j] >= 0) {
+            if (mat != NULL) {
+              scalar val = 0;
               // Numerical integration performed only if all 
-              // coefficients multiplying the form are nonzero
-              // and if the basis function is active.
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
-                  && al[m]->dof[i] >= 0) {
-                scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                                       refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                rhs->add(al[m]->dof[i], -val);
+              // coefficients multiplying the form are nonzero.
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
+                                                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
               }
-            }
-          }
-          else if (mat != NULL) {
-            scalar val = 0;
-            // Numerical integration performed only if all 
-            // coefficients multiplying the form are nonzero.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-              val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                                                    refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-            }
-            local_stiffness_matrix[i][j] = val;
-          }
-        }
+              local_stiffness_matrix[i][j] = val;
+	    }
+	  }
+	}
       }
       // Symmetric block.
       else {
         for (unsigned int j = 0; j < al[n]->cnt; j++) {
-          if (j < i && al[n]->dof[j] >= 0) 
-            continue;
+          if (j < i && al[n]->dof[j] >= 0) continue;
             
           pss[n]->set_active_shape(al[n]->idx[j]);
           
-          if (al[n]->dof[j] < 0) {
-            // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-            if (rhs != NULL && this->is_linear) {
-              // Numerical integration performed only if all 
-              // coefficients multiplying the form are nonzero
-              // and if basis function is active.
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
-                  && al[m]->dof[i] >= 0) {
-
-                scalar val = eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m]) * 
-                                       al[n]->coef[j] * al[m]->coef[i];
-                rhs->add(al[m]->dof[i], -val);
-	      }
+          if (al[n]->dof[j] >= 0) { 
+            if (mat != NULL) {
+              scalar val = 0;
+              // Numerical integration performed only if all coefficients 
+              // multiplying the form are nonzero.
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
+                                                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
+              }
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
-          }
-          else if (mat != NULL) {
-            scalar val = 0;
-            // Numerical integration performed only if all coefficients 
-            // multiplying the form are nonzero.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-              val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                                                    refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-            }
-            local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
           }
         }
       }
@@ -835,14 +808,6 @@ void DiscreteProblem::assemble_volume_matrix_forms(WeakForm::Stage& stage,
       if (mat != NULL) {
         mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
       }
-
-      // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-      if (rhs != NULL && this->is_linear)
-        for (unsigned int j = 0; j < al[m]->cnt; j++)
-          if (al[m]->dof[j] < 0)
-            for (unsigned int i = 0; i < al[n]->cnt; i++)
-              if (al[n]->dof[i] >= 0)
-                rhs->add(al[n]->dof[i], -local_stiffness_matrix[i][j]);
     }
   }
 }
@@ -897,24 +862,15 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
       if(mfv->sym == HERMES_NONSYM) {
         for (unsigned int j = 0; j < al[n]->cnt; j++) {
           pss[n]->set_active_shape(al[n]->idx[j]);
-          if (al[n]->dof[j] < 0) {
-            // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-            if (rhs != NULL && this->is_linear)
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
+          if (al[n]->dof[j] >= 0) {
+            if (mat != NULL) {
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
                 Hermes::vector<scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
-                              -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-              }
-          }
-          else if (mat != NULL) {
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-              Hermes::vector<scalar> result;
-              eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-              for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
-                mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
-                result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
+                  result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                }
               }
             }
           }
@@ -922,48 +878,24 @@ void DiscreteProblem::assemble_multicomponent_volume_matrix_forms(WeakForm::Stag
       }
       else {
         for (unsigned int j = 0; j < al[n]->cnt; j++) {
-          if(j < i && al[n]->dof[j] >= 0)
-            continue;
+          if(j < i && al[n]->dof[j] >= 0) continue;
           pss[n]->set_active_shape(al[n]->idx[j]);
 
-          if (al[n]->dof[j] < 0) {
-            // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-            if (rhs != NULL && this->is_linear)
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
-                Hermes::vector<scalar> result;
-                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                  rhs->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
-                           -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-              }
-          }
-          else {
-            if (al[m]->dof[i] < 0) {
-              if (rhs != NULL && this->is_linear)
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-                Hermes::vector<scalar> result;
-                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
-                  if(mfv->sym == HERMES_SYM)
-                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], 
-                             - result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  else
-                    rhs->add(al[mfv->coordinates[coordinate_i].second]->dof[j], result[coordinate_i] 
-                             * al[n]->coef[j] * al[m]->coef[i]);
-              }
-            }
-            else if (mat != NULL) {
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-                Hermes::vector<scalar> result;
-                eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
-                  mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
-                           al[mfv->coordinates[coordinate_i].second]->dof[j],
-                           result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-                  if(i != j)
-                    mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], 
-                             al[mfv->coordinates[coordinate_i].second]->dof[i],
+          if (al[n]->dof[j] >= 0) {
+            if (al[m]->dof[i] >= 0) {
+              if (mat != NULL) {
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+                  Hermes::vector<scalar> result;
+                  eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                    mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
+                             al[mfv->coordinates[coordinate_i].second]->dof[j],
                              result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                    if(i != j)
+                      mat->add(al[mfv->coordinates[coordinate_i].first]->dof[j], 
+                               al[mfv->coordinates[coordinate_i].second]->dof[i],
+                               result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
+                  }
                 }
               }
             }
@@ -1671,32 +1603,22 @@ void DiscreteProblem::assemble_surface_matrix_forms(WeakForm::Stage& stage,
       spss[m]->set_active_shape(al[m]->idx[i]);
       for (unsigned int j = 0; j < al[n]->cnt; j++) {
         pss[n]->set_active_shape(al[n]->idx[j]);
-        if (al[n]->dof[j] < 0) {
-          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-          if (rhs != NULL && this->is_linear) {
-            // Numerical integration performed only if all coefficients multiplying the form are nonzero
-            // and if the basis function is active.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12
-                && al[m]->dof[i] >= 0) {
-              scalar val = eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
-                                     refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
-              rhs->add(al[m]->dof[i], -val);
+        if (al[n]->dof[j] >= 0) {
+          if (mat != NULL) {
+            scalar val = 0;
+            // Numerical integration performed only if all coefficients multiplying the form are nonzero.
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+              val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
+                                                    refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
             }
+            local_stiffness_matrix[i][j] = val;
           }
-        }
-        else if (mat != NULL) {
-          scalar val = 0;
-          // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-          if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
-            val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
-                                                  refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
-          }
-          local_stiffness_matrix[i][j] = val;
         }
       }
     }
-    if (mat != NULL)
+    if (mat != NULL) {
       mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
+    }
   }
 }
 void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Stage& stage, 
@@ -1750,20 +1672,7 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
       spss[m]->set_active_shape(al[m]->idx[i]);
       for (unsigned int j = 0; j < al[n]->cnt; j++) {
         pss[n]->set_active_shape(al[n]->idx[j]);
-        if (al[n]->dof[j] < 0) {
-          // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
-          if (rhs != NULL && this->is_linear) {
-            // Numerical integration performed only if all coefficients multiplying the form are nonzero
-            // and if the basis function is active.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12 && al[m]->dof[i] >= 0) {
-              Hermes::vector<scalar> result;
-              eval_form(mfs, u_ext, pss[n], spss[m], refmap[n], refmap[m], &surf_pos, result);
-              for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-                rhs->add(al[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
-            }
-          }
-        }
-        else 
+        if (al[n]->dof[j] >= 0) {
           if (mat != NULL) {
             // Numerical integration performed only if all coefficients multiplying the form are nonzero.
             if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
@@ -1773,6 +1682,7 @@ void DiscreteProblem::assemble_multicomponent_surface_matrix_forms(WeakForm::Sta
                 mat->add(al[mfs->coordinates[coordinate_i].first]->dof[i], al[mfs->coordinates[coordinate_i].second]->dof[j],
                 result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
             }
+          }
         }
       }
     }
@@ -1954,28 +1864,19 @@ void DiscreteProblem::assemble_DG_matrix_forms(WeakForm::Stage& stage,
           support_neigh_u = true;
         }
 
-        if (ext_asmlist_u->dof[j] < 0) {
-          if (rhs != NULL && this->is_linear) {
-            // Evaluate the form with the activated discontinuous shape functions.
-            scalar val = eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
-                                      &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
-                                      stage.meshes[m]->get_seq() - min_dg_mesh_seq)
+        if (ext_asmlist_u->dof[j] >= 0) {
+          if (mat != NULL) {
+            scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
               * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
               * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
-            // Add the contribution to the global dof index.
-            rhs->add(ext_asmlist_v->dof[i], -val);
+            local_stiffness_matrix[i][j] = val;
           }
-        }
-        else if (mat != NULL) {
-          scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
-            * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-            * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
-          local_stiffness_matrix[i][j] = val;
         }
       }
     }
-    if (mat != NULL)
+    if (mat != NULL) {
       mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
+    }
   }
 }
 void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& stage, 
@@ -2075,27 +1976,16 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
           support_neigh_u = true;
         }
 
-        if (ext_asmlist_u->dof[j] < 0) {
-          if (rhs != NULL && this->is_linear) {
-            // Evaluate the form with the activated discontinuous shape functions.
+        if (ext_asmlist_u->dof[j] >= 0) {
+          if (mat != NULL) {
             Hermes::vector<scalar> result;
-            eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, 
-                                    &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, 
-                                    stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
+            eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
             for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-              rhs->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], -result[coordinate_i] 
+              mat->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], ext_asmlists[mfs->coordinates[coordinate_i].second]->dof[j],
+              result[coordinate_i] * block_scaling_coeffs[coordinate_i] 
               * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
               * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
           }
-        }
-        else if (mat != NULL) {
-          Hermes::vector<scalar> result;
-          eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
-          for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
-            mat->add(ext_asmlists[mfs->coordinates[coordinate_i].first]->dof[i], ext_asmlists[mfs->coordinates[coordinate_i].second]->dof[j],
-            result[coordinate_i] * block_scaling_coeffs[coordinate_i] 
-            * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-            * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]));
         }
       }
     }
@@ -2104,7 +1994,6 @@ void DiscreteProblem::assemble_multicomponent_DG_matrix_forms(WeakForm::Stage& s
       ext_asmlists[ext_asms_i]->free_central_al();
       delete ext_asmlists[ext_asms_i];
     }
-
   }
 }
 
@@ -4614,6 +4503,7 @@ bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
     }
 
     if (iter_count >= picard_max_iter) {
+      delete [] coeff_vec;
       delete matrix;
       delete rhs;
       delete solver;

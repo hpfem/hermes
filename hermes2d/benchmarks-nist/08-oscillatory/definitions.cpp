@@ -3,17 +3,15 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
-  CustomRightHandSide(double alpha) : DefaultNonConstRightHandSide(), alpha(alpha) {};
+  CustomRightHandSide(double alpha) : DefaultFunction(), alpha(alpha) {};
 
   virtual scalar value(double x, double y) const {
       return -sin(1.0/(alpha + pow((pow(x,2) + pow(y,2)),(1.0/2.0))))/pow((alpha
@@ -75,7 +73,7 @@ class CustomWeakForm : public WeakForm
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->alpha));
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
   };
 
 private:

@@ -117,8 +117,7 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);

@@ -5,7 +5,6 @@
 
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Exact solution */
 
@@ -56,10 +55,10 @@ public:
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
-  CustomRightHandSide(double coeff1) : DefaultNonConstRightHandSide(), coeff1(coeff1) {
+  CustomRightHandSide(double coeff1) : DefaultFunction(), coeff1(coeff1) {
     cef = new CustomExactFunction(coeff1);
   };
 
@@ -84,8 +83,8 @@ class CustomWeakFormPerturbedPoisson : public WeakForm
 {
 public:
   CustomWeakFormPerturbedPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_matrix_form(new DefaultLinearMass(0, 0, HERMES_ANY, rhs->coeff1*rhs->coeff1));
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+    add_matrix_form(new DefaultMatrixFormVol(0, 0, HERMES_ANY, rhs->coeff1*rhs->coeff1));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
   };
 };

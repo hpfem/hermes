@@ -3,18 +3,15 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/h1.h"
 
-using namespace WeakFormsH1;
-using namespace WeakFormsH1::RightHandSides;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
-  CustomRightHandSide(double epsilon) : DefaultNonConstRightHandSide(), epsilon(epsilon) {};
+  CustomRightHandSide(double epsilon) : DefaultFunction(), epsilon(epsilon) {};
 
   virtual double value(double x, double y) const{
     return -epsilon*(-2*pow(M_PI,2)*(1 - exp(-(1 - x)/epsilon))*(1 - exp(-(1 - y)/epsilon))*cos(M_PI*(x + y))
@@ -67,7 +64,7 @@ class CustomWeakForm : public WeakForm
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->epsilon));
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
   };
 
 private:

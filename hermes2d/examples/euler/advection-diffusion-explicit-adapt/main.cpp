@@ -282,8 +282,7 @@ int main(int argc, char* argv[])
       Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
       // Initialize the FE problem.
-      bool is_linear = true;
-      DiscreteProblem dp(&wf, *ref_spaces, is_linear);
+      DiscreteProblem dp(&wf, *ref_spaces);
 
       wf.set_time_step(time_step);
 

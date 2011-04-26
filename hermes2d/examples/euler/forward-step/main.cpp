@@ -80,9 +80,7 @@ int main(int argc, char* argv[])
     BDY_INLET, BDY_OUTLET, &prev_rho, &prev_rho_v_x, &prev_rho_v_y, &prev_e);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  
-  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
   
   // If the FE problem is in fact a FV problem.
   if(P_INIT == 0)

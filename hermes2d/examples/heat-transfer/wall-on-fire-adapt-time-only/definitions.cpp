@@ -56,7 +56,7 @@ public:
     add_vector_form_surf(vec_form_surf_1);
 
     // Surface residual - top boundary.
-    add_vector_form_surf(new DefaultResidualSurfConst(0, HERMES_ANY, -alpha_air / (rho*heatcap)));
+    add_vector_form_surf(new DefaultResidualSurf(0, HERMES_ANY, -alpha_air / (rho*heatcap)));
     add_vector_form_surf(new DefaultVectorFormSurf(0, HERMES_ANY, alpha_air* temp_ext_air / (rho*heatcap)));
   };
 

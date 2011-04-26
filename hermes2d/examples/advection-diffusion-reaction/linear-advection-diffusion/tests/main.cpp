@@ -43,10 +43,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double EPSILON = 0.01;                      // Diffusivity.
 const double B1 = 1., B2 = 1.;                    // Advection direction, div(B) = 0.
 
-// Boundary markers.
-const std::string BDY_LAYER = "2";
-const std::string BDY_REST = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -60,14 +56,14 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_LAYER, INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Layer", INIT_REF_NUM_BDY);
 
    // Initialize the weak formulation.
   WeakFormLinearAdvectionDiffusion wf(STABILIZATION_ON, SHOCK_CAPTURING_ON, B1, B2, EPSILON);
   
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_rest(BDY_REST, 1.0);
-  EssentialBCNonConst bc_layer(BDY_LAYER);
+  DefaultEssentialBCConst bc_rest("Rest", 1.0);
+  EssentialBCNonConst bc_layer("Layer");
 
   EssentialBCs bcs(Hermes::vector<EssentialBoundaryCondition *>(&bc_rest, &bc_layer));
 
@@ -97,13 +93,14 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Assemble the reference problem.
+    info("Solving on reference mesh.");
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
     dp->assemble(matrix, rhs);
 
     // Time measurement.

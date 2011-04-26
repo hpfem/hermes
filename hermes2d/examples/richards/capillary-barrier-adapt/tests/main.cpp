@@ -290,8 +290,7 @@ int main(int argc, char* argv[])
         }
 
         // Initialize the FE problem.
-        bool is_linear = false;
-        DiscreteProblem dp(wf, ref_space, is_linear);
+        DiscreteProblem dp(wf, ref_space);
 
         // Set up the solver, matrix, and rhs according to the solver selection.
         SparseMatrix* matrix = create_matrix(matrix_solver);

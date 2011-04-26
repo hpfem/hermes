@@ -67,11 +67,11 @@ private:
   bool shock_capturing_on;
 };
 
+/* Essential BC */
+
 class EssentialBCNonConst : public EssentialBoundaryCondition {
 public:
-  EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>()) {
-    markers.push_back(marker);
-  }
+  EssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>(marker)) { }
 
   ~EssentialBCNonConst() { }
 

@@ -50,8 +50,7 @@ int main(int argc, char* argv[])
   info("ndof = %d.", Space::get_num_dofs(spaces));
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, spaces, is_linear);
+  DiscreteProblem dp(&wf, spaces);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);

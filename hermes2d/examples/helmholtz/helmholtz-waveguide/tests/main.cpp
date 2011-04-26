@@ -89,8 +89,7 @@ int main(int argc, char* argv[])
         e_i_space.set_uniform_order(p_init);
 
         // Initialize the FE problem.
-        bool is_linear = true;
-        DiscreteProblem dp(&wf, Hermes::vector<Space *>(&e_r_space, &e_i_space), is_linear);
+        DiscreteProblem dp(&wf, Hermes::vector<Space *>(&e_r_space, &e_i_space));
 
         // Set up the solver, matrix, and rhs according to the solver selection.
         SparseMatrix* matrix = create_matrix(matrix_solver);

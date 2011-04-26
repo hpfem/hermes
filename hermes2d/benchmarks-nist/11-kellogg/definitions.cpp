@@ -3,7 +3,6 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 
 /* Exact solution */
@@ -82,7 +81,7 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(std::string area_1, double r, std::string area_2) : WeakForm(1)
   {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, area_1, r));
-    add_matrix_form(new DefaultLinearDiffusion(0, 0, area_2));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, area_1, r));
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0, area_2));
   };
 };

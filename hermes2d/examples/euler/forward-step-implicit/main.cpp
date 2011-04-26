@@ -86,8 +86,7 @@ int main(int argc, char* argv[])
   wf.set_time_step(time_step);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e), is_linear);
+  DiscreteProblem dp(&wf, Hermes::vector<Space*>(&space_rho, &space_rho_v_x, &space_rho_v_y, &space_e));
   
   // If the FE problem is in fact a FV problem.
   if(P_INIT == 0)

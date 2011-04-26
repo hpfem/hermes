@@ -133,10 +133,9 @@ int main(int argc, char* argv[])
   //Solver* solver = create_linear_solver(matrix_solver, matrix_S);
 
   // Assemble the matrices.
-  bool is_linear = true;
-  DiscreteProblem dp_S(&wf_S, &space, is_linear);
+  DiscreteProblem dp_S(&wf_S, &space);
   dp_S.assemble(matrix_S);
-  DiscreteProblem dp_M(&wf_M, &space, is_linear);
+  DiscreteProblem dp_M(&wf_M, &space);
   dp_M.assemble(matrix_M);
 
   // Initialize matrices.
@@ -254,11 +253,10 @@ int main(int argc, char* argv[])
 
     // Assemble matrices S and M on reference mesh.
     info("Assembling matrices S and M on reference mesh.");
-    is_linear = true;
-    DiscreteProblem dp_S_ref(&wf_S, ref_space, is_linear);
+    DiscreteProblem dp_S_ref(&wf_S, ref_space);
     matrix_S_ref->zero();
     dp_S_ref.assemble(matrix_S_ref);
-    DiscreteProblem dp_M_ref(&wf_M, ref_space, is_linear);
+    DiscreteProblem dp_M_ref(&wf_M, ref_space);
     matrix_M_ref->zero();
     dp_M_ref.assemble(matrix_M_ref);
 

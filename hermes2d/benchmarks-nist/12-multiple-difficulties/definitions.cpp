@@ -3,19 +3,17 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/h1.h"
 
-using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::RightHandSides;
 
 /* Right-hand side */
 
-class CustomRightHandSide: public DefaultNonConstRightHandSide
+class CustomRightHandSide: public DefaultFunction
 {
 public:
   CustomRightHandSide(double alpha_p, double x_p, double y_p, double alpha_w, double x_w,
                       double y_w, double omega_c, double r_0, double epsilon)
-    : DefaultNonConstRightHandSide(),
+    : DefaultFunction(),
       alpha_p(alpha_p), x_p(x_p), y_p(y_p), alpha_w(alpha_w), x_w(x_w), y_w(y_w),
       omega_c(omega_c), r_0(r_0), epsilon(epsilon) { }
 
@@ -111,9 +109,9 @@ public:
 class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  CustomWeakFormPoisson(DefaultNonConstRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormNonConst(0, HERMES_ANY, rhs));
+  CustomWeakFormPoisson(DefaultFunction* rhs) : WeakForm(1) {
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
   };
 };
 
