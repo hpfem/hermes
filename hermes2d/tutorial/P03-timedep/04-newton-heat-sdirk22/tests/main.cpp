@@ -84,9 +84,8 @@ int main(int argc, char* argv[])
     coeff_vec2[i] = coeff_vec1[i];
 
   // Initialize the weak formulation and the FE problem.
-    bool is_linear = false;
-  DiscreteProblem dp1(&wf1, &space, is_linear);
-  DiscreteProblem dp2(&wf2, &space, is_linear);
+  DiscreteProblem dp1(&wf1, &space);
+  DiscreteProblem dp2(&wf2, &space);
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
@@ -101,7 +100,7 @@ int main(int argc, char* argv[])
     // FIXME: One should use two different matrices for the two stages,
     // and not re-assemble them in every time step.
     if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix, rhs,
-	jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+  jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
       error("Newton's iteration did not converge.");
 
     // Convert the vector coeff_vec1 into a Solution.

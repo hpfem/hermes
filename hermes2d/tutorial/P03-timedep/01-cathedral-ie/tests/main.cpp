@@ -42,9 +42,9 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   double current_time = 0;
-  CustomWeakFormHeatRK1 wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, time_step, 
+  CustomWeakFormHeatRK1 wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, time_step,
                            &current_time, TEMP_INIT, T_FINAL, &tsln);
-  
+
   // Initialize boundary conditions.
   DefaultEssentialBCConst bc_essential("Boundary ground", TEMP_INIT);
   EssentialBCs bcs(&bc_essential);
@@ -53,10 +53,9 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
- 
+
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -64,7 +63,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
   solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
-  // Initial coefficient vector for the Newton's method.  
+  // Initial coefficient vector for the Newton's method.
   scalar* coeff_vec = new scalar[ndof];
   memset(coeff_vec, 0, ndof*sizeof(scalar));
 
@@ -76,12 +75,12 @@ int main(int argc, char* argv[])
   // Time stepping:
   int ts = 1;
   bool jacobian_changed = true;
-  do 
+  do
   {
     info("---- Time step %d, time %3.5f s", ts, current_time);
 
     // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
          jacobian_changed)) error("Newton's iteration failed.");
     jacobian_changed = false;
 
@@ -108,11 +107,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 9.547289) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 9.546375) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(0.0, 2.0) - 9.546265) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(1.0, 2.0) - 9.546375) > 1E-6) success = false;
-  if (fabs(tsln.get_pt_value(2.0, 2.0) - 9.547289) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-2.0, 2.0) - 10.001043) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(-1.0, 2.0) - 10.000171) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(0.0, 2.0) - 10.000085) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(1.0, 2.0) - 10.000171) > 1E-6) success = false;
+  if (fabs(tsln.get_pt_value(2.0, 2.0) - 10.001043) > 1E-6) success = false;
 
   if (success) {
     printf("Success!\n");

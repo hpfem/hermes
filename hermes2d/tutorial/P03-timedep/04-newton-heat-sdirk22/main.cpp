@@ -19,7 +19,7 @@ double BUTCHER_B_2 = 1. - 1./sqrt(2.);
 double BUTCHER_C_1 = 1. - 1./sqrt(2.);
 double BUTCHER_C_2 = 1.;
 
-//  The method can be found in Butcher's book on page 244. 
+//  The method can be found in Butcher's book on page 244.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity, du/dt - div[lambda(u)grad u] = f.
@@ -48,7 +48,7 @@ const std::string BDY_DIRICHLET = "1";
 // Weak forms.
 #include "definitions.cpp"
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   scalar* coeff_vec1 = new scalar[ndof];
   scalar* coeff_vec2 = new scalar[ndof];
   OGProjection::project_global(&space, &u_prev_time, coeff_vec1, matrix_solver);
-  for (int i = 0; i < ndof; i++) 
+  for (int i = 0; i < ndof; i++)
     coeff_vec2[i] = coeff_vec1[i];
 
   // Initialize views.
@@ -101,9 +101,8 @@ int main(int argc, char* argv[])
   oview.show(&space);
 
   // Initialize the weak formulation and the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp1(&wf1, &space, is_linear);
-  DiscreteProblem dp2(&wf2, &space, is_linear);
+  DiscreteProblem dp1(&wf1, &space);
+  DiscreteProblem dp2(&wf2, &space);
 
   // Time stepping loop:
   double current_time = 0; int ts = 1;
@@ -120,8 +119,8 @@ int main(int argc, char* argv[])
     // FIXME: One should use two different matrices for the two stages,
     // and not re-assemble them in every time step.
     if (!hermes2d.solve_newton(coeff_vec1, &dp1, solver, matrix, rhs,
-	jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-      error("Newton's iteration did not converge."); 
+  jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+      error("Newton's iteration did not converge.");
 
     // Convert the vector coeff_vec1 into a Solution.
     Solution::vector_to_solution(coeff_vec1, &space, &sdirk_stage_sol);
@@ -130,12 +129,12 @@ int main(int argc, char* argv[])
     info("---- Stage II:");
 
     if (!hermes2d.solve_newton(coeff_vec2, &dp2, solver, matrix, rhs,
-	jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
-      error("Newton's iteration did not converge."); 
+  jacobian_changed, NEWTON_TOL, NEWTON_MAX_ITER, verbose))
+      error("Newton's iteration did not converge.");
 
     // Translate Y2 into a Solution.
     Solution::vector_to_solution(coeff_vec2, &space, &u_prev_time);
-  
+
     // Update time.
     current_time += time_step;
 

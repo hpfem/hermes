@@ -5,9 +5,9 @@
 
 using namespace RefinementSelectors;
 
-//  This example shows how the Newton's method can be used 
+//  This example shows how the Newton's method can be used
 //  in conjunction with implicit time stepping for time-dependent
-//  problems. Time discretization is done using the implicit 
+//  problems. Time discretization is done using the implicit
 //  Euler method.
 //
 //  PDE: time-dependent heat transfer equation with nonlinear
@@ -75,8 +75,7 @@ int main(int argc, char* argv[])
   OGProjection::project_global(&space, &u_prev_time, coeff_vec, matrix_solver);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -91,14 +90,14 @@ int main(int argc, char* argv[])
   // Time stepping loop:
   double current_time = 0; int ts = 1;
   bool jacobian_changed = true;
-  do 
+  do
   {
     info("---- Time step %d, t = %g s.", ts, current_time);
 
     // Perform Newton's iteration.
     bool verbose = true;
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-	NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+  NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
     jacobian_changed = false;
 
     // Update previous time level solution.
