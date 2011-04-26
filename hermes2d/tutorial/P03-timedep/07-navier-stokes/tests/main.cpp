@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  Solution xvel_prev_time, yvel_prev_time, p_prev_time; 
+  Solution xvel_prev_time, yvel_prev_time, p_prev_time;
   xvel_prev_time.set_zero(&mesh);
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
@@ -107,10 +107,7 @@ int main(int argc, char* argv[])
     wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
-  bool is_linear;
-  if (NEWTON) is_linear = false;
-  else is_linear = true;
-  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), is_linear);
+  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -122,9 +119,9 @@ int main(int argc, char* argv[])
   scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
   if (NEWTON) {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-                   coeff_vec, matrix_solver, 
+    OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space),
+                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
+                   coeff_vec, matrix_solver,
                    Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
@@ -142,7 +139,7 @@ int main(int argc, char* argv[])
       Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
-    if (NEWTON) 
+    if (NEWTON)
     {
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
@@ -152,18 +149,18 @@ int main(int argc, char* argv[])
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+      Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space),
                                     Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
     else {
       // Linear solve.
       info("Assembling and solving linear problem.");
       dp.assemble(matrix, rhs, false);
-      if(solver->solve()) 
-        Solution::vector_to_solutions(solver->get_solution(), 
-                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+      if(solver->solve())
+        Solution::vector_to_solutions(solver->get_solution(),
+                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space),
                   Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-      else 
+      else
         error ("Matrix solver failed.\n");
     }
  }

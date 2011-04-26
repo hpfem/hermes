@@ -44,10 +44,13 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
- 
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -69,14 +72,14 @@ int main(int argc, char* argv[])
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
 
-  // Initialize refinement selector. 
+  // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-  
+
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
   // Adaptivity loop:
-  int as = 1; 
+  int as = 1;
   bool done = false;
   do
   {
@@ -84,6 +87,7 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -92,31 +96,36 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
-  
-    // Time measurement.
-    cpu_time.tick();
+
+    // Initial coefficient vector for the Newton's method.
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
+
+    // View the coarse mesh solution and polynomial orders.
+    //sview.show(&sln);
+    //oview.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate."); 
+    info("Calculating error estimate.");
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
+    info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
       Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
@@ -130,7 +139,7 @@ int main(int argc, char* argv[])
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
@@ -146,12 +155,12 @@ int main(int argc, char* argv[])
       delete ref_space->get_mesh();
     delete ref_space;
     delete dp;
-    
+
     // Increase counter.
     as++;
   }
   while (done == false);
-  
+
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   int ndof = Space::get_num_dofs(&space);
