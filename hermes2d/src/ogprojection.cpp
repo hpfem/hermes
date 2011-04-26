@@ -79,7 +79,7 @@ void OGProjection::project_global(Hermes::vector<Space *> spaces, Hermes::vector
   {
     if (found[i] == 0)
     {
-      warn("index of component: %d\n", i);
+      warn("Index of component: %d\n", i);
       error("Wrong projection norm in project_global().");
     }
   }

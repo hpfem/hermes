@@ -81,11 +81,11 @@ protected:
       case HERMES_H1_NORM:
         return h1_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_semi_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return h1_semi_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return hcurl_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return hdiv_projection_biform<double, scalar>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
         return 0.0;
@@ -102,11 +102,11 @@ protected:
       case HERMES_H1_NORM:
         return h1_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
-            return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return h1_semi_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HCURL_NORM:
-            return hcurl_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return hcurl_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_HDIV_NORM:
-            return hdiv_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return hdiv_projection_biform<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
         return Ord();
@@ -129,7 +129,7 @@ protected:
 
     template<typename Real, typename Scalar>
     static Scalar h1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                                            Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       _F_
       Scalar result = 0;
@@ -151,7 +151,7 @@ protected:
 
     template<typename Real, typename Scalar>
     static Scalar hcurl_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                                          Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       _F_
       Scalar result = 0;
@@ -164,7 +164,7 @@ protected:
 
     template<typename Real, typename Scalar>
     static Scalar hdiv_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+                                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
       _F_
       Scalar result = 0;
