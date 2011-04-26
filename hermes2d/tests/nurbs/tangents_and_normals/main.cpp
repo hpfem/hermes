@@ -108,8 +108,11 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(double rhs_const) : WeakForm(1)
   {
-    add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, rhs_const));
+    // Jacobian.
+    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+    // Residual.
+    add_vector_form(new DefaultResidualDiffusion(0));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -rhs_const));
   };
 };
 
@@ -147,8 +150,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
