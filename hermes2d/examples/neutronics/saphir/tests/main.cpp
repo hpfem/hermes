@@ -1,3 +1,4 @@
+#define HERMES_REPORT_ALL
 #include "hermes2d.h"
 
 using namespace RefinementSelectors;
@@ -75,6 +76,9 @@ double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -124,30 +128,35 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
+    // Initialize the FE problem.
+    DiscreteProblem dp(&wf, ref_space);
+
+    // Initialize the FE problem.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    dp->assemble(matrix, rhs);
 
-    // Time measurement.
-    cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. 
-    // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref*sizeof(scalar));
+
+    // Perform Newton's iteration on reference emesh.
+    info("Solving on reference mesh.");
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
+    Solution sln;
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
     // Time measurement.
     cpu_time.tick();
-
+   
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
     Adapt* adaptivity = new Adapt(&space);
@@ -179,14 +188,13 @@ int main(int argc, char* argv[])
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
-    
   }
   while (done == false);
   
@@ -194,7 +202,7 @@ int main(int argc, char* argv[])
 
   int ndof = Space::get_num_dofs(&space);
 
-  int n_dof_allowed = 670;
+  int n_dof_allowed = 630;
   printf("n_dof_actual = %d\n", ndof);
   printf("n_dof_allowed = %d\n", n_dof_allowed);// ndofs was 616 at the time this test was created
   if (ndof <= n_dof_allowed) {

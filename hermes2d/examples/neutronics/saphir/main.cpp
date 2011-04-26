@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -46,7 +44,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 100000;                     // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -92,6 +90,9 @@ double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -139,34 +140,36 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Adaptivity loop:
-  int as = 1; 
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Initialize matrix and matrix solver.
+    // Initialize the FE problem.
+    DiscreteProblem dp(&wf, ref_space);
+
+    // Initialize the FE problem.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble the reference problem.
-    info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
-    dp->assemble(matrix, rhs);
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref*sizeof(scalar));
 
-    // Time measurement.
-    cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. 
-    // If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    // Perform Newton's iteration on reference emesh.
+    info("Solving on reference mesh.");
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
+    Solution sln;
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
 
@@ -211,14 +214,13 @@ int main(int argc, char* argv[])
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
-    
   }
   while (done == false);
   
