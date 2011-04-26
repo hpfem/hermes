@@ -80,8 +80,7 @@ int main(int argc, char* argv[])
     info("Solving on coarse mesh:");
     bool verbose = true;
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
-    jacobian_changed = false;
+                               NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solution.
     Solution::vector_to_solution(coeff_vec, &space, &u_prev_time);
