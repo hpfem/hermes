@@ -5,13 +5,6 @@
 #include "../function/forms.h"
 #include <algorithm>
 
-/* Default weak form for neutron diffusion equations
-   with Dirichlet and/or zero Neumann BC.
-
-   Nonzero Neumann or Newton boundary conditions can be enabled
-   by creating a descendant and adding surface forms to it.
-*/
-
 namespace WeakFormsNeutronics
 {
   namespace MaterialProperties
@@ -426,7 +419,8 @@ namespace WeakFormsNeutronics
   {    
     namespace Diffusion 
     {
-      /* Simple monoenergetic neutron diffusion, with the following weak formulation within each
+      /* 
+        Simple monoenergetic neutron diffusion, with the following weak formulation within each
         homogeneous region:
       
             \int_{region} D \nabla\phi \cdot \nabla\psi d\bfx + \int_{region} \Sigma_a \phi\psi d\bfx
@@ -442,6 +436,9 @@ namespace WeakFormsNeutronics
         'regions', which is the marker used for all elements it is composed of (usually specified in the
         mesh file). A corresponding entry in the *_map arguments is the value of the particular physical 
         parameter for that marker.
+        
+        Dirichlet and/or zero Neumann BC are assumed - nonzero Neumann or Newton boundary conditions can 
+        be enabled by creating a descendant and adding surface forms to it.
       */
       class DefaultWeakFormFixedSource : public WeakForm
       {        
@@ -708,6 +705,8 @@ namespace WeakFormsNeutronics
             {
               Scalar result = 0;
               
+              // Constant properties within the current active element. Note that prop[e->elem_marker]
+              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined. 
               rank1 D_elem = D.find(e->elem_marker)->second;
               rank1 Sigma_r_elem = Sigma_r.find(e->elem_marker)->second;
               
@@ -805,9 +804,12 @@ namespace WeakFormsNeutronics
                 else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
               }
               
+              // Constant properties within the current active element. Note that prop[e->elem_marker]
+              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
               rank1 nu_elem = nu.find(e->elem_marker)->second;
               rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
               rank1 chi_elem = chi.find(e->elem_marker)->second;
+              
               return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
             }
             
@@ -856,6 +858,8 @@ namespace WeakFormsNeutronics
                 else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
               }
               
+              // Constant properties within the current active element. Note that prop[e->elem_marker]
+              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
               rank2 Sigma_s_elem = Sigma_s.find(e->elem_marker)->second;
               return result * (-Sigma_s_elem[gto][gfrom]);
             }
@@ -912,7 +916,9 @@ namespace WeakFormsNeutronics
             template<typename Real, typename Scalar>
             Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
-            {             
+            { 
+              // Constant properties within the current active element. Note that prop[e->elem_marker]
+              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
               rank1 nu_elem = nu.find(e->elem_marker)->second;
               rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
               rank1 chi_elem = chi.find(e->elem_marker)->second;
@@ -985,6 +991,8 @@ namespace WeakFormsNeutronics
             virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                            Geom<double> *e, ExtData<scalar> *ext) const 
             {
+              // Constant properties within the current active element. Note that prop[e->elem_marker]
+              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
               rank1 src_elem = src.find(e->elem_marker)->second;
               
               if (geom_type == HERMES_PLANAR) return src_elem[g] * int_v<double>(n, wt, v);
