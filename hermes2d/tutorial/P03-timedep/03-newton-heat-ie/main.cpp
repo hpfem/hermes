@@ -34,8 +34,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -51,10 +49,10 @@ int main(int argc, char* argv[])
 
   // Initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
