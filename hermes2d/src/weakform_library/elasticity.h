@@ -98,7 +98,7 @@ namespace WeakFormsElasticity {
     DefaultResidualElasticity_0_0(unsigned int i, double lambda, double mu)
       : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
     DefaultResidualElasticity_0_0(unsigned int i, std::string area, 
-                                            double lambda, double mu)
+                                  double lambda, double mu)
       : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>
@@ -197,7 +197,7 @@ namespace WeakFormsElasticity {
     DefaultResidualElasticity_1_1(unsigned int i, double lambda, double mu)
       : WeakForm::VectorFormVol(i), lambda(lambda), mu(mu) {}
     DefaultResidualElasticity_1_1(unsigned int i, std::string area, 
-                                            double lambda, double mu)
+                                  double lambda, double mu)
       : WeakForm::VectorFormVol(i,  area), lambda(lambda), mu(mu) { }
 
     template<typename Real, typename Scalar>

@@ -392,23 +392,28 @@ public:
 
 /* Weak forms */
 
-// We cannot use default Hermes linear elasticity forms since these equations 
-// are different.
-class CustomWeakFormLinearElasticity : public WeakForm
+// We cannot use default Hermes linear elasticity forms since the equations 
+// in Mitchell's paper are different (E, nu, lambda and mu do not satisfy 
+// standard relations http://en.wikipedia.org/wiki/Linear_elasticity).
+class CustomWeakFormElasticityNIST : public WeakForm
 {
 public:
-  CustomWeakFormLinearElasticity(double E, double nu, double mu, double lambda) : WeakForm(2)
+  CustomWeakFormElasticityNIST(double E, double nu, double mu, double lambda) : WeakForm(2)
   {
-    add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_0(E, nu));
-    add_matrix_form(new CustomMatrixFormVolLinearElasticity_0_1(E, nu));
-    add_matrix_form(new CustomMatrixFormVolLinearElasticity_1_1(E, nu));
+    // Jacobian.
+    add_matrix_form(new CustomMatrixFormVolElasticityNIST_0_0(E, nu));
+    add_matrix_form(new CustomMatrixFormVolElasticityNIST_0_1(E, nu));
+    add_matrix_form(new CustomMatrixFormVolElasticityNIST_1_1(E, nu));
+    // Residual.
+    add_vector_form(new CustomVectorFormVolElasticityNIST_0(E, nu));
+    add_vector_form(new CustomVectorFormVolElasticityNIST_1(E, nu));
   }
 
 private:
-  class CustomMatrixFormVolLinearElasticity_0_0 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolElasticityNIST_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) 
+    CustomMatrixFormVolElasticityNIST_0_0(double E, double nu) 
       : WeakForm::MatrixFormVol(0, 0, HERMES_ANY, HERMES_SYM), E(E), nu(nu) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
@@ -432,16 +437,16 @@ private:
     double A, B, E, nu;
   };
 
-  class CustomMatrixFormVolLinearElasticity_0_1 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolElasticityNIST_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) 
+    CustomMatrixFormVolElasticityNIST_0_1(double E, double nu) 
       : WeakForm::MatrixFormVol(0, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -450,7 +455,7 @@ private:
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+                    Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return wt[0] * (C * u->dx[0] * v->dy[0]);
     }
@@ -458,17 +463,17 @@ private:
     double C, E, nu;
   };
 
-  class CustomMatrixFormVolLinearElasticity_1_1 : public WeakForm::MatrixFormVol
+  class CustomMatrixFormVolElasticityNIST_1_1 : public WeakForm::MatrixFormVol
   {
   public:
-    CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) 
+    CustomMatrixFormVolElasticityNIST_1_1(double E, double nu) 
       : WeakForm::MatrixFormVol(1, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -477,12 +482,91 @@ private:
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) const
+                    Geom<Ord> *e, ExtData<Ord> *ext) const
     {
        return wt[0] * (B * u->dx[0] * v->dx[0] + A * u->dy[0] * v->dy[0]);
     }
   
     double A, B, E, nu;
   };
+
+  class CustomVectorFormVolElasticityNIST_0 : public WeakForm::VectorFormVol
+  {
+  public:
+    CustomVectorFormVolElasticityNIST_0(double E, double nu) 
+      : WeakForm::VectorFormVol(0, HERMES_ANY), E(E), nu(nu) {
+      A = -E * (1 - nu * nu)/(1 - 2 * nu);
+      B = -E * (1 - nu * nu)/(2 - 2 * nu);
+      C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], 
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+    {
+      scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        // Contribution of matrix form 0, 0.
+        result += wt[i] * (A * u_ext[0]->dx[i] * v->dx[i] + B * u_ext[0]->dy[i] * v->dy[i]);
+        // Contribution of matrix form 0, 1.
+        result += wt[i] * (C * u_ext[1]->dx[i] * v->dy[i]);
+      }
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], 
+                    Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+      Ord result = 0;
+      for (int i = 0; i < n; i++) {
+        // Contribution of matrix form 0, 0.
+        result += wt[i] * (A * u_ext[0]->dx[i] * v->dx[i] + B * u_ext[0]->dy[i] * v->dy[i]);
+        // Contribution of matrix form 0, 1.
+        result += wt[i] * (C * u_ext[1]->dx[i] * v->dy[i]);
+      }
+      return result;
+    }
+
+    double A, B, C, E, nu;
+  };
+
+  class CustomVectorFormVolElasticityNIST_1 : public WeakForm::VectorFormVol
+  {
+  public:
+    CustomVectorFormVolElasticityNIST_1(double E, double nu) 
+      : WeakForm::VectorFormVol(0, HERMES_ANY), E(E), nu(nu) {
+      A = -E * (1 - nu * nu)/(1 - 2 * nu);
+      B = -E * (1 - nu * nu)/(2 - 2 * nu);
+      C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],  
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+    {
+      scalar result = 0;
+      for (int i = 0; i < n; i++) {
+        // Contribution of matrix form 1, 0.
+        result += wt[i] * (C * u_ext[0]->dy[i] * v->dx[i]);
+        // Contribution of matrix form 1, 1.
+        result += wt[i] * (B * u_ext[1]->dx[i] * v->dx[i] + A * u_ext[1]->dy[i] * v->dy[i]);
+      }
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], 
+                    Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+      Ord result = 0;
+      for (int i = 0; i < n; i++) {
+        // Contribution of matrix form 1, 0.
+        result += wt[i] * (C * u_ext[0]->dy[i] * v->dx[i]);
+        // Contribution of matrix form 1, 1.
+        result += wt[i] * (B * u_ext[1]->dx[i] * v->dx[i] + A * u_ext[1]->dy[i] * v->dy[i]);
+      }
+      return result;
+    }
+
+    double A, B, C, E, nu;
+  };
+
 };
 

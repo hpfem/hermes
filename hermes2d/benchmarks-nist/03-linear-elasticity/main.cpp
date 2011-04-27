@@ -86,9 +86,6 @@ const double nu = 0.3;                            // Poisson ratio.
   const double Q = -0.2189232362488;              // Q for mode-2 solution.
 #endif
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Exact solution, weak forms.
 #include "definitions.cpp"
 
@@ -120,16 +117,16 @@ int main(int argc, char* argv[])
   CustomExactSolutionV exact_v(&v_mesh, E, nu, lambda, Q);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_u(BDY_DIRICHLET, &exact_u);
+  DefaultEssentialBCNonConst bc_u("Bdy", &exact_u);
   EssentialBCs bcs_u(&bc_u);
-  DefaultEssentialBCNonConst bc_v(BDY_DIRICHLET, &exact_v);
+  DefaultEssentialBCNonConst bc_v("Bdy", &exact_v);
   EssentialBCs bcs_v(&bc_v);
 
   // Initialize the weak formulation.
   // NOTE: We pass all four parameters (temporarily) 
   // since in Mitchell's paper (NIST benchmarks) they 
   // are mutually inconsistent.
-  CustomWeakFormLinearElasticity wf(E, nu, mu, lambda);
+  CustomWeakFormElasticityNIST wf(E, nu, mu, lambda);
 
   // Create H1 spaces with default shapeset for both displacement components.
   H1Space u_space(&u_mesh, &bcs_u, P_INIT_U);
@@ -155,14 +152,14 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_est, graph_cpu_est, graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
-  int as = 1; 
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
+    int ndof_ref = Space::get_num_dofs(*ref_spaces);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -170,18 +167,22 @@ int main(int argc, char* argv[])
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
     solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING);
 
-    // Assemble the reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem dp(&wf, *ref_spaces);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solutions(solver->get_solution(), *ref_spaces,
-                                                      Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
-    else error ("Matrix solver failed.\n");
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
 
     // Time measurement.
     cpu_time.tick();
@@ -249,10 +250,14 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector *>(&selector, &selector), 
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
+
+      // Increase the counter of adaptivity steps.
+      if (done == false)  as++;
     }
     if (Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
@@ -261,10 +266,6 @@ int main(int argc, char* argv[])
       for(unsigned int i = 0; i < ref_spaces->size(); i++)
         delete (*ref_spaces)[i]->get_mesh();
     delete ref_spaces;
-    delete dp;
-    
-    // Increase counter.
-    as++;
   }
   while (done == false);
 
