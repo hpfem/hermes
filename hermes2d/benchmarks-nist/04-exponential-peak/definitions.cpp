@@ -62,7 +62,10 @@ class CustomWeakFormPoisson : public WeakForm
 {
 public:
   CustomWeakFormPoisson(DefaultFunction* rhs) : WeakForm(1) {
+    // Jacobian.
     add_matrix_form(new DefaultJacobianDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
+    // Residual.
+    add_vector_form(new DefaultResidualDiffusion(0));
+    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -1.0, rhs));
   };
 };
