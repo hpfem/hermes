@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifdef WITH_SUPERLU
 #include"superlu.h"
+#ifdef WITH_SUPERLU
 #include <slu_zdefs.h>
 
 template <>
