@@ -3,6 +3,7 @@
 #include "boundaryconditions/essential_bcs.h"
 #include "weakform_library/h1.h"
 
+using namespace WeakFormsH1;
 using namespace WeakFormsH1::VolumetricMatrixForms;
 using namespace WeakFormsH1::VolumetricVectorForms;
 
@@ -48,14 +49,4 @@ public:
   double alpha;
 };
 
-/* Weak forms */
-
-class CustomWeakFormPoisson : public WeakForm
-{
-public:
-  CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
-  };
-};
 

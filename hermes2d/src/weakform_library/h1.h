@@ -607,8 +607,10 @@ namespace WeakFormsH1 {
     public:
       DefaultResidualAdvection(int i, std::string area = HERMES_ANY, scalar const_coeff = 1.0,
                                CubicSpline* c_spline1 = HERMES_DEFAULT_SPLINE,
-                               CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR)
-        : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), spline_coeff1(c_spline1), spline_coeff2(c_spline2), gt(gt)
+                               CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, 
+                               GeomType gt = HERMES_PLANAR)
+        : WeakForm::VectorFormVol(i, area), const_coeff(const_coeff), spline_coeff1(c_spline1), 
+          spline_coeff2(c_spline2), gt(gt)
       {
         if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
 
@@ -914,10 +916,13 @@ namespace WeakFormsH1 {
     class DefaultMultiComponentVectorFormSurf : public WeakForm::MultiComponentVectorFormSurf
     {
     public:
-      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area = HERMES_ANY,
-                                          Hermes::vector<scalar> coeffs = Hermes::vector<scalar>(1.0), GeomType gt = HERMES_PLANAR)
+      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
+                                          std::string area = HERMES_ANY,
+                                          Hermes::vector<scalar> coeffs = Hermes::vector<scalar>(1.0), 
+                                          GeomType gt = HERMES_PLANAR)
       : WeakForm::MultiComponentVectorFormSurf(coordinates, area), coeffs(coeffs), gt(gt) { }
-      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, Hermes::vector<std::string> areas,
+      DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
+                                          Hermes::vector<std::string> areas,
                                           Hermes::vector<scalar> coeffs, GeomType gt = HERMES_PLANAR)
       : WeakForm::MultiComponentVectorFormSurf(coordinates, areas), coeffs(coeffs), gt(gt) { }
 
@@ -1048,31 +1053,45 @@ namespace WeakFormsH1 {
     };
   }
 
-  namespace WeakForms {
+  /* Default weak form for the Laplace equation -div(S(u) grad u) = 0. */
 
-/* Default weak form for the Laplace equation -Laplace u = 0. */
-
-    class DefaultWeakFormLaplace : public WeakForm
+  class DefaultWeakFormLaplace : public WeakForm
+  {
+  public:
+    DefaultWeakFormLaplace(std::string area = HERMES_ANY, scalar const_coeff = 1.0,
+                           CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+                           GeomType gt = HERMES_PLANAR) : WeakForm()
     {
-    public:
-      DefaultWeakFormLaplace(std::string area = HERMES_ANY, scalar const_coeff = 1.0,
-                             GeomType gt = HERMES_PLANAR)
-        : WeakForm(), area(area), const_coeff(const_coeff), gt(gt)
-      {
-        // Jacobian.
-        add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff,
-                                                                            HERMES_DEFAULT_SPLINE, HERMES_SYM, gt));
-        // Residual.
-        add_vector_form(new VolumetricVectorForms::DefaultResidualDiffusion(0, area, const_coeff,
-                                                                            HERMES_DEFAULT_SPLINE, gt));
-      };
-
-    protected:
-      std::string area;
-      scalar const_coeff;
-      GeomType gt;
+      // Jacobian.
+      add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff,
+                                                                          HERMES_DEFAULT_SPLINE, HERMES_SYM, gt));
+      // Residual.
+      add_vector_form(new VolumetricVectorForms::DefaultResidualDiffusion(0, area, const_coeff,
+                                                                          HERMES_DEFAULT_SPLINE, gt));
     };
-  }
+  };
+
+
+  /* Default weak form for the Poisson equation -div(S(u) grad u) - rhs = 0. */
+
+  class DefaultWeakFormPoisson : public WeakForm
+  {
+  public:
+  DefaultWeakFormPoisson(DefaultFunction* rhs = HERMES_DEFAULT_FUNCTION,
+                         std::string area = HERMES_ANY, scalar const_coeff = 1.0, 
+                         CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+                         GeomType gt = HERMES_PLANAR) : WeakForm()
+    {
+      // Jacobian.
+      add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff,
+                                                                          c_spline, HERMES_SYM, gt));
+      // Residual.
+      add_vector_form(new VolumetricVectorForms::DefaultResidualDiffusion(0, area, const_coeff,
+                                                                          c_spline, gt));
+      add_vector_form(new VolumetricVectorForms::DefaultVectorFormVol(0, HERMES_ANY, -1.0, rhs, gt));
+    };
+  };
+
 }
 
 #endif
