@@ -448,24 +448,23 @@ namespace WeakFormsNeutronics
                                       Hermes::vector<double> Sigma_a_map, 
                                       Hermes::vector<double> Q_map ) : WeakForm(1) 
           {
-            using namespace WeakFormsH1::VolumetricMatrixForms;
-            using namespace WeakFormsH1::VolumetricVectorForms;
+            using namespace WeakFormsH1;
             
             for (unsigned int i = 0; i < regions.size(); i++)
             {
               /* Jacobian */
-          // Diffusion.
-          add_matrix_form(new DefaultJacobianDiffusion(0, 0, regions[i], D_map[i], HERMES_DEFAULT_SPLINE, HERMES_SYM));
-          // Absorption.
-          add_matrix_form(new DefaultMatrixFormVol(0, 0, regions[i], Sigma_a_map[i], HERMES_DEFAULT_FUNCTION, HERMES_SYM));
-          
-          /* Residual */
-          // Diffusion.
-          add_vector_form(new DefaultResidualDiffusion(0, regions[i], D_map[i]));
-          // Absorption.
-          add_vector_form(new DefaultResidualVol(0, regions[i], Sigma_a_map[i]));
-          // Sources.
-          add_vector_form(new DefaultVectorFormVol(0, regions[i], -Q_map[i]));
+              // Diffusion.
+              add_matrix_form(new DefaultJacobianDiffusion(0, 0, regions[i], D_map[i], HERMES_DEFAULT_SPLINE, HERMES_SYM));
+              // Absorption.
+              add_matrix_form(new DefaultMatrixFormVol(0, 0, regions[i], Sigma_a_map[i], HERMES_DEFAULT_FUNCTION, HERMES_SYM));
+              
+              /* Residual */
+              // Diffusion.
+              add_vector_form(new DefaultResidualDiffusion(0, regions[i], D_map[i]));
+              // Absorption.
+              add_vector_form(new DefaultResidualVol(0, regions[i], Sigma_a_map[i]));
+              // Sources.
+              add_vector_form(new DefaultVectorFormVol(0, regions[i], -Q_map[i]));
             }
           }
       };
@@ -677,7 +676,7 @@ namespace WeakFormsNeutronics
             DefaultDiffusionReaction(unsigned int g, 
                                     const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
                                     GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(g, g, HERMES_SYM),
+              : WeakForm::MatrixFormVol(g, g, HERMES_ANY, HERMES_SYM),
                 g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
             {
               if (D.size() != Sigma_r.size()) 
@@ -689,7 +688,7 @@ namespace WeakFormsNeutronics
             DefaultDiffusionReaction(unsigned int g, std::string area, 
                                     const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
                                     GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(g, g, HERMES_SYM, area),
+              : WeakForm::MatrixFormVol(g, g, area, HERMES_SYM),
                 g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
             { 
               if (D.size() != Sigma_r.size())
@@ -754,10 +753,8 @@ namespace WeakFormsNeutronics
             iMarkerPropertyMap1 D, Sigma_r;
             GeomType geom_type;
         };
-        
-        using WeakFormsH1::VolumetricMatrixForms::DefaultLinearMass;
-        
-        class DefaultFissionYield : public DefaultLinearMass
+                
+        class DefaultFissionYield : public WeakForm::MatrixFormVol
         {
           public:
             
@@ -766,7 +763,7 @@ namespace WeakFormsNeutronics
                                 const iMarkerPropertyMap1& Sigma_f,
                                 const iMarkerPropertyMap1& nu,
                                 GeomType geom_type = HERMES_PLANAR)
-              : DefaultLinearMass(gto, gfrom, 1.0, HERMES_NONSYM, geom_type), 
+              : WeakForm::MatrixFormVol(gto, gfrom), 
                 gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
             {
               if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
@@ -782,7 +779,7 @@ namespace WeakFormsNeutronics
                                 const iMarkerPropertyMap1& Sigma_f,
                                 const iMarkerPropertyMap1& nu,
                                 GeomType geom_type = HERMES_PLANAR)
-              : DefaultLinearMass(gto, gfrom, 1.0, HERMES_NONSYM, geom_type),
+              : WeakForm::MatrixFormVol(gto, gfrom, area),
                 gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
             { 
               if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
@@ -825,14 +822,14 @@ namespace WeakFormsNeutronics
             GeomType geom_type;
         };
             
-        class DefaultScattering : public DefaultLinearMass
+        class DefaultScattering : public WeakForm::MatrixFormVol
         {
           public:
             
             DefaultScattering(unsigned int gto, unsigned int gfrom, 
                               const iMarkerPropertyMap2& Sigma_s,
                               GeomType geom_type = HERMES_PLANAR)
-              : DefaultLinearMass(gto, gfrom, 1.0, HERMES_NONSYM, geom_type), 
+              : WeakForm::MatrixFormVol(gto, gfrom), 
                 gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
             {
               std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
@@ -841,7 +838,7 @@ namespace WeakFormsNeutronics
             DefaultScattering(unsigned int gto, unsigned int gfrom, std::string area,
                               const iMarkerPropertyMap2& Sigma_s,
                               GeomType geom_type = HERMES_PLANAR)
-              : DefaultLinearMass(gto, gfrom, area, 1.0, HERMES_NONSYM, geom_type),
+              : WeakForm::MatrixFormVol(gto, gfrom, area),
                 gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
             { 
               std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
@@ -878,9 +875,7 @@ namespace WeakFormsNeutronics
       };
       
       namespace VectorForms 
-      {
-        using WeakFormsH1::VolumetricVectorForms::DefaultVectorFormConst;
-        
+      {        
         class DefaultFissionYieldIterative : public WeakForm::VectorFormVol
         {
           public:
@@ -968,14 +963,14 @@ namespace WeakFormsNeutronics
             GeomType geom_type;
         };
         
-        class DefaultExternalSource : public DefaultVectorFormConst
+        class DefaultExternalSource : public WeakForm::VectorFormVol
         {
           public:
             
             DefaultExternalSource(unsigned int g, 
                                   const iMarkerPropertyMap1& src,
                                   GeomType geom_type = HERMES_PLANAR)
-              : DefaultVectorFormConst(g), g(g), src(src), geom_type(geom_type) 
+              : WeakForm::VectorFormVol(g), g(g), src(src), geom_type(geom_type) 
             { 
               std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
             }
@@ -983,7 +978,7 @@ namespace WeakFormsNeutronics
             DefaultExternalSource(unsigned int g, std::string area,
                                   const iMarkerPropertyMap1& src,
                                   GeomType geom_type = HERMES_PLANAR)
-              : DefaultVectorFormConst(g, area), g(g), src(src), geom_type(geom_type)
+              : WeakForm::VectorFormVol(g, area), g(g), src(src), geom_type(geom_type)
             { 
               std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
             }
