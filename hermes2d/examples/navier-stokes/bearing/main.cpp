@@ -132,9 +132,10 @@ int main(int argc, char* argv[])
 #else
   H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif
+  Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space);
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(spaces);
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -151,6 +152,8 @@ int main(int argc, char* argv[])
   xvel_prev_time.set_zero(&mesh);
   yvel_prev_time.set_zero(&mesh);
   p_prev_time.set_zero(&mesh);
+  Hermes::vector<Solution*> slns = Hermes::vector<Solution*>(&xvel_prev_time, &yvel_prev_time, 
+                                                             &p_prev_time);
 
   // Initialize weak formulation.
   WeakForm* wf;
@@ -160,7 +163,7 @@ int main(int argc, char* argv[])
     wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(wf, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+  DiscreteProblem dp(wf, spaces);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -178,13 +181,16 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
   if (NEWTON) {
-    info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-                   coeff_vec, matrix_solver, 
-                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    // Newton's vector is set to zero (no OG projection needed).
+    memset(coeff_vec, 0, ndof * sizeof(double));
+    /*
+    // This can be used for more complicated initial conditions.
+      info("Projecting initial condition to obtain initial vector for the Newton's method.");
+      OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
+                                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    */
   }
 
   // Time-stepping loop:
@@ -209,8 +215,7 @@ int main(int argc, char* argv[])
           NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                                    Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      Solution::vector_to_solutions(coeff_vec, spaces, slns);
     }
     else {
       // Linear solve.

@@ -81,7 +81,7 @@ Scalar newton_bilinear_form_unsym_1_0(int n, double *wt, Func<Scalar> *u_ext[], 
 {
   Scalar result = 0;
 #ifndef STOKES
-  Func<Scalar>* yvel_prev_newton = u_ext[0];
+  Func<Scalar>* yvel_prev_newton = u_ext[1];
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val[i] * v->val[i] * yvel_prev_newton->dx[i]);
 #endif

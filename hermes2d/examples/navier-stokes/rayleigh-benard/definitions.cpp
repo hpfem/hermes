@@ -151,7 +151,7 @@ public:
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                          Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
-      Func<scalar>* yvel_prev_newton = u_ext[0];
+      Func<scalar>* yvel_prev_newton = u_ext[1];
       for (int i = 0; i < n; i++)
         result += wt[i] * u->val[i] * yvel_prev_newton->dx[i] * v->val[i];
       return result;
@@ -160,7 +160,7 @@ public:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e,
                     ExtData<Ord> *ext) const {
       Ord result = 0;
-      Func<Ord>* yvel_prev_newton = u_ext[0];
+      Func<Ord>* yvel_prev_newton = u_ext[1];
       for (int i = 0; i < n; i++)
         result += wt[i] * u->val[i] * yvel_prev_newton->dx[i] * v->val[i];
       return result;

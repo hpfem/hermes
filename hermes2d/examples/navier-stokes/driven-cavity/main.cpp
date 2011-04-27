@@ -31,7 +31,6 @@ const int P_INIT_VEL = 2;                         // Initial polynomial degree f
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
                                                   // P_INIT_PRESSURE because of the inf-sup condition.
-const int P_INIT_TEMP = 1;                        // Initial polynomial degree for temperature
 const double time_step = 0.1;                     // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
@@ -78,7 +77,7 @@ int main(int argc, char* argv[])
   Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space);
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space::get_num_dofs(spaces);
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -121,10 +120,15 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
+  scalar* coeff_vec = new scalar[ndof];
+  // Newton's vector is set to zero (no OG projection needed).
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  /*
+  // This can be used for more complicated initial conditions.
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
                                Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm, t_proj_norm));
+  */
 
   // Time-stepping loop:
   char title[100];
