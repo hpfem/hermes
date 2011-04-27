@@ -4,7 +4,6 @@
 #include "boundaryconditions/essential_bcs.h"
 
 using namespace WeakFormsHcurl;
-using namespace WeakFormsHcurl::VolumetricMatrixForms;
 
 /* Initial condition for E */
 

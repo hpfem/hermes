@@ -4,7 +4,6 @@
 #include "boundaryconditions/essential_bcs.h"
 
 using namespace WeakFormsH1;
-using namespace WeakFormsH1::VolumetricMatrixForms;
 
 /* Weak forms */
 

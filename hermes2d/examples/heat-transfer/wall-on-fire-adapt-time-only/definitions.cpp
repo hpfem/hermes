@@ -4,10 +4,6 @@
 #include "boundaryconditions/essential_bcs.h"
 
 using namespace WeakFormsH1;
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::SurfaceMatrixForms;
-using namespace WeakFormsH1::SurfaceVectorForms;
 
 /* Space-dependent thermal conductivity */
 

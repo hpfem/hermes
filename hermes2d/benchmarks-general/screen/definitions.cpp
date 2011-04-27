@@ -207,8 +207,6 @@ public:
 /* Weak forms */
 
 using namespace WeakFormsHcurl;
-using namespace WeakFormsHcurl::VolumetricMatrixForms;
-using namespace WeakFormsHcurl::VolumetricVectorForms;
 
 class CustomWeakFormScreen : public WeakForm
 {

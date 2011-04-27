@@ -3,7 +3,7 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1::VolumetricMatrixForms;
+using namespace WeakFormsH1;
 
 /* Exact solution */
 

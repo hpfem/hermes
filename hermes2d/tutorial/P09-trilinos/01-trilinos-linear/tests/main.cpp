@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   CustomExactSolution exact(&mesh);
   
   // Initialize the weak formulation.
-  WeakFormPoisson wf1;
+  CustomWeakFormPoisson wf1;
 
   // Initialize boundary conditions
   DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
   info("---- Assembling by DiscreteProblem, solving by NOX:");
 
   // Initialize the weak formulation for Trilinos.
-  WeakFormPoisson wf2(TRILINOS_JFNK);
+  CustomWeakFormPoisson wf2(TRILINOS_JFNK);
   
   // Initialize DiscreteProblem.
   DiscreteProblem dp2(&wf2, &space);

@@ -3,9 +3,7 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::SurfaceMatrixForms;
-using namespace WeakFormsH1::SurfaceVectorForms;
+using namespace WeakFormsH1;
 
 /* Weak forms */
 
@@ -13,7 +11,7 @@ class WeakFormDrivenCavity : public WeakForm
 {
 public:
   WeakFormDrivenCavity(double Re, std::string bdy_top, double time_step, Solution* x_vel_previous_time,
-                         Solution* y_vel_previous_time)
+                       Solution* y_vel_previous_time)
     : WeakForm(3), Re(Re), time_step(time_step), x_vel_previous_time(x_vel_previous_time),
                 y_vel_previous_time(y_vel_previous_time) {
     /* Jacobian terms - first velocity equation */

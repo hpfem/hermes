@@ -1,10 +1,7 @@
 #include "weakform/weakform.h"
 #include "weakform_library/h1.h"
 
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::SurfaceMatrixForms;
-using namespace WeakFormsH1::SurfaceVectorForms;
+using namespace WeakFormsH1;
 
 /* Weak forms */
 

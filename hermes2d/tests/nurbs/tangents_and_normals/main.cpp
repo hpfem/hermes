@@ -4,9 +4,7 @@
 #include "function/function.h"
 #include "weakform_library/h1.h"
 
-using namespace RefinementSelectors;
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1;
 
 // This example makes sure that normal and tangential vectors to circular
 // arcs nurbs are calculated correctly.

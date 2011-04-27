@@ -4,10 +4,10 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 #include "function/function.h"
+#include "weakform_library/maxwell.h"
 
-using namespace WeakFormsMaxwell::VolumetricMatrixForms;
-using namespace WeakFormsMaxwell::VolumetricVectorForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1;
+using namespace WeakFormsMaxwell;
 
 /* Weak forms */
 
@@ -22,7 +22,7 @@ public:
 
     // Jacobian.
     add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_air, material_copper),
-                  1.0, HERMES_DEFAULT_SPLINE, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
+                                                      1.0, HERMES_DEFAULT_SPLINE, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
     add_matrix_form(new DefaultJacobianMagnetostatics(0, 0, Hermes::vector<std::string>(material_iron_1, material_iron_2),
                                                       1.0, mu_inv_iron, HERMES_NONSYM, HERMES_AXISYM_Y, order_inc));
     // Residual.
@@ -37,7 +37,8 @@ public:
 class HERMES_API FilterVectorPotencial : public MagFilter
 {
 public:
-  FilterVectorPotencial(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items) : MagFilter(solutions, items) {};
+  FilterVectorPotencial(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items) 
+    : MagFilter(solutions, items) {};
 
 protected:
   void filter_fn(int n, Hermes::vector<scalar*> values, scalar* result, Geom<double> *e)

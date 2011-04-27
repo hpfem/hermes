@@ -3,8 +3,7 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1;
 
 /* Exact solution */
 
@@ -29,10 +28,10 @@ public:
 
 /* Weak forms */
 
-class WeakFormPoisson : public WeakForm
+class CustomWeakFormPoisson : public WeakForm
 {
 public:
-  WeakFormPoisson(bool is_matfree = false) : WeakForm(1) {
+  CustomWeakFormPoisson(bool is_matfree = false) : WeakForm(1) {
     this->is_matfree = is_matfree;
     // Jacobian.
     add_matrix_form(new DefaultJacobianDiffusion(0, 0));

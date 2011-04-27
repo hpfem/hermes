@@ -4,8 +4,7 @@
 #include "weakform_library/h1.h"
 #include "adapt/kelly_type_adapt.h"
 
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1;
 
 /* Right-hand side */
 
