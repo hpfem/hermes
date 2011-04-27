@@ -1059,8 +1059,12 @@ namespace WeakFormsH1 {
                              GeomType gt = HERMES_PLANAR)
         : WeakForm(), area(area), const_coeff(const_coeff), gt(gt)
       {
+        // Jacobian.
         add_matrix_form(new VolumetricMatrixForms::DefaultJacobianDiffusion(0, 0, area, const_coeff,
                                                                             HERMES_DEFAULT_SPLINE, HERMES_SYM, gt));
+        // Residual.
+        add_vector_form(new VolumetricVectorForms::DefaultResidualDiffusion(0, area, const_coeff,
+                                                                            HERMES_DEFAULT_SPLINE, gt));
       };
 
     protected:
