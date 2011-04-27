@@ -51,12 +51,12 @@ int main(int argc, char* argv[])
   Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
-  CustomWeakFormHeatTransferPicard wf(&sln_prev_iter, HEAT_SRC);
+  CustomWeakFormPicard wf(&sln_prev_iter, HEAT_SRC);
 
   // Perform the Picard's iteration.
   bool verbose = true;
   hermes2d.solve_picard(&wf, &space, &sln_prev_iter, matrix_solver, PICARD_TOL,
-               PICARD_MAX_ITER, verbose);
+                        PICARD_MAX_ITER, verbose);
 
   ndof = Space::get_num_dofs(&space);
   info("Coordinate (-10, -10) value = %lf", sln_prev_iter.get_pt_value(-10.0, -10.0));

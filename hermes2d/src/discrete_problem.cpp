@@ -4458,8 +4458,8 @@ bool Hermes2D::solve_newton(scalar* coeff_vec, DiscreteProblem* dp, Solver* solv
 
 // Perform Picard's iteration.
 bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
-                            MatrixSolverType matrix_solver, double picard_tol,
-                            int picard_max_iter, bool verbose) const
+                            MatrixSolverType matrix_solver, double tol,
+                            int max_iter, bool verbose) const
 {
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
@@ -4475,12 +4475,14 @@ bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
   // Initial coefficient vector for the Newton's method.  
   int ndof = Space::get_num_dofs(space);
   scalar* coeff_vec = new scalar[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(scalar));
+  memset(coeff_vec, 0, ndof * sizeof(scalar));
 
   int iter_count = 0;
   while (true) {
     // Perform Newton's iteration to solve the linear problem.
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) 
+    bool jacobian_changed = true;
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+                               jacobian_changed, tol, max_iter)) 
         error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
@@ -4493,7 +4495,7 @@ bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
       iter_count+1, space->get_num_dofs(), rel_error);
 
     // Stopping criterion.
-    if (rel_error < picard_tol) {
+    if (rel_error < tol) {
       sln_prev_iter->copy(&sln_new);
       delete [] coeff_vec;
       delete matrix;
@@ -4502,7 +4504,7 @@ bool Hermes2D::solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter,
       return true;
     }
 
-    if (iter_count >= picard_max_iter) {
+    if (iter_count >= max_iter) {
       delete [] coeff_vec;
       delete matrix;
       delete rhs;

@@ -37,8 +37,7 @@ namespace WeakFormsNeutronDiffusion
                                           Hermes::vector<double> Sigma_a_map, 
                                           Hermes::vector<double> Q_map ) : WeakForm(1) 
       {
-        using namespace WeakFormsH1::VolumetricMatrixForms;
-        using namespace WeakFormsH1::VolumetricVectorForms;
+        using namespace WeakFormsH1;
         
         for (unsigned int i = 0; i < regions.size(); i++)
         {

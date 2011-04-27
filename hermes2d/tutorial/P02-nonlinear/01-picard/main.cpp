@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   Solution sln_prev_iter(&mesh, INIT_COND_CONST);
 
   // Initialize the weak formulation.
-  CustomWeakFormHeatTransferPicard wf(&sln_prev_iter, HEAT_SRC);
+  CustomWeakFormPicard wf(&sln_prev_iter, HEAT_SRC);
 
   // Perform the Picard's iteration.
   bool verbose = true;

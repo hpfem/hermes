@@ -34,10 +34,10 @@ public:
     add_vector_form(new WeakFormsElasticity::DefaultResidualElasticity_1_0(1, lambda, mu));
 
     // Gravity loading.
-    add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormVol(1, HERMES_ANY, -rho_g));
+    add_vector_form(new WeakFormsH1::DefaultVectorFormVol(1, HERMES_ANY, -rho_g));
 
     // External forces.
-    add_multicomponent_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultMultiComponentVectorFormSurf(
+    add_multicomponent_vector_form_surf(new WeakFormsH1::DefaultMultiComponentVectorFormSurf(
                                         Hermes::vector<unsigned int>(0, 1), surface_force_bdy, 
                                         Hermes::vector<double>(-f0, -f1)));
 #else 
@@ -51,15 +51,15 @@ public:
     add_vector_form(new WeakFormsElasticity::DefaultResidualElasticity_0_0(0, HERMES_ANY, lambda, mu));
     add_vector_form(new WeakFormsElasticity::DefaultResidualElasticity_0_1(0, HERMES_ANY, lambda, mu));
     // Surface force (first component).
-    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultVectorFormSurf(0, surface_force_bdy, -f0)); 
+    add_vector_form_surf(new WeakFormsH1::DefaultVectorFormSurf(0, surface_force_bdy, -f0)); 
 
     // Residual - second equation.
     add_vector_form(new WeakFormsElasticity::DefaultResidualElasticity_1_0(1, HERMES_ANY, lambda, mu));
     add_vector_form(new WeakFormsElasticity::DefaultResidualElasticity_1_1(1, HERMES_ANY, lambda, mu));
     // Gravity loading in the second vector component.
-    add_vector_form(new WeakFormsH1::VolumetricVectorForms::DefaultVectorFormVol(1, HERMES_ANY, -rho_g));
+    add_vector_form(new WeakFormsH1::DefaultVectorFormVol(1, HERMES_ANY, -rho_g));
     // Surface force (second component).
-    add_vector_form_surf(new WeakFormsH1::SurfaceVectorForms::DefaultVectorFormSurf(1, surface_force_bdy, -f1)); 
+    add_vector_form_surf(new WeakFormsH1::DefaultVectorFormSurf(1, surface_force_bdy, -f1)); 
 #endif
   };
 };

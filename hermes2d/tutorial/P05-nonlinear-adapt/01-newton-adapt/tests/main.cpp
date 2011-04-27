@@ -46,14 +46,8 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
-
-// Initial condition.
-#include "../initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -67,10 +61,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  CustomEssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  CustomEssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

@@ -4,8 +4,6 @@
 #include "weakform_library/hcurl.h"
 
 using namespace WeakFormsHcurl;
-using namespace WeakFormsHcurl::VolumetricMatrixForms;
-using namespace WeakFormsHcurl::SurfaceMatrixForms;
 
 /* Exact solution */
 

@@ -3,7 +3,7 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
-using namespace WeakFormsH1::VolumetricVectorForms;
+using namespace WeakFormsH1;
 
 /* Weak forms */
 
@@ -18,10 +18,10 @@ Real lam(Real u) {
   return 1 + pow(u, 4);
 }
 
-class CustomWeakFormHeatTransferPicard : public WeakForm
+class CustomWeakFormPicard : public WeakForm
 {
 public:
-  CustomWeakFormHeatTransferPicard(Solution* prev_iter_sln, double heat_src) : WeakForm(1) 
+  CustomWeakFormPicard(Solution* prev_iter_sln, double heat_src) : WeakForm(1) 
   {
     // Jacobian.
     CustomJacobian* matrix_form = new CustomJacobian(0, 0);
@@ -70,12 +70,10 @@ private:
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (
-                              lam<Real>(ext->fn[0]->val[i]) 
-                            * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i])
-                            - heat_src * v->val[i]
-                          );
+      for (int i = 0; i < n; i++) {
+        result += wt[i] * lam<Real>(ext->fn[0]->val[i]) * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+        result -= wt[i] * heat_src * v->val[i];
+      }
 
       return result;
     }

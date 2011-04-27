@@ -4,30 +4,13 @@
 #include "boundaryconditions/essential_bcs.h"
 
 using namespace WeakFormsH1;
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
-
-/* Weak forms */
-
-class CustomWeakFormHeatTransferNewton : public WeakForm
-{
-public:
-  CustomWeakFormHeatTransferNewton(CubicSpline* cspline, double heat_src)
-        : WeakForm(1) {
-    // Jacobian.
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0, HERMES_ANY, 1.0, cspline));
-    // Residual.
-    add_vector_form(new DefaultResidualDiffusion(0, HERMES_ANY, 1.0, cspline));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, -heat_src));
-  };
-};
 
 /* Initial condition for the Newton's method */
 
-class CustomInitialSolutionHeatTransfer : public ExactSolutionScalar
+class CustomInitialCondition : public ExactSolutionScalar
 {
 public:
-  CustomInitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+  CustomInitialCondition(Mesh* mesh) : ExactSolutionScalar(mesh) {};
 
   virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
     dx = (y+10)/100.;
@@ -48,10 +31,7 @@ public:
 class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
 public:
   CustomEssentialBCNonConst(std::string marker)
-           : EssentialBoundaryCondition(Hermes::vector<std::string>())
-  {
-    markers.push_back(marker);
-  }
+           : EssentialBoundaryCondition(Hermes::vector<std::string>(marker)) { }
 
   ~CustomEssentialBCNonConst() {};
 

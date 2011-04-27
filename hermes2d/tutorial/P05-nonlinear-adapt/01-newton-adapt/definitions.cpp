@@ -2,6 +2,8 @@
 #include "integrals/h1.h"
 #include "boundaryconditions/essential_bcs.h"
 
+/* Weak forms */
+
 class WeakFormHeatTransferNewton : public WeakForm
 {
 public:
@@ -89,6 +91,8 @@ private:
   };
 };
 
+/* Essential BC */
+
 class CustomEssentialBCNonConst : public EssentialBoundaryCondition {
 public:
   CustomEssentialBCNonConst(std::string marker) : EssentialBoundaryCondition(Hermes::vector<std::string>()) {
@@ -103,5 +107,26 @@ public:
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
     return (x+10)*(y+10)/100.;
+  }
+};
+
+/* Initial condition */
+
+class InitialSolutionHeatTransfer : public ExactSolutionScalar
+{
+public:
+  InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  virtual scalar value (double x, double y) const {
+    return (x+10)*(y+10)/100. + 2.;
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = (y+10)/10.;
+    dy = (x+10)/10.;
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return (x+10)*(y+10)/100. + 2.;
   }
 };

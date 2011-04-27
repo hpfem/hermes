@@ -20,8 +20,6 @@
 
 namespace WeakFormsMaxwell {
 
-  namespace VolumetricMatrixForms {
-
     /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx
        spline_coeff... nonconstant parameter given by cubic spline
     */
@@ -120,7 +118,6 @@ namespace WeakFormsMaxwell {
         GeomType gt;
         int order_increase;
     };
-  }
 
   /* Default volumetric matrix form \int_{area} u->val[i] * ((vel_x - e->y[i] * vel_ang) *
      v->dx[i] + (vel_y + e->x[i] * vel_ang) * v->dy[i])
@@ -167,7 +164,6 @@ namespace WeakFormsMaxwell {
   };
   */
 
-  namespace VolumetricVectorForms {
 
     /* Default volumetric vector form \int_{area} coeff
        \nabla u_ext[0] \cdot \nabla v d\bfx
@@ -328,7 +324,6 @@ namespace WeakFormsMaxwell {
         GeomType gt;
     };
     */
-  }
 }
 
 #endif

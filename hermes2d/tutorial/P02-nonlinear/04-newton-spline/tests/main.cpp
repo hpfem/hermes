@@ -1,13 +1,11 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function/function.h"
 
 using namespace RefinementSelectors;
 
-//  This test makes sure that example 17-newton-elliptic-2 works correctly.
+//  This test makes sure that example P02/04 works correctly.
 
 const int P_INIT = 2;                             // Initial polynomial degree.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
@@ -20,9 +18,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 double HEAT_SRC = 1.0;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -32,27 +27,24 @@ int main(int argc, char* argv[])
   Hermes2D hermes2d;
 
   // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
-  // Here lambda(u) = 1 + u^4.
+  // Step 1: Fill the x values and use lambda(u) = 1 + u^4 for the y values.
   #define lambda(x) (1 + pow(x, 4))
   Hermes::vector<double> lambda_pts(-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0);
   Hermes::vector<double> lambda_val;
-  for (unsigned int i = 0; i < lambda_pts.size(); i++) {
-    lambda_val.push_back(lambda(lambda_pts[i]));
-  }
-
-  // Create the cubic spline (and plot it for visual control). 
-  double second_der_left = 0.0;
-  double second_der_right = 0.0;
+  for (unsigned int i = 0; i < lambda_pts.size(); i++) lambda_val.push_back(lambda(lambda_pts[i]));
+  // Step 2: Create the cubic spline (and plot it for visual control). 
+  double bc_left = 0.0;
+  double bc_right = 0.0;
   bool first_der_left = false;
   bool first_der_right = false;
   bool extrapolate_der_left = true;
   bool extrapolate_der_right = true;
-  CubicSpline cs(lambda_pts, lambda_val, 0.0, 0.0, first_der_left, first_der_right,
-                 extrapolate_der_left, extrapolate_der_right);
+  CubicSpline spline_coeff(lambda_pts, lambda_val, bc_left, bc_right, first_der_left, first_der_right,
+                           extrapolate_der_left, extrapolate_der_right);
   info("Saving cubic spline into a Pylab file spline.dat.");
-  double interval_extension = 1.0; // The interval of definition of the spline will be 
+  double interval_extension = 3.0; // The interval of definition of the spline will be 
                                    // extended by "interval_extension" on both sides.
-  cs.plot("spline.dat", interval_extension);
+  spline_coeff.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;
@@ -61,10 +53,10 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  CustomEssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  CustomEssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -72,7 +64,9 @@ int main(int argc, char* argv[])
   int ndof = space.get_num_dofs();
 
   // Initialize the weak formulation
-  CustomWeakFormHeatTransferNewton wf(&cs, HEAT_SRC);
+  DefaultFunction heat_src(HEAT_SRC);
+  double const_coeff = 1.0;
+  DefaultWeakFormPoisson wf(&heat_src, HERMES_ANY, const_coeff, &spline_coeff);
 
   // Initialize the FE problem.
   DiscreteProblem dp(&wf, &space);
@@ -89,7 +83,7 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  CustomInitialSolutionHeatTransfer init_sln(&mesh);
+  CustomInitialCondition init_sln(&mesh);
   OGProjection::project_global(&space, &init_sln, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration.
@@ -102,7 +96,7 @@ int main(int argc, char* argv[])
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // Cleanup.
-  delete []coeff_vec;
+  delete [] coeff_vec;
   delete matrix;
   delete rhs;
   delete solver;

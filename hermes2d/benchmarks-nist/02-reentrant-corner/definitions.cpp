@@ -1,10 +1,6 @@
 #include "weakform_library/h1.h"
 
 using namespace WeakFormsH1;
-using namespace WeakFormsH1::VolumetricMatrixForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::VolumetricVectorForms;
-using namespace WeakFormsH1::WeakForms;
 
 /* Exact solution */
 

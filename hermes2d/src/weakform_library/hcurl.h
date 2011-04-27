@@ -20,8 +20,6 @@
 
 namespace WeakFormsHcurl {
 
-  namespace VolumetricMatrixForms {
-
     /* Default volumetric matrix form \int_{area} coeff \curl E \curl F d\bfx
      coeff... constant number
     */
@@ -93,9 +91,6 @@ namespace WeakFormsHcurl {
       private:
         scalar coeff;
     };
-  }
-
-  namespace SurfaceMatrixForms {
 
     /* Default surface matrix form \int_{area} coeff e tau f tau dS
        coeff... constant number
@@ -132,9 +127,6 @@ namespace WeakFormsHcurl {
       private:
         scalar coeff;
     };
-  }
-
-  namespace VolumetricVectorForms {
 
       /* Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx
          coeff... constant number
@@ -171,6 +163,5 @@ namespace WeakFormsHcurl {
       private:
         scalar coeff0, coeff1;
       };
-  }
 }
 #endif

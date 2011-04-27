@@ -111,8 +111,8 @@ public:
                     double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
 
   bool solve_picard(WeakForm* wf, Space* space, Solution* sln_prev_iter, 
-                    MatrixSolverType matrix_solver, double picard_tol = 1e-8, 
-                    int picard_max_iter = 100, bool verbose = false) const;
+                    MatrixSolverType matrix_solver, double tol = 1e-8, 
+                    int max_iter = 100, bool verbose = false) const;
 };
 
 #endif
