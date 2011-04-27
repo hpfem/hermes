@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 //  Newton's method, and nonzero Dirichlet boundary conditions.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] - heat_src = 0.
+//  conductivity, -div[S(u)grad u] - heat_src = 0 where S(u) is a cubic spline.
 //
 //  Domain: unit square (-10, 10)^2.
 //

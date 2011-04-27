@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 //  automatic adaptivity.
 //
 //  PDE: stationary heat transfer equation with nonlinear thermal
-//  conductivity, - div[lambda(u)grad u] = 0.
+//  conductivity, -div[S(u)grad u] - heat_src = 0 where S(u) is a cubic spline.
 //
 //  Domain: unit square (-10,10)^2.
 //
@@ -54,13 +54,36 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Weak forms.ton(
+// Problem parameters.
+double HEAT_SRC = 1.0;
+
+// Initial and boundary conditions.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
+
+  // Define nonlinear thermal conductivity lambda(u) via a cubic spline.
+  // Step 1: Fill the x values and use lambda(u) = 1 + u^4 for the y values.
+  #define lambda(x) (1 + pow(x, 4))
+  Hermes::vector<double> lambda_pts(-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0);
+  Hermes::vector<double> lambda_val;
+  for (unsigned int i = 0; i < lambda_pts.size(); i++) lambda_val.push_back(lambda(lambda_pts[i]));
+  // Step 2: Create the cubic spline (and plot it for visual control). 
+  double bc_left = 0.0;
+  double bc_right = 0.0;
+  bool first_der_left = false;
+  bool first_der_right = false;
+  bool extrapolate_der_left = true;
+  bool extrapolate_der_right = true;
+  CubicSpline spline_coeff(lambda_pts, lambda_val, bc_left, bc_right, first_der_left, first_der_right,
+                           extrapolate_der_left, extrapolate_der_right);
+  info("Saving cubic spline into a Pylab file spline.dat.");
+  double interval_extension = 3.0; // The interval of definition of the spline will be 
+                                   // extended by "interval_extension" on both sides.
+  spline_coeff.plot("spline.dat", interval_extension);
 
   // Load the mesh.
   Mesh mesh;
@@ -79,7 +102,9 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, &bcs, P_INIT);
 
   // Initialize the weak formulation
-  WeakFormHeatTransferNewton wf;
+  DefaultFunction heat_src(HEAT_SRC);
+  double const_coeff = 1.0;
+  DefaultWeakFormPoisson wf(&heat_src, HERMES_ANY, const_coeff, &spline_coeff);
 
   // Initialize the FE problem.
   DiscreteProblem dp_coarse(&wf, &space);
@@ -132,8 +157,7 @@ int main(int argc, char* argv[])
   delete [] coeff_vec_coarse;
 
   // Adaptivity loop:
-  int as = 1;
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
@@ -142,7 +166,7 @@ int main(int argc, char* argv[])
     Space* ref_space = Space::construct_refined_space(&space);
 
     // Initialize discrete problem on the reference mesh.
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
+    DiscreteProblem dp(&wf, ref_space);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -169,8 +193,8 @@ int main(int argc, char* argv[])
 
     // Newton's loop on the fine mesh.
     info("Solving on fine mesh:");
-    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs,
-  jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs,
+        jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution ref_sln.
     Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
@@ -218,13 +242,12 @@ int main(int argc, char* argv[])
     }
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
     delete adaptivity;
     delete ref_space;
-    delete dp;
-    delete [] coeff_vec;
 
     as++;
   }
