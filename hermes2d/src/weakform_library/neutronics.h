@@ -667,350 +667,560 @@ namespace WeakFormsNeutronics
           }
       };
       
-      namespace MatrixForms 
-      {  
-        class DefaultDiffusionReaction : public WeakForm::MatrixFormVol
-        {
-          public:
-            
-            DefaultDiffusionReaction(unsigned int g, 
-                                    const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
-                                    GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(g, g, HERMES_ANY, HERMES_SYM),
-                g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
-            {
-              if (D.size() != Sigma_r.size()) 
-                error(E_NONMATCHING_PROPERTIES);
+      namespace AtomicForms
+      {         
+        namespace Matrix 
+        {  
+          class DiffusionReaction : public WeakForm::MatrixFormVol
+          {
+            public:
               
-              std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
-              std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
-            }
-            DefaultDiffusionReaction(unsigned int g, std::string area, 
-                                    const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
-                                    GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(g, g, area, HERMES_SYM),
-                g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
-            { 
-              if (D.size() != Sigma_r.size())
-                error(E_NONMATCHING_PROPERTIES);
-              
-              std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
-              std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
-            }
-            
-            template<typename Real, typename Scalar>
-            Scalar matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const 
-            {
-              Scalar result = 0;
-              
-              // Constant properties within the current active element. Note that prop[e->elem_marker]
-              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined. 
-              rank1 D_elem = D.find(e->elem_marker)->second;
-              rank1 Sigma_r_elem = Sigma_r.find(e->elem_marker)->second;
-              
-              if (geom_type == HERMES_PLANAR) 
+              DiffusionReaction(unsigned int g, 
+                                const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
+                                GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::MatrixFormVol(g, g, HERMES_ANY, HERMES_SYM),
+                  g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
               {
-                result = D_elem[g] * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) +
-                         Sigma_r_elem[g] * int_u_v<Real, Scalar>(n, wt, u, v);
+                if (D.size() != Sigma_r.size()) 
+                  error(E_NONMATCHING_PROPERTIES);
+                
+                std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
+                std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
               }
-              else 
+              DiffusionReaction(unsigned int g, std::string area, 
+                                const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
+                                GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::MatrixFormVol(g, g, area, HERMES_SYM),
+                  g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
+              { 
+                if (D.size() != Sigma_r.size())
+                  error(E_NONMATCHING_PROPERTIES);
+                
+                std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
+                std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
+              }
+              
+              template<typename Real, typename Scalar>
+              Scalar matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                  Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const 
               {
-                if (geom_type == HERMES_AXISYM_X) 
+                Scalar result = 0;
+                
+                // Constant properties within the current active element. Note that prop[e->elem_marker]
+                // cannot be used since 'prop' is a constant std::map for which operator[] is undefined. 
+                rank1 D_elem = D.find(e->elem_marker)->second;
+                rank1 Sigma_r_elem = Sigma_r.find(e->elem_marker)->second;
+                
+                if (geom_type == HERMES_PLANAR) 
                 {
-                  result = D_elem[g] * int_y_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
-                           Sigma_r_elem[g] * int_y_u_v<Real, Scalar>(n, wt, u, v, e);
+                  result = D_elem[g] * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) +
+                          Sigma_r_elem[g] * int_u_v<Real, Scalar>(n, wt, u, v);
                 }
                 else 
                 {
-                  result = D_elem[g] * int_x_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
-                           Sigma_r_elem[g] * int_x_u_v<Real, Scalar>(n, wt, u, v, e);
+                  if (geom_type == HERMES_AXISYM_X) 
+                  {
+                    result = D_elem[g] * int_y_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
+                            Sigma_r_elem[g] * int_y_u_v<Real, Scalar>(n, wt, u, v, e);
+                  }
+                  else 
+                  {
+                    result = D_elem[g] * int_x_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
+                            Sigma_r_elem[g] * int_x_u_v<Real, Scalar>(n, wt, u, v, e);
+                  }
                 }
+                return result;
               }
-              return result;
-            }
 
-            virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
-            { 
-              return  matrix_form<double, scalar> (n, wt, u_ext, u, v, e, ext);
-            }
-            
-            virtual Ord ord( int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-                             Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext  ) const 
-            { 
-              return  matrix_form<Ord, Ord> (n, wt, u_ext, u, v, e, ext);
-            }
+              virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+              { 
+                return  matrix_form<double, scalar> (n, wt, u_ext, u, v, e, ext);
+              }
+              
+              virtual Ord ord( int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                              Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext  ) const 
+              { 
+                return  matrix_form<Ord, Ord> (n, wt, u_ext, u, v, e, ext);
+              }
 
-            // This is to make the form usable in rk_time_step().
-            virtual WeakForm::MatrixFormVol* clone() {
-              return new DefaultDiffusionReaction(*this);
-            }
+              // This is to make the form usable in rk_time_step().
+              virtual WeakForm::MatrixFormVol* clone() {
+                return new DiffusionReaction(*this);
+              }
 
-          private:
-            
-            unsigned int g;
-            iMarkerPropertyMap1 D, Sigma_r;
-            GeomType geom_type;
-        };
+            private:
+              
+              unsigned int g;
+              iMarkerPropertyMap1 D, Sigma_r;
+              GeomType geom_type;
+          };
+                  
+          class FissionYield : public WeakForm::MatrixFormVol
+          {
+            public:
+              
+              FissionYield( unsigned int gto, unsigned int gfrom, 
+                            const iMarkerPropertyMap1& chi,
+                            const iMarkerPropertyMap1& Sigma_f,
+                            const iMarkerPropertyMap1& nu,
+                            GeomType geom_type = HERMES_PLANAR )
+                : WeakForm::MatrixFormVol(gto, gfrom), 
+                  gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
+              {
+                if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                  error(E_NONMATCHING_PROPERTIES);
                 
-        class DefaultFissionYield : public WeakForm::MatrixFormVol
-        {
-          public:
-            
-            DefaultFissionYield(unsigned int gto, unsigned int gfrom, 
-                                const iMarkerPropertyMap1& chi,
-                                const iMarkerPropertyMap1& Sigma_f,
-                                const iMarkerPropertyMap1& nu,
-                                GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(gto, gfrom), 
-                gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
-            {
-              if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
-                error(E_NONMATCHING_PROPERTIES);
-              
-              std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
-              std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
-              std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
-            }
-            
-            DefaultFissionYield(unsigned int gto, unsigned int gfrom, std::string area,
-                                const iMarkerPropertyMap1& chi,
-                                const iMarkerPropertyMap1& Sigma_f,
-                                const iMarkerPropertyMap1& nu,
-                                GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(gto, gfrom, area),
-                gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
-            { 
-              if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
-                error(E_NONMATCHING_PROPERTIES);
-              
-              std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
-              std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
-              std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
-            }
-            
-            virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
-            {
-              scalar result = 0;
-              if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
-              else 
-              {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
-                else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+                std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
+                std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
+                std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
               }
               
-              // Constant properties within the current active element. Note that prop[e->elem_marker]
-              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
-              rank1 nu_elem = nu.find(e->elem_marker)->second;
-              rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
-              rank1 chi_elem = chi.find(e->elem_marker)->second;
-              
-              return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
-            }
-            
-            // This is to make the form usable in rk_time_step().
-            virtual WeakForm::MatrixFormVol* clone() {
-              return new DefaultFissionYield(*this);
-            }
-            
-          private:
-            
-            unsigned int gto, gfrom;
-            iMarkerPropertyMap1 chi, Sigma_f, nu;
-            GeomType geom_type;
-        };
-            
-        class DefaultScattering : public WeakForm::MatrixFormVol
-        {
-          public:
-            
-            DefaultScattering(unsigned int gto, unsigned int gfrom, 
-                              const iMarkerPropertyMap2& Sigma_s,
-                              GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(gto, gfrom), 
-                gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
-            {
-              std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
-            }
-            
-            DefaultScattering(unsigned int gto, unsigned int gfrom, std::string area,
-                              const iMarkerPropertyMap2& Sigma_s,
-                              GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::MatrixFormVol(gto, gfrom, area),
-                gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
-            { 
-              std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
-            }
-            
-            virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
-            {
-              scalar result = 0;
-              if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
-              else 
-              {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
-                else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+              FissionYield( unsigned int gto, unsigned int gfrom, std::string area,
+                            const iMarkerPropertyMap1& chi,
+                            const iMarkerPropertyMap1& Sigma_f,
+                            const iMarkerPropertyMap1& nu,
+                            GeomType geom_type = HERMES_PLANAR )
+                : WeakForm::MatrixFormVol(gto, gfrom, area),
+                  gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
+              { 
+                if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                  error(E_NONMATCHING_PROPERTIES);
+                
+                std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
+                std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
+                std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
               }
               
-              // Constant properties within the current active element. Note that prop[e->elem_marker]
-              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
-              rank2 Sigma_s_elem = Sigma_s.find(e->elem_marker)->second;
-              return result * (-Sigma_s_elem[gto][gfrom]);
-            }
-            
-            // This is to make the form usable in rk_time_step().
-            virtual WeakForm::MatrixFormVol* clone() {
-              return new DefaultScattering(*this);
-            }
-            
-          private:
-            
-            unsigned int gto, gfrom;
-            iMarkerPropertyMap2 Sigma_s;
-            GeomType geom_type;
+              virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+              {
+                scalar result = 0;
+                if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
+                else 
+                {
+                  if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+                  else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+                }
+                
+                // Constant properties within the current active element. Note that prop[e->elem_marker]
+                // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                rank1 nu_elem = nu.find(e->elem_marker)->second;
+                rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
+                rank1 chi_elem = chi.find(e->elem_marker)->second;
+                
+                return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
+              }
+              
+              // This is to make the form usable in rk_time_step().
+              virtual WeakForm::MatrixFormVol* clone() {
+                return new FissionYield(*this);
+              }
+              
+            private:
+              
+              unsigned int gto, gfrom;
+              iMarkerPropertyMap1 chi, Sigma_f, nu;
+              GeomType geom_type;
+          };
+              
+          class Scattering : public WeakForm::MatrixFormVol
+          {
+            public:
+              
+              Scattering( unsigned int gto, unsigned int gfrom, 
+                          const iMarkerPropertyMap2& Sigma_s,
+                          GeomType geom_type = HERMES_PLANAR )
+                : WeakForm::MatrixFormVol(gto, gfrom), 
+                  gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
+              {
+                std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
+              }
+              
+              Scattering( unsigned int gto, unsigned int gfrom, std::string area,
+                          const iMarkerPropertyMap2& Sigma_s,
+                          GeomType geom_type = HERMES_PLANAR )
+                : WeakForm::MatrixFormVol(gto, gfrom, area),
+                  gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
+              { 
+                std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
+              }
+              
+              virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                    Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+              {
+                scalar result = 0;
+                if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
+                else 
+                {
+                  if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+                  else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+                }
+                
+                // Constant properties within the current active element. Note that prop[e->elem_marker]
+                // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                rank2 Sigma_s_elem = Sigma_s.find(e->elem_marker)->second;
+                return result * (-Sigma_s_elem[gto][gfrom]);
+              }
+              
+              // This is to make the form usable in rk_time_step().
+              virtual WeakForm::MatrixFormVol* clone() {
+                return new Scattering(*this);
+              }
+              
+            private:
+              
+              unsigned int gto, gfrom;
+              iMarkerPropertyMap2 Sigma_s;
+              GeomType geom_type;
+          };
         };
-      };
       
-      namespace VectorForms 
-      {        
-        class DefaultFissionYieldIterative : public WeakForm::VectorFormVol
-        {
-          public:
-            
-            DefaultFissionYieldIterative(unsigned int g, 
-                                         const iMarkerPropertyMap1& chi,
-                                         const iMarkerPropertyMap1& Sigma_f,
-                                         const iMarkerPropertyMap1& nu,
-                                         int keff = 1.0,
-                                         GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::VectorFormVol(g),
-                g(g), keff(keff), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
-            {
-              if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
-                error(E_NONMATCHING_PROPERTIES);
-              std::for_each(chi.begin(), chi.end(), ensure_size_at_least(g));
-            }
-            
-            DefaultFissionYieldIterative(unsigned int g, std::string area,
-                                         const iMarkerPropertyMap1& chi,
-                                         const iMarkerPropertyMap1& Sigma_f,
-                                         const iMarkerPropertyMap1& nu,
-                                         int keff = 1.0,
-                                         GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::VectorFormVol(g, area),
-                g(g), keff(keff), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
-            {
-              if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
-                error(E_NONMATCHING_PROPERTIES);
-              std::for_each(chi.begin(), chi.end(), ensure_size_at_least(g));
-            }
-            
-            template<typename Real, typename Scalar>
-            Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
-                              Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
-            { 
-              // Constant properties within the current active element. Note that prop[e->elem_marker]
-              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
-              rank1 nu_elem = nu.find(e->elem_marker)->second;
-              rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
-              rank1 chi_elem = chi.find(e->elem_marker)->second;
+        namespace Vector 
+        {        
+          class FissionYieldIterative : public WeakForm::VectorFormVol
+          {
+            public:
               
-              if ((unsigned)ext->nf != nu_elem.size() || (unsigned)ext->nf != Sigma_f.size())
-                error(E_INVALID_GROUP_INDEX);
-              
-              Scalar result = 0;
-              for (int i = 0; i < n; i++) 
+              FissionYieldIterative(unsigned int g, 
+                                    const iMarkerPropertyMap1& chi,
+                                    const iMarkerPropertyMap1& Sigma_f,
+                                    const iMarkerPropertyMap1& nu,
+                                    int keff = 1.0,
+                                    GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::VectorFormVol(g),
+                  g(g), keff(keff), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
               {
-                for (int gfrom = 0; gfrom < ext->nf; gfrom++)
-                  result += nu_elem[gfrom] * Sigma_f_elem[gfrom] * ext->fn[gfrom]->val[i];
-                
-                result = result * wt[i] * v->val[i];
-                
-                if (geom_type == HERMES_AXISYM_X)
-                  result = result * e->y[i];
-                else if (geom_type == HERMES_AXISYM_Y)
-                  result = result * e->x[i];
+                if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                  error(E_NONMATCHING_PROPERTIES);
+                std::for_each(chi.begin(), chi.end(), ensure_size_at_least(g));
               }
               
-              return result * chi_elem[g] / keff;
-            }
-
-            virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                                Geom<double> *e, ExtData<scalar> *ext) const {
-              return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
-            }
-
-            virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext) const {
-              return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
-            }
-
-            // This is to make the form usable in rk_time_step().
-            virtual WeakForm::VectorFormVol* clone() {
-              return new DefaultFissionYieldIterative(*this);
-            }
-            
-            void update_keff(double new_keff) { keff = new_keff; }
-            
-          private:
-            
-            unsigned int g;
-            double keff;
-            iMarkerPropertyMap1 chi, Sigma_f, nu;
-            GeomType geom_type;
-        };
-        
-        class DefaultExternalSource : public WeakForm::VectorFormVol
-        {
-          public:
-            
-            DefaultExternalSource(unsigned int g, 
-                                  const iMarkerPropertyMap1& src,
-                                  GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::VectorFormVol(g), g(g), src(src), geom_type(geom_type) 
-            { 
-              std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
-            }
-            
-            DefaultExternalSource(unsigned int g, std::string area,
-                                  const iMarkerPropertyMap1& src,
-                                  GeomType geom_type = HERMES_PLANAR)
-              : WeakForm::VectorFormVol(g, area), g(g), src(src), geom_type(geom_type)
-            { 
-              std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
-            }
-            
-            virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                           Geom<double> *e, ExtData<scalar> *ext) const 
-            {
-              // Constant properties within the current active element. Note that prop[e->elem_marker]
-              // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
-              rank1 src_elem = src.find(e->elem_marker)->second;
-              
-              if (geom_type == HERMES_PLANAR) return src_elem[g] * int_v<double>(n, wt, v);
-              else 
+              FissionYieldIterative(unsigned int g, std::string area,
+                                    const iMarkerPropertyMap1& chi,
+                                    const iMarkerPropertyMap1& Sigma_f,
+                                    const iMarkerPropertyMap1& nu,
+                                    int keff = 1.0,
+                                    GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::VectorFormVol(g, area),
+                  g(g), keff(keff), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
               {
-                if (geom_type == HERMES_AXISYM_X) 
-                  return src_elem[g] * int_y_v<double>(n, wt, v, e);
-                else 
-                  return src_elem[g] * int_x_v<double>(n, wt, v, e);
+                if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                  error(E_NONMATCHING_PROPERTIES);
+                std::for_each(chi.begin(), chi.end(), ensure_size_at_least(g));
               }
-            }
-            
-            // This is to make the form usable in rk_time_step().
-            virtual WeakForm::VectorFormVol* clone() {
-              return new DefaultExternalSource(*this);
-            }
+              
+              template<typename Real, typename Scalar>
+              Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
+                                Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
+              { 
+                // Constant properties within the current active element. Note that prop[e->elem_marker]
+                // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                rank1 nu_elem = nu.find(e->elem_marker)->second;
+                rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
+                rank1 chi_elem = chi.find(e->elem_marker)->second;
+                
+                if ((unsigned)ext->nf != nu_elem.size() || (unsigned)ext->nf != Sigma_f.size())
+                  error(E_INVALID_GROUP_INDEX);
+                
+                Scalar result = 0;
+                for (int i = 0; i < n; i++) 
+                {
+                  for (int gfrom = 0; gfrom < ext->nf; gfrom++)
+                    result += nu_elem[gfrom] * Sigma_f_elem[gfrom] * ext->fn[gfrom]->val[i];
+                  
+                  result = result * wt[i] * v->val[i];
+                  
+                  if (geom_type == HERMES_AXISYM_X)
+                    result = result * e->y[i];
+                  else if (geom_type == HERMES_AXISYM_Y)
+                    result = result * e->x[i];
+                }
+                
+                return result * chi_elem[g] / keff;
+              }
+
+              virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                                  Geom<double> *e, ExtData<scalar> *ext) const {
+                return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
+              }
+
+              virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                      Geom<Ord> *e, ExtData<Ord> *ext) const {
+                return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+              }
+
+              // This is to make the form usable in rk_time_step().
+              virtual WeakForm::VectorFormVol* clone() {
+                return new FissionYieldIterative(*this);
+              }
+              
+              void update_keff(double new_keff) { keff = new_keff; }
+              
+            private:
+              
+              unsigned int g;
+              double keff;
+              iMarkerPropertyMap1 chi, Sigma_f, nu;
+              GeomType geom_type;
+          };
           
-          private:
+          class ExternalSources : public WeakForm::VectorFormVol
+          {
+            public:
+              
+              ExternalSources(unsigned int g, 
+                              const iMarkerPropertyMap1& src,
+                              GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::VectorFormVol(g), g(g), src(src), geom_type(geom_type) 
+              { 
+                std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
+              }
+              
+              ExternalSources(unsigned int g, std::string area,
+                              const iMarkerPropertyMap1& src,
+                              GeomType geom_type = HERMES_PLANAR)
+                : WeakForm::VectorFormVol(g, area), g(g), src(src), geom_type(geom_type)
+              { 
+                std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
+              }
+              
+              virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                            Geom<double> *e, ExtData<scalar> *ext) const 
+              {
+                // Constant properties within the current active element. Note that prop[e->elem_marker]
+                // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                rank1 src_elem = src.find(e->elem_marker)->second;
+                
+                if (geom_type == HERMES_PLANAR) return src_elem[g] * int_v<double>(n, wt, v);
+                else 
+                {
+                  if (geom_type == HERMES_AXISYM_X) 
+                    return src_elem[g] * int_y_v<double>(n, wt, v, e);
+                  else 
+                    return src_elem[g] * int_x_v<double>(n, wt, v, e);
+                }
+              }
+              
+              // This is to make the form usable in rk_time_step().
+              virtual WeakForm::VectorFormVol* clone() {
+                return new ExternalSources(*this);
+              }
             
-            unsigned int g;
-            iMarkerPropertyMap1 src;
-            GeomType geom_type;        
-        };
+            private:
+              
+              unsigned int g;
+              iMarkerPropertyMap1 src;
+              GeomType geom_type;        
+          };
+          
+          namespace Residuals
+          {    
+            class DiffusionReaction : public WeakForm::VectorFormVol
+            {
+              public:
+                
+                DiffusionReaction(unsigned int g, 
+                                  const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
+                                  GeomType geom_type = HERMES_PLANAR)
+                  : WeakForm::VectorFormVol(g),
+                    g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
+                {
+                  if (D.size() != Sigma_r.size()) 
+                    error(E_NONMATCHING_PROPERTIES);
+                  
+                  std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
+                  std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
+                }
+                DiffusionReaction(unsigned int g, std::string area, 
+                                  const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r,
+                                  GeomType geom_type = HERMES_PLANAR)
+                  : WeakForm::VectorFormVol(g, area),
+                    g(g), D(D), Sigma_r(Sigma_r), geom_type(geom_type)
+                { 
+                  if (D.size() != Sigma_r.size())
+                    error(E_NONMATCHING_PROPERTIES);
+                  
+                  std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
+                  std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
+                }
+                
+                template<typename Real, typename Scalar>
+                Scalar matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                                    Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const 
+                {
+                  Scalar result = 0;
+                  
+                  // Constant properties within the current active element. Note that prop[e->elem_marker]
+                  // cannot be used since 'prop' is a constant std::map for which operator[] is undefined. 
+                  rank1 D_elem = D.find(e->elem_marker)->second;
+                  rank1 Sigma_r_elem = Sigma_r.find(e->elem_marker)->second;
+                  
+                  if (geom_type == HERMES_PLANAR) 
+                  {
+                    result = D_elem[g] * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) +
+                            Sigma_r_elem[g] * int_u_v<Real, Scalar>(n, wt, u, v);
+                  }
+                  else 
+                  {
+                    if (geom_type == HERMES_AXISYM_X) 
+                    {
+                      result = D_elem[g] * int_y_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
+                              Sigma_r_elem[g] * int_y_u_v<Real, Scalar>(n, wt, u, v, e);
+                    }
+                    else 
+                    {
+                      result = D_elem[g] * int_x_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) + 
+                              Sigma_r_elem[g] * int_x_u_v<Real, Scalar>(n, wt, u, v, e);
+                    }
+                  }
+                  return result;
+                }
+
+                virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                      Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+                { 
+                  return  matrix_form<double, scalar> (n, wt, u_ext, u, v, e, ext);
+                }
+                
+                virtual Ord ord( int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                                Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext  ) const 
+                { 
+                  return  matrix_form<Ord, Ord> (n, wt, u_ext, u, v, e, ext);
+                }
+
+                // This is to make the form usable in rk_time_step().
+                virtual WeakForm::VectorFormVol* clone() {
+                  return new DiffusionReaction(*this);
+                }
+
+              private:
+                
+                unsigned int g;
+                iMarkerPropertyMap1 D, Sigma_r;
+                GeomType geom_type;
+            };
+                    
+            class FissionYield : public WeakForm::VectorFormVol
+            {
+              public:
+                
+                FissionYield( unsigned int gto, unsigned int gfrom, 
+                              const iMarkerPropertyMap1& chi,
+                              const iMarkerPropertyMap1& Sigma_f,
+                              const iMarkerPropertyMap1& nu,
+                              GeomType geom_type = HERMES_PLANAR )
+                  : WeakForm::VectorFormVol(gto), 
+                    gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
+                {
+                  if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                    error(E_NONMATCHING_PROPERTIES);
+                  
+                  std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
+                  std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
+                  std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
+                }
+                
+                FissionYield( unsigned int gto, unsigned int gfrom, std::string area,
+                              const iMarkerPropertyMap1& chi,
+                              const iMarkerPropertyMap1& Sigma_f,
+                              const iMarkerPropertyMap1& nu,
+                              GeomType geom_type = HERMES_PLANAR )
+                  : WeakForm::VectorFormVol(gto, area),
+                    gto(gto), gfrom(gfrom), chi(chi), Sigma_f(Sigma_f), nu(nu), geom_type(geom_type)
+                { 
+                  if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
+                    error(E_NONMATCHING_PROPERTIES);
+                  
+                  std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
+                  std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size_at_least(gfrom));
+                  std::for_each(nu.begin(), nu.end(), ensure_size_at_least(gfrom));
+                }
+                
+                virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                      Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+                {
+                  scalar result = 0;
+                  if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
+                  else 
+                  {
+                    if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+                    else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+                  }
+                  
+                  // Constant properties within the current active element. Note that prop[e->elem_marker]
+                  // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                  rank1 nu_elem = nu.find(e->elem_marker)->second;
+                  rank1 Sigma_f_elem = Sigma_f.find(e->elem_marker)->second;
+                  rank1 chi_elem = chi.find(e->elem_marker)->second;
+                  
+                  return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
+                }
+                
+                // This is to make the form usable in rk_time_step().
+                virtual WeakForm::VectorFormVol* clone() {
+                  return new FissionYield(*this);
+                }
+                
+              private:
+                
+                unsigned int gto, gfrom;
+                iMarkerPropertyMap1 chi, Sigma_f, nu;
+                GeomType geom_type;
+            };
+                
+            class Scattering : public WeakForm::VectorFormVol
+            {
+              public:
+                
+                Scattering( unsigned int gto, unsigned int gfrom, 
+                            const iMarkerPropertyMap2& Sigma_s,
+                            GeomType geom_type = HERMES_PLANAR )
+                  : WeakForm::VectorFormVol(gto), 
+                    gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
+                {
+                  std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
+                }
+                
+                Scattering(unsigned int gto, unsigned int gfrom, std::string area,
+                                  const iMarkerPropertyMap2& Sigma_s,
+                                  GeomType geom_type = HERMES_PLANAR)
+                  : WeakForm::VectorFormVol(gto, area),
+                    gto(gto), gfrom(gfrom), Sigma_s(Sigma_s), geom_type(geom_type)
+                { 
+                  std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
+                }
+                
+                virtual scalar value( int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                      Func<double> *v, Geom<double> *e, ExtData<scalar> *ext  ) const 
+                {
+                  scalar result = 0;
+                  if (geom_type == HERMES_PLANAR) result = int_u_v<double, scalar>(n, wt, u, v);
+                  else 
+                  {
+                    if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<double, scalar>(n, wt, u, v, e);
+                    else result = int_x_u_v<double, scalar>(n, wt, u, v, e);
+                  }
+                  
+                  // Constant properties within the current active element. Note that prop[e->elem_marker]
+                  // cannot be used since 'prop' is a constant std::map for which operator[] is undefined.
+                  rank2 Sigma_s_elem = Sigma_s.find(e->elem_marker)->second;
+                  return result * (-Sigma_s_elem[gto][gfrom]);
+                }
+                
+                // This is to make the form usable in rk_time_step().
+                virtual WeakForm::VectorFormVol* clone() {
+                  return new Scattering(*this);
+                }
+                
+              private:
+                
+                unsigned int gto, gfrom;
+                iMarkerPropertyMap2 Sigma_s;
+                GeomType geom_type;
+            };
+          }
+        }
       }
           
       class DefaultWeakFormFixedSource : public GenericMultigroupDiffusionWeakForm
