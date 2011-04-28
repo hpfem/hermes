@@ -15,36 +15,47 @@
 
 #include "hermes_module.h"
 
-void HermesModule::add_mesh(Mesh *mesh) 
+void HermesModule::add_mesh(Mesh *mesh)
 {
   this->meshes.push_back(mesh);
 }
 
-Mesh *HermesModule::get_mesh(int index) 
+Mesh *HermesModule::get_mesh(int index)
 {
   return this->meshes.at(index);
 }
 
-void HermesModule::add_boundary(BoundaryData *boundary) 
+Hermes::vector<Mesh *> HermesModule::get_meshes()
+{
+  return this->meshes;
+}
+
+void HermesModule::add_boundary(BoundaryData *boundary)
 {
   this->boundaries.push_back(boundary);
 }
 
-void HermesModule::add_material(MaterialData *material) 
+void HermesModule::add_material(MaterialData *material)
 {
   this->materials.push_back(material);
 }
 
-Space *HermesModule::get_space(int index) 
+Space *HermesModule::get_space(int index)
 {
   return this->spaces.at(index);
 }
 
-bool HermesModule::solve(std::string &message_out) 
+Hermes::vector<Space *> HermesModule::get_spaces()
+{
+  return this->spaces;
+}
+
+bool HermesModule::solve()
 {
   Hermes2D hermes2d;
+  TimePeriod cpu_time;
 
-  bool success;
+  bool success = false;
 
   /*
   RefinementSelectors::Selector* selector = NULL;
@@ -92,13 +103,11 @@ bool HermesModule::solve(std::string &message_out)
     scalar* coeff_vec = new scalar[ndof];
     memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-    bool jacobian_changed = true;
-    success = hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-				    this->properties()->solver()->newton_tol, this->properties()->solver()->newton_max_iter);
-    if (success == false) {
-      message_out = "Newton's method failed.";
-      return false;
-    }
+    if (hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, this->properties()->solver()->jacobian_changed,
+            this->properties()->solver()->newton_tol, this->properties()->solver()->newton_max_iter))
+      success = true;
+    else
+      error("Newton's iteration failed.");
 
     Solution::vector_to_solutions(coeff_vec, this->spaces, this->slns);
     delete [] coeff_vec;
@@ -120,19 +129,14 @@ bool HermesModule::solve(std::string &message_out)
 
       int ndof_ref = Space::get_num_dofs(ref_spaces);
       if (ndof_ref == 0)
-      {
         error("ndof_fine = %d", ndof_ref);
-        break;
-      }
 
       scalar* coeff_vec = new scalar[ndof_ref];
       memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
-      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs))
-      {
+      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, this->properties()->solver()->jacobian_changed,
+            this->properties()->solver()->newton_tol, this->properties()->solver()->newton_max_iter))
         error("Newton's iteration failed.");
-        break;
-      }
 
       Solution::vector_to_solutions(solver->get_solution(), ref_spaces, ref_slns);
 
@@ -154,15 +158,11 @@ bool HermesModule::solve(std::string &message_out)
                          this->properties()->adaptivity()->regularize);
 
       for (unsigned int i = 0; i < ref_spaces.size(); i++)
-      {
         delete ref_spaces.at(i);
-      }
-
       ref_spaces.clear();
 
       for (unsigned int i = 0; i < ref_slns.size(); i++)
         delete ref_slns.at(i);
-
       ref_slns.clear();
     }
   }
@@ -179,11 +179,15 @@ bool HermesModule::solve(std::string &message_out)
   }
   */
 
-  // Solve was successful.
-  message_out = "Computation was successful.";
-  return true;
+  return success;
 }
 
-Solution *HermesModule::get_solution(int index) {
+Solution *HermesModule::get_solution(int index)
+{
   return this->slns.at(index);
+}
+
+Hermes::vector<Solution *> HermesModule::get_solutions()
+{
+  return this->slns;
 }

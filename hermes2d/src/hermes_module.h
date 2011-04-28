@@ -85,6 +85,7 @@ struct SolverProperties {
   MatrixSolverType mat_solver;
   double newton_tol;
   int newton_max_iter;
+  bool jacobian_changed;
 };
 
 struct SolutionProperties {
@@ -159,21 +160,24 @@ public:
 
   virtual void add_mesh(Mesh *mesh);
   virtual Mesh *get_mesh(int index);
+  virtual Hermes::vector<Mesh *> get_meshes();
 
   virtual void add_boundary(BoundaryData *boundary);
   virtual void add_material(MaterialData *material);
 
   virtual void set_essential_bcs() = 0;
   virtual void set_weakforms() = 0;
-  virtual Space *get_space(int index);
+
   virtual void set_spaces() = 0;
-  virtual Hermes::vector<Space *> get_spaces() {return this->spaces; };
+  virtual Space *get_space(int index);
+  virtual Hermes::vector<Space *> get_spaces();
 
   virtual void add_proj_norm(ProjNormType *set_proj_norm) {};
 
-  virtual bool solve(std::string &message_out);
+  virtual bool solve();
 
   virtual Solution *get_solution(int index);
+  virtual Hermes::vector<Solution *> get_solutions();
 
   inline ModuleProperties *properties() {
     return module_properties;
