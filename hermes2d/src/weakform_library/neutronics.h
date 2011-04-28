@@ -19,6 +19,11 @@ namespace WeakFormsNeutronics
     typedef std::map<std::string, rank2> MaterialPropertyMap2;
     typedef std::map<std::string, rank3> MaterialPropertyMap3;
     
+    typedef std::map<int,rank0> iMarkerPropertyMap0;
+    typedef std::map<int,rank1> iMarkerPropertyMap1;
+    typedef std::map<int,rank2> iMarkerPropertyMap2;
+    typedef std::map<int,rank3> iMarkerPropertyMap3;
+    
     static const char* E_INF_VALUE = 
       "Attempt to set an infinite material property.";
     static const char* W_NEG_VALUE =
@@ -188,37 +193,58 @@ namespace WeakFormsNeutronics
     
     #undef for_each_element_in_map
     
-    struct ensure_trivial { 
-      void operator() (MaterialPropertyMap1::value_type x) { 
-        MaterialPropertyMap1::mapped_type::iterator it;
-        for (it = x.second.begin(); it != x.second.end(); ++it) 
-          if (fabs(*it) > 1e-14)
-            error(E_INVALID_COMBINATION);
-      }
-    };
-    
-    struct ensure_size { 
-      ensure_size(unsigned int nrows, unsigned int ncols = -1) 
-      : nrows(nrows), ncols(ncols) {};
+    namespace ValidationFunctors
+    {
+      struct ensure_trivial { 
+        void operator() (MaterialPropertyMap1::value_type x) { 
+          MaterialPropertyMap1::mapped_type::iterator it;
+          for (it = x.second.begin(); it != x.second.end(); ++it) 
+            if (fabs(*it) > 1e-14)
+              error(E_INVALID_COMBINATION);
+        }
+      };
       
-      void operator() (MaterialPropertyMap1::value_type x) { 
-        if (x.second.size() != nrows)
-          error(E_INVALID_SIZE);
-      }
-      
-      void operator() (MaterialPropertyMap2::value_type x) {
-        if (x.second.size() != nrows)
-          error(E_INVALID_SIZE);
+      struct ensure_size { 
+        ensure_size(unsigned int nrows, unsigned int ncols = 0) 
+          : nrows(nrows), ncols(ncols) {};
         
-        MaterialPropertyMap2::mapped_type::iterator it;
-        for (it = x.second.begin(); it != x.second.end(); ++it) 
-          if (it->size() != ncols)
+        void operator() (MaterialPropertyMap1::value_type x) { 
+          if (x.second.size() != nrows)
             error(E_INVALID_SIZE);
-      }
+        }
+        
+        void operator() (MaterialPropertyMap2::value_type x) {
+          if (x.second.size() != nrows)
+            error(E_INVALID_SIZE);
+          
+          MaterialPropertyMap2::mapped_type::iterator it;
+          for (it = x.second.begin(); it != x.second.end(); ++it) 
+            if (it->size() != ncols)
+              error(E_INVALID_SIZE);
+        }
+        
+        private:
+          unsigned int nrows, ncols;
+      };
       
-      private:
-        unsigned int nrows, ncols;
-    };
+      struct ensure_size_at_least { 
+        ensure_size_at_least(unsigned int nrows, unsigned int ncols = 0) 
+          : nrows(nrows), ncols(ncols) {};
+        
+        void operator() (iMarkerPropertyMap1::value_type x) { 
+          if (x.second.size() < nrows)
+            error(E_INVALID_GROUP_INDEX);
+        }
+        
+        void operator() (iMarkerPropertyMap2::value_type x) { 
+          if (x.second.size() < nrows || x.second[nrows].size() < ncols)
+            error(E_INVALID_GROUP_INDEX);
+        }
+        
+        private:
+          unsigned int nrows, ncols;
+      };
+    }
         
     class MaterialPropertyMaps
     {
@@ -271,7 +297,9 @@ namespace WeakFormsNeutronics
           : materials_list(mat_list), G(G)  { };
                      
         virtual void validate()
-        {                                              
+        {       
+          using namespace ValidationFunctors;
+          
           if (nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
             nu = map_divide<rank1>(nuSigma_f, Sigma_f);
           else if (nuSigma_f.empty() && !nu.empty() && !Sigma_f.empty())
@@ -476,30 +504,7 @@ namespace WeakFormsNeutronics
   namespace Multigroup
   {   
     using namespace MaterialProperties;
-    
-    typedef std::map<int,rank0> iMarkerPropertyMap0;
-    typedef std::map<int,rank1> iMarkerPropertyMap1;
-    typedef std::map<int,rank2> iMarkerPropertyMap2;
-    typedef std::map<int,rank3> iMarkerPropertyMap3;
-    
-    struct ensure_size_at_least { 
-      ensure_size_at_least(unsigned int nrows, unsigned int ncols = -1) 
-      : nrows(nrows), ncols(ncols) {};
-      
-      void operator() (iMarkerPropertyMap1::value_type x) { 
-        if (x.second.size() < nrows)
-          error(E_INVALID_GROUP_INDEX);
-      }
-      
-      void operator() (iMarkerPropertyMap2::value_type x) { 
-        if (x.second.size() < nrows || x.second[nrows].size() < ncols)
-          error(E_INVALID_GROUP_INDEX);
-      }
-      
-      private:
-        unsigned int nrows, ncols;
-    };
-        
+                
     class GenericMultigroupWeakForm : public WeakForm
     {
       protected:
@@ -568,6 +573,7 @@ namespace WeakFormsNeutronics
             if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (D.size() != src.size()))
               error(E_NONMATCHING_PROPERTIES);
             
+            using ValidationFunctors::ensure_size;
             std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size(G,G));
             std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size(G));
             std::for_each(src.begin(), src.end(), ensure_size(G));
@@ -690,8 +696,8 @@ namespace WeakFormsNeutronics
                   
                   void check_validity(int g) const
                   {
-                    std::for_each(D.begin(), D.end(), ensure_size_at_least(g));
-                    std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size_at_least(g));
+                    std::for_each(D.begin(), D.end(), ValidationFunctors::ensure_size_at_least(g));
+                    std::for_each(Sigma_r.begin(), Sigma_r.end(), ValidationFunctors::ensure_size_at_least(g));
                   }
                   
                   const rank1& D_elem(int elem_marker) const
@@ -888,6 +894,8 @@ namespace WeakFormsNeutronics
                 
                 void check_validity(int gto, int gfrom = 0) const
                 {
+                  using ValidationFunctors::ensure_size_at_least;
+                  
                   std::for_each(chi.begin(), chi.end(), ensure_size_at_least(gto));
                   
                   if (gfrom > 0) {
@@ -1151,7 +1159,7 @@ namespace WeakFormsNeutronics
                 
                 void check_validity(int gto, int gfrom) const
                 {
-                  std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size_at_least(gto, gfrom));
+                  std::for_each(Sigma_s.begin(), Sigma_s.end(), ValidationFunctors::ensure_size_at_least(gto, gfrom));
                 }
                 
                 const rank2& Sigma_s_elem(int elem_marker) const
@@ -1300,7 +1308,7 @@ namespace WeakFormsNeutronics
                 
                 void check_validity(int g) const
                 {
-                  std::for_each(src.begin(), src.end(), ensure_size_at_least(g));
+                  std::for_each(src.begin(), src.end(), ValidationFunctors::ensure_size_at_least(g));
                 }
                 
                 const rank1& src_elem(int elem_marker) const
