@@ -24,7 +24,6 @@ using namespace RefinementSelectors;
 
 class BoundaryData {
 public:
-  // Constant boundary conditions
   BoundaryData(std::string marker, BCType bc_type) {
     this->markers.push_back(marker);
     this->bc_type = bc_type;
@@ -151,12 +150,10 @@ public:
 
     this->meshes.clear();
 
-    for (unsigned int i = 0; i < this->spaces.size(); i++)
-        delete this->spaces.at(i);
+    for (unsigned int i = 0; i < this->spaces.size(); i++) delete this->spaces.at(i);
     this->spaces.clear();
 
-    for (unsigned int i = 0; i < this->slns.size(); i++)
-        delete this->slns.at(i);
+    for (unsigned int i = 0; i < this->slns.size(); i++) delete this->slns.at(i);
     this->slns.clear();
   };
 
@@ -166,13 +163,17 @@ public:
   virtual void add_boundary(BoundaryData *boundary);
   virtual void add_material(MaterialData *material);
 
+  virtual void set_essential_bcs() = 0;
   virtual void set_weakforms() = 0;
   virtual Space *get_space(int index);
   virtual void set_spaces() = 0;
+  virtual Hermes::vector<Space *> get_spaces() {return this->spaces; };
 
   virtual void add_proj_norm(ProjNormType *set_proj_norm) {};
 
-  virtual void solve();
+  virtual bool solve(std::string &message_out);
+
+  virtual Solution *get_solution(int index);
 
   inline ModuleProperties *properties() {
     return module_properties;
