@@ -9,12 +9,12 @@ copper). The object is heated by constant volumetric heat sources
 (generated, for example, by a DC electric current). The temperature 
 on the boundary is fixed. We will learn how to:
 
- * Define a weak formulation,
- * initialize matrix solver,
- * assemble and solve the matrix system,
- * output the solution and element orders in VTK format 
-   (to be visualized, e.g., using Paraview),
- * visualize the solution using Hermes' native OpenGL-based functionality.
+ * Define a weak formulation.
+ * Initialize matrix solver.
+ * Solve the discrete problem.
+ * Output the solution and element orders in VTK format 
+   (to be visualized, e.g., using Paraview).
+ * Visualize the solution using Hermes' native OpenGL-based functionality.
 
 Model problem
 ~~~~~~~~~~~~~
@@ -24,28 +24,22 @@ Let us solve the Poisson equation
 .. math::
     :label: poisson1
 
-       -\mbox{div}(\lambda \nabla u) - C = 0
+       -\mbox{div}(\lambda \nabla u) = C
 
-in the L-shaped domain $\Omega$ from the previous examples,
-equipped with homogeneous (zero) Dirichlet boundary conditions
+in the L-shaped domain $\Omega$ from the previous examples.
+The equation is equipped with zero Dirichlet boundary conditions
 
 .. math::
     :label: poisson2
 
        u = 0\ \ \  \mbox{on}\  \partial \Omega.
 
-Here $u$ is the unknown temperature distribution, 
-$C$ is a real number (volumetric heat sources). The thermal conductivity $\lambda$
-is piecewise constant, with different values in Copper and Aluminum. Note that in reality,
-$\lambda$ is temperature-dependent and thus the problem is nonlinear -- we will simplify 
-our life now by assuming that the temperature does not change much, and thus 
-$\lambda$ can be considered constant.
+Here $u$ is an unknown temperature distribution, 
+$C$ a real number representing volumetric heat sources/losses, and $\lambda > 0$ is thermal conductivity.
 
-
-The weak formulation 
-is derived in the standard way, first by multiplying equation :eq:`poisson1` with a test
-function $v$, then integrating over the domain $\Omega$, and then applying the Green's
-theorem (integration by parts) to the second derivatives.
+The weak formulation is derived as usual, first by multiplying equation :eq:`poisson1` 
+with a test function $v$, then integrating over the domain $\Omega$, and then applying 
+the Green's theorem (integration by parts) to the second derivatives.
 Because of the homogeneous Dirichlet condition :eq:`poisson2`,
 there are no surface integrals. Since the product of the two gradients 
 in the volumetric weak form needs to be integrable for all $u$ and $v$ in $V$, 
@@ -55,101 +49,98 @@ reads: Find $u \in V$ such that
 .. math::
     :label: poissonweak
 
-         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - C \int_\Omega v \;\mbox{d\bfx} = 0\ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = C \int_\Omega v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
 
-Equation :eq:`poissonweak` can be written in the form $a(u,v) - l(v) = 0$ where
-$a$ is a bilinear (matrix) form and $l$ is a linear (vector) form.
+Equation :eq:`poissonweak` can be written in the form $a(u,v) = l(v)$ where
+$a$ is a matrix form 
 
-Defining weak forms
-~~~~~~~~~~~~~~~~~~~
+.. math::
+    :label: poissonweak
 
-For the sake of consistency of linear and nonlinear problems, and other benefits that 
-will be discussed later, **Hermes always assumes that the problem is nonlinear**.
-The weak formulation consists of a Jacobian (matrix) form $J(u, v)$ and a residual
-(vector) form $F(u)$, where $F(u) = 0$ is the equation (or equation system) to be solved 
-and $J = DF/Du$. For linear problems the Jacobian matrix is the same as the 
-stiffness matrix. The weak formulation is a class that is derived from an abstract 
-class WeakForm::
+         a(u, v) = \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx}
+
+and $l$ is a linear vector form
+
+.. math::
+    :label: poissonweak
+
+         l(v) = C \int_\Omega v \;\mbox{d\bfx}.
+
+Hermes however requires that the equation is rewritten as $a(u,v) - l(v) = 0$. Let us 
+explain why.
+
+Jacobian-residual formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hermes always assumes that the problem is nonlinear, and by default it uses the 
+Newton's method to solve it. Other methods for the solution of nonlinear problems 
+are available as well (to be discussed later). For linear problems, the Newton's
+method converges in one step - usually. If the matrix solver has problems, even
+for linear equations the Newton's method may take more than one step to make 
+sure that the problem is solved correctly. This is a good reason to use the 
+Newton's method even for problems that are linear. In addition, a consistent 
+approach to linear and nonlinear problems allows Hermes users to first formulate 
+and solve a simplified linear version of the problem, and then extend it to 
+nonlinear easily, with almost no changes in the code. Let us show how this works.
+
+First, let's say that $\lambda$ is constant both for aluminum and copper. The 
+code for the weak form looks as follows::
 
     class CustomWeakFormPoisson : public WeakForm
     {
     public:
-      CustomWeakFormPoisson(std::string mat_al, double lambda_al,
-			    std::string mat_cu, double lambda_cu,
+      CustomWeakFormPoisson(std::string marker_al, double lambda_al,
+			    std::string marker_cu, double lambda_cu,
 			    double vol_heat_src) : WeakForm(1)
       {
 	// Jacobian forms - volumetric.
-	add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_al, lambda_al));
-	add_matrix_form(new DefaultLinearDiffusion(0, 0, mat_cu, lambda_cu));
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, marker_al, lambda_al));
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, marker_cu, lambda_cu));
 
 	// Residual forms - volumetric.
-	add_vector_form(new DefaultResidualLinearDiffusion(0, mat_al, lambda_al));
-	add_vector_form(new DefaultResidualLinearDiffusion(0, mat_cu, lambda_cu));
+	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_al, lambda_al));
+	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_cu, lambda_cu));
 	add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
       };
     };
 
-TUTORIAL UPGRADE PAUSED HERE AND WILL CONTINUE SOON.
+Next, let's say that $\lambda$ is a nonlinear function approximated with
+a cubic spline::
 
-Arguments of weak forms
-~~~~~~~~~~~~~~~~~~~~~~~
-
-The arguments of weak forms have the following meaning:
-
-  * *n* ... the number of integration points,
-  * *wt* ... array of integration weights for all integration points,
-  * *u_ext* ... solution values (for nonlinear problems only, to be discussed later),
-  * *u* ... basis function,
-  * *v* ... test function,
-  * *e* ... geometrical information such as physical positions of integration points, tangent and normal vectors to element edges, etc. (to be discussed later),
-  * *ext* ... external data to be passed into the weak forms (to be discussed later).
-
-(All is provided by Hermes automatically.) The reader does not have to worry about the 
-templates for now - they are used by Hermes to 
-automatically determine the number of integration points for each *u* and *v* pair (to be discussed
-later). The above code also reveals how the function values and partial derivatives of the basis and 
-test functions are accessed. Use
-::
-
-    u->val[i]
-
-to access the value of the basis function at i-th integration point,
-::
-
-    v->val[i]
-
-to access the value of the test function at i-th integration point,
-::
-
-    u->dx[i]
-
-to access the x-derivative of the basis function at i-th integration point, etc. 
-Later we will learn how to access the physical coordinates of integration points 
-and other data. 
-
-Using predefined integrals
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In many cases, such as in this one, one can replace the above code with predefined integrals
-that can be found in the file `src/integrals/h1.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/integrals/h1.h>`_::
-
-    // Return the value \int \nabla u . \nabla v dx.
-    template<typename Real, typename Scalar>
-    Scalar bilinear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    class CustomWeakFormPoisson : public WeakForm
     {
-      return int_grad_u_grad_v<Real, Scalar>(n, wt, u, v);
-    }
-   
-    // Return the value \int v dx.
-    template<typename Real, typename Scalar>
-    Scalar linear_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
-    {
-      return C * int_v<Real, Scalar>(n, wt, v);
-    }
+    public:
+      CustomWeakFormPoisson(std::string marker_al, CubicSpline* lambda_al,
+			    std::string marker_cu, CubicSpline* lambda_cu,
+			    double vol_heat_src) : WeakForm(1)
+      {
+	// Jacobian forms - volumetric.
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, marker_al, 1.0, lambda_al));
+	add_matrix_form(new DefaultLinearDiffusion(0, 0, marker_cu, 1.0, lambda_cu));
 
-Predefined integrals like this also exist for the Hcurl, Hdiv and L2 spaces. 
+	// Residual forms - volumetric.
+	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_al, 1.0, lambda_al));
+	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_cu, 1.0, lambda_cu));
+	add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
+      };
+    };
 
-Next let us present a typical sequence of steps that are needed to solve a linear problem.
+The point being made, in the rest of part P01 we will focus on linear 
+problems. Nonlinear problems will be discussed in more detail in part P02. 
+
+
+Default weak forms
+~~~~~~~~~~~~~~~~~~
+
+Weak forms in Hermes have a clean object oriented structure. For many problems they 
+are readily available, and for the rest they can be 
+extended easily. Let us begin with explaining the parameters of the default 
+forms used above.
+
+
+**MORE DETAILS TO BE ADDED.**
+
+
 
 Loading the mesh
 ~~~~~~~~~~~~~~~~
@@ -161,32 +152,41 @@ The main.cpp file typically begins with loading the mesh::
     H2DReader mloader;
     mloader.load("domain.mesh", &mesh);
 
+Performing initial mesh refinements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A number of initial refinement operations can be done as 
+explained above. In this case we just perform optional 
+uniform mesh refinements::
+
+    // Perform initial mesh refinements (optional).
+    for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+
+Initializing the weak formulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next, an instance of the corresponding weak form class is created::
+
+    // Initialize the weak formulation.
+    CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
+
 Setting zero Dirichlet boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To assign zero Dirichlet boundary conditions to the boundary, the user first has to 
-say that all boundary markers, in this case BDY_BOTTOM, BDY_OUTER, BDY_LEFT, and BDY_INNER
-will be Dirichlet::
+Zero Dirichlet boundary conditions are assigned to the boundary markers 
+BDY_BOTTOM, BDY_OUTER, BDY_LEFT, and BDY_INNER as follows::
 
-    // Enter boundary markers.
-    BCTypes bc_types;
-    bc_types.add_bc_dirichlet(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER));
+    // Initialize essential boundary conditions.
+    DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);
+    EssentialBCs bcs(&bc_essential);
 
-Do not worry about the complicated-looking Tuple, this is just to enter a set of several
-boundary markers (in fact positive integers) without using variable-length arrays.
-
-After this, create an instance of the class BCValues 
-and provide values for all Dirichlet boundary conditions. To impose
-zero Dirichlet conditions, which is a default for each marker, it is enough 
-to write::
-
-    // Enter Dirichlet boundary values.
-    BCValues bc_values;
+Do not worry about the complicated-looking Hermes::vector, this is just std::vector enhanced 
+with a few extra constructors. It is used to avoid using variable-length arrays.
 
 The treatment of nonzero Dirichlet and other boundary conditions 
 will be explained in more detail, and illustrated on examples, in 
-the following tutorial examples 04, 05 and 06. Now let's proceed
-to the finite element space. 
+the following examples. For the moment, let's proceed to the finite 
+element space. 
 
 Initializing finite element space
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -195,42 +195,22 @@ As a next step, we initialize the FE space in the same way as in the previous tu
 example 02::
 
     // Create an H1 space with default shapeset.
-    H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-    int ndof = Space::get_num_dofs(&space);
+    H1Space space(&mesh, &bcs, P_INIT);
+    int ndof = space.get_num_dofs();
     info("ndof = %d", ndof);
 
-Initializing weak formulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Weak forms need to be registered as follows::
-
-    // Initialize the weak formulation.
-    WeakForm wf();
-    wf.add_matrix_form(callback(bilinear_form));
-    wf.add_vector_form(callback(linear_form));
-
-The reader does not have to worry about the macro *callback()* for the moment, this is 
-related to automatic determination of integration order.
-For more complicated PDE and PDE systems one can add multiple matrix and vector forms.
-One can optimize assembling by indicating that a matrix form is symmetric, associate
-different weak forms with different element material markers, etc. All this will be 
-discussed later.
+Here P_INIT is a uniform polynomial degree of mesh elements (an integer number 
+between 1 and 10).
 
 Initializing discrete problem
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The weak formulation and space(s) constitute a finite element problem.
-To define it, one needs to create an instance of the DiscreteProblem 
+The weak formulation and finite element space(s) constitute a finite element 
+problem. To define it, one needs to create an instance of the DiscreteProblem 
 class::
 
     // Initialize the FE problem.
-    bool is_linear = true;
-    DiscreteProblem dp(&wf, &space, is_linear);
-
-The third argument "is_linear" is optional. If it is left out, Hermes 
-assumes that the problem is nonlinear. In the nonlinear case, the 
-matrix and vector weak forms are interpreted differently, we will 
-learn about this later. 
+    DiscreteProblem dp(&wf, &space);
 
 Initializing matrix solver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -240,7 +220,7 @@ Next one needs to choose a matrix solver::
     MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
 
 Besides UMFPACK, one can use SOLVER_AMESOS, SOLVER_MUMPS, SOLVER_PETSC, and
-SOLVER_SUPERLU (and matrix-free SOLVER_NOX for nonlinear problems. this will be discussed
+SOLVER_SUPERLU (and matrix-free SOLVER_NOX for nonlinear problems - to be discussed
 later). 
 
 After that one needs to create instances of a matrix, vector, and matrix solver 
@@ -251,31 +231,34 @@ as follows::
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-Assembling the matrix and vector
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Solving the discrete problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The stiffness matrix and load vector are assembled as follows::
+Before solving the discrete problem, one has to create a coefficient 
+vector:: 
 
-    // Assemble the stiffness matrix and right-hand side vector.
-    info("Assembling the stiffness matrix and right-hand side vector.");
-    dp.assemble(matrix, rhs);
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof];
+    memset(coeff_vec, 0, ndof*sizeof(scalar));
 
+The discrete problem is solved via the Newton's method::
 
-Solving the matrix problem
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
-Finally, the matrix problem is solved via::
+This function comes with a number of optional parameters, see the file 
+`hermes2d/src/h2d_common.h <https://github.com/hpfem/hermes/blob/master/hermes2d/src/h2d_common.h>`_
+for more details.
 
-    // Solve the linear system and if successful, obtain the solution.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-      Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-    else
-      error ("Matrix solver failed.\n");
+Translating the coefficient vector into a solution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The matrix solver can fail for various reasons -- direct solvers (UMFPACK,
-SUPERLU, MUMPS) may run out of memory if the number of equations is large,
-iterative solvers may fail to converge if the matrix is ill-conditioned.  
+The coefficient vector can be converted into a piecewise-polynomial 
+Solution via the function Solution::vector_to_solution()::
+
+    // Translate the resulting coefficient vector into a Solution.
+    Solution sln;
+    Solution::vector_to_solution(coeff_vec, &space, &sln);
 
 Saving solution in VTK format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -285,21 +268,21 @@ using `Paraview <http://www.paraview.org/>`_. To do this, one uses the
 Linearizer class that has the ability to approximate adaptively a higher-order
 polynomial solution using linear triangles::
 
-  // Output solution in VTK format.
-  Linearizer lin;
-  bool mode_3D = true;
-  lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
-  info("Solution in VTK format saved to file %s.", "sln.vtk");
+    // Output solution in VTK format.
+    Linearizer lin;
+    bool mode_3D = true;
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
+    info("Solution in VTK format saved to file %s.", "sln.vtk");
 
 The function save_solution_vtk() can be found in hermes2d/src/linearizer/ and its 
 complete header is::
 
-  // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
-                                 bool mode_3D = true, int item = H2D_FN_VAL_0, 
-                                 double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                                 MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
-                                 double dmult = 1.0);
+    // Saves a MeshFunction (Solution, Filter) in VTK format.
+    virtual void save_solution_vtk(MeshFunction* meshfn, const char* file_name, const char* quantity_name,
+                                   bool mode_3D = true, int item = H2D_FN_VAL_0, 
+                                   double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
+                                   MeshFunction* xdisp = NULL, MeshFunction* ydisp = NULL,
+                                   double dmult = 1.0);
 
 Only the first three arguments are mandatory, the remaining ones are optional.
 Their meaning is as follows:
@@ -351,6 +334,7 @@ Cleaning up
 We finish the main.cpp file with::
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;

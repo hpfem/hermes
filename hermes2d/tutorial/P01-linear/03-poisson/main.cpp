@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
   
-  // Initialize boundary conditions.
+  // Initialize essential boundary conditions.
   DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);
   EssentialBCs bcs(&bc_essential);
 
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration.
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
-  // Translate the resulting coefficient vector into the Solution sln.
+  // Translate the resulting coefficient vector into a Solution.
   Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
@@ -105,10 +105,10 @@ int main(int argc, char* argv[])
   }
 
   // Clean up.
+  delete [] coeff_vec;
   delete solver;
   delete matrix;
   delete rhs;
-  delete [] coeff_vec;
 
   return 0;
 }
