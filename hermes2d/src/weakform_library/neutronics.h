@@ -99,6 +99,12 @@ namespace WeakFormsNeutronics
           "Cannot create a multiregion material-property map: no regions specified.";
         static const char* E_INSUFFICIENT_DATA =
           "Not all required material properties have been set.";
+        static const char* W_NO_FISSION =
+          "Not all required fission properties have been set or could be determined automatically."
+          "Assuming a non-fissioning system.";
+        static const char* W_NO_SCATTERING =
+          "Not all required scattering properties have been set or could be determined automatically."
+          "Assuming a purely absorbing system.";
         static const char* E_INVALID_COMBINATION =
           "Invalid combination of entered material properties.";
         static const char* E_NONMATCHING_PROPERTIES =
@@ -110,7 +116,8 @@ namespace WeakFormsNeutronics
         static const char* E_INVALID_MARKER =
           "Material data undefined for the given element marker.";
         static const char* E_SG_SIGMA_R = 
-          "Group-reduction cross-section (Sigma_r) is not defined for one-group (i.e. monoenergetic) problems.";
+          "Group-reduction cross-section (Sigma_r) is not defined for one-group (i.e. monoenergetic) problems."
+          "Set Sigma_a instead.";
       }
       
       namespace ValidationFunctors
@@ -174,162 +181,163 @@ namespace WeakFormsNeutronics
         using namespace Definitions;
         using namespace Messages;
         
+        class NDArrayMapOp
+        {
+          //
+          // NOTE: Could be perhaps combined with the classes material_property_map and MultiArray below
+          // and moved to hermes_common as a general way of handling maps with multidimensional mapped types.
+          //
+          
+          template <typename NDArrayType>
+          static rank0 divide(rank0 x, rank0 y) 
+          {
+            if (x == 0 && y == 0) 
+              return 0.0;
+            else if (y == 0)
+            {
+              error(E_INF_VALUE);
+              return -1.0;
+            }
+            else
+              return x/y;
+          }
+          
+          template <typename NDArrayType>
+          static rank0 multiply(rank0 x, rank0 y) 
+          {
+            return x*y;
+          }
+          
+          template <typename NDArrayType>
+          static rank0 add(rank0 x, rank0 y) 
+          {
+            return x + y;
+          }
+          
+          template <typename NDArrayType>
+          static rank0 subtract(rank0 x, rank0 y) 
+          {
+            rank0 ret = x - y;
+            if(ret < 0)
+              warning(W_NEG_VALUE);
+            return ret;
+          }
+          
+          #define for_each_element_in_dimension \
+                      typedef typename NDArrayType::value_type dim_type;                      \
+                      typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
+                      typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
+                      for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y )                    
+          
+          template <typename NDArrayType>
+          static NDArrayType divide(const NDArrayType& x, const NDArrayType& y) 
+          { 
+            NDArrayType res; res.reserve(x.size());
+                  
+            for_each_element_in_dimension
+              res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+            
+            return res;
+          }
+          
+          template <typename NDArrayType>
+          static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y) 
+          { 
+            NDArrayType res; res.reserve(x.size());
+            
+            for_each_element_in_dimension
+              res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+            
+            return res;
+          }
+          
+          template <typename NDArrayType>
+          static NDArrayType add(const NDArrayType& x, const NDArrayType& y) 
+          { 
+            NDArrayType res; res.reserve(x.size());
+            
+            for_each_element_in_dimension
+              res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+            
+            return res;
+          }
+          
+          template <typename NDArrayType>
+          static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y) 
+          { 
+            NDArrayType res; res.reserve(x.size());
+            
+            for_each_element_in_dimension
+              res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+            
+            return res;
+          }
+          
+          
+          #undef for_each_element_in_dimension
+          
+          #define for_each_element_in_map \
+                    typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
+                    typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
+                    typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
+                    for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret )                    
+          
+          public:
+            template <typename T>
+            static std::map<std::string, T> divide(const std::map<std::string, T>& x, 
+                                                   const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = divide<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
+            
+            template <typename T>
+            static std::map<std::string, T> multiply(const std::map<std::string, T>& x, 
+                                                     const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = multiply<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
+                        
+            template <typename T>
+            static std::map<std::string, T> add(const std::map<std::string, T>& x, 
+                                                const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = add<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
+            
+            template <typename T>
+            static std::map<std::string, T> subtract(const std::map<std::string, T>& x, 
+                                                     const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = subtract<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
+            
+            #undef for_each_element_in_map
+        };
+        
+        
         class MaterialPropertyMaps
         {
           protected:
-            
-            class Operations
-            {
-              //
-              // NOTE: Could be perhaps combined with the classes material_property_map and MultiArray above
-              // and moved to hermes_common as a general way of handling maps with multidimensional mapped types.
-              //
-              
-              template <typename NDArrayType>
-              static rank0 divide(rank0 x, rank0 y) 
-              {
-                if (x == 0 && y == 0) 
-                  return 0.0;
-                else if (y == 0)
-                {
-                  error(E_INF_VALUE);
-                  return -1.0;
-                }
-                else
-                  return x/y;
-              }
-              
-              template <typename NDArrayType>
-              static rank0 multiply(rank0 x, rank0 y) 
-              {
-                return x*y;
-              }
-              
-              template <typename NDArrayType>
-              static rank0 add(rank0 x, rank0 y) 
-              {
-                return x + y;
-              }
-              
-              template <typename NDArrayType>
-              static rank0 subtract(rank0 x, rank0 y) 
-              {
-                rank0 ret = x - y;
-                if(ret < 0)
-                  warning(W_NEG_VALUE);
-                return ret;
-              }
-              
-              #define for_each_element_in_dimension \
-                          typedef typename NDArrayType::value_type dim_type;                      \
-                          typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
-                          typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
-                          for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y )                    
-              
-              template <typename NDArrayType>
-              static NDArrayType divide(const NDArrayType& x, const NDArrayType& y) 
-              { 
-                NDArrayType res; res.reserve(x.size());
-                      
-                for_each_element_in_dimension
-                  res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-                
-                return res;
-              }
-              
-              template <typename NDArrayType>
-              static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y) 
-              { 
-                NDArrayType res; res.reserve(x.size());
-                
-                for_each_element_in_dimension
-                  res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-                
-                return res;
-              }
-              
-              template <typename NDArrayType>
-              static NDArrayType add(const NDArrayType& x, const NDArrayType& y) 
-              { 
-                NDArrayType res; res.reserve(x.size());
-                
-                for_each_element_in_dimension
-                  res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-                
-                return res;
-              }
-              
-              template <typename NDArrayType>
-              static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y) 
-              { 
-                NDArrayType res; res.reserve(x.size());
-                
-                for_each_element_in_dimension
-                  res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-                
-                return res;
-              }
-              
-              
-              #undef for_each_element_in_dimension
-              
-              #define for_each_element_in_map \
-                        typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
-                        typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
-                        typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
-                        for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret )                    
-              
-              public:
-                template <typename T>
-                static std::map<std::string,  T> map_divide(const std::map<std::string, T>& x, 
-                                                            const std::map<std::string, T>& y)
-                {
-                  std::map<std::string, T> ret = x;
-                  
-                  for_each_element_in_map
-                    iterator_ret->second = divide<T>(iterator_x->second, iterator_y->second);
-                  
-                  return ret;
-                }
-                
-                template <typename T>
-                static std::map<std::string,  T> map_multiply(const std::map<std::string, T>& x, 
-                                                              const std::map<std::string, T>& y)
-                {
-                  std::map<std::string, T> ret = x;
-                  
-                  for_each_element_in_map
-                    iterator_ret->second = multiply<T>(iterator_x->second, iterator_y->second);
-                  
-                  return ret;
-                }
-                
-                template <typename T>
-                static std::map<std::string,  T> map_add(const std::map<std::string, T>& x, 
-                                                        const std::map<std::string, T>& y)
-                {
-                  std::map<std::string, T> ret = x;
-                  
-                  for_each_element_in_map
-                    iterator_ret->second = add<T>(iterator_x->second, iterator_y->second);
-                  
-                  return ret;
-                }
-                
-                template <typename T>
-                static std::map<std::string,  T> map_subtract(const std::map<std::string, T>& x, 
-                                                              const std::map<std::string, T>& y)
-                {
-                  std::map<std::string, T> ret = x;
-                  
-                  for_each_element_in_map
-                    iterator_ret->second = subtract<T>(iterator_x->second, iterator_y->second);
-                  
-                  return ret;
-                }
-                
-                #undef for_each_element_in_map
-            };
                                 
             MaterialPropertyMap1 Sigma_f;
             MaterialPropertyMap1 nu;
@@ -374,6 +382,13 @@ namespace WeakFormsNeutronics
                 mrmg_map->at(*it).assign(G, srsg_value);
             }
             
+            void fill_with(double c, MaterialPropertyMap1 *mrmg_map)
+            {
+              std::set<std::string>::const_iterator it;
+              for (it = materials_list.begin(); it != materials_list.end(); ++it)
+                mrmg_map->at(*it).assign(G, c);
+            }
+                      
             MaterialPropertyMaps(unsigned int G, std::set<std::string> mat_list = std::set<std::string>()) 
               : materials_list(mat_list), G(G)  { };
                         
@@ -381,27 +396,38 @@ namespace WeakFormsNeutronics
             {       
               using namespace ValidationFunctors;
               
+              if (chi.empty())
+                fill_with(1.0, &chi);
+              
               if (nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
-                nu = Operations::map_divide<rank1>(nuSigma_f, Sigma_f);
+                nu = NDArrayMapOp::divide<rank1>(nuSigma_f, Sigma_f);
               else if (nuSigma_f.empty() && !nu.empty() && !Sigma_f.empty())
-                nuSigma_f = Operations::map_multiply<rank1>(nu, Sigma_f);
+                nuSigma_f = NDArrayMapOp::multiply<rank1>(nu, Sigma_f);
               else if (Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
-                Sigma_f = Operations::map_divide<rank1>(nuSigma_f, nu);
+                Sigma_f = NDArrayMapOp::divide<rank1>(nuSigma_f, nu);
               else if (!Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
               {
-                MaterialPropertyMap1 diff = Operations::map_subtract<rank1>( nuSigma_f, 
-                                                                             Operations::map_multiply<rank1>(nu, Sigma_f) );
+                MaterialPropertyMap1 diff = NDArrayMapOp::subtract<rank1>( nuSigma_f, 
+                                                                           NDArrayMapOp::multiply<rank1>(nu, Sigma_f) );
                 std::for_each(diff.begin(), diff.end(), ensure_trivial());
               }
               else
-                error(E_INSUFFICIENT_DATA);
+              {
+                warning(W_NO_FISSION);
+                fill_with(0.0, &nu);
+                fill_with(0.0, &chi);
+                fill_with(0.0, &Sigma_f);
+              }
               
               if ((nu.size() != Sigma_f.size()) || (nu.size() != chi.size()))
                 error(E_NONMATCHING_PROPERTIES);
               
-              std::for_each(nu.begin(), nu.end(), ensure_size(G));
-              std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size(G));
-              std::for_each(chi.begin(), chi.end(), ensure_size(G));
+              if (Sigma_f.size() > 0)
+              {
+                std::for_each(nu.begin(), nu.end(), ensure_size(G));
+                std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size(G));
+                std::for_each(chi.begin(), chi.end(), ensure_size(G));
+              }
               
               if (Sigma_a.size() > 0)
               {
@@ -496,20 +522,169 @@ namespace WeakFormsNeutronics
             
           public:
             
-            DiffusionMaterialPropertyMaps(int G, std::set<std::string> mat_list = std::set<std::string>()) 
+            DiffusionMaterialPropertyMaps(unsigned int G, std::set<std::string> mat_list = std::set<std::string>()) 
               : Common::MaterialPropertyMaps(G, mat_list) { };
+              
+            MaterialPropertyMap1 extract_map2_diagonals(const MaterialPropertyMap2& map2)
+            {
+              MaterialPropertyMap1 diags;
+              
+              MaterialPropertyMap2::const_iterator map2_it = map2.begin();
+              for ( ; map2_it != map2.end(); ++map2_it)
+              {
+                diags[map2_it->first].reserve(G);
+                for (unsigned int g = 0; g < G; g++)
+                  diags[map2_it->first].push_back(map2_it->second[g][g]);    
+              }
+              
+              return diags;
+            }
             
+            MaterialPropertyMap1 sum_map2_columns(const MaterialPropertyMap2& map2)
+            {
+              MaterialPropertyMap1 summed;
+              
+              MaterialPropertyMap2::const_iterator map2_it = map2.begin();
+              for ( ; map2_it != map2.end(); ++map2_it)
+              {
+                summed[map2_it->first].reserve(G);
+                for (unsigned int gfrom = 0; gfrom < G; gfrom++)
+                {
+                  double sum = 0.0;
+                  
+                  for (unsigned int gto = 0; gto < G; gto++)
+                    sum += map2_it->second[gto][gfrom];
+                 
+                  summed[map2_it->first].push_back(sum);    
+                }
+              }
+              
+              return summed;
+            }
+            
+            MaterialPropertyMap2 create_map2_by_diagonals(const MaterialPropertyMap1& diags)
+            {
+              MaterialPropertyMap2 map2;
+              
+              MaterialPropertyMap1::const_iterator diags_it = diags.begin();
+              for ( ; diags_it != diags.end(); ++diags_it)
+              {
+                map2[diags_it->first].resize(G, rank1(G, 0.0));
+                
+                for (unsigned int g = 0; g < G; g++)
+                  map2[diags_it->first][g][g] = diags_it->second[g];
+              }
+              
+              return map2;
+            }
+            
+            void fill_with(double c, MaterialPropertyMap2 *mrmg_map)
+            {
+              std::set<std::string>::const_iterator it;
+              for (it = materials_list.begin(); it != materials_list.end(); ++it)
+                mrmg_map->at(*it).assign(G, rank1(G, c));
+            }
+            
+            // We always need to supply chi, nu, Sigma_f, Sigma_r, Sigma_s and D to our neutronics weak forms. 
+            // These parameters are often defined in terms of the other ones, or not specified at all and assumed 
+            // to be zero for a particular simplified situation. This method, together with its complement in the
+            // parent class, uses the most typical definitions to build the six-parameter set from the given input. 
+            // It also checks whether the user did not enter nonsensical values. However, values entered by the 
+            // user may sometimes not satisfy the common relations, as some empirical corrections may have been 
+            // already included in them.
             virtual void validate()
             {
               Common::MaterialPropertyMaps::validate();
               
-              if (G == 1) // Monoenergetic case.
+              bool D_given = !D.empty();
+              bool Sigma_r_given = !Sigma_r.empty();
+              bool Sigma_s_given = !Sigma_s.empty();
+              bool Sigma_t_given = !Sigma_t.empty();
+              bool Sigma_a_given = !Sigma_a.empty();
+              bool Sigma_f_given = !Sigma_f.empty();
+              
+              if (!Sigma_r_given)
               {
+                // If Sigma_r is not given, we can calculate it from Sigma_t and Sigma_s.
                 
+                if (Sigma_t_given)
+                {
+                  if (!Sigma_s_given)
+                  {
+                    if (Sigma_a_given)
+                    {
+                      // If Sigma_s is not given, but Sigma_a is, we can calculate Sigma_s from Sigma_t and Sigma_a.
+                      Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_a));
+                    }
+                    else 
+                    {
+                      // If only Sigma_t is given, we assume that all reaction terms are included in Sigma_t; all
+                      // other x-sections will be set to zero.
+                      warning(W_NO_SCATTERING);
+                      fill_with(0.0, &Sigma_s);
+                    }
+                    
+                    Sigma_s_given = true;
+                  }
+                }
+                else
+                {
+                  // If Sigma_t is not given, but Sigma_a and Sigma_s are, we can obtain Sigma_t from the latter two.
+                  
+                  if (!Sigma_s_given)
+                  {
+                    warning(W_NO_SCATTERING);
+                    fill_with(0.0, &Sigma_s);
+                    Sigma_s_given = true;
+                  }
+                  
+                  if (Sigma_a_given)
+                    Sigma_t = Common::NDArrayMapOp::add<rank1>(Sigma_a, sum_map2_columns(Sigma_s));
+                  else 
+                  {
+                    // If neither Sigma_r, Sigma_t, Sigma_a are given, we may have a purely fissioning system.
+                    if (Sigma_f_given)
+                      Sigma_t = Sigma_f;
+                    else
+                      error(E_INSUFFICIENT_DATA);
+                  }
+                  
+                  Sigma_t_given = true;
+                }
+                
+                Sigma_r = Common::NDArrayMapOp::subtract<rank1>(Sigma_t, extract_map2_diagonals(Sigma_s));
+                Sigma_r_given = true;
               }
-              else  // Multigroup case.
+              
+              // Now, we surely have Sigma_r ...
+              
+              if (!Sigma_s_given)
               {
+                // If Sigma_s is not given, but Sigma_t is, we can obtain the former from the latter and from Sigma_r.
+                // Note that the execution will come here only if the user entered Sigma_r himself - otherwise, Sigma_s
+                // has been already set in the previous test case.
                 
+                if (Sigma_t_given)
+                  Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_r));
+                else
+                {
+                  warning(W_NO_SCATTERING);
+                  fill_with(0.0, &Sigma_s);
+                }
+                
+                Sigma_s_given = true;
+              }
+              
+              // Now, we surely have Sigma_s and Sigma_r, one parameter to go ...
+              
+              if (!D_given)
+              {
+                MaterialPropertyMap1::const_iterator Sr_elem = Sigma_r.begin();
+                for ( ; Sr_elem != Sigma_r.end(); ++Sr_elem)
+                  for (unsigned int g = 0; g < G; g++)
+                    D[Sr_elem->first][g] = 1./(3.*Sr_elem->second[g]);
+                  
+                D_given = true;
               }
               
               if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (D.size() != src.size()))
@@ -659,7 +834,7 @@ namespace WeakFormsNeutronics
                     error(E_NONMATCHING_PROPERTIES);
                 }
                 
-                void check_validity(int g) const
+                void check_validity(unsigned int g) const
                 {
                   using MaterialProperties::ValidationFunctors::ensure_size_at_least;
                   
@@ -859,7 +1034,7 @@ namespace WeakFormsNeutronics
                     error(E_NONMATCHING_PROPERTIES);
                 }
                 
-                void check_validity(int gto, int gfrom = 0) const
+                void check_validity(unsigned int gto, unsigned int gfrom = 0) const
                 {
                   using MaterialProperties::ValidationFunctors::ensure_size_at_least;
                   
@@ -1124,7 +1299,7 @@ namespace WeakFormsNeutronics
               public:
                 Data(const iMarkerPropertyMap2& Sigma_s) : Sigma_s(Sigma_s) {};
                 
-                void check_validity(int gto, int gfrom) const
+                void check_validity(unsigned int gto, unsigned int gfrom) const
                 {
                   std::for_each(Sigma_s.begin(), Sigma_s.end(), 
                                 MaterialProperties::ValidationFunctors::ensure_size_at_least(gto, gfrom));
@@ -1274,7 +1449,7 @@ namespace WeakFormsNeutronics
               public:
                 Data(const iMarkerPropertyMap1& src) : src(src) {};
                 
-                void check_validity(int g) const
+                void check_validity(unsigned int g) const
                 {
                   std::for_each(src.begin(), src.end(), 
                                 MaterialProperties::ValidationFunctors::ensure_size_at_least(g));
@@ -1360,6 +1535,7 @@ namespace WeakFormsNeutronics
     namespace CompleteWeakForms
     { 
       using namespace MaterialProperties::Common;
+      using namespace MaterialProperties::Definitions;
       
       class GenericMultigroupWeakForm : public WeakForm
       {
