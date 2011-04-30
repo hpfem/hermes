@@ -1649,11 +1649,55 @@ namespace WeakFormsNeutronics
               add_vector_form(new ExternalSources::LinearForm(gto, ext_src_data, geom_type));
             }
           }
+          
+          DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
+                                     DefaultFunction *f_src,
+                                     GeomType geom_type = HERMES_PLANAR) 
+            : GenericMultigroupDiffusionWeakForm(matprop)
+          {            
+            for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+            {
+              add_matrix_form(new DiffusionReaction::Jacobian(gto, diffusion_reaction_data, geom_type));
+              add_vector_form(new DiffusionReaction::Residual(gto, diffusion_reaction_data, geom_type));
+              
+              for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
+              {
+                add_matrix_form(new Scattering::Jacobian(gto, gfrom, scattering_data, geom_type));
+                add_vector_form(new Scattering::Residual(gto, gfrom, scattering_data, geom_type));
+                
+                add_matrix_form(new FissionYield::Jacobian(gto, gfrom, fission_yield_data, geom_type));
+                add_vector_form(new FissionYield::Residual(gto, gfrom, fission_yield_data, geom_type));
+              }
+              
+              add_vector_form(new DefaultVectorFormVol(gto, 1.0, f_src, geom_type));
+            }
+          }
         };
-        
+                
         class DefaultWeakFormSourceIteration : public GenericMultigroupDiffusionWeakForm
         {
+          DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop,
+                                          double initial_keff_guess,
+                                          GeomType geom_type = HERMES_PLANAR ) 
+            : GenericMultigroupDiffusionWeakForm(matprop)
+          {            
+            for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+            {
+              add_matrix_form(new DiffusionReaction::Jacobian(gto, diffusion_reaction_data, geom_type));
+              add_vector_form(new DiffusionReaction::Residual(gto, diffusion_reaction_data, geom_type));
+              
+              for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
+              {
+                add_matrix_form(new Scattering::Jacobian(gto, gfrom, scattering_data, geom_type));
+                add_vector_form(new Scattering::Residual(gto, gfrom, scattering_data, geom_type));
+              }
+              
+              add_vector_form(new FissionYield::OuterIterationForm(gto, fission_yield_data, 
+                                                                   initial_keff_guess, geom_type));
+            }
+          }
         };
+        
       }
     }
   }
