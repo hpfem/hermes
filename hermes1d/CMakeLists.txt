@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+include_directories(${HERMES_COMMON_DIR_OLD})
+
 project(hermes1d)
 
 IF(H1D_DEBUG)
