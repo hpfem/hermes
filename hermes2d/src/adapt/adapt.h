@@ -18,7 +18,7 @@
 
 #include "../function/forms.h"
 #include "../space/space.h"
-#include "../../../hermes_common/vector.h"
+#include "vector.h"
 #include "../weakform/weakform.h"
 #include "../integrals/integrals_h1.h"
 #include "../integrals/integrals_hcurl.h"

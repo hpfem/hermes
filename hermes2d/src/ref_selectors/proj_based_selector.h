@@ -17,7 +17,7 @@
 #define __H2D_REFINEMENT_PROJ_BASED_SELECTOR_H
 
 #include "../h2d_common.h"
-#include "../../../hermes_common/matrix.h"
+#include "matrix.h"
 #include "optimum_selector.h"
 
 namespace RefinementSelectors {

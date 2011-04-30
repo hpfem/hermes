@@ -17,7 +17,7 @@
 #define _H2D_READER_H_
 
 #include "mesh_loader.h"
-#include "../../../hermes_common/python/python_api.h"
+#include "python/python_api.h"
 
 
 /// Mesh loader from Hermes2D format

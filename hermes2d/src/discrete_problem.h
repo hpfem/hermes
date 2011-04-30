@@ -16,10 +16,10 @@
 #ifndef __H2D_DISCRETE_PROBLEM_H
 #define __H2D_DISCRETE_PROBLEM_H
 
-#include "../../hermes_common/matrix.h"
-#include "../../hermes_common/solver/solver.h"
-#include "../../hermes_common/solver/dpinterface.h"
-#include "../../hermes_common/tables.h"
+#include "matrix.h"
+#include "solver/solver.h"
+#include "solver/dpinterface.h"
+#include "tables.h"
 #include "adapt/adapt.h"
 #include "graph.h"
 #include "function/forms.h"

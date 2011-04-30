@@ -15,7 +15,7 @@
 
 #include "../h2d_common.h"
 #include "solution.h"
-#include "../../../hermes_common/matrix.h"
+#include "matrix.h"
 #include "../shapeset/precalc.h"
 #include "../mesh/refmap.h"
 

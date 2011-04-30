@@ -17,7 +17,7 @@
 #ifndef __H2D_OGPROJECTION_H
 #define __H2D_OGPROJECTION_H
 
-#include "../hermes_common/common.h"
+#include "common.h"
 #include "function/solution.h"
 #include "function/forms.h"
 

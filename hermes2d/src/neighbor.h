@@ -1,7 +1,7 @@
 #ifndef NEIGHBOR_H_
 #define NEIGHBOR_H_
 
-#include "../hermes_common/common.h"
+#include "common.h"
 #include "mesh/mesh.h"
 #include "quadrature/quad.h"
 #include "function/solution.h"

@@ -1,5 +1,5 @@
 #include "../h2d_common.h"
-#include "../../../hermes_common/matrix.h"
+#include "matrix.h"
 #include "../function/solution.h"
 #include "../shapeset/shapeset_l2_all.h"
 #include "../mesh/element_to_refine.h"

@@ -16,8 +16,8 @@
 #ifndef __H2D_COMMON_H_
 #define __H2D_COMMON_H_
 
-#include "../../hermes_common/common.h"
-#include "../../hermes_common/matrix.h"
+#include "common.h"
+#include "matrix.h"
 
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."

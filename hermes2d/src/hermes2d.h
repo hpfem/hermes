@@ -24,31 +24,31 @@
 
 // RCP
 #ifndef WITH_TRILINOS
-#include "../hermes_common/third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
 #else
 #include "Teuchos_RCP.hpp"
 #endif
 
 // hermes_common solvers
-#include "../hermes_common/solver/amesos.h"
-#include "../hermes_common/solver/aztecoo.h"
-#include "../hermes_common/solver/epetra.h"
-#include "../hermes_common/solver/mumps.h"
-#include "../hermes_common/solver/nox.h"
-#include "../hermes_common/solver/petsc.h"
-#include "../hermes_common/solver/umfpack_solver.h"
-#include "../hermes_common/solver/superlu.h"
+#include "solver/amesos.h"
+#include "solver/aztecoo.h"
+#include "solver/epetra.h"
+#include "solver/mumps.h"
+#include "solver/nox.h"
+#include "solver/petsc.h"
+#include "solver/umfpack_solver.h"
+#include "solver/superlu.h"
 
 // preconditioners
-#include "../hermes_common/solver/precond.h"
-#include "../hermes_common/solver/precond_ifpack.h"
-#include "../hermes_common/solver/precond_ml.h"
+#include "solver/precond.h"
+#include "solver/precond_ifpack.h"
+#include "solver/precond_ml.h"
 
 // boundary conditions
 #include "boundaryconditions/essential_bcs.h"
 
 // Eigensolver
-#include "../hermes_common/solver/eigensolver.h"
+#include "solver/eigensolver.h"
 
 #include "hermes_logging.h"
 

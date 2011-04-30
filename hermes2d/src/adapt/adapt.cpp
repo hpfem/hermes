@@ -26,8 +26,8 @@
 #include "../ref_selectors/selector.h"
 #include "../views/scalar_view.h"
 #include "../views/order_view.h"
-#include "../../../hermes_common/matrix.h"
-#include "../../../hermes_common/common_time_period.h"
+#include "matrix.h"
+#include "common_time_period.h"
 
 using namespace std;
 

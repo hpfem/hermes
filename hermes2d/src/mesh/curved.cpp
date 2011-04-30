@@ -20,7 +20,7 @@
 #include "curved.h"
 #include "mesh.h"
 #include "../quadrature/quad_all.h"
-#include "../../../hermes_common/matrix.h"
+#include "matrix.h"
   
 H1ShapesetJacobi CurvMap::ref_map_shapeset;
 PrecalcShapeset CurvMap::ref_map_pss(&ref_map_shapeset);
