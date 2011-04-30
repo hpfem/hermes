@@ -501,6 +501,8 @@ namespace WeakFormsNeutronics
             {
               return this->chi;
             }
+            
+            unsigned int get_G() const { return G; }          
         };
       }
       
@@ -511,7 +513,7 @@ namespace WeakFormsNeutronics
         
         class DiffusionMaterialPropertyMaps : public Common::MaterialPropertyMaps
         {
-          private:
+          protected:
             
             MaterialPropertyMap1 D;
             MaterialPropertyMap1 Sigma_r;
@@ -812,6 +814,8 @@ namespace WeakFormsNeutronics
     namespace ElementaryForms
     {
       using namespace MaterialProperties::Common;
+      using namespace MaterialProperties::Definitions;
+      using namespace MaterialProperties::Messages;
       
       namespace Diffusion
       { 
@@ -823,13 +827,30 @@ namespace WeakFormsNeutronics
             
             class Data
             {
-              const iMarkerPropertyMap1& D;
-              const iMarkerPropertyMap1& Sigma_r;
+              iMarkerPropertyMap1 D;
+              iMarkerPropertyMap1 Sigma_r;
               
               public:
-                Data(const iMarkerPropertyMap1& D, const iMarkerPropertyMap1& Sigma_r) 
-                  : D(D), Sigma_r(Sigma_r)
+                Data() {};
+                
+                Data(const DiffusionMaterialPropertyMaps& matprop, 
+                     Mesh::ElementMarkersConversion *element_markers_conversion) 
                 {
+                  MaterialPropertyMap1 str_mpm = matprop.get_D();
+                  MaterialPropertyMap1::const_iterator str_mpm_iter = str_mpm.begin();
+                  for ( ; str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    D[int_marker] = str_mpm_iter->second;
+                  }
+                  
+                  str_mpm = matprop.get_Sigma_r();
+                  for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    Sigma_r[int_marker] = str_mpm_iter->second;
+                  }
+                  
                   if (D.size() != Sigma_r.size()) 
                     error(E_NONMATCHING_PROPERTIES);
                 }
@@ -1021,15 +1042,38 @@ namespace WeakFormsNeutronics
             
             class Data
             {
-              const iMarkerPropertyMap1& chi;
-              const iMarkerPropertyMap1& Sigma_f;
-              const iMarkerPropertyMap1& nu;
+              iMarkerPropertyMap1 chi;
+              iMarkerPropertyMap1 Sigma_f;
+              iMarkerPropertyMap1 nu;
               
               public:
-                Data( const iMarkerPropertyMap1& chi,
-                      const iMarkerPropertyMap1& Sigma_f,
-                      const iMarkerPropertyMap1& nu ) : chi(chi), Sigma_f(Sigma_f), nu(nu)
+                Data() {};
+                
+                Data(const DiffusionMaterialPropertyMaps& matprop,
+                     Mesh::ElementMarkersConversion *element_markers_conversion)
                 {
+                  MaterialPropertyMap1 str_mpm = matprop.get_Sigma_f();
+                  MaterialPropertyMap1::const_iterator str_mpm_iter = str_mpm.begin();
+                  for ( ; str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    Sigma_f[int_marker] = str_mpm_iter->second;
+                  }
+                  
+                  str_mpm = matprop.get_nu();
+                  for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    nu[int_marker] = str_mpm_iter->second;
+                  }
+                  
+                  str_mpm = matprop.get_chi();
+                  for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    chi[int_marker] = str_mpm_iter->second;
+                  }
+                  
                   if (chi.size() != Sigma_f.size() || chi.size() != nu.size())
                     error(E_NONMATCHING_PROPERTIES);
                 }
@@ -1294,10 +1338,22 @@ namespace WeakFormsNeutronics
             
             class Data
             {
-              const iMarkerPropertyMap2& Sigma_s;
+              iMarkerPropertyMap2 Sigma_s;
               
               public:
-                Data(const iMarkerPropertyMap2& Sigma_s) : Sigma_s(Sigma_s) {};
+                Data() {};
+                
+                Data(const DiffusionMaterialPropertyMaps& matprop,
+                     Mesh::ElementMarkersConversion *element_markers_conversion) 
+                {
+                  MaterialPropertyMap2 str_mpm2 = matprop.get_Sigma_s();
+                  MaterialPropertyMap2::const_iterator str_mpm2_iter = str_mpm2.begin();
+                  for ( ; str_mpm2_iter != str_mpm2.end(); ++str_mpm2_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm2_iter->first);
+                    Sigma_s[int_marker] = str_mpm2_iter->second;
+                  }
+                }
                 
                 void check_validity(unsigned int gto, unsigned int gfrom) const
                 {
@@ -1444,10 +1500,22 @@ namespace WeakFormsNeutronics
             
             class Data
             {
-              const iMarkerPropertyMap1& src;
+              iMarkerPropertyMap1 src;
               
               public:
-                Data(const iMarkerPropertyMap1& src) : src(src) {};
+                Data() {};
+                
+                Data(const DiffusionMaterialPropertyMaps& matprop,
+                     Mesh::ElementMarkersConversion *element_markers_conversion) 
+                {
+                  MaterialPropertyMap1 str_mpm = matprop.get_src();
+                  MaterialPropertyMap1::const_iterator str_mpm_iter = str_mpm.begin();
+                  for ( ; str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
+                  {
+                    int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
+                    src[int_marker] = str_mpm_iter->second;
+                  }
+                }
                 
                 void check_validity(unsigned int g) const
                 {
@@ -1536,90 +1604,53 @@ namespace WeakFormsNeutronics
     { 
       using namespace MaterialProperties::Common;
       using namespace MaterialProperties::Definitions;
-      
-      class GenericMultigroupWeakForm : public WeakForm
-      {
-        protected:
-          
-          iMarkerPropertyMap1 Sigma_f,
-                              nu,
-                              chi;
-          
-        public:
-          
-          GenericMultigroupWeakForm(unsigned int G, const MaterialPropertyMaps& matprop) : WeakForm(G)
-          {
-            MaterialPropertyMap1 str_mpm = matprop.get_Sigma_f();
-            MaterialPropertyMap1::const_iterator str_mpm_iter = str_mpm.begin();
-            for ( ; str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
-            {
-              int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
-              Sigma_f[int_marker] = str_mpm_iter->second;
-            }
             
-            str_mpm = matprop.get_nu();
-            for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
-            {
-              int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
-              nu[int_marker] = str_mpm_iter->second;
-            }
-            
-            str_mpm = matprop.get_chi();
-            for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
-            {
-              int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
-              chi[int_marker] = str_mpm_iter->second;
-            }
-          }
-      };
-      
       namespace Diffusion
       {      
         using namespace MaterialProperties::Diffusion;
+        using namespace ElementaryForms::Diffusion;
         
-        class GenericMultigroupDiffusionWeakForm : public GenericMultigroupWeakForm
+        class GenericMultigroupDiffusionWeakForm : public WeakForm
         {
           protected:
             
-            iMarkerPropertyMap1 D, Sigma_r;
-            iMarkerPropertyMap2 Sigma_s;
+            DiffusionReaction::Data diffusion_reaction_data;
+            FissionYield::Data fission_yield_data;
+            Scattering::Data scattering_data;
+            ExternalSources::Data ext_src_data;
             
           public:
             
-            GenericMultigroupDiffusionWeakForm(unsigned int G, const DiffusionMaterialPropertyMaps& matprop) 
-              : GenericMultigroupWeakForm(G, matprop)
-            {
-              MaterialPropertyMap1 str_mpm = matprop.get_D();
-              MaterialPropertyMap1::const_iterator str_mpm_iter = str_mpm.begin();
-              for ( ; str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
-              {
-                int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
-                D[int_marker] = str_mpm_iter->second;
-              }
-              
-              str_mpm = matprop.get_Sigma_r();
-              for (str_mpm_iter = str_mpm.begin(); str_mpm_iter != str_mpm.end(); ++str_mpm_iter)
-              {
-                int int_marker = element_markers_conversion->get_internal_marker(str_mpm_iter->first);
-                Sigma_r[int_marker] = str_mpm_iter->second;
-              }
-              
-              MaterialPropertyMap2 str_mpm2 = matprop.get_Sigma_s();
-              MaterialPropertyMap2::const_iterator str_mpm2_iter = str_mpm2.begin();
-              for ( ; str_mpm2_iter != str_mpm2.end(); ++str_mpm2_iter)
-              {
-                int int_marker = element_markers_conversion->get_internal_marker(str_mpm2_iter->first);
-                Sigma_s[int_marker] = str_mpm2_iter->second;
-              }
-            }
+            GenericMultigroupDiffusionWeakForm(const DiffusionMaterialPropertyMaps& matprop) 
+              : diffusion_reaction_data(matprop, element_markers_conversion),
+                fission_yield_data(matprop, element_markers_conversion),
+                scattering_data(matprop, element_markers_conversion),
+                ext_src_data(matprop, element_markers_conversion)
+            {};
         };
         
         class DefaultWeakFormFixedSource : public GenericMultigroupDiffusionWeakForm
         { 
-          DefaultWeakFormFixedSource(unsigned int G, const DiffusionMaterialPropertyMaps& matprop) 
-            : GenericMultigroupDiffusionWeakForm(G, matprop)
-          {
-            
+          DefaultWeakFormFixedSource(const DiffusionMaterialPropertyMaps& matprop, 
+                                     GeomType geom_type = HERMES_PLANAR) 
+            : GenericMultigroupDiffusionWeakForm(matprop)
+          {            
+            for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+            {
+              add_matrix_form(new DiffusionReaction::Jacobian(gto, diffusion_reaction_data, geom_type));
+              add_vector_form(new DiffusionReaction::Residual(gto, diffusion_reaction_data, geom_type));
+              
+              for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
+              {
+                add_matrix_form(new Scattering::Jacobian(gto, gfrom, scattering_data, geom_type));
+                add_vector_form(new Scattering::Residual(gto, gfrom, scattering_data, geom_type));
+                
+                add_matrix_form(new FissionYield::Jacobian(gto, gfrom, fission_yield_data, geom_type));
+                add_vector_form(new FissionYield::Residual(gto, gfrom, fission_yield_data, geom_type));
+              }
+              
+              add_vector_form(new ExternalSources::LinearForm(gto, ext_src_data, geom_type));
+            }
           }
         };
         
