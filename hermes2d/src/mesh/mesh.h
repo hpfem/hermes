@@ -378,6 +378,8 @@ protected:
     friend class Space;
     friend class Mesh;
   };
+  
+public:
 
   class ElementMarkersConversion : public MarkersConversion
   {
@@ -396,6 +398,8 @@ protected:
     void operator=(const BoundaryMarkersConversion& src);  // Assignment operator.
     virtual MarkersConversionType get_type() { return HERMES_BOUNDARY_MARKERS_CONVERSION; };
   };
+    
+protected:
 
   ElementMarkersConversion element_markers_conversion;
   BoundaryMarkersConversion boundary_markers_conversion;
