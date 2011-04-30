@@ -117,32 +117,30 @@ double vec_dot(double *r, double *s, int n_dof)
   return result;
 }
 
-template<typename Scalar>
-Scalar vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int n_dof)
+double vec_dot(Vector *r, Vector *s, int n_dof)
 {
-  Scalar result = 0;
+  double result = 0;
+#ifndef HERMES_COMMON_COMPLEX
   for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
+#endif
   return result;
 }
 
-// SparseMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
+// SparseMatrix ////////////////////////////////////////////////////////////////////////////////////
 
 void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
 
-
-template<typename Scalar>
-SparseMatrix<Scalar>::SparseMatrix()
+SparseMatrix::SparseMatrix()
 {
   _F_
-  this->size = 0;
+  size = 0;
   pages = NULL;
 
   row_storage = false;
   col_storage = false;
 }
 
-template<typename Scalar>
-SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
+SparseMatrix::SparseMatrix(unsigned int size)
 {
   _F_
   this->size = size;
@@ -152,15 +150,13 @@ SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
   col_storage = false;
 }
 
-template<typename Scalar>
-SparseMatrix<Scalar>::~SparseMatrix()
+SparseMatrix::~SparseMatrix()
 {
   _F_
   delete [] pages;
 }
 
-template<typename Scalar>
-void SparseMatrix<Scalar>::prealloc(unsigned int n)
+void SparseMatrix::prealloc(unsigned int n)
 {
   _F_
   this->size = n;
@@ -170,8 +166,7 @@ void SparseMatrix<Scalar>::prealloc(unsigned int n)
   memset(pages, 0, n * sizeof(Page *));
 }
 
-template<typename Scalar>
-void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
+void SparseMatrix::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
@@ -184,8 +179,7 @@ void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
   pages[col]->idx[pages[col]->count++] = row;
 }
 
-template<typename Scalar>
-int SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
+int SparseMatrix::sort_and_store_indices(Page *page, int *buffer, int *max)
 {
   _F_
   // gather all pages in the buffer, deleting them along the way
@@ -206,20 +200,18 @@ int SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *m
   return q - buffer;
 }
 
-template<typename Scalar>
-int SparseMatrix<Scalar>::get_num_indices()
+int SparseMatrix::get_num_indices()
 {
   _F_
   int total = 0;
-  for (unsigned int i = 0; i < this->size; i++)
+  for (unsigned int i = 0; i < size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
 
   return total;
 }
 
-template<typename Scalar>
-SparseMatrix<Scalar>* create_matrix(MatrixSolverType matrix_solver)
+SparseMatrix* create_matrix(MatrixSolverType matrix_solver)
 {
   _F_
   switch (matrix_solver) 
@@ -227,27 +219,27 @@ SparseMatrix<Scalar>* create_matrix(MatrixSolverType matrix_solver)
     case SOLVER_AMESOS:
     case SOLVER_AZTECOO:
       {
-        return new EpetraMatrix<Scalar>;
+        return new EpetraMatrix;
         break;
       }
     case SOLVER_MUMPS: 
       {
-        return new MumpsMatrix<Scalar>;
+        return new MumpsMatrix;
         break;
       }
     case SOLVER_PETSC: 
       {
-        return new PetscMatrix<Scalar>;
+        return new PetscMatrix;
         break;
       }
     case SOLVER_UMFPACK: 
       {
-        return new UMFPackMatrix<Scalar>;
+        return new UMFPackMatrix;
         break;
       }
     case SOLVER_SUPERLU: 
     {
-      return new SuperLUMatrix<Scalar>;
+      return new SuperLUMatrix;
       break;
     }
     default: 
@@ -256,53 +248,52 @@ SparseMatrix<Scalar>* create_matrix(MatrixSolverType matrix_solver)
   return NULL;
 }
 
-template<typename Scalar>
-Solver<Scalar>* create_linear_solver(MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
+Solver* create_linear_solver(MatrixSolverType matrix_solver, Matrix* matrix, Vector* rhs)
 {
   _F_
-  Vector<Scalar>* rhs_dummy = NULL;
+  Vector* rhs_dummy = NULL;
   switch (matrix_solver) 
   {
     case SOLVER_AZTECOO:
       {
         info("Using AztecOO."); 
-        if (rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-        else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+        if (rhs != NULL) return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AztecOOSolver(static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
         break;
       }
     case SOLVER_AMESOS:
       {
         info("Using Amesos.");         
-        if (rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-        else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+        if (rhs != NULL) return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs));
+        else return new AmesosSolver("Amesos_Klu", static_cast<EpetraMatrix*>(matrix), static_cast<EpetraVector*>(rhs_dummy));
         break;
       }
     case SOLVER_MUMPS: 
       {
         info("Using Mumps.");         
-        if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
-        else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
+        if (rhs != NULL) return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs)); 
+        else return new MumpsSolver(static_cast<MumpsMatrix*>(matrix), static_cast<MumpsVector*>(rhs_dummy)); 
         break;
       }
     case SOLVER_PETSC: 
       {
         info("Using PETSc.");        
-        if (rhs != NULL) return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs)); 
-        else return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy)); 
+        if (rhs != NULL) return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs)); 
+        else return new PetscLinearSolver(static_cast<PetscMatrix*>(matrix), static_cast<PetscVector*>(rhs_dummy)); 
         break;
       }
     case SOLVER_UMFPACK: 
       {
         info("Using UMFPack.");
-        if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
-        else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
+        if (rhs != NULL) return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs)); 
+        else return new UMFPackLinearSolver(static_cast<UMFPackMatrix*>(matrix), static_cast<UMFPackVector*>(rhs_dummy));  
         break;
       }
     case SOLVER_SUPERLU: 
     {
       info("Using SuperLU.");       
-      if (rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs)); 
-      else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy)); 
+      if (rhs != NULL) return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs)); 
+      else return new SuperLUSolver(static_cast<SuperLUMatrix*>(matrix), static_cast<SuperLUVector*>(rhs_dummy)); 
       break;
     }
     default: 
@@ -311,8 +302,7 @@ Solver<Scalar>* create_linear_solver(MatrixSolverType matrix_solver, Matrix<Scal
   return NULL;
 }
 
-template<typename Scalar>
-Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
+Vector* create_vector(MatrixSolverType matrix_solver)
 {
   _F_
   switch (matrix_solver) 
@@ -320,27 +310,27 @@ Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
     case SOLVER_AMESOS:
     case SOLVER_AZTECOO:
       {
-        return new EpetraVector<Scalar>;
+        return new EpetraVector;
         break;
       }
     case SOLVER_MUMPS: 
       {
-        return new MumpsVector<Scalar>;
+        return new MumpsVector;
         break;
       }
     case SOLVER_PETSC: 
       {
-        return new PetscVector<Scalar>;
+        return new PetscVector;
         break;
       }
     case SOLVER_UMFPACK: 
       {
-        return new UMFPackVector<Scalar>;
+        return new UMFPackVector;
         break;
       }
     case SOLVER_SUPERLU: 
     {
-      return new SuperLUVector<Scalar>;
+      return new SuperLUVector;
       break;
     }
     default: 
@@ -348,18 +338,3 @@ Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
   }
   return NULL;
 }
-
-template class SparseMatrix<double>;
-template class SparseMatrix<std::complex<double> >;
-
-template HERMES_API Vector<double>* create_vector(MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<double>*  create_matrix(MatrixSolverType matrix_solver);
-template HERMES_API Solver<double>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<double>* matrix, Vector<double>* rhs);
-
-template HERMES_API Vector<std::complex<double> >* create_vector(MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<std::complex<double> >*  create_matrix(MatrixSolverType matrix_solver);
-template HERMES_API Solver<std::complex<double> >*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
-
-

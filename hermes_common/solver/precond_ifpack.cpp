@@ -27,8 +27,7 @@
   #include <Ifpack_Graph_Epetra_CrsGraph.h>
 #endif
 
-template<typename Scalar>
-IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type)
+IfpackPrecond::IfpackPrecond(const char *cls, const char *type)
 {
 #ifdef HAVE_IFPACK
   this->prec = NULL;
@@ -42,8 +41,7 @@ IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type)
 #endif
 }
 
-template<typename Scalar>
-IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type, int overlap)
+IfpackPrecond::IfpackPrecond(const char *cls, const char *type, int overlap)
 {
 #ifdef HAVE_IFPACK
   this->prec = NULL;
@@ -59,8 +57,7 @@ IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type, int over
 }
 
 #ifdef HAVE_IFPACK
-template<typename Scalar>
-IfpackPrecond<Scalar>::IfpackPrecond(Ifpack_Preconditioner *ipc)
+IfpackPrecond::IfpackPrecond(Ifpack_Preconditioner *ipc)
 {
   this->prec = ipc;
   this->owner = false;
@@ -68,8 +65,7 @@ IfpackPrecond<Scalar>::IfpackPrecond(Ifpack_Preconditioner *ipc)
 }
 #endif
 
-template<typename Scalar>
-IfpackPrecond<Scalar>::~IfpackPrecond()
+IfpackPrecond::~IfpackPrecond()
 {
 
 #ifdef HAVE_IFPACK
@@ -77,8 +73,7 @@ IfpackPrecond<Scalar>::~IfpackPrecond()
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::set_param(const char *name, const char *value)
+void IfpackPrecond::set_param(const char *name, const char *value)
 {
 
 #ifdef HAVE_IFPACK
@@ -86,8 +81,7 @@ void IfpackPrecond<Scalar>::set_param(const char *name, const char *value)
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::set_param(const char *name, int value)
+void IfpackPrecond::set_param(const char *name, int value)
 {
 
 #ifdef HAVE_IFPACK
@@ -95,8 +89,7 @@ void IfpackPrecond<Scalar>::set_param(const char *name, int value)
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::set_param(const char *name, double value)
+void IfpackPrecond::set_param(const char *name, double value)
 {
 
 #ifdef HAVE_IFPACK
@@ -104,12 +97,11 @@ void IfpackPrecond<Scalar>::set_param(const char *name, double value)
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::create(Matrix<Scalar> *m)
+void IfpackPrecond::create(Matrix *m)
 {
 
 #ifdef HAVE_IFPACK
-  EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
+  EpetraMatrix *mt = dynamic_cast<EpetraMatrix *>(m);
   assert(mt != NULL);
   mat = mt;
   if (strcmp(cls, "point-relax") == 0) {
@@ -129,8 +121,7 @@ void IfpackPrecond<Scalar>::create(Matrix<Scalar> *m)
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::create_point_relax(EpetraMatrix<Scalar> *a, const char *name)
+void IfpackPrecond::create_point_relax(EpetraMatrix *a, const char *name)
 {
 
 #ifdef HAVE_IFPACK
@@ -139,8 +130,7 @@ void IfpackPrecond<Scalar>::create_point_relax(EpetraMatrix<Scalar> *a, const ch
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::create_block_relax(EpetraMatrix<Scalar> *a, const char *name)
+void IfpackPrecond::create_block_relax(EpetraMatrix *a, const char *name)
 {
 
 #ifdef HAVE_IFPACK
@@ -161,8 +151,7 @@ void IfpackPrecond<Scalar>::create_block_relax(EpetraMatrix<Scalar> *a, const ch
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap)
+void IfpackPrecond::create_add_schwartz(EpetraMatrix *a, const char *name, int overlap)
 {
 
 #ifdef HAVE_IFPACK
@@ -183,8 +172,7 @@ void IfpackPrecond<Scalar>::create_add_schwartz(EpetraMatrix<Scalar> *a, const c
 #endif
 }
 
-template<typename Scalar>
-int IfpackPrecond<Scalar>::initialize()
+int IfpackPrecond::initialize()
 {
 
 #ifdef HAVE_IFPACK
@@ -195,8 +183,7 @@ int IfpackPrecond<Scalar>::initialize()
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::compute()
+void IfpackPrecond::compute()
 {
 
 #ifdef HAVE_IFPACK
@@ -205,8 +192,7 @@ void IfpackPrecond<Scalar>::compute()
 #endif
 }
 
-template<typename Scalar>
-void IfpackPrecond<Scalar>::apply_params()
+void IfpackPrecond::apply_params()
 {
 
 #ifdef HAVE_IFPACK
@@ -215,27 +201,25 @@ void IfpackPrecond<Scalar>::apply_params()
 }
 
 #ifdef HAVE_IFPACK
-template<typename Scalar>
-int IfpackPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
+
+int IfpackPrecond::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
 {
   assert(prec != NULL);
   return prec->ApplyInverse(r, z);
 }
 
-template<typename Scalar>
-const Epetra_Comm &IfpackPrecond<Scalar>::Comm() const
+
+const Epetra_Comm &IfpackPrecond::Comm() const
 {
   return mat->mat->Comm();
 }
 
-template<typename Scalar>
-const Epetra_Map &IfpackPrecond<Scalar>::OperatorDomainMap() const
+const Epetra_Map &IfpackPrecond::OperatorDomainMap() const
 {
   return mat->mat->OperatorDomainMap();
 }
 
-template<typename Scalar>
-const Epetra_Map &IfpackPrecond<Scalar>::OperatorRangeMap() const
+const Epetra_Map &IfpackPrecond::OperatorRangeMap() const
 {
   return mat->mat->OperatorRangeMap();
 }

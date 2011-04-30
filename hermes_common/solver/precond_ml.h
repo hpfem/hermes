@@ -26,8 +26,7 @@
 /// Preconditioners built on ML
 ///
 /// @ingroup preconds
-template <typename Scalar>
-class HERMES_API MlPrecond : public Precond<Scalar> {
+class HERMES_API MlPrecond : public Precond {
 public:
   /// @param[in] type - type of the preconditioner [ sa | dd ]
   /// - sa = smooth aggregation
@@ -44,7 +43,7 @@ public:
 #endif
 
   /// @param[in] a
-  virtual void create(Matrix<Scalar> *mat);
+  virtual void create(Matrix *mat);
   /// Destroy the preconditioner object
   virtual void destroy();
   /// Compute the preconditioner
@@ -68,11 +67,11 @@ protected:
 #ifdef HAVE_ML
   ML_Epetra::MultiLevelPreconditioner *prec;
   Teuchos::ParameterList mlist;
-  EpetraMatrix<Scalar> *mat;
+  EpetraMatrix *mat;
 #endif
   unsigned owner:1;
 
-  friend class AztecOOSolver<Scalar>;
+  friend class AztecOOSolver;
 };
 
 #endif /* _PRECOND_ML_H_ */

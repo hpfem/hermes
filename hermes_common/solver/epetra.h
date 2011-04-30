@@ -30,14 +30,13 @@
   #include <Epetra_CrsMatrix.h>
 #endif
 
-template <typename Scalar> class AmesosSolver;
-template <typename Scalar> class AztecOOSolver;
-template <typename Scalar> class NoxSolver;
-template <typename Scalar> class IfpackPrecond;
-template <typename Scalar> class MlPrecond;
+class AmesosSolver;
+class AztecOOSolver;
+class NoxSolver;
+class IfpackPrecond;
+class MlPrecond;
 
-template <typename Scalar>
-class HERMES_API EpetraMatrix : public SparseMatrix<Scalar> {
+class HERMES_API EpetraMatrix : public SparseMatrix {
 public:
   EpetraMatrix();
 #ifdef HAVE_EPETRA
@@ -51,13 +50,13 @@ public:
 
   virtual void alloc();
   virtual void free();
-  virtual Scalar get(unsigned int m, unsigned int n);
+  virtual scalar get(unsigned int m, unsigned int n);
   virtual int get_num_row_entries(unsigned int row);
   virtual void extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs);
   virtual void zero();
-  virtual void add(unsigned int m, unsigned int n, Scalar v);
-  virtual void add_to_diagonal(Scalar v);
-  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, scalar v);
+  virtual void add_to_diagonal(scalar v);
+  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
@@ -68,19 +67,21 @@ protected:
   Epetra_BlockMap *std_map;
   Epetra_CrsGraph *grph;
   Epetra_CrsMatrix *mat;
-  Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
+  #ifdef HERMES_COMMON_COMPLEX
+    Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
+  #endif
   bool owner;
 #endif
 
-  friend class AmesosSolver<Scalar>;
-  friend class AztecOOSolver<Scalar>;
-  friend class NoxSolver<Scalar>;
-  friend class IfpackPrecond<Scalar>;
-  friend class MlPrecond<Scalar>;
+  friend class AmesosSolver;
+  friend class AztecOOSolver;
+  friend class NoxSolver;
+  friend class IfpackPrecond;
+  friend class MlPrecond;
 };
 
-template <typename Scalar>
-class HERMES_API EpetraVector : public Vector<Scalar> {
+
+class HERMES_API EpetraVector : public Vector {
 public:
   EpetraVector();
 #ifdef HAVE_EPETRA
@@ -91,22 +92,26 @@ public:
   virtual void alloc(unsigned int ndofs);
   virtual void free();
 #ifdef HAVE_EPETRA
-  virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
-  virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); }
+  virtual scalar get(unsigned int idx) { return (*vec)[idx]; }
+#ifndef HERMES_COMMON_COMPLEX
+  virtual void extract(double *v) const { vec->ExtractCopy(v); }
 #else
-  virtual Scalar get(unsigned int idx) { return 0.0; }
-  virtual void extract(Scalar *v) const { }
+  virtual void extract(scalar *v) const { }
+#endif
+#else
+  virtual scalar get(unsigned int idx) { return 0.0; }
+  virtual void extract(scalar *v) const { }
 #endif
   virtual void zero();
   virtual void change_sign();
-  virtual void set(unsigned int idx, Scalar y);
-  virtual void add(unsigned int idx, Scalar y);
-  virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-  virtual void add_vector(Vector<Scalar>* vec) {
+  virtual void set(unsigned int idx, scalar y);
+  virtual void add(unsigned int idx, scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
+  virtual void add_vector(Vector* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
-  virtual void add_vector(Scalar* vec) {
+  virtual void add_vector(scalar* vec) {
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
@@ -115,13 +120,15 @@ protected:
 #ifdef HAVE_EPETRA
   Epetra_BlockMap *std_map;
   Epetra_Vector *vec;
-  Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
+  #ifdef HERMES_COMMON_COMPLEX
+    Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
+  #endif
   bool owner;
 #endif
 
-  friend class AmesosSolver<Scalar>;
-  friend class AztecOOSolver<Scalar>;
-  friend class NoxSolver<Scalar>;
+  friend class AmesosSolver;
+  friend class AztecOOSolver;
+  friend class NoxSolver;
 };
 
 #endif

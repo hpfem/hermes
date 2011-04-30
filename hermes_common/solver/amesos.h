@@ -31,10 +31,9 @@
 /// Encapsulation of Amesos linear solver
 ///
 /// @ingroup solvers
-template<typename Scalar>
-class HERMES_API AmesosSolver : public LinearSolver<Scalar> {
+class HERMES_API AmesosSolver : public LinearSolver {
 public:
-  AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+  AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs);
   virtual ~AmesosSolver();
 
   static bool is_available(const char *name);
@@ -51,8 +50,8 @@ protected:
   Amesos_BaseSolver *solver;
   Epetra_LinearProblem problem;
 #endif
-  EpetraMatrix<Scalar> *m;
-  EpetraVector<Scalar> *rhs;
+  EpetraMatrix *m;
+  EpetraVector *rhs;
   
   bool setup_factorization();
 };

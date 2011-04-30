@@ -31,10 +31,9 @@
 /// Encapsulation of AztecOO linear solver
 ///
 /// @ingroup solvers
-template <typename Scalar>
-class HERMES_API AztecOOSolver : public IterSolver<Scalar> {
+class HERMES_API AztecOOSolver : public IterSolver {
 public:
-  AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+  AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs);
   virtual ~AztecOOSolver();
 
   virtual bool solve();
@@ -58,13 +57,12 @@ public:
   
   /// Set preconditioner from IFPACK
   /// @param[in] pc - IFPACK preconditioner
-
 #ifdef HAVE_TEUCHOS
-  virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+  virtual void set_precond(Teuchos::RCP<Precond> &pc)
 #else
-  virtual void set_precond(Precond<Scalar> *pc) 
+  virtual void set_precond(Precond *pc) 
 #endif
-  { this->precond_yes = true; this->pc = pc; }
+  { precond_yes = true; this->pc = pc; }
 
   /// Option setting function
   void set_option(int option, int value);
@@ -76,15 +74,14 @@ protected:
 #ifdef HAVE_AZTECOO
   AztecOO aztec;    ///< Instance of the Aztec solver.
 #endif
-  EpetraMatrix<Scalar> *m;
-  EpetraVector<Scalar> *rhs;
+  EpetraMatrix *m;
+  EpetraVector *rhs;
   
 #ifdef HAVE_TEUCHOS
-  Teuchos::RCP<Precond<Scalar> > pc;
+  Teuchos::RCP<Precond> pc;
 #else
-  Precond<Scalar> *pc;
+  Precond *pc;
 #endif
 };
-
 
 #endif

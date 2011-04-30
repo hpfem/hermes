@@ -15,7 +15,7 @@ namespace Hermes
 /** This class is used to pass a variable number of parameters in a type-safe fashion.
  *  \par Suggested Use
  *  Let us assume a function foo(Hermes::vector<Solution*>&) and instances sln1-sln3 of a class Solution. Then,
- *  - 2 up to 10 parameters: foo(Hermes::vector<Solution*>(&sln1, &sln2, &sln3));
+ *  - 2 up to 15 parameters: foo(Hermes::vector<Solution*>(&sln1, &sln2, &sln3));
  *  - more than 10 parameters: Fill the instance similarly to STL vector (std::vector).
  *  If needed, the one-parameter version of foo must be created separately, without using Hermes::vector.
  */
@@ -25,6 +25,8 @@ class vector : public std::vector<T>
 public:
   /// A default constructor. Creates an empty vector.
   vector() { };
+  /// 1 parameters constructor.
+  vector(const T& a) { this->reserve(1); this->push_back(a);};
   /// 2 parameters constructor.
   vector(const T& a, const T& b) { this->reserve(2); this->push_back(a); this->push_back(b); };
   /// 3 parameters constructor.
@@ -43,6 +45,16 @@ public:
   vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i) { this->reserve(9); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); };
   /// 10 parameters constructor.
   vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j) { this->reserve(10); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); };
+  /// 11 parameters constructor.
+  vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j, const T& k) { this->reserve(11); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); this->push_back(k);};
+  /// 12 parameters constructor.
+  vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j, const T& k, const T& l) { this->reserve(12); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); this->push_back(k); this->push_back(l);};
+  /// 13 parameters constructor.
+  vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j, const T& k, const T& l, const T& m) { this->reserve(13); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); this->push_back(k); this->push_back(l); this->push_back(m);};
+  /// 14 parameters constructor.
+  vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j, const T& k, const T& l, const T& m, const T& n) { this->reserve(14); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); this->push_back(k); this->push_back(l); this->push_back(m); this->push_back(n);};
+  /// 15 parameters constructor.
+  vector(const T& a, const T& b, const T& c, const T& d, const T& e, const T& f, const T& g, const T& h, const T& i, const T& j, const T& k, const T& l, const T& m, const T& n, const T& o) { this->reserve(15); this->push_back(a); this->push_back(b); this->push_back(c); this->push_back(d); this->push_back(e); this->push_back(f); this->push_back(g); this->push_back(h); this->push_back(i); this->push_back(j); this->push_back(k); this->push_back(l); this->push_back(m); this->push_back(n); this->push_back(o);};
 
   // Look up an integer number in an array.
   int find_index_slow(const T& x) {

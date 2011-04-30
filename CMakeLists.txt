@@ -6,8 +6,11 @@ project(hermes)
 cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
-set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
-set(HERMES_COMMON_LIB  hermes_common)
+set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common_unified)
+set(HERMES_COMMON_DIR_OLD ${PROJECT_SOURCE_DIR}/hermes_common)
+set(HERMES_COMMON_LIB  hermes_common_unified)
+set(HERMES_COMMON_LIB_REAL  hermes_common-real)
+set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
 
 
 #ADDED BY COLMAN
@@ -199,6 +202,23 @@ endif(WITH_PYTHON)
 # Allow to override the default values in CMake.vars:
 include(CMake.vars OPTIONAL)
 
+macro (DETERMINE_HERMES_COMMON_REAL_COMPLEX HXD)	#will be removed after unification of hermes_common vvvv
+    if (WITH_${HXD})
+        if (${HXD}_REAL)
+            set(HERMES_COMMON_REAL  YES)
+        endif (${HXD}_REAL)
+        if (${HXD}_COMPLEX)
+            set(HERMES_COMMON_COMPLEX YES)
+        endif (${HXD}_COMPLEX)
+    endif (WITH_${HXD})   
+endmacro(DETERMINE_HERMES_COMMON_REAL_COMPLEX)
+
+set(HERMES_COMMON_REAL    NO)
+set(HERMES_COMMON_COMPLEX NO)
+
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H1D)
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H2D)
+DETERMINE_HERMES_COMMON_REAL_COMPLEX(H3D)		#will be removed after unification of hermes_common ^^^^
 
 macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
@@ -207,15 +227,38 @@ macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
             # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
             set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
             set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
+
+            if (HERMES_COMMON_REAL)	#will be removed after unification of hermes_common
+                set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
+                set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
+            endif (HERMES_COMMON_REAL)
+            if (HERMES_COMMON_COMPLEX)
+                set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
+                set(HERMES_COMMON_LIB_CPLX_DEBUG ${HERMES_COMMON_LIB_CPLX}-debug)
+            endif (HERMES_COMMON_COMPLEX)
         else(MSVC)        
           if(${HXD}_DEBUG)
             set(HERMES_COMMON_DEBUG YES)
             set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
+
+            if(HERMES_COMMON_REAL)
+              set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
+            endif(HERMES_COMMON_REAL)
+            if(HERMES_COMMON_COMPLEX)
+              set(HERMES_COMMON_LIB_CPLX_DEBUG  ${HERMES_COMMON_LIB_CPLX}-debug)
+            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_DEBUG)
 
           if(${HXD}_RELEASE)
             set(HERMES_COMMON_RELEASE YES)
             set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
+
+            if(HERMES_COMMON_REAL)
+              set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
+            endif(HERMES_COMMON_REAL)
+            if(HERMES_COMMON_COMPLEX)
+              set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
+            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_RELEASE)
         endif(MSVC)
     endif (WITH_${HXD})   
@@ -393,6 +436,9 @@ ConfigureRPATH()
 
 add_subdirectory(${HERMES_COMMON_DIR})
 include_directories(${HERMES_COMMON_DIR})
+
+add_subdirectory(${HERMES_COMMON_DIR_OLD})
+include_directories(${HERMES_COMMON_DIR_OLD})
 
 if(WITH_H1D)
     add_subdirectory(hermes1d)

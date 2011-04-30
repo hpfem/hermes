@@ -5,12 +5,11 @@
 //#include "../vector.h"
 //#include "../tables.h"
 
-template<typename Scalar> class SparseMatrix;
-template<typename Scalar> class Vector;
+class SparseMatrix;
+class Vector;
 class Table;
 
 /// Minimalistic DiscreteProblem interface required by NoxProblemInterface.
-template<typename Scalar>
 class DiscreteProblemInterface
 {
 public:
@@ -27,7 +26,7 @@ public:
   /// forms do not exist. This is useful if the matrix is later to be merged with
   /// a matrix that has nonzeros in these blocks. The Table serves for optional
   /// weighting of matrix blocks in systems.
-  virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool rhsonly = false,
+  virtual void create_sparse_structure(SparseMatrix* mat, Vector* rhs = NULL,
                                        bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
 
   /// Assembling.
@@ -39,7 +38,7 @@ public:
   /// weighting of matrix blocks in systems. The parameter add_dir_lift decides 
   /// whether Dirichlet lift will be added while coeff_vec is converted into 
   /// Solutions.
-  virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool rhsonly = false,
+  virtual void assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs = NULL,
              bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL) = 0; 
                 
   virtual void invalidate_matrix() = 0;

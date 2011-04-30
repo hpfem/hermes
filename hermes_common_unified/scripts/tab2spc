@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+find $1 \( -name "*.cpp" -o -name "*.h" \) | while read line; do
+  expand -t$2 -i $line > $line.new
+  mv $line.new $line
+done
+

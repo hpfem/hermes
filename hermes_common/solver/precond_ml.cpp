@@ -15,8 +15,7 @@
 
 #include "precond_ml.h"
 
-template<typename Scalar>
-MlPrecond<Scalar>::MlPrecond(const char *type)
+MlPrecond::MlPrecond(const char *type)
 {
 #ifdef HAVE_ML
   this->prec = NULL;
@@ -31,9 +30,7 @@ MlPrecond<Scalar>::MlPrecond(const char *type)
 }
 
 #ifdef HAVE_ML
-
-template<typename Scalar>
-MlPrecond<Scalar>::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
+MlPrecond::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
 {
   this->prec = mpc;
   this->owner = false;
@@ -41,43 +38,38 @@ MlPrecond<Scalar>::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
 }
 #endif
 
-template<typename Scalar>
-MlPrecond<Scalar>::~MlPrecond()
+MlPrecond::~MlPrecond()
 {
 #ifdef HAVE_ML
   if (owner) delete prec;
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, const char *value)
+void MlPrecond::set_param(const char *name, const char *value)
 {
 #ifdef HAVE_ML
   mlist.set(name, value);
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, int value)
+void MlPrecond::set_param(const char *name, int value)
 {
 #ifdef HAVE_ML
   mlist.set(name, value);
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, double value)
+void MlPrecond::set_param(const char *name, double value)
 {
 #ifdef HAVE_ML
   mlist.set(name, value);
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
+void MlPrecond::create(Matrix *m)
 {
 #ifdef HAVE_ML
-  EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
+  EpetraMatrix *mt = dynamic_cast<EpetraMatrix *>(m);
   assert(mt != NULL);
   mat = mt;
   delete prec;
@@ -85,8 +77,7 @@ void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::destroy()
+void MlPrecond::destroy()
 {
 #ifdef HAVE_ML
   assert(prec != NULL);
@@ -94,8 +85,7 @@ void MlPrecond<Scalar>::destroy()
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::compute()
+void MlPrecond::compute()
 {
 #ifdef HAVE_ML
   assert(prec != NULL);
@@ -103,8 +93,7 @@ void MlPrecond<Scalar>::compute()
 #endif
 }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::print_unused()
+void MlPrecond::print_unused()
 {
 #ifdef HAVE_ML
   assert(prec != NULL);
@@ -114,27 +103,23 @@ void MlPrecond<Scalar>::print_unused()
 
 #ifdef HAVE_ML
 
-template<typename Scalar>
-int MlPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
+int MlPrecond::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
 {
   assert(prec != NULL);
   return prec->ApplyInverse(r, z);
 }
 
-template<typename Scalar>
-const Epetra_Comm &MlPrecond<Scalar>::Comm() const
+const Epetra_Comm &MlPrecond::Comm() const
 {
   return mat->mat->Comm();
 }
 
-template<typename Scalar>
-const Epetra_Map &MlPrecond<Scalar>::OperatorDomainMap() const
+const Epetra_Map &MlPrecond::OperatorDomainMap() const
 {
   return mat->mat->OperatorDomainMap();
 }
 
-template<typename Scalar>
-const Epetra_Map &MlPrecond<Scalar>::OperatorRangeMap() const
+const Epetra_Map &MlPrecond::OperatorRangeMap() const
 {
   return mat->mat->OperatorRangeMap();
 }
