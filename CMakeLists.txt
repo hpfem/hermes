@@ -435,10 +435,10 @@ ConfigureRPATH()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 add_subdirectory(${HERMES_COMMON_DIR})
-include_directories(${HERMES_COMMON_DIR})
+#include_directories(${HERMES_COMMON_DIR})
 
 add_subdirectory(${HERMES_COMMON_DIR_OLD})
-include_directories(${HERMES_COMMON_DIR_OLD})
+#include_directories(${HERMES_COMMON_DIR_OLD})
 
 if(WITH_H1D)
     add_subdirectory(hermes1d)
