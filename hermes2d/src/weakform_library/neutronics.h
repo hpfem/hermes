@@ -511,7 +511,7 @@ namespace WeakFormsNeutronics
         using namespace Definitions;
         using namespace Messages;
         
-        class DiffusionMaterialPropertyMaps : public Common::MaterialPropertyMaps
+        class MaterialPropertyMaps : public Common::MaterialPropertyMaps
         {
           protected:
             
@@ -524,7 +524,7 @@ namespace WeakFormsNeutronics
             
           public:
             
-            DiffusionMaterialPropertyMaps(unsigned int G, std::set<std::string> mat_list = std::set<std::string>()) 
+            MaterialPropertyMaps(unsigned int G, std::set<std::string> mat_list = std::set<std::string>()) 
               : Common::MaterialPropertyMaps(G, mat_list) { };
               
             MaterialPropertyMap1 extract_map2_diagonals(const MaterialPropertyMap2& map2)
@@ -813,9 +813,7 @@ namespace WeakFormsNeutronics
                                  
     namespace ElementaryForms
     {
-      using namespace MaterialProperties::Common;
       using namespace MaterialProperties::Definitions;
-      using namespace MaterialProperties::Messages;
       
       namespace Diffusion
       { 
@@ -833,7 +831,7 @@ namespace WeakFormsNeutronics
               public:
                 Data() {};
                 
-                Data(const DiffusionMaterialPropertyMaps& matprop, 
+                Data(const MaterialPropertyMaps& matprop, 
                      Mesh::ElementMarkersConversion *element_markers_conversion) 
                 {
                   MaterialPropertyMap1 str_mpm = matprop.get_D();
@@ -1049,7 +1047,7 @@ namespace WeakFormsNeutronics
               public:
                 Data() {};
                 
-                Data(const DiffusionMaterialPropertyMaps& matprop,
+                Data(const MaterialPropertyMaps& matprop,
                      Mesh::ElementMarkersConversion *element_markers_conversion)
                 {
                   MaterialPropertyMap1 str_mpm = matprop.get_Sigma_f();
@@ -1343,7 +1341,7 @@ namespace WeakFormsNeutronics
               public:
                 Data() {};
                 
-                Data(const DiffusionMaterialPropertyMaps& matprop,
+                Data(const MaterialPropertyMaps& matprop,
                      Mesh::ElementMarkersConversion *element_markers_conversion) 
                 {
                   MaterialPropertyMap2 str_mpm2 = matprop.get_Sigma_s();
@@ -1505,7 +1503,7 @@ namespace WeakFormsNeutronics
               public:
                 Data() {};
                 
-                Data(const DiffusionMaterialPropertyMaps& matprop,
+                Data(const MaterialPropertyMaps& matprop,
                      Mesh::ElementMarkersConversion *element_markers_conversion) 
                 {
                   MaterialPropertyMap1 str_mpm = matprop.get_src();
@@ -1602,7 +1600,6 @@ namespace WeakFormsNeutronics
     
     namespace CompleteWeakForms
     { 
-      using namespace MaterialProperties::Common;
       using namespace MaterialProperties::Definitions;
             
       namespace Diffusion
@@ -1621,7 +1618,7 @@ namespace WeakFormsNeutronics
             
           public:
             
-            GenericMultigroupDiffusionWeakForm(const DiffusionMaterialPropertyMaps& matprop) 
+            GenericMultigroupDiffusionWeakForm(const MaterialPropertyMaps& matprop) 
               : diffusion_reaction_data(matprop, element_markers_conversion),
                 fission_yield_data(matprop, element_markers_conversion),
                 scattering_data(matprop, element_markers_conversion),
@@ -1631,7 +1628,7 @@ namespace WeakFormsNeutronics
         
         class DefaultWeakFormFixedSource : public GenericMultigroupDiffusionWeakForm
         { 
-          DefaultWeakFormFixedSource(const DiffusionMaterialPropertyMaps& matprop, 
+          DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
                                      GeomType geom_type = HERMES_PLANAR) 
             : GenericMultigroupDiffusionWeakForm(matprop)
           {            
