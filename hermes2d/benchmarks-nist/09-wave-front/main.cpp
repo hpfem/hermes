@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
   mloader.load("square_quad.mesh", &mesh);     // quadrilaterals
   // mloader.load("square_tri.mesh", &mesh);   // triangles
 
-  // Perform initial mesh refinement.
+  // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
   
   // Set exact solution.
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
   CustomRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(&rhs);
+  DefaultWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
   DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
@@ -150,35 +150,37 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Adaptivity loop:
-  int as = 1;
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Set up the solver, matrix, and rhs according to the solver selection.
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble the reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
     Solution ref_sln;
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
-
-    // Time measurement.
-    cpu_time.tick();
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     Solution sln;
@@ -194,11 +196,12 @@ int main(int argc, char* argv[])
     Adapt* adaptivity = new Adapt(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
-    // Calculate exact error.   
+    // Calculate exact error.
     double err_exact_rel = hermes2d.calc_rel_error(&sln, &exact, HERMES_H1_NORM) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("ndof_coarse: %d, ndof_fine: %d",
+      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
@@ -221,20 +224,19 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      // Increase the counter of performed adaptivity steps.
+      // Increase the counter of adaptivity steps.
       if (done == false)  as++;
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
+    delete [] coeff_vec;
     delete solver;
     delete matrix;
     delete rhs;
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
-
   }
   while (done == false);
 
