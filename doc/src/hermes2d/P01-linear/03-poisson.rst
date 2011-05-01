@@ -47,7 +47,7 @@ the proper space for the solution is $V = H^1_0(\Omega)$. The weak formulation
 reads: Find $u \in V$ such that
 
 .. math::
-    :label: poissonweak
+    :label: poissonweak01
 
          \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = C \int_\Omega v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
 
@@ -55,14 +55,14 @@ Equation :eq:`poissonweak` can be written in the form $a(u,v) = l(v)$ where
 $a$ is a matrix form 
 
 .. math::
-    :label: poissonweak
+    :label: poissonweak02
 
          a(u, v) = \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx}
 
 and $l$ is a linear vector form
 
 .. math::
-    :label: poissonweak
+    :label: poissonweak03
 
          l(v) = C \int_\Omega v \;\mbox{d\bfx}.
 
