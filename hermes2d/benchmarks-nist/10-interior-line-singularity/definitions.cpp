@@ -74,14 +74,3 @@ public:
   double k, alpha;
 };
 
-/* Weak forms */
-
-class CustomWeakFormPoisson : public WeakForm
-{
-public:
-  CustomWeakFormPoisson(DefaultFunction* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
-  };
-};
-
