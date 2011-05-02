@@ -62,8 +62,10 @@ class CustomWeakForm : public WeakForm
 {
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
+	// Jacobian.
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->epsilon));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
+	// Residual.
+    add_vector_form(new CustomVectorFormVol(0, rhs));
   };
 
 private:
@@ -96,6 +98,39 @@ private:
     }
 
     double epsilon;
+  };
+
+  class CustomVectorFormVol : public WeakForm::VectorFormVol
+  {
+  public:
+    CustomVectorFormVol(int i, CustomRightHandSide* rhs)
+          : WeakForm::VectorFormVol(i), rhs(rhs) { }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar val = 0;
+      for (int i=0; i < n; i++) {
+        val += wt[i] * rhs->epsilon * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+        val += wt[i] * (2*u_ext[0]->dx[i] + u_ext[0]->dy[i]) * v->val[i];
+		val -= wt[i] * rhs->value(e->x[i], e->y[i]) * v->val[i]; 
+      }
+
+      return val;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const {
+      Ord val = 0;
+      for (int i=0; i < n; i++) {
+        val += wt[i] * rhs->epsilon * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]);
+        val += wt[i] * (2*u_ext[0]->dx[i] + u_ext[0]->dy[i]) * v->val[i];
+		val -= wt[i] * rhs->ord(e->x[i], e->y[i]) * v->val[i]; 
+      }
+
+      return val;
+    }
+
+    CustomRightHandSide* rhs;
   };
 };
 
