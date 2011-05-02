@@ -905,7 +905,6 @@ void ScalarView::draw_edges_2d() {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_edge_inx_buffer);
     GLuint *gl_inx_buffer = (GLuint*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
     GLenum err = glGetError();
-    unsigned char* msg = (unsigned char*)gluErrorString(err);
     if (err == GL_NO_ERROR) {//render edges
       unsigned int buffer_inx = 0;
       int3* edges = lin.get_edges();
