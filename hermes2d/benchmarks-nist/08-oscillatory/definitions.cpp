@@ -71,8 +71,10 @@ class CustomWeakForm : public WeakForm
 {
 public:
   CustomWeakForm(CustomRightHandSide* rhs) : WeakForm(1) {
+	// Jacobian.
     add_matrix_form(new CustomMatrixFormVol(0, 0, rhs->alpha));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
+	// Residual.
+    add_vector_form(new CustomVectorFormVol(0, rhs));
   };
 
 private:
@@ -80,7 +82,7 @@ private:
   {
   public:
     CustomMatrixFormVol(int i, int j, double alpha)
-      : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), alpha(alpha) { }
+      : WeakForm::MatrixFormVol(i, j), alpha(alpha) { }
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
@@ -109,6 +111,47 @@ private:
     }
 
     double alpha;
+  };
+
+  class CustomVectorFormVol : public WeakForm::VectorFormVol
+  {
+  public:
+    CustomVectorFormVol(int i, CustomRightHandSide* rhs)
+          : WeakForm::VectorFormVol(i), rhs(rhs) { }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[],
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar val = 0;
+      for (int i=0; i < n; i++) {
+        scalar x = e->x[i];
+        scalar y = e->y[i];
+        scalar r = sqrt(x*x + y*y);
+        scalar h = 1/(rhs->alpha + r);
+        scalar grad_u_grad_v = u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i];
+        val += wt[i] * (grad_u_grad_v - pow(h, 4) * u_ext[0]->val[i] * v->val[i]);
+		val -= wt[i] * rhs->value(e->x[i], e->y[i]) * v->val[i]; 
+      }
+
+      return val;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const {
+      Ord val = 0;
+      for (int i=0; i < n; i++) {
+        Ord x = e->x[i];
+        Ord y = e->y[i];
+        Ord r = sqrt(x*x + y*y);
+        Ord h = 1/(rhs->alpha + r);
+        Ord grad_u_grad_v = u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i];
+        val += wt[i] * (grad_u_grad_v - pow(h, 4) * u_ext[0]->val[i] * v->val[i]);
+		val -= wt[i] * rhs->ord(e->x[i], e->y[i]) * v->val[i]; 
+      }
+
+      return val;
+    }
+
+    CustomRightHandSide* rhs;
   };
 };
 

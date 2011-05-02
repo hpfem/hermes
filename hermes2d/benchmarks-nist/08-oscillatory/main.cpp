@@ -12,11 +12,11 @@ using namespace RefinementSelectors;
 //
 //  The problem is made harder for adaptive algorithms by decreasing the parameter ALPHA.
 //
-//  PDE: -Laplace u - u/(ALPHA + r(x, y)) = f where r(x, y) = sqrt(x*x + y*y)
+//  PDE: -Laplace u - u/(ALPHA + r(x, y)) - f = 0 where r(x, y) = sqrt(x*x + y*y)
 //
 //  Known exact solution, see functions fn() and fndd().
 //
-//  Domain: unit square (0, 1)x(0, 1), see the file square.mesh.
+//  Domain: unit square (0, 1) x (0, 1), see the file square.mesh.
 //
 //  BC:  Dirichlet, given by exact solution.
 //
@@ -58,7 +58,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double ALPHA = 1/(10*M_PI);
 
 // Boundary markers.
-const std::string BDY_DIRICHLET = "1";
+const std::string BDY_DIRICHLET = "Bdy";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -109,32 +109,38 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Adaptivity loop:
-  int as = 1;
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Set up the solver, matrix, and rhs according to the solver selection.
+    // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
     Vector* rhs = create_vector(matrix_solver);
     Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Assemble the reference problem.
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
     Solution ref_sln;
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+    delete [] coeff_vec;
 
     // Time measurement.
     cpu_time.tick();
@@ -192,7 +198,6 @@ int main(int argc, char* argv[])
     delete adaptivity;
     if(done == false) delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
 
   }
   while (done == false);
