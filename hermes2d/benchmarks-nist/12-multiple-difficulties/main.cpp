@@ -67,7 +67,7 @@ const double ALPHA_P = 1000.0;
 const double EPSILON = 1.0 / 100.0;
 
 // Boundary markers.
-const std::string BDY_DIRICHLET = "1";
+const std::string BDY_DIRICHLET = "Bdy";
 
 // Weak forms.
 #include "definitions.cpp"

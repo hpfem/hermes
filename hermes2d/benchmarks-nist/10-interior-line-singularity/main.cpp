@@ -60,7 +60,7 @@ const double K = M_PI/2;
 const double ALPHA = 2.01;
 
 // Boundary markers.
-const std::string BDY_DIRICHLET = "1", BDY_NEUMANN_LEFT = "2";
+const std::string BDY_DIRICHLET = "Bdy_rest", BDY_NEUMANN_LEFT = "Bdy_left";
 
 // Weak forms.
 #include "definitions.cpp"

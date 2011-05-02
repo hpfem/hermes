@@ -62,7 +62,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
-const std::string BDY_DIRICHLET = "1";
+const std::string BDY_DIRICHLET = "Bdy";
 
 // Weak forms.
 #include "definitions.cpp"
