@@ -27,11 +27,16 @@
                                                   // pressure approximation). Otherwise the standard continuous
                                                   // elements are used. The results are striking - check the
                                                   // tutorial for comparisons.
+const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
+const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
+                                                  // in every time step. Otherwise the convective term is linearized
+                                                  // using the velocities from the previous time step.
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
                                                   // P_INIT_PRESSURE because of the inf-sup condition.
-const double time_step = 0.1;                     // Time step.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const double time_step = 0.005;                   // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -39,8 +44,10 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double Re = 1.0;                            // Reynolds number.
-const double XVEL_TOP = 0.01;                     // Tangential velocity component on the top edge.
+const double Re = 1.0;                          // Reynolds number.
+const double XVEL_TOP = 0.01;                      // Tangential velocity component on the top edge.
+const double STARTUP_TIME = 1.0;                  // During this time, surface velocity of the inner circle increases 
+                                                  // gradually from 0 to VEL, then it stays constant.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -55,15 +62,15 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  for (int i=0; i < 4; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(HERMES_ANY, 4);
+  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  //mesh.refine_towards_boundary(HERMES_ANY, 4);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst zero_vel_bc_x_brl(Hermes::vector<std::string>("Bottom", "Right", "Left"), 0.0);
-  DefaultEssentialBCConst vel_bc_x_top(Hermes::vector<std::string>("Top"), XVEL_TOP);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition*>(&vel_bc_x_top, &zero_vel_bc_x_brl));
-  DefaultEssentialBCConst zero_vel_bc_y(Hermes::vector<std::string>("Bottom", "Right", "Top", "Left"), 0.0);
-  EssentialBCs bcs_vel_y(&zero_vel_bc_y);
+  EssentialBCNonConstX bc_top_vel_x(std::string("Top"), XVEL_TOP, STARTUP_TIME);
+  DefaultEssentialBCConst bc_top_vel_y(std::string("Top"), 0.0);
+  DefaultEssentialBCConst bc_outer_vel(std::string("Outer"), 0.0);
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_top_vel_x, &bc_outer_vel));
+  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_top_vel_y, &bc_outer_vel));
   EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
@@ -99,8 +106,11 @@ int main(int argc, char* argv[])
                                                              &p_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf = new WeakFormDrivenCavity(Re, "Top", time_step, 
-                                          &xvel_prev_time, &yvel_prev_time);
+  WeakForm* wf;
+  if (NEWTON)
+    wf = new WeakFormNSNewton(STOKES, Re, time_step, &xvel_prev_time, &yvel_prev_time);
+  else
+    wf = new WeakFormNSSimpleLinearization(STOKES, Re, time_step, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
@@ -138,15 +148,20 @@ int main(int argc, char* argv[])
   {
     info("---- Time step %d, time = %g:", ts, current_time);
 
+    // Update time-dependent essential BCs.
+    info("Updating time-dependent essential BC.");
+    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
+
     // Perform Newton's iteration.
     info("Solving nonlinear problem:");
     bool verbose = true;
     bool jacobian_changed = true;
     if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+                                NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
     // Update previous time level solutions.
     Solution::vector_to_solutions(coeff_vec, spaces, slns);
+
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);
     vview.set_title(title);
