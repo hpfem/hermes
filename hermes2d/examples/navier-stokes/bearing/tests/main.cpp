@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -206,44 +204,44 @@ int main(int argc, char* argv[])
 
   int success = 1;
   double eps = 1e-5;
-  if (fabs(xvel_prev_time.get_pt_value(-0.7, 0.1) - (0.003199)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(-0.7, 0.1) - (0.002491)) > eps) {
     printf("Coordinate ( -0.7, 0.1) xvel value = %lf\n", xvel_prev_time.get_pt_value(-0.7, 0.1));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.65, 0.0) - (-0.001314)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.65, 0.0) - (-0.000029)) > eps) {
     printf("Coordinate ( 0.65, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.65, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.7, 0.0) - (-0.001888)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.7, 0.0) - (-0.000061)) > eps) {
     printf("Coordinate ( 0.7, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.7, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.001262)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(0.9, 0.0) - (-0.000037)) > eps) {
     printf("Coordinate ( 0.9, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(1.1, 0.0) - (-0.000218)) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(1.1, 0.0) - (0.000006)) > eps) {
     printf("Coordinate ( 1.1, 0.0) xvel value = %lf\n", xvel_prev_time.get_pt_value(1.1, 0.0));
     success = 0;
   }
 
-  if (fabs(yvel_prev_time.get_pt_value(-0.7, 0.1) - (0.014744)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(-0.7, 0.1) - (0.018708)) > eps) {
     printf("Coordinate ( -0.7, 0.1) yvel value = %lf\n", yvel_prev_time.get_pt_value(-0.7, 0.1));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.65, 0.0) - (-0.033332)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.65, 0.0) - (-0.047984)) > eps) {
     printf("Coordinate ( 0.65, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.65, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.7, 0.0) - (-0.012353)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.7, 0.0) - (-0.020251)) > eps) {
     printf("Coordinate ( 0.7, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.7, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (-0.001691)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(0.9, 0.0) - (0.000218)) > eps) {
     printf("Coordinate ( 0.9, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(0.9, 0.0));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(1.1, 0.0) - (-0.000986)) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(1.1, 0.0) - (0.000303)) > eps) {
     printf("Coordinate ( 1.1, 0.0) yvel value = %lf\n", yvel_prev_time.get_pt_value(1.1, 0.0));
     success = 0;
   }
