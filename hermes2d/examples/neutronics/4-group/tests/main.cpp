@@ -24,67 +24,21 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
-
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h)
 
 // Initial eigenvalue approximation.
 double k_eff = 1.0;         
 
 // Element markers.
-const int marker_reflector = 1;
-const int marker_core = 2;
+std::string reflector = "reflector";
+std::string core = "core";
 
 // Boundary markers.
-const int BDY_VACUUM = 1;
-const int BDY_SYM = 2;
+std::string bdy_vacuum = "vacuum boundary";
+std::string bdy_symmetry = "symmetry plane";
 
-// Physical data of the problem for the 4 energy groups.
-#include "physical_parameters.cpp"
-// Weak forms.
-#include "../definitions.cpp"
-
-// Source function.
-void source_fn(int n, Hermes::vector<scalar*> values, scalar* out)
-{
-  for (int i = 0; i < n; i++)
-  {
-		out[i] = (nu[1][0] * Sf[1][0] * values.at(0)[i] +
-        nu[1][1] * Sf[1][1] * values.at(1)[i] +
-        nu[1][2] * Sf[1][2] * values.at(2)[i] +
-        nu[1][3] * Sf[1][3] * values.at(3)[i]);
-  }
-}
-
-// Integral over the active core.
-double integrate(MeshFunction* sln, int marker)
-{
-  Quad2D* quad = &g_quad_2d_std;
-  sln->set_quad_2d(quad);
-
-  double integral = 0.0;
-  Element* e;
-  Mesh* mesh = sln->get_mesh();
-
-  for_all_active_elements(e, mesh)
-  {
-    if (e->marker == marker)
-    {
-      update_limit_table(e->get_mode());
-      sln->set_active_element(e);
-      RefMap* ru = sln->get_refmap();
-      int o = sln->get_fn_order() + ru->get_inv_ref_order();
-      limit_order(o);
-      sln->set_quad_order(o, H2D_FN_VAL);
-      scalar *uval = sln->get_fn_values();
-      double* x = ru->get_phys_x(o);
-      double result = 0.0;
-      h1_integrate_expression(x[i] * uval[i]);
-      integral += result;
-    }
-  }
-
-  return 2.0 * M_PI * integral;
-}
+// Weak forms, input data and some other utility functions.
+#include "definitions.cpp"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -182,67 +136,64 @@ Extremum get_peak(MeshFunction *sln)
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+  
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../reactor.mesh", &mesh);
-
+  mloader.load("reactor.mesh", &mesh);
+  
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-
+  
   // Solution variables.
   Solution sln1, sln2, sln3, sln4;
-  Solution iter1, iter2, iter3, iter4;
   Hermes::vector<Solution*> solutions(&sln1, &sln2, &sln3, &sln4);
-
+  
   // Define initial conditions.
   info("Setting initial conditions.");
+  Solution iter1, iter2, iter3, iter4;
   iter1.set_const(&mesh, 1.00);
   iter2.set_const(&mesh, 1.00);
   iter3.set_const(&mesh, 1.00);
   iter4.set_const(&mesh, 1.00);
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_neumann(BDY_SYM);
-  bc_types.add_bc_newton(BDY_VACUUM);
-
+  Hermes::vector<MeshFunction*> iterates(&iter1, &iter2, &iter3, &iter4);
+  
   // Create H1 spaces with default shapesets.
-  H1Space space1(&mesh, &bc_types, P_INIT_1);
-  H1Space space2(&mesh, &bc_types, P_INIT_2);
-  H1Space space3(&mesh, &bc_types, P_INIT_3);
-  H1Space space4(&mesh, &bc_types, P_INIT_4);
+  H1Space space1(&mesh, P_INIT_1);
+  H1Space space2(&mesh, P_INIT_2);
+  H1Space space3(&mesh, P_INIT_3);
+  H1Space space4(&mesh, P_INIT_4);
   Hermes::vector<Space*> spaces(&space1, &space2, &space3, &space4);
   
-  int ndof = Space::get_num_dofs(Hermes::vector<Space*>(&space1, &space2, &space3, &space4));
+  int ndof = Space::get_num_dofs(spaces);
   info("ndof = %d.", ndof);
   
+  // Load physical data of the problem for the 4 energy groups.
+  MaterialPropertyMaps matprop(4);
+  matprop.set_D(D);
+  matprop.set_Sigma_r(Sr);
+  matprop.set_Sigma_s(Ss);
+  matprop.set_Sigma_s_nnz_structure(Ss_nnz);
+  matprop.set_Sigma_a(Sa);
+  matprop.set_Sigma_f(Sf);
+  matprop.set_nu(nu);
+  matprop.set_chi(chi);
+  matprop.validate();
+  
+  std::cout << matprop;
+  
   // Initialize the weak formulation.
-  WeakForm wf(4);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
-  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
-  wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(2, 2, callback(biform_2_2), HERMES_SYM);
-  wf.add_matrix_form(2, 1, callback(biform_2_1));
-  wf.add_matrix_form(3, 3, callback(biform_3_3), HERMES_SYM);
-  wf.add_matrix_form(3, 2, callback(biform_3_2));
-  wf.add_vector_form(0, callback(liform_0), marker_core, Hermes::vector<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(1, callback(liform_1), marker_core, Hermes::vector<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(2, callback(liform_2), marker_core, Hermes::vector<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_vector_form(3, callback(liform_3), marker_core, Hermes::vector<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), BDY_VACUUM);
-  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), BDY_VACUUM);
-  wf.add_matrix_form_surf(2, 2, callback(biform_surf_2_2), BDY_VACUUM);
-  wf.add_matrix_form_surf(3, 3, callback(biform_surf_3_3), BDY_VACUUM);
-
+  CustomWeakForm wf(matprop, iterates, k_eff, bdy_vacuum);
+  
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, spaces, is_linear);
-   
+  DiscreteProblem dp(&wf, spaces);
+  
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
+  
   if (matrix_solver == SOLVER_AZTECOO) 
   {
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
@@ -253,39 +204,47 @@ int main(int argc, char* argv[])
   // Time measurement.
   TimePeriod cpu_time, solver_time;
   
-  // Main power iteration loop:
-  int iter = 1; bool done = false;
-  bool rhs_only = false;
+  // Initial coefficient vector for the Newton's method.
+  scalar* coeff_vec = new scalar[ndof];
+  
+  // Force the Jacobian assembling in the first iteration.
+  bool Jacobian_changed = true;
+  
+  // In the following iterations, Jacobian will not be changing; its LU factorization
+  // may be reused.
   solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+  
+  // Main power iteration loop:
+  int it = 1; bool done = false;
   do
   {
-    info("------------ Power iteration %d:", iter);
-
-    info("Assembling the stiffness matrix and right-hand side vector.");
-    dp.assemble(matrix, rhs, rhs_only);
+    info("------------ Power iteration %d:", it);
     
-    info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
-    solver_time.tick(HERMES_SKIP);  
-    bool solved = solver->solve();  
+    info("Newton's method (matrix problem solved by %s).", MatrixSolverNames[matrix_solver].c_str());
+    
+    memset(coeff_vec, 0.0, ndof*sizeof(scalar)); //TODO: Why it doesn't work without zeroing coeff_vec in each iteration?
+    
+    solver_time.tick(HERMES_SKIP);      
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, Jacobian_changed, 1e-8, 10, true)) 
+      error("Newton's iteration failed.");
     solver_time.tick();
     
-    if(solved)
-      Solution::vector_to_solutions(solver->get_solution(), spaces, solutions);
-    else
-      error ("Matrix solver failed.\n");
-
-    SimpleFilter source(source_fn, Hermes::vector<MeshFunction*>(&sln1, &sln2, &sln3, &sln4));
-    SimpleFilter source_prev(source_fn, Hermes::vector<MeshFunction*>(&iter1, &iter2, &iter3, &iter4));
-
+    Solution::vector_to_solutions(solver->get_solution(), spaces, solutions);
+    
     // Compute eigenvalue.
-    double k_new = k_eff * (integrate(&source, marker_core) / integrate(&source_prev, marker_core));
+    
+    SourceFilter source(solutions, matprop);
+    SourceFilter source_prev(iterates, matprop);
+    
+    double k_new = k_eff * (integrate(&source, core) / integrate(&source_prev, core));
     info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_new, fabs((k_eff - k_new) / k_new));
     
     // Stopping criterion.
     if (fabs((k_eff - k_new) / k_new) < ERROR_STOP) done = true;
-
+    
     // Update eigenvalue.
     k_eff = k_new;
+    wf.update_keff(k_eff);
     
     if (!done)
     {
@@ -297,19 +256,21 @@ int main(int argc, char* argv[])
       
       // Don't need to reassemble the system matrix in further iterations,
       // only the rhs changes to reflect the progressively updated source.
-      rhs_only = true;
-
-      iter++;
+      Jacobian_changed = false;
+      
+      it++;
     }
   }
   while (!done);
+  
+  delete [] coeff_vec;
   
   // Time measurement.
   cpu_time.tick();
   solver_time.tick(HERMES_SKIP);
   
   // Print timing information.
-  verbose("Average solver time for one power iteration: %g s", solver_time.accumulated() / iter);
+  verbose("Average solver time for one power iteration: %g s", solver_time.accumulated() / it);
   
   // Clean up.
   delete matrix;
@@ -320,7 +281,7 @@ int main(int argc, char* argv[])
   verbose("Total running time: %g s", cpu_time.accumulated());
   
   // Calculation results for testing.
-  info("Number of iterations: %d", iter);
+  info("Number of iterations: %d", it);
   
   // Pointwise results.
   Extremum max1 = get_peak(&sln1); 
@@ -337,9 +298,9 @@ int main(int argc, char* argv[])
   info("Core eigenvalue: %lf", k_eff);
   
   TestSubject<int> num_iter(2);
-  num_iter.test_overshoot(iter, 48);
+  num_iter.test_overshoot(it, 48);
   
-  TestSubject<Extremum> peak(Extremum(1e-3, 1e-3, 1e-3));
+  TestSubject<Extremum> peak(Extremum(1e-2, 1e-2, 1e-2));
   peak.test_equality(max1, Extremum(1.020625,1.690169,5.497631));
   peak.test_equality(max2, Extremum(2.272566,1.807669,5.497631));
   peak.test_equality(max3, Extremum(0.337373,1.807669,5.497631));

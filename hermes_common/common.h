@@ -88,7 +88,7 @@ enum MatrixSolverType
 
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.
-const std::string MatrixSolverNames[7] = {
+const std::string MatrixSolverNames[6] = {
   "UMFPACK",
   "PETSc",
   "MUMPS",
@@ -429,6 +429,10 @@ const int H2D_DG_INNER_EDGE_INT = -1234567;
 const int H2D_DG_BOUNDARY_EDGE_INT = -12345;
 
 const int HERMES_DIRICHLET_DOF = -1; // Dirichlet lift is a special DOF with number -1.
+
+// For internal use (within Geom<Ord>).
+const int HERMES_DUMMY_ELEM_MARKER = -9999;
+const int HERMES_DUMMY_EDGE_MARKER = -8888;
 
 /// This class makes command line arguments available to any other method in Hermes.
 class HERMES_API CommandLineArgs
