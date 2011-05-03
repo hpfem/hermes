@@ -414,7 +414,7 @@ private:
   {
   public:
     CustomMatrixFormVolElasticityNIST_0_0(double E, double nu) 
-      : WeakForm::MatrixFormVol(0, 0, HERMES_ANY, HERMES_SYM), E(E), nu(nu) {
+      : WeakForm::MatrixFormVol(0, 0, HERMES_ANY, HERMES_SYM) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
@@ -431,17 +431,20 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
             Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
-       return wt[0] * (A * u->dx[0] * v->dx[0] + B * u->dy[0] * v->dy[0]);
+      Ord result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (A * u->dx[i] * v->dx[i] + B * u->dy[i] * v->dy[i]);
+      return result;
     }
 
-    double A, B, E, nu;
+    double A, B;
   };
 
   class CustomMatrixFormVolElasticityNIST_0_1 : public WeakForm::MatrixFormVol
   {
   public:
     CustomMatrixFormVolElasticityNIST_0_1(double E, double nu) 
-      : WeakForm::MatrixFormVol(0, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
+      : WeakForm::MatrixFormVol(0, 1, HERMES_ANY, HERMES_SYM) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
     }
 
@@ -457,17 +460,20 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
                     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
-       return wt[0] * (C * u->dx[0] * v->dy[0]);
+      Ord result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (C * u->dx[i] * v->dy[i]);
+      return result;
     }
 
-    double C, E, nu;
+    double C;
   };
 
   class CustomMatrixFormVolElasticityNIST_1_1 : public WeakForm::MatrixFormVol
   {
   public:
     CustomMatrixFormVolElasticityNIST_1_1(double E, double nu) 
-      : WeakForm::MatrixFormVol(1, 1, HERMES_ANY, HERMES_SYM), E(E), nu(nu) { 
+      : WeakForm::MatrixFormVol(1, 1, HERMES_ANY, HERMES_SYM) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
@@ -484,17 +490,20 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
                     Geom<Ord> *e, ExtData<Ord> *ext) const
     {
-       return wt[0] * (B * u->dx[0] * v->dx[0] + A * u->dy[0] * v->dy[0]);
+      Ord result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (B * u->dx[i] * v->dx[i] + A * u->dy[i] * v->dy[i]);
+      return result;
     }
   
-    double A, B, E, nu;
+    double A, B;
   };
 
   class CustomVectorFormVolElasticityNIST_0 : public WeakForm::VectorFormVol
   {
   public:
     CustomVectorFormVolElasticityNIST_0(double E, double nu) 
-      : WeakForm::VectorFormVol(0, HERMES_ANY), E(E), nu(nu) {
+      : WeakForm::VectorFormVol(0, HERMES_ANY) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
@@ -526,14 +535,14 @@ private:
       return result;
     }
 
-    double A, B, C, E, nu;
+    double A, B, C;
   };
 
   class CustomVectorFormVolElasticityNIST_1 : public WeakForm::VectorFormVol
   {
   public:
     CustomVectorFormVolElasticityNIST_1(double E, double nu) 
-      : WeakForm::VectorFormVol(0, HERMES_ANY), E(E), nu(nu) {
+      : WeakForm::VectorFormVol(0, HERMES_ANY) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
@@ -565,7 +574,7 @@ private:
       return result;
     }
 
-    double A, B, C, E, nu;
+    double A, B, C;
   };
 
 };
