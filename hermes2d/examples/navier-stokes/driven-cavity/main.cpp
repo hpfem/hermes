@@ -95,6 +95,8 @@ double integrate_over_wall(MeshFunction* meshfn, int marker)
   return integral * 0.5;
 }
 
+#define ONE_PIECE_BDY
+
 int main(int argc, char* argv[])
 {
   Hermes2D hermes_2D;
@@ -102,27 +104,42 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+#ifdef ONE_PIECE_BDY
+  mloader.load("domain-1.mesh", &mesh);
+#else 
+  mloader.load("domain-2.mesh", &mesh);
+#endif
   //mloader.load("domain-concentric.mesh", &mesh);
 
   // Initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+#ifdef ONE_PIECE_BDY
+  mesh.refine_towards_boundary(HERMES_ANY, INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+#else 
+  mesh.refine_towards_boundary(std::string("Bdy-1"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+  mesh.refine_towards_boundary(std::string("Bdy-2"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+  mesh.refine_towards_boundary(std::string("Bdy-3"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+  mesh.refine_towards_boundary(std::string("Bdy-4"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+#endif
 
   // Initialize boundary conditions.
+#ifdef ONE_PIECE_BDY
   EssentialBCNonConstX bc_inner_vel_x(std::string("Bdy"), VEL, STARTUP_TIME);
   EssentialBCNonConstY bc_inner_vel_y(std::string("Bdy"), VEL, STARTUP_TIME);
+#else 
+  EssentialBCNonConstX bc_inner_vel_x(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_inner_vel_y(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+#endif
   EssentialBCs bcs_vel_x(&bc_inner_vel_x);
   EssentialBCs bcs_vel_y(&bc_inner_vel_y);
-  EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
   H1Space yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
+  L2Space p_space(&mesh, P_INIT_PRESSURE);
 #else
-  H1Space p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
+  H1Space p_space(&mesh, P_INIT_PRESSURE);
 #endif
   Hermes::vector<Space *> spaces = Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space);
 
@@ -195,7 +212,7 @@ int main(int argc, char* argv[])
 
     // Update time-dependent essential BCs.
     info("Updating time-dependent essential BC.");
-    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
+    Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space), current_time);
 
     if (NEWTON) 
     {

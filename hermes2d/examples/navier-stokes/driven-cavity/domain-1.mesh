@@ -16,10 +16,10 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, "Bdy-1" ],
-  [ 1, 2, "Bdy-2" ],
-  [ 2, 3, "Bdy-3" ],
-  [ 3, 0, "Bdy-4" ]
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 3, "Bdy" ],
+  [ 3, 0, "Bdy" ]
 ]
 
 curves = [
