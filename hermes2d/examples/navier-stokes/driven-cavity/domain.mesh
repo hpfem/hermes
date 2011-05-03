@@ -1,20 +1,30 @@
-Lx = 1.0
-Ly = 1.0
+R = 1.0  # Radius of the circle
 
 vertices = [
-  [ 0, 0 ],
-  [ Lx, 0],
-  [ Lx, Ly ],
-  [ 0, Ly ]
+  [ -R, 0 ],   # vertex 0
+  [ 0, -R ],   # vertex 1
+  [ R, 0 ],    # vertex 2
+  [ 0, R ],    # vertex 3
+  [ 0, 0 ]     # vertex 4
 ]
 
 elements = [
-  [ 0, 1, 2, 3, "Water" ]
+  [ 0, 1, 4, 0 ],   # tri 0
+  [ 1, 2, 4, 0 ],   # tri 1
+  [ 2, 3, 4, 0 ],   # tri 2
+  [ 3, 0, 4, 0 ]    # tri 3
 ]
 
 boundaries = [
-  [ 0, 1, "Bottom" ],
-  [ 1, 2, "Right" ],
-  [ 2, 3, "Top" ],
-  [ 3, 0, "Left" ]
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 3, "Bdy" ],
+  [ 3, 0, "Bdy" ]
+]
+
+curves = [
+  [ 0, 1, 90 ],  # +90 degree circular arcs
+  [ 1, 2, 90 ],
+  [ 2, 3, 90 ],
+  [ 3, 0, 90 ]
 ]

@@ -21,8 +21,7 @@
 //     \partial v / \partial t - \Delta v / Re + (v \cdot \nabla) v + \nabla p = 0,
 //     div v = 0.
 //
-// BC: tangential velocity V on Gamma_1 (inner circle),
-//     zero velocity on Gamma_2 (outer circle).
+// BC: tangential velocity V on Gamma_1 (outer circle)
 //
 // Geometry: Area in between two concentric circles with radiuses r1 and r2,
 //           r1 < r2. These radiuses can be changed in the file "domain.mesh".
@@ -31,7 +30,6 @@
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements. 
 const int INIT_BDY_REF_NUM_INNER = 2;             // Number of initial mesh refinements towards boundary. 
-const int INIT_BDY_REF_NUM_OUTER = 2;             // Number of initial mesh refinements towards boundary. 
 
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
@@ -104,20 +102,18 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain-excentric.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
   //mloader.load("domain-concentric.mesh", &mesh);
 
   // Initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary("Inner", INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-  mesh.refine_towards_boundary("Outer", INIT_BDY_REF_NUM_OUTER, false);  // false for isotropic refinements
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
 
   // Initialize boundary conditions.
-  EssentialBCNonConstX bc_inner_vel_x(std::string("Inner"), VEL, STARTUP_TIME);
-  EssentialBCNonConstY bc_inner_vel_y(std::string("Inner"), VEL, STARTUP_TIME);
-  DefaultEssentialBCConst bc_outer_vel(std::string("Outer"), 0.0);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_outer_vel));
-  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_y, &bc_outer_vel));
+  EssentialBCNonConstX bc_inner_vel_x(std::string("Bdy"), VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_inner_vel_y(std::string("Bdy"), VEL, STARTUP_TIME);
+  EssentialBCs bcs_vel_x(&bc_inner_vel_x);
+  EssentialBCs bcs_vel_y(&bc_inner_vel_y);
   EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
