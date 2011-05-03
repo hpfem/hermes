@@ -53,7 +53,7 @@ const char* iterative_method = "bicgstab";        // Name of the iterative metho
 const char* preconditioner = "jacobi";            // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
-                                                  //  preconditioner from IFPACK (see solver/aztecoo.h)
+                                                  // preconditioner from IFPACK (see solver/aztecoo.h)
 
 // Initial eigenvalue approximation.
 double k_eff = 1.0;         
@@ -147,36 +147,42 @@ int main(int argc, char* argv[])
     ((AztecOOSolver*) solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
   }
-  
+   
   // Time measurement.
   TimePeriod cpu_time, solver_time;
   
+  // Initial coefficient vector for the Newton's method.
+  scalar* coeff_vec = new scalar[ndof];
+  
+  // Force the Jacobian assembling in the first iteration.
+  bool Jacobian_changed = true;
+  
+  // In the following iterations, Jacobian will not be changing; its LU factorization
+  // may be reused.
+  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+  
   // Main power iteration loop:
   int it = 1; bool done = false;
-  bool Jacobian_changed = true;
-      
-  solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
   do
   {
     info("------------ Power iteration %d:", it);
     
-    // Initial coefficient vector for the Newton's method.  
-    scalar* coeff_vec = new scalar[ndof];
-    memset(coeff_vec, 0.0, ndof*sizeof(scalar));
+    info("Newton's method (matrix problem solved by %s).", MatrixSolverNames[matrix_solver].c_str());
     
-    info("Solving the matrix problem by %s.", MatrixSolverNames[matrix_solver].c_str());
-    solver_time.tick(HERMES_SKIP);  
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, Jacobian_changed, 0.1, 10, true)) 
+    memset(coeff_vec, 0.0, ndof*sizeof(scalar)); //TODO: Why it doesn't work without zeroing coeff_vec in each iteration?
+    
+    solver_time.tick(HERMES_SKIP);      
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, Jacobian_changed, 1e-8, 10, true)) 
       error("Newton's iteration failed.");
     solver_time.tick();
     
     Solution::vector_to_solutions(solver->get_solution(), spaces, solutions);
     
     // Show intermediate solutions.
-    // view1.show(&sln1);    
-    // view2.show(&sln2);
-    // view3.show(&sln3);    
-    // view4.show(&sln4);
+    view1.show(&sln1);    
+    view2.show(&sln2);
+    view3.show(&sln3);    
+    view4.show(&sln4);
     
     // Compute eigenvalue.
     
@@ -207,12 +213,10 @@ int main(int argc, char* argv[])
 
       it++;
     }
-    
-    delete [] coeff_vec;
   }
   while (!done);
   
-  
+  delete [] coeff_vec;
   
   // Time measurement.
   cpu_time.tick();
