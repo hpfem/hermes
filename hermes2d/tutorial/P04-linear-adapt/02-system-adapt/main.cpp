@@ -164,7 +164,6 @@ int main(int argc, char* argv[])
     // Initialize reference problem.
     info("Solving on reference mesh.");
     DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces);
-    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();

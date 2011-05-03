@@ -158,8 +158,6 @@ public:
 
 /* Weak forms */
 
-
-
 class WeakFormFitzHughNagumo : public WeakForm
 {
 public:
