@@ -2,32 +2,44 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// This example solves the classical driven lid cavity flow where the flow is 
-// inside of a box whose one edge (top) moves. The time-dependent laminar 
-// incompressible Navier-Stokes and discretized in time via the implicit Euler 
-// method. The Newton's method is used to solve the nonlinear problem at each 
-// time step. Flow pressure can be approximated using either continuous (H1) 
-// elements or discontinuous (L2) elements. The L2 elements for pressure make 
-// the velocity dicreetely divergence-free. 
+// Flow in between two circles, inner circle is rotating with surface 
+// velocity VEL. The time-dependent laminar incompressible Navier-Stokes equations
+// are discretized in time via the implicit Euler method. If NEWTON == true,
+// the Newton's method is used to solve the nonlinear problem at each time
+// step. If NEWTON == false, the convective term is only linearized using the
+// velocities from the previous time step. Obviously the latter approach is wrong,
+// but people do this frequently because it is faster and simpler to implement.
+// Therefore we include this case for comparison purposes. We also show how
+// to use discontinuous ($L^2$) elements for pressure and thus make the
+// velocity discretely divergence-free. Comparison to approximating the
+// pressure with the standard (continuous) Taylor-Hood elements is enabled.
+// The Reynolds number Re = 200 which is very low. You can increase it but 
+// then you will need to make the mesh finer, and the computation will take 
+// more time.
 //
 // PDE: incompressible Navier-Stokes equations in the form
-//      \partial v / \partial t = \Delta v / Re - (v \cdot \nabla) v - \nabla p = 0,
-//      div v = 0,
+//     \partial v / \partial t - \Delta v / Re + (v \cdot \nabla) v + \nabla p = 0,
+//     div v = 0.
 //
-// BC: velocity... zero on the entire boundary except top edge where normal
-//                 component is zero and tangential is a nonzero constant.
+// BC: tangential velocity V on Gamma_1 (inner circle),
+//     zero velocity on Gamma_2 (outer circle).
 //
-// Geometry: Rectangle (0, Lx) x (0, Ly)... see the file domain.mesh.
+// Geometry: Area in between two concentric circles with radiuses r1 and r2,
+//           r1 < r2. These radiuses can be changed in the file "domain.mesh".
 //
 // The following parameters can be changed:
 
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements. 
+const int INIT_BDY_REF_NUM_INNER = 2;             // Number of initial mesh refinements towards boundary. 
+const int INIT_BDY_REF_NUM_OUTER = 2;             // Number of initial mesh refinements towards boundary. 
+
+const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
                                                   // discontinuous L2 elements (making the velocity discreetely
                                                   // divergence-free, more accurate than using a continuous
                                                   // pressure approximation). Otherwise the standard continuous
                                                   // elements are used. The results are striking - check the
                                                   // tutorial for comparisons.
-const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
                                                   // in every time step. Otherwise the convective term is linearized
                                                   // using the velocities from the previous time step.
@@ -35,22 +47,55 @@ const int P_INIT_VEL = 2;                         // Initial polynomial degree f
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
                                                   // P_INIT_PRESSURE because of the inf-sup condition.
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
-const double time_step = 0.005;                   // Time step.
+const double RE = 5000.0;                         // Reynolds number.
+const double VEL = 0.1;                           // Surface velocity of inner circle.
+const double STARTUP_TIME = 1.0;                  // During this time, surface velocity of the inner circle increases 
+                                                  // gradually from 0 to VEL, then it stays constant.
+const double TAU = 10.0;                          // Time step.
 const double T_FINAL = 3600.0;                    // Time interval length.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Problem parameters.
-const double Re = 1.0;                          // Reynolds number.
-const double XVEL_TOP = 0.01;                      // Tangential velocity component on the top edge.
-const double STARTUP_TIME = 1.0;                  // During this time, surface velocity of the inner circle increases 
-                                                  // gradually from 0 to VEL, then it stays constant.
+// Current time (used in weak forms).
+double current_time = 0;
 
 // Weak forms.
 #include "definitions.cpp"
+
+// Custom function to calculate drag coefficient.
+double integrate_over_wall(MeshFunction* meshfn, int marker)
+{
+  Quad2D* quad = &g_quad_2d_std;
+  meshfn->set_quad_2d(quad);
+
+  double integral = 0.0;
+  Element* e;
+  Mesh* mesh = meshfn->get_mesh();
+
+  for_all_active_elements(e, mesh)
+  {
+    for(int edge = 0; edge < e->nvert; edge++)
+    {
+      if ((e->en[edge]->bnd) && (e->en[edge]->marker == marker))
+      {
+        update_limit_table(e->get_mode());
+        RefMap* ru = meshfn->get_refmap();
+
+        meshfn->set_active_element(e);
+        int eo = quad->get_edge_points(edge);
+        meshfn->set_quad_order(eo, H2D_FN_VAL);
+        scalar *uval = meshfn->get_fn_values();
+        double3* pt = quad->get_points(eo);
+        double3* tan = ru->get_tangent(edge);
+        for (int i = 0; i < quad->get_num_points(eo); i++)
+          integral += pt[i][2] * uval[i] * tan[i][2];
+      }
+    }
+  }
+  return integral * 0.5;
+}
 
 int main(int argc, char* argv[])
 {
@@ -59,18 +104,20 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("domain-excentric.mesh", &mesh);
+  //mloader.load("domain-concentric.mesh", &mesh);
 
   // Initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  //mesh.refine_towards_boundary(HERMES_ANY, 4);
+  mesh.refine_towards_boundary("Inner", INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
+  mesh.refine_towards_boundary("Outer", INIT_BDY_REF_NUM_OUTER, false);  // false for isotropic refinements
 
   // Initialize boundary conditions.
-  EssentialBCNonConstX bc_top_vel_x(std::string("Top"), XVEL_TOP, STARTUP_TIME);
-  DefaultEssentialBCConst bc_top_vel_y(std::string("Top"), 0.0);
+  EssentialBCNonConstX bc_inner_vel_x(std::string("Inner"), VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_inner_vel_y(std::string("Inner"), VEL, STARTUP_TIME);
   DefaultEssentialBCConst bc_outer_vel(std::string("Outer"), 0.0);
-  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_top_vel_x, &bc_outer_vel));
-  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_top_vel_y, &bc_outer_vel));
+  EssentialBCs bcs_vel_x(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_x, &bc_outer_vel));
+  EssentialBCs bcs_vel_y(Hermes::vector<EssentialBoundaryCondition *>(&bc_inner_vel_y, &bc_outer_vel));
   EssentialBCs bcs_pressure;
 
   // Spaces for velocity components and pressure.
@@ -94,7 +141,6 @@ int main(int argc, char* argv[])
 #else
   ProjNormType p_proj_norm = HERMES_H1_NORM;
 #endif
-  ProjNormType t_proj_norm = HERMES_H1_NORM;
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
@@ -108,9 +154,9 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm* wf;
   if (NEWTON)
-    wf = new WeakFormNSNewton(STOKES, Re, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
   else
-    wf = new WeakFormNSSimpleLinearization(STOKES, Re, time_step, &xvel_prev_time, &yvel_prev_time);
+    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
@@ -121,46 +167,63 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.
-  VectorView vview("velocity", new WinGeom(0, 0, 400, 400));
-  ScalarView pview("pressure", new WinGeom(410, 0, 400, 400));
+  VectorView vview("velocity [m/s]", new WinGeom(0, 0, 600, 500));
+  ScalarView pview("pressure [Pa]", new WinGeom(610, 0, 600, 500));
   //vview.set_min_max_range(0, 1.6);
   vview.fix_scale_width(80);
+  //pview.set_min_max_range(-0.9, 1.0);
   pview.fix_scale_width(80);
   pview.show_mesh(true);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[ndof];
-  // Newton's vector is set to zero (no OG projection needed).
-  memset(coeff_vec, 0, ndof * sizeof(double));
-  /*
-  // This can be used for more complicated initial conditions.
-  info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
-                               Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm, t_proj_norm));
-  */
+  scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
+  if (NEWTON) {
+    // Newton's vector is set to zero (no OG projection needed).
+    memset(coeff_vec, 0, ndof * sizeof(double));
+    /*
+    // This can be used for more complicated initial conditions.
+      info("Projecting initial condition to obtain initial vector for the Newton's method.");
+      OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
+                                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    */
+  }
 
   // Time-stepping loop:
   char title[100];
-  double current_time = 0;
-  int num_time_steps = T_FINAL / time_step;
+  int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
+    current_time += TAU;
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
     info("Updating time-dependent essential BC.");
     Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
 
-    // Perform Newton's iteration.
-    info("Solving nonlinear problem:");
-    bool verbose = true;
-    bool jacobian_changed = true;
-    if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-                                NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    if (NEWTON) 
+    {
+      // Perform Newton's iteration.
+      info("Solving nonlinear problem:");
+      bool verbose = true;
+      bool jacobian_changed = true;
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-    // Update previous time level solutions.
-    Solution::vector_to_solutions(coeff_vec, spaces, slns);
+      // Update previous time level solutions.
+      Solution::vector_to_solutions(coeff_vec, spaces, slns);
+    }
+    else {
+      // Linear solve.
+      info("Assembling and solving linear problem.");
+      dp.assemble(matrix, rhs, false);
+      if(solver->solve()) 
+        Solution::vector_to_solutions(solver->get_solution(), 
+                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+                  Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      else 
+        error ("Matrix solver failed.\n");
+    }
 
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);
@@ -169,10 +232,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
-
-    // Update current time.
-    current_time += time_step;
-  }
+ }
 
   // Clean up.
   delete [] coeff_vec;

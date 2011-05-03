@@ -550,7 +550,7 @@ protected:
 
 /* Essential boundary conditions */
 
-// Time-dependent surface x-velocity.
+// Time-dependent surface x-velocity of inner circle.
 class EssentialBCNonConstX : public EssentialBoundaryCondition
 {
 public:
@@ -571,7 +571,9 @@ public:
     double velocity;
     if (current_time <= startup_time) velocity = vel * current_time/startup_time;
     else velocity = vel;
-    return velocity; 
+    double alpha = atan2(x, y);
+    double xvel = velocity*cos(alpha);
+    return xvel; 
   };
 
   protected:
@@ -579,4 +581,33 @@ public:
     double vel;
 };
 
+// Time-dependent surface y-velocity of inner circle.
+class EssentialBCNonConstY : public EssentialBoundaryCondition
+{
+public:
+  EssentialBCNonConstY(Hermes::vector<std::string> markers, double vel, double startup_time) : 
+    EssentialBoundaryCondition(markers), startup_time(startup_time), vel(vel)  {};
+  EssentialBCNonConstY(std::string marker, double vel_inlet, double H, double startup_time) : 
+    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel(vel)  {
+    markers.push_back(marker);
+  };
+  
+  ~EssentialBCNonConstY() {};
 
+  virtual EssentialBCValueType get_value_type() const { 
+    return BC_FUNCTION; 
+  };
+
+  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    double velocity;
+    if (current_time <= startup_time) velocity = vel * current_time/startup_time;
+    else velocity = vel;
+    double alpha = atan2(x, y);
+    double yvel = -velocity*sin(alpha);
+    return yvel; 
+  };
+
+  protected:
+    double startup_time;
+    double vel;
+};

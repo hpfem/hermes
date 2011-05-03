@@ -3,7 +3,7 @@ Ly = 1.0
 
 vertices = [
   [ 0, 0 ],
-  [ Lx, 0 ],
+  [ Lx, 0],
   [ Lx, Ly ],
   [ 0, Ly ]
 ]
@@ -13,8 +13,8 @@ elements = [
 ]
 
 boundaries = [
-  [ 0, 1, "Outer" ],
-  [ 1, 2, "Outer" ],
+  [ 0, 1, "Bottom" ],
+  [ 1, 2, "Right" ],
   [ 2, 3, "Top" ],
-  [ 3, 0, "Outer" ]
+  [ 3, 0, "Left" ]
 ]
