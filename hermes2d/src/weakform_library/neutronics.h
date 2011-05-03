@@ -112,7 +112,7 @@ namespace WeakFormsNeutronics
         static const char* E_INVALID_SIZE =
           "Material property defined for an unexpected number of groups.";
         static const char* E_INVALID_GROUP_INDEX =
-          "Attempted to access property data in an out-of-range group.";
+          "Attempted to access an out-of-range group.";
         static const char* E_INVALID_MARKER =
           "Material data undefined for the given element marker.";
         static const char* E_SG_SIGMA_R = 
@@ -437,8 +437,14 @@ namespace WeakFormsNeutronics
                 MaterialPropertyMap1::const_iterator ita = Sigma_a.begin();
                 MaterialPropertyMap1::const_iterator itf = Sigma_f.begin();
                 for ( ; ita != Sigma_a.end(); ++ita, ++itf)
-                  if (*ita < *itf)
-                    warning(W_SA_LT_SF);
+                {
+                  rank1::const_iterator a = ita->second.begin();
+                  rank1::const_iterator f = itf->second.begin();
+                  
+                  for ( ; a != ita->second.end(); ++a,++f)
+                    if (*a < *f)
+                      warning(W_SA_LT_SF);
+                }
               }
             }
             
@@ -604,6 +610,7 @@ namespace WeakFormsNeutronics
               bool Sigma_t_given = !Sigma_t.empty();
               bool Sigma_a_given = !Sigma_a.empty();
               bool Sigma_f_given = !Sigma_f.empty();
+              bool src_given = !src.empty();
               
               if (!Sigma_r_given)
               {
@@ -689,7 +696,7 @@ namespace WeakFormsNeutronics
                 D_given = true;
               }
               
-              if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (D.size() != src.size()))
+              if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (src_given && D.size() != src.size()))
                 error(E_NONMATCHING_PROPERTIES);
               
               using ValidationFunctors::ensure_size;
