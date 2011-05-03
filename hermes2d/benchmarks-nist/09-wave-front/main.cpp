@@ -10,9 +10,9 @@ using namespace RefinementSelectors;
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
 //
-//  PDE: -Laplace u = f
+//  PDE: -Laplace u - f = 0
 //
-//  Known exact solution; atan(ALPHA * (sqrt(pow(x - X_LOC, 2) + pow(y - Y_LOC, 2)) - R_ZERO));
+//  Known exact solution: atan(ALPHA * (sqrt(pow(x - X_LOC, 2) + pow(y - Y_LOC, 2)) - R_ZERO));
 //  See the class CustomExactSolution.
 //
 //  Domain: unit square (0, 1) x (0, 1), see the file square.mesh.
