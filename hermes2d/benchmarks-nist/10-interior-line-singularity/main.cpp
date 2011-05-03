@@ -11,8 +11,7 @@ using namespace RefinementSelectors;
 //
 //  Compare adaptivity with isotropic and anisotropic refinements.
 //
-//  PDE: -Laplace u = f.
-//  where f is dictated by the exact solution.
+//  PDE: -Laplace u - f = 0 where f is dictated by the exact solution.
 //
 //  Exact solution: u(x,y) = cos(K*y)    for x < 0,
 //                  u(x,y) = cos(K*y) + pow(x, alpha)   for x > 0   where alpha > 0.

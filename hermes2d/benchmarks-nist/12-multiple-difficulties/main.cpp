@@ -9,7 +9,7 @@ using namespace RefinementSelectors;
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
 //
-//  PDE: -Laplace u = f.
+//  PDE: -Laplace u - f = 0 
 //
 //  Known exact solution: 
 //  See the class CustomExactSolution.
