@@ -9,7 +9,7 @@
 //  Reference: W. Mitchell, A Collection of 2D Elliptic Problems for Testing Adaptive Algorithms, 
 //                          NIST Report 7668, February 2010.
 //
-//  PDE: -Laplace u = f
+//  PDE: -Laplace u - f = 0
 //
 //  Known exact solution; atan(ALPHA * (sqrt(pow(x - X_LOC, 2) + pow(y - Y_LOC, 2)) - R_ZERO));
 //  See the class CustomExactSolution.

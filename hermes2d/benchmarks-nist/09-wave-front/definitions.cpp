@@ -31,6 +31,7 @@ public:
   virtual Ord ord (Ord x, Ord y) const {
     return Ord(8);
   }
+
   double alpha, x_loc, y_loc, r_zero;
 };
 
@@ -40,10 +41,8 @@ public:
 class CustomExactSolution : public ExactSolutionScalar
 {
 public:
-  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double
-                      y_loc, double r_zero)
-             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc),
-                                   y_loc(y_loc), r_zero(r_zero) { }
+  CustomExactSolution(Mesh* mesh, double alpha, double x_loc, double y_loc, double r_zero)
+             : ExactSolutionScalar(mesh), alpha(alpha), x_loc(x_loc), y_loc(y_loc), r_zero(r_zero) { }
 
   virtual scalar value(double x, double y) const {
     return atan(alpha * (sqrt(pow(x - x_loc, 2) + pow(y - y_loc, 2)) - r_zero));
@@ -66,16 +65,5 @@ public:
   }
 
   double alpha, x_loc, y_loc, r_zero;
-};
-
-/* Weak forms */
-
-class CustomWeakFormPoisson : public WeakForm
-{
-public:
-  CustomWeakFormPoisson(CustomRightHandSide* rhs) : WeakForm(1) {
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 1.0, rhs));
-  };
 };
 

@@ -81,7 +81,12 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(std::string area_1, double r, std::string area_2) : WeakForm(1)
   {
+    // Jacobian.
     add_matrix_form(new DefaultJacobianDiffusion(0, 0, area_1, r));
     add_matrix_form(new DefaultJacobianDiffusion(0, 0, area_2));
+
+    // Residual.
+    add_vector_form(new DefaultResidualDiffusion(0, area_1, r));
+    add_vector_form(new DefaultResidualDiffusion(0, area_2));
   };
 };
