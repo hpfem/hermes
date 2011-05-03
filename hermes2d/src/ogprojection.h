@@ -234,74 +234,66 @@ protected:
     ProjNormType projNormType;
 
     template<typename Real, typename Scalar>
-    static Scalar h1_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                         Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar h1_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                         Geom<Real> *e, ExtData<Scalar> *ext) const
      {
        _F_
        Scalar result = 0;
        for (int i = 0; i < n; i++)
-         result += wt[i] * (
-                               (u_ext[0]->val[i] - ext->fn[0]->val[i]) * v->val[i] 
-			     + (u_ext[0]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
-                             + (u_ext[0]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]
-			   );
+         result += wt[i] * ((u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i] 
+                            + (u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
+                            + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
        return result;
     }
 
     template<typename Real, typename Scalar>
-    static Scalar h1_semi_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                              Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar h1_semi_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                              Geom<Real> *e, ExtData<Scalar> *ext) const
     {
       _F_
       Scalar result = 0;
       for (int i = 0; i < n; i++)
-        result += wt[i] * (
-			      (u_ext[0]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
-                            + (u_ext[0]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]
-                          );
+        result += wt[i] * ((u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
+                           + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
       return result;
     }
 
     template<typename Real, typename Scalar>
-    static Scalar l2_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                         Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar l2_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                         Geom<Real> *e, ExtData<Scalar> *ext) const
      {
        _F_
        Scalar result = 0;
        for (int i = 0; i < n; i++)
-         result += wt[i] * (u_ext[0]->val[i] - ext->fn[0]->val[i]) * v->val[i];
+         result += wt[i] * (u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i];
        return result;
     }
 
     template<typename Real, typename Scalar>
-    static Scalar hcurl_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                            Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar hcurl_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                            Geom<Real> *e, ExtData<Scalar> *ext) const
      {
        _F_
        Scalar result = 0;
        for (int i = 0; i < n; i++) {
-         result += wt[i] * (u_ext[0]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
-         result += wt[i] * (
-			      (u_ext[0]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
-			    + (u_ext[0]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i])
-                           );
+         result += wt[i] * (u_ext[this->i]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
+         result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
+			                      + (u_ext[this->i]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i]));
        }
 
        return result;
     }
 
     template<typename Real, typename Scalar>
-    static Scalar hdiv_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                           Geom<Real> *e, ExtData<Scalar> *ext)
+    Scalar hdiv_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
+                                           Geom<Real> *e, ExtData<Scalar> *ext) const
      {
        _F_
        Scalar result = 0;
        for (int i = 0; i < n; i++) {
-         result += wt[i] * (u_ext[0]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
-         result += wt[i] * (
-			      (u_ext[0]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
-			    + (u_ext[0]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i])
-                           );
+         result += wt[i] * (u_ext[this->i]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
+         result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
+			                      + (u_ext[this->i]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i]));
        }
 
        return result;
