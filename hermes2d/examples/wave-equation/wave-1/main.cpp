@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   //mesh.convert_triangles_to_quads();
 
   // Refine towards boundary.
-  mesh.refine_towards_boundary("Bdy", 1, true, true);
+  mesh.refine_towards_boundary("Bdy", 1, true);
 
   // Refine once towards vertex #4.
   mesh.refine_towards_vertex(4, 1);

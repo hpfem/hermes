@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
   //mesh.convert_triangles_to_quads();
 
   // Refine towards boundary.
-  mesh.refine_towards_boundary("Bdy", 1, true, true);
+  mesh.refine_towards_boundary("Bdy", 1, true);
 
   // Refine once towards vertex #4.
   mesh.refine_towards_vertex(4, 1);
@@ -75,16 +75,6 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   DiscreteProblem dp(&wf, Hermes::vector<Space *>(&u_space, &v_space));
 
-  /*
-  // Initialize views.
-  ScalarView u_view("Solution u", new WinGeom(0, 0, 500, 400));
-  //u_view.show_mesh(false);
-  u_view.fix_scale_width(50);
-  ScalarView v_view("Solution v", new WinGeom(510, 0, 500, 400));
-  //v_view.show_mesh(false);
-  v_view.fix_scale_width(50);
-  */
-
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
@@ -101,17 +91,6 @@ int main(int argc, char* argv[])
     if (!runge_kutta.rk_time_step(current_time, time_step, slns, 
                                   slns, jacobian_changed, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
-
-    /*
-    // Visualize the solutions.
-    char title[100];
-    sprintf(title, "Solution u, t = %g", current_time);
-    u_view.set_title(title);
-    u_view.show(&u_sln);
-    sprintf(title, "Solution v, t = %g", current_time);
-    v_view.set_title(title);
-    v_view.show(&v_sln);
-    */
 
     // Update time.
     current_time += time_step;
@@ -131,7 +110,7 @@ int main(int argc, char* argv[])
   info("Coordinate (5.0, 5.0) value = %lf", v_sln.get_pt_value(coord_x[2], coord_y[2]));
   info("Coordinate (7.0, 7.0) value = %lf", v_sln.get_pt_value(coord_x[3], coord_y[3]));
 
-  double t_value[8] = {0.212655, 0.000163, 0.000000, 0.000000, -0.793316, 0.007255, 0.000001, 0.000000};
+  double t_value[8] = {0.213990, 0.000114, -0.000001, -0.000001, -0.794632, 0.005934, -0.000034, -0.000053};
   bool success = true;
 
   for (int i = 0; i < 4; i++)
