@@ -10,7 +10,7 @@ using namespace RefinementSelectors;
 //                          NIST Report 7668, February 2010.
 //
 //  PDE: -\frac{\partial }{\partial x}\left(p(x, y)\frac{\partial u}{\partial x}\right)
-//       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) = f.
+//       -\frac{\partial }{\partial y}\left(q(x, y)\frac{\partial u}{\partial y}\right) - f = 0.
 //
 //  Exact solution: unknown.
 //
@@ -51,19 +51,6 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Element markers.
-const std::string OMEGA_1 = "1";
-const std::string OMEGA_2 = "2";
-const std::string OMEGA_3 = "3";
-const std::string OMEGA_4 = "4";
-const std::string OMEGA_5 = "5";
-
-// Boundary markers.
-const std::string BDY_LEFT = "1";
-const std::string BDY_TOP = "2";
-const std::string BDY_RIGHT = "3";
-const std::string BDY_BOTTOM = "4";
-
 // Weak forms.
 // In this example, some parameters are part of the weak formulation, 
 // see the file definitions.cpp, class CustomWeakFormPoisson.
@@ -83,8 +70,8 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, P_INIT);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(OMEGA_1, OMEGA_2, OMEGA_3, OMEGA_4, OMEGA_5, 
-                           BDY_LEFT, BDY_TOP, BDY_RIGHT, BDY_BOTTOM);
+  CustomWeakFormPoisson wf("1", "2", "3", "4", "5", 
+                           "Bdy_left", "Bdy_top", "Bdy_right", "Bdy_bottom");
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -106,8 +93,7 @@ int main(int argc, char* argv[])
   cpu_time.tick();
 
   // Adaptivity loop:
-  int as = 1; 
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);

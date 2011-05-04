@@ -88,26 +88,26 @@ elements = [
 ]
 
 boundaries = [
-  [ 5, 0, 1 ], # left bc marker = 1
-  [ 10, 5, 1 ],
-  [ 15, 10, 1 ],
-  [ 20, 15, 1 ],
-  [ 25, 20, 1 ],
-  [ 30, 25, 1 ],
-  [ 35, 30, 1 ],
-  [ 39, 38, 2 ], # top bc marker = 2
-  [ 38, 37, 2 ],
-  [ 37, 36, 2 ],
-  [ 36, 35, 2 ],
-  [ 4, 9, 3 ], # right bc marker = 3
-  [ 9, 14, 3 ],
-  [ 14, 19, 3 ],
-  [ 19, 24, 3 ],
-  [ 24, 29, 3 ],
-  [ 29, 34, 3 ],
-  [ 34, 39, 3 ],
-  [ 0, 1, 4 ], # bottom bc marker = 4
-  [ 1, 2, 4 ],
-  [ 2, 3, 4 ],
-  [ 3, 4, 4 ]
+  [  5,  0, "Bdy_left" ], # left bc marker = "Bdy_left"
+  [ 10,  5, "Bdy_left" ],
+  [ 15, 10, "Bdy_left" ],
+  [ 20, 15, "Bdy_left" ],
+  [ 25, 20, "Bdy_left" ],
+  [ 30, 25, "Bdy_left" ],
+  [ 35, 30, "Bdy_left" ],
+  [ 39, 38, "Bdy_top" ], # top bc marker = "Bdy_top"
+  [ 38, 37, "Bdy_top" ],
+  [ 37, 36, "Bdy_top" ],
+  [ 36, 35, "Bdy_top" ],
+  [ 4, 9, "Bdy_right" ], # right bc marker = "Bdy_right"
+  [ 9, 14, "Bdy_right" ],
+  [ 14, 19, "Bdy_right" ],
+  [ 19, 24, "Bdy_right" ],
+  [ 24, 29, "Bdy_right" ],
+  [ 29, 34, "Bdy_right" ],
+  [ 34, 39, "Bdy_right" ],
+  [ 0, 1, "Bdy_bottom" ], # bottom bc marker = "Bdy_bottom"
+  [ 1, 2, "Bdy_bottom" ],
+  [ 2, 3, "Bdy_bottom" ],
+  [ 3, 4, "Bdy_bottom" ]
 ]
