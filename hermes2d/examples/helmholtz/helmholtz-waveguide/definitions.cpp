@@ -30,8 +30,8 @@ public:
         add_matrix_form(new MatrixFormHelmholtzEquation_imag_real(1, 0, mu, omega, sigma));
         add_matrix_form(new MatrixFormHelmholtzEquation_imag_imag(1, 1, eps, mu, omega));
 
-        add_matrix_form_surf(new  MatrixFormSurfHelmholtz_real_imag(0, 1, BDY_IMPEDANCE, beta));
-        add_matrix_form_surf(new  MatrixFormSurfHelmholtz_imag_real(1, 0, BDY_IMPEDANCE, beta));
+        add_matrix_form_surf(new  MatrixFormSurfHelmholtz_real_imag(0, 1, "Bdy_impedance", beta));
+        add_matrix_form_surf(new  MatrixFormSurfHelmholtz_imag_real(1, 0, "Bdy_impedance", beta));
     };
 
 private:

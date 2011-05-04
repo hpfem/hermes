@@ -51,71 +51,73 @@ const double h = 0.1;                       // Height of waveguide
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
     // Load the mesh.
-    Mesh mesh;
-    H2DReader mloader;
-    mloader.load("domain.mesh", &mesh);
+  Mesh mesh;
+  H2DReader mloader;
+  mloader.load("domain.mesh", &mesh);
 
-    // Perform uniform mesh refinement.
-    for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
+  // Perform uniform mesh refinement.
+  for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements(2); // 2 is for vertical split.
 
-    // Initialize boundary conditions
-    DefaultEssentialBCConst bc1(BDY_PERFECT, 0.0);
-    EssentialBCNonConst bc2(BDY_LEFT);
-    EssentialBCs bcs(Hermes::vector<EssentialBoundaryCondition *>(&bc1, &bc2));
+  // Initialize boundary conditions
+  DefaultEssentialBCConst bc1("Bdy_perfect", 0.0);
+  EssentialBCNonConst bc2("Bdy_left");
+  EssentialBCs bcs(Hermes::vector<EssentialBoundaryCondition *>(&bc1, &bc2));
 
-    // Create an H1 space with default shapeset.
-    H1Space e_r_space(&mesh, &bcs, P_INIT);
-    H1Space e_i_space(&mesh, &bcs, P_INIT);
-    int ndof = Space::get_num_dofs(&e_r_space);
-    info("ndof = %d", ndof);
+  // Create an H1 space with default shapeset.
+  H1Space e_r_space(&mesh, &bcs, P_INIT);
+  H1Space e_i_space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&e_r_space);
+  info("ndof = %d", ndof);
 
-    // Initialize the weak formulation
-    // Weak forms for real and imaginary parts
+  // Initialize the weak formulation
+  // Weak forms for real and imaginary parts
 
-    // Initialize the weak formulation.
-    WeakFormHelmholtz wf(eps, mu, omega, sigma, beta, E0, h);
+  // Initialize the weak formulation.
+  WeakFormHelmholtz wf(eps, mu, omega, sigma, beta, E0, h);
 
-    // Initialize the FE problem.
-    DiscreteProblem dp(&wf, Hermes::vector<Space *>(&e_r_space, &e_i_space));
+  // Initialize the FE problem.
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&e_r_space, &e_i_space));
 
-    // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-    // Initialize the solutions.
-    Solution e_r_sln, e_i_sln;
+  // Initialize the solutions.
+  Solution e_r_sln, e_i_sln;
 
-    // Assemble the stiffness matrix and right-hand side vector.
-    info("Assembling the stiffness matrix and right-hand side vector.");
-    dp.assemble(matrix, rhs);
+  // Initial coefficient vector for the Newton's method.  
+  ndof = Space::get_num_dofs(Hermes::vector<Space *>(&e_r_space, &e_i_space));
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof * sizeof(scalar));
 
-    // Solve the linear system and if successful, obtain the solutions.
-    info("Solving the matrix problem.");
-    if(solver->solve())
-        Solution::vector_to_solutions(solver->get_solution(),
-                                      Hermes::vector<Space *>(&e_r_space, &e_i_space),
-                                      Hermes::vector<Solution *>(&e_r_sln, &e_i_sln));
-    else
-        error ("Matrix solver failed.\n");
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
-    // Visualize the solution.
-    ScalarView viewEr("Er [V/m]", new WinGeom(0, 0, 800, 400));
-    viewEr.show(&e_r_sln);
-    // viewEr.save_screenshot("real_part.bmp");
+  // Translate the resulting coefficient vector into the Solution sln.
+  Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&e_r_space, &e_i_space), Hermes::vector<Solution *>(&e_r_sln, &e_i_sln));
 
-    ScalarView viewEi("Ei [V/m]", new WinGeom(0, 450, 800, 400));
-    viewEi.show(&e_i_sln);
-    // viewEi.save_screenshot("imaginary_part.bmp");
+  // Visualize the solution.
+  ScalarView viewEr("Er [V/m]", new WinGeom(0, 0, 800, 400));
+  viewEr.show(&e_r_sln);
+  // viewEr.save_screenshot("real_part.bmp");
 
-    // Wait for the view to be closed.
-    View::wait();
+  ScalarView viewEi("Ei [V/m]", new WinGeom(0, 450, 800, 400));
+  viewEi.show(&e_i_sln);
+  // viewEi.save_screenshot("imaginary_part.bmp");
 
-    // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
+  // Wait for the view to be closed.
+  View::wait();
 
-    return 0;
+  // Clean up.
+  delete [] coeff_vec;
+  delete solver;
+  delete matrix;
+  delete rhs;
+
+  return 0;
 }
