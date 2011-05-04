@@ -238,7 +238,7 @@ public:
   /// should be refined uniformly, 1 if it is a quad and should be split
   /// horizontally, 2 if it is a quad and should be split vertically,
   /// and 3 if it is a triangle and should be split into three quads.
-  void refine_by_criterion(int (*criterion)(Element* e), int depth);
+  void refine_by_criterion(int (*criterion)(Element* e), int depth, bool tria_to_quad = false);
 
   /// Performs repeated refinements of elements containing the given vertex.
   /// A mesh graded towards the vertex is created.
@@ -249,12 +249,7 @@ public:
   /// by a vertex are refined. 'aniso' allows or disables anisotropic
   /// splits of quads.
   void refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso = true, bool tria_to_quad = false, bool mark_as_initial = false);
-  void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool tria_to_quad = false, bool mark_as_initial = false)
-  {
-    Hermes::vector<std::string> markers;
-    markers.push_back(marker);
-    refine_towards_boundary(markers, depth, aniso, tria_to_quad, mark_as_initial);
-  }
+  void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool tria_to_quad = false, bool mark_as_initial = false);
 
   /// Regularizes the mesh by refining elements with hanging nodes of
   /// degree more than 'n'. As a result, n-irregular mesh is obtained.
@@ -306,7 +301,7 @@ public:
   void convert_to_base();
 
   void refine_element_to_quads_id(int id);
-  void refine_triangle_to_quads(Element* e);
+  void refine_triangle_to_quads(Mesh* mesh, Element* e, Element** elems_out = NULL);
 
   void refine_element_to_triangles_id(int id);
   void refine_quad_to_triangles(Element* e);
