@@ -57,9 +57,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Problem parameters.
 const double EPSILON = 1e-1;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "Bdy";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -86,7 +83,7 @@ int main(int argc, char* argv[])
   CustomWeakForm wf(&rhs);
   
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

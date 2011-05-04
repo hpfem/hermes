@@ -58,9 +58,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double K = M_PI/2;
 const double ALPHA = 2.01;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "Bdy_rest", BDY_NEUMANN_LEFT = "Bdy_left";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -84,7 +81,7 @@ int main(int argc, char* argv[])
   CustomRightHandSide rhs(K, ALPHA);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy_dirichlet_rest", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

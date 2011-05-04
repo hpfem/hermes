@@ -61,9 +61,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 const double K = M_PI/2;
 const double ALPHA = 2.01;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "Bdy_rest", BDY_NEUMANN_LEFT = "Bdy_left";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -87,7 +84,7 @@ int main(int argc, char* argv[])
   CustomRightHandSide rhs(K, ALPHA);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy_dirichlet_rest", &exact);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -98,11 +95,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize views.
-  //ScalarView sview("Solution", new WinGeom(0, 0, 440, 350));
-  //sview.show_mesh(false);
-  //OrderView  oview("Polynomial orders", new WinGeom(450, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
@@ -148,10 +140,6 @@ int main(int argc, char* argv[])
     Solution sln;
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
-
-    // View the coarse mesh solution and polynomial orders.
-    //sview.show(&sln);
-    //oview.show(&space);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");

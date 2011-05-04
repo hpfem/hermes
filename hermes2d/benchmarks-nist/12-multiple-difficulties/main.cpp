@@ -66,9 +66,6 @@ const double ALPHA_P = 1000.0;
 
 const double EPSILON = 1.0 / 100.0;
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "Bdy";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -95,7 +92,7 @@ int main(int argc, char* argv[])
   DefaultWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
   EssentialBCs bcs(&bc_essential);
   
   // Create an H1 space with default shapeset.

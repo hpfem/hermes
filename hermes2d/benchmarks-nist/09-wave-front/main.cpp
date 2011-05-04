@@ -61,9 +61,6 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "Bdy";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -127,7 +124,7 @@ int main(int argc, char* argv[])
   DefaultWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc("Bdy", &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
