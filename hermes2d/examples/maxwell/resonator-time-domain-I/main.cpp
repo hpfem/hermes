@@ -6,8 +6,8 @@
 // with vector-valued E (an Hcurl function) and scalar B (an H1 function). Time integration 
 // is done using an arbitrary R-K method (see below).
 //
-// PDE: \partial E / \partial t = SPEED_OF_LIGHT**2 * curl B,
-//      \partial B / \partial t = - curl E.
+// PDE: \partial E / \partial t - SPEED_OF_LIGHT**2 * curl B = 0,
+//      \partial B / \partial t + curl E = 0.
 //
 // Note: curl E = \partial E_2 / \partial x - \partial E_1 / \partial y
 //       curl B = (\partial B / \partial y, - \partial B / \partial x)
