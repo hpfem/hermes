@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
                                INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinement
 
   // Initialize boundary conditions.
-  EssentialBCNonConstX bc_inner_vel_x(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
-  EssentialBCNonConstY bc_inner_vel_y(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
-  EssentialBCs bcs_vel_x(&bc_inner_vel_x);
-  EssentialBCs bcs_vel_y(&bc_inner_vel_y);
+  EssentialBCNonConstX bc_vel_x(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_vel_y(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+  EssentialBCs bcs_vel_x(&bc_vel_x);
+  EssentialBCs bcs_vel_y(&bc_vel_y);
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
