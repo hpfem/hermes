@@ -238,7 +238,7 @@ public:
   /// should be refined uniformly, 1 if it is a quad and should be split
   /// horizontally, 2 if it is a quad and should be split vertically,
   /// and 3 if it is a triangle and should be split into three quads.
-  void refine_by_criterion(int (*criterion)(Element* e), int depth);
+  void refine_by_criterion(int (*criterion)(Element* e), int depth, bool tria_to_quad = false);
 
   /// Performs repeated refinements of elements containing the given vertex.
   /// A mesh graded towards the vertex is created.
@@ -306,7 +306,7 @@ public:
   void convert_to_base();
 
   void refine_element_to_quads_id(int id);
-  void refine_triangle_to_quads(Element* e);
+  void refine_triangle_to_quads(Mesh* mesh, Element* e, Element** elems_out = NULL);
 
   void refine_element_to_triangles_id(int id);
   void refine_quad_to_triangles(Element* e);
