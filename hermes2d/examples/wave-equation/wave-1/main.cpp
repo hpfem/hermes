@@ -46,9 +46,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_RK_1;
 
-// Boundary markers.
-const std::string BDY = "1";
-
 // Problem parameters.
 const double C_SQUARED = 100;                      // Square of wave speed.                     
 
@@ -72,7 +69,7 @@ int main(int argc, char* argv[])
   //mesh.convert_triangles_to_quads();
 
   // Refine towards boundary.
-  mesh.refine_towards_boundary(BDY, 1, true, true);
+  mesh.refine_towards_boundary("Bdy", 1, true, true);
 
   // Refine once towards vertex #4.
   mesh.refine_towards_vertex(4, 1);
@@ -86,7 +83,7 @@ int main(int argc, char* argv[])
   CustomWeakFormWave wf(time_step, C_SQUARED, &u_sln, &v_sln);
   
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_essential(BDY, 0.0);
+  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create x- and y- displacement space using the default H1 shapeset.
