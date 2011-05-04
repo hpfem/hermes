@@ -34,7 +34,6 @@ void Node::ref_element(Element* e)
   ref++;
 }
 
-
 void Node::unref_element(HashTable* ht, Element* e)
 {
   if (type == HERMES_TYPE_VERTEX)
@@ -50,7 +49,6 @@ void Node::unref_element(HashTable* ht, Element* e)
     if (!--ref) ht->remove_edge_node(id);
   }
 }
-
 
 void Element::ref_all_nodes()
 {
@@ -79,7 +77,6 @@ Element* Element::get_neighbor(int ie) const
   return NULL;
 }
 
-
 double Element::get_area() const
 {
   double ax, ay, bx, by;
@@ -97,7 +94,6 @@ double Element::get_area() const
 
   return area + 0.5*(ax*by - ay*bx);
 }
-
 
 double Element::get_diameter() const
 {
@@ -121,7 +117,6 @@ double Element::get_diameter() const
   return sqrt(max);
 }
 
-
 //// mesh //////////////////////////////////////////////////////////////////////////////////////////
 
 unsigned g_mesh_seq = 0;
@@ -132,14 +127,12 @@ Mesh::Mesh() : HashTable()
   seq = g_mesh_seq++;
 }
 
-
 Element* Mesh::get_element(int id) const
 {
   if (id < 0 || id >= elements.get_size())
     error("Invalid element ID %d, current range: [0; %d]", id, elements.get_size());
   return &(elements[id]);
 }
-
 
 int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
 {
@@ -166,7 +159,6 @@ int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
   son2 = e->next_vert(edge);
   return 2;
 }
-
 
 //// low-level refinement //////////////////////////////////////////////////////////////////////////
 
@@ -458,8 +450,8 @@ Node* get_vertex_node(Node* v1, Node* v2)
   newnode->type = HERMES_TYPE_VERTEX;
   newnode->ref = 0;
   newnode->bnd = 0;
-  newnode->p1 = NULL;
-  newnode->p2 = NULL;
+  newnode->p1 = -9999;
+  newnode->p2 = -9999;
   newnode->x = (v1->x + v2->x) * 0.5;
   newnode->y = (v1->y + v2->y) * 0.5;
 
@@ -473,8 +465,8 @@ Node* get_edge_node()
   newnode->type = HERMES_TYPE_EDGE;
   newnode->ref = 0;
   newnode->bnd = 0;
-  newnode->p1 = NULL;
-  newnode->p2 = NULL;
+  newnode->p1 = -9999;
+  newnode->p2 = -9999;
   newnode->marker = 0;
   newnode->elem[0] = newnode->elem[1] = NULL;
 
@@ -816,14 +808,25 @@ static int rtb_criterion(Element* e)
   return 0;
 }
 
-void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad, bool mark_as_initial)
+void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, 
+                                   bool tria_to_quad, bool mark_as_initial)
 {
-  if(marker == HERMES_ANY)
-    for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table->begin(); it != this->boundary_markers_conversion.conversion_table->end(); it++)
-      refine_towards_boundary(it->second, depth, aniso, tria_to_quad, mark_as_initial);
+  bool all_markers = false;
+  unsigned int m;
+  for (m = 0; m < markers.size(); m++) {
+    if (markers[m] == HERMES_ANY) {
+      all_markers = true;
+      break;
+    }
+  }
 
+  if(all_markers == true) {
+    for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table->begin(); 
+                      it != this->boundary_markers_conversion.conversion_table->end(); it++)
+      refine_towards_boundary(it->second, depth, aniso, tria_to_quad, mark_as_initial);
+  }
   else {
-    rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
+    if(all_markers) rtb_marker = this->boundary_markers_conversion.get_internal_marker(markers[m]);
     rtb_aniso  = aniso;
     rtb_tria_to_quad = tria_to_quad;
 
@@ -840,7 +843,11 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bo
       Element* e;
       for_all_active_elements(e, this)
         for (unsigned int j = 0; j < e->nvert; j++) {
-          if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker)) {
+          bool marker_matches = false;
+          for (unsigned int m = 0; m < markers.size(); m++) {
+            marker_matches = (marker_matches || (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(markers[m])));
+          }
+          if (marker_matches) {
             rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
           }
         }
