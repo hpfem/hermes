@@ -65,7 +65,8 @@ and such, please report them to one of the mailing lists for
 .. toctree::
     :maxdepth: 1
 
-    src/first_pull_request
+    src/collaboration
+    src/editing_sphinx
 
 4. Tutorial
 -----------

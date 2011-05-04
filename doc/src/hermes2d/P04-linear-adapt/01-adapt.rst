@@ -88,7 +88,7 @@ where $e$ and $d$ are an estimated error and an estimated number of DOF of a can
 
 The first parameter ``CAND_LIST`` specifies which candidates are generated. In a case of quadrilaterals, all possible values and considered candidates are summarized in the following table:
 
-.. image:: 01-adapt/cand_list.quads.*
+.. image:: 01-adapt/cand_list_quads.png
    :align: center
    :alt: Candidates generated for a given candidate list.
 

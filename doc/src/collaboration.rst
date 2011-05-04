@@ -238,35 +238,6 @@ by typing::
 
     git co branch-name
 
-Special Note on Sphinx Docs
----------------------------
-
-The Sphinx documentation you are reading now is also 
-part of the Hermes git repository and can be developed
-in the same way as source files of Hermes. This very 
-file can be found in doc/src/intro-2.rst. After 
-making any changes to Sphinx docs, type::
-
-    make html
-
-in the doc/ directory. This will launch 
-a build process that will take a few seconds. 
-After it finishes, type::
-
-    firefox _build/html
-
-This will open a new tab in your Firefox where you will
-see something like 
-
-  .. image:: hermes2d/img/intro/firefox.png
-   :align: center
-   :width: 600
-   :alt: Firefox screenshot
-
-Click on the link "index.html" and you should see
-the local form of your Sphinx docs that include your 
-changes. 
-
 Further Reading
 ---------------
 
