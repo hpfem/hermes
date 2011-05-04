@@ -17,8 +17,8 @@
 // PDE: \frac{1}{SPEED_OF_LIGHT**2}\frac{\partial^2 E}{\partial t^2} + curl curl E = 0,
 // converted into
 //
-//      \frac{\partial E}{\partial t} = F,
-//      \frac{\partial F}{\partial t} = - SPEED_OF_LIGHT**2 * curl curl E.
+//      \frac{\partial E}{\partial t} - F = 0,
+//      \frac{\partial F}{\partial t} + SPEED_OF_LIGHT**2 * curl curl E = 0.
 //
 // Domain: Square (-pi/2, pi/2) x (-pi/2, pi/2)... See mesh file domain.mesh.
 //

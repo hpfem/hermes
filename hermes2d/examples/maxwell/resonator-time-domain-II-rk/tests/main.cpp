@@ -76,12 +76,6 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   DiscreteProblem dp(&wf, spaces);
 
-  // Initialize views.
-  // ScalarView E1_view("Solution E1", new WinGeom(0, 0, 400, 350));
-  // E1_view.fix_scale_width(50);
-  // ScalarView E2_view("Solution E2", new WinGeom(410, 0, 400, 350));
-  // E2_view.fix_scale_width(50);
-
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
@@ -96,17 +90,6 @@ int main(int argc, char* argv[])
     bool jacobian_changed = true;
     if (!runge_kutta.rk_time_step(current_time, time_step, slns, slns, jacobian_changed, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
-
-    /*
-    // Visualize the solutions.
-    char title[100];
-    sprintf(title, "E1, t = %g", current_time);
-    E1_view.set_title(title);
-    E1_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-    sprintf(title, "E2, t = %g", current_time);
-    E2_view.set_title(title);
-    E2_view.show(&E_sln, HERMES_EPS_NORMAL, H2D_FN_VAL_1);
-    */
 
     // Update time.
     current_time += time_step;
