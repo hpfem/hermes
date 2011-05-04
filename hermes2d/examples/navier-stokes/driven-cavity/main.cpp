@@ -2,29 +2,19 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-// Flow in between two circles, inner circle is rotating with surface 
-// velocity VEL. The time-dependent laminar incompressible Navier-Stokes equations
-// are discretized in time via the implicit Euler method. If NEWTON == true,
-// the Newton's method is used to solve the nonlinear problem at each time
-// step. If NEWTON == false, the convective term is only linearized using the
-// velocities from the previous time step. Obviously the latter approach is wrong,
-// but people do this frequently because it is faster and simpler to implement.
-// Therefore we include this case for comparison purposes. We also show how
-// to use discontinuous ($L^2$) elements for pressure and thus make the
-// velocity discretely divergence-free. Comparison to approximating the
-// pressure with the standard (continuous) Taylor-Hood elements is enabled.
-// The Reynolds number Re = 200 which is very low. You can increase it but 
-// then you will need to make the mesh finer, and the computation will take 
-// more time.
+// Flow inside a rotating circle. Both the flow and the circle are not moving 
+// at the beginning. As the circle starts to rotate at increasing speed. also 
+// the flow starts to move. We use time-dependent laminar incompressible Navier-Stokes 
+// equations discretized in time via the implicit Euler method. The Newton's method 
+// is used to solve the nonlinear problem at each time step.
 //
 // PDE: incompressible Navier-Stokes equations in the form
 //     \partial v / \partial t - \Delta v / Re + (v \cdot \nabla) v + \nabla p = 0,
 //     div v = 0.
 //
-// BC: tangential velocity V on Gamma_1 (outer circle)
+// BC: tangential velocity V on the boundary.
 //
-// Geometry: Area in between two concentric circles with radiuses r1 and r2,
-//           r1 < r2. These radiuses can be changed in the file "domain.mesh".
+// Geometry: A circular domain.
 //
 // The following parameters can be changed:
 
@@ -38,9 +28,6 @@ const bool STOKES = false;                        // For application of Stokes f
                                                   // pressure approximation). Otherwise the standard continuous
                                                   // elements are used. The results are striking - check the
                                                   // tutorial for comparisons.
-const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
-                                                  // in every time step. Otherwise the convective term is linearized
-                                                  // using the velocities from the previous time step.
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
                                                   // Note: P_INIT_VEL should always be greater than
@@ -149,11 +136,7 @@ int main(int argc, char* argv[])
                                                              &p_prev_time);
 
   // Initialize weak formulation.
-  WeakForm* wf;
-  if (NEWTON)
-    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
-  else
-    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  WeakForm* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem dp(wf, spaces);
@@ -175,16 +158,14 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   scalar* coeff_vec = new scalar[Space::get_num_dofs(spaces)];
-  if (NEWTON) {
-    // Newton's vector is set to zero (no OG projection needed).
-    memset(coeff_vec, 0, ndof * sizeof(double));
-    /*
-    // This can be used for more complicated initial conditions.
-      info("Projecting initial condition to obtain initial vector for the Newton's method.");
-      OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
-                                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
-    */
-  }
+  // Newton's vector is set to zero (no OG projection needed).
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  /*
+  // This can be used for more complicated initial conditions.
+    info("Projecting initial condition to obtain initial vector for the Newton's method.");
+    OGProjection::project_global(spaces, slns, coeff_vec, matrix_solver, 
+                                 Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+  */
 
   // Time-stepping loop:
   char title[100];
@@ -198,29 +179,15 @@ int main(int argc, char* argv[])
     info("Updating time-dependent essential BC.");
     Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space), current_time);
 
-    if (NEWTON) 
-    {
-      // Perform Newton's iteration.
-      info("Solving nonlinear problem:");
-      bool verbose = true;
-      bool jacobian_changed = true;
-      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+    // Perform Newton's iteration.
+    info("Solving nonlinear problem:");
+    bool verbose = true;
+    bool jacobian_changed = true;
+    if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-      // Update previous time level solutions.
-      Solution::vector_to_solutions(coeff_vec, spaces, slns);
-    }
-    else {
-      // Linear solve.
-      info("Assembling and solving linear problem.");
-      dp.assemble(matrix, rhs, false);
-      if(solver->solve()) 
-        Solution::vector_to_solutions(solver->get_solution(), 
-                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                  Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-      else 
-        error ("Matrix solver failed.\n");
-    }
+    // Update previous time level solutions.
+    Solution::vector_to_solutions(coeff_vec, spaces, slns);
 
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);
