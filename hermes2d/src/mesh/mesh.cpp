@@ -746,20 +746,16 @@ void Mesh::refine_all_elements(int refinement, bool mark_as_initial)
 
 static int rtb_marker;
 static bool rtb_aniso;
-static bool rtb_tria_to_quad;
 static char* rtb_vert;
 
-void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth, bool tria_to_quad)
+void Mesh::refine_by_criterion(int (*criterion)(Element*), int depth)
 {
   Element* e;
   elements.set_append_only(true);
   for (int r, i = 0; i < depth; i++) {
     for_all_active_elements(e, this) {
       if ((r = criterion(e)) >= 0)
-        if(tria_to_quad)
-          this->refine_element_to_quads_id(e->id);
-        else
-          refine_element_id(e->id, r);
+        refine_element_id(e->id, r);
     }
   }
   elements.set_append_only(false);
@@ -792,7 +788,7 @@ static int rtb_criterion(Element* e)
 
   if (i >= e->nvert) return -1;
   // triangle should be split into 3 quads
-  if (e->is_triangle() && rtb_tria_to_quad) return 3;
+//  if (e->is_triangle() && rtb_tria_to_quad) return 3;
   // triangle should be split into 4 triangles or quad should
   // be split into 4 quads
   if (e->is_triangle() || !rtb_aniso) return 0;
@@ -811,7 +807,7 @@ static int rtb_criterion(Element* e)
 
   return 0;
 }
-void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, bool tria_to_quad, bool mark_as_initial)
+void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
 {
   rtb_aniso = aniso;
 
@@ -833,7 +829,7 @@ void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int dept
           rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
         }
 
-    refine_by_criterion(rtb_criterion, 1, tria_to_quad);
+    refine_by_criterion(rtb_criterion, 1);
     delete [] rtb_vert;
   }
 
@@ -841,11 +837,11 @@ void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int dept
     ninitial = this->get_max_element_id();
 }
 
-void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool tria_to_quad, bool mark_as_initial)
+void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool mark_as_initial)
 {
   if(marker == HERMES_ANY)
     for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table->begin(); it != this->boundary_markers_conversion.conversion_table->end(); it++)
-      refine_towards_boundary(it->second, depth, aniso, tria_to_quad, mark_as_initial);
+      refine_towards_boundary(it->second, depth, aniso, mark_as_initial);
 
   else {
     rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
@@ -866,7 +862,7 @@ void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bo
           }
         }
 
-      refine_by_criterion(rtb_criterion, 1, tria_to_quad);
+      refine_by_criterion(rtb_criterion, 1);
       delete [] rtb_vert;
     }
 
