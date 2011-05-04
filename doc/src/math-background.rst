@@ -20,7 +20,7 @@ Some the above points are discussed in more detail below:
 
 .. image:: hermes2d/img/acoustic.png
    :align: center
-   :width: 500
+   :width: 700
    :alt: Illustration of curved elements.
 
 * **Reduced mesh generation needs**: Was the previous result obtained with the mesh below? The answer is *yes*. Do we fail to provide support for traditional mesh generators? The answer is *no*.

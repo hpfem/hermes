@@ -557,9 +557,7 @@ public:
   EssentialBCNonConstX(Hermes::vector<std::string> markers, double vel, double startup_time) : 
     EssentialBoundaryCondition(markers), startup_time(startup_time), vel(vel)  {};
   EssentialBCNonConstX(std::string marker, double vel_inlet, double H, double startup_time) : 
-    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel(vel)  {
-    markers.push_back(marker);
-  };
+    EssentialBoundaryCondition(Hermes::vector<std::string>(marker)), startup_time(startup_time), vel(vel)  { };
   
   ~EssentialBCNonConstX() {};
 
@@ -588,9 +586,7 @@ public:
   EssentialBCNonConstY(Hermes::vector<std::string> markers, double vel, double startup_time) : 
     EssentialBoundaryCondition(markers), startup_time(startup_time), vel(vel)  {};
   EssentialBCNonConstY(std::string marker, double vel_inlet, double H, double startup_time) : 
-    EssentialBoundaryCondition(Hermes::vector<std::string>()), startup_time(startup_time), vel(vel)  {
-    markers.push_back(marker);
-  };
+    EssentialBoundaryCondition(Hermes::vector<std::string>(marker)), startup_time(startup_time), vel(vel)  { };
   
   ~EssentialBCNonConstY() {};
 

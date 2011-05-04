@@ -95,8 +95,6 @@ double integrate_over_wall(MeshFunction* meshfn, int marker)
   return integral * 0.5;
 }
 
-#define ONE_PIECE_BDY
-
 int main(int argc, char* argv[])
 {
   Hermes2D hermes_2D;
@@ -104,34 +102,20 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-#ifdef ONE_PIECE_BDY
-  mloader.load("domain-1.mesh", &mesh);
-#else 
-  mloader.load("domain-2.mesh", &mesh);
-#endif
+  mloader.load("domain.mesh", &mesh);
+
   //mloader.load("domain-concentric.mesh", &mesh);
 
   // Initial mesh refinements.
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-#ifdef ONE_PIECE_BDY
-  mesh.refine_towards_boundary(HERMES_ANY, INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-#else 
-  mesh.refine_towards_boundary(std::string("Bdy-1"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-  mesh.refine_towards_boundary(std::string("Bdy-2"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-  mesh.refine_towards_boundary(std::string("Bdy-3"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-  mesh.refine_towards_boundary(std::string("Bdy-4"), INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinements
-#endif
+  mesh.refine_towards_boundary(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3", "Bdy-4"), 
+                               INIT_BDY_REF_NUM_INNER, false);  // true for anisotropic refinement
 
   // Initialize boundary conditions.
-#ifdef ONE_PIECE_BDY
-  EssentialBCNonConstX bc_inner_vel_x(std::string("Bdy"), VEL, STARTUP_TIME);
-  EssentialBCNonConstY bc_inner_vel_y(std::string("Bdy"), VEL, STARTUP_TIME);
-#else 
-  EssentialBCNonConstX bc_inner_vel_x(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
-  EssentialBCNonConstY bc_inner_vel_y(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
-#endif
-  EssentialBCs bcs_vel_x(&bc_inner_vel_x);
-  EssentialBCs bcs_vel_y(&bc_inner_vel_y);
+  EssentialBCNonConstX bc_vel_x(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+  EssentialBCNonConstY bc_vel_y(Hermes::vector<std::string>("Bdy-1", "Bdy-2", "Bdy-3","Bdy-4"), VEL, STARTUP_TIME);
+  EssentialBCs bcs_vel_x(&bc_vel_x);
+  EssentialBCs bcs_vel_y(&bc_vel_y);
 
   // Spaces for velocity components and pressure.
   H1Space xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
