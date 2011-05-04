@@ -5,14 +5,6 @@ ay = 1.585
 by = ay + 7.93
 cy = by + 1.185
 
-#materials
-reflector = 1
-core = 2
-
-#bc
-vacuum = 1
-sym = 2
-
 vertices = [
   [ 0, 0 ],
   [ ax, 0 ],
@@ -33,30 +25,30 @@ vertices = [
 ]
 
 elements = [
-  [ 0, 1, 5, 4, reflector ],
-  [ 1, 2, 6, 5, reflector ],
-  [ 2, 3, 7, 6, reflector ],
-  [ 4, 5, 9, 8, reflector ],
-  [ 5, 6, 10, 9, core ],
-  [ 6, 7, 11, 10, reflector ],
-  [ 8, 9, 13, 12, reflector ],
-  [ 9, 10, 14, 13, reflector ],
-  [ 10, 11, 15, 14, reflector ]
+  [ 0, 1, 5, 4,     "reflector" ],
+  [ 1, 2, 6, 5,     "reflector" ],
+  [ 2, 3, 7, 6,     "reflector" ],
+  [ 4, 5, 9, 8,     "reflector" ],
+  [ 5, 6, 10, 9,    "core"      ],
+  [ 6, 7, 11, 10,   "reflector" ],
+  [ 8, 9, 13, 12,   "reflector" ],
+  [ 9, 10, 14, 13,  "reflector" ],
+  [ 10, 11, 15, 14, "reflector" ]
 ]
 
 boundaries = [
-  [  0,  1, vacuum ],
-  [  1,  2, vacuum ],
-  [  2,  3, vacuum ],
-  [  3,  7, vacuum ],
-  [  7, 11, vacuum ],
-  [ 11, 15, vacuum ],
-  [ 15, 14, vacuum ],
-  [ 14, 13, vacuum ],
-  [ 13, 12, vacuum ],
-  [ 12,  8, sym ],
-  [  8,  4, sym ],
-  [  4,  0, sym ],
+  [  0,  1, "vacuum boundary" ],
+  [  1,  2, "vacuum boundary" ],
+  [  2,  3, "vacuum boundary" ],
+  [  3,  7, "vacuum boundary" ],
+  [  7, 11, "vacuum boundary" ],
+  [ 11, 15, "vacuum boundary" ],
+  [ 15, 14, "vacuum boundary" ],
+  [ 14, 13, "vacuum boundary" ],
+  [ 13, 12, "vacuum boundary" ],
+  [ 12,  8, "symmetry plane"  ],
+  [  8,  4, "symmetry plane"  ],
+  [  4,  0, "symmetry plane"  ],
 
   [ 5, 6, -1 ],
   [ 6, 10, -1 ],

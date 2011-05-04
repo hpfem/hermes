@@ -93,6 +93,7 @@ public:
   SimpleFilter() {};
 
   SimpleFilter(Hermes::vector<MeshFunction*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  SimpleFilter(Hermes::vector<Solution*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
   virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
