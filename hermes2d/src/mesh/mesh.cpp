@@ -1256,6 +1256,8 @@ void Mesh::copy_converted(Mesh* mesh)
 {
   free();
   HashTable::copy(mesh);
+  this->boundary_markers_conversion = mesh->boundary_markers_conversion;
+
   // clear reference for all nodes
   for(int i = 0; i < nodes.get_size(); i++)
   {
@@ -1345,7 +1347,6 @@ void Mesh::convert_triangles_to_quads()
   elements.set_append_only(true);
   for_all_active_elements(e, this)
     refine_element_to_quads_id(e->id);
-
   elements.set_append_only(false);
 
   Mesh mesh_tmp_for_convert;
