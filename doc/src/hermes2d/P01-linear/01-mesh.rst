@@ -222,13 +222,12 @@ way a graded mesh towards the vertex is created::
 
     void Mesh::refine_towards_vertex(int vertex_id, int depth);
 
-The following function performs repeated refinements of elements touching 
-the boundary with boundary marker 'marker'. Elements touching with an 
-edge or with a vertex are refined. 'aniso' allows or disables anisotropic
-splitting of quads, and 'tria_to_quad' can be used to convert boundary 
-triangles to quads::
+The following function performs repeated refinements of elements adjacent
+to the boundary with boundary marker 'marker'. Elements whose edge or vertex 
+lie on the boundary are refined. The flag 'aniso' allows or disables 
+anisotropic refinements (ignored for triangles)::
 
-    void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool tria_to_quad = false);
+    void refine_towards_boundary(std::string marker, int depth, bool aniso = true);
 
 The following will convert all quadrilateral elements in a triangular or 
 triangular-quadrilateral mesh into triangles::

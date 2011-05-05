@@ -32,10 +32,10 @@ const bool JFNK = true;
 const bool PRECOND = true;
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
+const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -48,16 +48,11 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_BOTTOM);
-  bc_types.add_bc_newton(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_const(BDY_BOTTOM, TEMP_INIT);
+  DefaultEssentialBCConst bc(BDY_BOTTOM, TEMP_INIT);
+  EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
@@ -65,11 +60,7 @@ int main(int argc, char* argv[])
   Solution t_prev_time(&mesh, TEMP_INIT);
 
   // Initialize the weak formulation.
-  WeakForm wf(1, JFNK ? true : false);
-  wf.add_matrix_form(callback(jacobian));
-  wf.add_matrix_form_surf(callback(jacobian_surf));
-  wf.add_vector_form(callback(residual), HERMES_ANY, &t_prev_time);
-  wf.add_vector_form_surf(callback(residual_surf));
+  CustomWeakForm wf(Hermes::vector<std::string>(BDY_RIGHT, BDY_TOP, BDY_LEFT), HEATCAP, RHO, TAU, LAMBDA, ALPHA, TEMP_EXT, &t_prev_time, JFNK);
 
   // Initialize the finite element problem.
   DiscreteProblem dp(&wf, &space);

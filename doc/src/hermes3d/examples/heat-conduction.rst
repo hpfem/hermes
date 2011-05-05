@@ -72,10 +72,7 @@ The corresponding weak formulation is:
     \int_{\Omega} \nabla T^{n+1}\cdot \nabla v + \int_{\Omega} \frac{T^{n+1}}{\tau} = 
     \int_{\Omega} f(t^{n+1}) v + \int_{\Omega} \frac{T^{n}}{\tau}.  
 
-Code for the exact solution and the weak forms: 
-
-.. code-block:: c++
-::
+Code for the exact solution and the weak forms::
 
     double fn(double x, double y, double z)
     {
@@ -121,19 +118,13 @@ Code for the exact solution and the weak forms:
 Before entering the main iteration loop, we need to initialize the previous solution sln_prev with the 
 initial condition $T_{init}$ The solution class can be forced to return zero, to return a constant, 
 or to return an arbitrary function using the methods set_zero(), set_const() and 
-set_exact(), repectively. In this example, we initilize the temperature as all zero:
-
-.. code-block:: c++
-::
+set_exact(), repectively. In this example, we initilize the temperature as all zero::
 
    // Construct initial solution and set zero.
    Solution sln_prev(&mesh);
    sln_prev.set_zero();
 
-Next, the weak forms above are registered as following:
-
-.. code-block:: c++
-::
+Next, the weak forms above are registered as following::
 
    // Initialize the weak formulation.
 

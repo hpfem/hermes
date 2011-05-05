@@ -33,9 +33,6 @@ unsigned flag_relresid = 1;                       // Flag for relative value of 
 double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
 int max_iters = 100;                              // Max number of iterations.
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -63,7 +60,7 @@ int main(int argc, char **argv)
   CustomWeakFormPoisson wf1;
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
   EssentialBCs bcs(&bc_essential);
  
   // Create an H1 space with default shapeset.

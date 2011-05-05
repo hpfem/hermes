@@ -28,23 +28,22 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
+// NOX parameters.
+unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
+                                                  // NOX error messages, see NOX_Utils.h.
+
+double ls_tolerance = 1e-5;                       // Tolerance for linear system.
+unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
+double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
+double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+int max_iters = 100;                              // Max number of iterations.
 
 // Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
-
-// Initial condition.
-double init_cond(double x, double y, double &dx, double &dy)
-{
-	dx = 0;
-	dy = 0;
-	return 0;
-}
-
-// Exact solution.
-#include "../exact_solution.cpp"
+const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -64,15 +63,11 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_zero(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
+  DefaultEssentialBCConst bc(Hermes::vector<std::string>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), 0.0);
+  EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
   int ndof = Space::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
@@ -82,13 +77,10 @@ int main(int argc, char* argv[])
   cpu_time.tick(HERMES_SKIP);
 
   // Initialize weak formulation,
-  WeakForm wf1;
-  wf1.add_matrix_form(callback(jacobian_form_hermes), HERMES_NONSYM, HERMES_ANY);
-  wf1.add_vector_form(callback(residual_form_hermes), HERMES_ANY);
+  CustomWeakForm wf1;
 
-  // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp1(&wf1, &space, is_linear);
+  // Initialize the discrete problem.
+  DiscreteProblem dp1(&wf1, &space);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -96,7 +88,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize the solution.
-  Solution sln_hermes;
+  Solution sln1;
 
   if (matrix_solver == SOLVER_AZTECOO) 
   {
@@ -109,9 +101,8 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   info("Projecting to obtain initial vector for the Newton's method.");
   scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  Solution* sln_tmp = new Solution(&mesh, init_cond);
-  OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
-  delete sln_tmp;
+  CustomInitialSolution sln_tmp(&mesh);
+  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration.
   int it = 1;
@@ -128,7 +119,7 @@ int main(int argc, char* argv[])
     rhs->change_sign();
     
     // Calculate the l2-norm of residual vector.
-    double res_l2_norm = get_l2_norm(rhs);
+    double res_l2_norm = hermes2d.get_l2_norm(rhs);
 
     // Info for user.
     info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
@@ -150,8 +141,8 @@ int main(int argc, char* argv[])
     it++;
   }
 
-  // Translate the resulting coefficient vector into the Solution sln_hermes.
-  Solution::vector_to_solution(coeff_vec, &space, &sln_hermes);
+  // Translate the resulting coefficient vector into the Solution sln1.
+  Solution::vector_to_solution(coeff_vec, &space, &sln1);
 
   // Cleanup.
   delete(matrix);
@@ -159,7 +150,7 @@ int main(int argc, char* argv[])
   delete(solver);
 
   // CPU time needed by UMFpack
-  double umf_time = cpu_time.tick().last();
+  double time1 = cpu_time.tick().last();
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -168,26 +159,21 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space.
   info("Projecting initial condition on the FE space.");
-  // The NULL pointer means that we do not want the projection result as a Solution.
-  sln_tmp = new Solution(&mesh, init_cond);
-  OGProjection::project_global(&space, sln_tmp, coeff_vec, matrix_solver);
-  delete sln_tmp;
+  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
 
   // Initialize the weak formulation for Trilinos.
-  WeakForm wf2(1, JFNK ? true : false);
-  if (!JFNK || (JFNK && PRECOND == 1)) wf2.add_matrix_form(callback(jacobian_form_nox), HERMES_SYM);
-  if (JFNK && PRECOND == 2) wf2.add_matrix_form(callback(precond_form_nox), HERMES_SYM);
-  wf2.add_vector_form(callback(residual_form_nox));
+  CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
 
   // Initialize DiscreteProblem.
   DiscreteProblem dp2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&dp2);
+  NoxSolver nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
+                       flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
 
   // Choose preconditioning.
@@ -198,14 +184,12 @@ int main(int argc, char* argv[])
     else nox_solver.set_precond("ML");
   }
 
-  // Solve the matrix problem using NOX.
+  // Solve the nonlinear problem using NOX.
   info("Assembling by DiscreteProblem, solving by NOX.");
-  bool solved = nox_solver.solve();
-  Solution sln_nox;
-  if (solved)
+  Solution sln2;
+  if (nox_solver.solve())
   {
-    double *coeffs = nox_solver.get_solution();
-    Solution::vector_to_solution(coeffs, &space, &sln_nox);
+    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -215,74 +199,70 @@ int main(int argc, char* argv[])
     error("NOX failed.");
 
   // CPU time needed by NOX.
-  double nox_time = cpu_time.tick().last();
+  double time2 = cpu_time.tick().last();
 
   // Calculate errors.
-  Solution ex(&mesh, &exact);
-  Adapt adaptivity(&space);
-  bool solutions_for_adapt = false;
-  double err_est_rel_1 = adaptivity.calc_err_exact(&sln_hermes, &ex, solutions_for_adapt) * 100;
-  info("Solution 1 (DiscreteProblem + %s): exact H1 error: %g (time %g [s])", 
-       MatrixSolverNames[matrix_solver].c_str(), err_est_rel_1, umf_time);
-  double err_est_rel_2 = adaptivity.calc_err_exact(&sln_nox, &ex, solutions_for_adapt) * 100;
-  info("Solution 2 (DiscreteProblem + NOX): exact H1 error: %g (time %g + %g = %g [s])", 
-       err_est_rel_2, proj_time, nox_time, proj_time+nox_time);
+  CustomExactSolution ex(&mesh);
+  double rel_err_1 = hermes2d.calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
+  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
+  double rel_err_2 = hermes2d.calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
+  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
-  info("Coordinate ( 0.6,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.6));
-  info("Coordinate ( 0.4,  0.6) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.4,  0.6));
-  info("Coordinate ( 0.4,  0.4) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.4,  0.4));
-  info("Coordinate ( 0.6,  0.0) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.6,  0.0));
-  info("Coordinate ( 0.5,  0.5) sln_hermes value = %lf", sln_hermes.get_pt_value( 0.5,  0.5));
+  info("Coordinate ( 0.6,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.6));
+  info("Coordinate ( 0.4,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.6));
+  info("Coordinate ( 0.4,  0.4) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.4));
+  info("Coordinate ( 0.6,  0.0) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.0));
+  info("Coordinate ( 0.5,  0.5) sln1 value = %lf", sln1.get_pt_value( 0.5,  0.5));
 
-  info("Coordinate ( 0.6,  0.6) sln_nox value = %lf", sln_nox.get_pt_value( 0.6,  0.6));
-  info("Coordinate ( 0.4,  0.6) sln_nox value = %lf", sln_nox.get_pt_value( 0.4,  0.6));
-  info("Coordinate ( 0.4,  0.4) sln_nox value = %lf", sln_nox.get_pt_value( 0.4,  0.4));
-  info("Coordinate ( 0.6,  0.0) sln_nox value = %lf", sln_nox.get_pt_value( 0.6,  0.0));
-  info("Coordinate ( 0.5,  0.5) sln_nox value = %lf", sln_nox.get_pt_value( 0.5,  0.5));
+  info("Coordinate ( 0.6,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.6));
+  info("Coordinate ( 0.4,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.6));
+  info("Coordinate ( 0.4,  0.4) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.4));
+  info("Coordinate ( 0.6,  0.0) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.0));
+  info("Coordinate ( 0.5,  0.5) sln2 value = %lf", sln2.get_pt_value( 0.5,  0.5));
 
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
-  if (fabs(sln_nox.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
-    printf("Coordinate (0.6, 0.6) sln_nox value is %g\n", sln_nox.get_pt_value(0.6, 0.6));
+  if (fabs(sln2.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
+    printf("Coordinate (0.6, 0.6) sln2 value is %g\n", sln2.get_pt_value(0.6, 0.6));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
-    printf("Coordinate ( 0.4, 0.6) sln_nox value is %g\n", sln_nox.get_pt_value( 0.4, 0.6));
+  if (fabs(sln2.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
+    printf("Coordinate ( 0.4, 0.6) sln2 value is %g\n", sln2.get_pt_value( 0.4, 0.6));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
-    printf("Coordinate ( 0.4,  0.4) sln_nox value is %g\n", sln_nox.get_pt_value( 0.4,  0.4));
+  if (fabs(sln2.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
+    printf("Coordinate ( 0.4,  0.4) sln2 value is %g\n", sln2.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
-    printf("Coordinate (0.6,  0.0) sln_nox value is %g\n", sln_nox.get_pt_value(0.6,  0.0));
+  if (fabs(sln2.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
+    printf("Coordinate (0.6,  0.0) sln2 value is %g\n", sln2.get_pt_value(0.6,  0.0));
     success = 0;
   }
-  if (fabs(sln_nox.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
-    printf("Coordinate ( 0.5,  0.5) sln_nox value is %g\n", sln_nox.get_pt_value( 0.5,  0.5));
+  if (fabs(sln2.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
+    printf("Coordinate ( 0.5,  0.5) sln2 value is %g\n", sln2.get_pt_value( 0.5,  0.5));
     success = 0;
   }
 
-  if (fabs(sln_hermes.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
-    printf("Coordinate (0.6, 0.6) sln_hermes value is %g\n", sln_hermes.get_pt_value(0.6, 0.6));
+  if (fabs(sln1.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
+    printf("Coordinate (0.6, 0.6) sln1 value is %g\n", sln1.get_pt_value(0.6, 0.6));
     success = 0;
   }
-  if (fabs(sln_hermes.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
-    printf("Coordinate ( 0.4, 0.6) sln_hermes value is %g\n", sln_hermes.get_pt_value( 0.4, 0.6));
+  if (fabs(sln1.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
+    printf("Coordinate ( 0.4, 0.6) sln1 value is %g\n", sln1.get_pt_value( 0.4, 0.6));
     success = 0;
   }
-  if (fabs(sln_hermes.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
-    printf("Coordinate ( 0.4,  0.4) sln_hermes value is %g\n", sln_hermes.get_pt_value( 0.4,  0.4));
+  if (fabs(sln1.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
+    printf("Coordinate ( 0.4,  0.4) sln1 value is %g\n", sln1.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(sln_hermes.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
-    printf("Coordinate (0.6,  0.0) sln_hermes value is %g\n", sln_hermes.get_pt_value(0.6,  0.0));
+  if (fabs(sln1.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
+    printf("Coordinate (0.6,  0.0) sln1 value is %g\n", sln1.get_pt_value(0.6,  0.0));
     success = 0;
   }
-  if (fabs(sln_hermes.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
-    printf("Coordinate ( 0.5,  0.5) sln_hermes value is %g\n", sln_hermes.get_pt_value( 0.5,  0.5));
+  if (fabs(sln1.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
+    printf("Coordinate ( 0.5,  0.5) sln1 value is %g\n", sln1.get_pt_value( 0.5,  0.5));
     success = 0;
   }
 

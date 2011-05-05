@@ -55,10 +55,7 @@ becames difficult for adaptive algorithms, and at the same time the advantage of
 adaptive $hp$-FEM over adaptive low-order FEM becames more significant. We will 
 use $S = 200$ in the following. 
 
-Code for the exact solution and the weak forms: 
-
-.. code-block:: c++
-::
+Code for the exact solution and the weak forms::
 
     // Exact solution to the problem
     double fn(double x, double y, double z)
