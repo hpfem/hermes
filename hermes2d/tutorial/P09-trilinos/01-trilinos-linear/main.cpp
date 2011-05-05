@@ -33,7 +33,7 @@ const char* iterative_method = "gmres";           // Name of the iterative metho
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
-                                                  // the other solvers).
+                                                  // other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
 // NOX parameters.
@@ -46,9 +46,6 @@ double abs_resid = 1.0e-3;                        // Tolerance for absolute valu
 unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
 double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
 int max_iters = 100;                              // Max number of iterations.
-
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -74,7 +71,7 @@ int main(int argc, char **argv)
   CustomExactSolution exact(&mesh);
 
   // Initialize boundary conditions
-  DefaultEssentialBCNonConst bc_essential(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
   EssentialBCs bcs(&bc_essential);
   
   // Initialize the weak formulation.
