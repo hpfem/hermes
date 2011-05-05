@@ -22,12 +22,15 @@ and automatic *hp*-adaptivity.
 Structure of higher-order basis functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you are not familiar with higher-order FEM, let us just say that the spaces can contain
+Let us talk about the $H^1$ space for a moment. Besides the standard (bi)linear vertex
+functions ("pyramids") 
+that form standard low-order FEM approximations, the space can contain
 quadratic, cubic, etc., *edge functions* that generate higher-degree
 polynomials along mesh edges, and *bubble functions* that complete the higher-order
-approximation in element interiors. Edge functions are associated with mesh edges,
-and bubble functions with element interiors. The next figure shows a higher-order  
-edge function (left) and a higher-order bubble function (right). 
+approximation in element interiors. Vertex functions are associated with mesh vertices,
+edge functions with mesh edges, and bubble functions with element interiors. The next 
+figure shows a higher-order edge function (left) and a higher-order bubble function 
+(right). 
 
 .. image:: 02-space/basisfn.jpg
    :align: center
