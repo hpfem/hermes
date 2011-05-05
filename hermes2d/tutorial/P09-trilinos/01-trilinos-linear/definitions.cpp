@@ -34,7 +34,7 @@ class WeakFormPoisson : public WeakForm
 public:
   WeakFormPoisson() : WeakForm(1) {
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, -4.0));
+    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -4.0));
   };
 };
 
@@ -47,6 +47,6 @@ public:
     this->is_matfree = is_matfree;
     add_matrix_form(new DefaultLinearDiffusion(0, 0));
     add_vector_form(new DefaultResidualLinearDiffusion(0));
-    add_vector_form(new DefaultVectorFormConst(0, 4.0));
+    add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, 4.0));
   };
 };
