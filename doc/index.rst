@@ -34,8 +34,8 @@ and such, please report them to one of the mailing lists for
 `Hermes2D <http://groups.google.com/group/hermes2d/>`_, or
 `Hermes3D <http://groups.google.com/group/hermes3d/>`_ -- thanks!
 
-1. Introduction
----------------
+Introduction
+------------
 
 .. toctree::
     :maxdepth: 1
@@ -45,8 +45,8 @@ and such, please report them to one of the mailing lists for
     src/web-access
     src/citing-hermes
 
-2. Installation
----------------
+Installation
+------------
 
 .. toctree::
     :maxdepth: 1
@@ -59,8 +59,8 @@ and such, please report them to one of the mailing lists for
     src/installation/cython_installation
     src/installation/exodusII_netcdf
 
-3. Collaboration
-----------------
+Collaboration
+-------------
 
 .. toctree::
     :maxdepth: 1
@@ -68,8 +68,8 @@ and such, please report them to one of the mailing lists for
     src/collaboration
     src/editing_sphinx
 
-4. Tutorial
------------
+Tutorial
+--------
 
 .. toctree::
     :maxdepth: 1
@@ -85,8 +85,8 @@ and such, please report them to one of the mailing lists for
     src/hermes2d/P09-trilinos
     src/hermes2d/P10-miscellaneous
 
-5. Benchmarks
--------------
+Benchmarks
+----------
 
 .. toctree::
     :maxdepth: 1
@@ -94,8 +94,8 @@ and such, please report them to one of the mailing lists for
     src/hermes2d/benchmarks-nist
     src/hermes2d/benchmarks-general
 
-6. Examples
------------
+Examples
+--------
 
 .. toctree::
     :maxdepth: 1
@@ -117,8 +117,8 @@ and such, please report them to one of the mailing lists for
     src/hermes2d/examples/wave-equation.rst
     src/hermes2d/examples/miscellaneous.rst
     
-7. Hermes3D
------------
+Hermes3D
+--------
 
 .. toctree::
     :maxdepth: 1
@@ -128,8 +128,8 @@ and such, please report them to one of the mailing lists for
     src/hermes3d/benchmarks.rst
     src/hermes3d/examples.rst
 
-8. Hermes1D
------------
+Hermes1D
+--------
 
 .. toctree::
     :maxdepth: 1

@@ -42,11 +42,7 @@ where $1 \le i, j, k, l \le 3$.
 
 The domain of interest is an L-shaped beam equipped with 
 zero Dirichlet boundary conditions: $u_1 = u_2 = u_3 = 0$ on all five boundary faces (${\Gamma}_u$) 
-except the left-most vertical one (${\Gamma}_F$), where an external force $F$ is applied.  
-
-
-.. code-block:: c++
-::
+except the left-most vertical one (${\Gamma}_F$), where an external force $F$ is applied::
 
         // Boundary condition types.
         BCType bc_types_x(int marker)
