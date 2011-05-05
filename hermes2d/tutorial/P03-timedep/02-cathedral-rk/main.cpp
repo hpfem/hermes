@@ -39,7 +39,7 @@ const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform m
 const double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver = SOLVER_AMESOS;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 

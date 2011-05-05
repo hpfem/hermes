@@ -107,8 +107,8 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) 
     mesh.refine_all_elements(0, true);
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, false, true);
-  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, false, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ANISO, true, true);
+  mesh.refine_towards_boundary(BDY_SOLID_WALL_BOTTOM, INIT_REF_NUM_BOUNDARY_ISO, false, true);
 
   // Initialize boundary condition types and spaces with default shapesets.
   L2Space space_rho(&mesh, P_INIT);
