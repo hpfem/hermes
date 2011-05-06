@@ -49,7 +49,8 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) 
+    mesh.refine_all_elements();
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
@@ -77,14 +78,16 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof*sizeof(scalar));
 
   // Perform Newton's iteration.
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) 
+    error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into a Solution.
   Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
   // VTK output.
-  if (VTK_VISUALIZATION) {
+  if (VTK_VISUALIZATION) 
+  {
     // Output solution in VTK format.
     Linearizer lin;
     bool mode_3D = true;
@@ -98,7 +101,8 @@ int main(int argc, char* argv[])
   }
 
   // Visualize the solution.
-  if (HERMES_VISUALIZATION) {
+  if (HERMES_VISUALIZATION) 
+  {
     ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
     // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
     // triangles for OpenGL. The second parameter of View::show() sets the error 

@@ -1,11 +1,9 @@
 ////// Weak formulation in axisymmetric coordinate system  ////////////////////////////////////
 
-#include "weakform_library/neutronics.h"
+#include "weakform_library/weakforms_neutronics.h"
 #include "function/filter.h"
 
 using namespace WeakFormsNeutronics::Multigroup::CompleteWeakForms::Diffusion; 
-using WeakFormsH1::DefaultMatrixFormSurf;
-using WeakFormsH1::DefaultResidualSurf;
 
 class CustomWeakForm : public DefaultWeakFormSourceIteration
 {
@@ -182,4 +180,9 @@ const bool2 Ss_nnz = bool2
   )(
     bool_row(0)(0)(1)(0)
   )
+);
+
+const bool1 chi_nnz = bool1
+(
+  bool_row(1)(1)(0)(0)
 );

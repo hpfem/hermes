@@ -56,9 +56,6 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 
 const bool USE_RESIDUAL_ESTIMATOR = true;         // Add also the norm of the residual to the error estimate of each element.
 
-// Boundary markers.
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "definitions.cpp"
 
@@ -119,10 +116,10 @@ int main(int argc, char* argv[])
   CustomRightHandSide rhs(alpha, x_loc, y_loc, r_zero);
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf(&rhs);
+  DefaultWeakFormPoisson wf(&rhs);
 
   // Initialize boundary conditions.
-  DefaultEssentialBCNonConst bc(BDY_DIRICHLET, &exact);
+  DefaultEssentialBCNonConst bc("Bdy", &exact);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -150,8 +147,7 @@ int main(int argc, char* argv[])
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs_vec);
 
   // Adaptivity loop:
-  int as = 1;
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
@@ -159,14 +155,21 @@ int main(int argc, char* argv[])
     // Assemble the discrete problem.
     info("Solving.");
     DiscreteProblem* dp = new DiscreteProblem(&wf, &space);
-    dp->assemble(matrix, rhs_vec);
 
     // Time measurement.
     cpu_time.tick();
 
-    // Solve the linear system. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), &space, &sln);
-    else error ("Matrix solver failed.\n");
+    // Initial coefficient vector for the Newton's method.  
+    int ndof = Space::get_num_dofs(&space);
+    scalar* coeff_vec = new scalar[ndof];
+    memset(coeff_vec, 0, ndof * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs_vec)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution ref_sln;
+    Solution::vector_to_solution(coeff_vec, &space, &sln);
 
     // View the approximate solution and polynomial orders.
     sview.show(&sln);
@@ -218,6 +221,7 @@ int main(int argc, char* argv[])
     if (done == false)  as++;
 
     // Clean up.
+    delete [] coeff_vec;
     delete adaptivity;
     delete dp;
   }

@@ -1,7 +1,3 @@
-#include "weakform/weakform.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
-
 class WeakFormHeatTransferNewtonTimedep : public WeakForm
 {
 public:
@@ -22,11 +18,11 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * v->val[i] / tau + dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] *
+        result -= wt[i] * (u->val[i] * v->val[i] / tau + dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] *
                            (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
                            + lam<Real>(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
       return result;
@@ -67,12 +63,12 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
-                       Geom<Real> *e, ExtData<Scalar> *ext) {
+                       Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       Func<Scalar>* u_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++)
-        result += wt[i] * ((u_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / tau +
+        result -= wt[i] * ((u_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / tau +
                           lam<Real>(u_prev_newton->val[i]) * (u_prev_newton->dx[i] * v->dx[i] 
                            + u_prev_newton->dy[i] * v->dy[i])
 		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);

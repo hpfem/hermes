@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "weakform_library/h1.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
+#include "hermes2d.h"
 
 using namespace WeakFormsH1;
 
@@ -44,5 +41,3 @@ public:
     return (x+10)*(y+10)/100.;
   }
 };
-
-

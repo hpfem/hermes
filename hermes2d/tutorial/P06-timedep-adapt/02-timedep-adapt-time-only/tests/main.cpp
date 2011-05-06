@@ -1,7 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "runge_kutta.h"
 
 using namespace RefinementSelectors;
 
@@ -23,6 +22,8 @@ const double TIME_STEP_DEC_RATIO = 0.8;            // Time step decrease ratio (
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+const double ALPHA = 4.0;                          // For the nonlinear thermal conductivity.
+
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
 // in the name of each method is its order. The one before last, if present, is the number of stages.
 // Explicit methods:
@@ -39,13 +40,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Model parameters.
-#include "../model.cpp"
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "definitions.cpp"
 
-// Main function.
+// Initial condition.
+#include "initial_condition.cpp"
+
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
@@ -82,9 +84,6 @@ int main(int argc, char* argv[])
   if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
   if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
-  // This is for experimental purposes.
-  //bt.switch_B_rows();
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -95,33 +94,26 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
+  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
 
-  int ndof = Space::get_num_dofs(space);
-  info("ndof = %d.", ndof);
+  // Convert initial condition into a Solution.
+  InitialSolutionHeatTransfer sln_time_prev(&mesh);
+  Solution sln_time_new(&mesh);
+  Solution time_error_fn(&mesh, 0.0);
 
-  // Previous and next time level solutions.
-  Solution* sln_time_prev = new Solution(&mesh, init_cond);
-  Solution* sln_time_new = new Solution(&mesh);
-  Solution* error_fn = new Solution(&mesh, 0.0);
+  // Initialize the weak formulation
+  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_time_prev);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_time_prev);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_time_prev);
-
-  // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, space, is_linear);
-
+  // Initialize the discrete problem.
+  DiscreteProblem dp(&wf, &space);
+  
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
+  
   // Graph for time step history.
   SimpleGraph time_step_graph;
   info("Time step history will be saved to file time_step_history.dat.");
@@ -133,10 +125,11 @@ int main(int argc, char* argv[])
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
-    bool verbose = true;
-    bool is_linear = false;
-    if (!RungeKutta::rk_time_step(current_time, time_step, &bt, sln_time_prev, sln_time_new, error_fn, &dp, matrix_solver,
-		      verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
+    bool verbose = false;
+    bool jacobian_changed = true;
+    if (!runge_kutta.rk_time_step(current_time, time_step, &sln_time_prev, 
+                                  &sln_time_new, &time_error_fn, jacobian_changed, verbose, 
+                                  NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
@@ -145,8 +138,8 @@ int main(int argc, char* argv[])
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err_time = hermes2d.calc_norm(error_fn, HERMES_H1_NORM) / 
-                          hermes2d.calc_norm(sln_time_new, HERMES_H1_NORM) * 100;
+    double rel_err_time = hermes2d.calc_norm(&time_error_fn, HERMES_H1_NORM) / 
+                          hermes2d.calc_norm(&sln_time_new, HERMES_H1_NORM) * 100;
     info("rel_err_time = %g%%", rel_err_time);
     if (rel_err_time > TIME_TOL_UPPER) {
       info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and repeating time step.", 
@@ -167,132 +160,129 @@ int main(int argc, char* argv[])
     // Update time.
     current_time += time_step;
 
+    // Copy solution for next time step.
+    sln_time_prev.copy(&sln_time_new);
+
     // Increase counter of time steps.
     ts++;
   } 
   while (current_time < T_FINAL);
 
-  info("Coordinate (-8.0, -8.0) value = %lf", sln_time_prev->get_pt_value(-8.0, -8.0));
-  info("Coordinate (-5.0, -5.0) value = %lf", sln_time_prev->get_pt_value(-5.0, -5.0));
-  info("Coordinate (-3.0, -3.0) value = %lf", sln_time_prev->get_pt_value(-3.0, -3.0));
-  info("Coordinate ( 0.0,  0.0) value = %lf", sln_time_prev->get_pt_value(0.0,  0.0));
-  info("Coordinate ( 3.0,  3.0) value = %lf", sln_time_prev->get_pt_value(3.0,  3.0));
-  info("Coordinate ( 5.0,  5.0) value = %lf", sln_time_prev->get_pt_value(5.0,  5.0));
-  info("Coordinate ( 8.0,  8.0) value = %lf", sln_time_prev->get_pt_value(8.0,  8.0));
+  info("Coordinate (-8.0, -8.0) value = %lf", sln_time_prev.get_pt_value(-8.0, -8.0));
+  info("Coordinate (-5.0, -5.0) value = %lf", sln_time_prev.get_pt_value(-5.0, -5.0));
+  info("Coordinate (-3.0, -3.0) value = %lf", sln_time_prev.get_pt_value(-3.0, -3.0));
+  info("Coordinate ( 0.0,  0.0) value = %lf", sln_time_prev.get_pt_value(0.0,  0.0));
+  info("Coordinate ( 3.0,  3.0) value = %lf", sln_time_prev.get_pt_value(3.0,  3.0));
+  info("Coordinate ( 5.0,  5.0) value = %lf", sln_time_prev.get_pt_value(5.0,  5.0));
+  info("Coordinate ( 8.0,  8.0) value = %lf", sln_time_prev.get_pt_value(8.0,  8.0));
 
   double coor_x_y[7] = {-8.0, -5.0, -3.0, 0.0, 3.0, 5.0, 8.0};
   bool success = true;
 
   switch (b_type)
   {
-    case 1: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 1: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 2: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 2: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 3: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 3: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
 
-    case 4: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 4: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 5: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 5: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 6: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 6: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 7: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 7: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 8: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 8: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;// Implicit_SDIRK_CASH_3_23_embedded is probably wrong!
 
-    case 9: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 9: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
             break;
 
-    case 10: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 10: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
              break;
 
-    case 11: if (fabs(sln_time_prev->get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev->get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 11: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
              break;
 
     default: error("Admissible command-line options are from 1 to 11.");
   }
-
-  // Cleanup.
-  delete space;
-  delete sln_time_prev;
-  delete sln_time_new;
-  delete error_fn;
 
   if (success) {
     printf("Success!\n");

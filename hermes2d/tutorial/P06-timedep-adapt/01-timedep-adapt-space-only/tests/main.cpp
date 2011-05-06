@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -55,8 +53,6 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -78,7 +74,7 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -95,8 +91,7 @@ int main(int argc, char* argv[])
   WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_prev_time);
 
   // Initialize the discrete problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, &space, is_linear);
+  DiscreteProblem dp_coarse(&wf, &space);
 
   // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -170,7 +165,7 @@ int main(int argc, char* argv[])
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
 
       // Initialize discrete problem on reference mesh.
-      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (ts == 1 && as == 1) {
@@ -188,6 +183,7 @@ int main(int argc, char* argv[])
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
       bool verbose = true;
+      bool jacobian_changed = true;
       if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 

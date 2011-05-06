@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "weakform_library/h1.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
+#include "hermes2d.h"
 
 using namespace WeakFormsH1;
 
@@ -76,8 +73,6 @@ public:
     double Reynolds;
     double time_step;
   };
-
-
   class BilinearFormNonsymVel_0_0 : public WeakForm::MatrixFormVol
   {
   public:
@@ -112,8 +107,6 @@ public:
   protected:
     bool Stokes;
   };
-
-
   class BilinearFormNonsymVel_0_1 : public WeakForm::MatrixFormVol
   {
   public:
@@ -144,8 +137,6 @@ public:
   protected:
     bool Stokes;
   };
-
-
   class BilinearFormNonsymVel_1_0 : public WeakForm::MatrixFormVol
   {
   public:
@@ -176,8 +167,6 @@ public:
   protected:
     bool Stokes;
   };
-
-
   class BilinearFormNonsymVel_1_1 : public WeakForm::MatrixFormVol
   {
   public:
@@ -214,8 +203,6 @@ public:
   protected:
     bool Stokes;
   };
-
-
   class BilinearFormNonsymXVelPressure : public WeakForm::MatrixFormVol
   {
   public:
@@ -231,8 +218,6 @@ public:
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
-
-
   class BilinearFormNonsymYVelPressure : public WeakForm::MatrixFormVol
   {
   public:
@@ -248,8 +233,6 @@ public:
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
-
-
   class VectorFormNS_0 : public WeakForm::VectorFormVol
   {
   public:

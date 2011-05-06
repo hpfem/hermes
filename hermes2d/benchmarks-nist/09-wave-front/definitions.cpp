@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
-#include "weakform_library/h1.h"
+#include "hermes2d.h"
 
 using namespace WeakFormsH1;
 
@@ -34,7 +31,6 @@ public:
 
   double alpha, x_loc, y_loc, r_zero;
 };
-
 
 /* Exact solution */
 

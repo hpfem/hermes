@@ -19,7 +19,7 @@ const double f0  = 0;                                      // External force in 
 const double f1  = 8e4;                                    // External force in y-direction.
 
 // Weak forms.
-#include "../definitions.cpp"
+#include "../definitions.h"
 
 int main(int argc, char* argv[])
 {

@@ -77,7 +77,7 @@ const std::string IRON = "3";
 const std::string ZERO_FLUX_BOUNDARY = "2";
 
 // Weak forms.
-#include "weakform_library/neutronics.h"
+#include "weakform_library/weakforms_neutronics.h"
 
 int main(int argc, char* argv[])
 {

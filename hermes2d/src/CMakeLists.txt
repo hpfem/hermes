@@ -77,6 +77,12 @@ set(SRC
        spline.cpp
        boundaryconditions/essential_bcs.cpp
        hermes_module.cpp
+	   
+	   weakform_library/weakforms_elasticity.cpp
+	   weakform_library/weakforms_h1.cpp
+	   weakform_library/weakforms_hcurl.cpp
+	   weakform_library/weakforms_maxwell.cpp
+	   weakform_library/weakforms_neutronics.cpp
        )
 
 #

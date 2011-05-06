@@ -28,7 +28,7 @@ EssentialBoundaryCondition::EssentialBCValueType CustomDirichletCondition::get_v
 }
 
 scalar CustomDirichletCondition::value(double x, double y, double n_x, double n_y, 
-                                               double t_x, double t_y) const 
+                                       double t_x, double t_y) const 
 {
   return A*x + B*y + C;
 }

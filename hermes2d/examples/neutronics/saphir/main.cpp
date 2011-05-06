@@ -86,7 +86,7 @@ double SIGMA_A_4 = SIGMA_T_4 - SIGMA_S_4;
 double SIGMA_A_5 = SIGMA_T_5 - SIGMA_S_5;
 
 // Weak forms.
-#include "weakform_library/neutronics.h"
+#include "weakform_library/weakforms_neutronics.h"
 
 int main(int argc, char* argv[])
 {

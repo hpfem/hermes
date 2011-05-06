@@ -1,127 +1,176 @@
-Boundary Conditions (04-bc-dirichlet, 05-bc-neumann, 06-bc-newton)
---------------------------------
+Essential and Natural Boundary Conditions
+-----------------------------------------
 
-Linking boundary markers with boundary condition types
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Hermes distinguishes between **essential** and **natural** boundary conditions. 
+The former type eliminates degrees of freedom from the domain's boundary
+(the solution or its portion is prescribed) while the other does not. 
+Examples of essential boundary conditions are Dirichlet conditions for 
+$H^1$ problems and perfect conductor conditions in the space $H(curl)$.
+Examples of natural boundary conditions are Neumann or Newton (Robin) 
+conditions for $H^1$ problems and impedance conditions in the space 
+$H(curl)$.
 
-Hermes recognizes four types of boundary conditions. These are
+Default constant essential boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Dirichlet, such as $u = \mbox{const}$,
-* Neumann, such as $\partial u/\partial n = \mbox{const}$ where $n$ is a unit outer normal vector to the boundary, 
-* Newton, such as $\mbox{const}_1 u + \partial u/\partial n = \mbox{const}_2$, 
-* None (solution on that part of the boundary is unknown but Hermes will not attempt to evaluate any surface integrals on it).
+We already met a default essential boundary condition in the previous example 
+`03-poisson <http://hpfem.org/hermes/doc/src/hermes2d/P01-linear/03-poisson.html>`_::
 
-Nonconstant values (functions of spatial variables $x$, $y$ and time $t$) are possible for all types. 
+    // Initialize essential boundary conditions.
+    DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);
 
-In the code, the user has to create an instance of the class BCTypes and use its methods::
- 
-    void BCTypes::add_bc_dirichlet(Hermes::Tuple<int> markers);
-    void BCTypes::add_bc_neumann(Hermes::Tuple<int> markers);
-    void BCTypes::add_bc_newton(Hermes::Tuple<int> markers);
-    void BCTypes::add_bc_none(Hermes::Tuple<int> markers);
+This one assigned a constant value FIXED_BDY_TEMP to all boundary edges with the markers 
+"Bottom", "Inner", "Outer" or "Left". 
 
-If a marker is not linked to any type, then the default is Neumann. For a single 
-marker, the Tuple reduces to a single integer::
+After creating one or more essential boundary conditions, they are passed into the container 
+class EssentialBCs::
 
-    void BCTypes::add_bc_dirichlet(int marker);
-    void BCTypes::add_bc_neumann(int marker);
-    void BCTypes::add_bc_newton(int marker);
-    void BCTypes::add_bc_none(int marker);
+    EssentialBCs bcs(&bc_essential);
 
-Nonzero Dirichlet BC (example 04)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The purpose of this container is to collect all essential boundary conditions to be passed into a Space, 
+as we shall see shortly. The constructor of the EssentialBCs class can accept a Hermes::vector of
+essential boundary conditions. 
+
+Default nonconstant essential boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Another default essential boundary condition reads boundary values from a given 
+function. This is useful, for example, in benchmarks with known exact solution. A typical
+usage is as follows (taken from `benchmark NIST-01 <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks-nist/nist-01.html>`_)::
+
+    // Set exact solution.
+    CustomExactSolution exact(&mesh, EXACT_SOL_P);
+
+    // Initialize boundary conditions
+    DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
+    EssentialBCs bcs(&bc_essential);
+
+This will be discussed in more detail in the benchmarks section.
+
+Custom essential boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom essential conditions can be created by subclassing the abstract class
+EssentialBoundaryCondition::
+
+    class HERMES_API EssentialBoundaryCondition
+    {
+    public:
+      /// Default constructor.
+      EssentialBoundaryCondition(Hermes::vector<std::string> markers);
+      EssentialBoundaryCondition(std::string marker);
+
+      /// Virtual destructor.
+      virtual ~EssentialBoundaryCondition();
+
+      /// Types of description of boundary values, either a function (callback), or a constant.
+      enum EssentialBCValueType {
+	BC_FUNCTION,
+	BC_CONST
+      };
+
+      /// Pure virtual function reporting the type of the essential boundary condition.
+      virtual EssentialBCValueType get_value_type() const = 0;
+
+      /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
+      /// normal and tangential vectors.
+      virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
+
+      /// Special case of a constant function.
+      scalar value_const;
+
+      /// Sets the current time for time-dependent boundary conditions.
+      void set_current_time(double time);
+      double get_current_time() const;
+
+    protected:
+      /// Current time.
+      double current_time;
+
+      // Markers.
+      Hermes::vector<std::string> markers;
+
+      // Friend class.
+      friend class EssentialBCs;
+      friend class Space;
+    };
+
+This class can represent arbitrary essential boundary conditions that depend 
+on space and time. Every descendant of this class must redefine the purely 
+virtual functions get_value_type() and value(). This will be explained in
+more detail in the following example.  
+
+Nonzero Dirichlet BC (04-bc-dirichlet)
+--------------------------------------
 
 **Git reference:** Tutorial example `04-bc-dirichlet 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet>`_. 
 
 Suppose that we would like to modify the boundary conditions for 
-example 03-poisson as follows:
+example `03-poisson <http://hpfem.org/hermes/doc/src/hermes2d/P01-linear/03-poisson.html>`_ as follows:
 
 .. math::
-         u(x,y) = -\frac{C}{4}(x^2 + y^2)\,\ \mbox{on}\,\ \partial \Omega.
+         u(x, y) = Ax + By + C
 
-This is done by defining a callback::
+where $A$, $B$ and $C$ are real constants.
 
-    scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-    {
-      return (-C/4)*(x*x + y*y);
+Subclassing EssentialBoundaryCondition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is done by defining a descendant of the EssentialBoundaryCondition class
+(see `definitions.h <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet/definitions.h>`_)::
+
+    class CustomDirichletCondition : public EssentialBoundaryCondition {
+    public:
+      CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C);
+
+      virtual EssentialBoundaryCondition::EssentialBCValueType get_value_type() const; 
+
+      virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const; 
+
+      protected:
+        double A, B, C;
+    };
+
+The methods are defined in `definitions.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet/definitions.cpp>`_ as follows::
+
+    CustomDirichletCondition::CustomDirichletCondition(Hermes::vector<std::string> markers, 
+                                                       double A, double B, double C)
+      : EssentialBoundaryCondition(markers), A(A), B(B), C(C) { }
+
+    EssentialBoundaryCondition::EssentialBCValueType CustomDirichletCondition::get_value_type() const
+    { 
+      return EssentialBoundaryCondition::BC_FUNCTION; 
     }
 
-The callback is registered as follows::
+    scalar CustomDirichletCondition::value(double x, double y, double n_x, double n_y, 
+                                           double t_x, double t_y) const 
+    {
+      return A*x + B*y + C;
+    }
 
-    // Enter Dirichlet boudnary values.
-    BCValues bc_values;
-    bc_values.add_function(Hermes::Tuple<int>(BDY_BOTTOM, BDY_OUTER, BDY_LEFT, BDY_INNER), essential_bc_values);
+The custom boundary condition class is used in `main.cpp <http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet/main.cpp>`_ as follows::
 
-   
-Defining constant, nonconstant, and time-dependent boundary values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The BCValues class enables registering constants, functions of space, and 
-functions of space and time::
-
-  void BCValues::add_zero(Hermes::Tuple<int> markers);
-  void BCValues::add_const(Hermes::Tuple<int> markers, scalar value);
-  void BCValues::add_function(Hermes::Tuple<int> markers, value_callback callback);
-  void BCValues::add_timedep_function(Hermes::Tuple<int> markers, value_callback_time callback); 
+    // Initialize boundary conditions.
+    CustomDirichletCondition bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
+                                          BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
+    EssentialBCs bcs(&bc_essential);
 
 Sample results
 ~~~~~~~~~~~~~~
 
-It is easy to see that the solution to this problem is the function
-
-.. math::
-         u(x,y) = -\frac{C}{4}(x^2 + y^2). 
-
-For the values $C = -4$ and P_INIT = 5, the output is shown below:
+The output for the parameters A = 1.0, B = 1,0 and C = 20.0 is shown below:
 
 .. image:: 04-05-06-bc/dirichlet.png
    :align: center
    :width: 400
-   :height: 350
    :alt: Solution of the Dirichlet problem.
 
-Mathematics of nonzero Dirichlet BC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Neumann BC (05-bc-newton)
+-------------------------
 
-Mathematically, nonzero Dirichlet conditions in Hermes are handled 
-as follows: The user defines some function (or constant) on the 
-Dirichlet boundary. Hermes then creates a Dirichlet lift $G$, which is 
-a continuous function that satisfies the Dirichlet boundary conditions
-but descends continuously to zero within the layer of elements that 
-are adjacent to the Dirichlet boundary. 
+NOTE: TUTORIAL UPGRADE STOPPED HERE. TO BE CONTINUED.
 
-Next, the solution $u$ to the original weak problem 
-
-.. math::
-    
-    a(u,v) = l(v)
-
-is written as $u = U + G$ where $U$ satisfies zero Dirichlet
-boundary conditions. Hereby the weak formulation turns into
-
-.. math::
-    
-    a(U,v) + a(G, v) = l(v)
-
-and since $a(G, v)$ is a linear form, we put it on the right-hand side:
-
-.. math::
-    
-    a(U,v) = l(v) - a(G, v)
-
-This is a new weak formulation that is solved by Hermes, and its solution 
-is $U$. The user, however, does not see any of this, as he is given 
-back the function $U + G$. 
-
-For more details on the treatment of boundary conditions as well as on the
-rest of the finite element technology, we refer the reader to 
-P. Solin: Partial Differential Equations and the Finite Element Methods,
-J. Wiley & Sons, 2005.
-
-
-Neumann BC (example 05)
-~~~~~~~~~~~~~~~~~~~~~~~
 
 **Git reference:** Tutorial example `05-bc-neumann 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/05-bc-neumann>`_. 
@@ -219,8 +268,8 @@ shown in the following figures:
 
    <hr style="clear: both; visibility: hidden;">
 
-Newton BC (example 06)
-~~~~~~~~~~~~~~~~~~~~~~
+Newton BC (06-bc-newton)
+------------------------
 
 **Git reference:** Tutorial example `06-bc-newton 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/06-bc-newton>`_. 
