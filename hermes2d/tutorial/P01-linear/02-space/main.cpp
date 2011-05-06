@@ -12,6 +12,10 @@
 // on the reference square and reference triangle domains,
 // just load the corresponding mesh at the beginning of the
 // main.cpp file.
+//
+// Geometry: L-Shape domain (see file domain.mesh). It can be replaced
+//           with "ref_square.mesh" and "ref_triangle.mesh" to visualize 
+//           reference element shape functions. 
 
 const int P_INIT = 3;
 
@@ -36,12 +40,12 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain.mesh", &mesh);            // original L-shape domain
+  mloader.load("domain.mesh", &mesh);            // L-shape domain,
 
   // The following can be used to view higher-order shape functions
   // on reference domains (disable uniform mesh refinememts for that).
-  //mloader.load("ref_square.mesh", &mesh);      // reference square
-  //mloader.load("ref_triangle.mesh", &mesh);    // reference triangle
+  //mloader.load("ref_square.mesh", &mesh);      // Reference square,
+  //mloader.load("ref_triangle.mesh", &mesh);    // Reference triangle,
 
   // Refine all elements (optional).
   mesh.refine_all_elements();
@@ -50,11 +54,11 @@ int main(int argc, char* argv[])
   H1Space space(&mesh, P_INIT);
 
   // View FE basis functions.
-  BaseView bview("FE Space", new WinGeom(0, 0, 440, 350));
+  BaseView bview("Finite Element Space", new WinGeom(0, 0, 440, 350));
   bview.fix_scale_width(50);
   bview.show(&space);
 
-  // Practice some keyboard and mouse controls.
+  // Practice keyboard and mouse controls.
   printf("%s", text);
 
   // Wait for the view to be closed.

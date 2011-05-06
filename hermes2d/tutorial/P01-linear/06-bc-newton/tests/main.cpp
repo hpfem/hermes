@@ -1,4 +1,4 @@
-#include "hermes2d.h"
+#include "../definitions.h"
 
 // This test makes sure that example 06-bc-newton works correctly.
 // CAUTION: This test will fail when any changes to the shapeset
@@ -20,9 +20,6 @@ const double T_EXTERIOR = 50.0;            // Exterior temperature.
 const double BDY_A_PARAM = 0.0;
 const double BDY_B_PARAM = 0.0;
 const double BDY_C_PARAM = 20.0;
-
-// Weak forms.
-#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

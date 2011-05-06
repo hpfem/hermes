@@ -1,4 +1,4 @@
-#include "hermes2d.h"
+#include "../definitions.h"
 
 // This test makes sure that example 07-general works correctly.
 // CAUTION: This test will fail when any changes to the shapeset
@@ -16,9 +16,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers). 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
-
-// Weak forms.
-#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {

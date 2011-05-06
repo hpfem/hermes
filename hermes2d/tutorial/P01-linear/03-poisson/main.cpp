@@ -1,5 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+#include "definitions.h"
 
 // This example shows how to solve a simple PDE that describes stationary 
 // heat transfer in an object consisting of two materials (aluminum and 
@@ -21,6 +21,8 @@
 //
 // Boundary conditions: Dirichlet u(x, y) = FIXED_BDY_TEMP on the boundary.
 //
+// Geometry: L-Shape domain (see file domain.mesh). 
+//
 // The following parameters can be changed:
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
@@ -35,9 +37,6 @@ const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatur
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
 const double VOLUME_HEAT_SRC = 5e3;        // Volume heat sources generated (for example) by electric current.        
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
-
-// Weak forms.
-#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +55,8 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
   
   // Initialize essential boundary conditions.
-  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);
+  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), 
+                                       FIXED_BDY_TEMP);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -100,6 +100,11 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if (HERMES_VISUALIZATION) {
     ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+    // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
+    // triangles for OpenGL. The second parameter of View::show() sets the error 
+    // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default), 
+    // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows 
+    // considerably with more accurate representation, so use it wisely.
     view.show(&sln, HERMES_EPS_HIGH);
     View::wait();
   }

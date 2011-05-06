@@ -27,12 +27,12 @@ Consider the Poisson equation
        -\mbox{div}(\lambda \nabla u) = C
 
 in the L-shaped domain $\Omega$ from the previous examples.
-The equation is equipped with zero Dirichlet boundary conditions
+The equation is equipped with constant Dirichlet boundary conditions
 
 .. math::
     :label: poisson2
 
-       u = 0\ \ \  \mbox{on}\  \partial \Omega.
+       u = u_0\ \ \  \mbox{on}\  \partial \Omega.
 
 Here $u$ is an unknown temperature distribution, 
 $C$ a real number representing volumetric heat sources/losses, and $\lambda > 0$ is thermal conductivity
@@ -50,14 +50,14 @@ reads: Find $u \in V$ such that
 .. math::
     :label: poissonweak01
 
-         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = C \int_\Omega v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = \int_\Omega C v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
 
-Hermes, however, requires that the equation is written as 
+Hermes, however, needs the equation in the form 
 
 .. math::
     :label: poissonweak01b
 
-         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - C \int_\Omega v  = 0 \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - \int_\Omega C v  = 0 \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
 Let us explain why.
 
 Jacobian-residual formulation
@@ -105,22 +105,18 @@ The residual weak form is the entire left-hand side of :eq:`poissonweak01b`:
 
 The corresponding code looks as follows::
 
-    class CustomWeakFormPoisson : public WeakForm
+    CustomWeakFormPoisson::CustomWeakFormPoisson(std::string marker_al, double lambda_al,
+    			                         std::string marker_cu, double lambda_cu,
+			                         double vol_heat_src) : WeakForm(1)
     {
-    public:
-      CustomWeakFormPoisson(std::string marker_al, double lambda_al,
-			    std::string marker_cu, double lambda_cu,
-			    double vol_heat_src) : WeakForm(1)
-      {
-	// Jacobian forms - volumetric.
-	add_matrix_form(new DefaultJacobianDiffusion(0, 0, marker_al, lambda_al));
-	add_matrix_form(new DefaultJacobianDiffusion(0, 0, marker_cu, lambda_cu));
+      // Jacobian forms - volumetric.
+      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0, marker_al, lambda_al));
+      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0, marker_cu, lambda_cu));
 
-	// Residual forms - volumetric.
-	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_al, lambda_al));
-	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_cu, lambda_cu));
-	add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
-      };
+      // Residual forms - volumetric.
+      add_vector_form(new WeakFormsH1::DefaultResidualLinearDiffusion(0, marker_al, lambda_al));
+      add_vector_form(new WeakFormsH1::DefaultResidualLinearDiffusion(0, marker_cu, lambda_cu));
+      add_vector_form(new WeakFormsH1::DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
     };
 
 Here, vol_heat_src stands for $C$. 
@@ -128,22 +124,18 @@ Here, vol_heat_src stands for $C$.
 Only minor changes are needed to extend the constants 
 $\lambda_{al}$ and $\lambda_{cu}$ to general cubic splines::
 
-    class CustomWeakFormPoisson : public WeakForm
+    CustomWeakFormPoisson::CustomWeakFormPoisson(std::string marker_al, CubicSpline* lambda_al,
+    			                         std::string marker_cu, CubicSpline* lambda_cu,
+			                         double vol_heat_src) : WeakForm(1)
     {
-    public:
-      CustomWeakFormPoisson(std::string marker_al, CubicSpline* lambda_al,
-			    std::string marker_cu, CubicSpline* lambda_cu,
-			    double vol_heat_src) : WeakForm(1)
-      {
-	// Jacobian forms - volumetric.
-	add_matrix_form(new DefaultJacobianDiffusion(0, 0, marker_al, 1.0, lambda_al));
-	add_matrix_form(new DefaultJacobianDiffusion(0, 0, marker_cu, 1.0, lambda_cu));
+      // Jacobian forms - volumetric.
+      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0, marker_al, 1.0, lambda_al));
+      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0, marker_cu, 1.0, lambda_cu));
 
-	// Residual forms - volumetric.
-	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_al, 1.0, lambda_al));
-	add_vector_form(new DefaultResidualLinearDiffusion(0, marker_cu, 1.0, lambda_cu));
-	add_vector_form(new DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
-      };
+      // Residual forms - volumetric.
+      add_vector_form(new WeakFormsH1::DefaultResidualLinearDiffusion(0, marker_al, 1.0, lambda_al));
+      add_vector_form(new WeakFormsH1::DefaultResidualLinearDiffusion(0, marker_cu, 1.0, lambda_cu));
+      add_vector_form(new WeakFormsH1::DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
     };
 
 The constant 1.0 is a scaling factor for the spline - a useful thing 
@@ -153,7 +145,7 @@ engineering applications. Arbitrary nonlinearities can be defined
 via custom forms. The treatment of nonlinearities will be discussed 
 in tutorial part P02.
 
-In the rest of part P01 we will focus linear problems.
+In the rest of part P01 we will focus on linear problems.
 
 
 Default weak forms
@@ -234,7 +226,7 @@ which adds to the residual weak form the integral
 
 .. math ::
 
-    - C \int_{\Omega} v \, \mbox{d}x \mbox{d}y
+    - \int_{\Omega} C v \, \mbox{d}x \mbox{d}y
 
 and thus it completes :eq:`poissonweak01b`.
 
@@ -266,11 +258,11 @@ Next, an instance of the corresponding weak form class is created::
     // Initialize the weak formulation.
     CustomWeakFormPoisson wf("Aluminum", LAMBDA_AL, "Copper", LAMBDA_CU, VOLUME_HEAT_SRC);
 
-Setting zero Dirichlet boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting constant Dirichlet boundary conditions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Zero Dirichlet boundary conditions are assigned to the boundary markers 
-BDY_BOTTOM, BDY_OUTER, BDY_LEFT, and BDY_INNER as follows::
+Constant Dirichlet boundary conditions are assigned to the boundary markers 
+"Bottom", "Inner", "Outer", and "Left" as follows::
 
     // Initialize essential boundary conditions.
     DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);

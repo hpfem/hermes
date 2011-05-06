@@ -6,15 +6,12 @@ vertices = [
 ]
 
 elements = [
-  [ 0, 1, 2, 0 ]  # ref. triangle
+  [ 0, 1, 2, "Mat" ]  # ref. triangle
 
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 2 ],
-  [ 2, 0, 3 ]
-]
-
-curves = [
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 0, "Bdy" ]
 ]

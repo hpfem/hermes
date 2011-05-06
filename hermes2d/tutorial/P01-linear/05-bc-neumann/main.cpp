@@ -1,5 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+#include "definitions.h"
 
 // This example shows how to use Neumann boundary conditions 
 // (prescibed boundary flux).
@@ -29,9 +29,6 @@ const double HEAT_FLUX = 0.0;              // Heat flux through the "Outer" part
 const double BDY_A_PARAM = 1.0;
 const double BDY_B_PARAM = 2.0;
 const double BDY_C_PARAM = 20.0;
-
-// Weak forms.
-#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
