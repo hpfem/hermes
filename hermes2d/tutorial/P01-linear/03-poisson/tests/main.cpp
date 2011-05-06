@@ -61,15 +61,13 @@ int main(int argc, char* argv[])
   Solution sln;
   Solution::vector_to_solution(coeff_vec, &space, &sln);
 
-  ndof = Space::get_num_dofs(&space);
-  printf("ndof = %d\n", ndof);
+  // Actual test. The values of 'sum' depend on the
+  // current shapeset. If you change the shapeset,
+  // you need to correct these numbers.
   double sum = 0;
   for (int i=0; i < ndof; i++) sum += coeff_vec[i];
   printf("coefficient sum = %g\n", sum);
 
-  // Actual test. The values of 'sum' depend on the
-  // current shapeset. If you change the shapeset,
-  // you need to correct these numbers.
   bool success = true;
   if (std::abs(sum + 0.357318) > 1e-4) success = false;
 

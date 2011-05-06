@@ -3,6 +3,8 @@
 
 // This example shows how to load a mesh, perform various types
 // of initial refinements, and use keyboard and mouse controls.
+//
+// Geometry: L-Shape domain (see file domain.mesh).
 
 static char text[] = "\
 Click into the image window and:\n\
@@ -17,10 +19,6 @@ Click into the image window and:\n\
   press 's' to save a screenshot in bmp format\n\
   press 'q' to quit.\n\
   Press F1 for help.\n";
-
-// Boundary markers.
-const std::string BDY_BOTTOM = "Bottom", BDY_OUTER = "Outer", 
-                  BDY_LEFT = "Left", BDY_INNER = "Inner";
 
 int main(int argc, char* argv[])
 {
@@ -51,7 +49,7 @@ int main(int argc, char* argv[])
   mesh.refine_towards_vertex(3, 4);    // Four refinements towards vertex no. 3.
 
   // Refine towards boundary (optional).
-  mesh.refine_towards_boundary(BDY_OUTER, 4);  // Four successive refinements towards 
+  mesh.refine_towards_boundary("Outer", 4);  // Four successive refinements towards 
                                                // boundary with marker "Outer".
 
   // Refine individual elements (optional).
