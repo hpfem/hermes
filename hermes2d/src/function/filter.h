@@ -38,7 +38,7 @@ public:
 
   void init(Hermes::vector<MeshFunction*> solutions);
 
-	virtual void set_quad_2d(Quad2D* quad_2d);
+  virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
   virtual void free();
   virtual void reinit();

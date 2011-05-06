@@ -310,7 +310,7 @@ scalar SimpleFilter::get_pt_value(double x, double y, int it)
 
 DXDYFilter::DXDYFilter(Hermes::vector<MeshFunction*> solutions) : Filter(solutions)
 {
-	init_components();
+  init_components();
 }
 
 void DXDYFilter::init_components()

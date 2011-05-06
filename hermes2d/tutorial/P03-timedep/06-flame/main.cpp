@@ -23,7 +23,7 @@ using namespace RefinementSelectors;
 
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 1;                             // Initial polynomial degree.
-const double time_step = 0.5;                     // Time step.
+
 const double T_FINAL = 60.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
@@ -31,14 +31,12 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem constants.
+const double time_step = 0.5;                     // Time step.
 const double Le    = 1.0;
 const double alpha = 0.8;
 const double beta  = 10.0;
 const double kappa = 0.1;
 const double x1    = 9.0;
-
-// Boundary markers.
-const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Initial conditions.
 scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
@@ -47,11 +45,17 @@ scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
 scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
 { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
-// Weak forms, definition of reaction rate omega.
-# include "forms.cpp"
+// Boundary markers.
+const std::string BDY_LEFT = "1", BDY_NEUMANN = "2", BDY_NEWTON_COOLED = "3";
+
+// Weak forms.
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -60,11 +64,12 @@ int main(int argc, char* argv[])
   // Initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
+/*
   // Initialize boundary conditions.
   BCTypes bc_types;
   bc_types.add_bc_dirichlet(BDY_LEFT);
   bc_types.add_bc_neumann(BDY_NEUMANN);
-  bc_types.add_bc_newton(BDY_COOLED);
+  bc_types.add_bc_newton(BDY_NEWTON_COOLED);
 
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
@@ -72,43 +77,48 @@ int main(int argc, char* argv[])
 
   BCValues bc_values_c;
   bc_values_c.add_zero(BDY_LEFT);
+*/
+
+  // Initialize boundary conditions.
+  DefaultEssentialBCConst bc_t(BDY_LEFT, 1.0);
+  EssentialBCs bcs_t(&bc_t);
+  DefaultEssentialBCConst bc_c(BDY_LEFT, 0.0);
+  EssentialBCs bcs_c(&bc_c);
 
   // Create H1 spaces with default shapesets.
-  H1Space tspace(&mesh, &bc_types, &bc_values_t, P_INIT);
-  H1Space cspace(&mesh, &bc_types, &bc_values_c, P_INIT);
+  H1Space tspace(&mesh, &bcs_t, P_INIT);
+  H1Space cspace(&mesh, &bcs_c, P_INIT);
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
   // Previous time level solutions.
-  Solution t_prev_time_1, c_prev_time_1, t_prev_time_2, c_prev_time_2, 
+  Solution t_prev_time_1, c_prev_time_1, 
+           t_prev_time_2, c_prev_time_2, 
            t_prev_newton, c_prev_newton;
 
   // And their initial exact setting.
-  t_prev_time_1.set_exact(&mesh, temp_ic); c_prev_time_1.set_exact(&mesh, conc_ic);
-  t_prev_time_2.set_exact(&mesh, temp_ic); c_prev_time_2.set_exact(&mesh, conc_ic);
-  t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
+  // FIXME: 
+  //t_prev_time_1.set_exact(&mesh, temp_ic); c_prev_time_1.set_exact(&mesh, conc_ic);
+  //t_prev_time_2.set_exact(&mesh, temp_ic); c_prev_time_2.set_exact(&mesh, conc_ic);
+  //t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
 
   // Filters for the reaction rate omega and its derivatives.
-  DXDYFilter omega(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dt(omega_dt_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  DXDYFilter omega_dc(omega_dc_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  // FIXME: 
+  //DXDYFilter omega(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  //DXDYFilter omega_dt(omega_dt_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  //DXDYFilter omega_dc(omega_dc_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
+  bool JFNK = false;
   // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
-  wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), 3);
-  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
-  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
-  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
-  wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-                     Hermes::vector<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
-  wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
-  wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-                     Hermes::vector<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+  CustomWeakForm wf(BDY_NEUMANN, BDY_NEWTON_COOLED, 
+                    time_step, Le, kappa, 
+                    /*&omega_dt, &omega_dc, &omega, */
+                    &t_prev_time_1, &t_prev_time_2, &t_prev_newton, 
+                    &c_prev_time_1, &c_prev_time_2, &c_prev_newton, JFNK);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&tspace, &cspace), is_linear);
+  //bool is_linear = false;
+  DiscreteProblem dp(&wf, Hermes::vector<Space *>(&tspace, &cspace));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -143,7 +153,8 @@ int main(int argc, char* argv[])
       dp.assemble(coeff_vec, NULL, rhs, false);
    
       // Calculate the l2-norm of residual vector.
-      double res_l2_norm = get_l2_norm(rhs);
+      // FIXME:
+      double res_l2_norm = hermes2d.get_l2_norm(rhs);
 
       // Info for the user.
       info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
@@ -176,21 +187,22 @@ int main(int argc, char* argv[])
       // and reinitialize filters of these solutions.
       Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&tspace, &cspace), 
                                     Hermes::vector<Solution *>(&t_prev_newton, &c_prev_newton));
+/*
       omega.reinit();
       omega_dt.reinit();
       omega_dc.reinit();
-
+*/
       it++;
     };
 
     // Visualization.
-    DXDYFilter omega_view(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+/*    DXDYFilter omega_view(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
     rview.set_min_max_range(0.0,2.0);
     char title[100];
     sprintf(title, "Reaction rate, t = %g", current_time);
     rview.set_title(title);
     rview.show(&omega_view);
-
+*/
     // Update current time.
     current_time += time_step;
 

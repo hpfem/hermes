@@ -52,23 +52,57 @@ void omega_dc_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> 
 class CustomWeakForm : public WeakForm
 {
 public:
-  CustomWeakForm(Hermes::vector<std::string> newton_boundaries, double time_step, 
-    double Le, double kappa, Solution* sln_prev_time, bool JFNK = false) : WeakForm(2, JFNK)
-  {
-    // Jacobian forms - volumetric.
-    add_matrix_form(new JacobianFormVol(0, 0, heatcap, rho, lambda, tau));
+  CustomWeakForm(Hermes::vector<std::string> neumann_boundaries, Hermes::vector<std::string> newton_boundaries,
+                 double time_step, double Le, double kappa, 
+                 /*DXDYFilter* omega_dt, DXDYFilter* omega_dc, DXDYFilter* omega,*/ 
+                 Solution* t_prev_time_1, Solution* t_prev_time_2, Solution* t_prev_newton,
+                 Solution* c_prev_time_1, Solution* c_prev_time_2, Solution* c_prev_newton, 
+                 bool JFNK = false) : WeakForm(2)//, 
+/*                 neumann_boundaries(neumann_boundaries), newton_boundaries(newton_boundaries), 
+                 time_step(time_step), Le(Le), kappa(kappa), 
+                 omega_dt(omega_dt), omega_dc(omega_dc), omega(omega),
+                 t_prev_time_1(t_prev_time_1), t_prev_time_2(t_prev_time_2), t_prev_newton(t_prev_newton), 
+                 c_prev_time_1(c_prev_time_1), c_prev_time_2(c_prev_time_2), c_prev_newton(c_prev_newton), JFNK(JFNK) */{
 
-    // Jacobian forms - surface.
-    add_matrix_form_surf(new JacobianFormSurf(0, 0, newton_boundaries, alpha, lambda));
+    // Jacobian forms 0 0 - volumetric.
+    add_matrix_form(new newton_bilinear_form_0_0(0, 0, time_step));
 
+    // Jacobian forms 0 0 - surface.
+    add_matrix_form_surf(new newton_bilinear_form_0_0_surf(0, 0, newton_boundaries, kappa));
 
-    // Residual forms - volumetric.
-    ResidualFormVol* res_form = new ResidualFormVol(0, heatcap, rho, lambda, tau);
-    res_form->ext.push_back(sln_prev_time);
-    add_vector_form(res_form);
+    // Jacobian forms 0 1 - volumetric.
+    add_matrix_form(new newton_bilinear_form_0_1(0, 1));
 
-    // Residual forms - surface.
-    add_vector_form_surf(new ResidualFormSurf(0, newton_boundaries, alpha, lambda, temp_ext));
+    // Jacobian forms 1 0 - volumetric.
+    add_matrix_form(new newton_bilinear_form_1_0(1, 0));
+
+    // Jacobian forms 1 1 - volumetric.
+    add_matrix_form(new newton_bilinear_form_1_1(1, 1, time_step, Le));
+
+    // Residual forms 0 - volumetric.
+//    ResidualFormVol* res_form = new ResidualFormVol(0, heatcap, rho, lambda, tau);
+//    res_form->ext.push_back(sln_prev_time);
+//    add_vector_form(res_form);
+    add_vector_form(new newton_linear_form_0(0, time_step));
+
+    // Residual forms 0 - surface.
+    add_vector_form_surf(new newton_linear_form_0_surf(0, newton_boundaries, kappa));
+
+    // Residual forms 1 - volumetric.
+    add_vector_form(new newton_linear_form_1(1, time_step, Le));
+
+/*
+  wf.add_matrix_form(0, 0, callback(newton_bilinear_form_0_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
+  wf.add_matrix_form_surf(0, 0, callback(newton_bilinear_form_0_0_surf), BDY_NEWTON_COOLED);
+  wf.add_matrix_form(0, 1, callback(newton_bilinear_form_0_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
+  wf.add_matrix_form(1, 0, callback(newton_bilinear_form_1_0), HERMES_NONSYM, HERMES_ANY, &omega_dt);
+  wf.add_matrix_form(1, 1, callback(newton_bilinear_form_1_1), HERMES_NONSYM, HERMES_ANY, &omega_dc);
+  wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
+                     Hermes::vector<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+  wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), BDY_NEWTON_COOLED);
+  wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
+                     Hermes::vector<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+*/
   }
 
   ~CustomWeakForm() {}
@@ -77,8 +111,8 @@ private:
   class newton_bilinear_form_0_0 : public WeakForm::MatrixFormVol
   {
   public:
-    newton_bilinear_form_0_0(int i, int j, double time_step) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM),
-    time_step(time_step) { }
+    newton_bilinear_form_0_0(int i, int j, double time_step) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM),
+    time_step(time_step) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -100,76 +134,6 @@ private:
     double time_step;
   };
 
-  class newton_bilinear_form_0_1 : public WeakForm::MatrixFormVol
-  {
-  public:
-    newton_bilinear_form_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) { }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      scalar result = 0;
-      Func<Real>* domegady = ext->fn[0];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (- domegady->val[i] * u->val[i] * v->val[i] );
-      return result;
-    }
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) const {
-      // Returning the sum of the degrees of the basis and test function plus two.
-      return Ord(10);
-    }
-
-  };
-
-  class newton_bilinear_form_1_0 : public WeakForm::MatrixFormVol
-  {
-  public:
-    newton_bilinear_form_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) { }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      scalar result = 0;
-      Func<Real>* domegadt = ext->fn[0];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * ( domegadt->val[i] * u->val[i] * v->val[i] );
-      return result;
-    }
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) const {
-      // Returning the sum of the degrees of the basis and test function plus two.
-      return Ord(10);
-    }
-
-  };
-
-  class newton_bilinear_form_1_1 : public WeakForm::MatrixFormVol
-  {
-  public:
-    newton_bilinear_form_1_1(int i, int j, double time_step, double Le) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM), 
-    time_step(time_step), Le(Le) { }
-
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-      scalar result = 0;
-      Func<Real>* domegady = ext->fn[0];
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (  1.5 * u->val[i] * v->val[i] / time_step
-                          +  (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) / Le
-                          + domegady->val[i] * u->val[i] * v->val[i] );
-      return result;
-    }
-
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) const {
-      // Returning the sum of the degrees of the basis and test function plus two.
-      return Ord(10);
-    }
-
-  double time_step, Le;
-
-  };
 
   class newton_bilinear_form_0_0_surf : public WeakForm::MatrixFormSurf
   {
@@ -193,21 +157,89 @@ private:
     double kappa;
   };
 
+  class newton_bilinear_form_0_1 : public WeakForm::MatrixFormVol
+  {
+  public:
+    newton_bilinear_form_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar result = 0;
+      Func<scalar>* domegady = ext->fn[0];
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (- domegady->val[i] * u->val[i] * v->val[i] );
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
+      // Returning the sum of the degrees of the basis and test function plus two.
+      return Ord(10);
+    }
+
+  };
+
+  class newton_bilinear_form_1_0 : public WeakForm::MatrixFormVol
+  {
+  public:
+    newton_bilinear_form_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar result = 0;
+      Func<scalar>* domegadt = ext->fn[0];
+      for (int i = 0; i < n; i++)
+        result += wt[i] * ( domegadt->val[i] * u->val[i] * v->val[i] );
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
+      // Returning the sum of the degrees of the basis and test function plus two.
+      return Ord(10);
+    }
+
+  };
+
+  class newton_bilinear_form_1_1 : public WeakForm::MatrixFormVol
+  {
+  public:
+    newton_bilinear_form_1_1(int i, int j, double time_step, double Le) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), 
+    time_step(time_step), Le(Le) { }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+      scalar result = 0;
+      Func<scalar>* domegady = ext->fn[0];
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (  1.5 * u->val[i] * v->val[i] / time_step
+                          +  (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) / Le
+                          + domegady->val[i] * u->val[i] * v->val[i] );
+      return result;
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+            Geom<Ord> *e, ExtData<Ord> *ext) const {
+      // Returning the sum of the degrees of the basis and test function plus two.
+      return Ord(10);
+    }
+
+  double time_step, Le;
+
+  };
 
   class newton_linear_form_0 : public WeakForm::VectorFormVol
   {
   public:
-    newton_linear_form_0(int i, double time_step) : WeakForm::VectorFormVol(i),
-    time_step(time_step)  {}
+    newton_linear_form_0(int i, double time_step) : WeakForm::VectorFormVol(i), time_step(time_step) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
-      for (int i = 0; i < n; i++)
-      Func<Real>* titer = u_ext[0];
-      Func<Real>* t_prev_time_1 = ext->fn[0];
-      Func<Real>* t_prev_time_2 = ext->fn[1];
-      Func<Real>* omega = ext->fn[2];
+      Func<scalar>* titer = u_ext[0];
+      Func<scalar>* t_prev_time_1 = ext->fn[0];
+      Func<scalar>* t_prev_time_2 = ext->fn[1];
+      Func<scalar>* omega = ext->fn[2];
       for (int i = 0; i < n; i++)
         result += wt[i] * ( (3.0 * titer->val[i] - 4.0 * t_prev_time_1->val[i] 
                              + t_prev_time_2->val[i]) * v->val[i] / (2.0 * time_step) +
@@ -235,10 +267,10 @@ private:
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
-      Func<Real>* c_prev_newton = u_ext[1];
-      Func<Real>* c_prev_time_1 = ext->fn[0];
-      Func<Real>* c_prev_time_2 = ext->fn[1];
-      Func<Real>* omega = ext->fn[2];
+      Func<scalar>* c_prev_newton = u_ext[1];
+      Func<scalar>* c_prev_time_1 = ext->fn[0];
+      Func<scalar>* c_prev_time_2 = ext->fn[1];
+      Func<scalar>* omega = ext->fn[2];
       for (int i = 0; i < n; i++)
         result += wt[i] * ( (3.0 * c_prev_newton->val[i] - 4.0 * c_prev_time_1->val[i] + c_prev_time_2->val[i])
                         * v->val[i] / (2.0 * time_step) +
@@ -266,7 +298,7 @@ private:
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
       scalar result = 0;
-      Func<Real>* t_prev_newton = u_ext[0];
+      Func<scalar>* t_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
         result += wt[i] * (kappa * t_prev_newton->val[i] * v->val[i]);
       return result;  
