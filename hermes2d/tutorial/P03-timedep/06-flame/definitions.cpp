@@ -1,51 +1,115 @@
+class InitialSolutionTemperature : public ExactSolutionScalar
+{
+public:
+  InitialSolutionTemperature(Mesh* mesh, double x1) : ExactSolutionScalar(mesh), x1(x1) {};
+
+  virtual scalar value (double x, double y) const 
+  {
+    return (x <= x1) ? 1.0 : exp(x1 - x); 
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = 0;
+    dy = 0;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(10); 
+  }
+
+  // Value.
+  double x1;
+};
+
+class InitialSolutionConcentration : public ExactSolutionScalar
+{
+public:
+  InitialSolutionConcentration(Mesh* mesh, double x1) : ExactSolutionScalar(mesh), x1(x1) {};
+
+  virtual scalar value (double x, double y) const 
+  {
+    return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); 
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = 0;
+    dy = 0;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(10); 
+  }
+
+  // Value.
+  double x1;
+};
+
 // definition of reaction rate omega
-
-void omega_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                      scalar* out, scalar* outdx, scalar* outdy)
+class DXDYFilterOmega : public DXDYFilter
 {
-  for (int i = 0; i < n; i++)
-  {
-    scalar t1 = values.at(0)[i] - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
-    scalar t5 = (beta / (t3 * t3)) * values.at(1)[i];
-    out[i] = t4 * values.at(1)[i];
-    outdx[i] = t4 * (dx.at(1)[i] + dx.at(0)[i] * t5);
-    outdy[i] = t4 * (dy.at(1)[i] + dy.at(0)[i] * t5);
-  }
-}
+public:
+  DXDYFilterOmega(Hermes::vector<MeshFunction*> solutions) : DXDYFilter(solutions) {};
+protected:
 
-void omega_dt_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                        scalar* out, scalar* outdx, scalar* outdy)
-{
-  for (int i = 0; i < n; i++)
-  {
-    scalar t1 = values.at(0)[i] - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
-    scalar t5 = (beta / (t3 * t3));
-    out[i] = t4 * t5 * values.at(1)[i];
-    outdx[i] = 0.0;
-    outdy[i] = 0.0; // not important
+  virtual void filter_fn (int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, 
+                          scalar* rslt, scalar* rslt_dx, scalar* rslt_dy) {
+    for (int i = 0; i < n; i++) {
+      scalar t1 = values.at(0)[i] - 1.0;
+      scalar t2 = t1 * beta;
+      scalar t3 = 1.0 + t1 * alpha;
+      scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+      scalar t5 = (beta / (t3 * t3)) * values.at(1)[i];
+      rslt[i] = t4 * values.at(1)[i];
+      rslt_dx[i] = t4 * (dx.at(1)[i] + dx.at(0)[i] * t5);
+      rslt_dy[i] = t4 * (dy.at(1)[i] + dy.at(0)[i] * t5);
+    }
   }
-}
+};
 
-void omega_dc_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                        scalar* out, scalar* outdx, scalar* outdy)
+// definition of reaction rate omega_dt
+class DXDYFilterOmega_dt : public DXDYFilter
 {
-  for (int i = 0; i < n; i++)
-  {
-    scalar t1 = values.at(0)[i] - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
-    out[i] = t4;
-    outdx[i] = 0.0;
-    outdy[i] = 0.0; // not important
+public:
+  DXDYFilterOmega_dt(Hermes::vector<MeshFunction*> solutions) : DXDYFilter(solutions) {};
+protected:
+
+  virtual void filter_fn (int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, 
+                          scalar* rslt, scalar* rslt_dx, scalar* rslt_dy) {
+    for (int i = 0; i < n; i++)
+    {
+      scalar t1 = values.at(0)[i] - 1.0;
+      scalar t2 = t1 * beta;
+      scalar t3 = 1.0 + t1 * alpha;
+      scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+      scalar t5 = (beta / (t3 * t3));
+      rslt[i] = t4 * t5 * values.at(1)[i];
+      rslt_dx[i] = 0.0;
+      rslt_dy[i] = 0.0; // not important
+    }
   }
-}
+};
+
+// definition of reaction rate omega_dc
+class DXDYFilterOmega_dc : public DXDYFilter
+{
+public:
+  DXDYFilterOmega_dc(Hermes::vector<MeshFunction*> solutions) : DXDYFilter(solutions) {};
+protected:
+
+  virtual void filter_fn (int n, Hermes::vector<scalar *> values, Hermes::vector<scalar *> dx, Hermes::vector<scalar *> dy, 
+                          scalar* rslt, scalar* rslt_dx, scalar* rslt_dy) {
+    for (int i = 0; i < n; i++)
+    {
+      scalar t1 = values.at(0)[i] - 1.0;
+      scalar t2 = t1 * beta;
+      scalar t3 = 1.0 + t1 * alpha;
+      scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+      rslt[i] = t4;
+      rslt_dx[i] = 0.0;
+      rslt_dy[i] = 0.0; // not important
+    }
+  }
+};
 
 // weak forms for the Newton's method
 
@@ -54,15 +118,10 @@ class CustomWeakForm : public WeakForm
 public:
   CustomWeakForm(Hermes::vector<std::string> neumann_boundaries, Hermes::vector<std::string> newton_boundaries,
                  double time_step, double Le, double kappa, 
-                 /*DXDYFilter* omega_dt, DXDYFilter* omega_dc, DXDYFilter* omega,*/ 
-                 Solution* t_prev_time_1, Solution* t_prev_time_2, Solution* t_prev_newton,
-                 Solution* c_prev_time_1, Solution* c_prev_time_2, Solution* c_prev_newton, 
-                 bool JFNK = false) : WeakForm(2)//, 
-/*                 neumann_boundaries(neumann_boundaries), newton_boundaries(newton_boundaries), 
-                 time_step(time_step), Le(Le), kappa(kappa), 
-                 omega_dt(omega_dt), omega_dc(omega_dc), omega(omega),
-                 t_prev_time_1(t_prev_time_1), t_prev_time_2(t_prev_time_2), t_prev_newton(t_prev_newton), 
-                 c_prev_time_1(c_prev_time_1), c_prev_time_2(c_prev_time_2), c_prev_newton(c_prev_newton), JFNK(JFNK) */{
+                 DXDYFilterOmega_dt* omega_dt, DXDYFilterOmega_dc* omega_dc, DXDYFilterOmega* omega, 
+                 InitialSolutionTemperature* t_prev_time_1, InitialSolutionTemperature* t_prev_time_2, InitialSolutionTemperature* t_prev_newton,
+                 InitialSolutionConcentration* c_prev_time_1, InitialSolutionConcentration* c_prev_time_2, InitialSolutionConcentration* c_prev_newton, 
+                 bool JFNK = false) : WeakForm(2) {
 
     // Jacobian forms 0 0 - volumetric.
     add_matrix_form(new newton_bilinear_form_0_0(0, 0, time_step));
@@ -80,9 +139,9 @@ public:
     add_matrix_form(new newton_bilinear_form_1_1(1, 1, time_step, Le));
 
     // Residual forms 0 - volumetric.
-//    ResidualFormVol* res_form = new ResidualFormVol(0, heatcap, rho, lambda, tau);
-//    res_form->ext.push_back(sln_prev_time);
-//    add_vector_form(res_form);
+    //newton_linear_form_0* res_form = new newton_linear_form_0(0, time_step);
+    //res_form->ext.push_back(t_prev_time_1);
+    //add_vector_form(res_form);
     add_vector_form(new newton_linear_form_0(0, time_step));
 
     // Residual forms 0 - surface.
@@ -138,7 +197,7 @@ private:
   class newton_bilinear_form_0_0_surf : public WeakForm::MatrixFormSurf
   {
   public:
-    newton_bilinear_form_0_0_surf(int i, int j, Hermes::vector<std::string> newton_boundaries, double kappa) : WeakForm::MatrixFormSurf(i, j, newton_boundaries), kappa(kappa) { }
+    newton_bilinear_form_0_0_surf(int i, int j, Hermes::vector<std::string> newton_boundaries, double kappa) : WeakForm::MatrixFormSurf(i, j, newton_boundaries), kappa(kappa) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -160,7 +219,7 @@ private:
   class newton_bilinear_form_0_1 : public WeakForm::MatrixFormVol
   {
   public:
-    newton_bilinear_form_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
+    newton_bilinear_form_0_1(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -182,7 +241,7 @@ private:
   class newton_bilinear_form_1_0 : public WeakForm::MatrixFormVol
   {
   public:
-    newton_bilinear_form_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) { }
+    newton_bilinear_form_1_0(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -205,7 +264,7 @@ private:
   {
   public:
     newton_bilinear_form_1_1(int i, int j, double time_step, double Le) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_NONSYM), 
-    time_step(time_step), Le(Le) { }
+    time_step(time_step), Le(Le) {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
                  Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
@@ -293,7 +352,8 @@ private:
   class newton_linear_form_0_surf : public WeakForm::VectorFormSurf
   {
   public:
-    newton_linear_form_0_surf(int i, Hermes::vector<std::string> newton_boundaries, double kappa) : WeakForm::VectorFormSurf(i, newton_boundaries), kappa(kappa)  {}
+    newton_linear_form_0_surf(int i, Hermes::vector<std::string> newton_boundaries, double kappa) : WeakForm::VectorFormSurf(i, newton_boundaries), 
+    kappa(kappa)  {}
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                          Geom<double> *e, ExtData<scalar> *ext) const {
@@ -313,4 +373,21 @@ private:
   private:
     double kappa;
   };
+
+protected:
+
+  double time_step; 
+  double Le;
+  double kappa;
+  DXDYFilterOmega_dt* omega_dt;
+  DXDYFilterOmega_dc* omega_dc;
+  DXDYFilterOmega* omega;
+  InitialSolutionTemperature* t_prev_time_1;
+  InitialSolutionTemperature* t_prev_time_2;
+  InitialSolutionTemperature* t_prev_newton;
+  InitialSolutionConcentration* c_prev_time_1; 
+  InitialSolutionConcentration* c_prev_time_2; 
+  InitialSolutionConcentration* c_prev_newton; 
+  bool JFNK;
+
 };

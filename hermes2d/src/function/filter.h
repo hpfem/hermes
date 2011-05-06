@@ -117,7 +117,7 @@ class HERMES_API DXDYFilter : public Filter
 {
 public:
   // one result (rslt), all inputs and result including derivatives
-	DXDYFilter() {};
+  DXDYFilter() {};
   DXDYFilter(Hermes::vector<MeshFunction*> solutions);
 
   void init(Hermes::vector<MeshFunction*> solutions);

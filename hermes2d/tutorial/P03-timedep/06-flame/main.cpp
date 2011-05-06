@@ -29,7 +29,9 @@ const double NEWTON_TOL = 1e-4;                   // Stopping criterion for the 
 const int NEWTON_MAX_ITER = 50;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-
+const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
+                                                  // in every time step. Otherwise the convective term is linearized
+                                                  // using the velocities from the previous time step.
 // Problem constants.
 const double time_step = 0.5;                     // Time step.
 const double Le    = 1.0;
@@ -38,15 +40,8 @@ const double beta  = 10.0;
 const double kappa = 0.1;
 const double x1    = 9.0;
 
-// Initial conditions.
-scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
-{ return (x <= x1) ? 1.0 : exp(x1 - x); }
-
-scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
-{ return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
-
 // Boundary markers.
-const std::string BDY_LEFT = "1", BDY_NEUMANN = "2", BDY_NEWTON_COOLED = "3";
+const std::string BDY_LEFT = "Bdy_left", BDY_NEUMANN = "Bdy_neumann", BDY_NEWTON_COOLED = "Bdy_newton_cooled";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -91,28 +86,25 @@ int main(int argc, char* argv[])
   int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&tspace, &cspace));
   info("ndof = %d.", ndof);
 
-  // Previous time level solutions.
-  Solution t_prev_time_1, c_prev_time_1, 
-           t_prev_time_2, c_prev_time_2, 
-           t_prev_newton, c_prev_newton;
+  // Previous time level solutions and their initial exact setting.
+  InitialSolutionTemperature t_prev_time_1(&mesh, x1);
+  InitialSolutionTemperature t_prev_time_2(&mesh, x1);
+  InitialSolutionTemperature t_prev_newton(&mesh, x1);
 
-  // And their initial exact setting.
-  // FIXME: 
-  //t_prev_time_1.set_exact(&mesh, temp_ic); c_prev_time_1.set_exact(&mesh, conc_ic);
-  //t_prev_time_2.set_exact(&mesh, temp_ic); c_prev_time_2.set_exact(&mesh, conc_ic);
-  //t_prev_newton.set_exact(&mesh, temp_ic); c_prev_newton.set_exact(&mesh, conc_ic);
+  InitialSolutionConcentration c_prev_time_1(&mesh, x1);
+  InitialSolutionConcentration c_prev_time_2(&mesh, x1);
+  InitialSolutionConcentration c_prev_newton(&mesh, x1);
 
   // Filters for the reaction rate omega and its derivatives.
-  // FIXME: 
-  //DXDYFilter omega(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  //DXDYFilter omega_dt(omega_dt_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
-  //DXDYFilter omega_dc(omega_dc_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilterOmega    omega(Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilterOmega_dt omega_dt(Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+  DXDYFilterOmega_dc omega_dc(Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
 
   bool JFNK = false;
   // Initialize the weak formulation.
   CustomWeakForm wf(BDY_NEUMANN, BDY_NEWTON_COOLED, 
                     time_step, Le, kappa, 
-                    /*&omega_dt, &omega_dc, &omega, */
+                    &omega_dt, &omega_dc, &omega, 
                     &t_prev_time_1, &t_prev_time_2, &t_prev_newton, 
                     &c_prev_time_1, &c_prev_time_2, &c_prev_newton, JFNK);
 
@@ -137,72 +129,53 @@ int main(int argc, char* argv[])
   ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
 
   // Time stepping loop:
-  double current_time = 0.0; int ts = 1;
-  bool jacobian_changed = true;
-  do 
+  double current_time = 0.0; 
+  int num_time_steps = T_FINAL / time_step;
+  for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    info("---- Time step %d, t = %g s.", ts, current_time);
+    current_time += time_step;
+    info("---- Time step %d, time = %g:", ts, current_time);
 
-    // Perform Newton's iteration. Note that we are not using the 
-    // function Hermes2D::solve_newton() now since extra actions 
-    // are needed inside the loop.
-    int it = 1;
-    while (1)
+    // Update time-dependent essential BCs.
+    //if (current_time <= STARTUP_TIME) {
+    //  info("Updating time-dependent essential BC.");
+      Space::update_essential_bc_values(Hermes::vector<Space *>(&tspace, &cspace), current_time);
+    //}
+
+    if (NEWTON)
     {
-      // First calculate the residual vector only.
-      dp.assemble(coeff_vec, NULL, rhs, false);
-   
-      // Calculate the l2-norm of residual vector.
-      // FIXME:
-      double res_l2_norm = hermes2d.get_l2_norm(rhs);
+      // Perform Newton's iteration.
+      info("Solving nonlinear problem:");
+      bool verbose = true;
+      bool jacobian_changed = true;
+      if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
-      // Info for the user.
-      info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, 
-           Space::get_num_dofs(Hermes::vector<Space *>(&tspace, &cspace)), res_l2_norm);
+      // Update previous time level solutions.
+      Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&tspace, &cspace),
+                                    Hermes::vector<Solution *>(&t_prev_time_1, &c_prev_time_1));
+    }
+    else {
+      // Linear solve.
+      info("Assembling and solving linear problem.");
+      dp.assemble(matrix, rhs, false);
+      if(solver->solve())
+        Solution::vector_to_solutions(solver->get_solution(),
+                  Hermes::vector<Space *>(&tspace, &cspace),
+                  Hermes::vector<Solution *>(&t_prev_time_1, &c_prev_time_1));
+      else
+        error ("Matrix solver failed.\n");
+    }
 
-      // If l2 norm of the residual vector is within tolerance, or the maximum number 
-      // of iteration has been reached, then quit.
-      if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-      // Assemble the Jacobian matrix.
-      if (jacobian_changed) {
-        dp.assemble(coeff_vec, matrix, NULL, false);
-        jacobian_changed = false;
-      }
-
-      // Multiply the residual vector with -1 since the matrix 
-      // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-      rhs->change_sign();
-
-      // Solve the linear system and if successful, obtain the solutions.
-      if(!solver->solve()) error ("Matrix solver failed.\n");
-
-      // Add \deltaY^{n+1} to Y^n.
-      for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-      
-      if (it >= NEWTON_MAX_ITER)
-        error ("Newton method did not converge.");
-     
-      // Set current solutions to the latest Newton iterate 
-      // and reinitialize filters of these solutions.
-      Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&tspace, &cspace), 
-                                    Hermes::vector<Solution *>(&t_prev_newton, &c_prev_newton));
-/*
-      omega.reinit();
-      omega_dt.reinit();
-      omega_dc.reinit();
-*/
-      it++;
-    };
 
     // Visualization.
-/*    DXDYFilter omega_view(omega_fn, Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
+    DXDYFilterOmega omega_view(Hermes::vector<MeshFunction*>(&t_prev_newton, &c_prev_newton));
     rview.set_min_max_range(0.0,2.0);
     char title[100];
     sprintf(title, "Reaction rate, t = %g", current_time);
     rview.set_title(title);
     rview.show(&omega_view);
-*/
+
     // Update current time.
     current_time += time_step;
 
@@ -212,9 +185,7 @@ int main(int argc, char* argv[])
     Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&tspace, &cspace), 
                                   Hermes::vector<Solution *>(&t_prev_time_1, &c_prev_time_1));
 
-    ts++;
   } 
-  while (current_time <= T_FINAL);
 
   // Cleanup.
   delete [] coeff_vec;
