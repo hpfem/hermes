@@ -1,5 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+#include "../definitions.h"
 
 // This test makes sure that example 05-bc-neumann works correctly. 
 
@@ -18,9 +18,6 @@ const double HEAT_FLUX = 0.0;              // Heat flux through the "Outer" part
 const double BDY_A_PARAM = 1.0;
 const double BDY_B_PARAM = 2.0;
 const double BDY_C_PARAM = 20.0;
-
-// Weak forms.
-#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
