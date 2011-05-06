@@ -1,6 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
-#include "hermes2d.h"
+#include "definitions.h"
 
 //  This example solves a general second-order linear equation with non-constant
 //  coefficients, and shows how integration orders in linear and bilinear forms
@@ -29,9 +29,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h).
-
-// Weak forms.
-#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
