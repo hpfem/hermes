@@ -7,15 +7,15 @@ vertices = [
 ]
 
 elements = [
-  [ 0, 1, 2, 3, 0 ]  # ref. square
+  [ 0, 1, 2, 3, "Mat" ]  # ref. square
 
 ]
 
 boundaries = [
-  [ 0, 1, 1 ],
-  [ 1, 2, 2 ],
-  [ 2, 3, 3 ],
-  [ 3, 0, 4 ]
+  [ 0, 1, "Bdy" ],
+  [ 1, 2, "Bdy" ],
+  [ 2, 3, "Bdy" ],
+  [ 3, 0, "Bdy" ]
 ]
 
 curves = [

@@ -1,5 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+#include "definitions.h"
 
 // This example shows how to solve a simple PDE that describes stationary 
 // heat transfer in an object consisting of two materials (aluminum and 
@@ -35,9 +35,6 @@ const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatur
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
 const double VOLUME_HEAT_SRC = 5e3;        // Volume heat sources generated (for example) by electric current.        
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
-
-// Weak forms.
-#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
