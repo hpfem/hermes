@@ -43,113 +43,91 @@ const double ERR_STOP = 20.0;              // Stopping criterion for adaptivity 
 const int NDOF_STOP = 60000;               // Adaptivity process stops when the number of degrees of freedom grows
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
 
+// NOX parameters.
+unsigned message_type = 0;
+/*
+unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
+*/                                                // NOX error messages, see NOX_Utils.h.
+
+double ls_tolerance = 1e-5;                       // Tolerance for linear system.
+unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
+double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
+double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+int max_iters = 100;                              // Max number of iterations.
+
 // Problem parameters.
-double SLOPE = 60;                         // Slope of the layer inside the domain
+double SLOPE = 60;                                // Slope of the layer inside the domain.
 
-// Exact solution.
-static double fn(double x, double y)
-{
-  return atan(SLOPE * (sqrt(sqr(x-1.25) + sqr(y+0.25)) - M_PI/3));
-}
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+                                                  // This solver is used for projections only.
 
-static double fndd(double x, double y, double& dx, double& dy)
-{
-  double t = sqrt(sqr(x-1.25) + sqr(y+0.25));
-  double u = t * (sqr(SLOPE) * sqr(t - M_PI/3) + 1);
-  dx = SLOPE * (x-1.25) / u;
-  dy = SLOPE * (y+0.25) / u;
-  return fn(x, y);
-}
-
-// Boundary markers.
-const int BDY_BOTTOM = 1, BDY_RIGHT = 2, BDY_TOP = 3, BDY_LEFT = 4;
-
-// Essential (Dirichlet) boundary conditions.
-scalar essential_bc_values(double x, double y)
-{
-  return fn(x,y);
-}
-
-// Right-hand side.
-template<typename Real>
-Real rhs(Real x, Real y)
-{
-  Real t2 = sqr(y + 0.25) + sqr(x - 1.25);
-  Real t = sqrt(t2);
-  Real u = (sqr(M_PI - 3.0*t)*sqr(SLOPE) + 9.0);
-  return 27.0/2.0 * sqr(2.0*y + 0.5) * (M_PI - 3.0*t) * pow(SLOPE,3.0) / (sqr(u) * t2) +
-         27.0/2.0 * sqr(2.0*x - 2.5) * (M_PI - 3.0*t) * pow(SLOPE,3.0) / (sqr(u) * t2) -
-          9.0/4.0 * sqr(2.0*y + 0.5) * SLOPE / (u * pow(t,3.0)) -
-          9.0/4.0 * sqr(2.0*x - 2.5) * SLOPE / (u * pow(t,3.0)) +
-          18.0 * SLOPE / (u * t);
-}
-
-// Preconditioner weak form.
-template<typename Real, typename Scalar>
-Scalar precond_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *vi, Func<Real> *vj, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, vi, vj);
-}
-
-// Residual weak form.
-template<typename Real, typename Scalar>
-Scalar residual_form(int n, double *wt, Func<Real> *u_ext[], Func<Real> *vj, Geom<Real> *e, ExtData<Scalar> *ext)
-{
-  return int_grad_u_grad_v<Real, Scalar>(n, wt, u_ext[0], vj) + int_F_v<Real, Scalar>(n, wt, rhs, vj, e);
-}
+// Weak forms.
+#include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
+  // Load the mesh.
+  Mesh mesh;
+  H2DReader mloader;
+  mloader.load("../square.mesh", &mesh);     // quadrilaterals
+
+  // Perform initial mesh refinements.
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  
+  // Define exact solution.
+  CustomExactSolution exact(&mesh, SLOPE);
+
+  // Define right-hand side.
+  CustomRightHandSide rhs(SLOPE);
+
+  // Initialize the weak formulation.
+  DefaultWeakFormPoisson wf(&rhs);
+  
+  // Initialize boundary conditions
+  DefaultEssentialBCNonConst bc_essential("Bdy", &exact);
+  EssentialBCs bcs(&bc_essential);
+
+  // Create an H1 space with default shapeset.
+  H1Space space(&mesh, &bcs, P_INIT);
+  
+  // Initialize refinement selector.
+  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+
+  // DOF and CPU convergence graphs.
+  SimpleGraph graph_dof, graph_cpu, graph_dof_exact, graph_cpu_exact;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
-  // Load the mesh.
-  Mesh mesh;
-  H2DReader mloader;
-  mloader.load("../square.mesh", &mesh);
-
-  // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
-
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT));
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(Hermes::vector<int>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), essential_bc_values);
-
-  // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  //info("Number of DOF: %d", space.get_num_dofs());
-
-  // Initialize the weak formulation.
-  WeakForm wf(1, JFNK ? true : false);
-  if (PRECOND) wf.add_matrix_form(callback(precond_form), HERMES_SYM);
-  wf.add_vector_form(callback(residual_form));
-
-  // DOF convergence graphs.
-  SimpleGraph graph_dof_est, graph_dof_exact;
-
-  // Initialize refinement selector.
-  H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
   // Adaptivity loop:
-  int as = 1;
-  bool done = false;
-  Solution sln, ref_sln;
+  int as = 1; bool done = false;
   do
   {
-    info("---- Adaptivity step %d:", as);
-   
-    // Initialize finite element problem.
-    DiscreteProblem dp(&wf, &space);
+   info("---- Adaptivity step %d:", as);
+
+    // Construct globally refined reference mesh and setup reference space.
+    Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
+
+    // Initialize reference problem.
+    info("Solving on reference mesh.");
+    DiscreteProblem dp(&wf, ref_space);
+
+    // Time measurement.
+    cpu_time.tick();
+
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
     // Initialize NOX solver.
-    NoxSolver solver(&dp);
+    NoxSolver solver(&dp, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
+                     flag_relresid, rel_resid, max_iters);
 
-    // Choose preconditioner.
+    // Select preconditioner.
     RCP<Precond> pc = rcp(new MlPrecond("sa"));
     if (PRECOND)
     {
@@ -157,96 +135,75 @@ int main(int argc, char* argv[])
       else solver.set_precond("ML");
     }
 
-    // Assemble on coarse mesh and solve the matrix problem using NOX.
-    int ndof = Space::get_num_dofs(&space);
-    info("Coarse mesh problem (ndof: %d): Assembling by DiscreteProblem, solving by NOX.", ndof);
-    if (solver.solve())
-    {
-      Solution::vector_to_solution(solver.get_solution(), &space, &sln);
+    // Time measurement.
+    cpu_time.tick();
 
-      info("Coarse Solution info:");
-      info(" Number of nonlin iterations: %d (norm of residual: %g)", 
+    Solution sln, ref_sln;
+
+    info("Assembling by DiscreteProblem, solving by NOX.");
+    solver.set_init_sln(coeff_vec);
+    if (solver.solve()) {
+      Solution::vector_to_solution(solver.get_solution(), ref_space, &ref_sln);
+      info("Number of nonlin iterations: %d (norm of residual: %g)", 
         solver.get_num_iters(), solver.get_residual());
-      info(" Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
+      info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
         solver.get_num_lin_iters(), solver.get_achieved_tol());
-
-      // Time measurement.
-      cpu_time.tick();
-
-      // Skip visualization time.
-      cpu_time.tick(HERMES_SKIP);
     }
     else
-      error("NOX failed on coarse mesh.");
+      error("NOX failed.");
 
-    // Create uniformly refined reference mesh.
-    Mesh rmesh; rmesh.copy(&mesh); 
-    rmesh.refine_all_elements();
+    info("Projecting reference solution on coarse mesh.");
+    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver);
 
-    // Reference FE space.
-    H1Space rspace(&rmesh, &bc_types, &bc_values, P_INIT);
-    int order_increase = 1;
-    rspace.copy_orders(&space, order_increase); // Increase orders by one.
+    // Calculate element errors and total error estimate.
+    info("Calculating error estimate and exact error.");
+    Adapt* adaptivity = new Adapt(&space);
+    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
-    // Initialize FE problem on reference mesh.
-    DiscreteProblem ref_dp(&wf, &rspace);
-
-    // Initialize NOX solver.
-    NoxSolver ref_solver(&ref_dp);
-    if (PRECOND)
-    {
-      if (JFNK) ref_solver.set_precond(pc);
-      else ref_solver.set_precond("ML");
-    }
-
-    // Assemble on fine mesh and solve the matrix problem using NOX.
-    ndof = Space::get_num_dofs(&rspace);
-    info("Fine mesh problem (ndof: %d): Assembling by DiscreteProblem, solving by NOX.", ndof);
-    if (ref_solver.solve())
-    {
-      Solution::vector_to_solution(ref_solver.get_solution(), &rspace, &ref_sln);
-
-      info("Reference solution info:");
-      info(" Number of nonlin iterations: %d (norm of residual: %g)",
-            ref_solver.get_num_iters(), ref_solver.get_residual());
-      info(" Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
-            ref_solver.get_num_lin_iters(), ref_solver.get_achieved_tol());
-    }
-    else
-      error("NOX failed on fine mesh.");
-
-    // Calculate element errors.
-    info("Calculating error (est).");
-    Adapt hp(&space);
-    double err_est_rel = hp.calc_err_est(&sln, &ref_sln) * 100;
- 
     // Calculate exact error.
-    Solution* exact = new Solution(&mesh, fndd);
+    //Solution* exact = new Solution(&mesh, &exact);
     bool solutions_for_adapt = false;
-    double err_exact_rel = hp.calc_err_exact(&sln, exact, solutions_for_adapt) * 100;
+    double err_exact_rel = adaptivity->calc_err_exact(&sln, &exact, solutions_for_adapt) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d, err_est: %g%%, err_exact: %g%%", 
-      Space::get_num_dofs(&space), Space::get_num_dofs(&rspace), err_est_rel, err_exact_rel);
+    info("ndof_coarse: %d, ndof_fine: %d",
+      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space));
+    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
-    // Add entries to DOF convergence graphs.
-    graph_dof_exact.add_values(space.get_num_dofs(), err_exact_rel);
+    // Time measurement.
+    cpu_time.tick();
+
+    // Add entry to DOF and CPU convergence graphs.
+    graph_dof.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof.save("conv_dof_est.dat");
+    graph_cpu.add_values(cpu_time.accumulated(), err_est_rel);
+    graph_cpu.save("conv_cpu_est.dat");
+    graph_dof_exact.add_values(Space::get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
-    graph_dof_est.add_values(space.get_num_dofs(), err_est_rel);
-    graph_dof_est.save("conv_dof_est.dat");
+    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
+    graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else {
-      info("Adapting the coarse mesh.");
-      done = hp.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+    else
+    {
+      info("Adapting coarse mesh.");
+      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+      // Increase the counter of adaptivity steps.
+      if (done == false)  as++;
     }
+    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
-    as++;
+    // Clean up.
+    delete [] coeff_vec;
+    delete adaptivity;
+    if(done == false) delete ref_space->get_mesh();
+    delete ref_space;
   }
   while (done == false);
+
+  verbose("Total running time: %g s", cpu_time.accumulated());
 
   int ndof = Space::get_num_dofs(&space);
 #define ERROR_SUCCESS                                0
