@@ -15,7 +15,7 @@ const double LAMBDA = 386;    // Thermal conductivity.
 const double ALPHA = 5.0;     // Heat flux coefficient on Gamma_heat_flux.
 
 // Weak forms.
-#include "../definitions.cpp"
+#include "../definitions.h"
 
 int main(int argc, char* argv[])
 {

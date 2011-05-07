@@ -33,7 +33,7 @@ const double f0  = 0;                                      // Surface force in x
 const double f1  = 8e4;                                    // Surface force in y-direction.
 
 // Weak forms.
-#include "definitions.cpp"
+#include "definitions.h"
 
 int main(int argc, char* argv[])
 {
