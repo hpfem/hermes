@@ -42,7 +42,7 @@ double SLOPE = 200.0;                             // Slope of the layer.
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-  return BC_ESSENTIAL;
+  return H3D_BC_ESSENTIAL;
 }
 
 // Essential (Dirichlet) boundary condition values.

@@ -29,8 +29,8 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 // Boundary condition types. 
 BCType bc_types(int marker)
 {
-  if (marker == 1) return BC_ESSENTIAL;
-  else return BC_NATURAL;
+  if (marker == 1) return H3D_BC_ESSENTIAL;
+  else return H3D_BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values. 

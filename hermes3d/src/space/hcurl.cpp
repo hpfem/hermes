@@ -157,7 +157,7 @@ void HcurlSpace::calc_vertex_boundary_projection(Element *elem, int ivertex) {
 	unsigned int vtx = elem->get_vertex(ivertex);
 	VertexData *vnode = vn_data[vtx];
 	Vertex *v = mesh->vertices[vtx];
-	if (vnode->bc_type == BC_ESSENTIAL) {
+	if (vnode->bc_type == H3D_BC_ESSENTIAL) {
 		// FIXME: use bc_vec_value_callback_by_coord
 		if ((vnode->bc_proj = bc_value_callback_by_coord(vnode->marker, v->x, v->y, v->z)) != 0.0)
 			EXIT(HERMES_ERR_NOT_IMPLEMENTED);  //projection of nonzero bc not implemented, see comment in .h
@@ -168,7 +168,7 @@ void HcurlSpace::calc_edge_boundary_projection(Element *elem, int iedge) {
 	_F_
   Edge::Key edge = mesh->get_edge_id(elem, iedge);
 	EdgeData *enode = en_data[edge];
-	if (enode->bc_type != BC_ESSENTIAL) return;			// process only Dirichlet BC
+	if (enode->bc_type != H3D_BC_ESSENTIAL) return;			// process only Dirichlet BC
 	if (enode->bc_proj != NULL) return;					// projection already calculated
 
 	int num_fns;
@@ -216,7 +216,7 @@ void HcurlSpace::calc_face_boundary_projection(Element *elem, int iface) {
 	Facet::Key facet_idx = mesh->get_facet_id(elem, iface);
 	FaceData *fnode = fn_data[facet_idx];
 
-	if (fnode->bc_type != BC_ESSENTIAL) return;
+	if (fnode->bc_type != H3D_BC_ESSENTIAL) return;
 	if (fnode->bc_proj != NULL) return;
 	if (fnode->n <= 0) return;
 

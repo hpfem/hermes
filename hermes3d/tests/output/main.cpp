@@ -89,7 +89,7 @@ scalar3 exact_vec_solution(double x, double y, double z, scalar3 &dx, scalar3 &d
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.

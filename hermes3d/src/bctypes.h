@@ -27,9 +27,9 @@
 // Types of boundary conditions.
 enum BCType
 {
-  BC_ESSENTIAL, ///< Essential (Dirichlet) BC.
-  BC_NATURAL,   ///< Natural (Neumann, Newton) BC.
-  BC_NONE       ///< Hermes will not attempt to evaluate any boundary
+  H3D_BC_ESSENTIAL, ///< Essential (Dirichlet) BC.
+  H3D_BC_NATURAL,   ///< Natural (Neumann, Newton) BC.
+  H3D_BC_NONE       ///< Hermes will not attempt to evaluate any boundary
                 ///< integrals on this part of the boundary.
 };
 
@@ -131,11 +131,11 @@ public:
     return false;
   }
 
-  // Default (if not found) is BC_NATURAL.
+  // Default (if not found) is H3D_BC_NATURAL.
   virtual BCType get_type(int marker) {
-    if (this->is_essential(marker)) return BC_ESSENTIAL;
-    if (this->is_none(marker)) return BC_NONE;
-    return BC_NATURAL;
+    if (this->is_essential(marker)) return H3D_BC_ESSENTIAL;
+    if (this->is_none(marker)) return H3D_BC_NONE;
+    return H3D_BC_NATURAL;
   }
 
   int find_index_dirichlet(int marker) {
@@ -264,7 +264,7 @@ public:
 
 static BCType default_bc_type(int marker)
 {
-  return BC_NATURAL;
+  return H3D_BC_NATURAL;
 }
 
 class HERMES_API BCTypesCallback: public BCTypes {
@@ -281,7 +281,7 @@ public:
           this->bc_type_callback = bc_type_callback;
   }
 
-  // default (if not found) is BC_NATURAL
+  // default (if not found) is H3D_BC_NATURAL
   virtual BCType get_type(int marker) {
     if (this->bc_type_callback == NULL) error("No callback was registered");
     return this->bc_type_callback(marker);

@@ -149,7 +149,7 @@ protected:
 
     NodeData() {
       marker = H3D_MARKER_UNDEFINED;
-      bc_type = BC_NONE;
+      bc_type = H3D_BC_NONE;
     }
   };
 

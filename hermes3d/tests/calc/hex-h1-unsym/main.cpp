@@ -44,7 +44,7 @@ double exact_sln_fn(double x, double y, double z, double &dx, double &dy, double
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.

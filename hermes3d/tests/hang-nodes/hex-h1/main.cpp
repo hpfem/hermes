@@ -84,9 +84,9 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 BCType bc_types(int marker) 
 {
 #ifdef DIRICHLET
-  return BC_ESSENTIAL;
+  return H3D_BC_ESSENTIAL;
 #elif defined NEWTON
-  return BC_NATURAL;
+  return H3D_BC_NATURAL;
 #endif
 }
 
