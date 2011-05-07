@@ -1,6 +1,4 @@
-#include "weakform/weakform.h"
-#include "weakform_library/h1.h"
-
+#include "hermes2d.h"
 using namespace WeakFormsH1;
   
 /* Weak forms */

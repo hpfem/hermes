@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "weakform_library/h1.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
+#include "hermes2d.h"
 
 using namespace WeakFormsH1;
 
@@ -511,5 +508,3 @@ bool solve_picard_eigen_ortho(Space* ref_space, UMFPackMatrix* matrix_S_ref, UMF
   return success;
 
 }
-
-

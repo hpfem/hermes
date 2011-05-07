@@ -1,8 +1,6 @@
-#include "weakform/weakform.h"
-#include "weakform_library/maxwell.h"
-#include "weakform_library/h1.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
+#include "hermes2d.h"
+#include "weakform_library/maxwell.h"
+
 #include "function/function.h"
 #include "weakform_library/maxwell.h"
 

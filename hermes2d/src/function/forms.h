@@ -444,4 +444,36 @@ public:
   }
 };
 
+// Generic class for functions of x, y in weak forms.
+class DefaultFunction
+{
+public:
+  DefaultFunction()
+  {
+    this->is_constant = false;
+    this->const_value = -9999;
+  }
+  DefaultFunction(scalar value)
+  {
+    this->is_constant = true;
+    this->const_value = value;
+  };
+
+  virtual scalar value(double x, double y) const
+  {
+    return const_value;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const
+  {
+    return Ord(1);
+  };
+
+protected:
+  bool is_constant;
+  scalar const_value;
+};
+
+
+
 #endif

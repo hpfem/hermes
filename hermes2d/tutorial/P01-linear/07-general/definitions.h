@@ -1,7 +1,4 @@
 #include "hermes2d.h"
-#include "weakform/weakform.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
 
 /* Essential boundary conditions */
 
