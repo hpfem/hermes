@@ -203,66 +203,67 @@ namespace WeakFormsNeutronics
             return ret;
           }
           
-          #define for_each_element_in_dimension \
-                      typedef typename NDArrayType::value_type dim_type;                      \
-                      typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
-                      typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
-                      for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y )                    
-          
-          template <typename NDArrayType>
-          static NDArrayType divide(const NDArrayType& x, const NDArrayType& y) 
-          { 
-            NDArrayType res; res.reserve(x.size());
-                  
-            for_each_element_in_dimension
-              res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-            
-            return res;
-          }
-          
-          template <typename NDArrayType>
-          static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y) 
-          { 
-            NDArrayType res; res.reserve(x.size());
-            
-            for_each_element_in_dimension
-              res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-            
-            return res;
-          }
-          
-          template <typename NDArrayType>
-          static NDArrayType add(const NDArrayType& x, const NDArrayType& y) 
-          { 
-            NDArrayType res; res.reserve(x.size());
-            
-            for_each_element_in_dimension
-              res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-            
-            return res;
-          }
-          
-          template <typename NDArrayType>
-          static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y) 
-          { 
-            NDArrayType res; res.reserve(x.size());
-            
-            for_each_element_in_dimension
-              res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-            
-            return res;
-          }
-          
-          
-          #undef for_each_element_in_dimension
-          
-          #define for_each_element_in_map \
-                    typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
-                    typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
-                    typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
-                    for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret )                    
-          
           public:
+          
+            #define for_each_element_in_dimension \
+                        typedef typename NDArrayType::value_type dim_type;                      \
+                        typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
+                        typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
+                        for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y )                    
+            
+            template <typename NDArrayType>
+            static NDArrayType divide(const NDArrayType& x, const NDArrayType& y) 
+            { 
+              NDArrayType res; res.reserve(x.size());
+                    
+              for_each_element_in_dimension
+                res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+            
+            template <typename NDArrayType>
+            static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y) 
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+            
+            template <typename NDArrayType>
+            static NDArrayType add(const NDArrayType& x, const NDArrayType& y) 
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+            
+            template <typename NDArrayType>
+            static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y) 
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+            
+            
+            #undef for_each_element_in_dimension
+            
+            #define for_each_element_in_map \
+                      typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
+                      typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
+                      typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
+                      for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret )                    
+          
             template <typename T>
             static std::map<std::string, T> divide(const std::map<std::string, T>& x, 
                                                    const std::map<std::string, T>& y)
@@ -336,7 +337,7 @@ namespace WeakFormsNeutronics
               
               MaterialPropertyMap0::const_iterator it;
               for (it = mrsg_map.begin(); it != mrsg_map.end(); ++it)
-                mrmg_map->at(it->first).assign(G, it->second);
+                (*mrmg_map)[it->first].assign(G, it->second);
             
             }
             
@@ -347,7 +348,7 @@ namespace WeakFormsNeutronics
               
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
-                mrmg_map->at(*it) = srmg_array;
+                (*mrmg_map)[*it] = srmg_array;
             }
             
             void extend_to_multiregion_multigroup(const rank0& srsg_value, MaterialPropertyMap1 *mrmg_map)
@@ -359,14 +360,17 @@ namespace WeakFormsNeutronics
               
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
-                mrmg_map->at(*it).assign(G, srsg_value);
+                (*mrmg_map)[*it].assign(G, srsg_value);
             }
             
             void fill_with(double c, MaterialPropertyMap1 *mrmg_map)
             {
+              if (materials_list.empty())
+                error(E_MR_EXTENSION);
+              
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
-                mrmg_map->at(*it).assign(G, c);
+                (*mrmg_map)[*it].assign(G, c);
             }
                       
             MaterialPropertyMaps(unsigned int G, std::set<std::string> mat_list = std::set<std::string>()) 
@@ -377,7 +381,13 @@ namespace WeakFormsNeutronics
               using namespace ValidationFunctors;
               
               if (chi.empty())
-                fill_with(1.0, &chi);
+              {
+                fill_with(0.0, &chi);
+                MaterialPropertyMap1::iterator it = chi.begin();
+                for ( ; it != chi.end(); ++it)
+                  it->second[0] = 1.0;
+              }
+                
               
               if (nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
                 nu = NDArrayMapOp::divide<rank1>(nuSigma_f, Sigma_f);
@@ -639,7 +649,7 @@ namespace WeakFormsNeutronics
             {
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
-                mrmg_map->at(*it).assign(G, rank1(G, c));
+                (*mrmg_map)[*it].assign(G, rank1(G, c));
             }
             
             // We always need to supply chi, nu, Sigma_f, Sigma_r, Sigma_s and D to our neutronics weak forms. 
@@ -1668,7 +1678,7 @@ namespace WeakFormsNeutronics
             
           public:
             DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                                      GeomType geom_type = HERMES_PLANAR) 
+                                       GeomType geom_type = HERMES_PLANAR) 
               : WeakForm(matprop.get_G())
             {
               lhs_init(matprop.get_G(), matprop, geom_type);
@@ -1677,25 +1687,53 @@ namespace WeakFormsNeutronics
             }
             
             DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                                      DefaultFunction *f_src,
-                                      std::string src_area,
-                                      GeomType geom_type = HERMES_PLANAR) 
+                                       DefaultFunction *f_src,
+                                       std::string src_area = HERMES_ANY,
+                                       GeomType geom_type = HERMES_PLANAR) 
               : WeakForm(matprop.get_G())
             {
               lhs_init(matprop.get_G(), matprop, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_area, 1.0, f_src, geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_area, -1.0, f_src, geom_type));
             }
             
             DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                                      DefaultFunction *f_src,
-                                      Hermes::vector<std::string> src_areas,
-                                      GeomType geom_type = HERMES_PLANAR) 
+                                       DefaultFunction *f_src,
+                                       Hermes::vector<std::string> src_areas,
+                                       GeomType geom_type = HERMES_PLANAR) 
               : WeakForm(matprop.get_G())
             {
               lhs_init(matprop.get_G(), matprop, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_areas, 1.0, f_src, geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_areas, -1.0, f_src, geom_type));
+            }
+            
+            DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
+                                       const std::vector<DefaultFunction*>& f_src,
+                                       std::string src_area = HERMES_ANY,
+                                       GeomType geom_type = HERMES_PLANAR) 
+              : WeakForm(matprop.get_G())
+            {
+              if (f_src.size() != matprop.get_G())
+                error(E_INVALID_SIZE);
+              
+              lhs_init(matprop.get_G(), matprop, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_area, -1.0, f_src[gto], geom_type));
+            }
+            
+            DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
+                                       const std::vector<DefaultFunction*>& f_src,
+                                       Hermes::vector<std::string> src_areas,
+                                       GeomType geom_type = HERMES_PLANAR) 
+              : WeakForm(matprop.get_G())
+            {
+              if (f_src.size() != matprop.get_G())
+                error(E_INVALID_SIZE);
+              
+              lhs_init(matprop.get_G(), matprop, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol(gto, src_areas, -1.0, f_src[gto], geom_type));
             }
         };
                 
