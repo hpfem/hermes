@@ -24,7 +24,7 @@
    Nonzero Neumann and Newton boundary conditions can be enabled
    by creating a descendant and adding surface forms to it.
 */
-
+#ifndef H2D_COMPLEX
 namespace WeakFormsElasticity {
 
   /* Single-component version -- to be used for multimesh assembling */
@@ -214,5 +214,6 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 };
+#endif
 
 #endif

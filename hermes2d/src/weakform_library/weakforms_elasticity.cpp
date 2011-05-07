@@ -1,5 +1,5 @@
 #include "../hermes2d.h"
-
+#ifndef H2D_COMPLEX
 namespace WeakFormsElasticity 
 {
   DefaultJacobianElasticity_0_0::DefaultJacobianElasticity_0_0
@@ -25,7 +25,7 @@ namespace WeakFormsElasticity
   scalar DefaultJacobianElasticity_0_0::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
                                                       Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
   {
-    return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
   }
 
   Ord DefaultJacobianElasticity_0_0::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -58,7 +58,7 @@ namespace WeakFormsElasticity
   scalar DefaultJacobianElasticity_0_1::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
   }
 
   Ord DefaultJacobianElasticity_0_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
@@ -91,7 +91,7 @@ namespace WeakFormsElasticity
   scalar DefaultResidualElasticity_0_0::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                         Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
   }
 
   Ord DefaultResidualElasticity_0_0::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
@@ -124,7 +124,7 @@ namespace WeakFormsElasticity
   scalar DefaultResidualElasticity_0_1::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                         Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
   }
 
   Ord DefaultResidualElasticity_0_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
@@ -157,7 +157,7 @@ namespace WeakFormsElasticity
   scalar DefaultResidualElasticity_1_0::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                         Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
   }
 
   Ord DefaultResidualElasticity_1_0::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
@@ -190,7 +190,7 @@ namespace WeakFormsElasticity
   scalar DefaultResidualElasticity_1_1::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
                         Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext);
+    return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
   }
 
   Ord DefaultResidualElasticity_1_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
@@ -223,7 +223,7 @@ namespace WeakFormsElasticity
   scalar DefaultJacobianElasticity_1_1::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
   {
-    return matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext);
+    return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
   }
 
   Ord DefaultJacobianElasticity_1_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -262,7 +262,7 @@ namespace WeakFormsElasticity
   void DefaultJacobianElasticity_00_11::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
                       Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const 
   {
-    matrix_form<scalar, scalar>(n, wt, u_ext, u, v, e, ext, result);
+    matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext, result);
   }
 
   Ord DefaultJacobianElasticity_00_11::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -308,7 +308,7 @@ namespace WeakFormsElasticity
   void DefaultResidualElasticity_00_11::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
                       Geom<double> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const 
   {
-    vector_form<scalar, scalar>(n, wt, u_ext, v, e, ext, result);
+    vector_form<double, scalar>(n, wt, u_ext, v, e, ext, result);
   }
 
   Ord DefaultResidualElasticity_00_11::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
@@ -324,3 +324,4 @@ namespace WeakFormsElasticity
     return to_return;
   }
 };
+#endif
