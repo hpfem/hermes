@@ -2,11 +2,10 @@ class WeakFormHeatTransferNewtonTimedep : public WeakForm
 {
 public:
   WeakFormHeatTransferNewtonTimedep(double alpha, double tau, Solution* sln_prev_time) 
-          : WeakForm(1) { add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau));
-
-    VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha, tau);
-    vector_form->ext.push_back(sln_prev_time);
-    add_vector_form(vector_form);
+          : WeakForm(1) 
+  { 
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau));
+    add_vector_form(new VectorFormVolHeatTransfer(0, alpha, tau));
   };
 
 private:
@@ -22,7 +21,7 @@ private:
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
       for (int i = 0; i < n; i++)
-        result -= wt[i] * (u->val[i] * v->val[i] / tau + dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] *
+        result -= wt[i] * (dlam_du<Real>(u_prev_newton->val[i]) * u->val[i] *
                            (u_prev_newton->dx[i] * v->dx[i] + u_prev_newton->dy[i] * v->dy[i])
                            + lam<Real>(u_prev_newton->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
       return result;
@@ -51,6 +50,10 @@ private:
       return alpha*pow(u, alpha - 1); 
     }
     
+    WeakForm::MatrixFormVol* clone() {
+      return new MatrixFormVolHeatTransfer(*this);
+    }
+
     double alpha;
     double tau;
   };
@@ -66,10 +69,8 @@ private:
                        Geom<Real> *e, ExtData<Scalar> *ext) const {
       Scalar result = 0;
       Func<Scalar>* u_prev_newton = u_ext[0];
-      Func<Scalar>* u_prev_time = ext->fn[0];
       for (int i = 0; i < n; i++)
-        result -= wt[i] * ((u_prev_newton->val[i] - u_prev_time->val[i]) * v->val[i] / tau +
-                          lam<Real>(u_prev_newton->val[i]) * (u_prev_newton->dx[i] * v->dx[i] 
+        result -= wt[i] * (lam<Real>(u_prev_newton->val[i]) * (u_prev_newton->dx[i] * v->dx[i] 
                            + u_prev_newton->dy[i] * v->dy[i])
 		           - heat_src<Real>(e->x[i], e->y[i]) * v->val[i]);
       return result;
@@ -96,6 +97,10 @@ private:
     template<typename Real>
     Real lam(Real u) const { 
       return 1 + pow(u, alpha); 
+    }
+
+    WeakForm::VectorFormVol* clone() {
+      return new VectorFormVolHeatTransfer(*this);
     }
 
     double alpha;

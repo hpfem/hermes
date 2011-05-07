@@ -1,7 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
-#include "runge_kutta.h"
 
 using namespace RefinementSelectors;
 
@@ -39,11 +38,13 @@ const double TIME_STEP_DEC_RATIO = 0.8;            // Time step decrease ratio (
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                    // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
+const double ALPHA = 4.0;                          // For the nonlinear thermal conductivity.
+
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
 // in the name of each method is its order. The one before last, if present, is the number of stages.
 // Explicit methods:
 //   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
-// Implicit methods: 
+// Implicit methods:
 //   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
 //   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
 //   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
@@ -56,13 +57,14 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMES
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Model parameters.
-#include "model.cpp"
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
-// Main function.
+// Initial condition.
+#include "initial_condition.cpp"
+
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
@@ -84,38 +86,31 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);   
+  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space* space = new H1Space(&mesh, &bc_types, &bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
 
-  int ndof = Space::get_num_dofs(space);
-  info("ndof = %d.", ndof);
+  // Convert initial condition into a Solution.
+  InitialSolutionHeatTransfer sln_time_prev(&mesh);
+  Solution sln_time_new(&mesh);
+  Solution time_error_fn(&mesh, 0.0);
 
-  // Previous and next time level solutions.
-  Solution* sln_time_prev = new Solution(&mesh, init_cond);
-  Solution* sln_time_new = new Solution(&mesh);
-  Solution* time_error_fn = new Solution(&mesh, 0.0);
+  // Initialize the weak formulation
+  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_time_prev);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_time_prev);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_time_prev);
-
-  // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, space, is_linear);
+  // Initialize the discrete problem.
+  DiscreteProblem dp(&wf, &space);
 
   // Initialize views.
   ScalarView sview_high("Solution (higher-order)", new WinGeom(0, 0, 500, 400));
   ScalarView sview_low("Solution (lower-order)", new WinGeom(490, 0, 500, 400));
   ScalarView eview("Temporal error", new WinGeom(1000, 0, 500, 400));
   eview.fix_scale_width(50);
+
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
   // Graph for time step history.
   SimpleGraph time_step_graph;
@@ -129,10 +124,10 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g, tau = %g, stages: %d).", 
          current_time, time_step, bt.get_size());
     bool verbose = true;
-    bool is_linear = false;
-    if (!RungeKutta::rk_time_step(current_time, time_step, &bt, sln_time_prev, 
-                                  sln_time_new, time_error_fn, &dp, matrix_solver,
-	                          verbose, is_linear, NEWTON_TOL, NEWTON_MAX_ITER)) {
+    bool jacobian_changed = true;
+    if (!runge_kutta.rk_time_step(current_time, time_step, &sln_time_prev, 
+                                  &sln_time_new, &time_error_fn, jacobian_changed, verbose, 
+                                  NEWTON_TOL, NEWTON_MAX_ITER)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
@@ -140,7 +135,7 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Temporal error, t = %g", current_time + time_step);
     eview.set_title(title);
-    AbsFilter abs_tef(time_error_fn);
+    AbsFilter abs_tef(&time_error_fn);
     eview.show(&abs_tef, HERMES_EPS_HIGH);
 
     // Calculate relative time stepping error and decide whether the 
@@ -148,8 +143,8 @@ int main(int argc, char* argv[])
     // reduced and the entire time step repeated. If yes, then another
     // check is run, and if the relative error is very low, time step 
     // is increased.
-    double rel_err_time = hermes2d.calc_norm(time_error_fn, HERMES_H1_NORM) / 
-                          hermes2d.calc_norm(sln_time_new, HERMES_H1_NORM) * 100;
+    double rel_err_time = hermes2d.calc_norm(&time_error_fn, HERMES_H1_NORM) / 
+                          hermes2d.calc_norm(&sln_time_new, HERMES_H1_NORM) * 100;
     info("rel_err_time = %g%%", rel_err_time);
     if (rel_err_time > TIME_TOL_UPPER) {
       info("rel_err_time above upper limit %g%% -> decreasing time step from %g to %g and repeating time step.", 
@@ -173,15 +168,15 @@ int main(int argc, char* argv[])
     // Show the new time level solution.
     sprintf(title, "Solution (higher-order), t = %g", current_time);
     sview_high.set_title(title);
-    sview_high.show(sln_time_new, HERMES_EPS_HIGH);
+    sview_high.show(&sln_time_new, HERMES_EPS_HIGH);
     sprintf(title, "Solution (lower-order), t = %g", current_time);
     sview_low.set_title(title);
-    SumFilter sln_time_new_low(Hermes::vector<MeshFunction*>(sln_time_new, time_error_fn), 
+    SumFilter sln_time_new_low(Hermes::vector<MeshFunction*>(&sln_time_new, &time_error_fn), 
                                Hermes::vector<int>(H2D_FN_VAL, H2D_FN_VAL));
     sview_low.show(&sln_time_new_low, HERMES_EPS_HIGH);
 
     // Copy solution for next time step.
-    sln_time_prev->copy(sln_time_new);
+    sln_time_prev.copy(&sln_time_new);
 
     // Increase counter of time steps.
     ts++;
@@ -190,12 +185,6 @@ int main(int argc, char* argv[])
 
   } 
   while (current_time < T_FINAL);
-
-  // Cleanup.
-  delete space;
-  delete sln_time_prev;
-  delete sln_time_new;
-  delete time_error_fn;
 
   // Wait for all views to be closed.
   View::wait();

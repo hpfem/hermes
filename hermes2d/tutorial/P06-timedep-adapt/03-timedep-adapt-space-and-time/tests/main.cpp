@@ -45,6 +45,7 @@ const int NDOF_STOP = 60000;                      // Adaptivity process stops wh
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+
 // Temporal adaptivity.
 bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
                                                   // The methods for the adaptive and fixed-step versions are set
@@ -55,6 +56,8 @@ const double TIME_ERR_TOL_LOWER = 0.8;            // If rel. temporal error is l
                                                   // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
 const double TIME_STEP_DEC_RATIO = 0.6;           // Time step decrease ratio (applied when rel. temporal error is too large).
+
+const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
 // Newton's method.
 const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on fine mesh.
@@ -77,11 +80,13 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 //   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
-// Model parameters.
-#include "../model.cpp"
+const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
-#include "../forms.cpp"
+#include "definitions.cpp"
+
+// Initial condition.
+#include "initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -89,13 +94,13 @@ int main(int argc, char* argv[])
   Hermes2D hermes2d;
 
   // Choose a Butcher's table or define your own.
-  ButcherTable* bt = new ButcherTable(butcher_table_type);
-  if (bt->is_explicit()) info("Using a %d-stage explicit R-K method.", bt->get_size());
-  if (bt->is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt->get_size());
-  if (bt->is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt->get_size());
+  ButcherTable bt(butcher_table_type);
+  if (bt.is_explicit()) info("Using a %d-stage explicit R-K method.", bt.get_size());
+  if (bt.is_diagonally_implicit()) info("Using a %d-stage diagonally implicit R-K method.", bt.get_size());
+  if (bt.is_fully_implicit()) info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
   // Turn off adaptive time stepping if R-K method is not embedded.
-  if (bt->is_embedded() == false && ADAPTIVE_TIME_STEP_ON == true) {
+  if (bt.is_embedded() == false && ADAPTIVE_TIME_STEP_ON == true) {
     warn("R-K method not embedded, turning off adaptive time stepping.");
     ADAPTIVE_TIME_STEP_ON = false;
   }
@@ -110,38 +115,32 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_DIRICHLET);
-
-  // Enter Dirichlet boundary values.
-  BCValues bc_values;
-  bc_values.add_function(BDY_DIRICHLET, essential_bc_values);
+  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, &bc_values, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = space.get_num_dofs();
 
   // Convert initial condition into a Solution.
-  Solution* sln_prev_time = new Solution(&mesh, init_cond);
+  InitialSolutionHeatTransfer sln_time_prev(&mesh);
 
-  // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(stac_jacobian), HERMES_NONSYM, HERMES_ANY, sln_prev_time);
-  wf.add_vector_form(callback(stac_residual), HERMES_ANY, sln_prev_time);
+  // Initialize the weak formulation
+  WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_time_prev);
 
   // Initialize the discrete problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
 
   // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
+  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
   // Graph for time step history.
   SimpleGraph time_step_graph;
   if (ADAPTIVE_TIME_STEP_ON) info("Time step history will be saved to file time_step_history.dat.");
   
   // Time stepping loop.
-  double current_time = time_step; int ts = 1;
+  double current_time = 0.0; int ts = 1;
   do 
   {
     info("Begin time step %d.", ts);
@@ -166,11 +165,11 @@ int main(int argc, char* argv[])
       ndof = Space::get_num_dofs(&space);
     }
 
-    // Spatial adaptivity loop. Note: sln_prev_time must not be 
+    // Spatial adaptivity loop. Note: sln_time_prev must not be 
     // changed during spatial adaptivity. 
     Solution ref_sln;
     Solution* time_error_fn;
-    if (bt->is_embedded() == true) time_error_fn = new Solution(&mesh);
+    if (bt.is_embedded() == true) time_error_fn = new Solution(&mesh);
     else time_error_fn = NULL;
     bool done = false; int as = 1;
     double err_est;
@@ -183,19 +182,21 @@ int main(int argc, char* argv[])
 
       // Runge-Kutta step on the fine mesh.
       info("Runge-Kutta time step on fine mesh (t = %g s, tau = %g s, stages: %d).", 
-         current_time, time_step, bt->get_size());
+         current_time, time_step, bt.get_size());
       bool verbose = true;
-      bool is_linear = false;
-      if (!RungeKutta::rk_time_step(current_time, time_step, bt, sln_prev_time, &ref_sln, time_error_fn,
-                        ref_dp, matrix_solver, verbose, is_linear, NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
+      bool jacobian_changed = true;
+      if (!runge_kutta.rk_time_step(current_time, time_step, &sln_time_prev, 
+                                    &ref_sln, time_error_fn, jacobian_changed, verbose, 
+                                    NEWTON_TOL_FINE, NEWTON_MAX_ITER)) {
+    
         error("Runge-Kutta time step failed, try to decrease time step size.");
       }
 
       /* If ADAPTIVE_TIME_STEP_ON == true, estimate temporal error. 
          If too large or too small, then adjust it and restart the time step. */
 
-      double rel_err_time;
-      if (bt->is_embedded() == true) {
+      double rel_err_time = 0;
+      if (bt.is_embedded() == true) {
         info("Calculating temporal error estimate.");
 
         rel_err_time = hermes2d.calc_norm(time_error_fn, HERMES_H1_NORM) / 
@@ -215,8 +216,7 @@ int main(int argc, char* argv[])
         }
         else if (rel_err_time < TIME_ERR_TOL_LOWER) {
           info("rel_err_time = %g%% is below lower limit %g%%", rel_err_time, TIME_ERR_TOL_UPPER);
-          info("Increasing tau from %g to %g s and restarting time step.", 
-               time_step, time_step * TIME_STEP_INC_RATIO);
+          info("Increasing tau from %g to %g s.", time_step, time_step * TIME_STEP_INC_RATIO);
           time_step *= TIME_STEP_INC_RATIO;
           delete ref_space;
           delete ref_dp;
@@ -275,18 +275,14 @@ int main(int argc, char* argv[])
     if (time_error_fn != NULL) delete time_error_fn;
 
 
-    // Copy last reference solution into sln_prev_time.
-    sln_prev_time->copy(&ref_sln);
+    // Copy last reference solution into sln_time_prev.
+    sln_time_prev.copy(&ref_sln);
 
     // Increase current time and counter of time steps.
     current_time += time_step;
     ts++;
   }
   while (current_time < T_FINAL);
-
-  // Clean up.
-  delete sln_prev_time;
-  delete bt;
 
   ndof = Space::get_num_dofs(&space);
 
