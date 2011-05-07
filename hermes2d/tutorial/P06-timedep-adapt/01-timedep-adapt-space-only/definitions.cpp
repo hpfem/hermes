@@ -1,7 +1,3 @@
-#include "weakform/weakform.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
-
 class WeakFormHeatTransferNewtonTimedep : public WeakForm
 {
 public:
