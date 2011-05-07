@@ -15,8 +15,8 @@ using namespace RefinementSelectors;
 // excitable system (e.g., a neuron).
 //
 // PDE: Linearized FitzHugh-Nagumo equation
-//      -d_u^2 \Delta u - f(u) + \sigma v = g_1,
-//      -d_v^2 \Delta v - u + v = g_2.
+//      -d_u^2 \Delta u - f(u) + \sigma v - g1 = 0,
+//      -d_v^2 \Delta v - u + v - g2 = 0.
 // In the original equation, f(u) = \lambda u - u^3 - \kappa. For
 // simplicity, here we just take f(u) = u.
 //
@@ -24,7 +24,7 @@ using namespace RefinementSelectors;
 //
 // BC: Both solution components are zero on the boundary.
 //
-// Exact solution: The functions g_1 and g_2 were calculated so that
+// Exact solution: The functions g1 and g2 were calculated so that
 //                 the exact solution is:
 //        u(x,y) = U(x)*U(y) where U(t) = cos(M_PI*t/2)
 //        v(x,y) = V(x)V(y) where V(t) = 1 - (exp(K*t)+exp(-K*t))/(exp(K) + exp(-K))
@@ -97,29 +97,29 @@ int main(int argc, char* argv[])
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
   mloader.load("square.mesh", &u_mesh);
-  if (MULTI == false) u_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
+  if (MULTI == false) u_mesh.refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Create initial mesh (master mesh).
   v_mesh.copy(&u_mesh);
 
   // Initial mesh refinements in the v_mesh towards the boundary.
-  if (MULTI == true) v_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
+  if (MULTI == true) v_mesh.refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Set exact solutions.
   ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
   ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K);
 
   // Define right-hand sides.
-  CustomRightHandSide1 rhs_1(K, D_u, SIGMA);
-  CustomRightHandSide2 rhs_2(K, D_v);
+  CustomRightHandSide1 g1(K, D_u, SIGMA);
+  CustomRightHandSide2 g2(K, D_v);
 
   // Initialize the weak formulation.
-  WeakFormFitzHughNagumo wf(&rhs_1, &rhs_2);
+  WeakFormFitzHughNagumo wf(&g1, &g2);
   
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_u("Outer", 0.0);
+  DefaultEssentialBCConst bc_u("Bdy", 0.0);
   EssentialBCs bcs_u(&bc_u);
-  DefaultEssentialBCConst bc_v("Outer", 0.0);
+  DefaultEssentialBCConst bc_v("Bdy", 0.0);
   EssentialBCs bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.
@@ -145,8 +145,7 @@ int main(int argc, char* argv[])
               graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
-  int as = 1; 
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
@@ -173,7 +172,7 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
     // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, true, 1e-8, 100, true)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
