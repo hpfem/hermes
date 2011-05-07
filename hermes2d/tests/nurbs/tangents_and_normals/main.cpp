@@ -2,8 +2,6 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 #include "function/function.h"
-#include "weakform_library/h1.h"
-
 using namespace WeakFormsH1;
 
 // This example makes sure that normal and tangential vectors to circular
