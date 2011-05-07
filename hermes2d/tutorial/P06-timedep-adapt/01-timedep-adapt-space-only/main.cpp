@@ -12,7 +12,7 @@ using namespace RefinementSelectors;
 //  PDE: time-dependent heat transfer equation with nonlinear thermal
 //  conductivity:
 //
-//  du/dt - div[lambda(u)grad u] = f.
+//  du/dt - div[lambda(u)grad u] - f = 0.
 //
 //  Domain: square (-10,10)^2.
 //
@@ -108,8 +108,7 @@ int main(int argc, char* argv[])
   WeakFormHeatTransferNewtonTimedep wf(ALPHA, time_step, &sln_prev_time);
 
   // Initialize the discrete problem.
-  bool is_linear = false;
-  DiscreteProblem dp_coarse(&wf, &space, is_linear);
+  DiscreteProblem dp_coarse(&wf, &space);
 
   // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -190,7 +189,7 @@ int main(int argc, char* argv[])
       scalar* coeff_vec = new scalar[Space::get_num_dofs(ref_space)];
 
       // Initialize discrete problem on reference mesh.
-      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
+      DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space);
 
       // Calculate initial coefficient vector for Newton on the fine mesh.
       if (ts == 1 && as == 1) {
@@ -208,6 +207,7 @@ int main(int argc, char* argv[])
       // Newton's loop on the fine mesh.
       info("Solving on fine mesh:");
       bool verbose = true;
+      bool jacobian_changed = true;
       if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, 
 	  jacobian_changed, NEWTON_TOL_FINE, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
