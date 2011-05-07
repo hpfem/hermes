@@ -4,8 +4,6 @@
 #include "function/filter.h"
 
 using namespace WeakFormsNeutronics::Multigroup::CompleteWeakForms::Diffusion; 
-using WeakFormsH1::DefaultMatrixFormSurf;
-using WeakFormsH1::DefaultResidualSurf;
 
 class CustomWeakForm : public DefaultWeakFormSourceIteration
 {
