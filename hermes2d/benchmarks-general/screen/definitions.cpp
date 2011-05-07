@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "integrals/h1.h"
-#include "boundaryconditions/essential_bcs.h"
-#include "weakform_library/hcurl.h"
+#include "hermes2d.h"
 
 /* Fresnel integral */
 
@@ -206,13 +203,11 @@ public:
 
 /* Weak forms */
 
-using namespace WeakFormsHcurl;
-
 class CustomWeakFormScreen : public WeakForm
 {
 public:
   CustomWeakFormScreen() : WeakForm(1) {
-    add_matrix_form(new DefaultLinearCurlCurl(0, 0, 1.0));
-    add_matrix_form(new DefaultLinearMass(0, 0, -1.0));
+    add_matrix_form(new WeakFormsHcurl::DefaultLinearCurlCurl(0, 0, 1.0));
+    add_matrix_form(new WeakFormsHcurl::DefaultLinearMass(0, 0, -1.0));
   };
 };
