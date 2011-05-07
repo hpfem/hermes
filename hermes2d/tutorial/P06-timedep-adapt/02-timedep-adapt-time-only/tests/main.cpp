@@ -181,104 +181,103 @@ int main(int argc, char* argv[])
 
   switch (b_type)
   {
-    case 1: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 1: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695536) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.260018) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279160) > 1E-6) success = false;
             break;
 
-    case 2: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 2: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003562) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259981) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279212) > 1E-6) success = false;
             break;
 
-    case 3: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 3: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259990) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279225) > 1E-6) success = false;
             break;
 
-
-    case 4: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 4: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259989) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279225) > 1E-6) success = false;
             break;
 
-    case 5: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 5: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259989) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279226) > 1E-6) success = false;
             break;
 
-    case 6: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 6: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003562) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695539) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259981) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279250) > 1E-6) success = false;
             break;
 
-    case 7: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 7: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003562) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695539) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259986) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279238) > 1E-6) success = false;
             break;
 
-    case 8: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
-            break;// Implicit_SDIRK_CASH_3_23_embedded is probably wrong!
-
-    case 9: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 8: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259987) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279225) > 1E-6) success = false;
             break;
 
-    case 10: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 9: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259989) > 1E-6) success = false;
+            if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279224) > 1E-6) success = false;
+            break;
+
+    case 10: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259989) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279224) > 1E-6) success = false;
              break;
 
-    case 11: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.040000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.490000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.000000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.690000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.250000) > 1E-6) success = false;
-             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.240000) > 1E-6) success = false;
+    case 11: if (fabs(sln_time_prev.get_pt_value(coor_x_y[0], coor_x_y[0]) - 0.044235) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[1], coor_x_y[1]) - 0.253124) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[2], coor_x_y[2]) - 0.493350) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[3], coor_x_y[3]) - 1.003563) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[4], coor_x_y[4]) - 1.695538) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[5], coor_x_y[5]) - 2.259989) > 1E-6) success = false;
+             if (fabs(sln_time_prev.get_pt_value(coor_x_y[6], coor_x_y[6]) - 3.279226) > 1E-6) success = false;
              break;
 
     default: error("Admissible command-line options are from 1 to 11.");
