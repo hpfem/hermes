@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Convert to quadrilaterals.
-  //mesh.convert_triangles_to_quads();
+  mesh.convert_triangles_to_quads();
 
   // Refine towards boundary.
   mesh.refine_towards_boundary("Bdy", 1, true);
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   info("Coordinate (5.0, 5.0) value = %lf", v_sln.get_pt_value(coord_x[2], coord_y[2]));
   info("Coordinate (7.0, 7.0) value = %lf", v_sln.get_pt_value(coord_x[3], coord_y[3]));
 
-  double t_value[8] = {0.213990, 0.000114, -0.000001, -0.000001, -0.794632, 0.005934, -0.000034, -0.000053};
+  double t_value[8] = {0.212655, 0.000163, 0.000000, 0.000000, -0.793316, 0.007255, 0.000001, 0.000000};
   bool success = true;
 
   for (int i = 0; i < 4; i++)
