@@ -172,7 +172,10 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
     // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, true, 1e-8, 100, true)) error("Newton's iteration failed.");
+    bool jacobian_changed = true;
+    bool verbose = true;
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, jacobian_changed, 
+                               1e-8, 100, verbose)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));

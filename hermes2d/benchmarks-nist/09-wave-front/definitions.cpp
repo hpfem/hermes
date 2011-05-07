@@ -31,6 +31,7 @@ public:
 
   double alpha, x_loc, y_loc, r_zero;
 };
+
 /* Exact solution */
 
 class CustomExactSolution : public ExactSolutionScalar
