@@ -164,11 +164,13 @@ The output for the parameters A = 1.0, B = 1,0 and C = 20.0 is shown below:
 .. image:: 04-05-06-bc/dirichlet.png
    :align: center
    :width: 400
-   :height: 350
    :alt: Solution of the Dirichlet problem.
 
 Neumann BC (05-bc-newton)
 -------------------------
+
+NOTE: TUTORIAL UPGRADE STOPPED HERE. TO BE CONTINUED.
+
 
 **Git reference:** Tutorial example `05-bc-neumann 
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/05-bc-neumann>`_. 

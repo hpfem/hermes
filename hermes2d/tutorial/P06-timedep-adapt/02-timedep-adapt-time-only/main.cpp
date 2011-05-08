@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     sprintf(title, "Temporal error, t = %g", current_time + time_step);
     eview.set_title(title);
     AbsFilter abs_tef(&time_error_fn);
-    eview.show(&abs_tef, HERMES_EPS_HIGH);
+    eview.show(&abs_tef, HERMES_EPS_VERYHIGH);
 
     // Calculate relative time stepping error and decide whether the 
     // time step can be accepted. If not, then the time step size is 
