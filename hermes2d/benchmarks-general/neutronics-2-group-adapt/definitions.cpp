@@ -1,4 +1,4 @@
-#include "weakform_library/neutronics.h"
+#include "weakform_library/weakforms_neutronics.h"
 #include "function/filter.h"
 
 using namespace WeakFormsNeutronics::Multigroup::CompleteWeakForms::Diffusion; 
