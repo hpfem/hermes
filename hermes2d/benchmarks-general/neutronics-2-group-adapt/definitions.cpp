@@ -130,7 +130,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) const {
-    return Ord::get_max_order();
+    return Ord(20);
   }
 };
 
@@ -172,7 +172,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) const {
-    return Ord::get_max_order();
+    return Ord(20);
   }
 };
 
@@ -198,7 +198,7 @@ public:
 
   virtual Ord ord(Ord x, Ord y) const 
   {
-    return Ord::get_max_order();
+    return Ord(Ord::get_max_order());
   }
 };
 
@@ -233,7 +233,7 @@ public:
 
   virtual Ord ord(Ord x, Ord y) const 
   {
-    return Ord::get_max_order();
+    return Ord(Ord::get_max_order());
   }
 };
 
