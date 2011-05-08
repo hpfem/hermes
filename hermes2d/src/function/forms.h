@@ -39,7 +39,8 @@ public:
   Ord(double d): order(0) {}
 
   int get_order() const { return order; }
-  int get_max_order() const {return 30;}
+  
+  static int get_max_order() {return 30;}
 
   Ord operator+(const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord operator+(double d) { return *this; }

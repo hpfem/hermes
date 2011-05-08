@@ -80,6 +80,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::MatrixFormVol* clone();
 
       private:
+        int idx_j;
         scalar const_coeff;
         CubicSpline* spline_coeff;
         GeomType gt;
@@ -122,9 +123,10 @@ namespace WeakFormsH1 {
       virtual WeakForm::MatrixFormVol* clone();
 
       private:
-      scalar const_coeff1, const_coeff2;
-      CubicSpline* spline_coeff1, *spline_coeff2;
-      GeomType gt;
+        int idx_j;
+        scalar const_coeff1, const_coeff2;
+        CubicSpline* spline_coeff1, *spline_coeff2;
+        GeomType gt;
     };
 
     /* Default volumetric vector form \int_{area} const_coeff * function_coeff(x, y) * v d\bfx
@@ -186,6 +188,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::VectorFormVol* clone();
 
       private:
+        int idx_i;
         scalar const_coeff;
         DefaultFunction* function_coeff;
         GeomType gt;
@@ -224,6 +227,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::VectorFormVol* clone();
 
       private:
+        int idx_i;
         scalar const_coeff;
         CubicSpline* spline_coeff;
         GeomType gt;
@@ -263,6 +267,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::VectorFormVol* clone();
 
       private:
+        int idx_i;
         scalar const_coeff1, const_coeff2;
         CubicSpline* spline_coeff1, *spline_coeff2;
         GeomType gt;
@@ -331,6 +336,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::MatrixFormSurf* clone();
 
       private:
+        int idx_j;
         scalar const_coeff;
         CubicSpline* spline_coeff;
         GeomType gt;
@@ -424,6 +430,7 @@ namespace WeakFormsH1 {
       virtual WeakForm::VectorFormSurf* clone();
 
       private:
+        int idx_i;
         scalar const_coeff;
         DefaultFunction* function_coeff;
         GeomType gt;
