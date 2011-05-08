@@ -79,7 +79,7 @@ const double D_v = 1;
 const double SIGMA = 1;
 const double LAMBDA = 1;
 const double KAPPA = 1;
-const double K = 100;
+const double K = 100.;
 
 // Weak forms.
 #include "definitions.cpp"
@@ -145,7 +145,8 @@ int main(int argc, char* argv[])
               graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
-  int as = 1; bool done = false;
+  int as = 1; 
+  bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
@@ -153,7 +154,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = 
       Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
-    int ndof_ref = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
+    int ndof_ref = Space::get_num_dofs(*ref_spaces);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
