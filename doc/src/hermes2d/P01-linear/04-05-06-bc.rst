@@ -2,40 +2,41 @@ Essential and Natural Boundary Conditions
 -----------------------------------------
 
 Hermes distinguishes between **essential** and **natural** boundary conditions. 
-The former type eliminates degrees of freedom from the domain's boundary.
+The former type eliminates degrees of freedom from the domain's boundary
+(the solution or its portion is prescribed) while the other does not. 
 Examples of essential boundary conditions are Dirichlet conditions for 
 $H^1$ problems and perfect conductor conditions in the space $H(curl)$.
-Natural boundary conditions, on the other hand, leave the solution on
-the boundary unknown, and they are incorporated into surface integrals 
-of the weak formulation. Examples of natural boundary conditions are
-Neumann or Newton (Robin) boundary conditions for $H^1$ problems and 
-impedance conditions in the space $H(curl)$.
+Examples of natural boundary conditions are Neumann or Newton (Robin) 
+conditions for $H^1$ problems and impedance conditions in the space 
+$H(curl)$.
 
 Default constant essential boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We have already seen a default essential boundary condition, it was a constant 
-Dirichlet condition in the previous example 03-poisson::
+We already met a default essential boundary condition in the previous example 
+`03-poisson <http://hpfem.org/hermes/doc/src/hermes2d/P01-linear/03-poisson.html>`_::
 
     // Initialize essential boundary conditions.
-    DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), 
-                                         FIXED_BDY_TEMP);
+    DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), FIXED_BDY_TEMP);
 
-We used it to assign the value FIXED_BDY_TEMP to all boundary edges with the markers 
-"Bottom", "Inner", "Outer" and "Left". After creating one or more essential boundary 
-conditions, they are passed into a container EssentialBCs::
+This one assigned a constant value FIXED_BDY_TEMP to all boundary edges with the markers 
+"Bottom", "Inner", "Outer" or "Left". 
+
+After creating one or more essential boundary conditions, they are passed into the container 
+class EssentialBCs::
 
     EssentialBCs bcs(&bc_essential);
 
-The constructor of the EssentialBCs class can accept a Hermes::vector of
+The purpose of this container is to collect all essential boundary conditions to be passed into a Space, 
+as we shall see shortly. The constructor of the EssentialBCs class can accept a Hermes::vector of
 essential boundary conditions. 
 
 Default nonconstant essential boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Another default essential boundary condition reads boundary values from a given 
-function. This is useful mainly in benchmarks with known exact solution. A typical
-usage is as follows (taken from benchmarks-nist/01-analytic-solution)::
+function. This is useful, for example, in benchmarks with known exact solution. A typical
+usage is as follows (taken from `benchmark NIST-01 <http://hpfem.org/hermes/doc/src/hermes2d/benchmarks-nist/nist-01.html>`_)::
 
     // Set exact solution.
     CustomExactSolution exact(&mesh, EXACT_SOL_P);
@@ -97,7 +98,7 @@ EssentialBoundaryCondition::
 This class can represent arbitrary essential boundary conditions that depend 
 on space and time. Every descendant of this class must redefine the purely 
 virtual functions get_value_type() and value(). This will be explained in
-more detail in the following example 04-bc-dirichlet.  
+more detail in the following example.  
 
 Nonzero Dirichlet BC (04-bc-dirichlet)
 --------------------------------------
@@ -106,10 +107,12 @@ Nonzero Dirichlet BC (04-bc-dirichlet)
 <http://git.hpfem.org/hermes.git/tree/HEAD:/hermes2d/tutorial/P01-linear/04-bc-dirichlet>`_. 
 
 Suppose that we would like to modify the boundary conditions for 
-example 03-poisson as follows:
+example `03-poisson <http://hpfem.org/hermes/doc/src/hermes2d/P01-linear/03-poisson.html>`_ as follows:
 
 .. math::
-         u(x, y) = Ax + By + C.
+         u(x, y) = Ax + By + C
+
+where $A$, $B$ and $C$ are real constants.
 
 Subclassing EssentialBoundaryCondition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
