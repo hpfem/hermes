@@ -35,8 +35,10 @@ using namespace RefinementSelectors;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Adaptivity control:
 
-const int P_INIT[2] = {1, 1};                     // Initial polynomial orders for the individual solution components.
-const int INIT_REF_NUM[2] = {1, 1};               // Initial uniform mesh refinement for the individual solution components.
+const int P_INIT[2] =
+  {1, 1};                                         // Initial polynomial orders for the individual solution components.
+const int INIT_REF_NUM[2] =
+  {1, 1};                                         // Initial uniform mesh refinement for the individual solution components.
 const int STRATEGY = 1;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
                                                   //   error is processed. If more elements have similar errors, refine
@@ -63,199 +65,26 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // candidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1;                        // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 1.0;                     // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference and coarse mesh solution in percent).
-const int NDOF_STOP = 40000;                      // Adaptivity process stops when the number of degrees of freedom grows over
+const int NDOF_STOP = 40000;                     // Adaptivity process stops when the number of degrees of freedom grows over
                                                   // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int MAX_ADAPT_NUM = 60;                     // Adaptivity process stops when the number of adaptation steps grows over
                                                   // this limit.
-const int ADAPTIVITY_NORM = 2;                    // Specifies the norm used by H1Adapt to calculate the error and norm.
-                                                  // ADAPTIVITY_NORM = 0 ... H1 norm.
-                                                  // ADAPTIVITY_NORM = 1 ... norm defined by the diagonal parts of the bilinear form.
-                                                  // ADAPTIVITY_NORM = 2 ... energy norm defined by the full (non-symmetric) bilinear form.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Variables used for reporting of results
-const int ERR_PLOT = 0;         // Row in the convergence graphs for exact errors .
-const int ERR_EST_PLOT = 1;     // Row in the convergence graphs for error estimates.
-const int GROUP_1 = 0;          // Row in the DOF evolution graph for group 1.
-const int GROUP_2 = 1;          // Row in the DOF evolution graph for group 2.
+const int ERR_PLOT = 0;                           // Row in the convergence graphs for exact errors.
+const int ERR_EST_PLOT = 1;                       // Row in the convergence graphs for error estimates.
+const int GROUP_1 = 0;                            // Row in the DOF evolution graph for group 1.
+const int GROUP_2 = 1;                            // Row in the DOF evolution graph for group 2.
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Problem data:
-
-// Two-group material properties for the 4 macro regions.
-/*
-const double D[4][2]  = { {1.12, 0.6},
-                          {1.2, 0.5},
-                          {1.35, 0.8},
-                          {1.3, 0.9}  };
-*/
-// FIXME: The benchmark and its exact solution must be fixed for discontinuous D
-const double D[4][2]  = { {1, 0.5},
-                          {1, 0.5},
-                          {1, 0.5},
-                          {1, 0.5}  };
-                          
-const double Sr[4][2] = { {0.011, 0.13},
-                          {0.09, 0.15},
-                          {0.035, 0.25},
-                          {0.04, 0.35}  };
-
-const double nSf[4][2]= { {0.0025, 0.15},
-                          {0.0, 0.0},
-                          {0.0011, 0.1},
-                          {0.004, 0.25} };
-const double chi[4][2]= { {1, 0},
-                          {1, 0},
-                          {1, 0},
-                          {1, 0} };   
-                          
-const double Ss[4][2][2] = { 
-                             { { 0.0, 0.0 },
-                               { 0.05, 0.0 }  },
-                             { { 0.0, 0.0 },
-                               { 0.08, 0.0 }  },
-                             { { 0.0, 0.0 },
-                               { 0.025, 0.0 } },
-                             { { 0.0, 0.0 },
-                               { 0.014, 0.0 } } 
-                           };
-
-double a = 0., b = 1., c = (a+b)/2.;
-
-inline int get_material(double x, double y)
-{
-  if (x >= a && x < c && y >= a && y < c) return 0;
-  if (x > c && x <= b && y >= a && y < c) return 1;
-  if (x > c && x <= b && y > c && y < b)  return 2;
-  if (x >= a && x < c && y > c && y <= b) return 3;
-  return -1;
-}
-
-double Q1(double x, double y)
-{
-  int q = get_material(x,y);
-
-  double L =  1./40.*exp(-4*sqr(x)) * ( 
-                20*( 1+4*(8*sqr(x)-1)*y*(y-2) ) * D[q][0] + 1./8.*y*(y-2) * (
-                  80*nSf[q][0] + (
-                    10-2*cos(8*M_PI*x) + cos(8*M_PI*(x-y)) - 2*cos(8*M_PI*y) + cos(8*M_PI*(x+y))
-                  )*nSf[q][1] - 80*Sr[q][0] 
-                )
-              );
-  return L;
-}
-
-double Q2(double x, double y)
-{
-  int q = get_material(x,y);
-
-  double yym2 = (y-2)*y;
-  double p2 = sqr(M_PI), x2 = sqr(x), px = M_PI*x, py = M_PI*y;
-  double s8px = sin(8*px);
-  double s8py = sin(8*py);
-  double c8px = cos(8*px);
-  double c8py = cos(8*py);
-  double s4px2 = sqr(sin(4*px));
-  double s4py2 = sqr(sin(4*py));
-
-  double L =  1./40.*exp(-4*x2) * (
-                10*yym2*Ss[q][1][0] - yym2*Sr[q][1]*( 1+s4px2*s4py2 ) + 0.5*D[q][1]*(
-                  5 + 20*(8*x2-1)*yym2 + (
-                    -1 + 4*(1+8*p2-8*x2)*yym2
-                  )*c8py + c8px*( 
-                    -1 + 4*(1+8*p2-8*x2)*yym2 + ( 1 - 4*(1+16*p2-8*x2)*yym2 )*c8py
-                  ) + 32*M_PI*(
-                    -4*x*yym2*s8px*s4py2 + (y-1)*s4px2*s8py
-                  )
-                )
-              );  
-  return L; 
-}
-
-// Essential boundary conditions.
-double g1_D(double x, double y) {
-  return 0.0;
-}
-
-double g2_D(double x, double y) {
-  return 0.0;
-}
+// Weak forms, input data and some other utility functions.
+#include "definitions.cpp"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Exact solution:
-
-static double exact_flux1(double x, double y, double& dx, double& dy)
-{
-  double em4x2 = exp(-4*sqr(x));
-  
-  dx =  2.0*em4x2*x*y*(y-2);
-  dy = -0.5*em4x2*(y-1);
-  
-  return em4x2*(y/2.-sqr(y/2.));
-}
-
-static double exact_flux2(double x, double y, double& dx, double& dy)
-{
-  double yym2 = (y-2)*y;
-  double x2 = sqr(x), px = M_PI*x, py = M_PI*y;
-  double em4x2 = exp(-4*x2);
-  double s8px = sin(8*px);
-  double s8py = sin(8*py);
-  double s4px2 = sqr(sin(4*px));
-  double s4py2 = sqr(sin(4*py));
-  
-  dx =  1./10.*em4x2*yym2 * ( 2*x + (2*x*s4px2 - M_PI*s8px) * s4py2 );
-  dy =  1./20.*em4x2 * ( 1-y-s4px2*( (y-1)*s4py2 + 2*M_PI*yym2*s8py )  );
-  
-  return em4x2*(y/2.-sqr(y/2.)) * (1 + s4px2 * s4py2) / 10.0;
-}
-
-// APPROXIMATE SOLUTION
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Boundary conditions:
-
-const int BDY_FLUX = 1;
-const int BDY_GAMMA = 2;
-const int BDY_SYMMETRY = 3;
-
-scalar essential_bc_values_1(double x, double y)
-{
-  return g1_D(x, y);
-}
-scalar essential_bc_values_2(double x, double y)
-{
-  return g2_D(x, y);
-}
-
-const double GAMMA = 8;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Weak forms:
-#include "../definitions.cpp"
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Functions for calculating errors:
-
-double error_total(double (*efn)(MeshFunction*, MeshFunction*, RefMap*, RefMap*),
-                   double (*nfn)(MeshFunction*, RefMap*), Hermes::vector<Solution*>& slns1, 
-                   Hermes::vector<Solution*>& slns2  )
-{
-  double error = 0.0, norm = 0.0;
-
-  for (unsigned int i=0; i < slns1.size(); i++) {
-    error += sqr(calc_abs_error(efn, slns1[i], slns2[i]));
-    if (nfn) norm += sqr(calc_norm(nfn, slns2[i]));
-  }
-
-  return (nfn ? sqrt(error/norm) : sqrt(error));
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Other utility functions:
+// Additional testing functions:
 
 // Calculate number of negative solution values.
 int get_num_of_neg(MeshFunction *sln)
@@ -286,8 +115,13 @@ int get_num_of_neg(MeshFunction *sln)
   return n;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+  
   // Load the mesh.
   Mesh mesh1, mesh2;
   H2DReader mloader;
@@ -305,33 +139,37 @@ int main(int argc, char* argv[])
   else // Use just one mesh for both groups.
     for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
 
-  // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_FLUX);
-  bc_types.add_bc_neumann(BDY_SYMMETRY);
-  bc_types.add_bc_newton(BDY_GAMMA);
-
-  // Enter Dirichlet boudnary values.
-  BCValues bc_values_1;
-  bc_values_1.add_function(BDY_FLUX, essential_bc_values_1);
-
-  BCValues bc_values_2;
-  bc_values_2.add_function(BDY_FLUX, essential_bc_values_2);
-
+  // Essential boundary conditions.
+  DefaultEssentialBCConst zero_flux("zero flux", 0.0);
+  EssentialBCs bc(&zero_flux);
+  
   // Create H1 space with default shapesets.
-  H1Space space1(&mesh1, &bc_types, &bc_values_1, P_INIT[0]);
-  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc_types, &bc_values_2, P_INIT[1]);
+  H1Space space1(&mesh1, &bc, P_INIT[0]);
+  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc, P_INIT[1]);
 
-  // Initialize the weak formulation.
-  WeakForm wf(2);
-  wf.add_matrix_form(0, 0, callback(biform_0_0), HERMES_SYM);
-  wf.add_matrix_form(0, 1, callback(biform_0_1));
-  wf.add_matrix_form(1, 0, callback(biform_1_0));
-  wf.add_matrix_form(1, 1, callback(biform_1_1), HERMES_SYM);
-  wf.add_vector_form(0, liform_0, liform_0_ord);
-  wf.add_vector_form(1, liform_1, liform_1_ord);
-  wf.add_matrix_form_surf(0, 0, callback(biform_surf_0_0), BDY_GAMMA);
-  wf.add_matrix_form_surf(1, 1, callback(biform_surf_1_1), BDY_GAMMA);
+  // Load physical data of the problem for the 4 energy groups.
+  MaterialPropertyMaps matprop(2, std::set<std::string>(regions, regions+4));
+  matprop.set_D(D);
+  matprop.set_Sigma_r(Sr);
+  matprop.set_Sigma_s(Ss);
+  matprop.set_nuSigma_f(nSf);
+  matprop.set_nu(nu);
+  matprop.set_chi(chi);
+  matprop.set_scattering_multigroup_structure(scattering_mg_structure);
+  matprop.set_fission_multigroup_structure(fission_mg_structure);
+  matprop.validate();
+  
+  //std::cout << std::endl << matprop << std::endl;
+  
+  // Initialize the weak formulation.  
+  const double a = 0., b = 1.;
+  CustomWeakForm wf( 
+    matprop, "gamma",
+    Hermes::vector<DefaultFunction*>(
+      new CustomRightHandSide_g1(a, b, matprop, regions), 
+      new CustomRightHandSide_g2(a, b, matprop, regions)
+    )
+  );
   
   // Initialize coarse and reference mesh solutions and pointers to them.
   Solution sln1, sln2; 
@@ -369,11 +207,16 @@ int main(int argc, char* argv[])
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
+  
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Adaptivity loop:
   int as = 1; 
   bool done = false;
-  double error_h1 = 0.0;
+  double error_h1;
   do
   {
     int ndof = Space::get_num_dofs(Hermes::vector<Space *>(&space1, &space2));
@@ -393,7 +236,7 @@ int main(int argc, char* argv[])
     int order_increase = 1;
     Space *ref_space1 = space1.dup(&ref_mesh1, order_increase);
     Space *ref_space2 = space2.dup(MULTIMESH ? &ref_mesh2 : &ref_mesh1, order_increase);
-
+    
     int ref_ndof = Space::get_num_dofs(Hermes::vector<Space *>(ref_space1, ref_space2));
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
                             
@@ -401,22 +244,21 @@ int main(int argc, char* argv[])
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, Hermes::vector<Space*>(ref_space1, ref_space2), is_linear);
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
-    dp->assemble(matrix, rhs);
+    DiscreteProblem* dp = new DiscreteProblem(&wf, Hermes::vector<Space*>(ref_space1, ref_space2));
     
     // Time measurement.
     cpu_time.tick();
-
-    // Solve the linear system associated with the reference problem.
-    if(solver->solve()) 
-      Solution::vector_to_solutions(solver->get_solution(), Hermes::vector<Space*>(ref_space1, ref_space2), ref_slns);
-    else error ("Matrix solver failed.\n");
     
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ref_ndof];
+    memset(coeff_vec, 0, ref_ndof * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, true, 1e-8, 10, true)) 
+      error("Newton's iteration failed.");
     delete dp;
+    
+    Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space*>(ref_space1, ref_space2), ref_slns);
     delete ref_space1;
     delete ref_space2;
     
@@ -425,20 +267,12 @@ int main(int argc, char* argv[])
         
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Hermes::vector<Space*>(&space1, &space2), ref_slns, slns);
-    
-    // View the distribution of polynomial orders on the coarse meshes.
-    info("flux1_dof=%d, flux2_dof=%d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));              
+    OGProjection::project_global(Hermes::vector<Space*>(&space1, &space2), ref_slns, slns, matrix_solver);                 
     
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
     Adapt adaptivity(Hermes::vector<Space*>(&space1, &space2));
-    if (ADAPTIVITY_NORM == 1) 
-    {
-      adaptivity.set_error_form(0, 0, callback(biform_0_0));
-      adaptivity.set_error_form(1, 1, callback(biform_1_1));
-    }
-    bool solutions_for_adapt = true;
+
     double err_est_energ_total = adaptivity.calc_err_est(slns, ref_slns) * 100;
     
     Adapt adaptivity_proj(Hermes::vector<Space*>(&space1, &space2));
@@ -446,18 +280,17 @@ int main(int argc, char* argv[])
     double err_est_h1_total = adaptivity_proj.calc_err_est(slns, ref_slns, NULL, false) * 100;
 
     Hermes::vector<double> err_exact_h1;
-    ExactSolution ex1(&mesh1, exact_flux1), ex2(MULTIMESH ? &mesh2 : &mesh1, exact_flux2);
-    Hermes::vector<Solution*> exslns(&ex1, &ex2);
+    CustomExactSolution_g1 ex1(&mesh1);
+    CustomExactSolution_g2 ex2(MULTIMESH ? &mesh2 : &mesh1);
+    Hermes::vector<Solution*> exslns(&ex1, &ex2); 
     error_h1 = adaptivity_proj.calc_err_exact(slns, exslns, &err_exact_h1, false) * 100;
     
     // Report results.
     cpu_time.tick(); 
 
     // Error w.r.t. the exact solution.
-    DiffFilter err_distrib_1(Hermes::vector<MeshFunction*>(&ex1, &sln1));
-    DiffFilter err_distrib_2(Hermes::vector<MeshFunction*>(&ex2, &sln2));
-
-    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", err_exact_h1[0] * 100, err_exact_h1[1] * 100);
+    info("Per-component error wrt. exact solution (H1 norm): %g%%, %g%%", 
+         err_exact_h1[0] * 100, err_exact_h1[1] * 100);
     info("Total error wrt. exact solution (H1 norm): %g%%", error_h1);
     info("Total error wrt. ref. solution  (H1 norm): %g%%", err_est_h1_total);
     info("Total error wrt. ref. solution  (E norm):  %g%%", err_est_energ_total);
@@ -489,14 +322,16 @@ int main(int argc, char* argv[])
     }
     
     // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
+    delete [] coeff_vec;
   }
   while (done == false);
-  
+
   cpu_time.tick();
   verbose("Total running time: %g s", cpu_time.accumulated());
+
+  delete solver;
+  delete matrix;
+  delete rhs;
   
   info("Number of iterations: %d", as);
   info("NDOF: %d, %d", Space::get_num_dofs(&space1), Space::get_num_dofs(&space2));
@@ -527,11 +362,13 @@ int main(int argc, char* argv[])
   if (   n_dof_1 <= n_dof_1_allowed && n_dof_2 <= n_dof_2_allowed 
       && n_neg <= n_neg_allowed
       && n_iter <= n_iter_allowed
-      && error <= error_allowed )   {
+      && error <= error_allowed )   
+  {
     printf("Success!\n");
     return ERR_SUCCESS;
   }
-  else {
+  else 
+  {
     printf("Failure!\n");
     return ERR_FAILURE;
   }
