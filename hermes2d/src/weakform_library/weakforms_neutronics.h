@@ -80,6 +80,7 @@ namespace WeakFormsNeutronics
         typedef std::map<std::string, rank2> MaterialPropertyMap2;
         typedef std::map<std::string, rank3> MaterialPropertyMap3;
         
+        typedef std::vector<bool > bool1;
         typedef std::vector<std::vector<bool > > bool2;
       }
       
@@ -329,6 +330,8 @@ namespace WeakFormsNeutronics
             
             std::set<std::string> materials_list;
             unsigned int G;
+            
+            bool1 fission_multigroup_structure;
                   
             void extend_to_multigroup(const MaterialPropertyMap0& mrsg_map, MaterialPropertyMap1 *mrmg_map)
             {
@@ -380,14 +383,18 @@ namespace WeakFormsNeutronics
             {       
               using namespace ValidationFunctors;
               
+              if (fission_multigroup_structure.empty())
+                fission_multigroup_structure = bool1(G, true);
+              
               if (chi.empty())
               {
                 fill_with(0.0, &chi);
                 MaterialPropertyMap1::iterator it = chi.begin();
                 for ( ; it != chi.end(); ++it)
                   it->second[0] = 1.0;
+                fission_multigroup_structure = bool1(G, false);
+                fission_multigroup_structure[0] = true;
               }
-                
               
               if (nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
                 nu = NDArrayMapOp::divide<rank1>(nuSigma_f, Sigma_f);
@@ -470,6 +477,11 @@ namespace WeakFormsNeutronics
               extend_to_multiregion(chi, &this->chi);
             }
             
+            void set_fission_multigroup_structure(const bool1& chi_nnz)
+            {
+              this->fission_multigroup_structure = chi_nnz;
+            }
+            
             void set_Sigma_a(const MaterialPropertyMap1& Sa)
             {
               this->Sigma_a = Sa;
@@ -496,6 +508,10 @@ namespace WeakFormsNeutronics
             const MaterialPropertyMap1& get_chi() const
             {
               return this->chi;
+            }
+            const bool1& get_fission_multigroup_structure() const
+            {
+              return this->fission_multigroup_structure;
             }
             
             const rank1& get_Sigma_f(std::string material) const
@@ -585,7 +601,7 @@ namespace WeakFormsNeutronics
             
             MaterialPropertyMap1 Sigma_t;
             
-            bool2 Sigma_s_nnz_structure;
+            bool2 scattering_multigroup_structure;
             
           public:
             
@@ -726,8 +742,8 @@ namespace WeakFormsNeutronics
               
               // Now, we surely have Sigma_r ...
               
-              if (Sigma_s_nnz_structure.empty())
-                Sigma_s_nnz_structure = bool2(G, std::vector<bool>(G, true));
+              if (scattering_multigroup_structure.empty())
+                scattering_multigroup_structure = bool2(G, std::vector<bool>(G, true));
               
               if (!Sigma_s_given)
               {
@@ -739,17 +755,17 @@ namespace WeakFormsNeutronics
                 {
                   Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_r));
                   
-                  Sigma_s_nnz_structure = bool2(G, std::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
                   for (unsigned int gto = 0; gto < G; gto++)
                     for (unsigned int gfrom = 0; gfrom < G; gfrom++)
                       if (gto == gfrom) 
-                        Sigma_s_nnz_structure[gto][gfrom] = true;
+                        scattering_multigroup_structure[gto][gfrom] = true;
                 }
                 else
                 {
                   warning(W_NO_SCATTERING);
                   fill_with(0.0, &Sigma_s);
-                  Sigma_s_nnz_structure = bool2(G, std::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
                 }
                 
                 Sigma_s_given = true;
@@ -817,9 +833,9 @@ namespace WeakFormsNeutronics
               this->Sigma_s = Ss;
             }
             
-            void set_Sigma_s_nnz_structure(const bool2& Ss_nnz)
+            void set_scattering_multigroup_structure(const bool2& Ss_nnz)
             {
-              this->Sigma_s_nnz_structure = Ss_nnz;
+              this->scattering_multigroup_structure = Ss_nnz;
             }
             
             const MaterialPropertyMap2& get_Sigma_s() const
@@ -838,9 +854,9 @@ namespace WeakFormsNeutronics
             {
               return this->src;
             }
-            const bool2& get_Sigma_s_nnz_structure() const 
+            const bool2& get_scattering_multigroup_structure() const 
             {
-              return this->Sigma_s_nnz_structure;
+              return this->scattering_multigroup_structure;
             }
             
             const rank2& get_Sigma_s(std::string material) const
@@ -1276,7 +1292,7 @@ namespace WeakFormsNeutronics
               
               Jacobian( unsigned int gto, unsigned int gfrom, std::string area,
                         const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
-                : WeakForm::MatrixFormVol(gto, gfrom), 
+                : WeakForm::MatrixFormVol(gto, gfrom, area), 
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
               {};
@@ -1285,6 +1301,9 @@ namespace WeakFormsNeutronics
               Scalar matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const 
               {
+                if (!matprop.get_fission_multigroup_structure()[gto])
+                  return 0.0;
+                
                 Scalar result = 0;
                 if (geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u, v);
                 else 
@@ -1357,6 +1376,9 @@ namespace WeakFormsNeutronics
               Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                                 Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
               { 
+                if (!matprop.get_fission_multigroup_structure()[g])
+                  return 0.0;
+                  
                 std::string mat = get_material(e->elem_marker, wf);
                 rank1 nu_elem = matprop.get_nu(mat);
                 rank1 Sigma_f_elem = matprop.get_Sigma_f(mat);
@@ -1422,7 +1444,7 @@ namespace WeakFormsNeutronics
               
               Residual( unsigned int gto, unsigned int gfrom, std::string area,
                         const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
-                : WeakForm::VectorFormVol(gto), 
+                : WeakForm::VectorFormVol(gto, area), 
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
               {};
@@ -1431,6 +1453,9 @@ namespace WeakFormsNeutronics
               Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                                 Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
               { 
+                if (!matprop.get_fission_multigroup_structure()[gto])
+                  return 0.0;
+                
                 Scalar result = 0;
                 if (geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u_ext[gfrom], v);
                 else 
@@ -1485,7 +1510,7 @@ namespace WeakFormsNeutronics
               
               Jacobian( unsigned int gto, unsigned int gfrom, std::string area,
                         const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
-                : WeakForm::MatrixFormVol(gto, gfrom), 
+                : WeakForm::MatrixFormVol(gto, gfrom, area), 
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
               {};
@@ -1541,7 +1566,7 @@ namespace WeakFormsNeutronics
               Residual( unsigned int gto, unsigned int gfrom, std::string area,
                         const MaterialPropertyMaps& matprop,
                         GeomType geom_type = HERMES_PLANAR )
-                : WeakForm::VectorFormVol(gto), 
+                : WeakForm::VectorFormVol(gto, area), 
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
               {};
@@ -1599,7 +1624,7 @@ namespace WeakFormsNeutronics
               
               LinearForm( unsigned int g, std::string area,
                           const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR)
-                : WeakForm::VectorFormVol(g), 
+                : WeakForm::VectorFormVol(g, area), 
                   GenericForm(matprop, geom_type),
                   g(g)
               {};
@@ -1660,6 +1685,9 @@ namespace WeakFormsNeutronics
           protected:
             void lhs_init(unsigned int G, const MaterialPropertyMaps& matprop, GeomType geom_type)
             {
+              bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
+              bool1 chi_nnz = matprop.get_fission_multigroup_structure();
+              
               for (unsigned int gto = 0; gto < G; gto++)
               {
                 add_matrix_form(new DiffusionReaction::Jacobian(gto, matprop, geom_type));
@@ -1667,11 +1695,17 @@ namespace WeakFormsNeutronics
                 
                 for (unsigned int gfrom = 0; gfrom < G; gfrom++)
                 {
-                  add_matrix_form(new Scattering::Jacobian(gto, gfrom, matprop, geom_type));
-                  add_vector_form(new Scattering::Residual(gto, gfrom, matprop, geom_type));
+                  if (Ss_nnz[gto][gfrom])
+                  {
+                    add_matrix_form(new Scattering::Jacobian(gto, gfrom, matprop, geom_type));
+                    add_vector_form(new Scattering::Residual(gto, gfrom, matprop, geom_type));
+                  }
                   
-                  add_matrix_form(new FissionYield::Jacobian(gto, gfrom, matprop, geom_type));
-                  add_vector_form(new FissionYield::Residual(gto, gfrom, matprop, geom_type));
+                  if (chi_nnz[gto])
+                  {
+                    add_matrix_form(new FissionYield::Jacobian(gto, gfrom, matprop, geom_type));
+                    add_vector_form(new FissionYield::Residual(gto, gfrom, matprop, geom_type));
+                  }
                 }
               }
             }
@@ -1749,7 +1783,7 @@ namespace WeakFormsNeutronics
                                             GeomType geom_type = HERMES_PLANAR ) 
               : WeakForm(matprop.get_G())
             {      
-              bool2 Ss_nnz = matprop.get_Sigma_s_nnz_structure();
+              bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
               
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
               {
