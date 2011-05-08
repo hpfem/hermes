@@ -18,150 +18,107 @@
 
 #include "../integrals/hcurl.h"
 
+
 namespace WeakFormsHcurl {
 
-    /* Default volumetric matrix form \int_{area} coeff \curl E \curl F d\bfx
-     coeff... constant number
-    */
+  /* Default volumetric matrix form \int_{area} coeff \curl E \curl F d\bfx
+    coeff... constant number
+  */
 
-    class DefaultLinearCurlCurl : public WeakForm::MatrixFormVol
-    {
-    public:
-      DefaultLinearCurlCurl(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), coeff(coeff) { }
-      DefaultLinearCurlCurl(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-	: WeakForm::MatrixFormVol(i, j, area, sym), coeff(coeff) { }
+  class DefaultLinearCurlCurl : public WeakForm::MatrixFormVol
+  {
+  public:
+    DefaultLinearCurlCurl(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM);
+    DefaultLinearCurlCurl(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM);
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        return coeff * int_curl_e_curl_f<Real, Scalar>(n, wt, u, v);
-      }
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const;
 
-      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                          Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
 
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                      Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+                    Geom<Ord> *e, ExtData<Ord> *ext) const;
 
-      virtual WeakForm::MatrixFormVol* clone() {
-        return new DefaultLinearCurlCurl(*this);
-      }
+    virtual WeakForm::MatrixFormVol* clone();
 
-      private:
-        scalar coeff;
-    };
+  private:
+      scalar coeff;
+  };
 
-    /* Default volumetric matrix form \int_{area} coeff E \cdot F d\bfx
-       coeff... constant number
-    */
+  /* Default volumetric matrix form \int_{area} coeff E \cdot F d\bfx
+      coeff... constant number
+  */
 
-    class DefaultLinearMass : public WeakForm::MatrixFormVol
-    {
-    public:
-      DefaultLinearMass(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-	: WeakForm::MatrixFormVol(i, j, HERMES_ANY, sym), coeff(coeff) { }
-      DefaultLinearMass(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM)
-	: WeakForm::MatrixFormVol(i, j, area, sym), coeff(coeff) { }
+  class DefaultLinearMass : public WeakForm::MatrixFormVol
+  {
+  public:
+    DefaultLinearMass(int i, int j, scalar coeff = 1.0, SymFlag sym = HERMES_SYM);
+    DefaultLinearMass(int i, int j, std::string area, scalar coeff = 1.0, SymFlag sym = HERMES_SYM);
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        return coeff * int_e_f<Real, Scalar>(n, wt, u, v);
-      }
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const;
 
-      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
-                           Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
-        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                          Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
 
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-              Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext) const;
 
-      virtual WeakForm::MatrixFormVol* clone() {
-        return new DefaultLinearMass(*this);
-      }
+    virtual WeakForm::MatrixFormVol* clone();
 
-      private:
-        scalar coeff;
-    };
+  private:
+      scalar coeff;
+  };
 
-    /* Default surface matrix form \int_{area} coeff e tau f tau dS
-       coeff... constant number
-    */
+  /* Default surface matrix form \int_{area} coeff e tau f tau dS
+      coeff... constant number
+  */
 
-    class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
-    {
-    public:
-      DefaultMatrixFormSurf(int i, int j, scalar coeff)
-        : WeakForm::MatrixFormSurf(i, j), coeff(coeff) { }
-      DefaultMatrixFormSurf(int i, int j, std::string area, scalar coeff)
-        : WeakForm::MatrixFormSurf(i, j, area), coeff(coeff) { }
+  class DefaultMatrixFormSurf : public WeakForm::MatrixFormSurf
+  {
+  public:
+    DefaultMatrixFormSurf(int i, int j, scalar coeff);
+    DefaultMatrixFormSurf(int i, int j, std::string area, scalar coeff);
 
-      template<typename Real, typename Scalar>
-      Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-        return coeff * int_e_tau_f_tau<Real, Scalar>(n, wt, u, v, e);
-      }
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                        Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const;
 
-      virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                           Geom<double> *e, ExtData<scalar> *ext) const {
-        return matrix_form(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                          Geom<double> *e, ExtData<scalar> *ext) const;
 
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-                      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
-      }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                    Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
 
-      virtual WeakForm::MatrixFormSurf* clone() {
-        return new DefaultMatrixFormSurf(*this);
-      }
+    virtual WeakForm::MatrixFormSurf* clone();
 
-      private:
-        scalar coeff;
-    };
+  private:
+      scalar coeff;
+  };
 
-      /* Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx
-         coeff... constant number
-      */
+  /* Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx
+      coeff... constant number
+  */
 
-      class DefaultVectorFormConst : public WeakForm::VectorFormVol
-      {
-      public:
-      DefaultVectorFormConst(int i, scalar coeff0, scalar coeff1)
-       : WeakForm::VectorFormVol(i), coeff0(coeff0), coeff1(coeff1) { }
-      DefaultVectorFormConst(int i, std::string area, scalar coeff0, scalar coeff1)
-         : WeakForm::VectorFormVol(i, area), coeff0(coeff0), coeff1(coeff1) { }
+  class DefaultVectorFormConst : public WeakForm::VectorFormVol
+  {
+  public:
+    DefaultVectorFormConst(int i, scalar coeff0, scalar coeff1);
+    DefaultVectorFormConst(int i, std::string area, scalar coeff0, scalar coeff1);
 
-        virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
-                             Geom<double> *e, ExtData<scalar> *ext) const {
-          scalar int_v0 = 0, int_v1 = 0;
-          for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
-          for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
-          return coeff0 * int_v0 + coeff1 * int_v1;
-        }
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v,
+                          Geom<double> *e, ExtData<scalar> *ext) const;
 
-        virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                Geom<Ord> *e, ExtData<Ord> *ext) const {
-          Ord int_v0 = 0, int_v1 = 0;
-          for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
-          for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
-          return coeff0 * int_v0 + coeff1 * int_v1;
-        }
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext) const;
 
-      virtual WeakForm::VectorFormVol* clone() {
-        return new DefaultVectorFormConst(*this);
-      }
+    virtual WeakForm::VectorFormVol* clone();
 
-      private:
-        scalar coeff0, coeff1;
-      };
-}
+  private:
+    scalar coeff0, coeff1;
+  };
+};
 #endif
