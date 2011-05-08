@@ -1,7 +1,7 @@
 #ifndef __H2D_NEUTRONICS_WEAK_FORMS_H
 #define __H2D_NEUTRONICS_WEAK_FORMS_H
 
-#include "h1.h"
+#include "weakforms_h1.h"
 #include "../function/forms.h"
 #include <algorithm>
 #include <iomanip>
