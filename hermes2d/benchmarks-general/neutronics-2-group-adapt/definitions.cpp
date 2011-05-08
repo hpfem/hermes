@@ -2,23 +2,75 @@
 #include "function/filter.h"
 
 using namespace WeakFormsNeutronics::Multigroup::CompleteWeakForms::Diffusion; 
-using namespace WeakFormsNeutronics::Multigroup::MaterialProperties::Diffusion;
-
-using WeakFormsH1::DefaultMatrixFormSurf;
-using WeakFormsH1::DefaultResidualSurf;
 
 class CustomWeakForm : public DefaultWeakFormFixedSource
 {
+  struct GammaBoundaryCondition
+  {
+    static const double gamma = 8;
+    
+    class Jacobian : public WeakForm::MatrixFormSurf
+    {
+      public:
+        Jacobian(unsigned int g, std::string bdy_gamma, const MaterialPropertyMaps& matprop) 
+          : WeakForm::MatrixFormSurf(g,g,bdy_gamma), 
+            g(g), matprop(matprop)
+        {};
+        
+        scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+        {
+          std::string mat = wf->get_element_markers_conversion()->get_user_marker(e->elem_marker);
+          return gamma * matprop.get_D(mat)[g] * int_u_v<double, scalar>(n, wt, u, v);
+        }
+
+        Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
+        {
+          return int_u_v<Ord, Ord>(n, wt, u, v);
+        }
+                      
+      private:
+        unsigned int g;
+        const MaterialPropertyMaps& matprop;
+    };
+    
+    class Residual : public WeakForm::VectorFormSurf
+    {
+      public:
+        Residual(unsigned int g, std::string bdy_gamma, const MaterialPropertyMaps& matprop) 
+          : WeakForm::VectorFormSurf(g,bdy_gamma), 
+            g(g), matprop(matprop) 
+        {};
+        
+        scalar value(int n, double *wt, Func<scalar> *u_ext[],
+                     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+        {
+          std::string mat = wf->get_element_markers_conversion()->get_user_marker(e->elem_marker);
+          return gamma * matprop.get_D(mat)[g] * int_u_v<double, scalar>(n, wt, u_ext[g], v);
+        }
+
+        Ord ord(int n, double *wt, Func<Ord> *u_ext[],
+                Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
+        {
+          return int_u_v<Ord, Ord>(n, wt, u_ext[g], v);
+        }
+                      
+      private:
+        unsigned int g;
+        const MaterialPropertyMaps& matprop;
+    };
+  };
+  
   public:
-    CustomWeakForm(const MaterialPropertyMaps& matprop,
-                   const std::vector<DefaultFunction*>& f_src,
-                   std::string bdy_gamma, double gamma)
+    CustomWeakForm(const MaterialPropertyMaps& matprop, std::string bdy_gamma,
+                   const std::vector<DefaultFunction*>& f_src)
       : DefaultWeakFormFixedSource(matprop, f_src)
     {
       for (unsigned int g = 0; g < matprop.get_G(); g++)
       {
-        add_matrix_form_surf(new DefaultMatrixFormSurf(g, g, bdy_gamma, gamma));
-        add_vector_form_surf(new DefaultResidualSurf(g, bdy_gamma, gamma));
+        add_matrix_form_surf(new GammaBoundaryCondition::Jacobian(g, bdy_gamma, matprop));
+        add_vector_form_surf(new GammaBoundaryCondition::Residual(g, bdy_gamma, matprop));
       }
     }
 };
@@ -44,7 +96,7 @@ class CustomPiecewiseFunction
     {
       if (x >= a && x < c && y >= a && y < c) return regions[0];
       if (x > c && x <= b && y >= a && y < c) return regions[1];
-      if (x > c && x <= b && y > c && y < b)  return regions[2];
+      if (x > c && x <= b && y > c && y <= b) return regions[2];
       if (x >= a && x < c && y > c && y <= b) return regions[3];
       return std::string();
     }
@@ -279,14 +331,18 @@ const MaterialPropertyMap2 Ss = material_property_map<rank2>
   )
 );
 
-const bool2 Ss_nnz = bool2
+const bool2 scattering_mg_structure = bool2
 (
   bool_mat
   (
-    bool_row(0)(0)
+    bool_row(false)(false)
   )(
-    bool_row(1)(0)
+    bool_row(true)(false)
   )
+);
+const bool1 fission_mg_structure = bool1
+(
+  bool_row(true)(false)
 );
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -113,33 +113,36 @@ int main(int argc, char* argv[])
   else // Use just one mesh for both groups.
     for (int i = 0; i < INIT_REF_NUM[0]; i++) mesh1.refine_all_elements();
 
-
+  // Essential boundary conditions.
+  DefaultEssentialBCConst zero_flux("zero flux", 0.0);
+  EssentialBCs bc(&zero_flux);
+  
   // Create H1 space with default shapesets.
-  H1Space space1(&mesh1, P_INIT[0]);
-  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, P_INIT[1]);
+  H1Space space1(&mesh1, &bc, P_INIT[0]);
+  H1Space space2(MULTIMESH ? &mesh2 : &mesh1, &bc, P_INIT[1]);
 
   // Load physical data of the problem for the 4 energy groups.
   MaterialPropertyMaps matprop(2, std::set<std::string>(regions, regions+4));
   matprop.set_D(D);
   matprop.set_Sigma_r(Sr);
   matprop.set_Sigma_s(Ss);
-  matprop.set_Sigma_s_nnz_structure(Ss_nnz);
   matprop.set_nuSigma_f(nSf);
   matprop.set_nu(nu);
   matprop.set_chi(chi);
+  matprop.set_scattering_multigroup_structure(scattering_mg_structure);
+  matprop.set_fission_multigroup_structure(fission_mg_structure);
   matprop.validate();
   
-  std::cout << std::endl << matprop << std::endl;
+  //std::cout << std::endl << matprop << std::endl;
   
   // Initialize the weak formulation.  
-  const double a = 0, b = 1;
+  const double a = 0., b = 1.;
   CustomWeakForm wf( 
-    matprop, 
+    matprop, "gamma",
     Hermes::vector<DefaultFunction*>(
       new CustomRightHandSide_g1(a, b, matprop, regions), 
       new CustomRightHandSide_g2(a, b, matprop, regions)
-    ),
-    "gamma", 8.
+    )
   );
   
   // Initialize coarse and reference mesh solutions and pointers to them.
@@ -192,6 +195,11 @@ int main(int argc, char* argv[])
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
+  
+  // Set up the solver, matrix, and rhs according to the solver selection.
+  SparseMatrix* matrix = create_matrix(matrix_solver);
+  Vector* rhs = create_vector(matrix_solver);
+  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Adaptivity loop:
   int as = 1; 
@@ -220,11 +228,6 @@ int main(int argc, char* argv[])
     info("------------------ Reference solution; NDOF=%d -------------------", ref_ndof);
                             
     if (ref_ndof >= NDOF_STOP) break;
-
-    // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
     // Assemble the reference problem.
     info("Solving on reference mesh.");
@@ -289,10 +292,10 @@ int main(int argc, char* argv[])
 
     view1.show(&sln1);
     view2.show(&sln2);
-    //view3.show(&ex1);
-    //view4.show(&ex2);
-    view3.show(&err_distrib_1);
-    view4.show(&err_distrib_2);
+    view3.show(&ex1);
+    view4.show(&ex2);
+    //view3.show(&err_distrib_1);
+    //view4.show(&err_distrib_2);
 
     if (ndof > 100) {
       // Add entry to DOF convergence graphs.
@@ -332,15 +335,16 @@ int main(int argc, char* argv[])
     
     // Clean up.
     delete [] coeff_vec;
-    delete solver;
-    delete matrix;
-    delete rhs;
   }
   while (done == false);
 
   cpu_time.tick();
   verbose("Total running time: %g s", cpu_time.accumulated());
 
+  delete solver;
+  delete matrix;
+  delete rhs;
+  
   ////////////////////////  Save plots with results.  //////////////////////////
   
   std::stringstream str;
