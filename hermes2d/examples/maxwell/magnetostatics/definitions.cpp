@@ -1,8 +1,4 @@
 #include "hermes2d.h"
-#include "weakform_library/maxwell.h"
-
-#include "function/function.h"
-#include "weakform_library/maxwell.h"
 
 using namespace WeakFormsH1;
 using namespace WeakFormsMaxwell;

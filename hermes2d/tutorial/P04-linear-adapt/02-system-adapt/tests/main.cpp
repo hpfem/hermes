@@ -52,7 +52,7 @@ const double D_v = 1;
 const double SIGMA = 1;
 const double LAMBDA = 1;
 const double KAPPA = 1;
-const double K = 100;
+const double K = 100.;
 
 // Weak forms.
 #include "../definitions.cpp"
@@ -66,29 +66,29 @@ int main(int argc, char* argv[])
   Mesh u_mesh, v_mesh;
   H2DReader mloader;
   mloader.load("../square.mesh", &u_mesh);
-  if (MULTI == false) u_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
+  if (MULTI == false) u_mesh.refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Create initial mesh (master mesh).
   v_mesh.copy(&u_mesh);
 
   // Initial mesh refinements in the v_mesh towards the boundary.
-  if (MULTI == true) v_mesh.refine_towards_boundary("Outer", INIT_REF_BDY);
+  if (MULTI == true) v_mesh.refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Set exact solutions.
   ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
   ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K);
 
   // Define right-hand sides.
-  CustomRightHandSide1 rhs_1(K, D_u, SIGMA);
-  CustomRightHandSide2 rhs_2(K, D_v);
+  CustomRightHandSide1 g1(K, D_u, SIGMA);
+  CustomRightHandSide2 g2(K, D_v);
 
   // Initialize the weak formulation.
-  WeakFormFitzHughNagumo wf(&rhs_1, &rhs_2);
+  WeakFormFitzHughNagumo wf(&g1, &g2);
   
   // Initialize boundary conditions
-  DefaultEssentialBCConst bc_u("Outer", 0.0);
+  DefaultEssentialBCConst bc_u("Bdy", 0.0);
   EssentialBCs bcs_u(&bc_u);
-  DefaultEssentialBCConst bc_v("Outer", 0.0);
+  DefaultEssentialBCConst bc_v("Bdy", 0.0);
   EssentialBCs bcs_v(&bc_v);
 
   // Create H1 spaces with default shapeset for both displacement components.
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Hermes::vector<Space *>* ref_spaces = 
       Space::construct_refined_spaces(Hermes::vector<Space *>(&u_space, &v_space));
-    int ndof_ref = Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space));
+    int ndof_ref = Space::get_num_dofs(*ref_spaces);
 
     // Initialize matrix solver.
     SparseMatrix* matrix = create_matrix(matrix_solver);
@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
     // Initialize reference problem.
     info("Solving on reference mesh.");
     DiscreteProblem* dp = new DiscreteProblem(&wf, *ref_spaces);
-    dp->assemble(matrix, rhs);
 
     // Time measurement.
     cpu_time.tick();
@@ -139,14 +138,18 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
 
     // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+    bool jacobian_changed = true;
+    bool verbose = true;
+    if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs, jacobian_changed, 
+                               1e-8, 100, verbose)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
     Solution::vector_to_solutions(coeff_vec, *ref_spaces, Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln));
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(Hermes::vector<Space *>(&u_space, &v_space), Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
+    OGProjection::project_global(Hermes::vector<Space *>(&u_space, &v_space), 
+                                 Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
                    Hermes::vector<Solution *>(&u_sln, &v_sln), matrix_solver); 
    
     // Calculate element errors.
@@ -156,7 +159,8 @@ int main(int argc, char* argv[])
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::vector<double> err_est_rel;
     double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution *>(&u_sln, &v_sln), 
-                               Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), &err_est_rel) * 100;
+                                                        Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
+                                                        &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::vector<double> err_exact_rel;
@@ -170,10 +174,10 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-         u_space.Space::get_num_dofs(), (*ref_spaces)[0]->Space::get_num_dofs());
+         u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
     info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
     info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-         v_space.Space::get_num_dofs(), (*ref_spaces)[1]->Space::get_num_dofs());
+         v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
     info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
