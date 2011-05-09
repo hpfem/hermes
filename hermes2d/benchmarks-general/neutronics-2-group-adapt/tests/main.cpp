@@ -3,7 +3,8 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include "hermes2d.h"
+#include "definitions.h"
+#include "problem_data.h"
 
 using namespace RefinementSelectors;
 
@@ -80,9 +81,6 @@ const int ERR_EST_PLOT = 1;                       // Row in the convergence grap
 const int GROUP_1 = 0;                            // Row in the DOF evolution graph for group 1.
 const int GROUP_2 = 1;                            // Row in the DOF evolution graph for group 2.
 
-// Weak forms, input data and some other utility functions.
-#include "definitions.cpp"
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Additional testing functions:
 
@@ -125,7 +123,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh1, mesh2;
   H2DReader mloader;
-  mloader.load("../square.mesh", &mesh1);
+  mloader.load((std::string("../") + mesh_file).c_str(), &mesh1);
 
   if (MULTIMESH) 
   {
