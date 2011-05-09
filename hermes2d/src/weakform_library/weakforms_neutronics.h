@@ -178,38 +178,117 @@ namespace WeakFormsNeutronics
             return ret;
           }
           
-          public:              
+          public: 
+            
+            #define for_each_element_in_dimension \
+                      typedef typename NDArrayType::value_type dim_type;                      \
+                      typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
+                      typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
+                      for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y ) 
             
             template <typename NDArrayType>
-            static NDArrayType divide(const NDArrayType& x, const NDArrayType& y);
+            static NDArrayType divide(const NDArrayType& x, const NDArrayType& y)
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+                        
+            template <typename NDArrayType>
+            static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y)
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
             
             template <typename NDArrayType>
-            static NDArrayType multiply(const NDArrayType& x, const NDArrayType& y);
-            
+            static NDArrayType add(const NDArrayType& x, const NDArrayType& y)
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
+
             template <typename NDArrayType>
-            static NDArrayType add(const NDArrayType& x, const NDArrayType& y);
+            static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y)
+            { 
+              NDArrayType res; res.reserve(x.size());
+              
+              for_each_element_in_dimension
+                res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
+              
+              return res;
+            }
             
-            template <typename NDArrayType>
-            static NDArrayType subtract(const NDArrayType& x, const NDArrayType& y);                
+            #undef for_each_element_in_dimension
+            
+            #define for_each_element_in_map \
+                      typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
+                      typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
+                      typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
+                      for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret ) 
           
             template <typename T>
             static std::map<std::string, T> divide(const std::map<std::string, T>& x, 
-                                                   const std::map<std::string, T>& y);
+                                                   const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = divide<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
             
             template <typename T>
             static std::map<std::string, T> multiply(const std::map<std::string, T>& x, 
-                                                     const std::map<std::string, T>& y);
+                                                     const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = multiply<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
                         
             template <typename T>
             static std::map<std::string, T> add(const std::map<std::string, T>& x, 
-                                                const std::map<std::string, T>& y);
+                                                const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = add<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }
             
             template <typename T>
             static std::map<std::string, T> subtract(const std::map<std::string, T>& x, 
-                                                     const std::map<std::string, T>& y);
+                                                     const std::map<std::string, T>& y)
+            {
+              std::map<std::string, T> ret = x;
+              
+              for_each_element_in_map
+                iterator_ret->second = subtract<T>(iterator_x->second, iterator_y->second);
+              
+              return ret;
+            }                                                     
+                                                     
+            #undef for_each_element_in_map                                                     
         };
-        
-        
+          
         class MaterialPropertyMaps
         {
           protected:

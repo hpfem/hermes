@@ -44,114 +44,6 @@ namespace WeakFormsNeutronics
     {
       namespace Common
       {
-        #define for_each_element_in_dimension \
-                        typedef typename NDArrayType::value_type dim_type;                      \
-                        typename NDArrayType::const_iterator dim_iterator_x = x.begin();        \
-                        typename NDArrayType::const_iterator dim_iterator_y = y.begin();        \
-                        for ( ; dim_iterator_x != x.end(); ++dim_iterator_x, ++dim_iterator_y )     
-                        
-        template <typename NDArrayType>
-        NDArrayType NDArrayMapOp::divide(const NDArrayType& x, const NDArrayType& y) 
-        { 
-          NDArrayType res; res.reserve(x.size());
-          
-          for_each_element_in_dimension
-            res.push_back( divide<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-          
-          return res;
-        }
-        
-        template <typename NDArrayType>
-        NDArrayType NDArrayMapOp::multiply(const NDArrayType& x, const NDArrayType& y) 
-        { 
-          NDArrayType res; res.reserve(x.size());
-          
-          for_each_element_in_dimension
-            res.push_back( multiply<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-          
-          return res;
-        }
-        
-        template <typename NDArrayType>
-        NDArrayType NDArrayMapOp::add(const NDArrayType& x, const NDArrayType& y) 
-        { 
-          NDArrayType res; res.reserve(x.size());
-          
-          for_each_element_in_dimension
-            res.push_back( add<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-          
-          return res;
-        }
-        
-        template <typename NDArrayType>
-        NDArrayType NDArrayMapOp::subtract(const NDArrayType& x, const NDArrayType& y) 
-        { 
-          NDArrayType res; res.reserve(x.size());
-          
-          for_each_element_in_dimension
-            res.push_back( subtract<dim_type>(*dim_iterator_x, *dim_iterator_y) );
-          
-          return res;
-        }
-        
-        #undef for_each_element_in_dimension
-        
-        #define for_each_element_in_map \
-        typename std::map<std::string, T>::iterator iterator_ret = ret.begin();   \
-        typename std::map<std::string, T>::const_iterator iterator_x = x.begin(); \
-        typename std::map<std::string, T>::const_iterator iterator_y = y.begin(); \
-        for ( ; iterator_x != x.end(); ++iterator_x, ++iterator_y, ++iterator_ret )  
-        
-        template <typename T>
-        std::map<std::string, T> NDArrayMapOp::divide( const std::map<std::string, T>& x, 
-                                                              const std::map<std::string, T>& y )
-        {
-          std::map<std::string, T> ret = x;
-          
-          for_each_element_in_map
-            iterator_ret->second = divide<T>(iterator_x->second, iterator_y->second);
-          
-          return ret;
-        }
-        
-        template <typename T>
-        std::map<std::string, T> NDArrayMapOp::multiply( const std::map<std::string, T>& x, 
-                                                                const std::map<std::string, T>& y )
-        {
-          std::map<std::string, T> ret = x;
-          
-          for_each_element_in_map
-            iterator_ret->second = multiply<T>(iterator_x->second, iterator_y->second);
-          
-          return ret;
-        }
-                    
-        template <typename T>
-        std::map<std::string, T> NDArrayMapOp::add(const std::map<std::string, T>& x, 
-                                                          const std::map<std::string, T>& y)
-        {
-          std::map<std::string, T> ret = x;
-          
-          for_each_element_in_map
-            iterator_ret->second = add<T>(iterator_x->second, iterator_y->second);
-          
-          return ret;
-        }
-        
-        template <typename T>
-        std::map<std::string, T> NDArrayMapOp::subtract( const std::map<std::string, T>& x, 
-                                                                const std::map<std::string, T>& y )
-        {
-          std::map<std::string, T> ret = x;
-          
-          for_each_element_in_map
-            iterator_ret->second = subtract<T>(iterator_x->second, iterator_y->second);
-          
-          return ret;
-        }
-        
-        #undef for_each_element_in_map
-        
         void MaterialPropertyMaps::extend_to_multigroup(const MaterialPropertyMap0& mrsg_map, 
                                                         MaterialPropertyMap1 *mrmg_map)
         {
@@ -618,6 +510,12 @@ namespace WeakFormsNeutronics
           
           return result;
         }
+        template
+        scalar VacuumBoundaryCondition::Jacobian::matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u,
+                                                              Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
+        template
+        Ord VacuumBoundaryCondition::Jacobian::matrix_form(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
+                                                           Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;                                                               
         
         template<typename Real, typename Scalar>
         Scalar VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
@@ -634,7 +532,13 @@ namespace WeakFormsNeutronics
           
           return result;
         }
-        
+        template
+        scalar VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<scalar> *u_ext[],
+                                                              Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
+        template
+        Ord VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<Ord> *u_ext[],
+                                                           Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;        
+       
         template<typename Real, typename Scalar>
         Scalar DiffusionReaction::Jacobian::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
