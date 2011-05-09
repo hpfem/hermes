@@ -44,6 +44,7 @@ namespace WeakFormsMaxwell {
     virtual WeakForm::MatrixFormVol* clone();
 
   private:
+    int idx_j;
     scalar const_coeff;
     CubicSpline* spline_coeff;
     GeomType gt;
@@ -71,6 +72,7 @@ namespace WeakFormsMaxwell {
     virtual WeakForm::VectorFormVol* clone();
 
   private:
+    int idx_i;
     scalar const_coeff;
     CubicSpline* spline_coeff;
     GeomType gt;

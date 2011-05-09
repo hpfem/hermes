@@ -1,5 +1,6 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+#include "definitions.h"
+#include "problem_data.h"
 
 // This example solves a 4-group neutron diffusion equation in the reactor core.
 // The eigenproblem is solved using power interations.
@@ -58,17 +59,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // Initial eigenvalue approximation.
 double k_eff = 1.0;         
 
-// Element markers.
-std::string reflector = "reflector";
-std::string core = "core";
-
-// Boundary markers.
-std::string bdy_vacuum = "vacuum boundary";
-std::string bdy_symmetry = "symmetry plane";
-
-// Weak forms, input data and some other utility functions.
-#include "definitions.cpp"
-
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
@@ -77,7 +67,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("reactor.mesh", &mesh);
+  mloader.load(mesh_file.c_str(), &mesh);
 
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
@@ -187,8 +177,8 @@ int main(int argc, char* argv[])
     
     // Compute eigenvalue.
     
-    SourceFilter source(solutions, matprop);
-    SourceFilter source_prev(iterates, matprop);
+    SourceFilter source(solutions, matprop, core);
+    SourceFilter source_prev(iterates, matprop, core);
     
     double k_new = k_eff * (integrate(&source, core) / integrate(&source_prev, core));
     info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_new, fabs((k_eff - k_new) / k_new));
