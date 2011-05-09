@@ -409,13 +409,13 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_0_0(double E, double nu) 
-      : MatrixFormVol(0, 0, HERMES_SYM), E(E), nu(nu) {
+      : MatrixFormVol<double>(0, 0, HERMES_SYM), E(E), nu(nu) {
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) 
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -424,7 +424,7 @@ private:
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) 
     {
        return wt[0] * (A * u->dx[0] * v->dx[0] + B * u->dy[0] * v->dy[0]);
     }
@@ -436,12 +436,12 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_0_1(double E, double nu) 
-      : MatrixFormVol(0, 1, HERMES_SYM), E(E), nu(nu) { 
+      : MatrixFormVol<double>(0, 1, HERMES_SYM), E(E), nu(nu) { 
       C = -E * (1 - nu * nu)/((1 - 2 * nu) * (2 - 2 * nu));
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) 
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -450,7 +450,7 @@ private:
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
-            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+            Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) 
     {
        return wt[0] * (C * u->dx[0] * v->dy[0]);
     }
@@ -462,13 +462,13 @@ private:
   {
   public:
     CustomMatrixFormVolLinearElasticity_1_1(double E, double nu) 
-      : MatrixFormVol(1, 1, HERMES_SYM), E(E), nu(nu) { 
+      : MatrixFormVol<double>(1, 1, HERMES_SYM), E(E), nu(nu) { 
       A = -E * (1 - nu * nu)/(1 - 2 * nu);
       B = -E * (1 - nu * nu)/(2 - 2 * nu);
     }
 
     scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const
+                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) 
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
@@ -477,7 +477,7 @@ private:
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, ExtData<Ord> *ext) const
+            Geom<Ord> *e, ExtData<Ord> *ext) 
     {
        return wt[0] * (B * u->dx[0] * v->dx[0] + A * u->dy[0] * v->dy[0]);
     }
