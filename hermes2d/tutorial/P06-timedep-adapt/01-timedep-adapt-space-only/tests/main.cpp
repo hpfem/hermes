@@ -53,8 +53,6 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
-const std::string BDY_DIRICHLET = "1";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -76,7 +74,7 @@ int main(int argc, char* argv[])
   mesh.copy(&basemesh);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
