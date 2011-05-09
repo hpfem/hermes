@@ -123,7 +123,7 @@
 #include "weakform_library/weakforms_h1.h"
 #include "weakform_library/weakforms_hcurl.h"
 #include "weakform_library/weakforms_maxwell.h"
-//#include "weakform_library\weakforms_neutronics.h"
+#include "weakform_library/weakforms_neutronics.h"
 
 /**
 
