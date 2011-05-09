@@ -3,7 +3,8 @@
 #define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 
-#include "hermes2d.h"
+#include "definitions.h"
+#include "problem_data.h"
 
 // This test makes sure that example "neutronics/4-group" works correctly.
 
@@ -36,9 +37,6 @@ std::string core = "core";
 // Boundary markers.
 std::string bdy_vacuum = "vacuum boundary";
 std::string bdy_symmetry = "symmetry plane";
-
-// Weak forms, input data and some other utility functions.
-#include "definitions.cpp"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +140,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("../reactor.mesh", &mesh);
+  mloader.load((std::string("../") + mesh_file).c_str(), &mesh);
   
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
