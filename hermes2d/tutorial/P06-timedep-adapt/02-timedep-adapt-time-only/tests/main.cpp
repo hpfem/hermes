@@ -45,9 +45,6 @@ const std::string BDY_DIRICHLET = "1";
 // Weak forms.
 #include "definitions.cpp"
 
-// Initial condition.
-#include "initial_condition.cpp"
-
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
