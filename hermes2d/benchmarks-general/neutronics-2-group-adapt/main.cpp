@@ -1,7 +1,8 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 
-#include "hermes2d.h"
+#include "definitions.h"
+#include "problem_data.h"
 
 using namespace RefinementSelectors;
 
@@ -86,9 +87,44 @@ const int ERR_EST_PLOT = 1;                       // Row in the convergence grap
 const int GROUP_1 = 0;                            // Row in the DOF evolution graph for group 1.
 const int GROUP_2 = 1;                            // Row in the DOF evolution graph for group 2.
 
-// Weak forms, input data and some other utility functions.
-#include "definitions.cpp"
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Construct a string representing the globally set adaptivity options.
+void make_str_from_adapt_opts(std::stringstream& str)
+{    
+  switch (CAND_LIST) {
+    case H2D_H_ANISO:
+    case H2D_H_ISO:
+      str << "h" << P_INIT[0] << "_" << P_INIT[1];
+      break;
+    case H2D_P_ANISO:
+    case H2D_P_ISO:
+      str << "p" << INIT_REF_NUM[0] << "_" << INIT_REF_NUM[1];
+      break;
+    default:
+      str << "hp";
+      break;
+  }
+  switch (CAND_LIST) {
+    case H2D_H_ANISO:
+    case H2D_P_ANISO:
+    case H2D_HP_ANISO:
+      str << "_aniso";
+      break;
+    case H2D_H_ISO:
+    case H2D_P_ISO:
+    case H2D_HP_ISO:
+      str << "_iso";
+      break;
+    case H2D_HP_ANISO_H:
+      str << "_anisoh";
+      break;
+    case H2D_HP_ANISO_P:
+      str << "_anisop";
+      break;
+  }
+  
+  str << (MULTIMESH ? "_multi" : "_single");
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[])
@@ -99,7 +135,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh1, mesh2;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh1);
+  mloader.load(mesh_file.c_str(), &mesh1);
 
   if (MULTIMESH) 
   {
