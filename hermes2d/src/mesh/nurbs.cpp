@@ -1,3 +1,18 @@
+// This file is part of Hermes2D.
+//
+// Hermes2D is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// Hermes2D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "nurbs.h"
 
 NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double w[], int KntMaxIndx, double Uvals[]) {
@@ -168,7 +183,7 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
   double ndu[p+1][p+1];
 
   double saved,temp;
-  int j,r;
+  int j, r;
 
   ndu[0][0] = 1.0;
   for(j=1; j<= p;j++) {
@@ -177,10 +192,10 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
     saved = 0.0;
     
     for(r=0; r<j; r++) {
-      // Lower triangle
+      // Lower triangle.
       ndu[j][r] = right[r+1]+left[j-r];
       temp = ndu[r][j-1]/ndu[j][r];
-      // Upper triangle
+      // Upper triangle.
       ndu[r][j] = saved+right[r+1] * temp;
       saved = left[j-r] * temp;
     }
@@ -188,19 +203,19 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
     ndu[j][j] = saved;
   }
 
-  for(j=0; j<=p; j++) // Load the basis functions
+  for(j=0; j<=p; j++) // Load the basis functions.
     ders[0][j] = ndu[j][p];
 
-  // Compute the derivatives Eq. 2.10 in The NURBS book
+  // Compute the derivatives Eq. 2.10 in The NURBS book.
 
   double a[2][p+1];
 
   for(r=0; r<=p; r++) {
     int s1,s2;
     s1 = 0; 
-    s2 = 1; // alternate rows in array a
+    s2 = 1; // Alternate rows in array a.
     a[0][0] = 1.0;
-    // Compute the kth derivative
+    // Compute the kth derivative.
     for(int k=1; k<=d; k++) {
       double d;
       int rk,pk,j1,j2;
