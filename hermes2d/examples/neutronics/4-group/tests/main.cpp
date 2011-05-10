@@ -30,14 +30,6 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // Initial eigenvalue approximation.
 double k_eff = 1.0;         
 
-// Element markers.
-std::string reflector = "reflector";
-std::string core = "core";
-
-// Boundary markers.
-std::string bdy_vacuum = "vacuum boundary";
-std::string bdy_symmetry = "symmetry plane";
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // General testing class. It can test
@@ -232,8 +224,8 @@ int main(int argc, char* argv[])
     
     // Compute eigenvalue.
     
-    SourceFilter source(solutions, matprop);
-    SourceFilter source_prev(iterates, matprop);
+    SourceFilter source(solutions, matprop, core);
+    SourceFilter source_prev(iterates, matprop, core);
     
     double k_new = k_eff * (integrate(&source, core) / integrate(&source_prev, core));
     info("Largest eigenvalue: %.8g, rel. difference from previous it.: %g", k_new, fabs((k_eff - k_new) / k_new));
