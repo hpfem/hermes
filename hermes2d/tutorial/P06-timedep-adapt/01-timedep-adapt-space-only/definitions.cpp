@@ -122,3 +122,6 @@ public:
     return (x+10)*(y+10)/100.;
   }
 };
+
+// Initial condition.
+#include "initial_condition.cpp"

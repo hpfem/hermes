@@ -25,10 +25,11 @@ using namespace RefinementSelectors;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
+const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
+const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
+const int P_INIT = 2;                              // Initial polynomial degree.
 double time_step = 0.05;                          // Time step. 
-const double T_FINAL = 2.0;                       // Time interval length.
+const double T_FINAL = 5.0;                       // Time interval length.
 
 // Spatial adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
@@ -69,12 +70,12 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
                                                   // The methods for the adaptive and fixed-step versions are set
                                                   // below. An embedded method must be used with adaptive time stepping. 
-const double TIME_ERR_TOL_UPPER = 1.0;            // If rel. temporal error is greater than this threshold, decrease time 
+const double TIME_ERR_TOL_UPPER = 5.0;            // If rel. temporal error is greater than this threshold, decrease time 
                                                   // step size and repeat time step.
-const double TIME_ERR_TOL_LOWER = 0.8;            // If rel. temporal error is less than this threshold, increase time step
+const double TIME_ERR_TOL_LOWER = 0.05;                 // If rel. temporal error is less than this threshold, increase time step
                                                   // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
-const double TIME_STEP_DEC_RATIO = 0.6;           // Time step decrease ratio (applied when rel. temporal error is too large).
+const double TIME_STEP_DEC_RATIO = 0.8;           // Time step decrease ratio (applied when rel. temporal error is too large).
 
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
@@ -100,9 +101,10 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
 
+const std::string BDY_DIRICHLET = "1";
+
 // Weak forms.
 #include "definitions.cpp"
-#include "initial_condition.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -125,13 +127,14 @@ int main(int argc, char* argv[])
   Mesh mesh, basemesh;
   H2DReader mloader;
   mloader.load("square.mesh", &basemesh);
-
-  // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
   mesh.copy(&basemesh);
 
+  // Initial mesh refinements.
+  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential("Bdy");
+  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -149,8 +152,6 @@ int main(int argc, char* argv[])
 
   // Create a refinement selector.
   H1ProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
   // Visualize initial condition.
   char title[100];
@@ -208,6 +209,8 @@ int main(int argc, char* argv[])
 
       // Initialize discrete problem on reference mesh.
       DiscreteProblem* ref_dp = new DiscreteProblem(&wf, ref_space);
+      
+      RungeKutta runge_kutta(ref_dp, &bt, matrix_solver);
 
       // Runge-Kutta step on the fine mesh.
       info("Runge-Kutta time step on fine mesh (t = %g s, tau = %g s, stages: %d).", 
@@ -251,7 +254,7 @@ int main(int argc, char* argv[])
           continue;
         }
         else if (rel_err_time < TIME_ERR_TOL_LOWER) {
-          info("rel_err_time = %g%% is below lower limit %g%%", rel_err_time, TIME_ERR_TOL_UPPER);
+          info("rel_err_time = %g%% is below lower limit %g%%", rel_err_time, TIME_ERR_TOL_LOWER);
           info("Increasing tau from %g to %g s.", time_step, time_step * TIME_STEP_INC_RATIO);
           time_step *= TIME_STEP_INC_RATIO;
           delete ref_space;
