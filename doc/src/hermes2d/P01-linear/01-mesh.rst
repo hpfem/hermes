@@ -285,8 +285,7 @@ The class MeshView provides the method show() that displays a window showing the
 
 .. image:: 01-mesh/meshview2.png
    :align: center
-   :width: 400
-   :height: 400
+   :width: 420
    :alt: Image of the mesh created via the MeshView class.
 
 To see the graphical output, the main.cpp file should be finished with::

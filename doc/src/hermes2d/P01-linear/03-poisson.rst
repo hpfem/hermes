@@ -24,7 +24,7 @@ Consider the Poisson equation
 .. math::
     :label: poisson1
 
-       -\mbox{div}(\lambda \nabla u) = C
+       -\mbox{div}(\lambda \nabla u) = C_{src}
 
 in the L-shaped domain $\Omega$ from the previous examples.
 The equation is equipped with constant Dirichlet boundary conditions
@@ -35,7 +35,7 @@ The equation is equipped with constant Dirichlet boundary conditions
        u = u_0\ \ \  \mbox{on}\  \partial \Omega.
 
 Here $u$ is an unknown temperature distribution, 
-$C$ a real number representing volumetric heat sources/losses, and $\lambda > 0$ is thermal conductivity
+$C_{src}$ a real number representing volumetric heat sources/losses, and $\lambda > 0$ is thermal conductivity
 of the material.
 
 The weak formulation is derived as usual, first by multiplying equation :eq:`poisson1` 
@@ -50,14 +50,14 @@ reads: Find $u \in V$ such that
 .. math::
     :label: poissonweak01
 
-         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = \int_\Omega C v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} = \int_\Omega C_{src} v \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
 
 Hermes, however, needs the equation in the form 
 
 .. math::
     :label: poissonweak01b
 
-         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - \int_\Omega C v  = 0 \;\mbox{d\bfx}\ \ \ \mbox{for all}\ v \in V.
+         \int_\Omega \lambda \nabla u \cdot \nabla v \;\mbox{d\bfx} - \int_\Omega C_{src} v \;\mbox{d\bfx} = 0\ \ \ \mbox{for all}\ v \in V.
 Let us explain why.
 
 Jacobian-residual formulation
@@ -101,7 +101,7 @@ The residual weak form is the entire left-hand side of :eq:`poissonweak01b`:
 
     \int_{\Omega_{al}} \lambda_{al} \nabla u \cdot \nabla v \, \mbox{d}x \mbox{d}y
     + \int_{\Omega_{cu}} \lambda_{cu} \nabla u \cdot \nabla v \, \mbox{d}x \mbox{d}y
-    - \int_{\Omega} C v \, \mbox{d}x \mbox{d}y.
+    - \int_{\Omega} C_{src} v \, \mbox{d}x \mbox{d}y.
 
 The corresponding code looks as follows::
 
@@ -119,7 +119,7 @@ The corresponding code looks as follows::
       add_vector_form(new WeakFormsH1::DefaultVectorFormConst(0, HERMES_ANY, -vol_heat_src));
     };
 
-Here, vol_heat_src stands for $C$. 
+Here, vol_heat_src stands for $C_{src}$. 
 
 Only minor changes are needed to extend the constants 
 $\lambda_{al}$ and $\lambda_{cu}$ to general cubic splines::
@@ -226,7 +226,7 @@ which adds to the residual weak form the integral
 
 .. math ::
 
-    - \int_{\Omega} C v \, \mbox{d}x \mbox{d}y
+    - \int_{\Omega} C_{src} v \, \mbox{d}x \mbox{d}y
 
 and thus it completes :eq:`poissonweak01b`.
 
@@ -280,7 +280,7 @@ Initializing finite element space
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As a next step, we initialize the FE space in the same way as in the previous tutorial 
-example 02::
+example 02-space::
 
     // Create an H1 space with default shapeset.
     H1Space space(&mesh, &bcs, P_INIT);

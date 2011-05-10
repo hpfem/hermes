@@ -32,7 +32,8 @@ User and Developer Documentation
 --------------------------------
 
 This user documentation can be found in the directory doc/. Type "make html" there 
-to build it. The HTML pages can then be displayed by typing "firefox _build/html".
+to build it. The HTML pages can then be displayed by typing "firefox _build/html",
+"chromium-browser _build/html" or similar.
 
 To compile the C++ reference manual for Hermes2D, go to 'hermes2d/doc.cpp/'. There
 type "doxygen hermes2d.lib-real.doxyfile" to build references for the 

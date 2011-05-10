@@ -35,6 +35,7 @@ using namespace RefinementSelectors;
 // h-adaptivity via the CAND_LIST option, and compare the multi-mesh vs.
 // single-mesh using the MULTI parameter.
 
+//#define WITH_EXACT_SOLUTION                       // Error wrt. exact solution will be calculated.
 const int P_INIT_U = 2;                           // Initial polynomial degree for u.
 const int P_INIT_V = 1;                           // Initial polynomial degree for v.
 const int INIT_REF_BDY = 5;                       // Number of initial boundary refinements
@@ -105,9 +106,11 @@ int main(int argc, char* argv[])
   // Initial mesh refinements in the v_mesh towards the boundary.
   if (MULTI == true) v_mesh.refine_towards_boundary("Bdy", INIT_REF_BDY);
 
+#ifdef WITH_EXACT_SOLUTION
   // Set exact solutions.
   ExactSolutionFitzHughNagumo1 exact_u(&u_mesh);
   ExactSolutionFitzHughNagumo2 exact_v(&v_mesh, K);
+#endif
 
   // Define right-hand sides.
   CustomRightHandSide1 g1(K, D_u, SIGMA);
@@ -141,8 +144,10 @@ int main(int argc, char* argv[])
   OrderView  o_view_1("Mesh[1]", new WinGeom(1330, 0, 420, 350));
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est, 
-              graph_dof_exact, graph_cpu_exact;
+  SimpleGraph graph_dof_est, graph_cpu_est; 
+#ifdef WITH_EXACT_SOLUTION
+  SimpleGraph graph_dof_exact, graph_cpu_exact;
+#endif
 
   // Adaptivity loop:
   int as = 1; 
@@ -205,17 +210,20 @@ int main(int argc, char* argv[])
                                                         Hermes::vector<Solution *>(&u_ref_sln, &v_ref_sln), 
                                                         &err_est_rel) * 100;
 
+#ifdef WITH_EXACT_SOLUTION
     // Calculate exact error for each solution component and the total exact error.
     Hermes::vector<double> err_exact_rel;
     bool solutions_for_adapt = false;
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution *>(&u_sln, &v_sln), 
                                                             Hermes::vector<Solution *>(&exact_u, &exact_v), 
                                                             &err_exact_rel, solutions_for_adapt) * 100;
+#endif
 
     // Time measurement.
     cpu_time.tick();
 
     // Report results.
+#ifdef WITH_EXACT_SOLUTION
     info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
          u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
     info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
@@ -225,17 +233,30 @@ int main(int argc, char* argv[])
     info("ndof_coarse_total: %d, ndof_fine_total: %d",
          Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
     info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
+#else
+    info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
+         u_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[0]));
+    info("err_est_rel[0]: %g%%", err_est_rel[0]*100);
+    info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
+         v_space.Space::get_num_dofs(), Space::get_num_dofs((*ref_spaces)[1]));
+    info("err_est_rel[1]: %g%%", err_est_rel[1]*100);
+    info("ndof_coarse_total: %d, ndof_fine_total: %d",
+         Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), Space::get_num_dofs(*ref_spaces));
+    info("err_est_rel_total: %g%%", err_est_rel_total);
+#endif
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
+#ifdef WITH_EXACT_SOLUTION
     graph_dof_exact.add_values(Space::get_num_dofs(Hermes::vector<Space *>(&u_space, &v_space)), 
                                err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");
+#endif
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel_total < ERR_STOP) 

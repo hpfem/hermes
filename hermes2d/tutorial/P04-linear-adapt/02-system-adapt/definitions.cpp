@@ -60,7 +60,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) const {
-    return Ord(20);
+    return Ord(10);
   }
 
   ~CustomRightHandSide1() { delete cef1; delete cef2;}
@@ -90,7 +90,7 @@ public:
   }
 
   virtual Ord ord(Ord x, Ord y) const {
-    return Ord(20);
+    return Ord(10);
   }
 
   ~CustomRightHandSide2() { delete cef1; delete cef2;}
@@ -124,7 +124,7 @@ public:
 
   virtual Ord ord(Ord x, Ord y) const 
   {
-    return Ord(20);
+    return Ord(10);
   }
 
   ~ExactSolutionFitzHughNagumo1() 
@@ -156,7 +156,7 @@ public:
 
   virtual Ord ord(Ord x, Ord y) const 
   {
-    return Ord(20);
+    return Ord(10);
   }
 
   ~ExactSolutionFitzHughNagumo2() 

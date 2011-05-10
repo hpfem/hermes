@@ -19,7 +19,10 @@ axisymmetric 3D problems.
    P01-linear/01-mesh   
    P01-linear/02-space
    P01-linear/03-poisson
-   P01-linear/04-05-06-bc
+   P01-linear/essential_and_natural_bc
+   P01-linear/04-bc-dirichlet
+   P01-linear/05-bc-neumann
+   P01-linear/06-bc-newton
    P01-linear/quadrature
    P01-linear/07-general
    P01-linear/08-system

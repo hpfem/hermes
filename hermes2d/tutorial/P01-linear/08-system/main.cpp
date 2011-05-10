@@ -48,6 +48,10 @@ int main(int argc, char* argv[])
   // Perform uniform mesh refinement.
   mesh.refine_all_elements();
 
+  // Show mesh.
+  MeshView mv("Mesh", new WinGeom(0, 0, 580, 400));
+  mv.show(&mesh);
+
   // Initialize boundary conditions.
   DefaultEssentialBCConst zero_disp("Bottom", 0.0);
   EssentialBCs bcs(&zero_disp);
@@ -85,7 +89,7 @@ int main(int argc, char* argv[])
                                 Hermes::vector<Solution *>(&u1_sln, &u2_sln));
   
   // Visualize the solution.
-  ScalarView view("Von Mises stress [Pa]", new WinGeom(0, 0, 800, 400));
+  ScalarView view("Von Mises stress [Pa]", new WinGeom(590, 0, 700, 400));
   double lambda = (E * nu) / ((1 + nu) * (1 - 2*nu));  // First Lame constant.
   double mu = E / (2*(1 + nu));                        // Second Lame constant.
   VonMisesFilter stress(Hermes::vector<MeshFunction *>(&u1_sln, &u2_sln), lambda, mu);
