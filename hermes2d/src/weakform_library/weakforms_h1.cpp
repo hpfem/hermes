@@ -51,7 +51,7 @@ namespace WeakFormsH1
   }
 
   Ord DefaultMatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-                  Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
+                                Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
     Ord result = 0;
     if (gt == HERMES_PLANAR) {
       for (int i = 0; i < n; i++) {
