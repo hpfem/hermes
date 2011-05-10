@@ -28,8 +28,8 @@ using namespace RefinementSelectors;
 const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
 const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
 const int P_INIT = 2;                              // Initial polynomial degree.
-double time_step = 0.05;                          // Time step. 
-const double T_FINAL = 5.0;                       // Time interval length.
+double time_step = 0.05;                           // Time step. 
+const double T_FINAL = 5.0;                        // Time interval length.
 
 // Spatial adaptivity.
 const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time step the mesh is derefined.
@@ -70,9 +70,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 bool ADAPTIVE_TIME_STEP_ON = true;                // This flag decides whether adaptive time stepping will be done.
                                                   // The methods for the adaptive and fixed-step versions are set
                                                   // below. An embedded method must be used with adaptive time stepping. 
-const double TIME_ERR_TOL_UPPER = 5.0;            // If rel. temporal error is greater than this threshold, decrease time 
+const double TIME_ERR_TOL_UPPER = 1.0;            // If rel. temporal error is greater than this threshold, decrease time 
                                                   // step size and repeat time step.
-const double TIME_ERR_TOL_LOWER = 0.05;                 // If rel. temporal error is less than this threshold, increase time step
+const double TIME_ERR_TOL_LOWER = 0.1;            // If rel. temporal error is less than this threshold, increase time step
                                                   // but do not repeat time step (this might need further research).
 const double TIME_STEP_INC_RATIO = 1.1;           // Time step increase ratio (applied when rel. temporal error is too small).
 const double TIME_STEP_DEC_RATIO = 0.8;           // Time step decrease ratio (applied when rel. temporal error is too large).
@@ -80,8 +80,8 @@ const double TIME_STEP_DEC_RATIO = 0.8;           // Time step decrease ratio (a
 const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
 
 // Newton's method.
-const double NEWTON_TOL_COARSE = 0.01;            // Stopping criterion for Newton on fine mesh.
-const double NEWTON_TOL_FINE = 0.05;              // Stopping criterion for Newton on fine mesh.
+const double NEWTON_TOL_COARSE = 0.001;           // Stopping criterion for Newton on fine mesh.
+const double NEWTON_TOL_FINE = 0.005;             // Stopping criterion for Newton on fine mesh.
 const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of Newton iterations.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
@@ -100,8 +100,6 @@ const int NEWTON_MAX_ITER = 20;                   // Maximum allowed number of N
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
 ButcherTableType butcher_table_type = Implicit_SDIRK_CASH_3_23_embedded;
-
-const std::string BDY_DIRICHLET = "1";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -131,10 +129,10 @@ int main(int argc, char* argv[])
 
   // Initial mesh refinements.
   for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  mesh.refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  EssentialBCNonConst bc_essential("Bdy");
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -194,6 +192,7 @@ int main(int argc, char* argv[])
 
       ndof = Space::get_num_dofs(&space);
     }
+    info("ndof: %d", ndof);
 
     // Spatial adaptivity loop. Note: sln_time_prev must not be 
     // changed during spatial adaptivity. 
@@ -236,7 +235,7 @@ int main(int argc, char* argv[])
         sprintf(title, "Temporal error est, spatial adaptivity step %d", as);     
         time_error_view.set_title(title);
         time_error_view.show_mesh(false);
-        time_error_view.show(time_error_fn);
+        time_error_view.show(time_error_fn, HERMES_EPS_HIGH);
 
         rel_err_time = hermes2d.calc_norm(time_error_fn, HERMES_H1_NORM) / 
                        hermes2d.calc_norm(&ref_sln, HERMES_H1_NORM) * 100;

@@ -1,9 +1,14 @@
+/* Weak forms */
+
 class WeakFormHeatTransferNewtonTimedep : public WeakForm
 {
 public:
   WeakFormHeatTransferNewtonTimedep(double alpha, double tau, Solution* sln_prev_time) 
-          : WeakForm(1) { add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau));
+          : WeakForm(1) { 
+    // Jacobian.
+    add_matrix_form(new MatrixFormVolHeatTransfer(0, 0, alpha, tau));
 
+    // Residual.
     VectorFormVolHeatTransfer* vector_form = new VectorFormVolHeatTransfer(0, alpha, tau);
     vector_form->ext.push_back(sln_prev_time);
     add_vector_form(vector_form);
@@ -123,5 +128,23 @@ public:
   }
 };
 
-// Initial condition.
-#include "initial_condition.cpp"
+/* Initial condition */
+
+class InitialSolutionHeatTransfer : public ExactSolutionScalar
+{
+public:
+  InitialSolutionHeatTransfer(Mesh* mesh) : ExactSolutionScalar(mesh) {};
+
+  virtual scalar value (double x, double y) const {
+    return (x+10)*(y+10)/100.;
+  }
+
+  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const {
+    dx = (y+10)/10.;
+    dy = (x+10)/10.;
+  }
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return (x+10)*(y+10)/100.;
+  }
+};

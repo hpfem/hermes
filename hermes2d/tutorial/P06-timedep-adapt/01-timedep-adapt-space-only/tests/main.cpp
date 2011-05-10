@@ -56,9 +56,6 @@ const double ALPHA = 4.0;                         // For the nonlinear thermal c
 // Weak forms.
 #include "../definitions.cpp"
 
-// Initial condition.
-#include "../initial_condition.cpp"
-
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
