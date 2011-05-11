@@ -15,6 +15,7 @@
 
 #include "nurbs.h"
 
+/// Constructor for the NURBS class.
 NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double w[], int KntMaxIndx, double Uvals[]) {
 
   p = deg;
@@ -36,6 +37,7 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
   }
 }
 
+/// Destructor for the NURBS class.
   NurbsCurve::~NurbsCurve() {
 
   delete [] U;
@@ -43,18 +45,15 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
 
  }
 
+///  Determines the knot span idex.
+///  Algorithm A2.1 in The NURBS book p68.
+///  Parameter:  
+///    u - Control parameter. Determines where to evaluate knot span index.
+///  Returns: 
+///    The knot span index while \f$ u < U[mid] \lor u >= U[mid+1] \f$. 
+///    That is \f$i\f$ if \f$ u_i <= u < u_{i+1} \f$.
+///                                                                     
   int NurbsCurve::FindSpan(double u) const {
-/*
-  Determine the knot span idex
-  Algorithm A2.1 in The NURBS book.
-
-  Input: n - number of control points,
-         p - degree of the curve, 
-         u - control parameter, 
-         knt - a knot vector, check out "nurbs.h"
-  Output: The knot span index while (u < U[mid] || u >= U[mid+1]);- that is 'i' if u <= u < u
-                                                                                    i        i+1
-*/
  
   if ( u >= U[n+1]) 
     return n;
@@ -77,20 +76,17 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
 
   }
 
+/// Computes the nonvanishing basis functions.
+/// Algorithm A2.2 of The NURBS book, p70.
+/// Based on Eq. 2.5 and Cox-deBoor-Mansfield reccurence algorithm.
+/// Parameters: 
+///   span - Specifies the span at which we compute basis functions.
+///   u - Control parameter value. 
+/// Output: 
+///   N - Non-zero basis functions in the array \f$ N[0],...N[p] \f$ of length p+1.
+///   This array has to be allocated in the calling function.
   void NurbsCurve::BasisFuns(int span, double u, double N[]) const {
-/*
-  Computes the nonvanishing basis functions.
-  Based on Eq. 2.5 and Cox-deBoor-Mansfield reccurence algorithm.
-  Algorithm A2.2 of The NURBS book, pp70. 
 
-  Input: span - specifies the span at which basis function to compute, 
-         u - the parametric value, 
-         p - degree of the curve, 
-         U - the knot vector
-  Output: N - the non-zero basis functions in the array N[0],...N[p] of length p+1.
-          This array has to be allocated in the calling function.
-
-*/
   int i = span;
   double *left = new double[2*(p+1)];
   double *right = &left[p+1];
@@ -115,22 +111,21 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
 
 }
 
+/// Computes the nonvanishing basis functions.
+/// Based on Eq. 2.5 and Cox-deBoor-Mansfield reccurence algorithm.
+/// Algorithm A2.2 of The NURBS book, p70. 
+/// Parameters: 
+///   span - Specifies the span at which we compute basis functions. 
+///   u - Control parameter value. 
+///   deg - Degree of the basis function we compute.  
+///   U - The knot vector.
+/// Output: 
+///   N - Non-zero basis functions in the array \f$ N[0],...N[deg] \f$ of length deg+1.
+///       This array has to be allocated in the calling function. 
+///       To relate N to the basis functions: 
+///       \f$ N_{all}[span -deg +i] = N[i] \f$, where \f$ i=0... deg \f$.
   void NurbsCurve::nurbsBasisFuns(int span, double u, int deg, double U[], double N[]) const {
-/*
-  Computes the nonvanishing basis functions.
-  Based on Eq. 2.5 and Cox-deBoor-Mansfield reccurence algorithm.
-  Algorithm A2.2 of The NURBS book, pp70. 
 
-  Input: span - specifies the span at which basis function to compute, 
-         u - the parametric value, 
-         deg - degree, 
-         U - the knot vector
-  Output: N - the non-zero basis functions in the array N[0],...N[deg] of length deg+1.
-          This array has to be allocated in the calling function. 
-          To relate N to the basis functions, 
-          N_{all}[span -deg +i] = N[i] for i=0... deg.
-
-*/
   int i = span;
   double *left = new double[2*(deg+1)];
   double *right = &left[deg+1];
@@ -155,27 +150,19 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
 
 }
 
+/// Computes the basis functions of the NURBS curve and their derivatives at parametric value "u". 
+/// Based on Eq. 2.10 and Algorithm A2.3 in The NURBS book, p72. 
+/// The result is stored in the ders matrix, where ders is of 
+/// size [d+1][p+1] and the derivative \f$ N'_i(u) = ders(1,i=span-p+j) \f$ where \f$ j = 0...p+1 \f$.
+/// Parameters:
+///   d - The degree of the derivation. 
+///   u - Control parameter value.
+///   span - Specifies the span at which we compute basis functions and their derivatives. 
+/// Output:
+///   ders - A [d+1][p+1] matrix containing the derivatives of the curve.
+///   This array has to be allocated in the calling function.
   void NurbsCurve::DersBasisFuns(int d, double u, int span, Matrix<double> &ders) const {
-/*
-  Compute the basis functions and their derivatives at 'u' of the NURBS curve.
-  Based on Eq. 2.10 and Algorithm A2.3 in The NURBS book, pp 72, 
 
-  The result is stored in the ders matrix, where ders is of 
-  size [d+1][p+1] and the derivative 
-  N'_i(u) = ders(1,i=span-p+j) where j = 0...p+1.
-
-
-  Input:
-  d - the degree of the derivation 
-  u - the parametric value
-  p - degree of the curve
-  span - the span for the basis functions
-  U - the knot vector on which the Basis functions must be computed
- 
-  Output:
-  ders  A [d+1][p+1] matrix containing the derivatives of the curve.
-
-*/
   double left[p+1];
   double right[p+1];
   
@@ -254,11 +241,11 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
       ders[k][r] = d;
       j = s1; 
       s1 = s2; 
-      s2 = j; // Switch rows
+      s2 = j; // Switch rows.
     }
   }
 
-  // Multiply through by the correct factors
+  // Multiply through by the correct factors.
   r = p;
   for(int k=1; k<=d; k++) {
     for(j=0; j<=p; j++)
@@ -268,22 +255,15 @@ NurbsCurve::NurbsCurve(int deg, int CPtMaxIndx, double Px[], double Py[], double
 
 }
 
-
-double NurbsCurve::SingleBasisFun(double u, int i, int p) const {
-/*
-   Computes single basis function of the curve
-
-  Computes the i basis function of degree p  of the curve at 
-  parameter u. 
-
-  Input:
-  u - the parametric value
-  i - specifies span at which basis function to compute
-  p - the degree to which the basis function is computed
-  Output:
-  the value of N_{i,p}(u)
-basisFun
-*/
+/// Computes the i-th basis function of degree p of the NURBS curve at parametric value u.
+/// Algorithm A2.4 of The NURBS book, p74. 
+/// Parameters:
+///   u - Control parameter value.
+///   i - Specifies the span at which we compute particular basis function.
+///   p - the degree to which the basis function is computed
+//  Returns:
+///  \f$ N_{i,p}(u) \f$ - The value of i-th basis function of degree p at u.  
+  double NurbsCurve::SingleBasisFun(double u, int i, int p) const {
 
   double Nip;
   double saved,Uleft,Uright,temp;
@@ -300,7 +280,7 @@ basisFun
   double N[p+1];
   
   int j;
-  //Inialize zeroth degree functions
+  // Inialize zeroth degree functions.
   for(j = 0; j <= p; j++) {
     if(u >= U[i+j] && u < U[i+j+1]) 
       N[j] = 1.0;
@@ -308,7 +288,7 @@ basisFun
       N[j] = 0.0;
   }
 
-  //Compute triangular table
+  // Compute triangular table.
   for(int k=1; k<=p ; k++){
     if(N[0] == 0.0)
       saved = 0.0;
@@ -320,27 +300,30 @@ basisFun
 
       if(N[j+1]==0.0) {
 	N[j] = saved;
-	saved = 0.0 ;
+	saved = 0.0;
       }
       else {
-	temp = N[j+1]/(Uright-Uleft) ;
-	N[j] = saved+(Uright-u)*temp ;
-	saved = (u-Uleft)*temp ;
+	temp = N[j+1]/(Uright-Uleft);
+	N[j] = saved+(Uright-u)*temp;
+	saved = (u-Uleft)*temp;
       }
     }
   }
-  Nip = N[0] ;
+  Nip = N[0];
 
-  return Nip ;  
+  return Nip;  
 }
 
-void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
-/*
-  Calculates all nonzero basis functions of all degrees from 0 up to p.
+/// Simple modification BasisFuns function enable calculation of 
+/// all nonzero basis functions of all degrees from 0 up to p.
+/// Parameters: 
+///   span - Specifies the span at which we compute basis functions. 
+///   u - Control parameter value.
+/// Output:
+///   A matrix N, where N[j][i] is the j-th basis function of i-th degree. 
+///   \f[ N_{span-i+j, i}(u), \; 0 <= i <= p, \; 0 <= j <= i \f].
+  void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
 
-  Returns a matrix N, where N[j][i] is the i-th degree basis function 
-  N_{span-i+j, i}(u). 0 <= i <= p;  0 <= j <= i.
-*/
  for (int i = 0; i<=p; i++) {
    double *Nb = new double[p+1];
    nurbsBasisFuns(span, u, p, U, Nb);
@@ -352,22 +335,14 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
 
 }
 
+/// Computes point on NURBS curve. 
+/// Algorithm A4.1 The NURBS book p124. 
+/// Parameter: 
+///   u - Parametric value we evaluate the curve at.
+/// Returns: 
+///   C(u) - a point of type Point2D It is found by projection 
+///   from Cw a point in three-dimensional space with coordinates \f$ {wx, wy, w} \f$.
   Point2D NurbsCurve::CurvePoint(double u) const {
-/*
-  Algorithm A4.1 The NURBS book pp 124
-  Computes point on rational B-spline curve
-  
-  Input: 
-  n - the highest index of ctrl points 
-  p - degree of the curve
-  U - knot vector 
-  Pw - weighted control points in the array. 
-  Pw[i] contains Pi(w_i*x_i, w_i*y_i, w_i) 
-  u  - parametric value we evaluate curve at
-
-  Output: C(u) - 2D control point, found by projection 
-   from Cw (a point in four-dimensional space {wx, wy, w})
-*/
 
   int span = FindSpan(u);
   double N[p+1];
@@ -382,7 +357,7 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
     Cw.w  += N[i]*P[span-p+i].w; 
   }
 
-  //Project it to 3D space
+  // Project it to normal 2D space.
   Point2D C;
   C.x = Cw.wx/Cw.w;
   C.y = Cw.wy/Cw.w;
@@ -391,23 +366,15 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
 
 }
 
-
+/// Computes point on NURBS curve.
+/// Algorithm A4.1 The NURBS book p124.  
+/// Parameter: 
+///   u - Parametric value we evaluate the curve at.
+///   span - Specifies the span at which we compute basis functions.
+/// Returns: 
+///   C(u) - a point of type Point2D. It is found by projection 
+///   from Cw, a point in three-dimensional space with coordinates \f$ {wx, wy, w} \f$.
   Point2D NurbsCurve::CurvePoint(double u, int span, double N[]) const {
-/*
-  Algorithm A4.1 The NURBS book pp 124
-  Computes point on rational B-spline curve
-  
-  Input: 
-  n - the highest index of ctrl points 
-  p - degree of the curve
-  U - knot vector 
-  Pw - weighted control points in the array. 
-  Pw[i] contains Pi(w_i*x_i, w_i*y_i, w_i) 
-  u  - parametric value we evaluate curve at
-
-  Output: C(u) - 2D control point, found by projection 
-   from Cw (a point in four-dimensional space {wx, wy, w})
-*/
 
   HPoint2D Cw;
   Cw.wx = 0.; Cw.wy = 0.; Cw.w = 0.;
@@ -418,7 +385,7 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
     Cw.w  += N[i]*P[span-p+i].w; 
   }
 
-  //Project it to 3D space
+  // Project it to normal 2D space.
   Point2D C;
   C.x = Cw.wx/Cw.w;
   C.y = Cw.wy/Cw.w;
@@ -427,22 +394,15 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
 
 }
 
+/// Computes point on rational B-spline curve.
+/// Algorithm A4.1 The NURBS book p124.  
+/// Parameter: 
+///   u - Parametric value we evaluate the curve at.
+///   span - Specifies the span at which we compute basis functions.
+/// Returns: 
+///   Cw(u) - a point of type HPoint2D. 
+///   It is a point in three-dimensional space with homogenous coordinates \f$ {wx, wy, w} \f$.
   HPoint2D NurbsCurve::CurvePointH(double u, int span) const {
-/*
-  Algorithm A4.1 The NURBS book pp 124
-  Computes point on rational B-spline curve
-  
-  Input: 
-  n - the highest index of ctrl points 
-  p - degree of the curve
-  U - knot vector 
-  Pw - weighted control points in the array. 
-  Pw[i] contains Pi(w_i*x_i, w_i*y_i, w_i) 
-  u  - parametric value we evaluate curve at
-
-  Output: C(u) - 2D control point, found by projection 
-   from Cw (a point in four-dimensional space {wx, wy, w})
-*/
 
   double N[p+1];
   BasisFuns(span, u, N);
@@ -460,21 +420,13 @@ void NurbsCurve::AllBasisFuns(int span, double u, Matrix<double> &N) const {
 
 }
 
-void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
-/*
-  Calculate first derivatives of NURBS curve at end points.
-  See Eq 4.9 and Eq 4.10 on pp 126 in The NURBS book.
-
-   Input: A pointer to an array Point2D Cd[2]; 
-   It should be initialized in the calling routine.
-
-   Cd[0].x = p/U[p+1]*(w[1]/w[0])*(Px[1]-Px[0]);
-   Cd[0].y = p/U[p+1]*(w[1]/w[0])(Py[1]-Py[0]);
-
-   Cd[1].x = p/(1-U[m-p-1])*(w[n-1]/w[n])(Px[n]-Px[n-1]);
-   Cd[1].y = p/(1-U[m-p-1])*(w[n-1]/w[n])(Py[n]-Py[n-1]);
-*/
-
+/// Calculate first derivatives of the NURBS curve at end points.
+/// Eq 4.9 and Eq 4.10 on p126 in The NURBS book.
+/// Parameters: 
+///   Cd - An array with two elements of type Point2D.
+///   It should be initialized in the calling routine with "Point2D Cd[2];",
+///   before the function is called.
+  void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
  
  Cd[0].x = double(p)/U[p+1]*(P[1].w/P[0].w)*(P[1].wx/P[1].w-P[0].wx/P[0].w);
  Cd[0].y = double(p)/U[p+1]*(P[1].w/P[0].w)*(P[1].wy/P[1].w-P[0].wy/P[0].w);
@@ -484,22 +436,17 @@ void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
  
  }
 
-
+/// Computes the derivative of degree d in the homonegeous domain.
+/// of the curve at parametric value u.
+/// Algorithm A3.2 on p93 in The NURBS book.
+/// Parameters:
+///   u - Control parameter value.
+///   d - Degree of the derivative.
+/// Output:
+///   ders - An array of size [d+1], containing the derivatives of the curve at u. 
+///   This array has to be allocated in the calling function.
   void NurbsCurve::deriveAtH(double u, int d, struct HPoint2D ders[]) const {
-/*
-  Algorithm A3.2 in The NURBS book.
 
-  Computes the derivative of degree d of the 
-         curve at parameter u in the homonegeous domain
-
-  For more information on the algorithm used, see A3.2 on p 93 
-  of the NurbsBook.
-
-  u -  the parametric value to evaluate at
-  d - the degree of the derivative
-  ders -an array of size [d+1], containing the derivatives of the curve at u. 
-
-*/
   int du = (d < p) ? d : p;
 
   int span = FindSpan(u);
@@ -519,22 +466,18 @@ void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
 }
 
 
+/// Computes the derivative of degree d in the homonegeous domain. 
+/// of the curve at parametric value u.
+/// Algorithm A3.2 on p93 in The NURBS book.
+/// Parameters:
+///   u - Control parameter value.
+///   d - Degree of the derivative.
+///   span - Specifies the span at which we compute basis functions.
+/// Output:
+///   ders - An array of size [d+1], with elements of type HPoint2D, containing the derivatives of the curve at u.
+///   This array has to be allocated in the calling function.
   void NurbsCurve::deriveAtH(double u, int d, int span, struct HPoint2D ders[]) const {
-/*
-  Algorithm A3.2 in The NURBS book.
 
-  Computes the derivative of degree d of the 
-         curve at parameter u in the homonegeous domain
-
-  For more information on the algorithm used, see A3.2 on p 93 
-  of the NurbsBook.
-
-  u -  the parametric value to evaluate at
-  d - the degree of the derivative
-  span - see FindSpan(u)
-  ders -an array of size [d+1], containing the derivatives of the curve at u. 
-
-*/
   int du = (d < p) ? d : p;
 
   Matrix<double> nders(du+1,p+1);
@@ -551,27 +494,25 @@ void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
 
 }
 
+/// Computes control points of all derivative curves up to and icluding k-th derivative \f$(d <= p)\f$.
+/// Alghorithm A3.3 in The NURBS book.
+/// Parameters: 
+/// d - Degree of the derivative. 
+/// r1, r2 - Auxilliary integers - they take values span-p and span respectively. 
+///  With \f$ 0 <= k <= d \f$ and \f$ r1 <= i <= r2-k \f$. If \f$r1 = 0\f$ and \f$r2 = n\f$, all control points are computed.
+/// Output: 
+///   A matrix PK of size [d+1][r+1] where PK[k][i] is the i-th control point of k-th derivative curve.
+/// Mathematical background: 
+/// k-th derivative curve's control point $P_i$  is:
+/// \f[
+///  P_i = \left\{
+///  \begin{array}{l l}
+///    P_i & \quad \text{if $k = 0$}\\
+///    \frac{p-k+1}{u[i+p+1]-u[i+k]}(P_{i+1}^{(k-1)} - P_{i}^{(k-1)}) & \quad \text{if $k > 0$}\\
+///  \end{array} \right.
+/// \f]
+///
   void NurbsCurve::DerivCpts(int d, int r1, int r2, Matrix<HPoint2D> &PK) const {
-/*
-  Alghorithm A3.3 in The NURBS book.
-  Computes control points of all derivative curves up to  and icluding kth derivative (d <= p)
-  
-  Input: d, r1, r2 
-  With 0 <= k <= d and r1 <= i <= r2-k. If r1 = 0 and r2 = n, all control points are computed.
- 
-  Output: A matrix PK of size [d+1][r+1] where PK[k][i] is the  ith control point of kth derivative curve
-
-  Mathematical background: 
-
-  kth derivative curve's control point P  is:
-                                        i
-  P  if  k = 0;
-   i
-
-       p-k+1        (k-1)    (k-1)
-  --------------- (P      - P      ) if k > 0;
-  u[i+p+1]-u[i+k]   i+1      i
-*/
 
     int r = r2 - r1;
 
@@ -592,17 +533,16 @@ void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
 
   }
 
+ 
+/// Computes curve derivatives using Eq. 3.8. p97.
+/// Alghorithm A3.4 of the NURBS book.
+/// Parameters: 
+///   u - Control parameter value where we evaluate derivatives. 
+///   d - Degree of the derivative. 
+/// Output: 
+///   ders - An array of size [d+1], with elements of type HPoint2D, containing the derivatives of the curve at u. 
+///   This array has to be allocated in the calling function.
   void NurbsCurve::deriveAtH2(double u, int d, struct HPoint2D ders[]) const {
-/* 
-  Computes curve derivatives using Eq. 3.8. p97.
-
-  Alghorithm A3.4 of the NURBS book.
-
-  Input: u - the parametric value to evaluate at, 
-         d - degree of the derivative 
-
-  Output: ders - a array containing the derivatives of the curve at u. 
-*/
 
    int du = ( d < p ) ? d : p;
    for (int k = p+1; k <= d; k++) 
@@ -628,27 +568,24 @@ void NurbsCurve::FirstD_at_ends(struct Point2D Cd[]) const {
    
  } 
 
-
-/*
- Setup the binomial coefficients into the matrix Bin
- Bin(i,j) = (i  j)
- The binomical coefficients are defined as follow
-   (n)         n!
-   (k)  =    k!(n-k)!       0<=k<=n
- and the following relationship applies 
- (n+1)     (n)   ( n )
- ( k ) =   (k) + (k-1)
-
-  parameter Bin the binomial matrix of size [d][d] to fill
-*/
-
-void binomialCoef(int d, Matrix<double> &Bin) {
+/// Sets up a matrix containing binomial coefficients Bin.
+/// \f[ \tt{Bin}[i][j] = \left( \begin{array}{c}i \\ j\end{array} \right)\f]
+/// The binomial coefficients are defined as follows:
+/// \f[ \left(\begin{array}{c}   n \\ k \end{array} \right)= \frac{ n!}{k!(n-k)!} \mbox{for $0\leq k \leq n$} \f]
+/// and the following relationship applies: 
+/// \f[ \left(\begin{array}{c} n+1 \\ k \end{array} \right) = 
+/// \left(\begin{array}{c} n \\ k \end{array} \right) +
+/// \left(\begin{array}{c} n \\ k-1 \end{array} \right) \f]
+/// Parameters:
+///   d - Number of rows and cols of "Bin" matrix.
+///   Bin - The binomial matrix of size [d][d] to fill.
+  void binomialCoef(int d, Matrix<double> &Bin) {
   int n,k;
-  // Setup the first line
+  // Setup the first line.
   Bin[0][0] = 1.0 ;
   for(k=d-1;k>0;--k)
     Bin[0][k] = 0.0 ;
-  // Setup the other lines
+  // Setup the other lines.
   for(n=0; n<d-1; n++){
     Bin[n+1][0] = 1.0;
     for(k=1;k<d;k++)
@@ -659,19 +596,16 @@ void binomialCoef(int d, Matrix<double> &Bin) {
   }
 }
 
-
-/* 
-  Compute C(u) derivatives from Cw(u) derivatives 
-  Algorithm A4.2 The NURBS book pp 127
-  
-  Computes the derivative at the parameter u
-
-  u parameter at which the derivative is computed
-  d  the degree of derivation
-  ders  an array of size [d+1] containing the derivatives of the point at \a u.
-
-*/
-
+/// Computes the derivative at the parameter u. 
+/// It uses derivatives from \f$ C^w(u) \f$ to compute derivatives in \f$ C(u) \f$.
+/// Functions deriveAtH, and deriveAtH2 work for B-splines. For NURBS we call this function. 
+/// Algorithm A4.2 The NURBS book p127.  
+/// Parameters:
+///   u - Parametric value at which the derivative is computed.
+///   d - Degree of derivation.
+/// Output:
+///   ders - An array of size [d+1] containing the derivatives of the point at u.
+///   This array has to be allocated in the calling function.
 void NurbsCurve::deriveAt(double u, int d, struct Point2D ders[]) const {
 
   HPoint2D dersW[d+1];
@@ -694,24 +628,28 @@ void NurbsCurve::deriveAt(double u, int d, struct Point2D ders[]) const {
     }
     ders[k].x = v.x; 
     ders[k].y = v.y;
-    //Projection
+    // Projection.
     ders[k].x /= dersW[0].w; 
     ders[k].y /= dersW[0].w;
   }
 
 }
 
-/*
-  Computes the first derivative in the homogenous space.
-  See Eq. 3.4 - 3.6 pp 94 in The NURBS book.
-
-  u - parameter to evaluate derivative at
-
-  The first derivative - a point in homogenous space
-
-  Input: U' = [0,...,0,u_{p+1},...,u_{m-p-1},1,...,1]
-                  p                             p
-*/
+/// Sometimes we need just first derivative...
+/// This function computes the first derivative in the homogenous space.
+/// See Eq. 3.4 pp 94 in The NURBS book.
+/// Parameter:
+///  u - Control parameter value at which we evaluate first derivative.
+/// Returns:
+/// Cd - The first derivative - a point in homogenous space HPoint2D.
+///
+/// Note we look for Basis Functions of (p-1)-th degree, where p is the degree of our NURBS curve,
+/// and then 
+/// There is also an alternative way to solve this problem. We use different knot vector
+/// \f[
+/// U=\{\underbrace{a,\ldots,a}_{p},u_{p+1},\ldots,u_{m-p-1},\underbrace{b,\ldots,b}_{p} \}, and look for p-th degree basis functions.
+/// \f]
+/// Check out Eq. 3.6 in The NURBS book for that.
  HPoint2D NurbsCurve::firstD(double u) const {
 
   int span = FindSpan(u); 
@@ -743,18 +681,22 @@ void NurbsCurve::deriveAt(double u, int d, struct Point2D ders[]) const {
   return Cd;
 }
 
-/*
-  Computes the first derivative in the homogenous space.
-  See Eq. 3.4 - 3.6 pp 94 in The NURBS book.
-
-  u - parameter to evaluate derivative at
-
-  The first derivative - a point in homogenous space
-
-  Input: U' = [0,...,0,u_{p+1},...,u_{m-p-1},1,...,1]
-                  p                             p
-*/
-
+/// Sometimes we need just first derivative...
+/// This function computes the first derivative in the homogenous space.
+/// See Eq. 3.4 pp 94 in The NURBS book.
+/// Parameter:
+///  u - Control parameter value at which we evaluate first derivative.
+///  span - Specifies the span determined by value of u.
+/// Returns:
+/// Cd - The first derivative - a point in homogenous space HPoint2D.
+///
+/// Note we look for Basis Functions of (p-1)-th degree, where p is the degree of our NURBS curve,
+/// and then 
+/// There is also an alternative way to solve this problem. We use different knot vector
+/// \f[
+/// U=\{\underbrace{a,\ldots,a}_{p},u_{p+1},\ldots,u_{m-p-1},\underbrace{b,\ldots,b}_{p} \}, and look for p-th degree basis functions.
+/// \f]
+/// Check out Eq. 3.6 in The NURBS book for that.
  HPoint2D NurbsCurve::firstD(double u, int span) const {
 
   double N[p];
@@ -783,17 +725,11 @@ void NurbsCurve::deriveAt(double u, int d, struct Point2D ders[]) const {
   return Cd;
 }
 
-/*
-  Computes the first derivative in the normal space.
-  
-  Input: 
-  u - parameter which determines where to compute the derivative
-  span 
-
-  Output: The first derivative in normal space
-
-*/
-
+/// Computes the first derivative in the normal space.  
+/// Parameter: 
+///   u - parameter which determines where to compute the derivative
+/// Returns: 
+///  Cp - The first derivative in normal space.
 Point2D NurbsCurve::firstDn(double u) const {
 
   int span = FindSpan(u); 
@@ -815,6 +751,11 @@ Point2D NurbsCurve::firstDn(double u) const {
   return Cp;
 }
 
+/// Computes normal of the curve at position determined by the value of parameter u.
+/// Parameter:
+///  u - Control parameter value.
+/// Returns:
+///  Cn - normal at parametric value u.
 Point2D NurbsCurve::normal_at(double u) const {
 
   Point2D Cn;
@@ -827,17 +768,17 @@ Point2D NurbsCurve::normal_at(double u) const {
 
 }
 
+/// Computes normal of the curve at end. 
+/// Parameter:
+///    which_end: It can be 0 or 1 : parametric beggining or the end of the curve.
 Point2D NurbsCurve::normal_at_end(int which_end) const {
-/*
-  parameter which_end: 0, 1 ? : parametric beggining or the end of the curve.
-*/
 
   Point2D Cn; 
 
   Point2D Cd[2];
   FirstD_at_ends(Cd);
   
-  //Branching: Is it at beggining or at the end of the curve?
+  // This checks is it at beggining or at the end of the curve.
   if (which_end == 0) {
     Cn.x = -Cd[0].y;
     Cn.y = Cd[0].x;
@@ -851,6 +792,7 @@ Point2D NurbsCurve::normal_at_end(int which_end) const {
 
 }
 
+/// Projects a HPoint2D point, that is a point in homogenous space to normal space.
 Point2D project(HPoint2D &Cw) {
 
   Point2D C;
