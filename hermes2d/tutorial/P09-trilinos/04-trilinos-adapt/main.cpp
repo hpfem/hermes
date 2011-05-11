@@ -54,10 +54,9 @@ const int NDOF_STOP = 60000;               // Adaptivity process stops when the 
                                            // over this limit. This is to prevent h-adaptivity to go on forever.
 
 // NOX parameters.
-unsigned message_type = 0;
-/*
+//unsigned message_type = 0;
 unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
-*/                                                // NOX error messages, see NOX_Utils.h.
+                                                  // NOX error messages, see NOX_Utils.h.
 
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
 unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.

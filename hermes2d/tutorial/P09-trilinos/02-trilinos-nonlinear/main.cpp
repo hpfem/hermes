@@ -7,7 +7,7 @@
 //  class and matrix problem solution via UMFpack) with the performance of the Trilinos/NOX 
 //  solver (using the Hermes DiscreteProblem class to assemble discrete problems).
 //
-//  PDE:  - \nabla (k \nabla u) = f
+//  PDE:  - \nabla (k \nabla u) - f = 0
 //  k = (1 + sqr(u_x) + sqr(u_y))^{-0.5}
 //
 //  Domain: Unit square.
@@ -22,7 +22,7 @@
 
 using namespace Teuchos;
 
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -48,13 +48,10 @@ unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::Ou
 
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
 unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
-double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+double abs_resid = 1.0e-8;                        // Tolerance for absolute value of the residuum.
 unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
-double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+double rel_resid = 1.0e-8;                        // Tolerance for relative value of the residuum.
 int max_iters = 100;                              // Max number of iterations.
-
-// Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
 
 // Weak forms.
 #include "definitions.cpp"
@@ -77,7 +74,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc(Hermes::vector<std::string>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), 0.0);
+  DefaultEssentialBCConst bc("Bdy", 0.0);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -113,47 +110,20 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  CustomInitialSolution sln_tmp(&mesh);
-  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  scalar* coeff_vec = new scalar[ndof];
+  // We can start with a zero vector.
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  // Or we can project the initial condition to obtain the initial
+  // coefficient vector.
+  //info("Projecting to obtain initial vector for the Newton's method.");
+  //CustomInitialSolution sln_tmp(&mesh);
+  //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration.
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(&space);
-
-    // Assemble the Jacobian matrix and residual vector.
-    dp1.assemble(coeff_vec, matrix, rhs, false);
-
-    // Multiply the residual vector with -1 since the matrix 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs->change_sign();
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = hermes2d.get_l2_norm(rhs);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!solver->solve())
-      error ("Matrix solver failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  bool verbose = true;
+  bool jacobian_changed = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp1, solver, matrix, rhs, jacobian_changed,
+      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln1.
   Solution::vector_to_solution(coeff_vec, &space, &sln1);
@@ -172,8 +142,13 @@ int main(int argc, char* argv[])
   // TRILINOS PART:
 
   // Project the initial condition on the FE space.
-  info("Projecting initial condition on the FE space.");
-  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  // We can start with a zero vector.
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  // Or we can project the initial condition to obtain the initial
+  // coefficient vector.
+  //info("Projecting to obtain initial vector for the Newton's method.");
+  //CustomInitialSolution sln_tmp(&mesh);
+  //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
@@ -218,9 +193,9 @@ int main(int argc, char* argv[])
   // Calculate errors.
   CustomExactSolution ex(&mesh);
   double rel_err_1 = hermes2d.calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
+  info("Solution 1 (%s):  exact H1 error: %g%% (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
   double rel_err_2 = hermes2d.calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
+  info("Solution 2 (NOX): exact H1 error: %g%% (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Show both solutions.
   ScalarView view1("Solution 1", new WinGeom(0, 0, 500, 400));

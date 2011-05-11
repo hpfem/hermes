@@ -20,7 +20,7 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 6;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 3;                             // Initial polynomial degree of all mesh elements.
 const bool TRILINOS_JFNK = true;                  // true = Jacobian-free method (for NOX),
                                                   // false = Newton (for NOX).
@@ -29,10 +29,10 @@ const bool PRECOND = true;                        // Preconditioning by jacobian
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-const char* iterative_method = "gmres";           // Name of the iterative method employed by AztecOO (ignored
+const char* iterative_method = "CG";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
+const char* preconditioner = "JACOBI";              // Name of the preconditioner employed by AztecOO (ignored by
                                                   // other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   // preconditioner from IFPACK (see solver/aztecoo.h)
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
   // "" stands for preconditioning that is set later.
-  NoxSolver nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
+  NoxSolver nox_solver(&dp2, message_type, iterative_method, "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
                        flag_relresid, rel_resid, max_iters);
   nox_solver.set_init_sln(coeff_vec);
   
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
   if (PRECOND)
   {
     if (TRILINOS_JFNK) nox_solver.set_precond(pc);
-    else nox_solver.set_precond("ML");
+    else nox_solver.set_precond(preconditioner);
   }
 
   // Assemble and solve using NOX.

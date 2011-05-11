@@ -1,6 +1,4 @@
-#define HERMES_REPORT_WARN
-#define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -39,9 +37,6 @@ unsigned flag_relresid = 1;                       // Flag for relative value of 
 double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
 int max_iters = 100;                              // Max number of iterations.
 
-// Boundary markers.
-const std::string BDY_BOTTOM = "1", BDY_RIGHT = "2", BDY_TOP = "3", BDY_LEFT = "4";
-
 // Weak forms.
 #include "../definitions.cpp"
 
@@ -63,7 +58,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc(Hermes::vector<std::string>(BDY_BOTTOM, BDY_RIGHT, BDY_TOP, BDY_LEFT), 0.0);
+  DefaultEssentialBCConst bc("Bdy", 0.0);
   EssentialBCs bcs(&bc);
 
   // Create an H1 space with default shapeset.
@@ -99,47 +94,20 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  info("Projecting to obtain initial vector for the Newton's method.");
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(&space)] ;
-  CustomInitialSolution sln_tmp(&mesh);
-  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  scalar* coeff_vec = new scalar[ndof];
+  // We can start with a zero vector.
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  // Or we can project the initial condition to obtain the initial
+  // coefficient vector.
+  //info("Projecting to obtain initial vector for the Newton's method.");
+  //CustomInitialSolution sln_tmp(&mesh);
+  //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration.
-  int it = 1;
-  while (1)
-  {
-    // Obtain the number of degrees of freedom.
-    int ndof = Space::get_num_dofs(&space);
-
-    // Assemble the Jacobian matrix and residual vector.
-    dp1.assemble(coeff_vec, matrix, rhs, false);
-
-    // Multiply the residual vector with -1 since the matrix 
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs->change_sign();
-    
-    // Calculate the l2-norm of residual vector.
-    double res_l2_norm = hermes2d.get_l2_norm(rhs);
-
-    // Info for user.
-    info("---- Newton iter %d, ndof %d, res. l2 norm %g", it, Space::get_num_dofs(&space), res_l2_norm);
-
-    // If l2 norm of the residual vector is within tolerance, or the maximum number 
-    // of iteration has been reached, then quit.
-    if (res_l2_norm < NEWTON_TOL || it > NEWTON_MAX_ITER) break;
-
-    // Solve the linear system.
-    if(!solver->solve())
-      error ("Matrix solver failed.\n");
-
-    // Add \deltaY^{n+1} to Y^n.
-    for (int i = 0; i < ndof; i++) coeff_vec[i] += solver->get_solution()[i];
-    
-    if (it >= NEWTON_MAX_ITER)
-      error ("Newton method did not converge.");
-
-    it++;
-  }
+  bool verbose = true;
+  bool jacobian_changed = true;
+  if (!hermes2d.solve_newton(coeff_vec, &dp1, solver, matrix, rhs, jacobian_changed,
+      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln1.
   Solution::vector_to_solution(coeff_vec, &space, &sln1);
@@ -158,8 +126,13 @@ int main(int argc, char* argv[])
   // TRILINOS PART:
 
   // Project the initial condition on the FE space.
-  info("Projecting initial condition on the FE space.");
-  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  // We can start with a zero vector.
+  memset(coeff_vec, 0, ndof * sizeof(double));
+  // Or we can project the initial condition to obtain the initial
+  // coefficient vector.
+  //info("Projecting to obtain initial vector for the Newton's method.");
+  //CustomInitialSolution sln_tmp(&mesh);
+  //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();

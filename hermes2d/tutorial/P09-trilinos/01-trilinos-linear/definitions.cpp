@@ -30,8 +30,10 @@ class CustomWeakFormPoisson : public WeakForm
 public:
   CustomWeakFormPoisson(bool is_matfree = false) : WeakForm(1) {
     this->is_matfree = is_matfree;
+
     // Jacobian.
     add_matrix_form(new DefaultJacobianDiffusion(0, 0));
+
     // Residual.
     add_vector_form(new DefaultResidualDiffusion(0));
     add_vector_form(new DefaultVectorFormVol(0, HERMES_ANY, 4.0));
