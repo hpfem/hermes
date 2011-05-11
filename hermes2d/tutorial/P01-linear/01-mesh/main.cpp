@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
   // Refine towards boundary (optional).
   mesh.refine_towards_boundary("Outer", 4);  // Four successive refinements towards 
-                                               // boundary with marker "Outer".
+                                             // boundary with marker "Outer".
 
   // Refine individual elements (optional).
   mesh.refine_element_id(86, 0);          // 0... isotropic refinement.

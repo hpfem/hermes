@@ -153,8 +153,8 @@ Default weak forms
 
 Weak forms in Hermes have a clean object-oriented hierarchy. For many problems they 
 are readily available, and for the rest they can be extended easily. The above 
-default forms can be found in the file `hermes2d/src/weakform_library/h1.h 
-<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform_library/h1.h>`_.
+default forms can be found in the file `weakforms_h1.h 
+<http://git.hpfem.org/hermes.git/blob/HEAD:/hermes2d/src/weakform_library/weakforms_h1.h>`_.
 
 To begin with, the line 
 
