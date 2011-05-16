@@ -28,7 +28,8 @@ static int num_petsc_objects = 0;
 
 CommandLineArgs cmd_line_args;
 
-inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[]){
+#ifdef WITH_PETSC
+inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[]) {
   VecGetValues(x, ni, ix, y);
 }
 
@@ -38,6 +39,7 @@ void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],double y[]){
   for (int i=0;i<ni;i++) y[i]=py[i].real();
   delete [] py;
 }
+#endif
 
 int remove_petsc_object()
 {

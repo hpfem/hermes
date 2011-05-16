@@ -5,13 +5,9 @@ project(hermes)
 
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common_unified/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common_unified)
-set(HERMES_COMMON_DIR_OLD ${PROJECT_SOURCE_DIR}/hermes_common)
 set(HERMES_COMMON_LIB  hermes_common_unified)
-set(HERMES_COMMON_LIB_REAL  hermes_common-real)
-set(HERMES_COMMON_LIB_CPLX  hermes_common-cplx)
-
 
 #ADDED BY COLMAN
 IF (APPLE)
@@ -202,24 +198,6 @@ endif(WITH_PYTHON)
 # Allow to override the default values in CMake.vars:
 include(CMake.vars OPTIONAL)
 
-macro (DETERMINE_HERMES_COMMON_REAL_COMPLEX HXD)	#will be removed after unification of hermes_common vvvv
-    if (WITH_${HXD})
-        if (${HXD}_REAL)
-            set(HERMES_COMMON_REAL  YES)
-        endif (${HXD}_REAL)
-        if (${HXD}_COMPLEX)
-            set(HERMES_COMMON_COMPLEX YES)
-        endif (${HXD}_COMPLEX)
-    endif (WITH_${HXD})   
-endmacro(DETERMINE_HERMES_COMMON_REAL_COMPLEX)
-
-set(HERMES_COMMON_REAL    NO)
-set(HERMES_COMMON_COMPLEX NO)
-
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H1D)
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H2D)
-DETERMINE_HERMES_COMMON_REAL_COMPLEX(H3D)		#will be removed after unification of hermes_common ^^^^
-
 macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
         if(MSVC)
@@ -269,9 +247,7 @@ if (NOT MSVC)
   set(HERMES_COMMON_DEBUG     NO)
 endif (NOT MSVC)
 
-DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H1D)
 DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
-DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H3D)
 
 #------------------------------------------------------------------------------
 # Find necessary packages according to the settings above.
@@ -436,9 +412,6 @@ ConfigureRPATH()
 
 add_subdirectory(${HERMES_COMMON_DIR})
 #include_directories(${HERMES_COMMON_DIR})
-
-add_subdirectory(${HERMES_COMMON_DIR_OLD})
-#include_directories(${HERMES_COMMON_DIR_OLD})
 
 if(WITH_H1D)
     add_subdirectory(hermes1d)

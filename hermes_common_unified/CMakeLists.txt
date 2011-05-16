@@ -153,7 +153,8 @@ endmacro(BUILD_LIB)
 # Build and install real versions:
 set(FLAGS "")
 if(MSVC)
-  BUILD_LIB(${HERMES_COMMON_LIB} ${FLAGS})
+  set(BUILD_FLAGS "${FLAGS} ${DEBUG_FLAGS}")
+  BUILD_LIB(${HERMES_COMMON_LIB} ${BUILD_FLAGS})
   ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB}
                        ${HERMES_COMMON_LIB_DEBUG}
                        ${HERMES_COMMON_LIB_RELEASE})

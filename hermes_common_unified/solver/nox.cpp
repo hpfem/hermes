@@ -500,7 +500,7 @@ bool NoxSolver<Scalar>::solve()
        achieved_tol = final_pars->sublist("Direction").sublist(nl_dir).sublist("Linear Solver").sublist("Output").get("Achieved Tolerance", 0.0);
 
        // Get the Epetra_Vector with the final solution from the solver
-       get_final_solution();
+       get_final_solution(solver);
        success = true;
      }
      else { // not converged
