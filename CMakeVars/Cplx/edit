@@ -1,3 +1,0 @@
-for dir in $(find ./ -type d); do
-        gedit ${dir}/CMake.vars &
-done

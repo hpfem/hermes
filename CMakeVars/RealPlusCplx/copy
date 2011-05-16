@@ -1,3 +1,0 @@
-for dir in $(find ./ -type d); do
-	cp ../Cplx/${dir}/CMake.vars ${dir}
-done
