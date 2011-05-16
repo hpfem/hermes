@@ -5,9 +5,9 @@ project(hermes)
 
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common_unified/cmake)
-set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common_unified)
-set(HERMES_COMMON_LIB  hermes_common_unified)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
+set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
+set(HERMES_COMMON_LIB  hermes_common)
 
 #ADDED BY COLMAN
 IF (APPLE)
@@ -56,23 +56,8 @@ ENDIF (APPLE)
 # The values below are sane defaults to produce a build on all platforms,
 # if you want to override them, set them in CMake.vars
 
-# H1D:
-set(WITH_H1D                  YES)
-	# For use in the common code.
-	set(H1D_REAL              YES)
-	# Release and debug versions.
-	set(H1D_DEBUG             YES)
-	set(H1D_RELEASE           NO)
-	# Optional parts of the library.
-	set(H1D_WITH_EXAMPLES     YES)
-	set(H1D_WITH_BENCHMARKS   YES)
-	set(H1D_WITH_TESTS        YES)
-
 # H2D:
 set(WITH_H2D                  YES)
-	# Real/complex version of the library (you can build either one or both):
-	set(H2D_REAL              YES)
-	set(H2D_COMPLEX           YES)
 	# Release and debug versions.
 	set(H2D_DEBUG             YES)
 	set(H2D_RELEASE           YES)
@@ -84,29 +69,6 @@ set(WITH_H2D                  YES)
 	set(H2D_WITH_GLUT         YES)
 	set(H2D_WITH_VIEWER_GUI   NO)
 	set(H2D_WITH_UTIL         YES)
-
-# H3D:		
-set(WITH_H3D                  YES)
-	# Real/complex version of the library.
-	set(H3D_REAL              YES)
-	set(H3D_COMPLEX           YES)
-	# Release and debug versions.
-	set(H3D_DEBUG             YES)
-	set(H3D_RELEASE           NO)
-	# Debugging options.
-	set(H3D_DEBUG_ORDER       NO)
-	set(H3D_PROFILING         NO)
-	# Supported element types.
-	set(WITH_TETRA            YES)
-	set(WITH_HEX              YES)
-	set(WITH_PRISM            NO)
-	
-	# Optional parts of the library.
-	set(H3D_WITH_EXAMPLES     YES)
-	set(H3D_WITH_BENCHMARKS   YES)
-	set(H3D_WITH_TESTS        YES)
-	set(H3D_WITH_TOOLS        NO)
-	set(H3D_WITH_DEV_TESTS    NO)
 	
 # Hermes_common (linked to all H1D, H2D and H3D):
 set(HERMES_COMMON_WITH_TESTS  YES)
@@ -200,43 +162,26 @@ include(CMake.vars OPTIONAL)
 
 macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
+		if(${HXD}_DEBUG)
+		  set(HERMES_COMMON_DEBUG YES)
+		endif(${HXD}_DEBUG)
+
+		if(${HXD}_RELEASE)
+		  set(HERMES_COMMON_RELEASE YES)
+		endif(${HXD}_RELEASE)
+		
         if(MSVC)
             # In MSVC, Release/Debug is distinguished in a special way
             # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
             set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
             set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
-
-            if (HERMES_COMMON_REAL)	#will be removed after unification of hermes_common
-                set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
-                set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif (HERMES_COMMON_REAL)
-            if (HERMES_COMMON_COMPLEX)
-                set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
-                set(HERMES_COMMON_LIB_CPLX_DEBUG ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif (HERMES_COMMON_COMPLEX)
         else(MSVC)        
           if(${HXD}_DEBUG)
-            set(HERMES_COMMON_DEBUG YES)
             set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
-
-            if(HERMES_COMMON_REAL)
-              set(HERMES_COMMON_LIB_REAL_DEBUG ${HERMES_COMMON_LIB_REAL}-debug)
-            endif(HERMES_COMMON_REAL)
-            if(HERMES_COMMON_COMPLEX)
-              set(HERMES_COMMON_LIB_CPLX_DEBUG  ${HERMES_COMMON_LIB_CPLX}-debug)
-            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_DEBUG)
 
           if(${HXD}_RELEASE)
-            set(HERMES_COMMON_RELEASE YES)
             set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
-
-            if(HERMES_COMMON_REAL)
-              set(HERMES_COMMON_LIB_REAL_RELEASE ${HERMES_COMMON_LIB_REAL})
-            endif(HERMES_COMMON_REAL)
-            if(HERMES_COMMON_COMPLEX)
-              set(HERMES_COMMON_LIB_CPLX_RELEASE ${HERMES_COMMON_LIB_CPLX})
-            endif(HERMES_COMMON_COMPLEX)
           endif(${HXD}_RELEASE)
         endif(MSVC)
     endif (WITH_${HXD})   
@@ -413,23 +358,15 @@ ConfigureRPATH()
 add_subdirectory(${HERMES_COMMON_DIR})
 #include_directories(${HERMES_COMMON_DIR})
 
-if(WITH_H1D)
-    add_subdirectory(hermes1d)
-endif(WITH_H1D)
-
 if(WITH_H2D)
     add_subdirectory(hermes2d)
 endif(WITH_H2D)
 
-if(WITH_H3D)
-    add_subdirectory(hermes3d)
-endif(WITH_H3D)
-
-if(H1D_WITH_TESTS OR H2D_WITH_TESTS OR H3D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
+if(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
   enable_testing()
   add_custom_target(test COMMAND ctest)
   add_custom_target(test-quick COMMAND ctest -LE slow -j9)
-endif(H1D_WITH_TESTS OR H2D_WITH_TESTS OR H3D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
+endif(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
 
 
 #------------------------------------------------------------------------------
@@ -473,26 +410,13 @@ else(REPORT_ALL)
 endif(REPORT_ALL)
 message("---------------------")
 message("Hermes common library:")
-message("\tBuild Real version: ${HERMES_COMMON_REAL}")
-message("\tBuild Complex version: ${HERMES_COMMON_COMPLEX}")
 message("\tBuild Debug version: ${HERMES_COMMON_DEBUG}")
 message("\tBuild Release version: ${HERMES_COMMON_RELEASE}")
 message("\tBuild with tests: ${HERMES_COMMON_WITH_TESTS}")
 message("\tBuild with check boundary conditions: ${HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS}")
 
-message("Build Hermes1D: ${WITH_H1D}")
-if(WITH_H1D)
-	message("\tBuild Hermes1D Debug version: ${H1D_DEBUG}")
-	message("\tBuild Hermes1D Release version: ${H1D_RELEASE}")
-	message("\tBuild Hermes1D examples: ${H1D_WITH_EXAMPLES}")
-	message("\tBuild Hermes1D benchmarks: ${H1D_WITH_BENCHMARKS}")
-	message("\tBuild Hermes1D tests: ${H1D_WITH_TESTS}")
-endif(WITH_H1D)
-
 message("Build Hermes2D: ${WITH_H2D}")
 if(WITH_H2D)
-	message("\tBuild Hermes2D real version: ${H2D_REAL}")
-	message("\tBuild Hermes2D complex version: ${H2D_COMPLEX}")
 	message("\tBuild Hermes2D Debug version: ${H2D_DEBUG}")
 	message("\tBuild Hermes2D Release version: ${H2D_RELEASE}")
 	message("\tBuild Hermes2D with examples: ${H2D_WITH_EXAMPLES}")
@@ -503,24 +427,6 @@ if(WITH_H2D)
 	message("\tBuild Hermes2D with VIEWER_GUI: ${H2D_WITH_VIEWER_GUI}")
 	message("\tBuild Hermes2D with util: ${H2D_WITH_UTIL}")
 endif(WITH_H2D)
-
-message("Build Hermes3D: ${WITH_H3D}")
-if(WITH_H3D)
-	message("\tBuild Hermes3D real version: ${H3D_REAL}")
-	message("\tBuild Hermes3D complex version: ${H3D_COMPLEX}")
-        message("\tBuild Hermes3D Debug version: ${H3D_DEBUG}")
-   	message("\tBuild Hermes3D Release version: ${H3D_RELEASE}")
-	message("\tBuild Hermes3D with Debug order: ${H3D_DEBUG_ORDER}")
-	message("\tBuild Hermes3D with profiling: ${H3D_PROFILING}")
-	message("\tBuild Hermes3D with Tetra: ${WITH_TETRA}")
-	message("\tBuild Hermes3D with Hex: ${WITH_HEX}")
-	message("\tBuild Hermes3D with Prism: ${WITH_PRISM}")
-	message("\tBuild Hermes3D with examples: ${H3D_WITH_EXAMPLES}")
-	message("\tBuild Hermes3D with benchmarks: ${H3D_WITH_BENCHMARKS}")
-	message("\tBuild Hermes3D with tests: ${H3D_WITH_TESTS}")
-	message("\tBuild Hermes3D with tools: ${H3D_WITH_TOOLS}")
-	message("\tBuild Hermes3D with development tests: ${H3D_WITH_DEV_TESTS}")
-endif(WITH_H3D)
 message("\n")
 
 #------------------------------------------------------------------------------
