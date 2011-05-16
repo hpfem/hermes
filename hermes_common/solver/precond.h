@@ -28,17 +28,18 @@
 /// @defgroup preconds Preconditioners
 ///
 
-
+template <typename Scalar> class Matrix;
 /// Abstract class to define interface for preconditioners
 ///
 /// @ingroup preconds
+template <typename Scalar>
 class Precond
 #ifdef HAVE_EPETRA
   : public Epetra_Operator
 #endif
 {
 public:
-  virtual void create(Matrix *mat) = 0;
+  virtual void create(Matrix<Scalar> *mat) = 0;
   virtual void destroy() = 0;
   virtual void compute() = 0;
 

@@ -56,7 +56,7 @@ to hermes/. There you will find a CMakeLists.txt file that contains the lines
     ...
 
 
-You are advised to create a file called "CMake.vars" where you set all 
+Create a file called "CMake.vars" where you set all 
 these variables according to your needs. Examples of CMake.vars files can
 be found in the CMakeVars folder.
 After that, type::
@@ -70,12 +70,12 @@ the number of CPUs of your computer.
 Tests
 ~~~~~
 
-To execute all tests, change dir to either hermes1d/, hermes2d/ or hermes3d/ and do::
+To execute all tests, do::
 
-    make test
+    ctest -jN
 
-Note that some tests take a long time to finish. To just execute the
-short running tests, do::
+where N is the number of your cores. Note that some tests (especially for adaptivity 
+algorithms) take a longer time to finish. To just execute the short running tests, type::
 
     make test-quick
 

@@ -25,13 +25,13 @@
 #endif
 
 #ifdef HAVE_AMESOS
-  Amesos AmesosSolver::factory;
+template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 #endif
 
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
-
-AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVector *rhs)
-  : LinearSolver(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
+template<typename Scalar>
+AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
+  : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -46,7 +46,8 @@ AmesosSolver::AmesosSolver(const char *solver_type, EpetraMatrix *m, EpetraVecto
 #endif
 }
 
-AmesosSolver::~AmesosSolver()
+template<typename Scalar>
+AmesosSolver<Scalar>::~AmesosSolver()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -54,7 +55,8 @@ AmesosSolver::~AmesosSolver()
 #endif
 }
 
-bool AmesosSolver::is_available(const char *name)
+template<typename Scalar>
+bool AmesosSolver<Scalar>::is_available(const char *name)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -64,7 +66,8 @@ bool AmesosSolver::is_available(const char *name)
 #endif
 }
 
-void AmesosSolver::set_use_transpose(bool use_transpose)
+template<typename Scalar>
+void AmesosSolver<Scalar>::set_use_transpose(bool use_transpose)
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -72,7 +75,8 @@ void AmesosSolver::set_use_transpose(bool use_transpose)
 #endif
 }
 
-bool AmesosSolver::use_transpose()
+template<typename Scalar>
+bool AmesosSolver<Scalar>::use_transpose()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -82,7 +86,8 @@ bool AmesosSolver::use_transpose()
 #endif
 }
 
-bool AmesosSolver::solve()
+template<>
+bool AmesosSolver<double>::solve()
 {
   _F_
 #ifdef HAVE_AMESOS
@@ -93,14 +98,10 @@ bool AmesosSolver::solve()
   
   TimePeriod tmr;  
 
-#ifdef HERMES_COMMON_COMPLEX
-  error("AmesosSolver::solve() not yet implemented for complex problems");
-#else
   problem.SetOperator(m->mat);
   problem.SetRHS(rhs->vec);
   Epetra_Vector x(*rhs->std_map);
   problem.SetLHS(&x);
-#endif
 
   if (!setup_factorization())
   {
@@ -116,17 +117,14 @@ bool AmesosSolver::solve()
   }
   
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
-  delete [] sln;
-  sln = new scalar[m->size]; MEM_CHECK(sln);
+  delete [] this->sln;
+  this->sln = new double[m->size]; MEM_CHECK(this->sln);
   // copy the solution into sln vector
-  memset(sln, 0, m->size * sizeof(scalar));
+  memset(this->sln, 0, m->size * sizeof(double));
   
-#ifdef HERMES_COMMON_COMPLEX
-#else 
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
-#endif
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
 
   return true;
 #else
@@ -134,17 +132,59 @@ bool AmesosSolver::solve()
 #endif
 }
 
-bool AmesosSolver::setup_factorization()
+template<>
+bool AmesosSolver<std::complex<double> >::solve()
+{
+  _F_
+#ifdef HAVE_AMESOS
+  assert(m != NULL);
+  assert(rhs != NULL);
+  
+  assert(m->size == rhs->size);
+  
+  TimePeriod tmr;  
+
+  error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
+
+  if (!setup_factorization())
+  {
+    warning("AmesosSolver: LU factorization could not be completed");
+    return false;
+  }
+
+  int status = solver->Solve();
+  if (status != 0) 
+  {
+    error("AmesosSolver: Solution failed.");
+    return false;
+  }
+  
+  tmr.tick();
+  this->time = tmr.accumulated();
+
+  delete [] this->sln;
+  this->sln = new std::complex<double>[m->size]; MEM_CHECK(this->sln);
+  // copy the solution into sln vector
+  memset(this->sln, 0, m->size * sizeof(std::complex<double>));
+  
+  return true;
+#else
+  return false;
+#endif
+}
+
+template<typename Scalar>
+bool AmesosSolver<Scalar>::setup_factorization()
 {
   _F_
 #ifdef HAVE_AMESOS
   // Perform both factorization phases for the first time.
   int eff_fact_scheme;
-  if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
+  if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
       solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
     eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
   else
-    eff_fact_scheme = factorization_scheme;
+    eff_fact_scheme = this->factorization_scheme;
   
   int status;
   switch(eff_fact_scheme)
@@ -173,3 +213,7 @@ bool AmesosSolver::setup_factorization()
   return false;
 #endif
 }
+
+template class HERMES_API AmesosSolver<double>;
+template class HERMES_API AmesosSolver<std::complex<double> >;
+

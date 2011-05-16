@@ -1,4 +1,5 @@
 # TODO: Complex version?
+    return()	#will be removed after unification of hermes_common 
 if (NOT HERMES_COMMON_REAL)
     return()
 endif (NOT HERMES_COMMON_REAL)

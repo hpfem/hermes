@@ -1,6 +1,0 @@
-if(H3D_REAL)
-add_subdirectory(copy)
-add_subdirectory(refinements)
-add_subdirectory(regularize)
-add_subdirectory(multi-mesh)
-endif(H3D_REAL)

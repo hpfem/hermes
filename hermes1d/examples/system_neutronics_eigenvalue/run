@@ -1,4 +1,0 @@
-[ -e solution_*.* ] && rm solution_*.*
-./system_neutronics_eigenvalue
-python plot.py final &
-python plot_mesh.py &

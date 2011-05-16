@@ -30,20 +30,25 @@
   #include <NOX_Epetra.H>
 #endif
 
-class NoxProblemInterface;
+template<typename Scalar> class NoxProblemInterface;
 
 /// Encapsulation of NOX nonlinear solver
 ///
 /// @ingroup solvers
-class HERMES_API NoxSolver : public IterSolver
+template <typename Scalar>
+class HERMES_API NoxSolver : public IterSolver<Scalar>
 {
+private: 
+#ifdef HAVE_NOX
+  void get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver);
+#endif
 public:
   // Basic constructor.
-  NoxSolver(DiscreteProblemInterface *problem);
+  NoxSolver(DiscreteProblemInterface<Scalar> *problem);
 #ifdef HAVE_NOX
   // Enhanced constructor.
   // For details of the parameter message_type, please see NOX_Utils.H, enum MsgType.
-  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, 
+  NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, 
     double ls_tolerance = 1e-8,
     const char* precond_type = "None",
     unsigned flag_absresid = 1,
@@ -68,7 +73,7 @@ public:
   virtual ~NoxSolver();
 
   bool set_init_sln(double *ic);
-  bool set_init_sln(EpetraVector *ic);
+  bool set_init_sln(EpetraVector<Scalar> *ic);
   virtual bool solve();
 
   virtual int get_num_iters() { return num_iters; }
@@ -105,9 +110,9 @@ public:
   }
   
 #ifdef HAVE_TEUCHOS
-  virtual void set_precond(Teuchos::RCP<Precond> &pc);
+  virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
 #else
-  virtual void set_precond(Precond* pc) 
+  virtual void set_precond(Precond<Scalar>* pc) 
   { 
     warning("Teuchos is currently required to use IFPACK/ML preconditioners. No preconditioning will be performed.");  
   }
@@ -116,7 +121,7 @@ public:
 
 protected:
 #ifdef HAVE_NOX
-  Teuchos::RCP<NoxProblemInterface> interface_;
+  Teuchos::RCP<NoxProblemInterface<Scalar> > interface_;
 #endif
   int num_iters;
   double residual;

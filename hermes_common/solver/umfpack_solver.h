@@ -26,7 +26,9 @@
 
 // General CSC Matrix class (can be used in umfpack, in that case use the
 // UMFPackMatrix subclass, or with EigenSolver, or anything else)
-class HERMES_API CSCMatrix : public SparseMatrix {
+
+template <typename Scalar>
+class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
 public:
   CSCMatrix();
   CSCMatrix(unsigned int size);
@@ -34,28 +36,28 @@ public:
 
   virtual void alloc();
   virtual void free();
-  virtual scalar get(unsigned int m, unsigned int n);
+  virtual Scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(unsigned int m, unsigned int n, scalar v);
-  virtual void add_to_diagonal(scalar v);
+  virtual void add(unsigned int m, unsigned int n, Scalar v);
+  virtual void add_to_diagonal(Scalar v);
   // TODO: implement this for other matrix types.
-  virtual void add_matrix(CSCMatrix* mat);
+  virtual void add_matrix(CSCMatrix<Scalar>* mat);
   // TODO: implement this for other matrix types.
-  virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix* mat);
+  virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
   // TODO: implement this for other matrix types.
-  virtual void add_as_block(unsigned int i, unsigned int j, CSCMatrix* mat);
-  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
+  virtual void add_as_block(unsigned int i, unsigned int j, CSCMatrix<Scalar>* mat);
+  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual unsigned int get_matrix_size() const;
   unsigned int get_nnz() {return this->nnz;}
   virtual double get_fill_in() const;
 
   // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
-  // Multiplies matrix with a scalar.
-  void multiply_with_scalar(scalar value);
+  void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+  // Multiplies matrix with a Scalar.
+  void multiply_with_scalar(Scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
-  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
   CSCMatrix* duplicate();
   // Exposes pointers to the CSC arrays.
@@ -65,13 +67,13 @@ public:
   int *get_Ai() {
       return this->Ai;
   }
-  scalar *get_Ax() {
+  Scalar *get_Ax() {
       return this->Ax;
   }
 
 protected:
   // UMFPack specific data structures for storing the system matrix (CSC format).
-  scalar *Ax;            // Matrix entries (column-wise).
+  Scalar *Ax;            // Matrix entries (column-wise).
   int *Ai;               // Row indices of values in Ax.
   int *Ap;               // Index to Ax/Ai, where each column starts.
   unsigned int nnz;      // Number of non-zero entries (= Ap[size]).
@@ -79,11 +81,12 @@ protected:
 };
 
 // This class is to be used with UMFPack solver only:
-class HERMES_API UMFPackMatrix : public CSCMatrix {
-  friend class UMFPackLinearSolver;
+template <typename Scalar>
+class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> {
 };
 
-class HERMES_API UMFPackVector : public Vector {
+template <typename Scalar>
+class HERMES_API UMFPackVector : public Vector<Scalar> {
 public:
   UMFPackVector();
   UMFPackVector(unsigned int size);
@@ -91,62 +94,62 @@ public:
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-  virtual scalar get(unsigned int idx) { return v[idx]; }
-  virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
+  virtual Scalar get(unsigned int idx) { return v[idx]; }
+  virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
   virtual void zero();
   virtual void change_sign();
-  virtual void set(unsigned int idx, scalar y);
-  virtual void add(unsigned int idx, scalar y);
-  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
-  virtual void add_vector(Vector* vec) {
+  virtual void set(unsigned int idx, Scalar y);
+  virtual void add(unsigned int idx, Scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+  virtual void add_vector(Vector<Scalar>* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
   };
-  virtual void add_vector(scalar* vec) {
+  virtual void add_vector(Scalar* vec) {
     for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
-  scalar *get_c_array() {
+  Scalar *get_c_array() {
       return this->v;
   }
 
 protected:
   //UMFPack specific data structures for storing the rhs.
-  scalar *v;
-  friend class UMFPackLinearSolver;
+  Scalar *v;
 };
 
 
 /// Encapsulation of UMFPACK linear solver
 ///
 /// @ingroup solvers
-class HERMES_API UMFPackLinearSolver : public LinearSolver {
+template <typename Scalar>
+class HERMES_API UMFPackLinearSolver : public LinearSolver<Scalar> {
 public:
-  UMFPackLinearSolver(UMFPackMatrix *m, UMFPackVector *rhs);
+  UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
   virtual ~UMFPackLinearSolver();
 
   virtual bool solve();
     
 protected:
-  UMFPackMatrix *m;
-  UMFPackVector *rhs;
+  UMFPackMatrix<Scalar> *m;
+  UMFPackVector<Scalar> *rhs;
   
   // Reusable factorization information (A denotes matrix represented by the pointer 'm').
   void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
   void *numeric;  // LU factorization of matrix A.
   
-  bool setup_factorization();
   void free_factorization_data();
+  bool setup_factorization();
 };
 
 
 
 /*** UMFPack matrix iterator ****/
-
+template <typename Scalar>
 class UMFPackIterator {
 public:
-  UMFPackIterator(CSCMatrix* mat) 
+  UMFPackIterator(CSCMatrix<Scalar>* mat) 
   {
     this->size = mat->get_size();
     this->nnz = mat->get_nnz();
@@ -157,22 +160,18 @@ public:
     this->Ap_pos = 0;
   };
   bool init();
-  void get_current_position(int& i, int& j, scalar& val);
+  void get_current_position(int& i, int& j, Scalar& val);
   bool move_to_position(int i, int j);
   bool move_ptr();
-  void add_to_current_position(scalar val);
+  void add_to_current_position(Scalar val);
 
 protected:
   int size;
   int nnz;
   int* Ai;
   int* Ap;
-  scalar* Ax;
+  Scalar* Ax;
   int Ai_pos;
   int Ap_pos;
 };
-
-
-
-
 #endif

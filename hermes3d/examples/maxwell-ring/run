@@ -1,4 +1,0 @@
-rm *~ 
-./maxwell-ring
-python plot_graph.py &
-

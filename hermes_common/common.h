@@ -27,6 +27,7 @@
 # undef _XOPEN_SOURCE	// typeinfo defines it
 #endif
 #include <typeinfo>
+#include <complex>
 
 #include <stdexcept>
 #include <cstdarg>
@@ -50,6 +51,18 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
+
+// Matrix solvers (maybe we could move it to solver/solver.h)
+enum MatrixSolverType 
+{
+   SOLVER_UMFPACK = 0, 
+   SOLVER_PETSC, 
+   SOLVER_MUMPS,
+   SOLVER_SUPERLU,
+   SOLVER_AMESOS,
+   SOLVER_AZTECOO
+};
+
 //
 // commonly used functions from hermes_common
 #include "hermes_logging.h"       // logging
@@ -57,6 +70,7 @@
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
 #include "error.h"
+//#include "solver/solver.h"
 //
 #include "vector.h"
 #include "tables.h"
@@ -75,16 +89,6 @@
 #define HERMES_ERR_UNKNOWN_MODE                    "Unknown mode (mode = %d)."
 #define HERMES_ERR_UNKNOWN_REFINEMENT_TYPE         "Unknown refinement type (refinement = %d)."
 
-// Matrix solvers (maybe we could move it to solver/solver.h)
-enum MatrixSolverType 
-{
-   SOLVER_UMFPACK = 0, 
-   SOLVER_PETSC, 
-   SOLVER_MUMPS,
-   SOLVER_SUPERLU,
-   SOLVER_AMESOS,
-   SOLVER_AZTECOO
-};
 
 // Should be in the same order as MatrixSolverTypes above, so that the
 // names may be accessed by the same enumeration variable.
@@ -139,59 +143,52 @@ enum ProjNormType
   HERMES_UNSET_NORM
 };
 
-#ifdef HERMES_COMMON_COMPLEX
+inline void fprint_num(FILE*f,double x){
+  fprintf(f,"%lf",x);
+}
 
-  #include <complex>
+inline void fprint_num(FILE*f,std::complex<double> x){
+  fprintf(f,"(%lf, %lf)",x.real(),x.imag());
+}
 
-  typedef std::complex<double> cplx;
-  typedef cplx complex2[2];
-  typedef cplx scalar;
 
-  #define CONJ(a)       (std::conj(a))
-  #define REAL(a)       (std::real(a))
-  #define IMAG(a)       (std::imag(a))
-  #define ABS(a)        (std::abs(a))
-  #define SCALAR_FMT      "(%lf, %lf)"
-  #define SCALAR(a)     std::real(a), std::imag(a)
-  
-  inline double sqr(cplx x)   { return std::norm(x); }
-  inline double magn(cplx x)  { return std::abs(x); }
-  inline cplx conj(cplx a)    { return std::conj(a); }
-  
-  #ifdef WITH_BLAS         // always true for Hermes3D
-  // BLAS-related functions
+#include <complex>
 
-    #ifdef __cplusplus
-    extern "C" {
-    #endif
+typedef std::complex<double> cplx;
+typedef cplx complex2[2];
+typedef cplx Scalar;
 
-    extern int zscal_(int *, cplx *, cplx *, int *);
-    extern int zaxpy_(int *, cplx *, cplx *, int *, cplx *, int *);
-    extern int zcopy_(int *, cplx *, int *, cplx *, int *);
+#define CONJ(a)       (std::conj(a))
+#define REAL(a)       (std::real(a))
+#define IMAG(a)       (std::imag(a))
+#define ABS(a)        (std::abs(a))
+#define SCALAR_FMT      "(%lf, %lf)"
+#define SCALAR(a)     std::real(a), std::imag(a)
 
-    #ifdef __cplusplus
-    }
-    #endif
+inline double magn(cplx x)  { return std::abs(x); }
+inline cplx conj(cplx a)    { return std::conj(a); }
 
-    /// x <- alpha * x
-    inline void blas_scal(int n, cplx alpha, cplx *x, int incx) { zscal_(&n, &alpha, x, &incx); }
-    /// y <- alpha * x + y
-    inline void blas_axpy(int n, cplx alpha, cplx *x, int incx, cplx *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
-    /// y <- x
-    inline void blas_copy(int n, cplx *x, int incx, cplx *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
+#ifdef WITH_BLAS         // always true for Hermes3D
+// BLAS-related functions
+
+  #ifdef __cplusplus
+  extern "C" {
   #endif
 
-#else
+  extern int zscal_(int *, cplx *, cplx *, int *);
+  extern int zaxpy_(int *, cplx *, cplx *, int *, cplx *, int *);
+  extern int zcopy_(int *, cplx *, int *, cplx *, int *);
 
-  typedef double scalar;
-  
-  #define CONJ(a)       (a)
-  #define REAL(a)       (a)
-  #define IMAG(a)       (0)
-  #define ABS(a)        (fabs(a))
-  #define SCALAR_FMT      "%lf"
-  #define SCALAR(a)     (a)
+  #ifdef __cplusplus
+  }
+  #endif
 
+  /// x <- alpha * x
+  inline void blas_scal(int n, cplx alpha, cplx *x, int incx) { zscal_(&n, &alpha, x, &incx); }
+  /// y <- alpha * x + y
+  inline void blas_axpy(int n, cplx alpha, cplx *x, int incx, cplx *y, int incy) { zaxpy_(&n, &alpha, x, &incx, y, &incy); }
+  /// y <- x
+  inline void blas_copy(int n, cplx *x, int incx, cplx *y, int incy) { zcopy_(&n, x, &incx, y, &incx); }
 #endif
 
 enum // node types
@@ -264,9 +261,9 @@ inline Point3D normalize(const Point3D &pt) {
 	return res;
 }
 
-
-struct Vector3D {
-	scalar x, y, z;		// coordinates of a point
+template<typename Scalar>
+class Vector3D {
+	Scalar x, y, z;		// coordinates of a point
 
 	Vector3D() {
 		x = y = z = 0;
@@ -284,8 +281,8 @@ struct Vector3D {
 		this->z = z;
 	}
 
-	scalar dot_product(Vector3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
-	scalar dot_product(Point3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	Scalar dot_product(Vector3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
+	Scalar dot_product(Point3D vec2) {return x * vec2.x + y * vec2.y + z * vec2.z;};
 	double norm() { return sqrt(REAL(dot_product(*this)));};
 	void cross_product(Vector3D a, Vector3D b) {
 		x = a.y * b.z - a.z * b.y;
@@ -322,6 +319,7 @@ const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
 inline int sqr(int x) { return x*x; }
 inline double sqr(double x) { return x*x; }
+inline double sqr(std::complex<double> x)   { return std::norm(x); }
 inline double magn(double x) { return fabs(x); }
 inline double conj(double a) {  return a; }
 
@@ -359,34 +357,35 @@ typedef double double2x2[2][2];
 typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 
-struct scalar2 
+template<typename Scalar>
+class Scalar2 
 { 
-  scalar val[2]; 
+  Scalar val[2]; 
 
  public:
-  scalar2(scalar v1, scalar v2) 
+  Scalar2(Scalar v1, Scalar v2) 
   { 
     val[0] = v1; val[1] = v2; 
   }
 
-  scalar& operator[] (int idx) 
+  Scalar& operator[] (int idx) 
   { 
     assert(idx >= 0 && idx < 2);
     return val[idx];
   }
 };
-
-struct scalar3
+template<typename Scalar>
+class Scalar3
 { 
-  scalar val[3]; 
+  Scalar val[3]; 
 
  public:
-  scalar3(scalar v1, scalar v2, scalar v3) 
+  Scalar3(Scalar v1, Scalar v2, Scalar v3) 
   { 
     val[0] = v1; val[1] = v2, val[2] = v3; 
   }
 
-  scalar& operator[] (int idx) 
+  Scalar& operator[] (int idx) 
   { 
     assert(idx >= 0 && idx < 3);
     return val[idx];

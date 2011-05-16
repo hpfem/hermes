@@ -19,14 +19,16 @@
 
 #include "aztecoo.h"
 #include "../callstack.h"
-#ifdef HAVE_KOMPLEX
-  #include <Komplex_LinearProblem.h>
+
+#ifdef HAVE_AZTECOO
+#include <Komplex_LinearProblem.h>
 #endif
 
 // AztecOO solver //////////////////////////////////////////////////////////////////////////////////
 
-AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
-  : IterSolver(), m(m), rhs(rhs)
+template<typename Scalar>
+AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
+  : IterSolver<Scalar>(), m(m), rhs(rhs)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -38,8 +40,8 @@ AztecOOSolver::AztecOOSolver(EpetraMatrix *m, EpetraVector *rhs)
 #endif
 }
 
-
-AztecOOSolver::~AztecOOSolver()
+template<typename Scalar>
+AztecOOSolver<Scalar>::~AztecOOSolver()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -48,7 +50,8 @@ AztecOOSolver::~AztecOOSolver()
 #endif
 }
 
-void AztecOOSolver::set_solver(const char *name)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_solver(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -64,7 +67,8 @@ void AztecOOSolver::set_solver(const char *name)
 #endif
 }
 
-void AztecOOSolver::set_precond(const char *name)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_precond(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -75,12 +79,13 @@ void AztecOOSolver::set_precond(const char *name)
   else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
   else az_precond = AZ_none;
   
-  precond_yes = (az_precond != AZ_none);
+  this->precond_yes = (az_precond != AZ_none);
   aztec.SetAztecOption(AZ_precond, az_precond);
 #endif
 }
 
-void AztecOOSolver::set_option(int option, int value)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_option(int option, int value)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -88,7 +93,8 @@ void AztecOOSolver::set_option(int option, int value)
 #endif
 }
 
-void AztecOOSolver::set_param(int param, double value)
+template<typename Scalar>
+void AztecOOSolver<Scalar>::set_param(int param, double value)
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -96,7 +102,8 @@ void AztecOOSolver::set_param(int param, double value)
 #endif
 }
 
-bool AztecOOSolver::solve()
+template<>
+bool AztecOOSolver<double>::solve()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -109,7 +116,6 @@ bool AztecOOSolver::solve()
   // no output
   aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
 
-#ifndef HERMES_COMMON_COMPLEX
   // setup the problem
   aztec.SetUserMatrix(m->mat);
   aztec.SetRHS(rhs->vec);
@@ -128,19 +134,38 @@ bool AztecOOSolver::solve()
   }
 
   // solve it
-  aztec.Iterate(max_iters, tolerance);
+  aztec.Iterate(this->max_iters, this->tolerance);
 
   tmr.tick();
-  time = tmr.accumulated();
+  this->time = tmr.accumulated();
 
-  delete [] sln;
-  sln = new scalar[m->size];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(scalar));
+  delete [] this->sln;
+  this->sln = new double[m->size];
+  MEM_CHECK(this->sln);
+  memset(this->sln, 0, m->size * sizeof(double));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = x[i];
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
+  return true;
 #else
+  return false;
+#endif
+}
+
+template<>
+bool AztecOOSolver<std::complex<double> >::solve()
+{
+  _F_
+#ifdef HAVE_AZTECOO
+  assert(m != NULL);
+  assert(rhs != NULL);
+  assert(m->size == rhs->size);
+
+  TimePeriod tmr;
+
+  // no output
+  aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
+
   double c0r = 1.0, c0i = 0.0;
   double c1r = 0.0, c1i = 1.0;
 
@@ -152,25 +177,25 @@ bool AztecOOSolver::solve()
   aztec.SetProblem(*lp);
 
   // solve it
-  aztec.Iterate(max_iters, tolerance);
+  aztec.Iterate(this->max_iters, this->tolerance);
 
   kp.ExtractSolution(xr, xi);
 
-  delete [] sln;
-  sln = new scalar[m->size];
-  MEM_CHECK(sln);
-  memset(sln, 0, m->size * sizeof(scalar));
+  delete [] this->sln;
+  this->sln = new std::complex<double>[m->size];
+  MEM_CHECK(this->sln);
+  memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
   // copy the solution into sln vector
-  for (unsigned int i = 0; i < m->size; i++) sln[i] = scalar(xr[i], xi[i]);
-#endif
+  for (unsigned int i = 0; i < m->size; i++) this->sln[i] = std::complex<double>(xr[i], xi[i]);
   return true;
 #else
   return false;
 #endif
 }
 
-int AztecOOSolver::get_num_iters()
+template<typename Scalar>
+int AztecOOSolver<Scalar>::get_num_iters()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -180,7 +205,8 @@ int AztecOOSolver::get_num_iters()
 #endif
 }
 
-double AztecOOSolver::get_residual()
+template<typename Scalar>
+double AztecOOSolver<Scalar>::get_residual()
 {
   _F_
 #ifdef HAVE_AZTECOO
@@ -190,3 +216,5 @@ double AztecOOSolver::get_residual()
 #endif
 }
 
+template class HERMES_API AztecOOSolver<double>;
+template class HERMES_API AztecOOSolver<std::complex<double> >;

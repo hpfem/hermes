@@ -26,35 +26,33 @@
 #ifdef WITH_MUMPS
   extern "C" {
     #include <mumps_c_types.h>
-  #ifndef HERMES_COMMON_COMPLEX
     #include <dmumps_c.h>
-    typedef scalar mumps_scalar;
-    #define MUMPS_SCALAR(a) SCALAR(a)
-    #define MUMPS_STRUCT    DMUMPS_STRUC_C
-  #else
     #include <zmumps_c.h>
-    typedef ZMUMPS_COMPLEX mumps_scalar;
-    #define MUMPS_SCALAR(a) a.r, a.i  
-    #define MUMPS_STRUCT    ZMUMPS_STRUC_C
-  #endif
   }
   
   #ifdef WITH_MPI
     #include <mpi.h>
   #endif
-  
-#else
-  #ifndef HERMES_COMMON_COMPLEX
-    typedef scalar mumps_scalar;
-    #define MUMPS_SCALAR(a) SCALAR(a)
-  #else
-    typedef struct { double r, i; } mumps_scalar;
-    #define MUMPS_SCALAR(a) a.r, a.i
-  #endif
+
+template <typename Scalar> struct mumps_type;
+
+template <>
+struct mumps_type<std::complex<double> >{
+  typedef ZMUMPS_STRUC_C mumps_struct;
+  typedef ZMUMPS_COMPLEX mumps_scalar;
+};
+template <>
+struct mumps_type<double>{
+  typedef DMUMPS_STRUC_C mumps_struct;
+  typedef double mumps_scalar;
+};
 #endif
 
+template <typename Scalar> class MumpsSolver;
 
-class MumpsMatrix : public SparseMatrix 
+
+template <typename Scalar>
+class MumpsMatrix : public SparseMatrix<Scalar> 
 {
 public:
   MumpsMatrix();
@@ -62,11 +60,11 @@ public:
 
   virtual void alloc();
   virtual void free();
-  virtual scalar get(unsigned int m, unsigned int n);
+  virtual Scalar get(unsigned int m, unsigned int n);
   virtual void zero();
-  virtual void add(unsigned int m, unsigned int n, scalar v);
-  virtual void add_to_diagonal(scalar v);
-  virtual void add(unsigned int m, unsigned int n, scalar **mat, int *rows, int *cols);
+  virtual void add(unsigned int m, unsigned int n, Scalar v);
+  virtual void add_to_diagonal(Scalar v);
+  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
@@ -76,11 +74,11 @@ public:
   virtual void add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat);
 
   // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply_with_vector(scalar* vector_in, scalar* vector_out);
-  // Multiplies matrix with a scalar.
-  void multiply_with_scalar(scalar value);
+  void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+  // Multiplies matrix with a Scalar.
+  void multiply_with_scalar(Scalar value);
   // Creates matrix using size, nnz, and the three arrays.
-  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, scalar* ax);
+  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
   MumpsMatrix* duplicate();
 
@@ -89,67 +87,70 @@ protected:
   unsigned int nnz;          // Number of non-zero elements. 
   int *irn;         // Row indices.
   int *jcn;         // Column indices.
-  mumps_scalar *Ax; // Matrix entries (column-wise).
+#ifdef WITH_MUMPS
+  typename mumps_type<Scalar>::mumps_scalar *Ax; // Matrix entries (column-wise).
+#endif
   int *Ai;          // Row indices of values in Ax.
   unsigned int *Ap;          // Index to Ax/Ai, where each column starts.
 
-  friend class MumpsSolver;
+  friend class MumpsSolver<Scalar>;
 };
 
-
-class MumpsVector : public Vector {
+template <typename Scalar>
+class MumpsVector : public Vector<Scalar> {
 public:
   MumpsVector();
   virtual ~MumpsVector();
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-#ifndef HERMES_COMMON_COMPLEX
-  virtual scalar get(unsigned int idx) { return v[idx]; }
-#else
-  virtual scalar get(unsigned int idx) { return cplx(v[idx].r, v[idx].i); }
-#endif
-  virtual void extract(scalar *v) const { memcpy(v, this->v, size * sizeof(scalar)); }
+  virtual Scalar get(unsigned int idx) { return v[idx]; }
+  virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
   virtual void zero();
   virtual void change_sign();
-  virtual void set(unsigned int idx, scalar y);
-  virtual void add(unsigned int idx, scalar y);
-  virtual void add(unsigned int n, unsigned int *idx, scalar *y);
-  virtual void add_vector(Vector* vec) {
+  virtual void set(unsigned int idx, Scalar y);
+  virtual void add(unsigned int idx, Scalar y);
+  virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+  virtual void add_vector(Vector<Scalar>* vec) {
     assert(this->length() == vec->length());
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
   };
-  virtual void add_vector(scalar* vec) {
+  virtual void add_vector(Scalar* vec) {
     for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
   };
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
   // MUMPS specific data structures for storing the rhs.
-  mumps_scalar *v;
+  Scalar *v;
 
-  friend class MumpsSolver;
+  friend class MumpsSolver<Scalar>;
 };
 
 
 /// Encapsulation of MUMPS linear solver
 ///
 /// @ingroup solvers
-class HERMES_API MumpsSolver : public LinearSolver {
+template <typename Scalar>
+class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
+private:
+#ifdef WITH_MUMPS
+  void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
+#endif
 public:
-  MumpsSolver(MumpsMatrix *m, MumpsVector *rhs);
+  MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
   virtual ~MumpsSolver();
 
   virtual bool solve();
 
 protected:
-  MumpsMatrix *m;
-  MumpsVector *rhs;
+  MumpsMatrix<Scalar> *m;
+  MumpsVector<Scalar> *rhs;
   
   bool setup_factorization();
 
 #ifdef WITH_MUMPS
-  MUMPS_STRUCT  param;
+  typename mumps_type<Scalar>::mumps_struct param;
   
   bool check_status();
   
