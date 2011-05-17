@@ -388,10 +388,12 @@ void EpetraVector<Scalar>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
-  delete std_map; std_map = NULL;
-  delete vec; vec = NULL;
-  delete vec_im; vec_im = NULL;
-  this->size = 0;
+  if(this->owner) {
+    delete std_map; std_map = NULL;
+    delete vec; vec = NULL;
+    delete vec_im; vec_im = NULL;
+    this->size = 0;
+  }
 #endif
 }
 
