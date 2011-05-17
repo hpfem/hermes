@@ -90,7 +90,7 @@ bool read_n_nums(char *row, int n, double values[]) {
   return (i == n);
 }
 
-int read_matrix_and_rhs(char *file_name, int &n, 
+int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
                         std::map<unsigned int, Matrix<Scalar>Entry> &mat, std::map<unsigned int, scalar> &rhs, bool &cplx_2_real) 
 {
   FILE *file = fopen(file_name, "r");
@@ -105,12 +105,6 @@ int read_matrix_and_rhs(char *file_name, int &n,
   // Variables needed to turn complex matrix into real.
   int k = 0; 
   int l = 0;
-  int param = 0;
-  bool fill_upper = true;
-  bool fill_lower = false;
-  int* imgn_i = NULL;
-  int* imgn_j = NULL;
-  double* imgn_value = NULL;
   double* rhs_buffer = NULL;
 
   double buffer[4]; 
@@ -120,159 +114,50 @@ int read_matrix_and_rhs(char *file_name, int &n,
       case STATE_N:
         if (read_n_nums(row, 1, buffer)) {
           if (cplx_2_real) {
-             if (fill_upper==true) { 
-             n = 2*((int) buffer[0]); 
-
-             // Allocate and initialize temporary arrays 
-             // we need for turning complex matrix to real.
-             imgn_i = new int[n];
-             imgn_j = new int[n];
-             imgn_value = new double[n];
-             rhs_buffer = new double[n];
-               for (int i = 0; i < n; i++) {
-                 imgn_i[i] = 0;
-                 imgn_j[i] =0;
-                 imgn_value[i] = 0.0;
-                 rhs_buffer[i] = 0.0;              
-               }
-             }
-             else 
-               printf("\n");
+            n = 2*((int) buffer[0]);
+            rhs_buffer = new double[n];
+            for (int i = 0; i < n; i++) {
+             rhs_buffer[i] = 0.0;              
+            }
           }   
-          else{ 
-             n = (int) buffer[0];
-          } 
-                              
-          state = STATE_MATRIX;
+          else
+            n = (int) buffer[0];
+          
+          state = STATE_NNZ;
         } 
+      break;
+
+      case STATE_NNZ:
+        if (read_n_nums(row, 1, buffer))
+             nnz = (int) buffer[0];
+
+        state = STATE_MATRIX; 
       break;
 
 #ifndef HERMES_COMMON_COMPLEX
 
       case STATE_MATRIX:
-        if (cplx_2_real){
+        if (cplx_2_real) {
           if (read_n_nums(row, 4, buffer)) {
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k,   MatrixEntry((int) buffer[0],     (int) buffer[1],     buffer[2])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1],     buffer[3])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz, MatrixEntry((int) buffer[0],     (int) buffer[1] + n/2, (-1)*buffer[3])));
+            mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz+1, MatrixEntry((int) buffer[0] + n/2, (int) buffer[1] + n/2, buffer[2])));
+            k=k+2;
+          }
+          else        
+            state = STATE_RHS;
+          }
+        else { // if cplx_2_real is false.
+          if (read_n_nums(row, 3, buffer)) 
+           mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], buffer[2]));
 
-              if (fill_upper == true) { //case FILL_UPPER:
-           
-                if (buffer[0] == k)
-                {
-                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], (scalar) buffer[2]));
-
-                   imgn_value[l] = (scalar) (-1)*buffer[3];
-                   imgn_i[l] = (int) buffer[0];
-                   imgn_j[l] = (int) buffer[1] + int (n/2); 
-                   l=l+1;
-                }
-                else // we have read an element that belongs to next row. Now what?
-                {
-                   // OK, first finish the previous row with imaginaries.
-                   for (int i=0; i < l; i++) 
-                   {
-                     mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
-                   }
-
-                   // Now begin the next row with real
-                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], buffer[2]));
-
-                   // And remember imaginary part from this row
-                   imgn_value[0] = (scalar) (-1)*buffer[3];
-                   imgn_i[0] = (int) buffer[0];
-                   imgn_j[0] = (int) buffer[1] + n/2; 
-                   l = 1;
- 
-                   while(k < buffer[0]) // Fast forward k, we need it for next read.
-                     k++;
-                }
-              } // break;  // case FILL_UPPER break.
-
-              if (fill_lower == true){ //case FILL_LOWER: We fill in lower half of the matrix, by different rules
- 
-                if (buffer[0] == k)
-                {
-                   // Create next matrix entry
-                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0] + n/2, (int) buffer[1], (scalar) buffer[3]));
-
-                   // Save imaginary part for later
-                   imgn_value[l] = (scalar) buffer[2];
-                   imgn_i[l] = (int) buffer[0] + n/2;
-                   imgn_j[l] = (int) buffer[1] + n/2; 
-                   l=l+1;                 
-
-                }
-                else // we have read an element that belongs to next row. Now what?
-                {
-                   //OK, first finish the previous row with imaginaries.
-                   for (int i=0; i < l; i++) 
-                   {
-                     mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
-                   }
-
-                   // Now begin the next row with real
-                   mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0] + n/2, (int) buffer[1], buffer[3]));
-
-                   // Save imaginary part for later
-                   imgn_value[0] = (scalar) buffer[2];
-                   imgn_i[0] = (int) buffer[0] + n/2;
-                   imgn_j[0] = (int) buffer[1] + n/2; 
-                   l = 1;
-
-                   // Fast forward k, we need it for next read. 
-                   while(k < buffer[0]) 
-                     k++;
-                }
-                } // case FILL_LOWER break.
-
-          } // if (read_n_nums) block end.
-
- 	  else {
-           // We have reached the line in the input file, 
-           // where the first rhs vector entries are defined. 
-           // But before we go to STATE_RHS, 
-           // let's finish filling the lower half of the new real matrix. 
-              if (param == 0){
-                   //OK, first finish the previous row with imaginaries.
-                  for (int i=0; i < l; i++) 
-                  {
-                    mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
-                  }
-                k = 0;
-                l = 0;
-
-                //Go to the top of the file.
-                rewind (file); 
-
-                // Anticipate the length of the first line.
-                state = STATE_N;
-
-                // Now we will fill lower half of the matrix.
-                fill_lower = true; 
-                fill_upper = false;
-
-                // Change parameter that brought us to this place.
-                param = 1; 
-              }
-              else {
-                  //OK, first finish the previous row with imaginaries.
-                  for (int i=0; i < l; i++) 
-                  {
-                    mat[mat.size()] = (Matrix<Scalar>Entry(imgn_i[i], imgn_j[i], imgn_value[i]));
-                  }
-                l = 0;
-                state = STATE_RHS;
-              }
-          }      
-     
-        }else{ // if cplx_2_real is false.
-           if (read_n_nums(row, 3, buffer)) 
-             mat[mat.size()] = (Matrix<Scalar>Entry((int) buffer[0], (int) buffer[1], buffer[2]));
-
-           else        
-           state = STATE_RHS;
+          else        
+          state = STATE_RHS;
          }
       break; //case STATE_MATRIX break.
 
-        case STATE_RHS:
+      case STATE_RHS:
         if (cplx_2_real) {
           if (read_n_nums(row, 3, buffer)) {
 
@@ -331,15 +216,9 @@ int read_matrix_and_rhs(char *file_name, int &n,
   fclose(file);
 
   // Free memory
-  delete [] imgn_i;
-  delete [] imgn_j;
-  delete [] imgn_value;
   delete [] rhs_buffer;
   
-  //Clear pointers
-  imgn_i = NULL;
-  imgn_j = NULL;
-  imgn_value = NULL;
+  // Clear pointer.
   rhs_buffer = NULL;
 
   return ERR_SUCCESS;
@@ -425,6 +304,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   int n;
+  int nnz;
   bool cplx_2_real;
   
   std::map<unsigned int, Matrix<Scalar>Entry> ar_mat;
@@ -435,7 +315,7 @@ int main(int argc, char *argv[]) {
   else
      cplx_2_real = false;
 
-  if (read_matrix_and_rhs(argv[2], n, ar_mat, ar_rhs, cplx_2_real) != ERR_SUCCESS)
+  if (read_matrix_and_rhs(argv[2], n, nnz, ar_mat, ar_rhs, cplx_2_real) != ERR_SUCCESS)
     error("Failed to read the matrix and rhs.");
 
   //show_mat("Here is the original ar_mat: ", ar_mat);
