@@ -26,7 +26,7 @@
 ///
 /// @ingroup preconds
 template <typename Scalar>
-class IfpackPrecond: public Precond<Scalar> {
+class HERMES_API IfpackPrecond: public Precond<Scalar> {
 public:
   /// Constructor for relaxation methods
   /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]
