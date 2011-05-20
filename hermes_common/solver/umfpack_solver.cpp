@@ -276,8 +276,8 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *r
 /// dumping matrix and right-hand side
 ///
 
-template<typename Scalar>
-bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+template<>
+bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt) 
   {
@@ -331,7 +331,145 @@ bool CSCMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
     case DF_PLAIN_ASCII:
       EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+    {
+      const double zero_cutoff = 1e-10;
+      scalar *ascii_entry_buff = new scalar[nnz];
+      int *ascii_entry_i = new int[nnz];
+      int *ascii_entry_j = new int[nnz];
+      int k = 0;
+
+      // If real or imaginary part of scalar entry is below zero_cutoff
+      // it's not included in ascii file, and number of non-zeros is reduced by one.
+      for (unsigned int j = 0; j < size; j){
+        for (int i = Ap[j]; i < Ap[j  1]; i){
+          if (REAL(Ax[i]) > zero_cutoff || IMAG(Ax[i]) > zero_cutoff){
+            ascii_entry_buff[k] = Ax[i];
+            ascii_entry_i[k] = Ai[i];
+            ascii_entry_j[k] = j;
+            k; 
+          }
+          else
+            nnz -= 1;            
+        }
+      }
+
+      fprintf(file, "%d\n", size);
+      fprintf(file, "%d\n", nnz);
+      for (unsigned int k = 0; k < nnz; k)
+        fprintf(file, "%d %d" SCALAR_FMT "\n", ascii_entry_i[k], ascii_entry_j[k], SCALAR(ascii_entry_buff[k]));
+
+      //Free memory
+      delete [] ascii_entry_buff;
+      delete [] ascii_entry_i;
+      delete [] ascii_entry_j;
+
+      //Clear pointer
+      ascii_entry_buff = NULL;
+      ascii_entry_i = NULL;
+      ascii_entry_j = NULL;
+
+      return true;
+    }
+
+    default:
       return false;
+  }
+}
+
+template<>
+bool CSCMatrix<std::complex<double>>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+  _F_
+  switch (fmt)
+  {
+    case DF_MATLAB_SPARSE:
+      fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
+              this->size, this->size, nnz, nnz);
+      for (unsigned int j = 0; j < this->size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++){
+          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+          fprint_num(file, Ax[i]);
+          fprintf(file, "\n");
+        }
+      fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+
+      return true;
+
+    case DF_MATRIX_MARKET:
+    {
+      fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+      int nnz_sym=0;
+      for (unsigned int j = 0; j < this->size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          if ((int)j <= Ai[i]) nnz_sym++;
+      fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
+      for (unsigned int j = 0; j < this->size; j++)
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          // The following line was replaced with the one below, because it gave a warning 
+	  // to cause code abort at runtime. 
+          //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
+          if ((int)j <= Ai[i]){
+            fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
+            fprint_num(file, Ax[i]);
+            fprintf(file, "\n");
+          }
+
+      return true;
+    }
+
+    case DF_HERMES_BIN: 
+    {
+      hermes_fwrite("HERMESX\001", 1, 8, file);
+      int ssize = sizeof(Scalar);
+      hermes_fwrite(&ssize, sizeof(int), 1, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
+      hermes_fwrite(&nnz, sizeof(int), 1, file);
+      hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+      hermes_fwrite(Ai, sizeof(int), nnz, file);
+      hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
+      return true;
+    }
+
+    case DF_PLAIN_ASCII:
+      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+    {
+      const double zero_cutoff = 1e-10;
+      scalar *ascii_entry_buff = new scalar[nnz];
+      int *ascii_entry_i = new int[nnz];
+      int *ascii_entry_j = new int[nnz];
+      int k = 0;
+
+      // If real or imaginary part of scalar entry is below zero_cutoff
+      // it's not included in ascii file, and number of non-zeros is reduced by one.
+      for (unsigned int j = 0; j < size; j){
+        for (int i = Ap[j]; i < Ap[j  1]; i){
+          if (REAL(Ax[i]) > zero_cutoff || IMAG(Ax[i]) > zero_cutoff){
+            ascii_entry_buff[k] = Ax[i];
+            ascii_entry_i[k] = Ai[i];
+            ascii_entry_j[k] = j;
+            k; 
+          }
+          else
+            nnz -= 1;            
+        }
+      }
+
+      fprintf(file, "%d\n", size);
+      fprintf(file, "%d\n", nnz);
+      for (unsigned int k = 0; k < nnz; k)
+        fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], REAL(ascii_entry_buff[k]), IMAG(ascii_entry_buff[k]));     
+
+      //Free memory
+      delete [] ascii_entry_buff;
+      delete [] ascii_entry_i;
+      delete [] ascii_entry_j;
+
+      //Clear pointer
+      ascii_entry_buff = NULL;
+      ascii_entry_i = NULL;
+      ascii_entry_j = NULL;
+
+      return true;
+    }
 
     default:
       return false;
@@ -456,8 +594,8 @@ void UMFPackVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) {
     v[idx[i]] += y[i];
 }
 
-template<typename Scalar>
-bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+template<>
+bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt) 
   {
@@ -480,9 +618,56 @@ bool UMFPackVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       return true;
     }
 
-    case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+    case DF_PLAIN_ASCII: 
+    {
+      fprintf(file, "\n");
+      for (unsigned int i = 0; i < size; i) {
+ 
+        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
+      }
+
+      return true;
+    }
+
+    default:
       return false;
+  }
+}
+
+
+template<>
+bool UMFPackVector<std::complex<double>>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+  _F_
+  switch (fmt) 
+  {
+    case DF_MATLAB_SPARSE:
+      fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+      for (unsigned int i = 0; i < this->size; i++){
+        fprint_num(file,v[i]);
+        fprintf(file, "\n");
+      }
+      fprintf(file, " ];\n");
+      return true;
+
+    case DF_HERMES_BIN: 
+    {
+      hermes_fwrite("HERMESR\001", 1, 8, file);
+      int ssize = sizeof(Scalar);
+      hermes_fwrite(&ssize, sizeof(int), 1, file);
+      hermes_fwrite(&this->size, sizeof(int), 1, file);
+      hermes_fwrite(v, sizeof(Scalar), this->size, file);
+      return true;
+    }
+
+    case DF_PLAIN_ASCII: 
+    {
+      fprintf(file, "\n");
+      for (unsigned int i = 0; i < size; i) {
+        fprintf(file, "%E %E\n", REAL(v[i]), IMAG(v[i]));     
+      }
+
+      return true;
+    }
 
     default:
       return false;
