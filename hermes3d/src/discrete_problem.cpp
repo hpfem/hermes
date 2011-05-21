@@ -539,7 +539,7 @@ void DiscreteProblem::assemble(scalar* coeff_vec, SparseMatrix* mat, Vector* rhs
         {
           if (e[i] == NULL) continue;
           int j = s->idx[i];
-          if ((nat[j] = (spaces[j]->bc_type_callback(marker) == BC_NATURAL)))
+          if ((nat[j] = (spaces[j]->bc_type_callback(marker) == H3D_BC_NATURAL)))
             spaces[j]->get_boundary_assembly_list(e[i], isurf, al + j);
         }
 

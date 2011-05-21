@@ -92,12 +92,12 @@ scalar ic_C(double x, double y, double z, double &dx, double &dy, double &dz) {
 
 // Boundary condition types. 
 BCType bc_types_phi(int marker) {
-  if (marker == BDY_TOP || marker == BDY_BOT) return BC_ESSENTIAL;
-  else return BC_NATURAL;
+  if (marker == BDY_TOP || marker == BDY_BOT) return H3D_BC_ESSENTIAL;
+  else return H3D_BC_NATURAL;
 }
 
 BCType bc_types_C(int marker) {
-  return BC_NATURAL;
+  return H3D_BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values. 

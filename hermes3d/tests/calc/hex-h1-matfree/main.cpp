@@ -71,7 +71,7 @@ T dfnc(T x, T y, T z)
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.
@@ -118,7 +118,7 @@ T dfnc(T x, T y, T z)
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_NATURAL;
+	return H3D_BC_NATURAL;
 }
 
 template<typename Real, typename Scalar>
@@ -176,7 +176,7 @@ T dfnc(T x, T y, T z)
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_NATURAL;
+	return H3D_BC_NATURAL;
 }
 
 template<typename Real, typename Scalar>
@@ -213,7 +213,7 @@ Scalar form_0_surf(int n, double *wt, Func<Real> *u[], Func<Real> *vi, Geom<Real
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.

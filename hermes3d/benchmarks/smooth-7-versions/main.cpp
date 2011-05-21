@@ -58,29 +58,29 @@ BCType bc_types(int marker)
 {
   switch (ANISO_TYPE) {
     // u = sin(x), thus we prescribe zero Dirichlet at faces 1 and 2, and zero Neumann elsewhere.
-    case ANISO_X: if (marker == 1 || marker == 2) return BC_ESSENTIAL; 
-                  else return BC_NATURAL;
+    case ANISO_X: if (marker == 1 || marker == 2) return H3D_BC_ESSENTIAL; 
+                  else return H3D_BC_NATURAL;
     // u = sin(y), thus we prescribe zero Dirichlet at faces 3 and 4, and zero Neumann elsewhere.
-    case ANISO_Y: if (marker == 3 || marker == 4) return BC_ESSENTIAL; 
-                  else return BC_NATURAL;
+    case ANISO_Y: if (marker == 3 || marker == 4) return H3D_BC_ESSENTIAL; 
+                  else return H3D_BC_NATURAL;
     // u = sin(z), thus we prescribe zero Dirichlet at faces 5 and 6, and zero Neumann elsewhere.
-    case ANISO_Z: if (marker == 5 || marker == 6) return BC_ESSENTIAL; 
-                  else return BC_NATURAL;
+    case ANISO_Z: if (marker == 5 || marker == 6) return H3D_BC_ESSENTIAL; 
+                  else return H3D_BC_NATURAL;
     // u = sin(x)*sin(y), thus we prescribe zero Dirichlet at faces 1, 2, 3, 4 and zero Neumann elsewhere.
-    case ANISO_X | ANISO_Y: if (marker == 1 || marker == 2 || marker == 3 || marker == 4) return BC_ESSENTIAL; 
-                            else return BC_NATURAL;
+    case ANISO_X | ANISO_Y: if (marker == 1 || marker == 2 || marker == 3 || marker == 4) return H3D_BC_ESSENTIAL; 
+                            else return H3D_BC_NATURAL;
     // u = sin(x)*sin(z), thus we prescribe zero Dirichlet at faces 1, 2, 5, 6 and zero Neumann elsewhere.
-    case ANISO_X | ANISO_Z: if (marker == 1 || marker == 2 || marker == 5 || marker == 6) return BC_ESSENTIAL; 
-                            else return BC_NATURAL;
+    case ANISO_X | ANISO_Z: if (marker == 1 || marker == 2 || marker == 5 || marker == 6) return H3D_BC_ESSENTIAL; 
+                            else return H3D_BC_NATURAL;
     // u = sin(y)*sin(z), thus we prescribe zero Dirichlet at faces 3, 4, 5, 6 and zero Neumann elsewhere.
-    case ANISO_Y | ANISO_Z: if (marker == 3 || marker == 4 || marker == 5 || marker == 6) return BC_ESSENTIAL; 
-                            else return BC_NATURAL;
+    case ANISO_Y | ANISO_Z: if (marker == 3 || marker == 4 || marker == 5 || marker == 6) return H3D_BC_ESSENTIAL; 
+                            else return H3D_BC_NATURAL;
     // u = sin(x)*sin(y)*sin(z), thus we prescribe zero Dirichlet everywhere.
-    case ANISO_X | ANISO_Y | ANISO_Z: return BC_ESSENTIAL;
+    case ANISO_X | ANISO_Y | ANISO_Z: return H3D_BC_ESSENTIAL;
     default: error("Admissible command-line options are x, y, x, xy, xz, yz, xyz.");
   }
 
-  return BC_ESSENTIAL;
+  return H3D_BC_ESSENTIAL;
 }
 
 // Assign the lowest possible directional polynomial degrees so that the problem's NDOF >= 1.

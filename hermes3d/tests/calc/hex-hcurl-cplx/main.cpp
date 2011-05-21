@@ -56,7 +56,7 @@ void f(Real x, Real y, Real z, Scalar (&val)[3]) {
 // Boundary condition types.
 BCType bc_types(int marker) 
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 template<typename Real, typename Scalar>

@@ -25,9 +25,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 // Note: "essential" means that solution value is prescribed.
 BCType bc_types(int marker)
 {
-  if (marker > 0) return BC_ESSENTIAL;
+  if (marker > 0) return H3D_BC_ESSENTIAL;
     else
-      return BC_NATURAL;
+      return H3D_BC_NATURAL;
 }
 
 // Essential (Dirichlet) boundary condition values.

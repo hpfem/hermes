@@ -51,7 +51,7 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.
@@ -104,8 +104,8 @@ const int marker_right = 2;
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	if (marker == marker_right) return BC_NATURAL;
-	else return BC_ESSENTIAL;
+	if (marker == marker_right) return H3D_BC_NATURAL;
+	else return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.
@@ -165,7 +165,7 @@ double exact_solution(double x, double y, double z, double &dx, double &dy, doub
 // Boundary condition types.
 BCType bc_types(int marker)
 {
-	return BC_ESSENTIAL;
+	return H3D_BC_ESSENTIAL;
 }
 
 // Dirichlet boundary conditions.

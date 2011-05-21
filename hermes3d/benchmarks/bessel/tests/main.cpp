@@ -37,9 +37,9 @@ const double lambda = 1.0;
 BCType bc_types(int marker)
 {
   if (marker == 1 || marker == 6)
-    return BC_ESSENTIAL; // perfect conductor
+    return H3D_BC_ESSENTIAL; // perfect conductor
   else
-    return BC_NATURAL; // impedance
+    return H3D_BC_NATURAL; // impedance
 }
 
 // Essential (Dirichlet) boundary condition values. 

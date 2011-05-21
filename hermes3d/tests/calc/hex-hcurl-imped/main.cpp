@@ -148,7 +148,7 @@ scalar3 &bc_values(int ess_bdy_marker, double x, double y, double z) {
 // Boundary condition types.
 BCType bc_types(int marker) 
 {
-	return BC_NATURAL;
+	return H3D_BC_NATURAL;
 }
 
 template<typename Real, typename Scalar>

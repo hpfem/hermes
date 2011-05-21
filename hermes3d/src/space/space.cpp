@@ -346,7 +346,7 @@ void Space::assign_vertex_dofs(unsigned int vid) {
 	_F_
 	VertexData *node = vn_data[vid];
 	int ndofs = get_vertex_ndofs();
-	if (node->bc_type == BC_ESSENTIAL) {
+	if (node->bc_type == H3D_BC_ESSENTIAL) {
 		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
@@ -360,7 +360,7 @@ void Space::assign_edge_dofs(Edge::Key idx) {
 	_F_
 	EdgeData *node = en_data[idx];
 	int ndofs = get_edge_ndofs(node->order);
-	if (node->bc_type == BC_ESSENTIAL) {
+	if (node->bc_type == H3D_BC_ESSENTIAL) {
 		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
@@ -374,7 +374,7 @@ void Space::assign_face_dofs(Facet::Key idx) {
 	_F_
 	FaceData *node = fn_data[idx];
 	int ndofs = get_face_ndofs(node->order);
-	if (node->bc_type == BC_ESSENTIAL) {
+	if (node->bc_type == H3D_BC_ESSENTIAL) {
 		node->dof = HERMES_DIRICHLET_DOF;
 	}
 	else {
@@ -555,7 +555,7 @@ void Space::get_bubble_assembly_list(Element *e, AsmList *al) {
 
 void Space::set_bc_info(NodeData *node, BCType bc, int marker) {
 	_F_
-	if (bc == BC_ESSENTIAL || (bc == BC_NATURAL && node->bc_type == BC_NONE)) {
+	if (bc == H3D_BC_ESSENTIAL || (bc == H3D_BC_NATURAL && node->bc_type == H3D_BC_NONE)) {
 		node->bc_type = bc;
 		node->marker = marker;
 	}
