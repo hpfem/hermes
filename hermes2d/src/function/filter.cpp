@@ -481,14 +481,18 @@ ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solu
 };
 
 
-void AbsFilter::filter_fn(int n,  Hermes::vector<std::complex<double>*> v1, double* result)
+void AbsFilter::filter_fn(int n,  Hermes::vector<scalar*> v1, double* result)
 {
   for (int i = 0; i < n; i++)
+#ifndef H2D_COMPLEX
+		result[i] = fabs(v1.at(0)[i]);
+#else
 		result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));
+#endif
 };
 
-AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter<std::complex<double> >(solutions, items)
+AbsFilter::AbsFilter(Hermes::vector<MeshFunction<scalar>*> solutions, Hermes::vector<int> items)
+          : SimpleFilter<scalar>(solutions, items)
 {
 		if (solutions.size() > 1)
 		error("RealFilter only supports one MeshFunction.");

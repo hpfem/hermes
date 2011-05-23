@@ -63,7 +63,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, LightArray<Node*>*>* tables[10];
+  std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>* tables[10];
 
   bool unimesh;
   UniData** unidata;
@@ -208,12 +208,12 @@ protected:
 
 
 /// Computes the absolute value of a complex solution.
-class HERMES_API AbsFilter : public SimpleFilter<std::complex<double> >
+class HERMES_API AbsFilter : public SimpleFilter<scalar >
 {
 public: 
-  AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  AbsFilter(Hermes::vector<MeshFunction<scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
+  virtual void filter_fn(int n, Hermes::vector<scalar*> values, double* result);
 };
 
 /// Computes the angle of a complex solution.
