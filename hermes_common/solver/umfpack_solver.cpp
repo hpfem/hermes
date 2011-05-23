@@ -275,6 +275,22 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *r
 
 /// dumping matrix and right-hand side
 ///
+double inline real(double x){
+  return x;
+}
+
+double inline imag(double x){
+  return 0;
+}
+
+
+double inline real(std::complex<double> x){
+  return x.real();
+}
+
+double inline imag(std::complex<double> x){
+  return x.imag();;
+}
 
 template<>
 bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
@@ -333,7 +349,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       EXIT(HERMES_ERR_NOT_IMPLEMENTED);
     {
       const double zero_cutoff = 1e-10;
-      scalar *ascii_entry_buff = new scalar[nnz];
+      Scalar *ascii_entry_buff = new Scalar[nnz];
       int *ascii_entry_i = new int[nnz];
       int *ascii_entry_j = new int[nnz];
       int k = 0;
@@ -341,8 +357,8 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       // If real or imaginary part of scalar entry is below zero_cutoff
       // it's not included in ascii file, and number of non-zeros is reduced by one.
       for (unsigned int j = 0; j < size; j){
-        for (int i = Ap[j]; i < Ap[j  1]; i){
-          if (REAL(Ax[i]) > zero_cutoff || IMAG(Ax[i]) > zero_cutoff){
+        for (int i = Ap[j]; i < Ap[j + 1]; i){
+          if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff){
             ascii_entry_buff[k] = Ax[i];
             ascii_entry_i[k] = Ai[i];
             ascii_entry_j[k] = j;
@@ -377,7 +393,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 }
 
 template<>
-bool CSCMatrix<std::complex<double>>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt)
   {
@@ -433,7 +449,7 @@ bool CSCMatrix<std::complex<double>>::dump(FILE *file, const char *var_name, EMa
       EXIT(HERMES_ERR_NOT_IMPLEMENTED);
     {
       const double zero_cutoff = 1e-10;
-      scalar *ascii_entry_buff = new scalar[nnz];
+      Scalar *ascii_entry_buff = new Scalar[nnz];
       int *ascii_entry_i = new int[nnz];
       int *ascii_entry_j = new int[nnz];
       int k = 0;
@@ -441,8 +457,8 @@ bool CSCMatrix<std::complex<double>>::dump(FILE *file, const char *var_name, EMa
       // If real or imaginary part of scalar entry is below zero_cutoff
       // it's not included in ascii file, and number of non-zeros is reduced by one.
       for (unsigned int j = 0; j < size; j){
-        for (int i = Ap[j]; i < Ap[j  1]; i){
-          if (REAL(Ax[i]) > zero_cutoff || IMAG(Ax[i]) > zero_cutoff){
+        for (int i = Ap[j]; i < Ap[j + 1]; i){
+          if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff){
             ascii_entry_buff[k] = Ax[i];
             ascii_entry_i[k] = Ai[i];
             ascii_entry_j[k] = j;
@@ -623,7 +639,8 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       fprintf(file, "\n");
       for (unsigned int i = 0; i < size; i) {
  
-        fprintf(file, SCALAR_FMT "\n", SCALAR(v[i]));
+        fprint_num(file, v[i]);
+        fprintf(file, "\n");
       }
 
       return true;
@@ -636,7 +653,7 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
 
 
 template<>
-bool UMFPackVector<std::complex<double>>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
+bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) {
   _F_
   switch (fmt) 
   {

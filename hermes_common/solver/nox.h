@@ -50,7 +50,7 @@ public:
   // For details of the parameter message_type, please see NOX_Utils.H, enum MsgType.
   // http://trilinos.sandia.gov/packages/docs/r4.0/packages/nox/doc/html/parameters.html
   // http://trilinos.sandia.gov/packages/docs/r7.0/packages/nox/doc/html/classNOX_1_1Epetra_1_1LinearSystemAztecOO.html
-  NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* ls_type = "GMRES", const char* nl_dir = "Newton", 
+  NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, const char* ls_type = "GMRES", const char* nl_dir = "Newton", 
 
     double ls_tolerance = 1e-8,
     const char* precond_type = "None",

@@ -212,7 +212,7 @@ NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : IterSo
 }
 #ifdef HAVE_NOX
 template<typename Scalar>
-NoxSolver::NoxSolver(DiscreteProblemInterface *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
+NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
     double ls_tolerance,
     const char* precond_type,
     unsigned flag_absresid,
