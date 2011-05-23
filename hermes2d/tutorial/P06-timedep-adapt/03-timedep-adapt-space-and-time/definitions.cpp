@@ -30,12 +30,12 @@ private:
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const {
+                         Func<double> *v, Geom<double> *e, ExtData<scalar> *ext){
       return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-                    Geom<Ord> *e, ExtData<Ord> *ext) const {
+                    Geom<Ord> *e, ExtData<Ord> *ext){
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }
 
@@ -79,12 +79,12 @@ private:
     }
 
     virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<scalar> *ext) const {
+                         Geom<double> *e, ExtData<scalar> *ext){
       return vector_form<double, scalar>(n, wt, u_ext, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
-                    ExtData<Ord> *ext) const {
+                    ExtData<Ord> *ext){
       return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
     }
 
@@ -124,7 +124,8 @@ public:
 
   inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
 
-  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+  //virtual double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+  virtual double value(double x, double y) const
   {
     return (x+10)*(y+10)/100.;
   }
