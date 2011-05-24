@@ -51,7 +51,7 @@ public:
 
   /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
   /// normal and tangential vectors.
-  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
+  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
  
   /// Special case of a constant function.
   Scalar value_const;
@@ -79,6 +79,8 @@ public:
   /// Constructors.
   DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
   DefaultEssentialBCConst(std::string marker, Scalar value_const);
+
+  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
   /// Function giving info that u_Essential is a constant.
   typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
@@ -117,7 +119,7 @@ public:
  
   ~DefaultEssentialBCNonConstHcurl() {};
 
-  virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
   /// Function giving info that u_Essential is a non-constant function.
   typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }

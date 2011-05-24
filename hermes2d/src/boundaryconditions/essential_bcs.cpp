@@ -59,10 +59,11 @@ DefaultEssentialBCConst<Scalar>::DefaultEssentialBCConst(std::string marker, Sca
   this->markers.push_back(marker);
 }
 
-scalar DefaultEssentialBCConst::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+template<typename Scalar>
+Scalar DefaultEssentialBCConst<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
   warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
   return 0.0;
-};
+}
 
 // Essential boundary condition non-constant (scalar case).
 template<typename Scalar>
@@ -81,26 +82,29 @@ DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(std::string marke
 };
 
 template<typename Scalar>
-scalar DefaultEssentialBCNonConst::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
 {
   return exact_solution->value(x, y);
 };
 
 // Essential boundary condition non-constant (Hcurl case... tangential component).
-DefaultEssentialBCNonConstHcurl::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
-                                                                 ExactSolutionVector* exact_solution2)  
+template<typename Scalar>
+DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
+                                                                 ExactSolutionVector<Scalar>* exact_solution2)  
        : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
 {
   for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
 };
 
-DefaultEssentialBCNonConstHcurl::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector* exact_solution2) 
+template<typename Scalar>
+DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2) 
        : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
 {
   markers.push_back(marker);
 };
 
-scalar DefaultEssentialBCNonConstHcurl::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
+template<typename Scalar>
+Scalar DefaultEssentialBCNonConstHcurl<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
 {
   scalar2 val = exact_solution2->value(x, y);
   return val.val[0] * t_x + val.val[1] * t_y;
