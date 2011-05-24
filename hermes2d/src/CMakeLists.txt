@@ -69,7 +69,6 @@ set(SRC
        weakform/weakform.cpp 
 
        neighbor.cpp
-       numerical_flux.cpp
        graph.cpp
        ogprojection.cpp
        h2d_common.cpp  
@@ -77,6 +76,12 @@ set(SRC
        runge_kutta.cpp
        spline.cpp
        boundaryconditions/essential_bcs.cpp
+       
+       weakform_library/weakforms_elasticity.cpp
+       weakform_library/weakforms_h1.cpp
+       weakform_library/weakforms_hcurl.cpp
+       weakform_library/weakforms_maxwell.cpp
+       weakform_library/weakforms_neutronics.cpp
        )
 
 #
@@ -203,6 +208,7 @@ file(GLOB INC_QUAD      "${CMAKE_CURRENT_SOURCE_DIR}/quadrature/*.h")
 file(GLOB INC_REF_SEL   "${CMAKE_CURRENT_SOURCE_DIR}/ref_selectors/*.h")
 file(GLOB INC_VIEWS     "${CMAKE_CURRENT_SOURCE_DIR}/views/*.h")
 file(GLOB INC_WEAKFORM  "${CMAKE_CURRENT_SOURCE_DIR}/weakform/*.h")
+file(GLOB INC_WEAKFORM_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/weakform_library/*.h")
 
 install(FILES ${INC}           DESTINATION include/hermes/hermes2d/src/)
 install(FILES ${INC_SPACE}     DESTINATION include/hermes/hermes2d/src/space)
@@ -217,3 +223,4 @@ install(FILES ${INC_QUAD}      DESTINATION include/hermes/hermes2d/src/quadratur
 install(FILES ${INC_REF_SEL}   DESTINATION include/hermes/hermes2d/src/ref_selectors)
 install(FILES ${INC_VIEWS}     DESTINATION include/hermes/hermes2d/src/views)
 install(FILES ${INC_WEAKFORM}  DESTINATION include/hermes/hermes2d/src/weakform)
+install(FILES ${INC_WEAKFORM_LIBRARY}  DESTINATION include/hermes/hermes2d/src/weakform_library)
