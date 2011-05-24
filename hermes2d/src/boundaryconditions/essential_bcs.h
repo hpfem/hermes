@@ -25,6 +25,7 @@
 
 //#include "../function/solution.h"
 template<typename Scalar> class ExactSolutionScalar;
+template<typename Scalar> class ExactSolutionVector;
 template<typename Scalar> class EssentialBCs;
 
 /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
@@ -105,22 +106,23 @@ public:
 
 /// Class representing non-constant essential boundary condition 
 /// (tangential component for Hcurl approximations).
-class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition
+template<typename Scalar>
+class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
 {
 public:
   // Tangential values given by a vector-valued solution.
   DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
-                                  ExactSolutionVector* exact_solution2); 
-  DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector* exact_solution2); 
+                                  ExactSolutionVector<Scalar>* exact_solution2); 
+  DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2); 
  
   ~DefaultEssentialBCNonConstHcurl() {};
 
   virtual scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
   /// Function giving info that u_Essential is a non-constant function.
-  inline EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition::BC_FUNCTION; }
+  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
-  ExactSolutionVector* exact_solution2;
+  ExactSolutionVector<Scalar>* exact_solution2;
 };
 
 /// Class encapsulating all boundary conditions of one problem.

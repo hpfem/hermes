@@ -36,17 +36,17 @@ public:
   unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
   unsigned int cap;       ///< internal
 
-    AsmList(const AsmList & other)
+  AsmList(const AsmList & other)
   {
     this->cnt = other.cnt;
     this->cap = other.cap;
     this->idx = (int*) malloc(sizeof(int) * cap);
     this->dof = (int*) malloc(sizeof(int) * cap);
-    this->coef = (scalar*) malloc(sizeof(scalar) * cap);
+    this->coef = (Scalar*) malloc(sizeof(Scalar) * cap);
     for(unsigned int i = 0; i < cnt; i) {
       coef[i] = other.coef[i];
-        dof[i] = other.dof[i];
-        idx[i] = other.idx[i];
+      dof[i] = other.dof[i];
+      idx[i] = other.idx[i];
     }
   }
 
