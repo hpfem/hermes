@@ -27,7 +27,7 @@ public:
   vector() { };
   /// 1 parameters constructor.
   /// Problematic when passing as an argument, not for use.
-  vector(const T& a) { this->reserve(1); this->push_back(a);};
+  //vector(const T& a) { this->reserve(1); this->push_back(a);};
   /// 2 parameters constructor.
   vector(const T& a, const T& b) { this->reserve(2); this->push_back(a); this->push_back(b); };
   /// 3 parameters constructor.
