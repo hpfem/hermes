@@ -118,7 +118,7 @@ public:
   void set_default_order(int tri_order, int quad_order = -1);
   /// Set the element order relative to the current order.
   /// The parameter min_order prevents decreasing polynomial order below this threshold.
-  void adjust_element_order(int order_change, unsigned int min_order);
+  void adjust_element_order(int order_change, int min_order);
   /// Version for quads.
   void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
   

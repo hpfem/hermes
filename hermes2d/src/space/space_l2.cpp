@@ -173,16 +173,16 @@ Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
   {
     surf_pos->t = surf_pos->lo;
     // Find out the (x,y) coordinates for the first endpoint.
-    double x, y;
+    double x, y, n_x, n_y, t_x, t_y;
     Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-    CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+    CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
     // Calculate.
-    proj[0] = bc->value(x, y);
+    proj[0] = bc->value(x, y, n_x, n_y, t_x, t_y);
     surf_pos->t = surf_pos->hi;
     // Find out the (x,y) coordinates for the second endpoint.
-    CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+    CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
     // Calculate.
-    proj[1] = bc->value(x, y);
+    proj[1] = bc->value(x, y, n_x, n_y, t_x, t_y);
   }
 
   if (order-- > 1)
@@ -216,12 +216,12 @@ Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
         else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
         {
           // Find out the (x,y) coordinate.
-          double x, y;
+          double x, y, n_x, n_y, t_x, t_y;
           Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-          CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
+          CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
           // Calculate.
           rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-            * (bc->value(x, y) - l);
+            * (bc->value(x, y, n_x, n_y, t_x, t_y) - l);
         }
       }
     }

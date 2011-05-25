@@ -17,7 +17,8 @@
 
 template<typename Scalar>
 Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
-        : shapeset(shapeset), mesh(mesh)
+        : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh) {          
+        }
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
@@ -32,7 +33,11 @@ Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essen
   this->was_assigned = false;
   this->ndof = 0;
 
-  this->essential_bcs = essential_bcs;
+  if(essential_bcs != NULL)
+     for(std::vector<EssentialBoundaryCondition*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+       for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+         if(mesh->get_boundary_markers_conversion().conversion_table_inverse->find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse->end())
+           error("A boundary condition defined on a non-existent marker.");
 
   own_shapeset = (shapeset == NULL);
 }
@@ -224,9 +229,21 @@ void Space<Scalar>::adjust_element_order(int order_change, unsigned int min_orde
   for_all_active_elements(e, this->get_mesh()) {
     if(e->is_triangle())
       set_element_order_internal(e->id, std::max<int>(min_order, get_element_order(e->id) + order_change));
-    else
-      set_element_order_internal(e->id, std::max<int>(H2D_MAKE_QUAD_ORDER(min_order, min_order), 
-      H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + order_change)));
+    else{
+      int h_order, v_order;
+      // check that we are not imposing smaller than minimal orders.
+      if(H2D_GET_H_ORDER(get_element_order(e->id)) + order_change < min_order)
+        h_order = min_order;
+      else
+        h_order = H2D_GET_H_ORDER(get_element_order(e->id)) + order_change;
+
+      if(H2D_GET_V_ORDER(get_element_order(e->id)) + order_change < min_order)
+        v_order = min_order;
+      else
+        v_order = H2D_GET_V_ORDER(get_element_order(e->id)) + order_change;
+
+      set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(h_order, v_order));
+    }
   }
   assign_dofs();
 }
@@ -247,6 +264,95 @@ void Space<Scalar>::adjust_element_order(int horizontal_order_change, int vertic
            H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change)));
   }
   assign_dofs();
+}
+
+template<typename Scalar>
+void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
+{
+  // find inactive elements with active sons
+  std::vector<int> list;
+  Element* e;
+  for_all_inactive_elements(e, this->mesh)
+  {
+    bool found = true;
+    for (unsigned int i = 0; i < 4; i++)
+      if (e->sons[i] != NULL && 
+          (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < this->mesh->ninitial))  
+         )
+        { found = false; break; }
+
+    if (found) list.push_back(e->id);
+  }
+
+  // unrefine the found elements
+  for (unsigned int i = 0; i < list.size(); i++) {
+    unsigned int order = 0, h_order = 0, v_order = 0;
+    unsigned int num_sons = 0;
+    if (this->mesh->get_element_fast(list[i])->bsplit()) {
+      num_sons = 4;
+      for (int sons_i = 0; sons_i < 4; sons_i++) {
+        if(this->mesh->get_element_fast(list[i])->sons[sons_i]->active) {
+          if(this->mesh->get_element_fast(list[i])->sons[sons_i]->is_triangle())
+            order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id);
+          else {
+            h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
+            v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
+          }
+        }
+      }
+    }
+    else {
+      if (this->mesh->get_element_fast(list[i])->hsplit()) {
+        num_sons = 2;
+        if(this->mesh->get_element_fast(list[i])->sons[0]->active) {
+          if(this->mesh->get_element_fast(list[i])->sons[0]->is_triangle())
+            order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id);
+          else {
+            h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
+            v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
+          }
+        }
+        if(this->mesh->get_element_fast(list[i])->sons[1]->active) {
+          if(this->mesh->get_element_fast(list[i])->sons[1]->is_triangle())
+            order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id);
+          else {
+            h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
+            v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
+          }
+        }
+      }
+      else {
+        num_sons = 2;
+        if(this->mesh->get_element_fast(list[i])->sons[2]->active) {
+          if(this->mesh->get_element_fast(list[i])->sons[2]->is_triangle())
+            order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id);
+          else {
+            h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
+            v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
+          }
+        }
+        if(this->mesh->get_element_fast(list[i])->sons[3]->active) {
+          if(this->mesh->get_element_fast(list[i])->sons[3]->is_triangle())
+            order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id);
+          else {
+            h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
+            v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
+          }
+        }
+      }
+    }
+    order = (unsigned int)(order / num_sons);
+    h_order = (unsigned int)(h_order / num_sons);
+    v_order = (unsigned int)(v_order / num_sons);
+
+    if(this->mesh->get_element_fast(list[i])->is_triangle())
+      edata[list[i]].order = order;
+    else
+      edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
+    this->mesh->unrefine_element_id(list[i]);
+  }
+
+  this->assign_dofs();
 }
 
 template<typename Scalar>
