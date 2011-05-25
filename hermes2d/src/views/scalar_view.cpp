@@ -713,6 +713,13 @@ void ScalarView<Scalar>::draw_tri_contours(double3* vert, int3* tri)
 
   int l1 = 0, l2 = 1;
   int r1 = 0, r2 = 2;
+
+  // Adjustment of the contour step.
+  while(std::abs(val - vert[idx[r2]][2]) > 50 * cont_step)
+    cont_step *= 10;
+  while(std::abs(val - vert[idx[r2]][2]) < 2E-2 * cont_step)
+    cont_step /= 10;
+ 
   while (val < vert[idx[r2]][2])
   {
     double ld = vert[idx[l2]][2] - vert[idx[l1]][2];
@@ -925,7 +932,6 @@ void ScalarView<Scalar>::draw_edges_2d() {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_edge_inx_buffer);
     GLuint *gl_inx_buffer = (GLuint*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
     GLenum err = glGetError();
-    unsigned char* msg = (unsigned char*)gluErrorString(err);
     if (err == GL_NO_ERROR) {//render edges
       unsigned int buffer_inx = 0;
       int3* edges = lin.get_edges();
