@@ -121,6 +121,10 @@ public:
   void adjust_element_order(int order_change, int min_order);
   /// Version for quads.
   void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
+
+  /// Recursively removes all son elements of the given element and
+  /// makes it active. Also handles element orders.
+  void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
   
   /// Sets the shapeset.
   virtual void set_shapeset(Shapeset* shapeset) = 0;
