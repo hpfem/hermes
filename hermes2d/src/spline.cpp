@@ -18,27 +18,54 @@
 
 CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values, 
                          double bc_left, double bc_right, 
-                         bool first_der_left, bool first_der_right) 
-  : points(points), values(values), bc_left(bc_left), bc_right(bc_right), 
-    first_der_left(first_der_left), first_der_right(first_der_right)
-{
-  // Sanity check.
-  if (points.empty() || values.empty()) error("Supply both points and values when initializing a spline.");
-  if (points.size() != values.size()) error("Mismatched number of spline points and values.");
+                         bool first_der_left, bool first_der_right,
+                         bool extrapolate_der_left, bool extrapolate_der_right) 
+  : is_constant(false), const_value(-9999), points(points), values(values), 
+    bc_left(bc_left), bc_right(bc_right), first_der_left(first_der_left), 
+    first_der_right(first_der_right), extrapolate_der_left(extrapolate_der_left), 
+    extrapolate_der_right(extrapolate_der_right) 
+    { 
+      bool success = this->calculate_coeffs(); 
+      if (!success) error("There was a problem constructing a cubic spline.");
+    }
 
-  // Initializing coefficient array.
-  int nelem = points.size() - 1;
-  coeffs = new SplineCoeff[nelem];
+double CubicSpline::get_value(double x_in) 
+{  
+  // For constant case.
+  if (this->is_constant) {
+    return this->const_value;
+  }
+
+  // For general case.
+  int m = -1;
+  if (!this->find_interval(x_in, m)) {
+    // Point lies on the left of interval of definition.
+    if (x_in <= point_left) {  
+      // Spline should be extrapolated by constant function 
+      // matching the value at the end.
+      if (extrapolate_der_left == false) return value_left;
+      // Spline should be extrapolated as a linear function 
+      // matching the derivative at the end.
+      else return extrapolate_value(point_left, value_left, derivative_left, x_in);
+    }
+    // Point lies on the right of interval of definition.
+    else {  
+      // Spline should be extrapolated by constant function 
+      // matching the value at the end.
+      if (extrapolate_der_right == false) return value_right;
+      // Spline should be extrapolated as a linear function 
+      // matching the derivative at the end.
+      else return extrapolate_value(point_right, value_right, derivative_right, x_in);
+    }
+  }
+
+  return get_value_from_interval(x_in, m); 
 }
 
-bool CubicSpline::get_value(double x_in, double& val_out) 
-{  
-  int m = -1;
-  if (!this->find_interval(x_in, m)) return false;
-
-  val_out = get_value_from_interval(x_in, m); 
-
-  return true;
+double CubicSpline::extrapolate_value(double point_end, double value_end, 
+                                      double derivative_end, double x_in)
+{
+  return value_end + derivative_end * (x_in - point_end);
 }
 
 double CubicSpline::get_value_from_interval(double x_in, int m) 
@@ -49,14 +76,35 @@ double CubicSpline::get_value_from_interval(double x_in, int m)
          + this->coeffs[m].d * x3;
 }
 
-bool CubicSpline::get_derivative(double x_in, double& der_out) 
+double CubicSpline::get_derivative(double x_in) 
 {
+  // For constant case.
+  if (this->is_constant) return 0.0;
+
+  // For general case.
   int m = -1;
-  if (!this->find_interval(x_in, m)) return false;
+  if (!this->find_interval(x_in, m)) {
+    // Point lies on the left of interval of definition.
+    if (x_in <= point_left) {  
+      // Spline should be extrapolated by constant function 
+      // matching the value at the end.
+      if (extrapolate_der_left == false) return 0;
+      // Spline should be extrapolated as a linear function 
+      // matching the derivative at the end.
+      else return derivative_left;
+    }
+    // Point lies on the right of interval of definition.
+    else {  
+      // Spline should be extrapolated by constant function 
+      // matching the value at the end.
+      if (extrapolate_der_right == false) return 0;
+      // Spline should be extrapolated as a linear function 
+      // matching the derivative at the end.
+      else return derivative_right;
+    }
+  }
 
-  der_out = get_derivative_from_interval(x_in, m); 
-
-  return true;
+  return get_derivative_from_interval(x_in, m); 
 };
 
 double CubicSpline::get_derivative_from_interval(double x_in, int m) 
@@ -84,33 +132,107 @@ bool CubicSpline::find_interval(double x_in, int &m)
   return true;
 };
 
-void CubicSpline::plot(const char* filename, int subdiv) 
+void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) 
 {
   FILE *f = fopen(filename, "wb");
   if (f == NULL) error("Could not open a spline file for writing."); 
   
+  // Plotting on the left of the area of definition.
+  double x_left = point_left - extension;
+  double h = extension / subdiv;
+  for (int j = 0; j < subdiv; j++) {
+    double x = x_left + j * h;
+    double val;
+    if (!plot_derivative) val = get_value(x);
+    else val = get_derivative(x); 
+    fprintf(f, "%g %g\n", x, val);
+  }
+  double x_last = point_left;
+  double val_last;
+  if (!plot_derivative) val_last = get_value(x_last);
+  else val_last = get_derivative(x_last); 
+  fprintf(f, "%g %g\n", x_last, val_last);
+
+  // Plotting inside the interval of definition.
   for (unsigned int i = 0; i < points.size() - 1; i++) {
     double h = (points[i+1] - points[i]) / subdiv;
     for (int j = 0; j < subdiv; j++) {
       double x = points[i] + j * h;
-      double val = get_value_from_interval(x, i); 
+      double val;
+      // Do not use get_value_from_interval() here.
+      if (!plot_derivative) val = this->get_value(x); 
+      else val = get_derivative(x); 
       fprintf(f, "%g %g\n", x, val);
     }
   }
-  double x_last = points[points.size() - 1];
-  double val_last = get_value_from_interval(x_last, points.size() - 1);
+  x_last = points[points.size() - 1];
+  // Do not use get_value_from_interval() here.
+  if (!plot_derivative) val_last = get_value(x_last); 
+  else val_last = get_derivative(x_last);
   fprintf(f, "%g %g\n", x_last, val_last);
+
+  // Plotting on the right of the area of definition.
+  double x_right = point_right + extension;
+  h = extension / subdiv;
+  for (int j = 0; j < subdiv; j++) {
+    double x = point_right + j * h;
+    double val;
+    if (!plot_derivative) val = get_value(x); 
+    else val = get_derivative(x); 
+    fprintf(f, "%g %g\n", x, val);
+  }
+  x_last = x_right;
+  if (!plot_derivative) val_last = get_value(x_last);
+  else val_last = get_derivative(x_last);
+  fprintf(f, "%g %g\n", x_last, val_last);
+
   fclose(f);
 }
 
 bool CubicSpline::calculate_coeffs() 
 {
   int nelem = points.size() - 1;
+
+  // Basic sanity checks.
+  if (points.empty() || values.empty()) {
+    warn("Empty points or values vector in CubicSpline, returning false.");
+    return false;
+  }
+  if (points.size() < 2 || values.size() < 2) {
+    warn("At least two points and values required in CubicSpline, returning false.");
+    return false;
+  }
+  if (points.size() != values.size()) {
+    warn("Mismatched number fo points and values in CubicSpline, returning false.");
+    return false;
+  }
+  
+  // Check for improperly ordered or duplicated points.
+  double eps = 1e-8;
+  for (int i = 0; i < nelem; i++) {
+    if (points[i+1] < points[i] + eps) {
+      warn("Duplicated or improperly ordered points in CubicSpline detected, returning false.");
+      return false;
+    }
+  }
+
+  /* START COMPUTATION */
+
+  // Initializing coefficient array.
+  coeffs = new SplineCoeff[nelem];
+
+  // Allocate matrix and rhs.
   const int n = 4 * nelem;
   double** matrix = new_matrix<double>(n, n);
-  memset(matrix, 0, n*n*sizeof(double));
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      matrix[i][j] = 0;
+    }
+  } 
   double* rhs = new double[n];
-  memset(rhs, 0, n*sizeof(double));
+  for (int j = 0; j < n; j++) {
+    rhs[j] = 0;
+  }
 
   // Fill the rhs vector.
   for (int i=0; i < nelem; i++) {
@@ -129,6 +251,8 @@ bool CubicSpline::calculate_coeffs()
     matrix[2*i][4*i + 2] = xx2;
     matrix[2*i][4*i + 3] = xx3;
     xx = points[i+1];
+    xx2 = xx*xx;
+    xx3 = xx2 * xx;
     matrix[2*i + 1][4*i + 0] = 1.0;
     matrix[2*i + 1][4*i + 1] = xx;
     matrix[2*i + 1][4*i + 2] = xx2;
@@ -181,7 +305,7 @@ bool CubicSpline::calculate_coeffs()
     matrix[offset + 0][3] = 3*xx*xx;
     rhs[n-2] = bc_left; // Value of the first derivative.
   }
-  xx = points[n-1]; // Right end-point.
+  xx = points[nelem]; // Right end-point.
   if (first_der_right == false) { 
     matrix[offset + 1][n-2] = 2;
     matrix[offset + 1][n-1] = 6*xx;
@@ -207,6 +331,16 @@ bool CubicSpline::calculate_coeffs()
     coeffs[i].c = rhs[4*i + 2];
     coeffs[i].d = rhs[4*i + 3];
   }
+
+  // Define end point values and derivatives so that 
+  // the points[] and values[] arrays are no longer
+  // needed.
+  point_left = points[0];
+  value_left = values[0];
+  derivative_left = get_derivative_from_interval(point_left, 0);
+  point_right = points[points.size() - 1];
+  value_right = values[values.size() - 1];
+  derivative_right = get_derivative_from_interval(point_right, points.size() - 2);
 
   // Free the matrix and rhs vector.
   delete [] matrix;
