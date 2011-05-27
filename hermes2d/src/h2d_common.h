@@ -105,17 +105,15 @@ public:
 
   double get_l2_norm(Vector<Scalar>* vec) const;
 
-  /// New interface, still in developement
-  /// HERMES_API bool solve_newton(Scalar* coeff_vec, DiscreteProblem* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
-  ///		               Vector<Scalar>* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose,
-  ///                             unsigned int stop_condition = NEWTON_WATCH_RESIDUAL);
   bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
-			       Vector<Scalar>* rhs, double NEWTON_TOL, int NEWTON_MAX_ITER, bool verbose = false,
-                               bool residual_as_function = false,
-                               double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
+			       Vector<Scalar>* rhs, bool jacobian_changed = true, double newton_tol = 1e-8, 
+                    int newton_max_iter = 100, bool verbose = false,
+                    bool residual_as_function = false,
+                    double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
 
-  bool solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter, MatrixSolverType matrix_solver, double picard_tol, 
-       int picard_max_iter, bool verbose) const;
+  bool solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter, 
+                    MatrixSolverType matrix_solver, double tol = 1e-8, 
+                    int max_iter = 100, bool verbose = false) const;
 };
 
 

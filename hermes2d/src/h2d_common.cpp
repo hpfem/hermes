@@ -58,7 +58,7 @@ double Hermes2D<Scalar>::get_l2_norm(Vector<Scalar>* vec) const
 
 template<typename Scalar>
 bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
-                  Vector<Scalar>* rhs, double newton_tol, int newton_max_iter, bool verbose,
+                  Vector<Scalar>* rhs, bool jacobian_changed, double newton_tol, int newton_max_iter, bool verbose,
                   bool residual_as_function,
                   double damping_coeff, double max_allowed_residual_norm) const
 {
@@ -79,13 +79,9 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
     // Obtain the number of degrees of freedom.
     int ndof = dp->get_num_dofs();
 
-    // Assemble the Jacobian matrix and residual vector.
-    dp->assemble(coeff_vec, matrix, rhs, false);
-
-    // Multiply the residual vector with -1 since the matrix
-    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-    rhs->change_sign();
-
+    // Assemble the residual vector.
+    dp->assemble(coeff_vec, NULL, rhs); // NULL = we do not want the Jacobian.
+ 
     // Measure the residual norm.
     if (residual_as_function) {
       // Translate the residual vector into a residual function (or multiple functions)
@@ -103,8 +99,13 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
     }
 
     // Info for the user.
-    if (verbose) info("---- Newton iter %d, ndof %d, residual norm %g", it, ndof, residual_norm);
-
+    if(it == 1)
+      if(verbose) 
+        info("---- Newton initial residual norm: %g", residual_norm);
+      else 
+        if(verbose)
+          info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
+ 
     // If maximum allowed residual norm is exceeded, fail.
     if (residual_norm > max_allowed_residual_norm) {
       if (verbose) {
@@ -120,6 +121,13 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
     // If residual norm is within tolerance, or the maximum number
     // of iteration has been reached, then quit.
     if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) break;
+
+    // If Jacobian changed, assemble the matrix.
+    if (jacobian_changed) dp->assemble(coeff_vec, matrix, NULL); // NULL = we do not want the rhs.
+
+    // Multiply the residual vector with -1 since the matrix
+    // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+    rhs->change_sign();
 
     // Solve the linear system.
     if(!solver->solve()) error ("Matrix<Scalar> solver failed.\n");
@@ -144,43 +152,57 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
 // Perform Picard's iteration.
 template<typename Scalar>
 bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter,
-                  MatrixSolverType matrix_solver, double picard_tol,
-                  int picard_max_iter, bool verbose) const
+                  MatrixSolverType matrix_solver, double tol,
+                  int max_iter, bool verbose) const
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix<Scalar>* matrix = create_matrix<Scalar>(matrix_solver);
   Vector<Scalar>* rhs = create_vector<Scalar>(matrix_solver);
   Solver<Scalar>* solver = create_linear_solver<Scalar>(matrix_solver, matrix, rhs);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem<Scalar> dp(wf, space, is_linear);
+  DiscreteProblem dp(wf, space);
 
+  // Initial coefficient vector for the Newton's method.  
+  int ndof = Space::get_num_dofs(space);
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof * sizeof(scalar));
+ 
   int iter_count = 0;
   while (true) {
     // Assemble the stiffness matrix and right-hand side.
     dp.assemble(matrix, rhs);
+    // Perform Newton's iteration to solve the linear problem.
+    bool jacobian_changed = true;
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
+                               jacobian_changed, tol, max_iter)) 
+        error("Newton's iteration failed.");
 
     // Solve the linear system and if successful, obtain the solution.
+    // Translate the resulting coefficient vector into the Solution sln.
     Solution<Scalar> sln_new;
-    if(solver->solve()) Solution<Scalar>::vector_to_solution(solver->get_solution(), space, &sln_new);
-    else error ("Matrix<Scalar> solver failed.\n");
-
+    Solution::vector_to_solution(coeff_vec, space, &sln_new);
+ 
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
                        / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
     if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%",
       iter_count+1, space->get_num_dofs(), rel_error);
 
     // Stopping criterion.
-    if (rel_error < picard_tol) {
+    if (rel_error < tol) {
       sln_prev_iter->copy(&sln_new);
+      delete [] coeff_vec;
       delete matrix;
       delete rhs;
       delete solver;
       return true;
     }
 
-    if (iter_count >= picard_max_iter) {
+    if (iter_count >= max_iter) {
+      delete [] coeff_vec;
       delete matrix;
       delete rhs;
       delete solver;
