@@ -5,6 +5,9 @@ void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> space
                                     Scalar* target_vec, MatrixSolverType matrix_solver)
 {
   _F_
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   unsigned int n = spaces.size();
 
   // sanity checks
@@ -16,24 +19,23 @@ void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> space
   int ndof = Space<Scalar>::assign_dofs(spaces);
 
   // Initialize DiscreteProblem.
-  bool is_linear = true;
-  DiscreteProblem<Scalar>* dp = new DiscreteProblem<Scalar>(wf, spaces, is_linear);
+  DiscreteProblem* dp = new DiscreteProblem(wf, spaces);
 
   SparseMatrix<Scalar>* matrix = create_matrix<Scalar>(matrix_solver);
   Vector<Scalar>* rhs = create_vector<Scalar>(matrix_solver);
   Solver<Scalar>* solver = create_linear_solver<Scalar>(matrix_solver, matrix, rhs);
 
-  dp->assemble(matrix, rhs, false);
+  // Initial coefficient vector for the Newton's method.  
+  scalar* coeff_vec = new scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(scalar));
 
-  // Calculate the coefficient vector.
-  bool solved = solver->solve();
-  Scalar* coeffs = NULL;
-  if (solved)
-    coeffs = solver->get_solution();
+  // Perform Newton's iteration.
+  if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
   if (target_vec != NULL)
-    for (int i=0; i<ndof; i++) target_vec[i] = coeffs[i];
-
+    for (int i=0; i < ndof; i++) target_vec[i] = coeff_vec[i];
+ 
+  delete [] coeff_vec;
   delete solver;
   delete matrix;
   delete rhs;
@@ -70,14 +72,16 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
     // FIXME - memory leak - create Projection class and encapsulate this function project_global(...)
     // maybe in more general form
     found[i] = 1;
-    proj_wf->add_matrix_form(new ProjectionMatrixVolForm(i, i, norm));
-    proj_wf->add_vector_form(new ProjectionVectorVolForm(i, source_meshfns[i], norm));
+    // Jacobian.
+    proj_wf->add_matrix_form(new ProjectionMatrixFormVol(i, i, norm));
+    // Residual.
+    proj_wf->add_vector_form(new ProjectionVectorFormVol(i, source_meshfns[i], norm));
   }
   for (int i=0; i < n; i++)
   {
     if (found[i] == 0)
     {
-      warn("index of component: %d\n", i);
+      warn("Index of component: %d\n", i);
       error("Wrong projection norm in project_global().");
     }
   }
@@ -113,7 +117,7 @@ void OGProjection<Scalar>::project_global(Space<Scalar>* space, MeshFunction<Sca
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
                                   Hermes::vector<Solution<Scalar>*> sols_dest, MatrixSolverType matrix_solver,
-                                  Hermes::vector<ProjNormType> proj_norms)
+                                  Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
 {
   _F_
 
@@ -123,6 +127,12 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
     ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
 
   OGProjection<Scalar>::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
+
+  if(delete_old_meshes)
+    for(unsigned int i = 0; i < sols_src.size(); i++) {
+      delete sols_src[i]->get_mesh();
+      sols_src[i]->own_mesh = false;
+    }
 
   Solution<Scalar>::vector_to_solutions(target_vec, spaces, sols_dest);
 
