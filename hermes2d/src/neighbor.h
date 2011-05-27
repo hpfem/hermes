@@ -150,8 +150,8 @@ public:
   /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
   ///
   ExtendedShapeset* create_extended_asmlist(Space<Scalar>* space, AsmList<Scalar>* al);
-  ExtendedShapeset* create_extended_asmlist_multicomponent(Space *space, AsmList* al); 
-/*** Methods for working with quadrature on the active edge. ***/
+  ExtendedShapeset* create_extended_asmlist_multicomponent(Space<Scalar>* space, AsmList<Scalar>* al); 
+  /*** Methods for working with quadrature on the active edge. ***/
 
   /// Sets the quadrature order to be used for obtaining integration points and weights in both neighbors.
   ///
@@ -378,7 +378,8 @@ public:
     /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
     /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
     ///
-    ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
+    ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
+
     ExtendedShapeset(const ExtendedShapeset & other);
 
     /// Destructor.

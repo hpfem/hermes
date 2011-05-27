@@ -683,7 +683,7 @@ int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bo
 }
 
 template<typename Scalar>
-NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(const NeighborSearch<Scalar>::ExtendedShapeset & other) {
+NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(const ExtendedShapeset & other) {
   this->central_al = new AsmList<Scalar>(*other.central_al);
   this->cnt = other.cnt;
   this->dof = other.dof;
@@ -704,7 +704,7 @@ typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::creat
 }
 
 template<typename Scalar>
-NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(Space<Scalar> *space, AsmList<Scalar>* al)
+typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(Space<Scalar> *space, AsmList<Scalar>* al)
 {
   _F_
   if (supported_shapes != NULL)
