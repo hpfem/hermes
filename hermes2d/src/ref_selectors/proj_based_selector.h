@@ -60,6 +60,10 @@ namespace RefinementSelectors {
      *  \param[in] weight_aniso An error weight of ANISO-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_ANISO. */
     void set_error_weights(double weight_h = H2DRS_DEFAULT_ERR_WEIGHT_H, double weight_p = H2DRS_DEFAULT_ERR_WEIGHT_P, double weight_aniso = H2DRS_DEFAULT_ERR_WEIGHT_ANISO);
 
+    double get_error_weight_h() { return error_weight_h; };
+    double get_error_weight_p() { return error_weight_p; };
+    double get_error_weight_aniso() { return error_weight_aniso; };
+
   protected: //evaluated shape basis
     /// A transform shaped function expansions.
     /** The contents of the class can be accessed through an array index operator.
@@ -239,7 +243,7 @@ namespace RefinementSelectors {
     /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
     virtual void evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error);
 
-    /// Calculates projection errors of an elements of candidates for all permitations of orders.
+    /// Calculates projection errors of an elements of candidates for all permutations of orders.
     /** Errors are not normalized and they are squared.
      *  The range of orders is defined through parameters \a info_h, \a info_h, and \a info_aniso.
      *
