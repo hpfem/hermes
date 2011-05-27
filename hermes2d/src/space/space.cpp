@@ -17,8 +17,7 @@
 
 template<typename Scalar>
 Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
-        : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh) {          
-        }
+        : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
 {
   _F_
   if (mesh == NULL) error("Space must be initialized with an existing mesh.");
