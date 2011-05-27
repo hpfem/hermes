@@ -683,6 +683,15 @@ int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bo
 }
 
 template<typename Scalar>
+NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(const NeighborSearch<Scalar>::ExtendedShapeset & other) {
+  this->central_al = new AsmList<Scalar>(*other.central_al);
+  this->cnt = other.cnt;
+  this->dof = other.dof;
+  this->neighbor_al = new AsmList<Scalar>(*other.neighbor_al);
+  this->combine_assembly_lists();
+}
+
+template<typename Scalar>
 typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(Space<Scalar>*space, AsmList<Scalar>* al)
 {
   _F_
@@ -692,6 +701,18 @@ typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::creat
     supported_shapes->update(this, space);
 
   return supported_shapes;
+}
+
+template<typename Scalar>
+NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(Space<Scalar> *space, AsmList<Scalar>* al)
+{
+  _F_
+  if (supported_shapes != NULL)
+    delete supported_shapes;
+  
+  supported_shapes = new ExtendedShapeset(this, al, space);
+  
+  return new ExtendedShapeset(*supported_shapes);
 }
 
 template<typename Scalar>
