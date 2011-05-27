@@ -20,7 +20,7 @@
 #include "../shapeset/precalc.h"
 #include "../quadrature/quad_all.h"
 
-struct Element;
+class Element;
 
 
 /// \brief Represents the reference mapping.

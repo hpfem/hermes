@@ -529,7 +529,7 @@ bool H2DReader::save(const char* filename, Mesh *mesh)
     for (unsigned i = 0; i < e->nvert; i++)
       if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
         const char* nl = first ? "\n" : ",\n";  first = false;
-        fprintf(f, "%s  { %d, %d, %d }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mrk);
+        fprintf(f, "%s  { %d, %d, \"%s\" }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).c_str());
       }
   fprintf(f, "\n}\n\n");
 

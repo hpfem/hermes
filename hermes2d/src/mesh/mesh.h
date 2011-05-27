@@ -20,7 +20,7 @@
 #include "curved.h"
 
 
-struct Element;
+class Element;
 class HashTable;
 template<typename Scalar> class Space;
 template<typename Scalar> class KellyTypeAdapt;
@@ -87,8 +87,11 @@ struct HERMES_API Node
 /// If an element has curved edges, the member 'cm' points to an associated CurvMap structure,
 /// otherwise it is NULL.
 ///
-struct HERMES_API Element
+class HERMES_API Element
 {
+public:
+  Element() : visited(false) {};
+
   int id;            ///< element id number
   unsigned nvert:30; ///< number of vertices (3 or 4)
   unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons
@@ -247,7 +250,8 @@ public:
   /// boundary marked by 'marker'. Elements touching both by an edge or
   /// by a vertex are refined. 'aniso' allows or disables anisotropic
   /// splits of quads.
-  void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool tria_to_quad = false);
+  void refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso = true, bool mark_as_initial = false);
+  void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool mark_as_initial = false);
 
   /// Regularizes the mesh by refining elements with hanging nodes of
   /// degree more than 'n'. As a result, n-irregular mesh is obtained.
@@ -289,17 +293,29 @@ public:
   Element* get_element_fast(int id) const { return &(elements[id]);}
   /// Refines all triangle elements to quads.
   /// It can refine a triangle element into three quadrilaterals.
-  /// Note: this function creates a base mesh -- it can only be
-  /// used before any other mesh refinement function is called.
+  /// Note: this function creates a base mesh.
   void convert_triangles_to_quads();
   /// Refines all quad elements to triangles.
   /// It refines a quadrilateral element into two triangles.
-  /// Note: this function creates a base mesh -- it can only be
-  /// used before any other mesh refinement function is called.
+  /// Note: this function creates a base mesh.
   void convert_quads_to_triangles();
+  /// Convert all active elements to a base mesh.
+  void convert_to_base();
 
-  void refine_triangle_to_quads(Element* e);
   void refine_element_to_quads_id(int id);
+  void refine_triangle_to_quads(Mesh* mesh, Element* e, Element** elems_out = NULL);
+
+  void refine_element_to_triangles_id(int id);
+  void refine_quad_to_triangles(Element* e);
+  /// Refines one quad element into four quad elements.
+  /// The difference between refine_quad_to_quads() and refine_quad() 
+  /// is that all the internal edges of the former's son elements are  
+  /// straight edges. 
+  void refine_quad_to_quads(Element* e, int refinement = 0);
+
+  void convert_element_to_base_id(int id);
+  void convert_triangles_to_base(Element* e);
+  void convert_quads_to_base(Element* e);
 
   Array<Element> elements;
   int nactive;
@@ -323,9 +339,6 @@ protected:
   void regularize_triangle(Element* e);
   void regularize_quad(Element* e);
   void flatten();
-
-  void refine_quad_to_triangles(Element* e);
-  void refine_element_to_triangles_id(int id);
 
   class HERMES_API MarkersConversion
   {
@@ -365,6 +378,9 @@ protected:
     // Inverse tables, so that it is possible to search using either
     // the internal representation, or the user std::string value.
     std::map<std::string, int>* conversion_table_inverse;
+    friend class Space<double>;
+    friend class Space<std::complex<double> >;
+    friend class Mesh;
   };
 
   class ElementMarkersConversion : public MarkersConversion
@@ -389,6 +405,7 @@ protected:
   BoundaryMarkersConversion boundary_markers_conversion;
 
   friend class H2DReader;
+  friend class ExodusIIReader;
   friend class DiscreteProblem<double>;
   friend class DiscreteProblem<std::complex<double> >;
   friend class WeakForm<double>;

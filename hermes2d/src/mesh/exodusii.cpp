@@ -153,6 +153,16 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
     // read connectivity array
     int *connect = new int [n_elem_nodes * n_elems_in_blk];
     err = ex_get_elem_conn(exoid, id, connect);
+    
+    // Update the mesh' internal array element_markers_conversion.
+    std::ostringstream string_stream;
+    string_stream << id;
+    std::string el_marker = string_stream.str();
+    
+    // This functions check if the user-supplied marker on this element has been
+    // already used, and if not, inserts it in the appropriate structure.
+    mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
+    int marker = mesh->element_markers_conversion.get_internal_marker(el_marker);
 
     int ic = 0;
     for (int j = 0; j < n_elems_in_blk; j++)
@@ -163,7 +173,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
         tri[it][0] = vmap[connect[ic++]];
         tri[it][1] = vmap[connect[ic++]];
         tri[it][2] = vmap[connect[ic++]];
-        tri[it][3] = id;
+        tri[it][3] = marker;
         els[iel] = tri[it];
         it++;
       }
@@ -173,7 +183,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
         quad[iq][1] = vmap[connect[ic++]];
         quad[iq][2] = vmap[connect[ic++]];
         quad[iq][3] = vmap[connect[ic++]];
-        quad[iq][4] = id;
+        quad[iq][4] = marker;
         els[iel] = quad[iq];
         iq++;
       }
@@ -214,6 +224,16 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
     int *elem_list = new int [num_elem_in_set];
     int *side_list = new int [n_sides_in_set];
     err = ex_get_side_set(exoid, sid, elem_list, side_list);
+    
+    // Update the mesh' internal array boundary_markers_conversion.
+    std::ostringstream string_stream;
+    string_stream << sid;
+    std::string bnd_marker = string_stream.str();
+    
+    // This functions check if the user-supplied marker on this element has been
+    // already used, and if not, inserts it in the appropriate structure.
+    mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
+    int marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker);
 
     for (int j = 0; j < num_elem_in_set; j++)
     {
@@ -221,7 +241,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
       int vt = side_list[j] - 1;
       marks[im][0] = els[elem_list[j] - 1][vt];
       marks[im][1] = els[elem_list[j] - 1][(vt + 1) % nv];
-      marks[im][2] = sid;
+      marks[im][2] = marker;
       im++;
     }
 
@@ -232,7 +252,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 
   // we are done
   err = ex_close(exoid);
-
+  
   mesh->create(n_vtx, vtx, n_tri, tri, n_quad, quad, n_mark, marks);
 
   // clean-up
