@@ -63,10 +63,10 @@ protected:
                                MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
   // Jacobian matrix (same as stiffness matrix since projections are linear).
-  class ProjectionMatrixFormVol : public WeakForm::MatrixFormVol
+  class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
   {
   public:
-    ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : WeakForm::MatrixFormVol(i, j)
+    ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
     {
       this->adapt_eval = false;
       this->projNormType = projNormType;
@@ -235,7 +235,7 @@ protected:
     ProjNormType projNormType;
 
     template<typename real, typename scalar>
-    static scalar h1_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
+    scalar h1_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
                                        Geom<real> *e, ExtData<scalar> *ext) const
     {
       _F_
@@ -248,7 +248,7 @@ protected:
     }
 
     template<typename real, typename scalar>
-    static scalar h1_semi_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
+    scalar h1_semi_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
                                             Geom<real> *e, ExtData<scalar> *ext) const
     {
       _F_
@@ -260,7 +260,7 @@ protected:
     }
 
     template<typename real, typename scalar>
-    static scalar l2_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
+    scalar l2_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
                                        Geom<real> *e, ExtData<scalar> *ext) const
     {
       _F_
@@ -271,7 +271,7 @@ protected:
     }
 
     template<typename real, typename scalar>
-    static scalar hcurl_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
+    scalar hcurl_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
                                           Geom<real> *e, ExtData<scalar> *ext) const
      {
       _F_
@@ -286,7 +286,7 @@ protected:
     }
 
     template<typename real, typename scalar>
-    static scalar hdiv_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
+    scalar hdiv_projection_residual(int n, double *wt, Func<scalar> *u_ext[], Func<real> *v,
                                          Geom<real> *e, ExtData<scalar> *ext) const
      {
       _F_
