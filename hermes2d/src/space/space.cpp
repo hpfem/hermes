@@ -33,7 +33,7 @@ Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essen
   this->ndof = 0;
 
   if(essential_bcs != NULL)
-     for(std::vector<EssentialBoundaryCondition*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+     for(typename std::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
        for(unsigned int i = 0; i < (*it)->markers.size(); i++)
          if(mesh->get_boundary_markers_conversion().conversion_table_inverse->find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse->end())
            error("A boundary condition defined on a non-existent marker.");
@@ -221,7 +221,7 @@ void Space<Scalar>::set_default_order(int tri_order, int quad_order)
 }
 
 template<typename Scalar>
-void Space<Scalar>::adjust_element_order(int order_change, unsigned int min_order)
+void Space<Scalar>::adjust_element_order(int order_change, int min_order)
 {
   _F_
   Element* e;
