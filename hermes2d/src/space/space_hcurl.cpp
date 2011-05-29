@@ -85,7 +85,7 @@ HcurlSpace<Scalar>::~HcurlSpace()
 template<typename Scalar>
 Space<Scalar>* HcurlSpace<Scalar>::dup(Mesh* mesh, int order_increase) const
 {
-  HcurlSpace* space = new HcurlSpace(mesh, essential_bcs, 0, this->shapeset);
+  HcurlSpace* space = new HcurlSpace(mesh, this->essential_bcs, 0, this->shapeset);
   space->copy_orders(this, order_increase);
   return space;
 }

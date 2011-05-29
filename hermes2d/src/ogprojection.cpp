@@ -6,7 +6,7 @@ void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> space
 {
   _F_
   // Instantiate a class with global functions.
-  Hermes2D hermes2d;
+  Hermes2D<Scalar> hermes2d;
 
   unsigned int n = spaces.size();
 
@@ -19,15 +19,15 @@ void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> space
   int ndof = Space<Scalar>::assign_dofs(spaces);
 
   // Initialize DiscreteProblem.
-  DiscreteProblem* dp = new DiscreteProblem(wf, spaces);
+  DiscreteProblem<Scalar>* dp = new DiscreteProblem<Scalar>(wf, spaces);
 
   SparseMatrix<Scalar>* matrix = create_matrix<Scalar>(matrix_solver);
   Vector<Scalar>* rhs = create_vector<Scalar>(matrix_solver);
   Solver<Scalar>* solver = create_linear_solver<Scalar>(matrix_solver, matrix, rhs);
 
   // Initial coefficient vector for the Newton's method.  
-  scalar* coeff_vec = new scalar[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(scalar));
+  Scalar* coeff_vec = new Scalar[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
   // Perform Newton's iteration.
   if (!hermes2d.solve_newton(coeff_vec, dp, solver, matrix, rhs)) error("Newton's iteration failed.");

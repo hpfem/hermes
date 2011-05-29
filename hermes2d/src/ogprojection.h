@@ -31,7 +31,7 @@ public:
 
   static void project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
                              Scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
+                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
   static void project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
                              Scalar* target_vec, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
@@ -40,7 +40,7 @@ public:
   static void project_global(Hermes::vector<Space<Scalar>*> spaces,
                              Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
                              MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+                             Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
   static void project_global(Space<Scalar>* space,
                              Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
