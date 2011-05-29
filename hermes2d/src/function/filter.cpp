@@ -222,6 +222,28 @@ SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutio
 }
 
 template<typename Scalar>
+SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<int> items)
+{
+  this->num = solutions.size();
+  if(this->num > 10)
+    error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+  if(items.size() != (unsigned) this->num)
+    if(items.size() > 0)
+      error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+    
+    for(int i = 0; i < this->num; i++)
+    {
+      this->sln[i] = solutions.at(i);
+      if(items.size() > 0)
+        this->item[i] = items.at(i);
+      else
+        this->item[i] = H2D_FN_VAL;
+    }
+    this->init();
+    init_components();
+}
+
+template<typename Scalar>
 void SimpleFilter<Scalar>::init_components()
 {
   bool vec1 = false, vec2 = false;

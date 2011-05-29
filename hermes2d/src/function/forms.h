@@ -40,7 +40,7 @@ public:
   Ord(double d): order(0) {}
 
   int get_order() const { return order; }
-  int get_max_order() const {return 30;}
+  static int get_max_order() {return 30;}
 
   Ord operator+(const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord operator+(double d) { return *this; }
@@ -450,5 +450,37 @@ public:
     delete [] fn;
   }
 };
+
+// Generic class for functions of x, y in weak forms.
+template<typename Scalar>
+class DefaultFunction
+{
+public:
+  DefaultFunction()
+  {
+    this->is_constant = false;
+    this->const_value = -9999;
+  }
+  DefaultFunction(Scalar value)
+  {
+    this->is_constant = true;
+    this->const_value = value;
+  };
+
+  virtual Scalar value(double x, double y) const
+  {
+    return const_value;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const
+  {
+    return Ord(1);
+  };
+
+protected:
+  bool is_constant;
+  Scalar const_value;
+};
+
 
 #endif

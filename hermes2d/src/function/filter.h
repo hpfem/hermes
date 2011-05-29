@@ -63,7 +63,7 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
-  std::map<uint64_t, LightArray<Node*>*>* tables[10];
+  std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>* tables[10];
 
   bool unimesh;
   UniData** unidata;
@@ -96,6 +96,7 @@ public:
   SimpleFilter() {};
 
   SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
   virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 

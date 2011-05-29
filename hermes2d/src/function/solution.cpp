@@ -1521,7 +1521,6 @@ template<typename Scalar>
 ExactSolution<Scalar>::ExactSolution(Mesh* mesh) : Solution<Scalar>(mesh)
 {
   this->sln_type = HERMES_EXACT;
-  this->num_components = 1;
   this->exact_mult = 1.0;
   this->num_dofs = -1;
 }
@@ -1532,7 +1531,9 @@ ExactSolution<Scalar>::~ExactSolution()
 
 template<typename Scalar>
 ExactSolutionScalar<Scalar>::ExactSolutionScalar(Mesh* mesh) : ExactSolution<Scalar>(mesh)
-{}
+{
+  this->num_components = 1;
+}
 
 template<typename Scalar>
 ExactSolutionScalar<Scalar>::~ExactSolutionScalar()
@@ -1546,7 +1547,9 @@ unsigned int ExactSolutionScalar<Scalar>::get_dimension() const
  
 template<typename Scalar>
 ExactSolutionVector<Scalar>::ExactSolutionVector(Mesh* mesh) : ExactSolution<Scalar>(mesh)
-{}
+{
+  this->num_components = 2;
+}
 
 template<typename Scalar>
 ExactSolutionVector<Scalar>::~ExactSolutionVector()

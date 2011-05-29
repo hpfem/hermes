@@ -16,7 +16,7 @@
 #include "../h2d_common.h"
 #include "../quadrature/limit_order.h"
 #include "../mesh/refmap.h"
-#include "../integrals/integrals_h1.h"
+#include "../integrals/h1.h"
 #include "../mesh/traverse.h"
 #include "../discrete_problem.h"
 
