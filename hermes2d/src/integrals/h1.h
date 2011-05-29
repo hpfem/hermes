@@ -22,26 +22,92 @@
 
 //// the following integrals can be used in both volume and surface forms ////
 
-template<typename real, typename scalar>
-scalar int_v(int n, double *wt, Func<real> *v)
+template<typename Real>
+Real int_v(int n, double *wt, Func<Real> *v)
 {
-  scalar result = 0;
+  Real result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->val[i]);
+    result += wt[i] * v->val[i];
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_u_v(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real>
+Real int_x_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
 {
-  scalar result = 0;
+  Real result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (u->val[i] * v->val[i]);
+    result += wt[i] * e->x[i] * v->val[i];
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_F_v(int n, double *wt, real (*F)(real x, real y), Func<real> *v, Geom<real> *e)
+template<typename Real>
+Real int_y_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
+{
+  Real result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->val[i];
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_u_ext_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u_ext->val[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * u->val[i] * v->val[i];
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_x_u_ext_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * u_ext->val[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_y_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * u->val[i] * v->val[i];
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_y_u_ext_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * u_ext->val[i] * v->val[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_F_v(int n, double *wt, Real (*F)(Real x, Real y), Func<Real> *v, Geom<Real> *e)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -49,8 +115,8 @@ scalar int_F_v(int n, double *wt, real (*F)(real x, real y), Func<real> *v, Geom
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_grad_u_grad_v(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -58,8 +124,56 @@ scalar int_grad_u_grad_v(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudx_v(int n, double *wt, Func<real> *u, Func<real> *v)
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_grad_u_ext_grad_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_x_grad_u_ext_grad_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->x[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_y_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_y_grad_u_ext_grad_v(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * e->y[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_dudx_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -67,8 +181,8 @@ scalar int_dudx_v(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudy_v(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_dudy_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -76,26 +190,64 @@ scalar int_dudy_v(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_u_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_u_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->dx[i] * u->val[i]);
+    result += wt[i] * u->val[i] * v->dx[i];
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_u_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_u_dvdx_over_x(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * (v->dy[i] * u->val[i]);
+    result += wt[i] * ((e->x[i] > 0) ? u->val[i] * v->dx[i] / e->x[i] : 0.0);
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudx_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_u_ext_dvdx_over_x(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u_ext->val[i] * v->dx[i] / e->x[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u->val[i] * v->dy[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_u_dvdy_over_y(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * ((e->y[i] > 0) ? u->val[i] * v->dy[i] / e->y[i] : 0.0);
+  return result;
+}
+
+// For residual forms.
+template<typename Real, typename scalar>
+scalar int_u_ext_dvdy_over_y(int n, double *wt, Func<scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * u_ext->val[i] * v->dy[i] / e->y[i];
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_dudx_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -103,8 +255,8 @@ scalar int_dudx_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudy_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_dudy_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -112,8 +264,8 @@ scalar int_dudy_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudx_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_dudx_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -121,8 +273,8 @@ scalar int_dudx_dvdy(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_dudy_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_dudy_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -130,9 +282,9 @@ scalar int_dudy_dvdx(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_w_nabla_u_v(int n, double *wt, Func<real> *w1, Func<real> *w2,
-                       Func<real> *u, Func<real> *v)
+template<typename Real, typename scalar>
+scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2,
+                       Func<Real> *u, Func<Real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -184,7 +336,6 @@ inline double int_h1_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* r
   return result;
 }
 
-
 template<typename Scalar>
 inline double int_h1_semi_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
@@ -208,7 +359,6 @@ inline double int_h1_semi_error(Function<Scalar>* fu, Function<Scalar>* fv, RefM
   return result;
 }
 
-
 template<typename Scalar>
 inline double int_l2_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
@@ -227,7 +377,6 @@ inline double int_l2_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* r
   h1_integrate_expression(sqr(fnu[i] - fnv[i]));
   return result;
 }
-
 
 template<typename Scalar>
 inline double int_dx_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
@@ -249,7 +398,6 @@ inline double int_dx_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* r
   return result;
 }
 
-
 template<typename Scalar>
 inline double int_dy_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
 {
@@ -270,7 +418,6 @@ inline double int_dy_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* r
   return result;
 }
 
-
 template<typename Scalar>
 inline double int_h1_norm(Function<Scalar>* fu, RefMap* ru)
 {
@@ -288,7 +435,6 @@ inline double int_h1_norm(Function<Scalar>* fu, RefMap* ru)
   h1_integrate_expression(sqr(fnu[i]) + sqr(dudx[i]) + sqr(dudy[i]));
   return result;
 }
-
 
 template<typename Scalar>
 inline double int_h1_seminorm(Function<Scalar>* fu, RefMap* ru)
@@ -308,7 +454,6 @@ inline double int_h1_seminorm(Function<Scalar>* fu, RefMap* ru)
   return result;
 }
 
-
 template<typename Scalar>
 inline double int_l2_norm(Function<Scalar>* fu, RefMap* ru)
 {
@@ -324,6 +469,5 @@ inline double int_l2_norm(Function<Scalar>* fu, RefMap* ru)
   h1_integrate_expression(sqr(fnu[i]));
   return result;
 }
-
 
 #endif

@@ -24,7 +24,13 @@ template<typename Scalar>
 class MatrixFormVolL2 : public MatrixFormVol<Scalar>
 {
 public:
-    MatrixFormVolL2(int i, int j, SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, sym) {}
+    // One area.
+    MatrixFormVolL2(int i, int j, std::string area = HERMES_ANY, 
+                    SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, area, sym) {}
+    // Multiple areas.
+    MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas, 
+                    SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) {}
+        
 
     template<typename real, typename scalar>
     scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u,
@@ -36,14 +42,14 @@ public:
       return result;
     }
 
-    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<Scalar> *ext)
+    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<Scalar> *ext) const
     {
         return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext)
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext) const
     {
         return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     }

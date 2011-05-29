@@ -27,12 +27,52 @@ scalar int_e_f(int n, double *wt, Func<real> *u, Func<real> *v)
   return result;
 }
 
+template<typename Scalar>
+class MatrixFormVolHCurl : public MatrixFormVol<Scalar>
+{
+public:
+    // One area.
+    MatrixFormVolHCurl(unsigned int i, unsigned int j, std::string area = HERMES_ANY, 
+                       SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, area, sym) { }
+    // Multiple areas.
+    MatrixFormVolHCurl(unsigned int i, unsigned int j, Hermes::vector<std::string> areas, 
+                       SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) { }
+
+    template<typename Real, typename scalar>
+    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
+                       Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const
+    {
+      return int_e_f<Real, scalar>(n, wt, u, v);
+    }
+
+    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<scalar> *ext) const
+    {
+        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+    }
+
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+            Geom<Ord> *e, ExtData<Ord> *ext) const
+    {
+        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    }
+};
+
 template<typename real, typename scalar>
 scalar int_curl_e_curl_f(int n, double *wt, Func<real> *u, Func<real> *v)
 {
   scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->curl[i] * conj(v->curl[i]));
+  return result;
+}
+
+template<typename Real, typename scalar>
+scalar int_v0(int n, double *wt, Func<scalar> *v)
+{
+  scalar result = 0;
+  for (int i = 0; i < n; i++)
+    result += wt[i] * v->val0[i];
   return result;
 }
 
