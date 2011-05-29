@@ -19,7 +19,7 @@
 #include "../refmap.h"
 #include "../shapeset_h1_all.h"
 #include "../quad_all.h"
-#include "../integrals_h1.h"
+#include "../h1.h"
 #include "../matrix_old.h"
 #include "adapt_ortho_l2.h"
 #include "../traverse.h"

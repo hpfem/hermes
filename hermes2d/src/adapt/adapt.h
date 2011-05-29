@@ -20,10 +20,10 @@
 #include "../space/space.h"
 #include "vector.h"
 #include "../weakform/weakform.h"
-#include "../integrals/integrals_h1.h"
-#include "../integrals/integrals_hcurl.h"
-#include "../integrals/integrals_hdiv.h"
-#include "../integrals/integrals_l2.h"
+#include "../integrals/h1.h"
+#include "../integrals/hcurl.h"
+#include "../integrals/hdiv.h"
+#include "../integrals/l2.h"
 #include "../ref_selectors/selector.h"
 
 /** \defgroup g_adapt Adaptivity
@@ -166,7 +166,7 @@ public:
     static scalar hdiv_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
     {
 
-      error("hdiv error form not implemented yet in integrals_hdiv.h.");
+      error("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
       scalar result = 0;
@@ -350,7 +350,7 @@ protected: //forms and error evaluation
   MatrixFormVolError* error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error
 
   /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
-  /** If overrided, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
+  /** If overridden, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
    *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
    *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
   virtual double calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
