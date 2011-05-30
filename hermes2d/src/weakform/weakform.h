@@ -41,6 +41,19 @@ template<typename Scalar> class MatrixFormVol;
 template<typename Scalar> class VectorFormVol;
 template<typename Scalar> class MatrixFormSurf;
 template<typename Scalar> class VectorFormSurf;
+template<typename Scalar> class MultiComponentMatrixFormVol;
+template<typename Scalar> class MultiComponentVectorFormVol;
+template<typename Scalar> class MultiComponentMatrixFormSurf;
+template<typename Scalar> class MultiComponentVectorFormSurf;
+
+ 
+// Bilinear form symmetry flag, see WeakForm::add_matrix_form
+enum SymFlag
+{
+  HERMES_ANTISYM = -1,
+  HERMES_NONSYM = 0,
+  HERMES_SYM = 1
+};
 
 /// \brief Represents the weak formulation of a PDE problem.
 ///
@@ -73,10 +86,10 @@ public:
   void add_vector_form(VectorFormVol<Scalar>* vfv);
   void add_vector_form_surf(VectorFormSurf<Scalar>* vfs);
 
-  void add_multicomponent_matrix_form(MultiComponentMatrixFormVol* mfv);
-  void add_multicomponent_matrix_form_surf(MultiComponentMatrixFormSurf* mfs);
-  void add_multicomponent_vector_form(MultiComponentVectorFormVol* vfv);
-  void add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf* vfs);
+  void add_multicomponent_matrix_form(MultiComponentMatrixFormVol<Scalar>* mfv);
+  void add_multicomponent_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* mfs);
+  void add_multicomponent_vector_form(MultiComponentVectorFormVol<Scalar>* vfv);
+  void add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* vfs);
 
   void set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>());
 
@@ -130,10 +143,10 @@ public:
   Hermes::vector<VectorFormVol<Scalar> *> vfvol;
   Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
 
-  Hermes::vector<MultiComponentMatrixFormVol *> mfvol_mc;
-  Hermes::vector<MultiComponentMatrixFormSurf *> mfsurf_mc;
-  Hermes::vector<MultiComponentVectorFormVol *> vfvol_mc;
-  Hermes::vector<MultiComponentVectorFormSurf *> vfsurf_mc;
+  Hermes::vector<MultiComponentMatrixFormVol<Scalar> *> mfvol_mc;
+  Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> mfsurf_mc;
+  Hermes::vector<MultiComponentVectorFormVol<Scalar> *> vfvol_mc;
+  Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
 
   void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
@@ -174,12 +187,12 @@ protected:
   Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
     Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 
-  Stage* find_stage(std::vector<WeakForm::Stage>& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
+  Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
     Mesh* m1, Mesh* m2,
-    Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
-  Stage* find_stage(std::vector<WeakForm::Stage>& stages, Hermes::vector<unsigned int> coordinates,
+    Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
+  Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
     Mesh* m1, Mesh* m2,
-    Hermes::vector<MeshFunction*>& ext, Hermes::vector<Solution*>& u_ext);
+    Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 
   Mesh::ElementMarkersConversion* element_markers_conversion;
   Mesh::BoundaryMarkersConversion* boundary_markers_conversion;
@@ -459,10 +472,10 @@ public:
   Hermes::vector<VectorFormVol<Scalar> *> vfvol;
   Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
 
-  Hermes::vector<MultiComponentMatrixFormVol *> mfvol_mc;
-  Hermes::vector<MultiComponentMatrixFormSurf *> mfsurf_mc;
-  Hermes::vector<MultiComponentVectorFormVol *> vfvol_mc;
-  Hermes::vector<MultiComponentVectorFormSurf *> vfsurf_mc;
+  Hermes::vector<MultiComponentMatrixFormVol<Scalar> *> mfvol_mc;
+  Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> mfsurf_mc;
+  Hermes::vector<MultiComponentVectorFormVol<Scalar> *> vfvol_mc;
+  Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
   std::set<int> idx_set;
   std::set<unsigned> seq_set;
