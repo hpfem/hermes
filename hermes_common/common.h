@@ -63,6 +63,10 @@ enum MatrixSolverType
    SOLVER_AZTECOO
 };
 
+// For internal use (within Geom<Ord>).
+const int HERMES_DUMMY_ELEM_MARKER = -9999;
+const int HERMES_DUMMY_EDGE_MARKER = -8888;
+
 //
 // commonly used functions from hermes_common
 #include "hermes_logging.h"       // logging

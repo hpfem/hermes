@@ -96,8 +96,8 @@ bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Her
   
   // Project the previous time level solutions onto the actual spaces to be able to add the resulting vector to
   // the K_vector when passing the u_ext.
-  scalar* slns_prev_time_projection = new scalar[ndof];
-  OGProjection::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, SOLVER_UMFPACK);
+  Scalar* slns_prev_time_projection = new Scalar[ndof];
+  OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, SOLVER_UMFPACK);
 
   // Creates the stage weak formulation.
   create_stage_wf(dp->get_spaces().size(), current_time, time_step);
@@ -303,7 +303,7 @@ void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time,
   // First let's do the mass matrix (only one block ndof times ndof).
   for(unsigned int component_i = 0; component_i < size; component_i++) {
     if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE) {
-      MatrixFormVolL2* proj_form = new MatrixFormVolL2(component_i, component_i);
+      MatrixFormVolL2<Scalar>* proj_form = new MatrixFormVolL2<Scalar>(component_i, component_i);
       proj_form->areas.push_back(HERMES_ANY);
       proj_form->scaling_factor = 1.0;
       proj_form->u_ext_offset = 0;
@@ -313,7 +313,7 @@ void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time,
       stage_wf_left.add_matrix_form(proj_form);
     }
     if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE) {
-      MatrixFormVolHCurl* proj_form = new MatrixFormVolHCurl(component_i, component_i);
+      MatrixFormVolHCurl<Scalar>* proj_form = new MatrixFormVolHCurl<Scalar>(component_i, component_i);
       proj_form->areas.push_back(HERMES_ANY);
       proj_form->scaling_factor = 1.0;
       proj_form->u_ext_offset = 0;

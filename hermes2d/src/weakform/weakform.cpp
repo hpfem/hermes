@@ -29,6 +29,7 @@ ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offse
   stage_time = 0.0;
 }
 
+template<typename Scalar>
 Form<Scalar>::Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param,
   double scaling_factor, int u_ext_offset) :
 ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
@@ -36,6 +37,18 @@ ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offse
   adapt_eval = false;
   this->areas = areas;
   stage_time = 0.0;
+}
+
+template<typename Scalar>
+void Form<Scalar>::set_current_stage_time(double time)
+{
+  stage_time = time;
+}
+
+template<typename Scalar>
+double Form<Scalar>::get_current_stage_time() const
+{
+  return stage_time;
 }
 
 template<typename Scalar>
