@@ -20,7 +20,7 @@
 #include "mesh/refmap.h"
 #include "function/solution.h"
 #include "quadrature/limit_order.h"
-#include "integrals/integrals_h1.h"
+#include "integrals/h1.h"
 #include "discrete_problem.h"
 
 template<typename Scalar> class MeshFunction;
@@ -164,12 +164,12 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
   Solver<Scalar>* solver = create_linear_solver<Scalar>(matrix_solver, matrix, rhs);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(wf, space);
+  DiscreteProblem<Scalar> dp(wf, space);
 
   // Initial coefficient vector for the Newton's method.  
-  int ndof = Space::get_num_dofs(space);
-  scalar* coeff_vec = new scalar[ndof];
-  memset(coeff_vec, 0, ndof * sizeof(scalar));
+  int ndof = Space<Scalar>::get_num_dofs(space);
+  Scalar* coeff_vec = new Scalar[ndof];
+  memset(coeff_vec, 0, ndof * sizeof(Scalar));
  
   int iter_count = 0;
   while (true) {
@@ -184,7 +184,7 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
     // Solve the linear system and if successful, obtain the solution.
     // Translate the resulting coefficient vector into the Solution sln.
     Solution<Scalar> sln_new;
-    Solution::vector_to_solution(coeff_vec, space, &sln_new);
+    Solution<Scalar>::vector_to_solution(coeff_vec, space, &sln_new);
  
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
                        / calc_norm(&sln_new, HERMES_H1_NORM) * 100;

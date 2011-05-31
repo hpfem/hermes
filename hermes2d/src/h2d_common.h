@@ -36,6 +36,14 @@ const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
 #define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
 #define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
 
+// Geometrical type of weak forms.
+enum GeomType
+{
+  HERMES_PLANAR = 0,         // Planar problem.
+  HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
+  HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
+};
+
 // Enabling second derivatives in weak forms. Turned off by default. Second
 // derivatives are employed, among others, by stabilization methods for
 // transport equations. For usage see the example linear-convection-diffusion.
