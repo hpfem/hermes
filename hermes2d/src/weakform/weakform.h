@@ -370,7 +370,7 @@ public:
 
   Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates;
   int sym;
-  virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+  virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
@@ -397,7 +397,7 @@ public:
 
   Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates;
 
-  virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
+  virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
@@ -423,7 +423,7 @@ public:
   virtual MultiComponentVectorFormVol* clone();
   Hermes::vector<unsigned int> coordinates;
 
-  virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+  virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, 
     ExtData<Ord> *ext) const = 0;
@@ -450,7 +450,7 @@ public:
 
   Hermes::vector<unsigned int> coordinates;
 
-  virtual void value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
+  virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
     Geom<Ord> *e, ExtData<Ord> *ext) const = 0;
