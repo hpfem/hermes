@@ -91,22 +91,22 @@ Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y, double n_x,
 template<typename Scalar>
 DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
                                                                  ExactSolutionVector<Scalar>* exact_solution2)  
-       : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
+       : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
 {
-  for (unsigned int i=0; i < markers.size(); i++) markers.push_back(markers_[i]);
+  for (unsigned int i=0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
 };
 
 template<typename Scalar>
 DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2) 
-       : EssentialBoundaryCondition(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
+       : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2) 
 {
-  markers.push_back(marker);
+  this->markers.push_back(marker);
 };
 
 template<typename Scalar>
 Scalar DefaultEssentialBCNonConstHcurl<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
 {
-  scalar2 val = exact_solution2->value(x, y);
+  Scalar2<Scalar> val = exact_solution2->value(x, y);
   return val.val[0] * t_x + val.val[1] * t_y;
 };
 

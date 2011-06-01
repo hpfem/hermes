@@ -26,7 +26,7 @@
 #include "function/solution.h"
 #include "config.h"
 #include "neighbor.h"
-#include "views/Scalar_view.h"
+#include "views/scalar_view.h"
 #include "views/base_view.h"
 #include "boundaryconditions/essential_bcs.h"
 
@@ -1903,7 +1903,7 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
     surf_pos.base = trav_base;
 
     // Create the extended shapeset on the union of the central element and its current neighbor.
-    Hermes::vector<NeighborSearch<Scalar>::ExtendedShapeset*> ext_asmlists;
+    Hermes::vector<typename NeighborSearch<Scalar>::ExtendedShapeset*> ext_asmlists;
     Hermes::vector<unsigned int> coordinates_processed;
     for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++) {
       bool new_coordinate = true;
@@ -1925,8 +1925,8 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
       }
     }
 
-    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
-    NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
+    typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+    typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.

@@ -164,7 +164,10 @@ bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Her
       residual_norm = hermes2d.get_l2_norm(&vector_right);
     else {
       // Translate residual vector into residual functions.
-      Solution<Scalar>::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift);
+      Hermes::vector<bool> add_dir_lift_vector;
+      add_dir_lift_vector.reserve(1);
+      add_dir_lift_vector.push_back(add_dir_lift);
+      Solution<Scalar>::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift_vector);
       residual_norm = hermes2d.calc_norms(residuals_vector);
     }
 
