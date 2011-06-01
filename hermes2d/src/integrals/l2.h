@@ -34,7 +34,7 @@ public:
 
     template<typename real, typename scalar>
     scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u,
-                       Func<real> *v, Geom<real> *e, ExtData<scalar> *ext)
+                       Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) const
     {
       scalar result = 0;
       for (int i = 0; i < n; i++)
