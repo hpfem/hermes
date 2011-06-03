@@ -23,14 +23,14 @@
 #include "callstack.h"
 
 //  Solvers
-#include "solver/solver.h"
-#include "solver/umfpack_solver.h"
-#include "solver/superlu.h"
-#include "solver/amesos.h"
-#include "solver/petsc.h"
-#include "solver/mumps.h"
-#include "solver/nox.h"
-#include "solver/aztecoo.h"
+#include "solvers/solver.h"
+#include "solvers/umfpack_solver.h"
+#include "solvers/superlu.h"
+#include "solvers/amesos.h"
+#include "solvers/petsc.h"
+#include "solvers/mumps.h"
+#include "solvers/nox.h"
+#include "solvers/aztecoo.h"
 
 #define HERMES_TINY 1.0e-20
 

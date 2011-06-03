@@ -36,36 +36,35 @@ endif (NOT WITH_TRILINOS)
 # Source files for the Hermes_common library.
 #
 set(SRC
-  hermes_logging.cpp
-  common_time_period.cpp
-  callstack.cpp
-  error.cpp
-  utils.cpp
-  matrix.cpp
-  tables.cpp
-  qsort.cpp
+  src/hermes_logging.cpp
+  src/common_time_period.cpp
+  src/callstack.cpp
+  src/error.cpp
+  src/utils.cpp
+  src/matrix.cpp
+  src/tables.cpp
+  src/qsort.cpp
+  src/c99_functions.cpp
   third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
-  solver/nox.cpp
-  solver/epetra.cpp
-  solver/aztecoo.cpp
-  solver/amesos.cpp
-  solver/mumps.cpp
-  solver/superlu.cpp
-  solver/superlu_real.cpp
-  solver/superlu_cplx.cpp
-  solver/petsc.cpp
-  solver/umfpack_solver.cpp
-  solver/precond_ml.cpp
-  solver/precond_ifpack.cpp
-  solver/eigensolver.cpp
-  solver/eigen.cpp
-  compat/fmemopen.cpp
-  compat/c99_functions.cpp
-
+  solvers/nox.cpp
+  solvers/epetra.cpp
+  solvers/aztecoo.cpp
+  solvers/amesos.cpp
+  solvers/mumps.cpp
+  solvers/superlu.cpp
+  solvers/superlu_real.cpp
+  solvers/superlu_cplx.cpp
+  solvers/petsc.cpp
+  solvers/umfpack_solver.cpp
+  solvers/precond_ml.cpp
+  solvers/precond_ifpack.cpp
+  solvers/eigensolver.cpp
+  solvers/eigen.cpp
+  
   ${TEUCHOS_SOURCES}
 
-  python/python_api.cpp
-  python/python_engine.cpp
+  python_API/python_api.cpp
+  python_API/python_engine.cpp
 )
 
 #
@@ -73,12 +72,12 @@ set(SRC
 #
 if(WITH_TESTS)
     enable_testing()
-    add_subdirectory(solver)
+    add_subdirectory(solvers)
 endif(WITH_TESTS)
 
 if(WITH_PYTHON)
     set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
-    add_subdirectory(hermes_common)
+    add_subdirectory(hermes_common_python)
 endif(WITH_PYTHON)
 
 
@@ -174,14 +173,12 @@ endif(MSVC)
 
 # Install header files.
 
-file(GLOB INC_COMMON    "*.h")
-file(GLOB INC_SOLVER    "solver/*.h")
-file(GLOB INC_COMPAT    "compat/*.h")
-file(GLOB INC_PYTHON    "python/*.h")
+file(GLOB INC_COMMON    "include/*.h")
+file(GLOB INC_SOLVER    "solvers/*.h")
+file(GLOB INC_PYTHON    "python_API/*.h")
 file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/*.h*")
 install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
-install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solver)
-install(FILES ${INC_COMPAT}    DESTINATION include/hermes/hermes_common/compat)
-install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python)
+install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers)
+install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python_API)
 install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos)
 

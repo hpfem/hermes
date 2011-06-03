@@ -466,6 +466,36 @@ class HERMES_API CommandLineArgs
 /** \param[in] text A text (a cause) of the exception. */
 extern HERMES_API void throw_exception(char *text);
 
+#ifdef IMPLEMENT_C99
+
+/* Definitions of C99 specification. Used in a case of MSVC 2008 and
+ * below because MSVC follows C++ rather than C
+ */
+
+// Not-a-number constant.
+#define NAN 0x7fffffffffffffffL;
+
+// functions
+HERMES_API double exp2(double x)
+{
+	return pow(2.0, x);
+}
+
+HERMES_API double log2(double x)
+{
+	return log(x) / M_LN2;
+}
+
+HERMES_API double cbrt(double x)
+{
+	if (!_isnan(x))
+		return pow(x, 1.0 / 3.0);
+	else
+		return x;
+}
+
+#endif /* IMPLEMENT_C99 */
+
 
 /// Int types handling.
 #ifdef JU_WIN

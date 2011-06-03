@@ -642,7 +642,7 @@ static PyObject *__pyx_int_150;
 static PyObject *__pyx_k_5;
 static PyObject *__pyx_k_6;
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":28
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":28
  *         vec = v[:, i]
  *         r.append((w[i], vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -676,7 +676,7 @@ static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1(PyObject *
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":7
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":7
  * import warnings
  * 
  * def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
@@ -767,7 +767,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_vec = Py_None; __Pyx_INCREF(Py_None);
   __pyx_v_eigs = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":13
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":13
  *     Uses numpy to solve the A*x = lambda*B*x eigenproblem.
  *     """
  *     from numpy import array, dot             # <<<<<<<<<<<<<<
@@ -799,7 +799,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":14
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":14
  *     """
  *     from numpy import array, dot
  *     from numpy.linalg import inv, eig             # <<<<<<<<<<<<<<
@@ -831,7 +831,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":15
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":15
  *     from numpy import array, dot
  *     from numpy.linalg import inv, eig
  *     A = A.todense()             # <<<<<<<<<<<<<<
@@ -847,7 +847,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_A = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":16
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":16
  *     from numpy.linalg import inv, eig
  *     A = A.todense()
  *     B = B.todense()             # <<<<<<<<<<<<<<
@@ -863,7 +863,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_B = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":18
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":18
  *     B = B.todense()
  * 
  *     print "inverting"             # <<<<<<<<<<<<<<
@@ -872,7 +872,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__inverting)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":19
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":19
  * 
  *     print "inverting"
  *     M = dot(inv(B), A)             # <<<<<<<<<<<<<<
@@ -902,7 +902,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_M = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":20
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":20
  *     print "inverting"
  *     M = dot(inv(B), A)
  *     print "solving"             # <<<<<<<<<<<<<<
@@ -911,7 +911,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__solving)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":21
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":21
  *     M = dot(inv(B), A)
  *     print "solving"
  *     w, v = eig(M)             # <<<<<<<<<<<<<<
@@ -955,7 +955,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __pyx_t_3 = 0;
   }
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":22
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":22
  *     print "solving"
  *     w, v = eig(M)
  *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
@@ -964,7 +964,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_2)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":24
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":24
  *     print "sorting the eigenvalues"
  * 
  *     r = []             # <<<<<<<<<<<<<<
@@ -977,7 +977,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_r = ((PyObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":25
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":25
  * 
  *     r = []
  *     for i in range(len(w)):             # <<<<<<<<<<<<<<
@@ -1021,7 +1021,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __pyx_v_i = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":26
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":26
  *     r = []
  *     for i in range(len(w)):
  *         vec = v[:, i]             # <<<<<<<<<<<<<<
@@ -1045,7 +1045,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __pyx_v_vec = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":27
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":27
  *     for i in range(len(w)):
  *         vec = v[:, i]
  *         r.append((w[i], vec))             # <<<<<<<<<<<<<<
@@ -1069,7 +1069,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":28
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":28
  *         vec = v[:, i]
  *         r.append((w[i], vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -1090,7 +1090,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":29
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":29
  *         r.append((w[i], vec))
  *     r.sort(key=lambda x: x[0])
  *     print "eigenvalues:"             # <<<<<<<<<<<<<<
@@ -1099,7 +1099,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_3)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":30
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":30
  *     r.sort(key=lambda x: x[0])
  *     print "eigenvalues:"
  *     eigs = []             # <<<<<<<<<<<<<<
@@ -1112,7 +1112,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_eigs = ((PyObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":31
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":31
  *     print "eigenvalues:"
  *     eigs = []
  *     for w, vec in r:             # <<<<<<<<<<<<<<
@@ -1169,7 +1169,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
       __pyx_t_4 = 0;
     }
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":32
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":32
  *     eigs = []
  *     for w, vec in r:
  *         if w > 0:             # <<<<<<<<<<<<<<
@@ -1182,7 +1182,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (__pyx_t_8) {
 
-      /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":33
+      /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":33
  *     for w, vec in r:
  *         if w > 0:
  *             break             # <<<<<<<<<<<<<<
@@ -1194,7 +1194,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     }
     __pyx_L10:;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":34
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":34
  *         if w > 0:
  *             break
  *         print w             # <<<<<<<<<<<<<<
@@ -1203,7 +1203,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
  */
     if (__Pyx_PrintOne(0, __pyx_v_w) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":35
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":35
  *             break
  *         print w
  *         eigs.append(vec)             # <<<<<<<<<<<<<<
@@ -1217,7 +1217,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_L9_break:;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":36
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":36
  *         print w
  *         eigs.append(vec)
  *     return r             # <<<<<<<<<<<<<<
@@ -1258,7 +1258,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":58
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":58
  *         E = w[i]
  *         r.append((E, vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -1292,7 +1292,7 @@ static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2(PyObject *
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":38
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":38
  *     return r
  * 
  * def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
@@ -1378,7 +1378,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_E = Py_None; __Pyx_INCREF(Py_None);
   __pyx_v_eigs = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":44
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":44
  *     Uses scipy to solve the A*x = lambda*B*x eigenproblem.
  *     """
  *     from numpy import array             # <<<<<<<<<<<<<<
@@ -1401,7 +1401,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":45
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":45
  *     """
  *     from numpy import array
  *     from scipy.linalg import eigh             # <<<<<<<<<<<<<<
@@ -1424,7 +1424,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":46
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":46
  *     from numpy import array
  *     from scipy.linalg import eigh
  *     A = A.todense()             # <<<<<<<<<<<<<<
@@ -1440,7 +1440,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_A = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":47
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":47
  *     from scipy.linalg import eigh
  *     A = A.todense()
  *     B = B.todense()             # <<<<<<<<<<<<<<
@@ -1456,7 +1456,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_B = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":49
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":49
  *     B = B.todense()
  * 
  *     print "solving"             # <<<<<<<<<<<<<<
@@ -1465,7 +1465,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__solving)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":50
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":50
  * 
  *     print "solving"
  *     w, v = eigh(A, B)             # <<<<<<<<<<<<<<
@@ -1512,7 +1512,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_t_3 = 0;
   }
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":51
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":51
  *     print "solving"
  *     w, v = eigh(A, B)
  *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
@@ -1521,7 +1521,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_2)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":53
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":53
  *     print "sorting the eigenvalues"
  * 
  *     r = []             # <<<<<<<<<<<<<<
@@ -1534,7 +1534,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_r = ((PyObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":54
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":54
  * 
  *     r = []
  *     for i in range(len(w)):             # <<<<<<<<<<<<<<
@@ -1578,7 +1578,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_v_i = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":55
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":55
  *     r = []
  *     for i in range(len(w)):
  *         vec = v[:, i]             # <<<<<<<<<<<<<<
@@ -1602,7 +1602,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_v_vec = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":56
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":56
  *     for i in range(len(w)):
  *         vec = v[:, i]
  *         E = w[i]             # <<<<<<<<<<<<<<
@@ -1615,7 +1615,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_v_E = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":57
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":57
  *         vec = v[:, i]
  *         E = w[i]
  *         r.append((E, vec))             # <<<<<<<<<<<<<<
@@ -1637,7 +1637,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":58
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":58
  *         E = w[i]
  *         r.append((E, vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -1658,7 +1658,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":59
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":59
  *         r.append((E, vec))
  *     r.sort(key=lambda x: x[0])
  *     print "eigenvalues:"             # <<<<<<<<<<<<<<
@@ -1667,7 +1667,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_3)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":60
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":60
  *     r.sort(key=lambda x: x[0])
  *     print "eigenvalues:"
  *     eigs = []             # <<<<<<<<<<<<<<
@@ -1680,7 +1680,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_eigs = ((PyObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":61
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":61
  *     print "eigenvalues:"
  *     eigs = []
  *     for w, vec in r:             # <<<<<<<<<<<<<<
@@ -1737,7 +1737,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
       __pyx_t_4 = 0;
     }
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":65
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":65
  *         #    break
  *         #print w
  *         eigs.append(vec)             # <<<<<<<<<<<<<<
@@ -1750,7 +1750,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":66
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":66
  *         #print w
  *         eigs.append(vec)
  *     return r             # <<<<<<<<<<<<<<
@@ -1789,7 +1789,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":68
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":68
  *     return r
  * 
  * def convert_mat(mtx):             # <<<<<<<<<<<<<<
@@ -1823,7 +1823,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_v_ii = Py_None; __Pyx_INCREF(Py_None);
   __pyx_v_n_in_row = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":72
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":72
  *     Converts a scipy matrix "mtx" to a pysparse matrix.
  *     """
  *     from pysparse import spmatrix             # <<<<<<<<<<<<<<
@@ -1846,7 +1846,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":73
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":73
  *     """
  *     from pysparse import spmatrix
  *     mtx = mtx.tocsr()             # <<<<<<<<<<<<<<
@@ -1862,7 +1862,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_v_mtx = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":74
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":74
  *     from pysparse import spmatrix
  *     mtx = mtx.tocsr()
  *     A = spmatrix.ll_mat(*mtx.shape)             # <<<<<<<<<<<<<<
@@ -1884,7 +1884,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_v_A = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":75
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":75
  *     mtx = mtx.tocsr()
  *     A = spmatrix.ll_mat(*mtx.shape)
  *     for i in xrange( mtx.indptr.shape[0] - 1 ):             # <<<<<<<<<<<<<<
@@ -1936,7 +1936,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_v_i = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":76
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":76
  *     A = spmatrix.ll_mat(*mtx.shape)
  *     for i in xrange( mtx.indptr.shape[0] - 1 ):
  *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )             # <<<<<<<<<<<<<<
@@ -1971,7 +1971,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_v_ii = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":77
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":77
  *     for i in xrange( mtx.indptr.shape[0] - 1 ):
  *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
  *         n_in_row = ii.stop - ii.start             # <<<<<<<<<<<<<<
@@ -1990,7 +1990,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_v_n_in_row = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":78
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":78
  *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
  *         n_in_row = ii.stop - ii.start
  *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )             # <<<<<<<<<<<<<<
@@ -2036,7 +2036,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":79
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":79
  *         n_in_row = ii.stop - ii.start
  *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
  *     return A             # <<<<<<<<<<<<<<
@@ -2071,7 +2071,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":117
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":117
  *         vec = Q[:, i]
  *         r.append((lmbd[i], vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -2105,7 +2105,7 @@ static PyObject *__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3(PyObjec
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":81
+/* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
  *     return A
  * 
  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
@@ -2269,7 +2269,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_i = Py_None; __Pyx_INCREF(Py_None);
   __pyx_v_vec = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":93
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":93
  *     """
  *     # Suppress the pysparse numpy warnings:
  *     warnings.simplefilter("ignore", DeprecationWarning)             # <<<<<<<<<<<<<<
@@ -2295,7 +2295,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":94
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":94
  *     # Suppress the pysparse numpy warnings:
  *     warnings.simplefilter("ignore", DeprecationWarning)
  *     from pysparse import jdsym, precon, itsolvers             # <<<<<<<<<<<<<<
@@ -2336,7 +2336,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":95
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":95
  *     warnings.simplefilter("ignore", DeprecationWarning)
  *     from pysparse import jdsym, precon, itsolvers
  *     if verbose:             # <<<<<<<<<<<<<<
@@ -2346,7 +2346,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_4) {
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":96
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":96
  *     from pysparse import jdsym, precon, itsolvers
  *     if verbose:
  *         print "converting to pysparse"             # <<<<<<<<<<<<<<
@@ -2358,7 +2358,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   }
   __pyx_L6:;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":97
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":97
  *     if verbose:
  *         print "converting to pysparse"
  *     n = A.shape[0]             # <<<<<<<<<<<<<<
@@ -2374,7 +2374,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_n = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":98
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":98
  *         print "converting to pysparse"
  *     n = A.shape[0]
  *     A = convert_mat(A)             # <<<<<<<<<<<<<<
@@ -2396,7 +2396,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_A = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":99
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":99
  *     n = A.shape[0]
  *     A = convert_mat(A)
  *     B = convert_mat(B)             # <<<<<<<<<<<<<<
@@ -2418,7 +2418,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_B = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":100
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":100
  *     A = convert_mat(A)
  *     B = convert_mat(B)
  *     if verbose:             # <<<<<<<<<<<<<<
@@ -2428,7 +2428,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_4) {
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":101
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":101
  *     B = convert_mat(B)
  *     if verbose:
  *         print "solving (%d x %d)" % (n, n)             # <<<<<<<<<<<<<<
@@ -2452,7 +2452,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   }
   __pyx_L7:;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":102
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":102
  *     if verbose:
  *         print "solving (%d x %d)" % (n, n)
  *     Atau = A.copy()             # <<<<<<<<<<<<<<
@@ -2468,7 +2468,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_Atau = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":103
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":103
  *         print "solving (%d x %d)" % (n, n)
  *     Atau = A.copy()
  *     tau = target_value             # <<<<<<<<<<<<<<
@@ -2479,7 +2479,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_v_tau);
   __pyx_v_tau = __pyx_v_target_value;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":104
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":104
  *     Atau = A.copy()
  *     tau = target_value
  *     Atau.shift(-tau, B)             # <<<<<<<<<<<<<<
@@ -2504,7 +2504,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(((PyObject *)__pyx_t_2)); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":105
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":105
  *     tau = target_value
  *     Atau.shift(-tau, B)
  *     K = precon.jacobi(Atau)             # <<<<<<<<<<<<<<
@@ -2526,7 +2526,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_K = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":106
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":106
  *     Atau.shift(-tau, B)
  *     K = precon.jacobi(Atau)
  *     A = A.to_sss()             # <<<<<<<<<<<<<<
@@ -2542,7 +2542,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_A = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":107
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":107
  *     K = precon.jacobi(Atau)
  *     A = A.to_sss()
  *     B = B.to_sss()             # <<<<<<<<<<<<<<
@@ -2558,7 +2558,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_B = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":108
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":108
  *     A = A.to_sss()
  *     B = B.to_sss()
  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
@@ -2568,7 +2568,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_jdsym, __pyx_n_s__jdsym); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":109
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":109
  *     B = B.to_sss()
  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
  *             max_iter, itsolvers.qmrs)             # <<<<<<<<<<<<<<
@@ -2615,7 +2615,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_t_6 = PyTuple_GET_ITEM(tuple, 3); __Pyx_INCREF(__pyx_t_6);
     __pyx_t_7 = PyTuple_GET_ITEM(tuple, 4); __Pyx_INCREF(__pyx_t_7);
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":108
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":108
  *     A = A.to_sss()
  *     B = B.to_sss()
  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
@@ -2671,7 +2671,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_t_7 = 0;
   }
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":110
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":110
  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
  *             max_iter, itsolvers.qmrs)
  *     if verbose:             # <<<<<<<<<<<<<<
@@ -2681,7 +2681,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_4) {
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":111
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":111
  *             max_iter, itsolvers.qmrs)
  *     if verbose:
  *         print "number of converged eigenvalues:", kconv             # <<<<<<<<<<<<<<
@@ -2702,7 +2702,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   }
   __pyx_L8:;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":113
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":113
  *         print "number of converged eigenvalues:", kconv
  * 
  *     r = []             # <<<<<<<<<<<<<<
@@ -2715,7 +2715,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_r = ((PyObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":114
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":114
  * 
  *     r = []
  *     for i in range(len(lmbd)):             # <<<<<<<<<<<<<<
@@ -2759,7 +2759,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_v_i = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":115
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":115
  *     r = []
  *     for i in range(len(lmbd)):
  *         vec = Q[:, i]             # <<<<<<<<<<<<<<
@@ -2783,7 +2783,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_v_vec = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":116
+    /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":116
  *     for i in range(len(lmbd)):
  *         vec = Q[:, i]
  *         r.append((lmbd[i], vec))             # <<<<<<<<<<<<<<
@@ -2807,7 +2807,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   }
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":117
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":117
  *         vec = Q[:, i]
  *         r.append((lmbd[i], vec))
  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
@@ -2828,7 +2828,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(((PyObject *)__pyx_t_2)); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":125
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":125
  *     #    print w
  *     #    eigs.append(vec)
  *     return r             # <<<<<<<<<<<<<<
@@ -3043,7 +3043,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   /*--- Function import code ---*/
   /*--- Execution code ---*/
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":5
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":5
  * # cython --cplus eigen.pyx
  * 
  * import warnings             # <<<<<<<<<<<<<<
@@ -3055,7 +3055,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__warnings, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":7
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":7
  * import warnings
  * 
  * def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
@@ -3067,7 +3067,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_numpy, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":38
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":38
  *     return r
  * 
  * def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
@@ -3079,7 +3079,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_scipy, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":68
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":68
  *     return r
  * 
  * def convert_mat(mtx):             # <<<<<<<<<<<<<<
@@ -3091,7 +3091,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__convert_mat, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":81
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
  *     return A
  * 
  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
@@ -3104,7 +3104,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":82
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":82
  * 
  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
  *         jdtol=1e-6, max_iter=150):             # <<<<<<<<<<<<<<
@@ -3117,7 +3117,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":81
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
  *     return A
  * 
  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
@@ -3129,7 +3129,7 @@ PyMODINIT_FUNC PyInit_eigen(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_pysparse, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/solver/eigen.pyx":1
+  /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":1
  * # Compile with:             # <<<<<<<<<<<<<<
  * #
  * # cython --cplus eigen.pyx

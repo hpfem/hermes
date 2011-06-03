@@ -3,7 +3,7 @@
 
 #include "../matrix.h"
 
-#include "../python/python_api.h"
+#include "../python_API/python_api.h"
 
 #include "../config.h"
 // RCP
