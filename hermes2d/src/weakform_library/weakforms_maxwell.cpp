@@ -1,4 +1,4 @@
-#include "../hermes2d.h"
+#include "hermes2d.h"
 
 namespace WeakFormsMaxwell {
   DefaultJacobianMagnetostatics::DefaultJacobianMagnetostatics(int i, int j, std::string area, Scalar const_coeff,

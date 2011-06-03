@@ -1,5 +1,5 @@
-#include "../h2d_common.h"
-#include "../range.h"
+#include "h2d_common.h"
+#include "range.h"
 #include "element_to_refine.h"
 
 using namespace std;

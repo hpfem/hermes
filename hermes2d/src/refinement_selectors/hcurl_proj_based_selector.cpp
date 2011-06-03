@@ -1,8 +1,8 @@
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "matrix.h"
-#include "../function/solution.h"
-#include "../shapeset/shapeset_hc_all.h"
-#include "../mesh/element_to_refine.h"
+#include "solution.h"
+#include "shapeset/shapeset_hc_all.h"
+#include "element_to_refine.h"
 #include "hcurl_proj_based_selector.h"
 
 namespace RefinementSelectors {

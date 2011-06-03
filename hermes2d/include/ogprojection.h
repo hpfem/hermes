@@ -19,7 +19,7 @@
 
 #include "common.h"
 #include "function/solution.h"
-#include "function/forms.h"
+#include "form/forms.h"
 
 template<typename Scalar>
 class HERMES_API OGProjection

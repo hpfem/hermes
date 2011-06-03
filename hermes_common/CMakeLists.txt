@@ -21,6 +21,7 @@ include(BuildAndInstallScripts)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/solvers/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python_API/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party_codes/trilinos-teuchos/include)
 
 # Teuchos RCP
 if (NOT WITH_TRILINOS)
@@ -90,7 +91,7 @@ endif(WITH_PYTHON)
 # Create file with preprocessor definitions exposing the build settings to the source code.
 configure_file(
   config.h.cmake
-  config.h
+  include/config.h
 )
 
 #
@@ -183,8 +184,8 @@ file(GLOB INC_COMMON    "include/*.h")
 file(GLOB INC_SOLVER    "solvers/include/*.h")
 file(GLOB INC_PYTHON    "python_API/include/*.h")
 file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/include/*.h*")
-install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
-install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers)
-install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python_API)
-install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos)
+install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common/include)
+install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers/include)
+install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python_API/include)
+install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos/include)
 

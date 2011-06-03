@@ -28,7 +28,7 @@
 
 #include <map>
 #include <vector>
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "view.h"
 #include "view_support.h"
 

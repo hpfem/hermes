@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "space_l2.h"
 #include "matrix.h"
-#include "../quadrature/quad_all.h"
-#include "../shapeset/shapeset_l2_all.h"
-#include "../boundaryconditions/essential_bcs.h"
+#include "quad_all.h"
+#include "shapeset/shapeset_l2_all.h"
+#include "boundary_conditions/essential_bcs.h"
 
 template<typename Scalar>
 void L2Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)

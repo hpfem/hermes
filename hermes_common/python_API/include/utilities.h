@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-void throw_exception(char *text)
+void throw_exception(char *text) throw(...)
 {
     throw std::runtime_error(text);
 }

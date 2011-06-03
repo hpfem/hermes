@@ -516,7 +516,7 @@ static PyObject *__pyx_k_tuple_22;
 static PyObject *__pyx_k_tuple_23;
 static PyObject *__pyx_k_tuple_25;
 
-/* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":6
+/* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":6
  *     pass
  * 
  * def convert2tuple(s):             # <<<<<<<<<<<<<<
@@ -541,7 +541,7 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
   __pyx_self = __pyx_self;
   __pyx_v_y = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":22
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":22
  * 
  *     """
  *     if hasattr(s, "__iter__"):             # <<<<<<<<<<<<<<
@@ -551,7 +551,7 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
   __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, ((PyObject *)__pyx_n_s____iter__)); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__pyx_t_1) {
 
-    /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":23
+    /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":23
  *     """
  *     if hasattr(s, "__iter__"):
  *         return tuple([convert2tuple(y) for y in s])             # <<<<<<<<<<<<<<
@@ -610,7 +610,7 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
   }
   /*else*/ {
 
-    /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":25
+    /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":25
  *         return tuple([convert2tuple(y) for y in s])
  *     else:
  *         return s             # <<<<<<<<<<<<<<
@@ -641,7 +641,7 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":27
+/* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":27
  *         return s
  * 
  * def read_hermes_format(filename):             # <<<<<<<<<<<<<<
@@ -662,7 +662,7 @@ static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_se
   __pyx_self = __pyx_self;
   __pyx_v_m = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":34
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":34
  *     syntax is invalid.
  *     """
  *     m = open(filename).read()             # <<<<<<<<<<<<<<
@@ -687,7 +687,7 @@ static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_se
   __pyx_v_m = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":35
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":35
  *     """
  *     m = open(filename).read()
  *     return read_hermes_format_str(m)             # <<<<<<<<<<<<<<
@@ -725,7 +725,7 @@ static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_se
   return __pyx_r;
 }
 
-/* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":37
+/* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":37
  *     return read_hermes_format_str(m)
  * 
  * def read_hermes_format_str(m):             # <<<<<<<<<<<<<<
@@ -768,7 +768,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_nurbs = Py_None; __Pyx_INCREF(Py_None);
   __pyx_v_refinements = Py_None; __Pyx_INCREF(Py_None);
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":44
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":44
  *     syntax is invalid.
  *     """
  *     m = m.strip()             # <<<<<<<<<<<<<<
@@ -784,7 +784,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":45
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":45
  *     """
  *     m = m.strip()
  *     m = m.replace("\r\n", "\n")             # <<<<<<<<<<<<<<
@@ -800,7 +800,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":46
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":46
  *     m = m.strip()
  *     m = m.replace("\r\n", "\n")
  *     m = m.replace("=\n", "= \\\n")             # <<<<<<<<<<<<<<
@@ -816,7 +816,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":47
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":47
  *     m = m.replace("\r\n", "\n")
  *     m = m.replace("=\n", "= \\\n")
  *     m = m.replace("{", "[")             # <<<<<<<<<<<<<<
@@ -832,7 +832,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":48
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":48
  *     m = m.replace("=\n", "= \\\n")
  *     m = m.replace("{", "[")
  *     m = m.replace("}", "]")             # <<<<<<<<<<<<<<
@@ -848,7 +848,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":49
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":49
  *     m = m.replace("{", "[")
  *     m = m.replace("}", "]")
  *     m = m.replace("^", "**")             # <<<<<<<<<<<<<<
@@ -864,7 +864,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":51
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":51
  *     m = m.replace("^", "**")
  *     # Make sure 1/2 produces 0.5:
  *     m = "from __future__ import division\n\n" + m             # <<<<<<<<<<<<<<
@@ -877,7 +877,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_m = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":52
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":52
  *     # Make sure 1/2 produces 0.5:
  *     m = "from __future__ import division\n\n" + m
  *     namespace = {}             # <<<<<<<<<<<<<<
@@ -890,7 +890,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_namespace = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":53
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":53
  *     m = "from __future__ import division\n\n" + m
  *     namespace = {}
  *     try:             # <<<<<<<<<<<<<<
@@ -905,7 +905,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
     __Pyx_XGOTREF(__pyx_save_exc_tb);
     /*try:*/ {
 
-      /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":54
+      /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":54
  *     namespace = {}
  *     try:
  *         exec m in math.__dict__, namespace             # <<<<<<<<<<<<<<
@@ -931,7 +931,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":55
+    /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":55
  *     try:
  *         exec m in math.__dict__, namespace
  *     except (SyntaxError, NameError), e:             # <<<<<<<<<<<<<<
@@ -949,7 +949,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
       __Pyx_DECREF(__pyx_v_e);
       __pyx_v_e = __pyx_t_2;
 
-      /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":56
+      /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":56
  *         exec m in math.__dict__, namespace
  *     except (SyntaxError, NameError), e:
  *         print "Error while parsing the mesh file. More information below."             # <<<<<<<<<<<<<<
@@ -958,7 +958,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  */
       if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_18)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L7_except_error;}
 
-      /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":57
+      /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":57
  *     except (SyntaxError, NameError), e:
  *         print "Error while parsing the mesh file. More information below."
  *         raise ParseError(str(e))             # <<<<<<<<<<<<<<
@@ -1006,7 +1006,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
     __pyx_L12_try_end:;
   }
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":58
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":58
  *         print "Error while parsing the mesh file. More information below."
  *         raise ParseError(str(e))
  *     nodes = namespace.pop("vertices", None)             # <<<<<<<<<<<<<<
@@ -1022,7 +1022,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_nodes = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":59
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":59
  *         raise ParseError(str(e))
  *     nodes = namespace.pop("vertices", None)
  *     elements = namespace.pop("elements", None)             # <<<<<<<<<<<<<<
@@ -1038,7 +1038,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_elements = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":60
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":60
  *     nodes = namespace.pop("vertices", None)
  *     elements = namespace.pop("elements", None)
  *     boundary = namespace.pop("boundaries", None)             # <<<<<<<<<<<<<<
@@ -1054,7 +1054,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_boundary = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":61
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":61
  *     elements = namespace.pop("elements", None)
  *     boundary = namespace.pop("boundaries", None)
  *     nurbs = namespace.pop("curves", None)             # <<<<<<<<<<<<<<
@@ -1070,7 +1070,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_nurbs = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":62
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":62
  *     boundary = namespace.pop("boundaries", None)
  *     nurbs = namespace.pop("curves", None)
  *     refinements = namespace.pop("refinements", None)             # <<<<<<<<<<<<<<
@@ -1086,7 +1086,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __pyx_v_refinements = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":63
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":63
  *     nurbs = namespace.pop("curves", None)
  *     refinements = namespace.pop("refinements", None)
  *     if nodes is None or elements is None or boundary is None:             # <<<<<<<<<<<<<<
@@ -1108,7 +1108,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   }
   if (__pyx_t_9) {
 
-    /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":64
+    /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":64
  *     refinements = namespace.pop("refinements", None)
  *     if nodes is None or elements is None or boundary is None:
  *         raise ParseError("Either nodes, elements or boundary is missing")             # <<<<<<<<<<<<<<
@@ -1127,7 +1127,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   }
   __pyx_L15:;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":65
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":65
  *     if nodes is None or elements is None or boundary is None:
  *         raise ParseError("Either nodes, elements or boundary is missing")
  *     return convert2tuple(nodes), convert2tuple(elements), \             # <<<<<<<<<<<<<<
@@ -1158,7 +1158,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":66
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":66
  *         raise ParseError("Either nodes, elements or boundary is missing")
  *     return convert2tuple(nodes), convert2tuple(elements), \
  *             convert2tuple(boundary), convert2tuple(nurbs), \             # <<<<<<<<<<<<<<
@@ -1187,7 +1187,7 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":67
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":67
  *     return convert2tuple(nodes), convert2tuple(elements), \
  *             convert2tuple(boundary), convert2tuple(nurbs), \
  *             convert2tuple(refinements)             # <<<<<<<<<<<<<<
@@ -1322,7 +1322,7 @@ static int __Pyx_InitCachedBuiltins(void) {
 static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants");
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":45
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":45
  *     """
  *     m = m.strip()
  *     m = m.replace("\r\n", "\n")             # <<<<<<<<<<<<<<
@@ -1339,7 +1339,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(((PyObject *)__pyx_kp_s_3));
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_4));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":46
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":46
  *     m = m.strip()
  *     m = m.replace("\r\n", "\n")
  *     m = m.replace("=\n", "= \\\n")             # <<<<<<<<<<<<<<
@@ -1356,7 +1356,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(((PyObject *)__pyx_kp_s_6));
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_7));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":47
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":47
  *     m = m.replace("\r\n", "\n")
  *     m = m.replace("=\n", "= \\\n")
  *     m = m.replace("{", "[")             # <<<<<<<<<<<<<<
@@ -1373,7 +1373,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(((PyObject *)__pyx_kp_s_9));
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_10));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":48
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":48
  *     m = m.replace("=\n", "= \\\n")
  *     m = m.replace("{", "[")
  *     m = m.replace("}", "]")             # <<<<<<<<<<<<<<
@@ -1390,7 +1390,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(((PyObject *)__pyx_kp_s_12));
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_13));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":49
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":49
  *     m = m.replace("{", "[")
  *     m = m.replace("}", "]")
  *     m = m.replace("^", "**")             # <<<<<<<<<<<<<<
@@ -1407,7 +1407,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(((PyObject *)__pyx_kp_s_15));
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_16));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":58
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":58
  *         print "Error while parsing the mesh file. More information below."
  *         raise ParseError(str(e))
  *     nodes = namespace.pop("vertices", None)             # <<<<<<<<<<<<<<
@@ -1424,7 +1424,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(Py_None);
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_19));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":59
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":59
  *         raise ParseError(str(e))
  *     nodes = namespace.pop("vertices", None)
  *     elements = namespace.pop("elements", None)             # <<<<<<<<<<<<<<
@@ -1441,7 +1441,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(Py_None);
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_20));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":60
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":60
  *     nodes = namespace.pop("vertices", None)
  *     elements = namespace.pop("elements", None)
  *     boundary = namespace.pop("boundaries", None)             # <<<<<<<<<<<<<<
@@ -1458,7 +1458,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(Py_None);
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_21));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":61
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":61
  *     elements = namespace.pop("elements", None)
  *     boundary = namespace.pop("boundaries", None)
  *     nurbs = namespace.pop("curves", None)             # <<<<<<<<<<<<<<
@@ -1475,7 +1475,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(Py_None);
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_22));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":62
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":62
  *     boundary = namespace.pop("boundaries", None)
  *     nurbs = namespace.pop("curves", None)
  *     refinements = namespace.pop("refinements", None)             # <<<<<<<<<<<<<<
@@ -1492,7 +1492,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(Py_None);
   __Pyx_GIVEREF(((PyObject *)__pyx_k_tuple_23));
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":64
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":64
  *     refinements = namespace.pop("refinements", None)
  *     if nodes is None or elements is None or boundary is None:
  *         raise ParseError("Either nodes, elements or boundary is missing")             # <<<<<<<<<<<<<<
@@ -1582,7 +1582,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   /*--- Function import code ---*/
   /*--- Execution code ---*/
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":1
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":1
  * import math             # <<<<<<<<<<<<<<
  * 
  * class ParseError(Exception):
@@ -1592,7 +1592,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__math, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":3
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":3
  * import math
  * 
  * class ParseError(Exception):             # <<<<<<<<<<<<<<
@@ -1613,7 +1613,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":6
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":6
  *     pass
  * 
  * def convert2tuple(s):             # <<<<<<<<<<<<<<
@@ -1625,7 +1625,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__convert2tuple, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 6; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":27
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":27
  *         return s
  * 
  * def read_hermes_format(filename):             # <<<<<<<<<<<<<<
@@ -1637,7 +1637,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__read_hermes_format, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":37
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":37
  *     return read_hermes_format_str(m)
  * 
  * def read_hermes_format_str(m):             # <<<<<<<<<<<<<<
@@ -1649,7 +1649,7 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s_1, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes2d/src/mesh/python_reader.pyx":1
+  /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":1
  * import math             # <<<<<<<<<<<<<<
  * 
  * class ParseError(Exception):

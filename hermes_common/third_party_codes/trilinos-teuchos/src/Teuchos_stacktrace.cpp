@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // For the HAVE_TEUCHOS_LINK and HAVE_TEUCHOS_BFD defines
 #ifndef CONFIG_H_INCLUDED
-  #include "../../config.h"
+  #include "config.h"
   #define CONFIG_H_INCLUDED
 #endif
 

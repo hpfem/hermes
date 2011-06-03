@@ -63,8 +63,12 @@ protected:
   /// a table from the lowest layer.
   /// The highest layer (in contrast to the PrecalcShapeset class) is represented
   /// here only by this array.
+#ifdef _MSC_VER // For Visual Studio compiler the latter does not compile.
+  std::map<uint64_t, LightArray<Node*>*>* tables[10];
+#else
   std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>* tables[10];
-
+#endif
+  
   bool unimesh;
   UniData** unidata;
 

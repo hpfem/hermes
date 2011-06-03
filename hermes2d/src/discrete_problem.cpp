@@ -17,18 +17,17 @@
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
 #include "discrete_problem.h"
-#include "mesh/traverse.h"
+#include "traverse.h"
 #include "space/space.h"
 #include "shapeset/precalc.h"
 #include "matrix.h"
-#include "solver/umfpack_solver.h"
-#include "mesh/refmap.h"
+#include "refmap.h"
 #include "function/solution.h"
 #include "config.h"
 #include "neighbor.h"
 #include "views/scalar_view.h"
-#include "views/base_view.h"
-#include "boundaryconditions/essential_bcs.h"
+#include "base_view.h"
+#include "boundary_conditions/essential_bcs.h"
 
 template<typename Scalar>
 DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)

@@ -22,6 +22,7 @@
 
 #include "solver.h"
 #include "epetra_solver.h"
+#include "compat.h"
 
 #ifdef HAVE_AMESOS
   #include <Amesos.h>

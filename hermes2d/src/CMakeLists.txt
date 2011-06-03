@@ -1,88 +1,111 @@
 #
+# Header files location for the Hermes2d library.
+#
+
+include_directories(${HERMES_COMMON_DIR}/include)
+include_directories(${HERMES_COMMON_DIR}/solvers/include)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/form)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/space)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/mesh)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/boundary_conditions)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/shapeset)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/function)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/integrals)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/linearizer)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/adapt)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/quadrature)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/refinement_selectors)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/views)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform_library)
+
+#
 # Source files for the Hermes2d library.
 #
+
 set(SRC
-       forms.cpp
+   forms.cpp
+   
+   adapt/adapt.cpp
+   adapt/kelly_type_adapt.cpp
+
+   function/solution.cpp 
+   function/filter.cpp
 	   
-	   adapt/adapt.cpp
-       adapt/kelly_type_adapt.cpp
+   linearizer/linear1.cpp 
+   linearizer/linear2.cpp 
+   linearizer/linear3.cpp 
 
-       function/solution.cpp 
-       function/filter.cpp
-       	   
-       linearizer/linear1.cpp 
-       linearizer/linear2.cpp 
-       linearizer/linear3.cpp 
+   mesh/refmap.cpp 
+   mesh/curved.cpp
+   mesh/refinement_type.cpp 
+   mesh/element_to_refine.cpp
+   mesh/exodusii.cpp 
+   mesh/hash.cpp 
+   mesh/h2d_reader.cpp
+   mesh/mesh.cpp 
+   mesh/regul.cpp 
+   mesh/transform.cpp 
+   mesh/traverse.cpp
+   mesh/trans.cpp
+   mesh/python_reader.cpp
 
-       mesh/refmap.cpp 
-       mesh/curved.cpp
-       mesh/refinement_type.cpp 
-       mesh/element_to_refine.cpp
-       mesh/exodusii.cpp 
-       mesh/hash.cpp 
-       mesh/h2d_reader.cpp
-       mesh/mesh.cpp 
-       mesh/regul.cpp 
-       mesh/transform.cpp 
-       mesh/traverse.cpp
-       mesh/trans.cpp
-       mesh/python_reader.cpp
+   quadrature/limit_order.cpp
+   quadrature/quad_std.cpp
 
-       quadrature/limit_order.cpp
-       quadrature/quad_std.cpp
+   refinement_selectors/selector.cpp 
+   refinement_selectors/order_permutator.cpp 
+   refinement_selectors/optimum_selector.cpp 
+   refinement_selectors/proj_based_selector.cpp 
+   refinement_selectors/l2_proj_based_selector.cpp 
+   refinement_selectors/h1_proj_based_selector.cpp 
+   refinement_selectors/hcurl_proj_based_selector.cpp
 
-       refinement_selectors/selector.cpp 
-       refinement_selectors/order_permutator.cpp 
-       refinement_selectors/optimum_selector.cpp 
-       refinement_selectors/proj_based_selector.cpp 
-       refinement_selectors/l2_proj_based_selector.cpp 
-       refinement_selectors/h1_proj_based_selector.cpp 
-       refinement_selectors/hcurl_proj_based_selector.cpp
+   shapeset/shapeset.cpp 
+   shapeset/shapeset_h1_ortho.cpp 
+   shapeset/shapeset_h1_jacobi.cpp 
+   shapeset/shapeset_h1_quad.cpp
+   shapeset/shapeset_hc_legendre.cpp 
+   shapeset/shapeset_hc_gradleg.cpp
+   shapeset/shapeset_hd_legendre.cpp
+   shapeset/shapeset_l2_legendre.cpp
+   shapeset/precalc.cpp 
 
-       shapeset/shapeset.cpp 
-       shapeset/shapeset_h1_ortho.cpp 
-       shapeset/shapeset_h1_jacobi.cpp 
-       shapeset/shapeset_h1_quad.cpp
-       shapeset/shapeset_hc_legendre.cpp 
-       shapeset/shapeset_hc_gradleg.cpp
-       shapeset/shapeset_hd_legendre.cpp
-       shapeset/shapeset_l2_legendre.cpp
-       shapeset/precalc.cpp 
+   space/space.cpp 
+   space/space_h1.cpp 
+   space/space_hcurl.cpp 
+   space/space_l2.cpp
+   space/space_hdiv.cpp
 
-       space/space.cpp 
-       space/space_h1.cpp 
-       space/space_hcurl.cpp 
-       space/space_l2.cpp
-       space/space_hdiv.cpp
+   views/base_view.cpp 
+   views/mesh_view.cpp 
+   views/order_view.cpp 
+   views/scalar_view.cpp 
+   views/stream_view.cpp 
+   views/vector_base_view.cpp 
+   views/vector_view.cpp 
+   views/view.cpp 
+   views/view_data.cpp 
+   views/view_support.cpp
 
-       views/base_view.cpp 
-       views/mesh_view.cpp 
-       views/order_view.cpp 
-       views/scalar_view.cpp 
-       views/stream_view.cpp 
-       views/vector_base_view.cpp 
-       views/vector_view.cpp 
-       views/view.cpp 
-       views/view_data.cpp 
-       views/view_support.cpp
+   weakform/weakform.cpp 
 
-       weakform/weakform.cpp 
-
-       neighbor.cpp
-       graph.cpp
-       ogprojection.cpp
-       h2d_common.cpp  
-       discrete_problem.cpp
-       runge_kutta.cpp
-       spline.cpp
-       boundary_conditions/essential_bcs.cpp
-       
-       weakform_library/weakforms_elasticity.cpp
-       weakform_library/weakforms_h1.cpp
-       weakform_library/weakforms_hcurl.cpp
-       weakform_library/weakforms_maxwell.cpp
-       weakform_library/weakforms_neutronics.cpp
-       )
+   neighbor.cpp
+   graph.cpp
+   ogprojection.cpp
+   h2d_common.cpp  
+   discrete_problem.cpp
+   runge_kutta.cpp
+   spline.cpp
+   boundary_conditions/essential_bcs.cpp
+   
+   weakform_library/weakforms_elasticity.cpp
+   weakform_library/weakforms_h1.cpp
+   weakform_library/weakforms_hcurl.cpp
+   weakform_library/weakforms_maxwell.cpp
+   weakform_library/weakforms_neutronics.cpp
+   )
 
 #
 # Build and install the library.
@@ -196,6 +219,7 @@ endif(H2D_COMPLEX)
 # Install header files.
 
 file(GLOB INC           "hermes2d/include/*.h")
+file(GLOB INC_FORM     "hermes2d/include/form/*.h")
 file(GLOB INC_SPACE     "hermes2d/include/space/*.h")
 file(GLOB INC_MESH      "hermes2d/include/mesh/*.h")
 file(GLOB INC_BC        "hermes2d/include/boundary_conditions/*.h")
@@ -211,6 +235,7 @@ file(GLOB INC_WEAKFORM  "hermes2d/include/weakform/*.h")
 file(GLOB INC_WEAKFORM_LIBRARY "hermes2d/include/weakform_library/*.h")
 
 install(FILES ${INC}           DESTINATION include/hermes/hermes2d/)
+install(FILES ${INC_FORM}     DESTINATION include/hermes/hermes2d/form)
 install(FILES ${INC_SPACE}     DESTINATION include/hermes/hermes2d/space)
 install(FILES ${INC_MESH}      DESTINATION include/hermes/hermes2d/mesh)
 install(FILES ${INC_BC}        DESTINATION include/hermes/hermes2d/boundaryconditions)

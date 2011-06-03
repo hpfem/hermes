@@ -1,7 +1,8 @@
-#include "../hermes2d.h"
+#include "hermes2d.h"
 
 namespace WeakFormsH1 
 {
+  template<typename Scalar>
   DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
     (int i, int j, std::string area, Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, 
@@ -9,23 +10,26 @@ namespace WeakFormsH1
     : MatrixFormVol<Scalar>(i, j, area, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
     (int i, int j, Hermes::vector<std::string> areas,Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol<Scalar>() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultMatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
                                      Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -51,6 +55,7 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
+  template<typename Scalar>
   Ord DefaultMatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                                 Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -76,13 +81,15 @@ namespace WeakFormsH1
     return result;
   }
 
+  template<typename Scalar>
   MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone() 
   {
     return new DefaultMatrixFormVol<Scalar>(*this);
   }
 
 
-  DefaultJacobianDiffusion::DefaultJacobianDiffusion(int i, int j, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::string area, Scalar const_coeff,
                                                      CubicSpline* c_spline,
                                                      SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, area, sym), 
@@ -92,7 +99,8 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   };
 
-  DefaultJacobianDiffusion::DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, 
+  template<typename Scalar>
+  DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, 
                                                      Scalar const_coeff, CubicSpline* c_spline,
                                                      SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, areas, sym),
@@ -102,12 +110,14 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
-  DefaultJacobianDiffusion::~DefaultJacobianDiffusion() 
+  template<typename Scalar>
+  DefaultJacobianDiffusion<Scalar>::~DefaultJacobianDiffusion() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
 
-  Scalar DefaultJacobianDiffusion::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+  template<typename Scalar>
+  Scalar DefaultJacobianDiffusion<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
                                          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
   {
     Scalar result = 0;
@@ -141,7 +151,8 @@ namespace WeakFormsH1
     return result;
   }
 
-  Ord DefaultJacobianDiffusion::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultJacobianDiffusion<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                                     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
     Ord result = 0;
@@ -175,13 +186,15 @@ namespace WeakFormsH1
     return result;
   }
 
-  MatrixFormVol<Scalar>* DefaultJacobianDiffusion::clone() 
+  template<typename Scalar>
+  MatrixFormVol<Scalar>* DefaultJacobianDiffusion<Scalar>::clone() 
   {
-    return new DefaultJacobianDiffusion(*this);
+    return new DefaultJacobianDiffusion<Scalar>(*this);
   }
   
 
-  DefaultJacobianAdvection::DefaultJacobianAdvection(int i, int j, std::string area, 
+  template<typename Scalar>
+  DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, std::string area, 
                                                      Scalar const_coeff1, Scalar const_coeff2,
                                                      CubicSpline* c_spline1,
                                                      CubicSpline* c_spline2, GeomType gt)
@@ -196,7 +209,8 @@ namespace WeakFormsH1
     if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
   }
 
-  DefaultJacobianAdvection::DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas, 
+  template<typename Scalar>
+  DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas, 
                                                      Scalar const_coeff1, Scalar const_coeff2,
                                                      CubicSpline* c_spline1,
                                                      CubicSpline* c_spline2,
@@ -212,68 +226,75 @@ namespace WeakFormsH1
     if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
   }
 
-  DefaultJacobianAdvection::~DefaultJacobianAdvection() 
+  template<typename Scalar>
+  DefaultJacobianAdvection<Scalar>::~DefaultJacobianAdvection() 
   {
     if (spline_coeff1 != HERMES_DEFAULT_SPLINE) delete spline_coeff1;
     if (spline_coeff2 != HERMES_DEFAULT_SPLINE) delete spline_coeff2;
   };
 
-  template<typename Real, typename Scalar>
-  Scalar DefaultJacobianAdvection::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
-  {
-    Scalar result = 0;
-        for (int i = 0; i < n; i++) {
-          result += wt[i] * (  const_coeff1*spline_coeff1->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
-                             + const_coeff1*spline_coeff1->get_value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
-                             + const_coeff2*spline_coeff2->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
-                             + const_coeff2*spline_coeff2->get_value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
-        }
-        return result;
-      }
-
-  Scalar DefaultJacobianAdvection::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+  template<typename Scalar>
+  Scalar DefaultJacobianAdvection<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
                                          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
-    return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+    Scalar result = 0;
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * (  const_coeff1*spline_coeff1->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
+      + const_coeff1*spline_coeff1->get_value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
+      + const_coeff2*spline_coeff2->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
+      + const_coeff2*spline_coeff2->get_value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
+    }
+    return result;
   }
 
-  Ord DefaultJacobianAdvection::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultJacobianAdvection<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
                                     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
-    return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    Ord result = 0;
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * (  const_coeff1*spline_coeff1->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
+      + const_coeff1*spline_coeff1->get_value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
+      + const_coeff2*spline_coeff2->get_derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
+      + const_coeff2*spline_coeff2->get_value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
+    }
+    return result;
   }
 
-  // This is to make the form usable in rk_time_step().
-  MatrixFormVol<Scalar>* DefaultJacobianAdvection::clone() 
+  template<typename Scalar>
+  MatrixFormVol<Scalar>* DefaultJacobianAdvection<Scalar>::clone() 
   {
-    return new DefaultJacobianAdvection(*this);
+    return new DefaultJacobianAdvection<Scalar>(*this);
   }
 
 
+  template<typename Scalar>
   DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, std::string area, Scalar const_coeff,
                                              DefaultFunction<Scalar>* f_coeff,
                                              GeomType gt)
     : VectorFormVol<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
                                              DefaultFunction<Scalar>* f_coeff,
                                              GeomType gt)
     : VectorFormVol<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol<Scalar>() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultVectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                      Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -298,6 +319,7 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
+  template<typename Scalar>
   Ord DefaultVectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                 Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -323,38 +345,43 @@ namespace WeakFormsH1
     return result;
   }
 
+  template<typename Scalar>
   VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone() 
   {
     return new DefaultVectorFormVol<Scalar>(*this);
   }
 
 
-  DefaultResidualVol::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
                                          DefaultFunction<Scalar>* f_coeff,
                                          GeomType gt)
     : VectorFormVol<Scalar>(i, area),
       idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
-  DefaultResidualVol::DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
                                          DefaultFunction<Scalar>* f_coeff,
                                          GeomType gt)
     : VectorFormVol<Scalar>(i, areas),
       idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
-  DefaultResidualVol::~DefaultResidualVol() 
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::~DefaultResidualVol() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
-  Scalar DefaultResidualVol::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                    Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
@@ -378,7 +405,8 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
-  Ord DefaultResidualVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                               Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
@@ -403,13 +431,15 @@ namespace WeakFormsH1
     return result;
   }
 
-  VectorFormVol<Scalar>* DefaultResidualVol::clone() 
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone() 
   {
     return new DefaultResidualVol(*this);
   }
 
     
-  DefaultResidualDiffusion::DefaultResidualDiffusion(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::string area, Scalar const_coeff,
                                                      CubicSpline* c_spline,
                                                      GeomType gt)
     : VectorFormVol<Scalar>(i, area),
@@ -419,7 +449,8 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   };
 
-  DefaultResidualDiffusion::DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
                                                      CubicSpline* c_spline, 
                                                      GeomType gt)
     : VectorFormVol<Scalar>(i, areas),
@@ -429,12 +460,14 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
-  DefaultResidualDiffusion::~DefaultResidualDiffusion() 
+  template<typename Scalar>
+  DefaultResidualDiffusion<Scalar>::~DefaultResidualDiffusion() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
 
-  Scalar DefaultResidualDiffusion::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualDiffusion<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                          Geom<double> *e, ExtData<Scalar> *ext) const
   {
     Scalar result = 0;
@@ -462,7 +495,8 @@ namespace WeakFormsH1
     return result;
   }
 
-  Ord DefaultResidualDiffusion::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualDiffusion<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
@@ -476,13 +510,15 @@ namespace WeakFormsH1
     return result;
   }
 
-  VectorFormVol<Scalar>* DefaultResidualDiffusion::clone() 
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualDiffusion<Scalar>::clone() 
   {
     return new DefaultResidualDiffusion(*this);
   }
  
   
-  DefaultResidualAdvection::DefaultResidualAdvection(int i, std::string area, 
+  template<typename Scalar>
+  DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, std::string area, 
                                                      Scalar const_coeff1, Scalar const_coeff2, 
                                                      CubicSpline* c_spline1,
                                                      CubicSpline* c_spline2,
@@ -498,7 +534,8 @@ namespace WeakFormsH1
     if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
   }
   
-  DefaultResidualAdvection::DefaultResidualAdvection(int i, Hermes::vector<std::string> areas,\
+  template<typename Scalar>
+  DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, Hermes::vector<std::string> areas,\
                                                      Scalar const_coeff1, Scalar const_coeff2,
                                                      CubicSpline* c_spline1,
                                                      CubicSpline* c_spline2, GeomType gt)
@@ -513,15 +550,16 @@ namespace WeakFormsH1
     if (c_spline2 == HERMES_DEFAULT_SPLINE) this->spline_coeff2 = new CubicSpline(1.0);
   }
 
-  DefaultResidualAdvection::~DefaultResidualAdvection() 
+  template<typename Scalar>
+  DefaultResidualAdvection<Scalar>::~DefaultResidualAdvection() 
   {
     if (spline_coeff1 != HERMES_DEFAULT_SPLINE) delete spline_coeff1;
     if (spline_coeff2 != HERMES_DEFAULT_SPLINE) delete spline_coeff2;
   };
 
-  template<typename Real, typename Scalar>
-  Scalar DefaultResidualAdvection::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
-                                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
+  template<typename Scalar>
+  Scalar DefaultResidualAdvection<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+                                         Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
     Func<Scalar>* u_prev = u_ext[idx_i];
@@ -532,47 +570,53 @@ namespace WeakFormsH1
     return result;
   }
 
-  Scalar DefaultResidualAdvection::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-                                         Geom<double> *e, ExtData<Scalar> *ext) const 
-  {
-    return vector_form<double, Scalar>(n, wt, u_ext, v, e, ext);
-  }
-
-  Ord DefaultResidualAdvection::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualAdvection<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
-    return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+    Ord result = 0;
+    Func<Scalar>* u_prev = u_ext[idx_i];
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * (const_coeff1*spline_coeff1->get_value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
+                          + const_coeff2*spline_coeff2->get_value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
+    }
+    return result;
   }
 
-  VectorFormVol<Scalar>* DefaultResidualAdvection::clone() 
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualAdvection<Scalar>::clone() 
   {
     return new DefaultResidualAdvection(*this);
   }
  
   
+  template<typename Scalar>
   DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area,
                                                Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
                                                GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
   
+  template<typename Scalar>
   DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
                                                Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
                                                GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf<Scalar>() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultMatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
                                       Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -598,6 +642,7 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
+  template<typename Scalar>
   Ord DefaultMatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                                  Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -623,13 +668,14 @@ namespace WeakFormsH1
     return result;
   }
 
-  // This is to make the form usable in rk_time_step().
+  template<typename Scalar>
   MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone() 
   {
     return new DefaultMatrixFormSurf<Scalar>(*this);
   }
  
   
+  template<typename Scalar>
   DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf<Scalar>(int i, int j, std::string area, Scalar const_coeff,
                                                    CubicSpline* c_spline,
                                                    GeomType gt)
@@ -640,6 +686,7 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
   
+  template<typename Scalar>
   DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff,
                                                    CubicSpline* c_spline,
                                                    GeomType gt)
@@ -649,14 +696,15 @@ namespace WeakFormsH1
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
+  template<typename Scalar>
   DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf<Scalar>() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
 
-  template<typename Real, typename Scalar>
-  Scalar DefaultJacobianFormSurf<Scalar>::matrix_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                                   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
+  template<typename Scalar>
+  Scalar DefaultJacobianFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                                        Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
     for (int i = 0; i < n; i++) {
@@ -667,48 +715,53 @@ namespace WeakFormsH1
     return result;
   }
 
-  Scalar DefaultJacobianFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                                        Geom<double> *e, ExtData<Scalar> *ext) const 
-  {
-    return matrix_form_surf<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-  }
-
+  template<typename Scalar>
   Ord DefaultJacobianFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
                                    Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
-    return matrix_form_surf<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+    Ord result = 0;
+    for (int i = 0; i < n; i++) {
+      result += wt[i] * (const_coeff*spline_coeff->get_derivative(u_ext[idx_j]->val[i]) * u_ext[idx_j]->val[i]
+                          + const_coeff*spline_coeff->get_value(u_ext[idx_j]->val[i]))
+                * u->val[i] * v->val[i];
+    }
+    return result;
   }
 
-  // This is to make the form usable in rk_time_step().
+  template<typename Scalar>
   MatrixFormSurf<Scalar>* DefaultJacobianFormSurf<Scalar>::clone() 
   {
     return new DefaultJacobianFormSurf<Scalar>(*this);
   }
 
 
+  template<typename Scalar>
   DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, std::string area, Scalar const_coeff,
                                                DefaultFunction<Scalar>* f_coeff,
                                                GeomType gt)
     : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
   
+  template<typename Scalar>
   DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
                                                DefaultFunction<Scalar>* f_coeff,
                                                GeomType gt)
     : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
+  template<typename Scalar>
   DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf<Scalar>() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultVectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                       Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -734,6 +787,7 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
+  template<typename Scalar>
   Ord DefaultVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                  Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -759,12 +813,14 @@ namespace WeakFormsH1
     return result;
   }
 
+  template<typename Scalar>
   VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone() 
   {
     return new DefaultVectorFormSurf<Scalar>(*this);
   }
  
   
+  template<typename Scalar>
   DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
                                                                            std::string area,
                                                                            Hermes::vector<Scalar> coeffs,
@@ -773,6 +829,7 @@ namespace WeakFormsH1
   { 
   }
   
+  template<typename Scalar>
   DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
                                                                            Hermes::vector<std::string> areas,
                                                                            Hermes::vector<Scalar> coeffs, GeomType gt)
@@ -780,6 +837,7 @@ namespace WeakFormsH1
   { 
   }
 
+  template<typename Scalar>
   void DefaultMultiComponentVectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                                   Geom<double> *e, ExtData<Scalar> *ext, 
                                                   Hermes::vector<Scalar>& result) const 
@@ -797,6 +855,7 @@ namespace WeakFormsH1
       result.push_back(result_base * coeffs[result_i]);
   }
 
+  template<typename Scalar>
   Ord DefaultMultiComponentVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                                Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -809,38 +868,36 @@ namespace WeakFormsH1
         return int_x_v<Ord>(n, wt, v, e);
   }
 
-  /*
-  VectorFormSurf<Scalar>* DefaultMultiComponentVectorFormSurf<Scalar>::clone() {
-    return new DefaultMultiComponentVectorFormSurf<Scalar>(*this);
-  }
-  */
-
-  DefaultResidualSurf::DefaultResidualSurf(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area, Scalar const_coeff,
                                            DefaultFunction<Scalar>* f_coeff,
                                            GeomType gt)
     : VectorFormSurf<Scalar>(i, area),
       idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
   
-  DefaultResidualSurf::DefaultResidualSurf(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
                                            DefaultFunction<Scalar>* f_coeff,
                                            GeomType gt)
     : VectorFormSurf<Scalar>(i, areas),
       idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
   {
     // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction(1.0);
+    if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new DefaultFunction<Scalar>(1.0);
   }
 
-  DefaultResidualSurf::~DefaultResidualSurf() 
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::~DefaultResidualSurf() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
-  Scalar DefaultResidualSurf::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
                                     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
@@ -865,7 +922,8 @@ namespace WeakFormsH1
     return const_coeff * result;
   }
 
-  Ord DefaultResidualSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                                Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
@@ -890,14 +948,15 @@ namespace WeakFormsH1
     return result;
   }
 
-  // This is to make the form usable in rk_time_step().
-  VectorFormSurf<Scalar>* DefaultResidualSurf::clone() 
+  template<typename Scalar>
+  VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone() 
   {
     return new DefaultResidualSurf(*this);
   }
 
   
-  DefaultWeakFormLaplace::DefaultWeakFormLaplace(std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultWeakFormLaplace<Scalar>::DefaultWeakFormLaplace(std::string area, Scalar const_coeff,
                                                  CubicSpline* spline_coeff,
                                                  GeomType gt) : WeakForm()
   {
@@ -910,7 +969,8 @@ namespace WeakFormsH1
   };
   
   
-  DefaultWeakFormPoisson::DefaultWeakFormPoisson(DefaultFunction<Scalar>* rhs,
+  template<typename Scalar>
+  DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson(DefaultFunction<Scalar>* rhs,
                                                  std::string area, Scalar const_coeff,
                                                  CubicSpline* spline_coeff,
                                                  GeomType gt) : WeakForm()

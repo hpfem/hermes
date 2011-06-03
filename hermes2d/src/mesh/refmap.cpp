@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "mesh.h"
 #include "refmap.h"
-#include "../shapeset/shapeset_h1_all.h"
+#include "shapeset/shapeset_h1_all.h"
 
 
 H1ShapesetJacobi ref_map_shapeset;
@@ -235,7 +235,7 @@ bool RefMap::is_parallelogram()
 
 /// Quickly calculates the (hard-coded) reference mapping for elements with constant jacobians
 /// (ie., linear triangles and linear parallelogram quads). How it works for parallelograms
-/// can be found <a href="../data/parallelogram.pdf">here</a>.
+/// can be found <a href="data/parallelogram.pdf">here</a>.
 ///
 void RefMap::calc_const_inv_ref_map()
 {

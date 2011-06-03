@@ -19,7 +19,7 @@
 
 #define HERMES_REPORT_WARN
 
-#include "../hermes2d.h"
+#include "hermes2d.h"
 // Essential boundary condition.
 template<typename Scalar>
 EssentialBoundaryCondition<Scalar>::EssentialBoundaryCondition(Hermes::vector<std::string> markers) : markers(markers) {

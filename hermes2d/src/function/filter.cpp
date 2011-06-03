@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "filter.h"
-#include "../mesh/traverse.h"
+#include "traverse.h"
 
 
 //// Filter ////////////////////////////////////////////////////////////////////////////////////////

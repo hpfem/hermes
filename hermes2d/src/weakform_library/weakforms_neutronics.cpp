@@ -1,4 +1,4 @@
-#include "../hermes2d.h"
+#include "hermes2d.h"
 
 #include <algorithm>
 #include <iomanip>

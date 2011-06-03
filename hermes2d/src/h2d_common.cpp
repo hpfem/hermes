@@ -15,9 +15,9 @@
 
 #include "h2d_common.h"
 #include "quadrature/quad_all.h"
-#include "mesh/mesh.h"
-#include "mesh/traverse.h"
-#include "mesh/refmap.h"
+#include "mesh.h"
+#include "traverse.h"
+#include "refmap.h"
 #include "function/solution.h"
 #include "quadrature/limit_order.h"
 #include "integrals/h1.h"

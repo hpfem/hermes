@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "../h2d_common.h"
-#include "../shapeset/shapeset_h1_all.h"
-#include "../shapeset/shapeset_common.h"
-#include "../shapeset/precalc.h"
+#include "h2d_common.h"
+#include "shapeset/shapeset_h1_all.h"
+#include "shapeset/shapeset_common.h"
+#include "shapeset/precalc.h"
 #include "curved.h"
 #include "mesh.h"
-#include "../quadrature/quad_all.h"
+#include "quad_all.h"
 #include "matrix.h"
   
 H1ShapesetJacobi CurvMap::ref_map_shapeset;

@@ -16,15 +16,15 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "../function/forms.h"
-#include "../space/space.h"
+#include "forms.h"
+#include "space.h"
 #include "vector.h"
-#include "../weakform/weakform.h"
-#include "../integrals/h1.h"
-#include "../integrals/hcurl.h"
-#include "../integrals/hdiv.h"
-#include "../integrals/l2.h"
-#include "../ref_selectors/selector.h"
+#include "weakform.h"
+#include "h1.h"
+#include "hcurl.h"
+#include "hdiv.h"
+#include "l2.h"
+#include "selector.h"
 
 /** \defgroup g_adapt Adaptivity
  *  \brief Adaptivity provides framework for modyfying elements in order to decrease errors of the solution.

@@ -22,10 +22,10 @@
 # include <sys/time.h>
 #endif
 
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "view_support.h"
 #include "view.h"
-#include "../function/solution.h"
+#include "solution.h"
 
 ///////////////// private constants /////////////////
 #define HERMES_WAIT_CLOSE_MSG "close all views to continue"
@@ -557,7 +557,7 @@ void View::wait_for_close()
 
 // These two includes are needed for the wait_for_draw() function below:
 //#include <csignal>
-#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/include/Teuchos_stacktrace.hpp"
 
 void View::wait_for_draw()
 {

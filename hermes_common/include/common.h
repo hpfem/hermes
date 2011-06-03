@@ -74,10 +74,10 @@ const int HERMES_DUMMY_EDGE_MARKER = -8888;
 #include "compat.h"               // platform compatibility stuff
 #include "callstack.h"            // error tracing
 #include "error.h"
-//#include "solver/solver.h"
-//
 #include "vector.h"
 #include "tables.h"
+#include "../python_API/include/python_api.h"
+#include "../python_API/include/python_engine_api.h"
 
 #define HERMES  "Hermes"
 
@@ -167,10 +167,6 @@ inline void fprint_num(FILE*f,std::complex<double> x){
 
 #include <complex>
 
-typedef std::complex<double> cplx;
-typedef cplx complex2[2];
-typedef cplx Scalar;
-
 #define CONJ(a)       (std::conj(a))
 #define REAL(a)       (std::real(a))
 #define IMAG(a)       (std::imag(a))
@@ -178,8 +174,8 @@ typedef cplx Scalar;
 #define SCALAR_FMT      "(%lf, %lf)"
 #define SCALAR(a)     std::real(a), std::imag(a)
 
-inline double magn(cplx x)  { return std::abs(x); }
-inline cplx conj(cplx a)    { return std::conj(a); }
+inline double magn(std::complex<double> x)  { return std::abs(x); }
+inline std::complex<double> conj(std::complex<double> a)    { return std::conj(a); }
 
 #ifdef WITH_BLAS         // always true for Hermes3D
 // BLAS-related functions

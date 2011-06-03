@@ -17,12 +17,11 @@
 #define __H2D_DISCRETE_PROBLEM_H
 
 #include "matrix.h"
-#include "solver/solver.h"
-#include "solver/dpinterface.h"
+#include "../../hermes_common/include/hermes_common.h"
 #include "tables.h"
 #include "adapt/adapt.h"
 #include "graph.h"
-#include "function/forms.h"
+#include "form/forms.h"
 #include "weakform/weakform.h"
 #include "views/view.h"
 #include "views/scalar_view.h"
@@ -30,7 +29,7 @@
 #include "views/order_view.h"
 #include "function/function.h"
 #include "neighbor.h"
-#include "ref_selectors/selector.h"
+#include "refinement_selectors/selector.h"
 #include "adapt/kelly_type_adapt.h"
 #include <map>
 

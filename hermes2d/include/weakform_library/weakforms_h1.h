@@ -113,10 +113,6 @@ namespace WeakFormsH1
 
     ~DefaultJacobianAdvection();
 
-    template<typename Real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
       Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -218,10 +214,6 @@ namespace WeakFormsH1
 
     ~DefaultResidualDiffusion();
 
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -257,10 +249,6 @@ namespace WeakFormsH1
       CubicSpline* c_spline2 = HERMES_DEFAULT_SPLINE, GeomType gt = HERMES_PLANAR);
 
     ~DefaultResidualAdvection();
-
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -327,10 +315,6 @@ namespace WeakFormsH1
       GeomType gt = HERMES_PLANAR);
 
     ~DefaultJacobianFormSurf<Scalar>();
-
-    template<typename Real, typename scalar>
-    scalar matrix_form_surf(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const;

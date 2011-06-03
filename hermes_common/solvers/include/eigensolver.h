@@ -5,10 +5,10 @@
 
 #include "python_api.h"
 
-#include "../config.h"
+#include "config.h"
 // RCP
 #ifndef WITH_TRILINOS
-#include "../../third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
+#include "Teuchos_RCP.hpp"
 #else
 #include "Teuchos_RCP.hpp"
 #endif

@@ -1,4 +1,4 @@
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "order_permutator.h"
 
 namespace RefinementSelectors {

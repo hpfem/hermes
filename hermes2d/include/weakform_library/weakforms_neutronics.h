@@ -2,7 +2,7 @@
 #define __H2D_NEUTRONICS_WEAK_FORMS_H
 
 #include "weakforms_h1.h"
-#include "../function/forms.h"
+#include "../form/forms.h"
 
 namespace WeakFormsNeutronics
 {
@@ -551,6 +551,7 @@ namespace WeakFormsNeutronics
             : matprop(matprop), geom_type(geom_type) 
           {};
 
+          template<typename Scalar>
           std::string get_material(int elem_marker, WeakForm<Scalar>*wf) const 
           { 
             if (elem_marker == HERMES_DUMMY_ELEM_MARKER)

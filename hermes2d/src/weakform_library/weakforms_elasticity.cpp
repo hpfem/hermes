@@ -1,4 +1,4 @@
-#include "../hermes2d.h"
+#include "hermes2d.h"
 #ifndef H2D_COMPLEX
 namespace WeakFormsElasticity 
 {

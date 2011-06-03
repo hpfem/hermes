@@ -16,7 +16,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "../h2d_common.h"
+#include "h2d_common.h"
 #include "vector_view.h"
 
 

@@ -176,6 +176,7 @@ namespace WeakFormsElasticity {
     double lambda, mu;
   };
 
+  template<typename Scalar>
   class HERMES_API DefaultJacobianElasticity_00_11 
     : public MultiComponentMatrixFormVol<Scalar>
   {

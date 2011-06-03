@@ -22,35 +22,8 @@
 
 #include "config.h"
 
-// RCP
-#ifndef WITH_TRILINOS
-#include "third_party_codes/trilinos-teuchos/Teuchos_RCP.hpp"
-#else
-#include "Teuchos_RCP.hpp"
-#endif
-
-// hermes_common solvers
-#include "solver/amesos.h"
-#include "solver/aztecoo.h"
-#include "solver/epetra.h"
-#include "solver/mumps.h"
-#include "solver/nox.h"
-#include "solver/petsc.h"
-#include "solver/umfpack_solver.h"
-#include "solver/superlu.h"
-
-// preconditioners
-#include "solver/precond.h"
-#include "solver/precond_ifpack.h"
-#include "solver/precond_ml.h"
-
 // boundary conditions
-#include "boundaryconditions/essential_bcs.h"
-
-// Eigensolver
-#include "solver/eigensolver.h"
-
-#include "hermes_logging.h"
+#include "boundary_conditions/essential_bcs.h"
 
 #include "range.h"
 #include "quadrature/limit_order.h"
@@ -77,7 +50,7 @@
 
 #include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "function/forms.h"
+#include "form/forms.h"
 
 #include "integrals/h1.h"
 #include "integrals/hcurl.h"
@@ -100,13 +73,13 @@
 
 #include "mesh/refinement_type.h"
 #include "mesh/element_to_refine.h"
-#include "ref_selectors/selector.h"
-#include "ref_selectors/order_permutator.h"
-#include "ref_selectors/optimum_selector.h"
-#include "ref_selectors/proj_based_selector.h"
-#include "ref_selectors/l2_proj_based_selector.h"
-#include "ref_selectors/h1_proj_based_selector.h"
-#include "ref_selectors/hcurl_proj_based_selector.h"
+#include "refinement_selectors/selector.h"
+#include "refinement_selectors/order_permutator.h"
+#include "refinement_selectors/optimum_selector.h"
+#include "refinement_selectors/proj_based_selector.h"
+#include "refinement_selectors/l2_proj_based_selector.h"
+#include "refinement_selectors/h1_proj_based_selector.h"
+#include "refinement_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt/adapt.h"
 #include "adapt/kelly_type_adapt.h"
