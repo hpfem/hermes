@@ -39,6 +39,8 @@ namespace Hermes
       Filter() {};
 
       Filter(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      
+      Filter(Hermes::vector<Solution<Scalar>*> solutions);
 
       virtual ~Filter();
 
@@ -139,6 +141,8 @@ namespace Hermes
       DXDYFilter() {};
 
       DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      
+      DXDYFilter(Hermes::vector<Solution<Scalar>*> solutions);
 
       void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
 

@@ -339,6 +339,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<Solution<Scalar>*> solutions) : Filter<Scalar>(solutions)
+    {
+      init_components();
+    }
+
+    template<typename Scalar>
     void DXDYFilter<Scalar>::init_components()
     {
       this->num_components = this->sln[0]->get_num_components();
