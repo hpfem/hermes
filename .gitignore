@@ -6,3 +6,10 @@ CTestTestfile.cmake
 Makefile
 cmake_install.cmake
 config_real.cmake
+
+# Windows / Visual Studio
+*vcxproj*
+*tlog
+*.obj
+*.sln
+CMake.vars
