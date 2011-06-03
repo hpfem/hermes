@@ -18,7 +18,8 @@ include(PickRealOrCplxLibs)
 # Additional building steps required by MSVC.
 include(BuildAndInstallScripts)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/solvers/include)
 
 # Teuchos RCP
 if (NOT WITH_TRILINOS)
@@ -50,20 +51,20 @@ set(SRC
   
   solvers/src/dpinterface.cpp
   solvers/src/solver.cpp
-  solvers/nox/nox.cpp
-  solvers/epetra/epetra.cpp
-  solvers/aztecoo/aztecoo.cpp
-  solvers/amesos/amesos.cpp
-  solvers/mumps/mumps.cpp
-  solvers/superlu/superlu.cpp
-  solvers/superlu/superlu_real.cpp
-  solvers/superlu/superlu_cplx.cpp
-  solvers/petsc/petsc.cpp
-  solvers/umfpack/umfpack_solver.cpp
-  solvers/precond/precond_ml.cpp
-  solvers/precond/precond_ifpack.cpp
-  solvers/eigensolver/eigensolver.cpp
-  solvers/eigensolver/eigen.cpp
+  solvers/src/nox.cpp
+  solvers/src/epetra.cpp
+  solvers/src/aztecoo.cpp
+  solvers/src/amesos.cpp
+  solvers/src/mumps.cpp
+  solvers/src/superlu.cpp
+  solvers/src/superlu_real.cpp
+  solvers/src/superlu_cplx.cpp
+  solvers/src/petsc.cpp
+  solvers/src/umfpack_solver.cpp
+  solvers/src/precond_ml.cpp
+  solvers/src/precond_ifpack.cpp
+  solvers/src/eigensolver.cpp
+  solvers/src/eigen.cpp
   
   ${TEUCHOS_SOURCES}
 
@@ -178,8 +179,7 @@ endif(MSVC)
 # Install header files.
 
 file(GLOB INC_COMMON    "include/*.h")
-file(GLOB INC_SOLVER    "solvers/include/*.h" "solvers/nox/*.h" "solvers/epetra/*.h" "solvers/aztecoo/*.h" "solvers/amesos/*.h" "solvers/mumps/*.h" "solvers/superlu/*.h" 
-"solvers/petsc/*.h" "solvers/umfpack/*.h" "solvers/precond/*.h" "solvers/eigensolver/*.h")
+file(GLOB INC_SOLVER    "solvers/include/*.h")
 file(GLOB INC_PYTHON    "python_API/*.h")
 file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/*.h*")
 install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
