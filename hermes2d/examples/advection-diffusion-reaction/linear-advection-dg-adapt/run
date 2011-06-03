@@ -1,4 +1,0 @@
-rm *~ 
-./linear-advection-dg-adapt
-python plot_graph.py &
-

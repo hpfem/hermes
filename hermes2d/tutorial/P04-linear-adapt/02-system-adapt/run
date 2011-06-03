@@ -1,3 +1,0 @@
-rm *~ 
-./P04-02-system-adapt
-python plot_graph.py &

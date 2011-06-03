@@ -1,4 +1,0 @@
-rm *~ 
-./elasticity-crack
-python plot_graph.py &
-

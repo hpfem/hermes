@@ -1,3 +1,0 @@
-rm *~ 
-./elasticity-bracket
-python plot_graph.py &

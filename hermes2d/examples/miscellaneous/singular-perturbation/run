@@ -1,4 +1,0 @@
-rm *~ 
-./singular-perturbation
-python plot_graph.py &
-

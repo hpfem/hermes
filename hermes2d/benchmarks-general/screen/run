@@ -1,4 +1,0 @@
-rm *~ 
-./screen
-python plot_graph.py &
-

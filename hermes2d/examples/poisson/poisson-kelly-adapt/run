@@ -1,4 +1,0 @@
-rm *~ 
-./poisson-kelly-adapt
-python plot_graph.py &
-

@@ -1,4 +1,0 @@
-rm *~ 
-./smooth-aniso-x
-python plot_graph.py &
-

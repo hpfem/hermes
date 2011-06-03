@@ -1,4 +1,0 @@
-rm *~ 
-./P06-05-gross-pitaevski-adapt
-python plot_graph.py &
-

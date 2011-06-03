@@ -1,4 +1,0 @@
-rm *~ 
-./linear-advection-diffusion
-python plot_graph.py &
-

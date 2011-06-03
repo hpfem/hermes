@@ -1,4 +1,0 @@
-rm *~ 
-./layer-boundary
-python plot_graph.py &
-

@@ -1,3 +1,0 @@
-rm *~ 
-./P05-01-newton-adapt
-python plot_graph.py &

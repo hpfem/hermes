@@ -1,4 +1,0 @@
-rm *~ 
-./neutronics-heat-conduction
-python plot_graph.py &
-
