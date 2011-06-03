@@ -2,7 +2,8 @@
 
 namespace WeakFormsHcurl 
 {
-  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
+  template<typename Scalar>
+  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
     (int i, int j, std::string area, Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, 
     GeomType gt)
@@ -13,7 +14,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
+  template<typename Scalar>
+  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
     (int i, int j, Hermes::vector<std::string> areas,Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -23,11 +25,13 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol<Scalar>() 
+  template<typename Scalar>
+  DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultMatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -40,6 +44,7 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   Ord DefaultMatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -52,13 +57,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone() 
   {
     return new DefaultMatrixFormVol<Scalar>(*this);
   }
 
 
-  DefaultJacobianCurlCurl::DefaultJacobianCurlCurl(int i, int j, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, std::string area, Scalar const_coeff,
     CubicSpline* c_spline,
     SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, area, sym), 
@@ -69,7 +76,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   };
 
-  DefaultJacobianCurlCurl::DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas, 
+  template<typename Scalar>
+  DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas, 
     Scalar const_coeff, CubicSpline* c_spline,
     SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, areas, sym),
@@ -80,12 +88,14 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultJacobianCurlCurl::~DefaultJacobianCurlCurl() 
+  template<typename Scalar>
+  DefaultJacobianCurlCurl<Scalar>::~DefaultJacobianCurlCurl() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
 
-  Scalar DefaultJacobianCurlCurl::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+  template<typename Scalar>
+  Scalar DefaultJacobianCurlCurl<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
@@ -97,7 +107,8 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  Ord DefaultJacobianCurlCurl::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultJacobianCurlCurl<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
@@ -109,13 +120,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  MatrixFormVol<Scalar>* DefaultJacobianCurlCurl::clone() 
+  template<typename Scalar>
+  MatrixFormVol<Scalar>* DefaultJacobianCurlCurl<Scalar>::clone() 
   {
     return new DefaultJacobianCurlCurl(*this);
   }
 
 
-  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, std::string area, Scalar const_coeff0, Scalar const_coeff1,
+  template<typename Scalar>
+  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area, Scalar const_coeff0, Scalar const_coeff1,
     DefaultFunction<Scalar>* f_coeff0, DefaultFunction<Scalar>* f_coeff1,
     GeomType gt)
     : VectorFormVol<Scalar>(i, area), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
@@ -128,7 +141,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, 
+  template<typename Scalar>
+  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, Hermes::vector<std::string> areas, 
     Scalar const_coeff0, Scalar const_coeff1,
     DefaultFunction<Scalar>* f_coeff0, DefaultFunction<Scalar>* f_coeff1,
     GeomType gt)
@@ -142,12 +156,14 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol<Scalar>() 
+  template<typename Scalar>
+  DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol() 
   {
     if (function_coeff0 != HERMES_DEFAULT_FUNCTION) delete function_coeff0;
     if (function_coeff1 != HERMES_DEFAULT_FUNCTION) delete function_coeff1;
   };
 
+  template<typename Scalar>
   Scalar DefaultVectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -157,6 +173,7 @@ namespace WeakFormsHcurl
     return const_coeff0 * int_v0 + const_coeff1 * int_v1;
   }
 
+  template<typename Scalar>
   Ord DefaultVectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -166,13 +183,15 @@ namespace WeakFormsHcurl
     return const_coeff0 * int_v0 + const_coeff1 * int_v1;
   }
 
+  template<typename Scalar>
   VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone() 
   {
     return new DefaultVectorFormVol<Scalar>(*this);
   }
 
 
-  DefaultResidualVol::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormVol<Scalar>(i, area),
@@ -183,7 +202,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultResidualVol::DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormVol<Scalar>(i, areas),
@@ -194,12 +214,14 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultResidualVol::~DefaultResidualVol() 
+  template<typename Scalar>
+  DefaultResidualVol<Scalar>::~DefaultResidualVol() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
-  Scalar DefaultResidualVol::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
@@ -214,7 +236,8 @@ namespace WeakFormsHcurl
     return const_coeff * result;
   }
 
-  Ord DefaultResidualVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
@@ -228,13 +251,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  VectorFormVol<Scalar>* DefaultResidualVol::clone() 
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone() 
   {
     return new DefaultResidualVol(*this);
   }
 
 
-  DefaultResidualCurlCurl::DefaultResidualCurlCurl(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, std::string area, Scalar const_coeff,
     CubicSpline* c_spline,
     GeomType gt)
     : VectorFormVol<Scalar>(i, area),
@@ -245,7 +270,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   };
 
-  DefaultResidualCurlCurl::DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
     CubicSpline* c_spline, 
     GeomType gt)
     : VectorFormVol<Scalar>(i, areas),
@@ -256,12 +282,14 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultResidualCurlCurl::~DefaultResidualCurlCurl() 
+  template<typename Scalar>
+  DefaultResidualCurlCurl<Scalar>::~DefaultResidualCurlCurl() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
 
-  Scalar DefaultResidualCurlCurl::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualCurlCurl<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
     Func<Scalar>* u_prev = u_ext[idx_i];
@@ -280,7 +308,8 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  Ord DefaultResidualCurlCurl::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualCurlCurl<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Func<Ord>* u_prev = u_ext[idx_i];
@@ -299,13 +328,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  VectorFormVol<Scalar>* DefaultResidualCurlCurl::clone() 
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualCurlCurl<Scalar>::clone() 
   {
     return new DefaultResidualCurlCurl(*this);
   }
 
 
-  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area,
+  template<typename Scalar>
+  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::string area,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -315,7 +346,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+  template<typename Scalar>
+  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -325,11 +357,13 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf<Scalar>() 
+  template<typename Scalar>
+  DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultMatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -342,6 +376,7 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   Ord DefaultMatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -354,13 +389,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone() 
   {
     return new DefaultMatrixFormSurf<Scalar>(*this);
   }
 
 
-  DefaultResidualSurf::DefaultResidualSurf(int i, std::string area,
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -370,7 +407,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultResidualSurf::DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -380,12 +418,14 @@ namespace WeakFormsHcurl
     else error("Nonconstant functions in Hcurl forms not implemented yet.");
   }
 
-  DefaultResidualSurf::~DefaultResidualSurf()
+  template<typename Scalar>
+  DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
-  Scalar DefaultResidualSurf::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
     Scalar result = 0;
@@ -400,7 +440,8 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  Ord DefaultResidualSurf::ord(int n, double *wt, Func<Ord> *u_ext[],
+  template<typename Scalar>
+  Ord DefaultResidualSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[],
     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
   {
     Ord result = 0;
@@ -414,13 +455,15 @@ namespace WeakFormsHcurl
     return result;
   }
 
-  VectorFormSurf<Scalar>* DefaultResidualSurf::clone()
+  template<typename Scalar>
+  VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone()
   {
     return new DefaultResidualSurf(*this);
   }
 
 
-  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::string area, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -430,7 +473,8 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -440,11 +484,13 @@ namespace WeakFormsHcurl
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
   }
 
-  DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf<Scalar>() 
+  template<typename Scalar>
+  DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
 
+  template<typename Scalar>
   Scalar DefaultVectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
@@ -459,6 +505,7 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   Ord DefaultVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
@@ -473,6 +520,7 @@ namespace WeakFormsHcurl
     return result;
   }
 
+  template<typename Scalar>
   VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone() 
   {
     return new DefaultVectorFormSurf<Scalar>(*this);

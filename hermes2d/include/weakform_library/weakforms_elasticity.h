@@ -35,11 +35,7 @@ namespace WeakFormsElasticity {
   public:
     DefaultJacobianElasticity_0_0(unsigned int i, unsigned int j, double lambda, double mu);
     DefaultJacobianElasticity_0_0(unsigned int i, unsigned int j, std::string area, double lambda, double mu);
-
-    template<typename Real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
-
+    
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
       Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -56,10 +52,6 @@ namespace WeakFormsElasticity {
   public:
     DefaultJacobianElasticity_0_1(unsigned int i, unsigned int j, double lambda, double mu);
     DefaultJacobianElasticity_0_1(unsigned int i, unsigned int j, std::string area, double lambda, double mu);
-
-    template<typename Real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
       Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -78,10 +70,6 @@ namespace WeakFormsElasticity {
     DefaultResidualElasticity_0_0(unsigned int i, double lambda, double mu);
     DefaultResidualElasticity_0_0(unsigned int i, std::string area, double lambda, double mu);
 
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *v, 
-      Geom<Real> *e, ExtData<scalar> *ext) const;
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
       Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -98,10 +86,6 @@ namespace WeakFormsElasticity {
   public:
     DefaultResidualElasticity_0_1(unsigned int i, double lambda, double mu);
     DefaultResidualElasticity_0_1(unsigned int i, std::string area, double lambda, double mu);
-
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *v, 
-      Geom<Real> *e, ExtData<scalar> *ext) const;
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
       Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -120,10 +104,6 @@ namespace WeakFormsElasticity {
     DefaultResidualElasticity_1_0(unsigned int i, double lambda, double mu);
     DefaultResidualElasticity_1_0(unsigned int i, std::string area, double lambda, double mu);
 
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *v, 
-      Geom<Real> *e, ExtData<scalar> *ext) const;
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
       Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -141,10 +121,6 @@ namespace WeakFormsElasticity {
     DefaultResidualElasticity_1_1(unsigned int i, double lambda, double mu);
     DefaultResidualElasticity_1_1(unsigned int i, std::string area, double lambda, double mu);
 
-    template<typename Real, typename scalar>
-    scalar vector_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *v, 
-      Geom<Real> *e, ExtData<scalar> *ext) const;
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
       Geom<double> *e, ExtData<Scalar> *ext) const;
 
@@ -161,10 +137,6 @@ namespace WeakFormsElasticity {
   public:
     DefaultJacobianElasticity_1_1(unsigned int i, unsigned int j, double lambda, double mu);
     DefaultJacobianElasticity_1_1(unsigned int i, unsigned int j, std::string area, double lambda, double mu);
-
-    template<typename Real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-      Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
       Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -186,10 +158,6 @@ namespace WeakFormsElasticity {
     DefaultJacobianElasticity_00_11
       (Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area, double lambda, double mu);
 
-    template<typename Real, typename scalar>
-    void matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
-      Geom<Real> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const;
-
     virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const;
 
@@ -208,10 +176,6 @@ namespace WeakFormsElasticity {
       (Hermes::vector<unsigned int> coordinates, double lambda, double mu);
     DefaultResidualElasticity_00_11
       (Hermes::vector<unsigned int> coordinates, std::string area, double lambda, double mu);
-
-    template<typename Real, typename scalar>
-    void vector_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *v,
-      Geom<Real> *e, ExtData<scalar> *ext, Hermes::vector<scalar>& result) const;
 
     virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const;

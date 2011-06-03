@@ -1,7 +1,8 @@
 #include "hermes2d.h"
 
 namespace WeakFormsMaxwell {
-  DefaultJacobianMagnetostatics::DefaultJacobianMagnetostatics(int i, int j, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, std::string area, Scalar const_coeff,
     CubicSpline* c_spline,
     SymFlag sym,
     GeomType gt,
@@ -13,7 +14,8 @@ namespace WeakFormsMaxwell {
     // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
-  DefaultJacobianMagnetostatics::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
+  template<typename Scalar>
+  DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
     Scalar const_coeff,
     CubicSpline* c_spline,
     SymFlag sym,
@@ -27,7 +29,8 @@ namespace WeakFormsMaxwell {
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
-  Scalar DefaultJacobianMagnetostatics::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+  template<typename Scalar>
+  Scalar DefaultJacobianMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const {
       Scalar planar_part = 0;
       Scalar axisym_part = 0;
@@ -63,7 +66,8 @@ namespace WeakFormsMaxwell {
       return planar_part + axisym_part;
   }
 
-  Ord DefaultJacobianMagnetostatics::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultJacobianMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord planar_part = 0;
       for (int i = 0; i < n; i++) {
@@ -81,12 +85,14 @@ namespace WeakFormsMaxwell {
       return planar_part * Ord(order_increase);
   }
 
-  MatrixFormVol<Scalar>* DefaultJacobianMagnetostatics::clone() {
+  template<typename Scalar>
+  MatrixFormVol<Scalar>* DefaultJacobianMagnetostatics<Scalar>::clone() {
     return new DefaultJacobianMagnetostatics(*this);
   }
 
 
-  DefaultResidualMagnetostatics::DefaultResidualMagnetostatics(int i, std::string area, Scalar const_coeff,
+  template<typename Scalar>
+  DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::string area, Scalar const_coeff,
     CubicSpline* c_spline,
     GeomType gt,
     int order_increase)
@@ -97,7 +103,8 @@ namespace WeakFormsMaxwell {
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
-  DefaultResidualMagnetostatics::DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff, 
+  template<typename Scalar>
+  DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff, 
     CubicSpline* c_spline,
     GeomType gt, int order_increase)
     : VectorFormVol<Scalar>(i, areas), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
@@ -107,7 +114,8 @@ namespace WeakFormsMaxwell {
     if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
   }
 
-  Scalar DefaultResidualMagnetostatics::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+  template<typename Scalar>
+  Scalar DefaultResidualMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
     Geom<double> *e, ExtData<Scalar> *ext) const {
       Scalar planar_part = 0;
       Scalar axisym_part = 0;
@@ -123,7 +131,8 @@ namespace WeakFormsMaxwell {
       return planar_part + axisym_part;
   }
 
-  Ord DefaultResidualMagnetostatics::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+  template<typename Scalar>
+  Ord DefaultResidualMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord planar_part = 0;
       for (int i = 0; i < n; i++) {
@@ -135,7 +144,8 @@ namespace WeakFormsMaxwell {
   }
 
   // This is to make the form usable in rk_time_step().
-  VectorFormVol<Scalar>* DefaultResidualMagnetostatics::clone() {
+  template<typename Scalar>
+  VectorFormVol<Scalar>* DefaultResidualMagnetostatics<Scalar>::clone() {
     return new DefaultResidualMagnetostatics(*this);
   }
 };

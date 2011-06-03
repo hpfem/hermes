@@ -85,7 +85,7 @@ protected:
   double eps, max, cmax;
   bool auto_max;
 
-  MeshFunction<scalar> *xdisp, *ydisp;
+  MeshFunction<double> *xdisp, *ydisp;
   double dmult;
 
   double3* verts;  ///< vertices: (x, y, value) triplets

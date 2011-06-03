@@ -18,10 +18,10 @@
 
 //// new volume integrals //////////////////////////////////////////////////////////////////////////////
 
-template<typename real, typename scalar>
-scalar int_e_f(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename real, typename Scalar>
+Scalar int_e_f(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
   return result;
@@ -38,17 +38,17 @@ public:
     MatrixFormVolHCurl(unsigned int i, unsigned int j, Hermes::vector<std::string> areas, 
                        SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) { }
 
-    template<typename Real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-                       Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
     {
-      return int_e_f<Real, scalar>(n, wt, u, v);
+      return int_e_f<Real, Scalar>(n, wt, u, v);
     }
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<scalar> *ext) const
+    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+                 Geom<double> *e, ExtData<Scalar> *ext) const
     {
-        return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+        return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
@@ -58,46 +58,46 @@ public:
     }
 };
 
-template<typename real, typename scalar>
-scalar int_curl_e_curl_f(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename real, typename Scalar>
+Scalar int_curl_e_curl_f(int n, double *wt, Func<real> *u, Func<real> *v)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (u->curl[i] * conj(v->curl[i]));
   return result;
 }
 
-template<typename Real, typename scalar>
-scalar int_v0(int n, double *wt, Func<scalar> *v)
+template<typename Real, typename Scalar>
+Scalar int_v0(int n, double *wt, Func<Scalar> *v)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * v->val0[i];
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_v1(int n, double *wt, Func<real> *v)
+template<typename real, typename Scalar>
+Scalar int_v1(int n, double *wt, Func<real> *v)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (v->val1[i]);
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_F_e_f(int n, double *wt, double (*F)(int marker, real x, real y), Func<real> *u, Func<real> *v, Geom<real> *e)
+template<typename real, typename Scalar>
+Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, real x, real y), Func<real> *u, Func<real> *v, Geom<real> *e)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (*F)(e->elem_marker, e->x[i], e->y[i]) * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
   return result;
 }
 
-template<typename real, typename scalar>
-scalar int_e_tau_f_tau(int n, double *wt, Func<real> *u, Func<real> *v, Geom<real> *e)
+template<typename real, typename Scalar>
+Scalar int_e_tau_f_tau(int n, double *wt, Func<real> *u, Func<real> *v, Geom<real> *e)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * (    (u->val0[i] * e->tx[i] + u->val1[i] * e->ty[i]) *
                        conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));

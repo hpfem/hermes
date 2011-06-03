@@ -578,9 +578,9 @@ namespace WeakFormsNeutronics
               g(g), geom_type(geom_type)
             {};
 
-            template<typename Real, typename scalar>
-            scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns matrix_form(int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const {
@@ -616,9 +616,9 @@ namespace WeakFormsNeutronics
               g(g), geom_type(geom_type)
             {};
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
               Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const {
@@ -661,9 +661,9 @@ namespace WeakFormsNeutronics
               g(g)
             {};
 
-            template<typename Real, typename scalar>
-            scalar matrix_form( int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext  ) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns matrix_form( int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext  ) const;
 
             virtual Scalar value( int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext  ) const { 
@@ -704,9 +704,9 @@ namespace WeakFormsNeutronics
               g(g)
             {};
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
               Geom<double> *e, ExtData<Scalar> *ext) const  {
@@ -750,9 +750,9 @@ namespace WeakFormsNeutronics
               gto(gto), gfrom(gfrom)
             {};
 
-            template<typename Real, typename scalar>
-            scalar matrix_form( int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext  ) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns matrix_form( int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext  ) const;
 
             virtual Scalar value( int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext  ) const { 
@@ -805,9 +805,9 @@ namespace WeakFormsNeutronics
                 error(E_INVALID_GROUP_INDEX);
             }
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
               Geom<double> *e, ExtData<Scalar> *ext) const {
@@ -850,9 +850,9 @@ namespace WeakFormsNeutronics
               gto(gto), gfrom(gfrom)
             {};
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
               Geom<double> *e, ExtData<Scalar> *ext) const {
@@ -896,9 +896,9 @@ namespace WeakFormsNeutronics
               gto(gto), gfrom(gfrom)
             {};
 
-            template<typename Real, typename scalar>
-            scalar matrix_form( int n, double *wt, Func<scalar> *u_ext[], Func<Real> *u,
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext  ) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns matrix_form( int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext  ) const;
 
             virtual Scalar value( int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext  ) const { 
@@ -940,9 +940,9 @@ namespace WeakFormsNeutronics
               gto(gto), gfrom(gfrom)
             {};
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
               Geom<double> *e, ExtData<Scalar> *ext) const {
@@ -986,9 +986,9 @@ namespace WeakFormsNeutronics
               g(g)
             {};
 
-            template<typename Real, typename scalar>
-            scalar vector_form(int n, double *wt, Func<scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, ExtData<scalar> *ext) const;
+            template<typename Real, typename ScalarTestFns>
+            ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
+              Func<Real> *v, Geom<Real> *e, ExtData<ScalarTestFns> *ext) const;
 
             virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
               Geom<double> *e, ExtData<Scalar> *ext) const {

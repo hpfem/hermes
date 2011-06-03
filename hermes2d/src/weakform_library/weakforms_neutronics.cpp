@@ -9,7 +9,8 @@ namespace WeakFormsNeutronics
   {    
     namespace Diffusion 
     {
-      DefaultWeakFormFixedSource::DefaultWeakFormFixedSource( Hermes::vector<std::string> regions, 
+      template<typename Scalar>
+      DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( Hermes::vector<std::string> regions, 
                                                               Hermes::vector<double> D_map, 
                                                               Hermes::vector<double> Sigma_a_map, 
                                                               Hermes::vector<double> Q_map ) : WeakForm(1) 
@@ -20,7 +21,7 @@ namespace WeakFormsNeutronics
         {
           /* Jacobian */
           // Diffusion.
-          add_matrix_form(new DefaultJacobianDiffusion(0, 0, regions[i], D_map[i], 
+          add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], D_map[i], 
                                                        HERMES_DEFAULT_SPLINE, HERMES_SYM));
           // Absorption.
           add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], Sigma_a_map[i], 
@@ -28,9 +29,9 @@ namespace WeakFormsNeutronics
           
           /* Residual */
           // Diffusion.
-          add_vector_form(new DefaultResidualDiffusion(0, regions[i], D_map[i]));
+          add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], D_map[i]));
           // Absorption.
-          add_vector_form(new DefaultResidualVol(0, regions[i], Sigma_a_map[i]));
+          add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], Sigma_a_map[i]));
           // Sources.
           add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], -Q_map[i]));
         }
@@ -495,8 +496,9 @@ namespace WeakFormsNeutronics
     {             
       namespace Diffusion
       { 
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar VacuumBoundaryCondition::Jacobian::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+        Scalar VacuumBoundaryCondition::Jacobian<ScalarClass>::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         { 
           Scalar result;
@@ -510,15 +512,10 @@ namespace WeakFormsNeutronics
           
           return result;
         }
-        template
-        Scalar VacuumBoundaryCondition::Jacobian::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-                                                              Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
-        template
-        Ord VacuumBoundaryCondition::Jacobian::matrix_form(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-                                                           Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;                                                               
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar VacuumBoundaryCondition::Residual<ScalarClass>::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                                                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         { 
           Scalar result;
@@ -532,15 +529,10 @@ namespace WeakFormsNeutronics
           
           return result;
         }
-        template
-        Scalar VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
-                                                              Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
-        template
-        Ord VacuumBoundaryCondition::Residual::vector_form(int n, double *wt, Func<Ord> *u_ext[],
-                                                           Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;        
        
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar DiffusionReaction::Jacobian::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+        Scalar DiffusionReaction::Jacobian<ScalarClass>::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         {
           Scalar result;
@@ -570,8 +562,9 @@ namespace WeakFormsNeutronics
           return result;
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar DiffusionReaction::Residual::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar DiffusionReaction::Residual<ScalarClass>::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                                                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         { 
           Scalar result;
@@ -601,8 +594,9 @@ namespace WeakFormsNeutronics
           return result;
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar FissionYield::Jacobian::matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+        Scalar FissionYield::Jacobian<ScalarClass>::matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const 
         {
           if (!matprop.get_fission_multigroup_structure()[gto])
@@ -624,8 +618,9 @@ namespace WeakFormsNeutronics
           return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar FissionYield::OuterIterationForm::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar FissionYield::OuterIterationForm<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
                                                               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const 
         { 
           if (!matprop.get_fission_multigroup_structure()[g])
@@ -659,8 +654,9 @@ namespace WeakFormsNeutronics
           return result * chi_elem[g] / keff;
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar FissionYield::Residual::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar FissionYield::Residual<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
                                                     Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const 
         { 
           if (!matprop.get_fission_multigroup_structure()[gto])
@@ -682,8 +678,9 @@ namespace WeakFormsNeutronics
           return result * chi_elem[gto] * nu_elem[gfrom] * Sigma_f_elem[gfrom];
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar Scattering::Jacobian::matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+        Scalar Scattering::Jacobian<ScalarClass>::matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
                                                   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const  
         {
           Scalar result = 0;
@@ -697,8 +694,9 @@ namespace WeakFormsNeutronics
           return result * matprop.get_Sigma_s(get_material(e->elem_marker, wf))[gto][gfrom];
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar Scattering::Residual::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar Scattering::Residual<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
                                                   Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const 
         { 
           Scalar result = 0;
@@ -712,8 +710,9 @@ namespace WeakFormsNeutronics
           return result * matprop.get_Sigma_s(get_material(e->elem_marker, wf))[gto][gfrom];
         }
         
+        template<typename ScalarClass>
         template<typename Real, typename Scalar>
-        Scalar ExternalSources::LinearForm::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
+        Scalar ExternalSources::LinearForm<ScalarClass>::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
                                                         Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         { 
           std::string mat = get_material(e->elem_marker, wf);
@@ -735,7 +734,8 @@ namespace WeakFormsNeutronics
     {             
       namespace Diffusion
       {   
-        void DefaultWeakFormFixedSource::lhs_init(unsigned int G, const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        void DefaultWeakFormFixedSource<Scalar>::lhs_init(unsigned int G, const MaterialPropertyMaps& matprop, 
                                                   GeomType geom_type)
         {
           bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
@@ -763,7 +763,8 @@ namespace WeakFormsNeutronics
           }
         }
         
-        DefaultWeakFormFixedSource::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
                                                                GeomType geom_type) : WeakForm(matprop.get_G())
         {
           lhs_init(matprop.get_G(), matprop, geom_type);
@@ -771,7 +772,8 @@ namespace WeakFormsNeutronics
             add_vector_form(new ExternalSources::LinearForm(gto, matprop, geom_type));
         }
         
-        DefaultWeakFormFixedSource::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
                                                                 DefaultFunction<Scalar>*f_src, std::string src_area,
                                                                 GeomType geom_type  ) : WeakForm(matprop.get_G())
         {
@@ -780,7 +782,8 @@ namespace WeakFormsNeutronics
             add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, -1.0, f_src, geom_type));
         }
         
-        DefaultWeakFormFixedSource::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
                                                                 DefaultFunction<Scalar>*f_src,
                                                                 Hermes::vector<std::string> src_areas,
                                                                 GeomType geom_type  ) : WeakForm(matprop.get_G())
@@ -790,7 +793,8 @@ namespace WeakFormsNeutronics
             add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, -1.0, f_src, geom_type));
         }
         
-        DefaultWeakFormFixedSource::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
                                                                 const std::vector<DefaultFunction<Scalar>*>& f_src,
                                                                 std::string src_area, 
                                                                 GeomType geom_type ) : WeakForm(matprop.get_G())
@@ -803,7 +807,8 @@ namespace WeakFormsNeutronics
             add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, -1.0, f_src[gto], geom_type));
         }
         
-        DefaultWeakFormFixedSource::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
+        template<typename Scalar>
+        DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
                                                                 const std::vector<DefaultFunction<Scalar>*>& f_src,
                                                                 Hermes::vector<std::string> src_areas,
                                                                 GeomType geom_type ) : WeakForm(matprop.get_G())
@@ -816,7 +821,8 @@ namespace WeakFormsNeutronics
             add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, -1.0, f_src[gto], geom_type));
         }
         
-        DefaultWeakFormSourceIteration::DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop,
+        template<typename Scalar>
+        DefaultWeakFormSourceIteration<Scalar>::DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop,
                                                                         Hermes::vector<MeshFunction<Scalar>*>& iterates,
                                                                         double initial_keff_guess, 
                                                                         GeomType geom_type ) : WeakForm(matprop.get_G())
@@ -844,7 +850,8 @@ namespace WeakFormsNeutronics
           }
         }
         
-        void DefaultWeakFormSourceIteration::update_keff(double new_keff) 
+        template<typename Scalar>
+        void DefaultWeakFormSourceIteration<Scalar>::update_keff(double new_keff) 
         { 
           std::vector<FissionYield::OuterIterationForm*>::iterator it = keff_iteration_forms.begin();
           for ( ; it != keff_iteration_forms.end(); ++it)
