@@ -189,7 +189,7 @@ template<>
 std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n)
 {
   _F_
-  Scalar v = 0.0;
+  std::complex<double> v = 0.0;
 #ifdef WITH_PETSC
   MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
 #endif
