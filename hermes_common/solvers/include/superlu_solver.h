@@ -21,7 +21,7 @@
 #define __HERMES_COMMON_SUPERLU_SOLVER_H_
 
 #include "solver.h"
-#include "../matrix.h"
+#include "matrix.h"
 
 #ifdef WITH_SUPERLU  
   #ifdef SLU_MT

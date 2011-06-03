@@ -17,9 +17,9 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "epetra.h"
-#include "../error.h"
-#include "../callstack.h"
+#include "epetra_solver.h"
+#include "error.h"
+#include "callstack.h"
 
 // EpetraMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
 #ifdef HAVE_EPETRA

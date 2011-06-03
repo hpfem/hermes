@@ -17,7 +17,7 @@
 #define __HERMES_COMMON_NOX_SOLVER_H_
 
 #include "solver.h"
-#include "epetra.h"
+#include "epetra_solver.h"
 
 #ifdef HAVE_NOX
   #include <NOX.H>

@@ -21,7 +21,7 @@
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 
 #include "solver.h"
-#include "../matrix.h"
+#include "matrix.h"
 
 
 // General CSC Matrix class (can be used in umfpack, in that case use the

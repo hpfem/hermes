@@ -27,10 +27,10 @@
   }
 #endif
 
-#include "../trace.h"
-#include "../error.h"
-#include "../utils.h"
-#include "../callstack.h"
+#include "trace.h"
+#include "error.h"
+#include "utils.h"
+#include "callstack.h"
 
 
 

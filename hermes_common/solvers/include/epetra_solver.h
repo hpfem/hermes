@@ -17,34 +17,43 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef __HERMES_COMMON_PETSC_SOLVER_H_
-#define __HERMES_COMMON_PETSC_SOLVER_H_
+#ifndef __HERMES_COMMON_SOLVER_EPETRA_H_
+#define __HERMES_COMMON_SOLVER_EPETRA_H_
 
-#include "../matrix.h"
-#include "solver.h"
+#include "matrix.h"
 
-#ifdef WITH_PETSC
-  #include <petsc.h>
-  #include <petscmat.h>
-  #include <petscvec.h>
-  #include <petscksp.h>
+#ifdef HAVE_EPETRA
+  #include <Epetra_SerialComm.h>
+  #include <Epetra_Map.h>
+  #include <Epetra_Vector.h>
+  #include <Epetra_CrsGraph.h>
+  #include <Epetra_CrsMatrix.h>
 #endif
 
-/// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
-///
-
-template <typename Scalar> class PetscLinearSolver;
+template <typename Scalar> class AmesosSolver;
+template <typename Scalar> class AztecOOSolver;
+template <typename Scalar> class NoxSolver;
+template <typename Scalar> class IfpackPrecond;
+template <typename Scalar> class MlPrecond;
 
 template <typename Scalar>
-class PetscMatrix : public SparseMatrix<Scalar> {
+class HERMES_API EpetraMatrix : public SparseMatrix<Scalar> {
 public:
-  PetscMatrix();
-  virtual ~PetscMatrix();
+  EpetraMatrix();
+#ifdef HAVE_EPETRA
+  EpetraMatrix(Epetra_RowMatrix &mat);
+#endif
+  virtual ~EpetraMatrix();
+
+  virtual void prealloc(unsigned int n);
+  virtual void pre_add_ij(unsigned int row, unsigned int col);
+  virtual void finish();
 
   virtual void alloc();
   virtual void free();
-  virtual void finish();
   virtual Scalar get(unsigned int m, unsigned int n);
+  virtual int get_num_row_entries(unsigned int row);
+  virtual void extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs);
   virtual void zero();
   virtual void add(unsigned int m, unsigned int n, Scalar v);
   virtual void add_to_diagonal(Scalar v);
@@ -53,46 +62,41 @@ public:
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
-#ifdef WITH_PETSC
-  virtual void add_matrix(PetscMatrix* mat);
-  virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
-  virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
-#endif
 
-  // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
-
-#ifdef WITH_PETSC
-  // Multiplies matrix with a Scalar.
-  void multiply_with_scalar(Scalar value);
-  // Creates matrix in PETSC format using size, nnz, and the three arrays.
-  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
-  // Duplicates a matrix (including allocation).
-  PetscMatrix* duplicate();
-#endif
 protected:
-#ifdef WITH_PETSC
-  Mat matrix;
+#ifdef HAVE_EPETRA
+  Epetra_BlockMap *std_map;
+  Epetra_CrsGraph *grph;
+  Epetra_CrsMatrix *mat;
+  Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
+  bool owner;
 #endif
-  unsigned int nnz;
-  bool inited;
 
-  friend class PetscLinearSolver<Scalar>;
+  friend class AmesosSolver<Scalar>;
+  friend class AztecOOSolver<Scalar>;
+  friend class NoxSolver<Scalar>;
+  friend class IfpackPrecond<Scalar>;
+  friend class MlPrecond<Scalar>;
 };
 
-/// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
-///
 template <typename Scalar>
-class PetscVector : public Vector<Scalar> {
+class HERMES_API EpetraVector : public Vector<Scalar> {
 public:
-  PetscVector();
-  virtual ~PetscVector();
+  EpetraVector();
+#ifdef HAVE_EPETRA
+  EpetraVector(const Epetra_Vector &v);
+#endif
+  virtual ~EpetraVector();
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-  virtual void finish();
-  virtual Scalar get(unsigned int idx);
-  virtual void extract(Scalar *v) const;
+#ifdef HAVE_EPETRA
+  virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
+  virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); }
+#else
+  virtual Scalar get(unsigned int idx) { return 0.0; }
+  virtual void extract(Scalar *v) const { }
+#endif
   virtual void zero();
   virtual void change_sign();
   virtual void set(unsigned int idx, Scalar y);
@@ -108,28 +112,16 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifdef WITH_PETSC
-  Vec vec;
+#ifdef HAVE_EPETRA
+  Epetra_BlockMap *std_map;
+  Epetra_Vector *vec;
+  Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
+  bool owner;
 #endif
-  bool inited;
 
-  friend class PetscLinearSolver<Scalar>;
-};
-
-/// Encapsulation of PETSc linear solver
-///
-/// @ingroup solvers
-template <typename Scalar>
-class HERMES_API PetscLinearSolver : public LinearSolver<Scalar> {
-public:
-  PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
-  virtual ~PetscLinearSolver();
-
-  virtual bool solve();
-
-protected:
-  PetscMatrix<Scalar> *m;
-  PetscVector<Scalar> *rhs;
+  friend class AmesosSolver<Scalar>;
+  friend class AztecOOSolver<Scalar>;
+  friend class NoxSolver<Scalar>;
 };
 
 #endif

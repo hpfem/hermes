@@ -17,10 +17,10 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "petsc.h"
-#include "../trace.h"
-#include "../error.h"
-#include "../callstack.h"
+#include "petsc_solver.h"
+#include "trace.h"
+#include "error.h"
+#include "callstack.h"
 
 // TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 

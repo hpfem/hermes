@@ -20,7 +20,7 @@
 #ifndef __HERMES_COMMON_AZTECOO_SOLVER_H_
 #define __HERMES_COMMON_AZTECOO_SOLVER_H_
 
-#include "epetra.h"
+#include "epetra_solver.h"
 #include "solver.h"
 #include "precond_ifpack.h"
 

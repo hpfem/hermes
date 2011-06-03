@@ -17,11 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "superlu.h"
-#include "../trace.h"
-#include "../error.h"
-#include "../utils.h"
-#include "../callstack.h"
+#include "superlu_solver.h"
+#include "trace.h"
+#include "error.h"
+#include "utils.h"
+#include "callstack.h"
 
 
 #ifdef SLU_MT
@@ -322,7 +322,6 @@ void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vect
   for(unsigned int i=0;i<this->size;i++){
     vector_out[i]=0;
   }
-  Scalar a;
   for (unsigned int c=0;c<this->size;c++){
     for (unsigned int i=Ap[c];i<Ap[c+1];i++){
       vector_out[c]+=vector_in[Ai[i]]*Ax[i];
@@ -336,7 +335,6 @@ template<typename Scalar>
 void SuperLUMatrix<Scalar>::multiply_with_scalar(Scalar value){
   _F_
   int n=nnz;
-  Scalar a;
   for(int i=0;i<n;i++){
     Ax[i]=Ax[i]*value;
   }

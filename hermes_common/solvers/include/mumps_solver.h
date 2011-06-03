@@ -21,7 +21,7 @@
 #define __HERMES_COMMON_MUMPS_SOLVER_H_
 
 #include "solver.h"
-#include "../matrix.h"
+#include "matrix.h"
 
 #ifdef WITH_MUMPS
   extern "C" {

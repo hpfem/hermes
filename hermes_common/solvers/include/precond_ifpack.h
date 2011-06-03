@@ -17,7 +17,7 @@
 #define __HERMES_COMMON_PRECOND_IFPACK_H_
 
 #include "precond.h"
-#include "epetra.h"
+#include "epetra_solver.h"
 #ifdef HAVE_IFPACK
   #include <Ifpack_Preconditioner.h>
 #endif

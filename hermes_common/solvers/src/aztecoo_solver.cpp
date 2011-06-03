@@ -17,8 +17,8 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "aztecoo.h"
-#include "../callstack.h"
+#include "aztecoo_solver.h"
+#include "callstack.h"
 
 #ifdef HAVE_AZTECOO
 #include <Komplex_LinearProblem.h>

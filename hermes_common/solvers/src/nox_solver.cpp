@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nox.h"
+#include "nox_solver.h"
 
 #ifdef HAVE_NOX
 

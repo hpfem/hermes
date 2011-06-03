@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../common.h"
+#include "common.h"
 #include "c99_functions.h"
 
 #ifdef IMPLEMENT_C99

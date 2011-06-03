@@ -17,11 +17,11 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "mumps.h"
-#include "../trace.h"
-#include "../error.h"
-#include "../utils.h"
-#include "../callstack.h"
+#include "mumps_solver.h"
+#include "trace.h"
+#include "error.h"
+#include "utils.h"
+#include "callstack.h"
 
 #define USE_COMM_WORLD  -987654
 

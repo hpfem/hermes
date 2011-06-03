@@ -20,6 +20,7 @@ include(BuildAndInstallScripts)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/solvers/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python_API)
 
 # Teuchos RCP
 if (NOT WITH_TRILINOS)
@@ -51,15 +52,15 @@ set(SRC
   
   solvers/src/dpinterface.cpp
   solvers/src/solver.cpp
-  solvers/src/nox.cpp
-  solvers/src/epetra.cpp
-  solvers/src/aztecoo.cpp
-  solvers/src/amesos.cpp
-  solvers/src/mumps.cpp
-  solvers/src/superlu.cpp
+  solvers/src/nox_solver.cpp
+  solvers/src/epetra_solver.cpp
+  solvers/src/aztecoo_solver.cpp
+  solvers/src/amesos_solver.cpp
+  solvers/src/mumps_solver.cpp
+  solvers/src/superlu_solver.cpp
   solvers/src/superlu_real.cpp
   solvers/src/superlu_cplx.cpp
-  solvers/src/petsc.cpp
+  solvers/src/petsc_solver.cpp
   solvers/src/umfpack_solver.cpp
   solvers/src/precond_ml.cpp
   solvers/src/precond_ifpack.cpp
