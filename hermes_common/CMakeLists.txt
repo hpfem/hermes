@@ -20,17 +20,17 @@ include(BuildAndInstallScripts)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/solvers/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python_API)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python_API/include)
 
 # Teuchos RCP
 if (NOT WITH_TRILINOS)
   set( TEUCHOS_SOURCES
-    third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
-    third_party_codes/trilinos-teuchos/Teuchos_dyn_cast.cpp
-    third_party_codes/trilinos-teuchos/Teuchos_Ptr.cpp
-    third_party_codes/trilinos-teuchos/Teuchos_RCPNode.cpp
-    third_party_codes/trilinos-teuchos/Teuchos_TestForException.cpp
-    third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_TypeNameTraits.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_dyn_cast.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_Ptr.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_RCPNode.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_TestForException.cpp
+    third_party_codes/trilinos-teuchos/src/Teuchos_TypeNameTraits.cpp
   )
 endif (NOT WITH_TRILINOS)
 
@@ -48,7 +48,7 @@ set(SRC
   src/qsort.cpp
   src/c99_functions.cpp
   
-  third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
+  third_party_codes/trilinos-teuchos/src/Teuchos_stacktrace.cpp
   
   solvers/src/dpinterface.cpp
   solvers/src/solver.cpp
@@ -69,8 +69,8 @@ set(SRC
   
   ${TEUCHOS_SOURCES}
 
-  python_API/python_api.cpp
-  python_API/python_engine.cpp
+  python_API/src/python_api.cpp
+  python_API/src/python_engine.cpp
 )
 
 #
@@ -181,12 +181,10 @@ endif(MSVC)
 
 file(GLOB INC_COMMON    "include/*.h")
 file(GLOB INC_SOLVER    "solvers/include/*.h")
-file(GLOB INC_PYTHON    "python_API/*.h")
-file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/*.h*")
+file(GLOB INC_PYTHON    "python_API/include/*.h")
+file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/include/*.h*")
 install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
-install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers/include)
 install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers)
-
 install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python_API)
 install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos)
 
