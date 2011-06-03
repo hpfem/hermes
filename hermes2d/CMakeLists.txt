@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 project(hermes2d)
 
 include_directories(${HERMES_COMMON_DIR})
-#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../hermes_common/cmake)
-#set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/../hermes_common)
 
 IF(H2D_DEBUG)
 	set(DEBUG YES)
@@ -17,30 +15,6 @@ IF(H2D_RELEASE)
 ELSE(H2D_RELEASE)
 	set(RELEASE NO)
 ENDIF(H2D_RELEASE)
-
-IF(H2D_WITH_EXAMPLES)
-	set(WITH_EXAMPLES YES)
-ELSE(H2D_WITH_EXAMPLES)
-	set(WITH_EXAMPLES NO)
-ENDIF(H2D_WITH_EXAMPLES)
-
-IF(H2D_WITH_BENCHMARKS)
-	set(WITH_BENCHMARKS YES)
-ELSE(H2D_WITH_BENCHMARKS)
-	set(WITH_BENCHMARKS NO)
-ENDIF(H2D_WITH_BENCHMARKS)
-
-IF(H2D_WITH_TESTS)
-	set(WITH_TESTS YES)
-ELSE(H2D_WITH_TESTS)
-	set(WITH_TESTS NO)
-ENDIF(H2D_WITH_TESTS)
-
-IF(H2D_WITH_TUTORIAL)
-	set(WITH_TUTORIAL YES)
-ELSE(H2D_WITH_TUTORIAL)
-	set(WITH_TUTORIAL NO)
-ENDIF(H2D_WITH_TUTORIAL)
 
 #
 # Version configuration.
@@ -138,7 +112,7 @@ if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) # Required by python wrappers.
   set(CYTHON_INCLUDE_DIRECTORIES -I.)
   set(CYTHON_INCLUDE_DIRECTORIES ${CYTHON_INCLUDE_DIRECTORIES} -I${CMAKE_SOURCE_DIR}/hermes_common)
-  add_subdirectory(hermes2d)
+  add_subdirectory(hermes2d_python)
 endif(WITH_PYTHON)
 
 #
@@ -147,27 +121,9 @@ endif(WITH_PYTHON)
 
 add_subdirectory(src)
 
-if(WITH_TESTS)
-  enable_testing()  
-  add_subdirectory(tests)
-endif(WITH_TESTS)
-
-if(WITH_EXAMPLES)
-  add_subdirectory(examples)
-endif(WITH_EXAMPLES)
-
-if(WITH_BENCHMARKS)
-  add_subdirectory(benchmarks-general)
-  add_subdirectory(benchmarks-nist)
-endif(WITH_BENCHMARKS)
-
-if(WITH_TUTORIAL)
-  add_subdirectory(tutorial)
-endif(WITH_TUTORIAL)
-
-if(H2D_WITH_UTIL)
-  add_subdirectory(util)
-endif(H2D_WITH_UTIL)
+if(H2D_WITH_TEST_EXAMPLES)
+  add_subdirectory(test_examples)
+endif(H2D_WITH_TEST_EXAMPLES)
 
 #
 # Documentation

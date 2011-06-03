@@ -1,5 +1,3 @@
-
-
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/hermes_common/cmake/cxx_flag_overrides.cmake)
 project(hermes)
 
@@ -46,7 +44,6 @@ IF (APPLE)
     ENDIF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
 ENDIF (APPLE)
 
-
 #------------------------------------------------------------------------------
 # Main configuration options.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,13 +59,7 @@ set(WITH_H2D                  YES)
 	set(H2D_DEBUG             YES)
 	set(H2D_RELEASE           YES)
 	# Optional parts of the library.
-	set(H2D_WITH_EXAMPLES     YES)
-	set(H2D_WITH_BENCHMARKS   YES)
-	set(H2D_WITH_TESTS        YES)
-	set(H2D_WITH_TUTORIAL     YES)
-	set(H2D_WITH_GLUT         YES)
-	set(H2D_WITH_VIEWER_GUI   NO)
-	set(H2D_WITH_UTIL         YES)
+	set(H2D_WITH_TEST_EXAMPLES     YES)
 	
 # Hermes_common (linked to all H1D, H2D and H3D):
 set(HERMES_COMMON_WITH_TESTS  YES)
@@ -356,7 +347,6 @@ ConfigureRPATH()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 add_subdirectory(${HERMES_COMMON_DIR})
-#include_directories(${HERMES_COMMON_DIR})
 
 if(WITH_H2D)
     add_subdirectory(hermes2d)
@@ -419,10 +409,9 @@ message("Build Hermes2D: ${WITH_H2D}")
 if(WITH_H2D)
 	message("\tBuild Hermes2D Debug version: ${H2D_DEBUG}")
 	message("\tBuild Hermes2D Release version: ${H2D_RELEASE}")
-	message("\tBuild Hermes2D with examples: ${H2D_WITH_EXAMPLES}")
-	message("\tBuild Hermes2D with benchmarks: ${H2D_WITH_BENCHMARKS}")
-	message("\tBuild Hermes2D with tests: ${H2D_WITH_TESTS}")
-	message("\tBuild Hermes2D with tutorial: ${H2D_WITH_TUTORIAL}")
+message("---------------------")
+	message("\tBuild Hermes2D with test examples: ${H2D_WITH_TEST_EXAMPLES}")
+message("---------------------")
 	message("\tBuild Hermes2D with GLUT: ${H2D_WITH_GLUT}")
 	message("\tBuild Hermes2D with VIEWER_GUI: ${H2D_WITH_VIEWER_GUI}")
 	message("\tBuild Hermes2D with util: ${H2D_WITH_UTIL}")
