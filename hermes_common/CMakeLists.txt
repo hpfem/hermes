@@ -45,21 +45,25 @@ set(SRC
   src/tables.cpp
   src/qsort.cpp
   src/c99_functions.cpp
+  
   third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
-  solvers/nox.cpp
-  solvers/epetra.cpp
-  solvers/aztecoo.cpp
-  solvers/amesos.cpp
-  solvers/mumps.cpp
-  solvers/superlu.cpp
-  solvers/superlu_real.cpp
-  solvers/superlu_cplx.cpp
-  solvers/petsc.cpp
-  solvers/umfpack_solver.cpp
-  solvers/precond_ml.cpp
-  solvers/precond_ifpack.cpp
-  solvers/eigensolver.cpp
-  solvers/eigen.cpp
+  
+  solvers/src/dpinterface.cpp
+  solvers/src/solver.cpp
+  solvers/nox/nox.cpp
+  solvers/epetra/epetra.cpp
+  solvers/aztecoo/aztecoo.cpp
+  solvers/amesos/amesos.cpp
+  solvers/mumps/mumps.cpp
+  solvers/superlu/superlu.cpp
+  solvers/superlu/superlu_real.cpp
+  solvers/superlu/superlu_cplx.cpp
+  solvers/petsc/petsc.cpp
+  solvers/umfpack/umfpack_solver.cpp
+  solvers/precond/precond_ml.cpp
+  solvers/precond/precond_ifpack.cpp
+  solvers/eigensolver/eigensolver.cpp
+  solvers/eigensolver/eigen.cpp
   
   ${TEUCHOS_SOURCES}
 
@@ -174,11 +178,14 @@ endif(MSVC)
 # Install header files.
 
 file(GLOB INC_COMMON    "include/*.h")
-file(GLOB INC_SOLVER    "solvers/*.h")
+file(GLOB INC_SOLVER    "solvers/include/*.h" "solvers/nox/*.h" "solvers/epetra/*.h" "solvers/aztecoo/*.h" "solvers/amesos/*.h" "solvers/mumps/*.h" "solvers/superlu/*.h" 
+"solvers/petsc/*.h" "solvers/umfpack/*.h" "solvers/precond/*.h" "solvers/eigensolver/*.h")
 file(GLOB INC_PYTHON    "python_API/*.h")
 file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/*.h*")
 install(FILES ${INC_COMMON}    DESTINATION include/hermes/hermes_common)
+install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers/include)
 install(FILES ${INC_SOLVER}    DESTINATION include/hermes/hermes_common/solvers)
+
 install(FILES ${INC_PYTHON}    DESTINATION include/hermes/hermes_common/python_API)
 install(FILES ${INC_TP}        DESTINATION include/hermes/hermes_common/third_party_codes/trilinos-teuchos)
 
