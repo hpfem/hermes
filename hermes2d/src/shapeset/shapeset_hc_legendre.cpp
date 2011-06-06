@@ -17,10 +17,6 @@
 #include "shapeset_common.h"
 #include "shapeset_hc_all.h"
 
-//#ifdef H2D_COMPLEX
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // TRIANGLE
 
 // Shape functions for the curl operator for triangles, based on Legendre polynomials

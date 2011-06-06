@@ -331,3 +331,4 @@ namespace RefinementSelectors
       return total_error_squared;
     }
   }
+}

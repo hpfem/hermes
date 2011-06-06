@@ -1,5 +1,4 @@
 #include "hermes2d.h"
-#ifndef H2D_COMPLEX
 namespace WeakFormsElasticity 
 {
   template<typename Scalar>
@@ -316,4 +315,3 @@ namespace WeakFormsElasticity
     return to_return;
   }
 };
-#endif

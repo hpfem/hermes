@@ -16,10 +16,6 @@
 #include "h2d_common.h"
 #include "shapeset_common.h"
 #include "shapeset_hd_all.h"
-
-//#ifdef H2D_COMPLEX
-
-/////////////////////////////////////////////////////////////////////////////////////////
 /* EDGE FUNCTIONS */
 
 /* ORDER 0 */

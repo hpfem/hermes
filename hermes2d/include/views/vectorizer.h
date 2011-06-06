@@ -47,7 +47,7 @@ public: //accessors
   virtual void load_data(const char* filename);
   virtual void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
-  void free();
+  void free() {}
 
 protected:
 

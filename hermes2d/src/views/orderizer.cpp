@@ -371,7 +371,7 @@ void Orderizer::save_orders_vtk(Space<double>* space, const char* file_name)
   // Create an Orderizer. This class creates a triangular mesh 
   // with "solution values" that represent the polynomial 
   // degrees of mesh elements. 
-  Orderizer<Scalar> ord;
+  Orderizer ord;
 
   // Create a piecewise-linear approximation, and save it to a file in VTK format.
   ord.process_space(space);

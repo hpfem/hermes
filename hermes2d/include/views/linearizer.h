@@ -32,83 +32,25 @@ const double HERMES_EPS_VERYHIGH = 0.000002;
 // Actually, the tables contain two levels of refinement -- this is an optimization to reduce
 // the number of calls to sln->get_values().
 
-static double3 lin_pts_0_tri[] =
-{
-  { -1.0, -1.0, 0.0 },
-  {  1.0, -1.0, 0.0 },
-  { -1.0,  1.0, 0.0 }
-};
+extern double3 lin_pts_0_tri[];
 
-static double3 lin_pts_0_quad[] =
-{
-  { -1.0, -1.0, 0.0 },
-  {  1.0, -1.0, 0.0 },
-  {  1.0,  1.0, 0.0 },
-  { -1.0,  1.0, 0.0 }
-};
+extern double3 lin_pts_0_quad[];
 
-static double3 lin_pts_1_tri[12] =
-{
-  {  0.0, -1.0, 0.0 }, // 0
-  {  0.0,  0.0, 0.0 }, // 1
-  { -1.0,  0.0, 0.0 }, // 2
-  { -0.5, -1.0, 0.0 }, // 3
-  { -0.5, -0.5, 0.0 }, // 4
-  { -1.0, -0.5, 0.0 }, // 5
-  {  0.5, -1.0, 0.0 }, // 6
-  {  0.5, -0.5, 0.0 }, // 7
-  {  0.0, -0.5, 0.0 }, // 8
-  { -0.5,  0.0, 0.0 }, // 9
-  { -0.5,  0.5, 0.0 }, // 10
-  { -1.0,  0.5, 0.0 }  // 11
-};
+extern double3 lin_pts_1_tri[12];
 
-static double3 lin_pts_1_quad[21] =
-{
-  {  0.0, -1.0, 0.0 }, // 0
-  {  1.0,  0.0, 0.0 }, // 1
-  {  0.0,  1.0, 0.0 }, // 2
-  { -1.0,  0.0, 0.0 }, // 3
-  {  0.0,  0.0, 0.0 }, // 4
-  { -0.5, -1.0, 0.0 }, // 5
-  {  0.0, -0.5, 0.0 }, // 6
-  { -0.5,  0.0, 0.0 }, // 7
-  { -1.0, -0.5, 0.0 }, // 8
-  { -0.5, -0.5, 0.0 }, // 9
-  {  0.5, -1.0, 0.0 }, // 10
-  {  1.0, -0.5, 0.0 }, // 11
-  {  0.5,  0.0, 0.0 }, // 12
-  {  0.5, -0.5, 0.0 }, // 13
-  {  1.0,  0.5, 0.0 }, // 14
-  {  0.5,  1.0, 0.0 }, // 15
-  {  0.0,  0.5, 0.0 }, // 16
-  {  0.5,  0.5, 0.0 }, // 17
-  { -0.5,  1.0, 0.0 }, // 18
-  { -1.0,  0.5, 0.0 }, // 19
-  { -0.5,  0.5, 0.0 }  // 20
-};
+extern double3 lin_pts_1_quad[21];
 
-int quad_indices[9][5] =
-{
-  { 0, 1, 2, 3, 4 },
-  { 5, 6, 7, 8, 9 }, { 10, 11, 12, 6, 13 },
-  { 12, 14, 15, 16, 17 }, { 7, 16, 18, 19, 20 },
-  { 0, 11, 4, 8, 6 }, { 4, 14, 2, 19, 16 },
-  { 5, 4, 18, 3, 7 }, { 10, 1, 15, 4, 12 }
-};
+extern int quad_indices[9][5];
 
-int tri_indices[5][3] =
-{
-  { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
-};
+extern int tri_indices[5][3];
 
-int lin_np_tri[2]   = { 3, 12 };
-int lin_np_quad[2]  = { 4, 21 };
-static int* lin_np[2] = { lin_np_tri, lin_np_quad };
+extern int lin_np_tri[2];
+extern int lin_np_quad[2];
+extern int* lin_np[2];
 
-static double3*  lin_tables_tri[2]  = { lin_pts_0_tri, lin_pts_1_tri };
-static double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
-static double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
+extern double3*  lin_tables_tri[2];
+extern double3*  lin_tables_quad[2];
+extern double3** lin_tables[2];
 
 
 class Quad2DLin : public Quad2D
@@ -126,7 +68,7 @@ public:
 
   virtual void dummy_fn() {}
 
-} quad_lin;
+};
 
 
 /// Linearizer<Scalar> is a utility class which converts a higher-order FEM solution defined on
@@ -185,13 +127,14 @@ public:
 
 protected:
 
+  Quad2DLin quad_lin;
   MeshFunction<Scalar>* sln;
   int item, ia, ib;
 
   double eps, max, cmax;
   bool auto_max;
 
-  MeshFunction<double> *xdisp, *ydisp;
+  MeshFunction<Scalar> *xdisp, *ydisp;
   double dmult;
 
   double3* verts;  ///< vertices: (x, y, value) triplets

@@ -1336,21 +1336,6 @@ void Solution<Scalar>::load(const char* filename)
   }
   else if (hdr.ss == 2*sizeof(double))
   {
-    /*
-    #ifndef H2D_COMPLEX
-    warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
-    Scalar* temp = new Scalar[num_coefs*2];
-    for (int temp_i = 0; temp_i < num_coefs*2; temp_i++)
-    temp[temp_i] = (Scalar)0.0;
-
-    hermes_fread(temp, sizeof(Scalar), num_coefs*2, f);
-    mono_coefs = new double[num_coefs];
-    for (i = 0; i < num_coefs; i++)
-    mono_coefs[i] = temp[2*i];
-    delete [] temp;
-
-    #else
-    */
     mono_coefs = new Scalar[num_coefs];;
     hermes_fread(mono_coefs, sizeof(Scalar), num_coefs, f);
   }
