@@ -4,9 +4,9 @@
 
 template<typename Scalar>
 KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
-                               Hermes::vector< ProjNormType > norms_,
-                               bool ignore_visited_segments_,
-                               Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
+  Hermes::vector< ProjNormType > norms_,
+  bool ignore_visited_segments_,
+  Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
   : Adapt<Scalar>(spaces_, norms_)
 {
   error_estimators_surf.reserve(this->num);
@@ -29,20 +29,20 @@ KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
 
 template<typename Scalar>
 KellyTypeAdapt<Scalar>::KellyTypeAdapt(Space<Scalar>* space_, 
-                               ProjNormType norm_, 
-                               bool ignore_visited_segments_, 
-                               interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt<Scalar>(space_, norm_)
-{ 
+  ProjNormType norm_, 
+  bool ignore_visited_segments_, 
+  interface_estimator_scaling_fn_t interface_scaling_fn_) : Adapt<Scalar>(space_, norm_)
+{
   if (interface_scaling_fn_ == NULL)
     interface_scaling_fns.push_back(scale_by_element_diameter);
   else
     interface_scaling_fns.push_back(interface_scaling_fn_);
-  
+
   use_aposteriori_interface_scaling = true;
 
   interface_scaling_const = boundary_scaling_const = volumetric_scaling_const = 1.0;
   ignore_visited_segments = ignore_visited_segments_;
-  
+
   element_markers_conversion = space_->get_mesh()->element_markers_conversion;
   boundary_markers_conversion = space_->get_mesh()->boundary_markers_conversion;
 }
@@ -62,7 +62,7 @@ template<typename Scalar>
 void KellyTypeAdapt<Scalar>::add_error_estimator_vol(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if(form->i < 0 || form->i >= this->num,
-           "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
+    "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
 
   form->adapt = this;
   this->error_estimators_vol.push_back(form);
@@ -72,7 +72,7 @@ template<typename Scalar>
 void KellyTypeAdapt<Scalar>::add_error_estimator_surf(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
 {
   error_if (form->i < 0 || form->i >= this->num,
-            "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
+    "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
 
   form->adapt = this;
   this->error_estimators_surf.push_back(form);
@@ -80,12 +80,12 @@ void KellyTypeAdapt<Scalar>::add_error_estimator_surf(typename KellyTypeAdapt<Sc
 
 template<typename Scalar>
 double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns,
-                                         Hermes::vector<double>* component_errors,
-                                         unsigned int error_flags)
-{    
+  Hermes::vector<double>* component_errors,
+  unsigned int error_flags)
+{
   int n = slns.size();
   error_if (n != this->num,
-            "Wrong number of solutions.");
+    "Wrong number of solutions.");
 
   TimePeriod tmr;
 
@@ -96,7 +96,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   }
 
   this->have_coarse_solutions = true;
-  
+
   Stage<Scalar> stage;
 
   this->num_act_elems = 0;
@@ -112,18 +112,18 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
     this->errors[i] = new double[max];
     memset(this->errors[i], 0.0, sizeof(double) * max);
   }
-/*
+  /*
   for (unsigned int i = 0; i < error_estimators_vol.size(); i++)
-    trset.insert(error_estimators_vol[i].ext.begin(), error_estimators_vol[i].ext.end());
+  trset.insert(error_estimators_vol[i].ext.begin(), error_estimators_vol[i].ext.end());
   for (unsigned int i = 0; i < error_estimators_surf.size(); i++)
-    trset.insert(error_estimators_surf[i].ext.begin(), error_estimators_surf[i].ext.end());
-*/
+  trset.insert(error_estimators_surf[i].ext.begin(), error_estimators_surf[i].ext.end());
+  */
 
   double total_norm = 0.0;
 
   bool calc_norm = false;
   if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
-      (error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
+    (error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
 
   double *norms = NULL;
   if (calc_norm)
@@ -153,20 +153,20 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
         e->visited = false;
     }
   }
-  
+
   //WARNING: AD HOC debugging parameter.
   bool multimesh = false;
 
   // Begin the multimesh traversal.
   trav.begin(this->num, &(stage.meshes.front()), &(stage.fns.front()));
   while ((ee = trav.get_next_state(bnd, surf_pos)) != NULL)
-  {   
+  {
     // Go through all solution components.
     for (int i = 0; i < this->num; i++)
     {
       if (ee[i] == NULL)
         continue;
-      
+
       // Set maximum integration order for use in integrals, see limit_order()
       update_limit_table(ee[i]->get_mode());
 
@@ -183,8 +183,8 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
           continue;
         /*
         if (error_estimators_vol[iest].area != ee[i]->marker)
-          continue;
-          */
+        continue;
+        */
         else if (error_estimators_vol[iest]->area != HERMES_ANY)
           continue;
 
@@ -199,19 +199,19 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
 
         for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
         {
-            /*
+          /*
           if (error_estimators_surf[iest].area > 0 &&
-              error_estimators_surf[iest].area != surf_pos[isurf].marker) continue;
+          error_estimators_surf[iest].area != surf_pos[isurf].marker) continue;
           */
           if (bnd[isurf])   // Boundary
           {
             if (error_estimators_surf[iest]->area == H2D_DG_INNER_EDGE) continue;
-            
+
             /*
             if (boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest].area) < 0 &&
-                error_estimators_surf[iest].area != HERMES_ANY) continue;
+            error_estimators_surf[iest].area != HERMES_ANY) continue;
             */    
-            
+
             err += eval_boundary_estimator(error_estimators_surf[iest], rm, surf_pos);
           }
           else              // Interface
@@ -219,37 +219,38 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
             if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE) continue;
 
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
-            
+
             // 5 is for bits per page in the array.
             LightArray<NeighborSearch<Scalar>*> neighbor_searches(5);
             unsigned int num_neighbors = 0;
             NeighborNode* root;
             int ns_index;
-            
+
             dp.min_dg_mesh_seq = 0;
             for(int j = 0; j < this->num; j++)
               if(stage.meshes[j]->get_seq() < dp.min_dg_mesh_seq || j == 0)
                 dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
-            
+
             ns_index = stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq; // = 0 for single mesh
-            
+
             // Determine the minimum mesh seq in this stage.
             if (multimesh) 
-            {              
+            {
               // Initialize the NeighborSearches.
               dp.init_neighbors(neighbor_searches, stage, isurf);
-              
+
               // Create a multimesh tree;
               root = new NeighborNode(NULL, 0);
               dp.build_multimesh_tree(root, neighbor_searches);
-              
+
               // Update all NeighborSearches according to the multimesh tree.
               // After this, all NeighborSearches in neighbor_searches should have the same count 
               // of neighbors and proper set of transformations
               // for the central and the neighbor element(s) alike.
               // Also check that every NeighborSearch has the same number of neighbor elements.
               for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
-                if(neighbor_searches.present(j)) {
+                if(neighbor_searches.present(j)) 
+                {
                   NeighborSearch<Scalar>* ns = neighbor_searches.get(j);
                   dp.update_neighbor_search(ns, root);
                   if(num_neighbors == 0)
@@ -271,103 +272,106 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
             // Go through all segments of the currently processed interface (segmentation is caused
             // by hanging nodes on the other side of the interface).
             for (unsigned int neighbor = 0; neighbor < num_neighbors; neighbor++)
-            {              
-              if (ignore_visited_segments) {
+            {
+              if (ignore_visited_segments) 
+              {
                 bool processed = true;
                 for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
                   if(neighbor_searches.present(j))
-                    if(!neighbor_searches.get(j)->neighbors.at(neighbor)->visited) {
+                    if(!neighbor_searches.get(j)->neighbors.at(neighbor)->visited) 
+                    {
                       processed = false;
                       break;
                     }
-                if (processed) continue;
+                    if (processed) continue;
               }
-              
+
               // Set the active segment in all NeighborSearches
               for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
-                if(neighbor_searches.present(j)) {
+                if(neighbor_searches.present(j)) 
+                {
                   neighbor_searches.get(j)->active_segment = neighbor;
                   neighbor_searches.get(j)->neighb_el = neighbor_searches.get(j)->neighbors[neighbor];
                   neighbor_searches.get(j)->neighbor_edge = neighbor_searches.get(j)->neighbor_edges[neighbor];
                 }
-                
-              // Push all the necessary transformations to all functions of this stage.
-              // The important thing is that the transformations to the current subelement are already there.
-              // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
-              if (multimesh) 
-              {
-                for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                  for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
-                    stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
-              }
-              else
-              {            
-                // Push the transformations only to the solution on the current mesh
-                for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(ns_index)->central_n_trans[neighbor]; trf_i++)
-                  stage.fns[i]->push_transform(neighbor_searches.get(ns_index)->central_transformations[neighbor][trf_i]);
-              }
-              /* END COPY FROM DISCRETE_PROBLEM.CPP */
-              rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
-              
-              // The estimate is multiplied by 0.5 in order to distribute the error equally onto
-              // the two neighboring elements.
-              double central_err = 0.5 * eval_interface_estimator(error_estimators_surf[iest],
-                                                                  rm, surf_pos, neighbor_searches, 
-                                                                  ns_index);
-              double neighb_err = central_err;
 
-              // Scale the error estimate by the scaling function dependent on the element diameter
-              // (use the central element's diameter).
-              if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                central_err *= interface_scaling_fns[i](ee[i]->get_diameter());
+                // Push all the necessary transformations to all functions of this stage.
+                // The important thing is that the transformations to the current subelement are already there.
+                // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
+                if (multimesh) 
+                {
+                  for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                    for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
+                      stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
+                }
+                else
+                {
+                  // Push the transformations only to the solution on the current mesh
+                  for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(ns_index)->central_n_trans[neighbor]; trf_i++)
+                    stage.fns[i]->push_transform(neighbor_searches.get(ns_index)->central_transformations[neighbor][trf_i]);
+                }
+                /* END COPY FROM DISCRETE_PROBLEM.CPP */
+                rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
 
-              // In the case this edge will be ignored when calculating the error for the element on
-              // the other side, add the now computed error to that element as well.
-              if (ignore_visited_segments)
-              {
-                Element *neighb = neighbor_searches.get(i)->neighb_el;
+                // The estimate is multiplied by 0.5 in order to distribute the error equally onto
+                // the two neighboring elements.
+                double central_err = 0.5 * eval_interface_estimator(error_estimators_surf[iest],
+                  rm, surf_pos, neighbor_searches, 
+                  ns_index);
+                double neighb_err = central_err;
 
                 // Scale the error estimate by the scaling function dependent on the element diameter
-                // (use the diameter of the element on the other side).
+                // (use the central element's diameter).
                 if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                  neighb_err *= interface_scaling_fns[i](neighb->get_diameter());
+                  central_err *= interface_scaling_fns[i](ee[i]->get_diameter());
 
-                errors_components[i] += central_err + neighb_err;
-                total_error += central_err + neighb_err;
-                this->errors[i][ee[i]->id] += central_err;
-                this->errors[i][neighb->id] += neighb_err;
-              }
-              else
-                err += central_err;
-              
-              /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
-              
-              // Clear the transformations from the RefMaps and all functions.
-              if (multimesh)
-                for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                  stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
-              else
-                stage.fns[i]->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
+                // In the case this edge will be ignored when calculating the error for the element on
+                // the other side, add the now computed error to that element as well.
+                if (ignore_visited_segments)
+                {
+                  Element *neighb = neighbor_searches.get(i)->neighb_el;
 
-              rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
+                  // Scale the error estimate by the scaling function dependent on the element diameter
+                  // (use the diameter of the element on the other side).
+                  if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
+                    neighb_err *= interface_scaling_fns[i](neighb->get_diameter());
 
-              
-              /* END COPY FROM DISCRETE_PROBLEM.CPP */
+                  errors_components[i] += central_err + neighb_err;
+                  total_error += central_err + neighb_err;
+                  this->errors[i][ee[i]->id] += central_err;
+                  this->errors[i][neighb->id] += neighb_err;
+                }
+                else
+                  err += central_err;
+
+                /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+
+                // Clear the transformations from the RefMaps and all functions.
+                if (multimesh)
+                  for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
+                    stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+                else
+                  stage.fns[i]->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
+
+                rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
+
+
+                /* END COPY FROM DISCRETE_PROBLEM.CPP */
             }
-            
+
             /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
-            
+
             if (multimesh)
               // Delete the multimesh tree;
               delete root;
-            
+
             // Delete the neighbor_searches array.
             for(unsigned int j = 0; j < neighbor_searches.get_size(); j++) 
               if(neighbor_searches.present(j))
                 delete neighbor_searches.get(j);
-              
+
             /* END COPY FROM DISCRETE_PROBLEM.CPP */
-            
+
           }
         }
       }
@@ -462,10 +466,12 @@ double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt<Scalar>::Matrix
   order += o.get_order();
 
   Solution<Scalar>*sol = static_cast<Solution<Scalar>*>(sln);
-  if(sol && sol->get_type() == HERMES_EXACT) {
+  if(sol && sol->get_type() == HERMES_EXACT) 
+  {
     limit_order_nowarn(order);
   }
-  else {
+  else 
+  {
     limit_order(order);
   }
 
@@ -519,41 +525,41 @@ double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt
   // Clean up.
   for (int i = 0; i < this->num; i++)
     if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-  delete [] oi;
-  delete fake_e;
-  delete fake_ext;
+    delete [] oi;
+    delete fake_e;
+    delete fake_ext;
 
-  // eval the form
-  Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
-  double3* pt = quad->get_points(order);
-  int np = quad->get_num_points(order);
+    // eval the form
+    Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
+    double3* pt = quad->get_points(order);
+    int np = quad->get_num_points(order);
 
-  // init geometry and jacobian*weights
-  Geom<double>* e = init_geom_vol(rm, order);
-  double* jac = rm->get_jacobian(order);
-  double* jwt = new double[np];
-  for(int i = 0; i < np; i++)
-    jwt[i] = pt[i][2] * jac[i];
+    // init geometry and jacobian*weights
+    Geom<double>* e = init_geom_vol(rm, order);
+    double* jac = rm->get_jacobian(order);
+    double* jwt = new double[np];
+    for(int i = 0; i < np; i++)
+      jwt[i] = pt[i][2] * jac[i];
 
-  // function values
-  Func<Scalar>** ui = new Func<Scalar>* [this->num];
-  
-  for (int i = 0; i < this->num; i++)
-    ui[i] = init_fn(this->sln[i], order);
-  
-  ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
+    // function values
+    Func<Scalar>** ui = new Func<Scalar>* [this->num];
 
-  Scalar res = volumetric_scaling_const *
-                err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+    for (int i = 0; i < this->num; i++)
+      ui[i] = init_fn(this->sln[i], order);
 
-  for (int i = 0; i < this->num; i++)
-    if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
-  delete [] ui;
-  if (ext != NULL) { ext->free(); delete ext; }
-  e->free(); delete e;
-  delete [] jwt;
+    ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
 
-  return std::abs(res);
+    Scalar res = volumetric_scaling_const *
+      err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+
+    for (int i = 0; i < this->num; i++)
+      if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
+      delete [] ui;
+      if (ext != NULL) { ext->free(); delete ext; }
+      e->free(); delete e;
+      delete [] jwt;
+
+      return std::abs(res);
 }
 
 template<typename Scalar>
@@ -579,57 +585,57 @@ double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<S
   // Clean up.
   for (int i = 0; i < this->num; i++)
     if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-  delete [] oi;
-  delete fake_e;
-  delete fake_ext;
+    delete [] oi;
+    delete fake_e;
+    delete fake_ext;
 
-  // eval the form
-  Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
-  int eo = quad->get_edge_points(surf_pos->surf_num, order);
-  double3* pt = quad->get_points(eo);
-  int np = quad->get_num_points(eo);
+    // eval the form
+    Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
+    int eo = quad->get_edge_points(surf_pos->surf_num, order);
+    double3* pt = quad->get_points(eo);
+    int np = quad->get_num_points(eo);
 
-  // init geometry and jacobian*weights
-  Geom<double>* e = init_geom_surf(rm, surf_pos, eo);
-  double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
-  double* jwt = new double[np];
-  for(int i = 0; i < np; i++)
-    jwt[i] = pt[i][2] * tan[i][2];
+    // init geometry and jacobian*weights
+    Geom<double>* e = init_geom_surf(rm, surf_pos, eo);
+    double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
+    double* jwt = new double[np];
+    for(int i = 0; i < np; i++)
+      jwt[i] = pt[i][2] * tan[i][2];
 
-  // function values
-  Func<Scalar>** ui = new Func<Scalar>* [this->num];
-  for (int i = 0; i < this->num; i++)
-    ui[i] = init_fn(this->sln[i], eo);
-  ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
+    // function values
+    Func<Scalar>** ui = new Func<Scalar>* [this->num];
+    for (int i = 0; i < this->num; i++)
+      ui[i] = init_fn(this->sln[i], eo);
+    ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
 
-  Scalar res = boundary_scaling_const *
-                err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+    Scalar res = boundary_scaling_const *
+      err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
-  for (int i = 0; i < this->num; i++)
-    if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
-  delete [] ui;
-  if (ext != NULL) { ext->free(); delete ext; }
-  e->free(); delete e;
-  delete [] jwt;
+    for (int i = 0; i < this->num; i++)
+      if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
+      delete [] ui;
+      if (ext != NULL) { ext->free(); delete ext; }
+      e->free(); delete e;
+      delete [] jwt;
 
-  return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
-                              // are defined in (-1, 1). Thus multiplying with 0.5 to correct
-                              // the weights.
+      return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
+      // are defined in (-1, 1). Thus multiplying with 0.5 to correct
+      // the weights.
 }
 
 template<typename Scalar>
 double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
-                                                RefMap *rm, SurfPos* surf_pos,
-                                                LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index)
+  RefMap *rm, SurfPos* surf_pos,
+  LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index)
 {
   NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
   Hermes::vector<MeshFunction<Scalar>*> slns;
   for (int i = 0; i < this->num; i++)
     slns.push_back(this->sln[i]);
-  
+
   // Determine integration order.
   ExtData<Ord>* fake_ui = dp.init_ext_fns_ord(slns, neighbor_searches);
-  
+
   // Order of additional external functions.
   // ExtData<Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext, nbs);
 
@@ -651,33 +657,33 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
     fake_ui->free_ord();
     delete fake_ui;
   }
-  
+
   delete fake_e;
-  
+
   //delete fake_ext;
-  
+
   Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
   int eo = quad->get_edge_points(surf_pos->surf_num, order);
   int np = quad->get_num_points(eo);
   double3* pt = quad->get_points(eo);
-  
+
   // Init geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).
   double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
   double* jwt = new double[np];
   for(int i = 0; i < np; i++)
     jwt[i] = pt[i][2] * tan[i][2];
-  
+
   Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos, eo), 
-                                              nbs->neighb_el->marker, 
-                                              nbs->neighb_el->id, 
-                                              nbs->neighb_el->get_diameter());
-    
+    nbs->neighb_el->marker, 
+    nbs->neighb_el->id, 
+    nbs->neighb_el->get_diameter());
+
   // function values
   ExtData<Scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
   //ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, nbs);
 
   Scalar res = interface_scaling_const *
-                err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
+    err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
   if (ui != NULL) { ui->free(); delete ui; }
   //if (ext != NULL) { ext->free(); delete ext; }
@@ -685,8 +691,8 @@ double KellyTypeAdapt<Scalar>::eval_interface_estimator(typename KellyTypeAdapt<
   delete [] jwt;
 
   return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
-                              // are defined in (-1, 1). Thus multiplying with 0.5 to correct
-                              // the weights.
+  // are defined in (-1, 1). Thus multiplying with 0.5 to correct
+  // the weights.
 }
 
 // #endif

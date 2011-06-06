@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_LINEAR_H
-#define __H2D_LINEAR_H
+#ifndef __H2D_LINEARIZER_H
+#define __H2D_LINEARIZER_H
 
 #include "../h2d_common.h"
 #include "../function/solution.h"
@@ -24,24 +24,130 @@ const double HERMES_EPS_NORMAL   = 0.0004;
 const double HERMES_EPS_HIGH     = 0.0001;
 const double HERMES_EPS_VERYHIGH = 0.000002;
 
-/// Linearizer is a utility class which converts a higher-order FEM solution defined on
+//// linearization "quadrature" ////////////////////////////////////////////////////////////////////
+
+// The tables with index zero are for obtaining solution values at the element
+// vertices. Index one tables serve for the retrieval of interior values. Index one tables
+// are used for adaptive approximation of the solution by transforming their points to sub-elements.
+// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
+// the number of calls to sln->get_values().
+
+static double3 lin_pts_0_tri[] =
+{
+  { -1.0, -1.0, 0.0 },
+  {  1.0, -1.0, 0.0 },
+  { -1.0,  1.0, 0.0 }
+};
+
+static double3 lin_pts_0_quad[] =
+{
+  { -1.0, -1.0, 0.0 },
+  {  1.0, -1.0, 0.0 },
+  {  1.0,  1.0, 0.0 },
+  { -1.0,  1.0, 0.0 }
+};
+
+static double3 lin_pts_1_tri[12] =
+{
+  {  0.0, -1.0, 0.0 }, // 0
+  {  0.0,  0.0, 0.0 }, // 1
+  { -1.0,  0.0, 0.0 }, // 2
+  { -0.5, -1.0, 0.0 }, // 3
+  { -0.5, -0.5, 0.0 }, // 4
+  { -1.0, -0.5, 0.0 }, // 5
+  {  0.5, -1.0, 0.0 }, // 6
+  {  0.5, -0.5, 0.0 }, // 7
+  {  0.0, -0.5, 0.0 }, // 8
+  { -0.5,  0.0, 0.0 }, // 9
+  { -0.5,  0.5, 0.0 }, // 10
+  { -1.0,  0.5, 0.0 }  // 11
+};
+
+static double3 lin_pts_1_quad[21] =
+{
+  {  0.0, -1.0, 0.0 }, // 0
+  {  1.0,  0.0, 0.0 }, // 1
+  {  0.0,  1.0, 0.0 }, // 2
+  { -1.0,  0.0, 0.0 }, // 3
+  {  0.0,  0.0, 0.0 }, // 4
+  { -0.5, -1.0, 0.0 }, // 5
+  {  0.0, -0.5, 0.0 }, // 6
+  { -0.5,  0.0, 0.0 }, // 7
+  { -1.0, -0.5, 0.0 }, // 8
+  { -0.5, -0.5, 0.0 }, // 9
+  {  0.5, -1.0, 0.0 }, // 10
+  {  1.0, -0.5, 0.0 }, // 11
+  {  0.5,  0.0, 0.0 }, // 12
+  {  0.5, -0.5, 0.0 }, // 13
+  {  1.0,  0.5, 0.0 }, // 14
+  {  0.5,  1.0, 0.0 }, // 15
+  {  0.0,  0.5, 0.0 }, // 16
+  {  0.5,  0.5, 0.0 }, // 17
+  { -0.5,  1.0, 0.0 }, // 18
+  { -1.0,  0.5, 0.0 }, // 19
+  { -0.5,  0.5, 0.0 }  // 20
+};
+
+int quad_indices[9][5] =
+{
+  { 0, 1, 2, 3, 4 },
+  { 5, 6, 7, 8, 9 }, { 10, 11, 12, 6, 13 },
+  { 12, 14, 15, 16, 17 }, { 7, 16, 18, 19, 20 },
+  { 0, 11, 4, 8, 6 }, { 4, 14, 2, 19, 16 },
+  { 5, 4, 18, 3, 7 }, { 10, 1, 15, 4, 12 }
+};
+
+int tri_indices[5][3] =
+{
+  { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
+};
+
+int lin_np_tri[2]   = { 3, 12 };
+int lin_np_quad[2]  = { 4, 21 };
+static int* lin_np[2] = { lin_np_tri, lin_np_quad };
+
+static double3*  lin_tables_tri[2]  = { lin_pts_0_tri, lin_pts_1_tri };
+static double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
+static double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
+
+
+class Quad2DLin : public Quad2D
+{
+public:
+
+  Quad2DLin()
+  {
+    mode = HERMES_MODE_TRIANGLE;
+    max_order[0]  = max_order[1]  = 1;
+    num_tables[0] = num_tables[1] = 2;
+    tables = lin_tables;
+    np = lin_np;
+  };
+
+  virtual void dummy_fn() {}
+
+} quad_lin;
+
+
+/// Linearizer<Scalar> is a utility class which converts a higher-order FEM solution defined on
 /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
 /// regular mesh. This is done by adaptive refinement of the higher-order mesh and its
 /// subsequent regularization. The linearized mesh can then be easily displayed or
 /// exported to standard formats. The class correctly handles discontinuities in the
 /// solution (e.g., gradients or in Hcurl) by inserting double vertices where necessary.
-/// Linearizer also serves as a container for the resulting linearized mesh.
+/// Linearizer<Scalar> also serves as a container for the resulting linearized mesh.
 ///
-class HERMES_API Linearizer // (implemented in linear1.cpp)
+template<typename Scalar>
+class HERMES_API Linearizer
 {
 public:
 
   Linearizer();
   ~Linearizer();
 
-  void process_solution(MeshFunction<scalar>* sln, int item = H2D_FN_VAL_0,
+  void process_solution(MeshFunction<Scalar>* sln, int item = H2D_FN_VAL_0,
                         double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                        MeshFunction<scalar>* xdisp = NULL, MeshFunction<scalar>* ydisp = NULL,
+                        MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL,
                         double dmult = 1.0);
 
   void lock_data() const { pthread_mutex_lock(&data_mutex); }
@@ -66,10 +172,10 @@ public:
   // Loads data in a binary format.
   virtual void load_data(const char* filename);
   // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_solution_vtk(MeshFunction<scalar>* meshfn, const char* file_name, const char* quantity_name,
+  virtual void save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char* quantity_name,
                                  bool mode_3D = true, int item = H2D_FN_VAL_0, 
                                  double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
-                                 MeshFunction<scalar>* xdisp = NULL, MeshFunction<scalar>* ydisp = NULL,
+                                 MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL,
                                  double dmult = 1.0);
 
   // This function is used by save_solution_vtk().
@@ -79,7 +185,7 @@ public:
 
 protected:
 
-  MeshFunction<scalar>* sln;
+  MeshFunction<Scalar>* sln;
   int item, ia, ib;
 
   double eps, max, cmax;
@@ -143,10 +249,10 @@ protected:
   }
 
   void process_triangle(int iv0, int iv1, int iv2, int level,
-                        scalar* val, double* phx, double* phy, int* indices);
+                        Scalar* val, double* phx, double* phy, int* indices);
 
   void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    scalar* val, double* phx, double* phy, int* indices);
+                    Scalar* val, double* phx, double* phy, int* indices);
 
   void process_edge(int iv1, int iv2, int marker);
   void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
@@ -158,131 +264,8 @@ protected:
   static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y); ///< Calculates AABB from an array of X-axis and Y-axis coordinates. The distance between values in the array is stride bytes.
 };
 
-
-/// Like the Linearizer, but generates a triangular mesh showing polynomial
-/// orders in a space, hence the funky name.
-///
-class HERMES_API Orderizer : public Linearizer // (implemented in linear2.cpp)
-{
-public:
-
-  Orderizer();
-  ~Orderizer();
-
-  void process_space(Space<double>* space);
-  void process_space(Space<std::complex<double> >* space);
-
-  int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
-        { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
-
-  virtual void save_data(const char* filename);
-  virtual void load_data(const char* filename);
-  // Saves a MeshFunction (Solution, Filter) in VTK format.
-  virtual void save_orders_vtk(Space<double>* space, const char* file_name);
-  // This function is used by save_solution_vtk().
-  virtual void save_data_vtk(const char* file_name);
-
-protected:
-
-  char  buffer[1000];
-  char* labels[11][11];
-
-  int  nl, cl1, cl2, cl3;
-  int* lvert;
-  char** ltext;
-  double2* lbox;
-
-};
-
-
-/// "Vectorizer" is a Linearizer for vector solutions. The only difference is
-/// that linearized vertices are vector-valued. Also, regularization of the
-/// resulting mesh is not attempted. The class can handle different meshes in
-/// both X and Y components.
-///
-class HERMES_API Vectorizer : public Linearizer // (implemented in linear3.cpp)
-{
-public:
-
-  Vectorizer();
-  ~Vectorizer();
-
-  void process_solution(MeshFunction<scalar>* xsln, int xitem, MeshFunction<scalar>* ysln, int yitem, double eps);
-
-public: //accessors
-  double4* get_vertices() const { return verts; }
-  int get_num_vertices() const { return nv; }
-
-  int2* get_dashes() const { return dashes; }
-  int get_num_dashes() const { return nd; }
-
-  double get_min_value() const { return min_val; }
-  double get_max_value() const { return max_val; }
-
-  virtual void save_data(const char* filename);
-  virtual void load_data(const char* filename);
-  virtual void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
-
-  void free();
-
-protected:
-
-  MeshFunction<scalar>*xsln, *ysln;
-  int xitem, yitem;
-  int xia, xib, yia, yib;
-  double4* verts;  ///< vertices: (x, y, xvalue, yvalue) quadruples
-  int2* dashes;
-  int nd, ed, cd;
-
-  int get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue);
-  int create_vertex(double x, double y, double xvalue, double yvalue);
-  void process_dash(int iv1, int iv2);
-
-  int add_vertex()
-  {
-    if (nv >= cv)
-    {
-      cv *= 2;
-      verts = (double4*) realloc(verts, sizeof(double4) * cv);
-      info = (int4*) realloc(info, sizeof(int4) * cv);
-      verbose("Vectorizer::add_vertex(): realloc to %d", cv);
-    }
-    return nv++;
-  }
-
-  void add_dash(int iv1, int iv2)
-  {
-    if (nd >= cd) dashes = (int2*) realloc(dashes, sizeof(int2) * (cd = cd * 3 / 2));
-    dashes[nd][0] = iv1;
-    dashes[nd++][1] = iv2;
-  }
-
-  void push_transform(int son)
-  {
-    xsln->push_transform(son);
-    if (ysln != xsln) ysln->push_transform(son);
-  }
-
-  void pop_transform()
-  {
-    xsln->pop_transform();
-    if (ysln != xsln) ysln->pop_transform();
-  }
-
-  void process_triangle(int iv0, int iv1, int iv2, int level,
-                        scalar* xval, scalar* yval, double* phx, double* phy, int* indices);
-
-  void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                    scalar* xval, scalar* yval, double* phx, double* phy, int* indices);
-
-  void find_min_max();
-
-};
-
-
 // maximum subdivision level (2^N)
 const int LIN_MAX_LEVEL = 6;
-
 
 #define lin_init_array(array, type, c, e) \
   if (c < e) { \
@@ -293,7 +276,4 @@ const int LIN_MAX_LEVEL = 6;
   if (array != NULL) { \
     ::free(array); array = NULL; \
     n = c = 0; }
-
-
-
 #endif

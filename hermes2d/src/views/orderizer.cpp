@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
-#include "linear.h"
-#include "refmap.h"
-
+#include "orderizer.h"
 
 #include "linear_data.cpp"
 
@@ -57,9 +54,9 @@ public:
 } quad_ord;
 
 
-//// Orderizer /////////////////////////////////////////////////////////////////////////////////////
+//// Orderizer<Scalar> /////////////////////////////////////////////////////////////////////////////////////
 Orderizer::Orderizer()
-         : Linearizer()
+  : Linearizer()
 {
   ltext = NULL;
   lvert = NULL;
@@ -73,9 +70,9 @@ Orderizer::Orderizer()
     {
       assert((unsigned) p < sizeof(buffer)-5);
       if (i == j)
-          sprintf(buffer+p, "%d", i);
+        sprintf(buffer+p, "%d", i);
       else
-          sprintf(buffer+p, "%d|%d", i, j);
+        sprintf(buffer+p, "%d|%d", i, j);
       labels[i][j] = buffer+p;
       p += strlen(buffer+p) + 1;
     }
@@ -97,7 +94,8 @@ void Orderizer::process_space(Space<double>* space)
 
   // estimate the required number of vertices and triangles
   Mesh* mesh = space->get_mesh();
-  if (mesh == NULL) {
+  if (mesh == NULL) 
+  {
     error("Mesh is NULL in Orderizer:process_solution().");
   }
   int nn = mesh->get_num_active_elements();
@@ -134,11 +132,11 @@ void Orderizer::process_space(Space<double>* space)
     int id[80];
     assert(np <= 80);
 
-    #define make_vert(index, x, y, val) \
-      { (index) = add_vertex(); \
-      verts[index][0] = (x); \
-      verts[index][1] = (y); \
-      verts[index][2] = (val); }
+#define make_vert(index, x, y, val) \
+    { (index) = add_vertex(); \
+    verts[index][0] = (x); \
+    verts[index][1] = (y); \
+    verts[index][2] = (val); }
 
     int mode = e->get_mode();
     if (e->is_quad())
@@ -157,8 +155,8 @@ void Orderizer::process_space(Space<double>* space)
     for (int i = 0; i < num_edge[mode][type]; i++)
     {
       if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
-          ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-           (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
+        ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
+        (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
       {
         add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
       }
@@ -195,7 +193,8 @@ void Orderizer::process_space(Space<std::complex<double> >* space)
 
   // estimate the required number of vertices and triangles
   Mesh* mesh = space->get_mesh();
-  if (mesh == NULL) {
+  if (mesh == NULL) 
+  {
     error("Mesh is NULL in Orderizer:process_solution().");
   }
   int nn = mesh->get_num_active_elements();
@@ -232,11 +231,11 @@ void Orderizer::process_space(Space<std::complex<double> >* space)
     int id[80];
     assert(np <= 80);
 
-    #define make_vert(index, x, y, val) \
-      { (index) = add_vertex(); \
-      verts[index][0] = (x); \
-      verts[index][1] = (y); \
-      verts[index][2] = (val); }
+#define make_vert(index, x, y, val) \
+    { (index) = add_vertex(); \
+    verts[index][0] = (x); \
+    verts[index][1] = (y); \
+    verts[index][2] = (val); }
 
     int mode = e->get_mode();
     if (e->is_quad())
@@ -255,8 +254,8 @@ void Orderizer::process_space(Space<std::complex<double> >* space)
     for (int i = 0; i < num_edge[mode][type]; i++)
     {
       if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
-          ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-           (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
+        ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
+        (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
       {
         add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
       }
@@ -300,21 +299,21 @@ void Orderizer::save_data(const char* filename)
     if (strchr(ltext[i], '|'))
       sscanf(ltext[i], "%d|%d", &ho, &vo);
     else
-      { sscanf(ltext[i], "%d", &ho); vo = ho; }
+    { sscanf(ltext[i], "%d", &ho); vo = ho; }
     orders[i] = H2D_MAKE_QUAD_ORDER(ho, vo);
   }
 
   if (fwrite("H2DO\001\000\000\000", 1, 8, f) != 8 ||
-      fwrite(&nv, sizeof(int), 1, f) != 1 ||
-      fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
-      fwrite(&nt, sizeof(int), 1, f) != 1 ||
-      fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
-      fwrite(&ne, sizeof(int), 1, f) != 1 ||
-      fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne ||
-      fwrite(&nl, sizeof(int), 1, f) != 1 ||
-      fwrite(lvert, sizeof(int), nl, f) != (unsigned) nl ||
-      fwrite(lbox, sizeof(double2), nl, f) != (unsigned) nl ||
-      fwrite(orders, sizeof(int), nl, f) != (unsigned) nl)
+    fwrite(&nv, sizeof(int), 1, f) != 1 ||
+    fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
+    fwrite(&nt, sizeof(int), 1, f) != 1 ||
+    fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
+    fwrite(&ne, sizeof(int), 1, f) != 1 ||
+    fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne ||
+    fwrite(&nl, sizeof(int), 1, f) != 1 ||
+    fwrite(lvert, sizeof(int), nl, f) != (unsigned) nl ||
+    fwrite(lbox, sizeof(double2), nl, f) != (unsigned) nl ||
+    fwrite(orders, sizeof(int), nl, f) != (unsigned) nl)
   {
     error("Error writing data to %s", filename);
   }
@@ -334,16 +333,16 @@ void Orderizer::load_data(const char* filename)
     error("Error reading %s", filename);
 
   if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'O')
-    error("File %s is not a Hermes2D Orderizer file.", filename);
+    error("File %s is not a Hermes2D Orderizer<Scalar> file.", filename);
   if (hdr.ver > 1)
     error("File %s -- unsupported file version.", filename);
 
-  #define read_array(array, type, n, c, what) \
-    if (fread(&n, sizeof(int), 1, f) != 1) \
-      error("Error reading the number of " what " from %s", filename); \
-    lin_init_array(array, type, c, n); \
-    if (fread(array, sizeof(type), n, f) != (unsigned) n) \
-      error("Error reading " what " from %s", filename);
+#define read_array(array, type, n, c, what) \
+  if (fread(&n, sizeof(int), 1, f) != 1) \
+  error("Error reading the number of " what " from %s", filename); \
+  lin_init_array(array, type, c, n); \
+  if (fread(array, sizeof(type), n, f) != (unsigned) n) \
+  error("Error reading " what " from %s", filename);
 
   read_array(verts, double3, nv, cv,  "vertices");
   read_array(tris,  int3,    nt, ct,  "triangles");
@@ -372,7 +371,7 @@ void Orderizer::save_orders_vtk(Space<double>* space, const char* file_name)
   // Create an Orderizer. This class creates a triangular mesh 
   // with "solution values" that represent the polynomial 
   // degrees of mesh elements. 
-  Orderizer ord;
+  Orderizer<Scalar> ord;
 
   // Create a piecewise-linear approximation, and save it to a file in VTK format.
   ord.process_space(space);
@@ -393,21 +392,24 @@ void Orderizer::save_data_vtk(const char* file_name)
 
   // Output vertices.
   fprintf(f, "POINTS %d %s\n", this->nv, "float");
-  for (int i=0; i < this->nv; i++) {
+  for (int i=0; i < this->nv; i++) 
+  {
     fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
   }
 
   // Output elements.
   fprintf(f, "\n");
   fprintf(f, "CELLS %d %d\n", this->nt, 4 * this->nt);
-  for (int i=0; i < this->nt; i++) {
+  for (int i=0; i < this->nt; i++) 
+  {
     fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
   }
 
   // Output cell types.
   fprintf(f, "\n");
   fprintf(f, "CELL_TYPES %d\n", this->nt);
-  for (int i=0; i < this->nt; i++) {
+  for (int i=0; i < this->nt; i++) 
+  {
     fprintf(f, "5\n");    // The "5" means triangle in VTK.
   }
 
@@ -417,7 +419,8 @@ void Orderizer::save_data_vtk(const char* file_name)
   fprintf(f, "POINT_DATA %d\n", this->nv);
   fprintf(f, "doubleS %s %s %d\n", "Mesh", "float", 1);
   fprintf(f, "LOOKUP_TABLE %s\n", "default");
-  for (int i=0; i < this->nv; i++) {
+  for (int i=0; i < this->nv; i++) 
+  {
     fprintf(f, "%g\n", this->verts[i][2]);
   }
 

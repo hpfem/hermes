@@ -21,7 +21,7 @@
 #include "mesh.h"
 #include "quad_all.h"
 #include "matrix.h"
-  
+
 H1ShapesetJacobi CurvMap::ref_map_shapeset;
 PrecalcShapeset CurvMap::ref_map_pss(&ref_map_shapeset);
 
@@ -45,37 +45,37 @@ bool CurvMap::warning_issued = false;
 double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
 {
   _F_
-  if (k == 0)
-  {
-    return (t >= knot[i] && t <= knot[i+1] && knot[i] < knot[i+1]) ? 1.0 : 0.0;
-  }
-  else
-  {
-    double N1 = nurbs_basis_fn(i, k-1, t, knot);
-    double N2 = nurbs_basis_fn(i+1, k-1, t, knot);
+    if (k == 0)
+    {
+      return (t >= knot[i] && t <= knot[i+1] && knot[i] < knot[i+1]) ? 1.0 : 0.0;
+    }
+    else
+    {
+      double N1 = nurbs_basis_fn(i, k-1, t, knot);
+      double N2 = nurbs_basis_fn(i+1, k-1, t, knot);
 
-    double result = 0.0;
-    if (knot[i+k] != knot[i])
-    {
-      result += ((t - knot[i]) / (knot[i+k] - knot[i])) * N1;
+      double result = 0.0;
+      if (knot[i+k] != knot[i])
+      {
+        result += ((t - knot[i]) / (knot[i+k] - knot[i])) * N1;
+      }
+      if (knot[i+k+1] != knot[i+1])
+      {
+        result += ((knot[i+k+1] - t) / (knot[i+k+1] - knot[i+1])) * N2;
+      }
+      return result;
     }
-    if (knot[i+k+1] != knot[i+1])
-    {
-      result += ((knot[i+k+1] - t) / (knot[i+k+1] - knot[i+1])) * N2;
-    }
-    return result;
-  }
 }
 
 // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
 // as well as the unit normal and unit tangential vectors. This is done using 
 // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
 void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
-                         double& y, double& n_x, double& n_y, double& t_x, double& t_y)
+  double& y, double& n_x, double& n_y, double& t_x, double& t_y)
 {
   _F_
-  // Nurbs curves are parametrized from 0 to 1.
-  t = (t + 1.0) / 2.0;
+    // Nurbs curves are parametrized from 0 to 1.
+    t = (t + 1.0) / 2.0;
 
   // Start point A, end point B.
   double2 A, B;
@@ -100,9 +100,11 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     n_x = t_y;
     n_y = -t_x;
   }
-  else {
+  else 
+  {
     // Circular arc.
-    if (nurbs->arc == true) {
+    if (nurbs->arc == true) 
+    {
       double3* cp = nurbs->pt;
       x = y = 0.0;
       double sum = 0.0;  // sum of basis fns and weights
@@ -133,7 +135,7 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       //printf("***** A = %g %g\n", A[0], A[1]);
       //printf("***** B = %g %g\n", B[0], B[1]);
       //printf("***** M = %g %g\n", M[0], M[1]);
-      
+
       // Unit vector from M to center of circle S.
       double2 w;
       w[0] = -v[1] / abs_v;
@@ -145,7 +147,7 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       double alpha_rad = nurbs->angle * M_PI / 180.;
       double L = 0.5 * abs_v / tan(0.5 * alpha_rad);
       //printf("***** L = %g\n", L);
-    
+
       // Center of circle.
       double2 S;
       S[0] = M[0] + w[0] * L;
@@ -223,7 +225,8 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
 
       // Correcting sign so that the normal points outside 
       // if the angle is negative.
-      if (nurbs->angle < 0) {
+      if (nurbs->angle < 0) 
+      {
         n_x *= -1;
         n_y *= -1;
         t_x *= -1;
@@ -232,7 +235,8 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
     }
     // General NURBS. 
     // FIXME - calculation of normal and tangential vectors needs to be added.
-    else {
+    else 
+    {
       double3* cp = nurbs->pt;
       x = y = 0.0;
       double sum = 0.0;  // sum of basis fns and weights
@@ -251,7 +255,8 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
       x /= sum;
       y /= sum;
 
-      if(!warning_issued) {
+      if(!warning_issued) 
+      {
         printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
         warning_issued = true;
       }
@@ -264,10 +269,11 @@ void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x
 }
 
 //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
-const double2 CurvMap::ref_vert[2][4] = {
-    { { -1.0, -1.0 }, { 1.0, -1.0 }, { -1.0, 1.0 }, {  0.0, 0.0 } },
-    { { -1.0, -1.0 }, { 1.0, -1.0 }, {  1.0, 1.0 }, { -1.0, 1.0 } }
-  };
+const double2 CurvMap::ref_vert[2][4] = 
+{
+  { { -1.0, -1.0 }, { 1.0, -1.0 }, { -1.0, 1.0 }, {  0.0, 0.0 } },
+  { { -1.0, -1.0 }, { 1.0, -1.0 }, {  1.0, 1.0 }, { -1.0, 1.0 } }
+};
 
 // subtraction of straight edge and nurbs curve
 void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
@@ -288,7 +294,7 @@ void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double&
 void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y)
 {
   _F_
-  double  fx,  fy;
+    double  fx,  fy;
   x = y = 0.0;
 
   for (unsigned int j = 0; j < e->nvert; j++)
@@ -297,7 +303,8 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
     int vb = e->next_vert(j);
     double l_a = 0;
     double l_b = 0;
-    switch(va) {
+    switch(va) 
+    {
     case 0:
       l_a = lambda_0(xi_1, xi_2);
       break;
@@ -309,7 +316,8 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
       break;
     }
 
-    switch(vb) {
+    switch(vb) 
+    {
     case 0:
       l_b = lambda_0(xi_1, xi_2);
       break;
@@ -326,7 +334,7 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
     y += e->vn[j]->y * l_a;
 
     if (!(((ref_vert[0][va][0] == xi_1) && (ref_vert[0][va][1] == xi_2)) ||
-          ((ref_vert[0][vb][0] == xi_1) && (ref_vert[0][vb][1] == xi_2))))
+      ((ref_vert[0][vb][0] == xi_1) && (ref_vert[0][vb][1] == xi_2))))
     {
       // edge part
       double t = l_b - l_a;
@@ -340,10 +348,10 @@ void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi
 
 
 void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
-                              double& x, double& y)
+  double& x, double& y)
 {
   _F_
-  double ex[4], ey[4];
+    double ex[4], ey[4];
 
   double n_x, n_y, t_x, t_y;
   nurbs_edge(e, nurbs[0], 0,  xi_1, ex[0], ey[0], n_x, n_y, t_x, t_y);
@@ -352,24 +360,24 @@ void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double x
   nurbs_edge(e, nurbs[3], 3, -xi_2, ex[3], ey[3], n_x, n_y, t_x, t_y);
 
   x = (1-xi_2)/2.0 * ex[0] + (1+xi_1)/2.0 * ex[1] +
-      (1+xi_2)/2.0 * ex[2] + (1-xi_1)/2.0 * ex[3] -
-      (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->x - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->x -
-      (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->x - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->x;
+    (1+xi_2)/2.0 * ex[2] + (1-xi_1)/2.0 * ex[3] -
+    (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->x - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->x -
+    (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->x - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->x;
 
   y = (1-xi_2)/2.0 * ey[0] + (1+xi_1)/2.0 * ey[1] +
-      (1+xi_2)/2.0 * ey[2] + (1-xi_1)/2.0 * ey[3] -
-      (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->y - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->y -
-      (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->y - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->y;
+    (1+xi_2)/2.0 * ey[2] + (1-xi_1)/2.0 * ey[3] -
+    (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->y - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->y -
+    (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->y - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->y;
 }
 
 
 void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
 {
   _F_
-  if (e->get_mode() == HERMES_MODE_QUAD)
-    calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
-  else
-    calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
+    if (e->get_mode() == HERMES_MODE_QUAD)
+      calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
+    else
+      calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
 }
 
 
@@ -379,7 +387,7 @@ void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, 
 void CurvMap::precalculate_cholesky_projection_matrix_edge()
 {
   _F_
-  int order = ref_map_shapeset.get_max_order();
+    int order = ref_map_shapeset.get_max_order();
   int n = order - 1; // number of edge basis functions
   edge_proj_matrix = new_matrix<double>(n, n);
 
@@ -396,7 +404,8 @@ void CurvMap::precalculate_cholesky_projection_matrix_edge()
         double fi = 0;
         double fj = 0;
         double x = pt[k][0];
-        switch(i+2) {
+        switch(i+2) 
+        {
         case 0:
           fi = lob0(x);
           break;
@@ -434,7 +443,8 @@ void CurvMap::precalculate_cholesky_projection_matrix_edge()
           fi = lob11(x);
           break;
         }
-        switch(j+2) {
+        switch(j+2) 
+        {
         case 0:
           fj = lob0(x);
           break;
@@ -487,7 +497,7 @@ void CurvMap::precalculate_cholesky_projection_matrix_edge()
 double** CurvMap::calculate_bubble_projection_matrix(int nb, int* indices)
 {
   _F_
-  double** mat = new_matrix<double>(nb, nb);
+    double** mat = new_matrix<double>(nb, nb);
 
   for (int i = 0; i < nb; i++)
   {
@@ -521,8 +531,8 @@ double** CurvMap::calculate_bubble_projection_matrix(int nb, int* indices)
 void CurvMap::precalculate_cholesky_projection_matrices_bubble()
 {
   _F_
-  // *** triangles ***
-  ref_map_pss.set_mode(HERMES_MODE_TRIANGLE);
+    // *** triangles ***
+    ref_map_pss.set_mode(HERMES_MODE_TRIANGLE);
   int order = ref_map_shapeset.get_max_order();
 
   // calculate projection matrix of maximum order
@@ -556,7 +566,7 @@ void CurvMap::precalculate_cholesky_projection_matrices_bubble()
 void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v)
 {
   _F_
-  int mode = e->get_mode();
+    int mode = e->get_mode();
   double2 a, b;
   a[0] = ctm.m[0] * ref_vert[mode][edge][0] + ctm.t[0];
   a[1] = ctm.m[1] * ref_vert[mode][edge][1] + ctm.t[1];
@@ -575,7 +585,7 @@ void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v)
 void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj)
 {
   _F_
-  ref_map_pss.set_active_element(e);
+    ref_map_pss.set_active_element(e);
 
   int i, j, k;
   int mo1 = quad1d.get_max_order();
@@ -622,7 +632,8 @@ void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int orde
       {
         double t = pt[j][0];
         double fi = 0;
-        switch(i+2) {
+        switch(i+2) 
+        {
         case 0:
           fi = lob0(t);
           break;
@@ -675,7 +686,7 @@ void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int orde
 void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2])
 {
   _F_
-  int mo2 = quad2d.get_max_order();
+    int mo2 = quad2d.get_max_order();
   int np = quad2d.get_num_points(mo2);
 
   for (unsigned int k = 0; k < e->nvert; k++) // loop over vertices
@@ -710,7 +721,7 @@ void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2
 void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj)
 {
   _F_
-  ref_map_pss.set_active_element(e);
+    ref_map_pss.set_active_element(e);
 
   int i, j, k;
   int mo2 = quad2d.get_max_order();
@@ -723,7 +734,8 @@ void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, doubl
 
   double* rhside[2];
   double* old[2];
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; i++) 
+  {
     rhside[i] = new double[nb];
     old[i] = new double[np];
     memset(rhside[i], 0, sizeof(double) * nb);
@@ -769,7 +781,8 @@ void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, doubl
       result[i][k] = rhside[k][i];
   }
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; i++) 
+  {
     delete [] rhside[i];
     delete [] old[i];
   }
@@ -782,29 +795,29 @@ void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, doubl
 void CurvMap::ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj)
 {
   _F_
-  // vertex part
-  for (unsigned int i = 0; i < e->nvert; i++)
-  {
-    proj[i][0] = e->vn[i]->x;
-    proj[i][1] = e->vn[i]->y;
-  }
+    // vertex part
+    for (unsigned int i = 0; i < e->nvert; i++)
+    {
+      proj[i][0] = e->vn[i]->x;
+      proj[i][1] = e->vn[i]->y;
+    }
 
-  if (e->cm->toplevel == false)
-    e = e->cm->parent;
+    if (e->cm->toplevel == false)
+      e = e->cm->parent;
 
-  // edge part
-  for (int edge = 0; edge < (int)e->nvert; edge++)
-    calc_edge_projection(e, edge, nurbs, order, proj);
+    // edge part
+    for (int edge = 0; edge < (int)e->nvert; edge++)
+      calc_edge_projection(e, edge, nurbs, order, proj);
 
-  //bubble part
-  calc_bubble_projection(e, nurbs, order, proj);
+    //bubble part
+    calc_bubble_projection(e, nurbs, order, proj);
 }
 
 
 void CurvMap::update_refmap_coeffs(Element* e)
 {
   _F_
-  ref_map_pss.set_quad_2d(&quad2d);
+    ref_map_pss.set_quad_2d(&quad2d);
   //ref_map_pss.set_active_element(e);
 
   // calculation of projection matrices
@@ -820,7 +833,8 @@ void CurvMap::update_refmap_coeffs(Element* e)
   int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
   int nb = ref_map_shapeset.get_num_bubbles(qo);
   nc = nv + nv*ne + nb;
-  if (coeffs != NULL) {
+  if (coeffs != NULL) 
+  {
     delete [] coeffs;
     coeffs = NULL;
   }
@@ -851,7 +865,7 @@ void CurvMap::update_refmap_coeffs(Element* e)
 void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
 {
   _F_
-  Nurbs** nurbs = this->nurbs;
+    Nurbs** nurbs = this->nurbs;
   Transformable tran;
   tran.set_active_element(e);
 
@@ -875,19 +889,19 @@ void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
 void Nurbs::unref()
 {
   _F_
-  if (!--ref) // fixme: possible leak, we need ~Nurbs too
-  {
-    delete [] pt;
-    delete [] kv;
-    delete this;
-  }
+    if (!--ref) // fixme: possible leak, we need ~Nurbs too
+    {
+      delete [] pt;
+      delete [] kv;
+      delete this;
+    }
 }
 
 
 CurvMap::CurvMap(CurvMap* cm)
 {
   _F_
-  memcpy(this, cm, sizeof(CurvMap));
+    memcpy(this, cm, sizeof(CurvMap));
   coeffs = new double2[nc];
   memcpy(coeffs, cm->coeffs, sizeof(double2) * nc);
 
@@ -900,12 +914,13 @@ CurvMap::CurvMap(CurvMap* cm)
 CurvMap::~CurvMap()
 {
   _F_
-  if (coeffs != NULL) {
-    delete [] coeffs;
-    coeffs = NULL;
-  }
-  if (toplevel)
-    for (int i = 0; i < 4; i++)
-      if (nurbs[i] != NULL)
-        nurbs[i]->unref();
+    if (coeffs != NULL) 
+    {
+      delete [] coeffs;
+      coeffs = NULL;
+    }
+    if (toplevel)
+      for (int i = 0; i < 4; i++)
+        if (nurbs[i] != NULL)
+          nurbs[i]->unref();
 }

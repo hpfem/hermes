@@ -41,9 +41,9 @@
 #   define TwBar void /* avoid necessity to define ENABLE_VIEWER_GUI in underlaying applications */
 # endif
 
-/// \brief Visualizes a scalar PDE solution.
+/// \brief Visualizes a Scalar PDE solution.
 ///
-/// ScalarView is a visualization window for all scalar-valued PDE solutions.
+/// ScalarView is a visualization window for all Scalar-valued PDE solutions.
 ///
 template<typename Scalar>
 class HERMES_API ScalarView : public View
@@ -83,7 +83,7 @@ public: // input/output routines
   "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
 #define SVG_UNIT_MM 3.543307 /* size of 1 mm in SVG px */
 
-  Linearizer lin;
+  Linearizer<Scalar> lin;
 
 protected: // node selection
   struct VertexNodeInfo ///< Information about a vertex node.

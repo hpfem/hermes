@@ -304,7 +304,8 @@ void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
     error("\"sym\" must be -1, 0 or 1.");
   if (form->sym < 0 && form->i == form->j)
     error("Only off-diagonal forms can be antisymmetric.");
-  if (mfvol.size() > 100) {
+  if (mfvol.size() > 100) 
+  {
     warn("Large number of forms (> 100). Is this the intent?");
   }
 
@@ -353,7 +354,8 @@ void WeakForm<Scalar>::add_multicomponent_matrix_form(MultiComponentMatrixFormVo
 {
   _F_
 
-    for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++) {
+    for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++) 
+    {
       if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
         error("Invalid equation number.");
       if (form->sym < 0 && form->coordinates.at(form_i).first == form->coordinates.at(form_i).second)
@@ -428,11 +430,13 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
   unsigned int i;
   stages.clear();
 
-  if (want_matrix || want_vector) {    
+  if (want_matrix || want_vector) 
+  {
     // This is because of linear problems where
     // matrix terms with the Dirichlet lift go to rhs.
     // Process volume matrix forms.
-    for (i = 0; i < mfvol.size(); i++) {
+    for (i = 0; i < mfvol.size(); i++) 
+    {
       unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
       Mesh* m1 = spaces[ii]->get_mesh();
       Mesh* m2 = spaces[jj]->get_mesh();
@@ -441,7 +445,8 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     }
 
     // Process surface matrix forms.
-    for (i = 0; i < mfsurf.size(); i++) {
+    for (i = 0; i < mfsurf.size(); i++) 
+    {
       unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
       Mesh* m1 = spaces[ii]->get_mesh();
       Mesh* m2 = spaces[jj]->get_mesh();
@@ -450,9 +455,11 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     }
 
     // Multi component forms.
-    for (unsigned i = 0; i < mfvol_mc.size(); i++) {
+    for (unsigned i = 0; i < mfvol_mc.size(); i++) 
+    {
       Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
-      for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++) {
+      for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++) 
+      {
         if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
           error("When using multi-component forms, the Meshes have to be identical.");
         if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
@@ -462,9 +469,11 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
       Stage<Scalar>* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext);
       s->mfvol_mc.push_back(mfvol_mc[i]);
     }
-    for (unsigned i = 0; i < mfsurf_mc.size(); i++) {
+    for (unsigned i = 0; i < mfsurf_mc.size(); i++) 
+    {
       Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
-      for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++) {
+      for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++) 
+      {
         if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
           error("When using multi-component forms, the Meshes have to be identical.");
         if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
@@ -475,9 +484,11 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
       s->mfsurf_mc.push_back(mfsurf_mc[i]);
     }
   }
-  if (want_vector) {
+  if (want_vector) 
+  {
     // Process volume vector forms.
-    for (unsigned i = 0; i < vfvol.size(); i++) {
+    for (unsigned i = 0; i < vfvol.size(); i++) 
+    {
       unsigned int ii = vfvol[i]->i;
       Mesh *m = spaces[ii]->get_mesh();
       Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
@@ -485,7 +496,8 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     }
 
     // Process surface vector forms.
-    for (unsigned i = 0; i < vfsurf.size(); i++) {
+    for (unsigned i = 0; i < vfsurf.size(); i++) 
+    {
       unsigned int ii = vfsurf[i]->i;
       Mesh *m = spaces[ii]->get_mesh();
       Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
@@ -493,7 +505,8 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
     }
 
     // Multi component forms.
-    for (unsigned i = 0; i < vfvol_mc.size(); i++) {
+    for (unsigned i = 0; i < vfvol_mc.size(); i++) 
+    {
       Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
       for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
         if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
@@ -503,7 +516,8 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
       s->vfvol_mc.push_back(vfvol_mc[i]);
     }
 
-    for (unsigned i = 0; i < vfsurf_mc.size(); i++) {
+    for (unsigned i = 0; i < vfsurf_mc.size(); i++) 
+    {
       Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
       for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
         if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
@@ -522,163 +536,182 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
 template<typename Scalar>
 Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
   Mesh* m1, Mesh* m2,
-  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) {
+  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+{
 
-    _F_
+  _F_
     // first create a list of meshes the form uses
     std::set<unsigned> seq;
-    seq.insert(m1->get_seq());
-    seq.insert(m2->get_seq());
-    Mesh *mmm;
-    for (unsigned i = 0; i < ext.size(); i++) {
-      mmm = ext[i]->get_mesh();
-      if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+  seq.insert(m1->get_seq());
+  seq.insert(m2->get_seq());
+  Mesh *mmm;
+  for (unsigned i = 0; i < ext.size(); i++) 
+  {
+    mmm = ext[i]->get_mesh();
+    if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+    seq.insert(mmm->get_seq());
+  }
+  for (unsigned i = 0; i < u_ext.size(); i++) 
+  {
+    if (u_ext[i] != NULL) 
+    {
+      mmm = u_ext[i]->get_mesh();
+      if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
       seq.insert(mmm->get_seq());
     }
-    for (unsigned i = 0; i < u_ext.size(); i++) {
-      if (u_ext[i] != NULL) {
-        mmm = u_ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-        seq.insert(mmm->get_seq());
-      }
+  }
+
+  // find a suitable existing stage for the form
+  Stage<Scalar>* s = NULL;
+  for (unsigned i = 0; i < stages.size(); i++)
+    if (seq.size() == stages[i].seq_set.size() &&
+      equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
+    {
+      s = &stages[i]; break;
     }
 
-    // find a suitable existing stage for the form
-    Stage<Scalar>* s = NULL;
-    for (unsigned i = 0; i < stages.size(); i++)
-      if (seq.size() == stages[i].seq_set.size() &&
-        equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
-          s = &stages[i]; break;
-      }
+    // create a new stage if not found
+    if (s == NULL) 
+    {
 
-      // create a new stage if not found
-      if (s == NULL) {
+      Stage<Scalar> newstage;
+      stages.push_back(newstage);
+      s = &stages.back();
+      s->seq_set = seq;
+    }
 
-        Stage<Scalar> newstage;
-        stages.push_back(newstage);
-        s = &stages.back();
-        s->seq_set = seq;
-      }
+    // update and return the stage
+    for (unsigned int i = 0; i < ext.size(); i++)
+      s->ext_set.insert(ext[i]);
+    for (unsigned int i = 0; i < u_ext.size(); i++)
+      if (u_ext[i] != NULL)
+        s->ext_set.insert(u_ext[i]);
 
-      // update and return the stage
-      for (unsigned int i = 0; i < ext.size(); i++)
-        s->ext_set.insert(ext[i]);
-      for (unsigned int i = 0; i < u_ext.size(); i++)
-        if (u_ext[i] != NULL)
-          s->ext_set.insert(u_ext[i]);
-
-      s->idx_set.insert(ii);
-      s->idx_set.insert(jj);
-      return s;
+    s->idx_set.insert(ii);
+    s->idx_set.insert(jj);
+    return s;
 }
 
 template<typename Scalar>
 Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
   Mesh* m1, Mesh* m2,
-  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) {
+  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+{
 
-    _F_
+  _F_
     // first create a list of meshes the form uses
     std::set<unsigned> seq;
-    seq.insert(m1->get_seq());
-    seq.insert(m2->get_seq());
-    Mesh *mmm;
-    for (unsigned i = 0; i < ext.size(); i++) {
-      mmm = ext[i]->get_mesh();
-      if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+  seq.insert(m1->get_seq());
+  seq.insert(m2->get_seq());
+  Mesh *mmm;
+  for (unsigned i = 0; i < ext.size(); i++) 
+  {
+    mmm = ext[i]->get_mesh();
+    if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+    seq.insert(mmm->get_seq());
+  }
+  for (unsigned i = 0; i < u_ext.size(); i++) 
+  {
+    if (u_ext[i] != NULL) 
+    {
+      mmm = u_ext[i]->get_mesh();
+      if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
       seq.insert(mmm->get_seq());
     }
-    for (unsigned i = 0; i < u_ext.size(); i++) {
-      if (u_ext[i] != NULL) {
-        mmm = u_ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-        seq.insert(mmm->get_seq());
-      }
+  }
+
+  // find a suitable existing stage for the form
+  Stage<Scalar>* s = NULL;
+  for (unsigned i = 0; i < stages.size(); i++)
+    if (seq.size() == stages[i].seq_set.size() &&
+      equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
+    {
+      s = &stages[i]; break;
     }
 
-    // find a suitable existing stage for the form
-    Stage<Scalar>* s = NULL;
-    for (unsigned i = 0; i < stages.size(); i++)
-      if (seq.size() == stages[i].seq_set.size() &&
-        equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
-          s = &stages[i]; break;
-      }
+    // create a new stage if not found
+    if (s == NULL) 
+    {
 
-      // create a new stage if not found
-      if (s == NULL) {
+      Stage<Scalar> newstage;
+      stages.push_back(newstage);
+      s = &stages.back();
+      s->seq_set = seq;
+    }
 
-        Stage<Scalar> newstage;
-        stages.push_back(newstage);
-        s = &stages.back();
-        s->seq_set = seq;
-      }
+    // update and return the stage
+    for (unsigned int i = 0; i < ext.size(); i++)
+      s->ext_set.insert(ext[i]);
+    for (unsigned int i = 0; i < u_ext.size(); i++)
+      if (u_ext[i] != NULL)
+        s->ext_set.insert(u_ext[i]);
 
-      // update and return the stage
-      for (unsigned int i = 0; i < ext.size(); i++)
-        s->ext_set.insert(ext[i]);
-      for (unsigned int i = 0; i < u_ext.size(); i++)
-        if (u_ext[i] != NULL)
-          s->ext_set.insert(u_ext[i]);
-
-      for(unsigned int ii = 0; ii < coordinates.size(); ii++) {
-        s->idx_set.insert(coordinates.at(ii).first);
-        s->idx_set.insert(coordinates.at(ii).second);
-      }
-      return s;
+    for(unsigned int ii = 0; ii < coordinates.size(); ii++) 
+    {
+      s->idx_set.insert(coordinates.at(ii).first);
+      s->idx_set.insert(coordinates.at(ii).second);
+    }
+    return s;
 }
 
 template<typename Scalar>
 Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
   Mesh* m1, Mesh* m2,
-  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) {
+  Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+{
 
-    _F_
+  _F_
     // first create a list of meshes the form uses
     std::set<unsigned> seq;
-    seq.insert(m1->get_seq());
-    seq.insert(m2->get_seq());
-    Mesh *mmm;
-    for (unsigned i = 0; i < ext.size(); i++) {
-      mmm = ext[i]->get_mesh();
-      if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+  seq.insert(m1->get_seq());
+  seq.insert(m2->get_seq());
+  Mesh *mmm;
+  for (unsigned i = 0; i < ext.size(); i++) 
+  {
+    mmm = ext[i]->get_mesh();
+    if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+    seq.insert(mmm->get_seq());
+  }
+  for (unsigned i = 0; i < u_ext.size(); i++) 
+  {
+    if (u_ext[i] != NULL) 
+    {
+      mmm = u_ext[i]->get_mesh();
+      if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
       seq.insert(mmm->get_seq());
     }
-    for (unsigned i = 0; i < u_ext.size(); i++) {
-      if (u_ext[i] != NULL) {
-        mmm = u_ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-        seq.insert(mmm->get_seq());
-      }
+  }
+
+  // find a suitable existing stage for the form
+  Stage<Scalar>* s = NULL;
+  for (unsigned i = 0; i < stages.size(); i++)
+    if (seq.size() == stages[i].seq_set.size() &&
+      equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
+    {
+      s = &stages[i]; break;
     }
 
-    // find a suitable existing stage for the form
-    Stage<Scalar>* s = NULL;
-    for (unsigned i = 0; i < stages.size(); i++)
-      if (seq.size() == stages[i].seq_set.size() &&
-        equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) {
-          s = &stages[i]; break;
-      }
+    // create a new stage if not found
+    if (s == NULL) 
+    {
 
-      // create a new stage if not found
-      if (s == NULL) {
+      Stage<Scalar> newstage;
+      stages.push_back(newstage);
+      s = &stages.back();
+      s->seq_set = seq;
+    }
 
-        Stage<Scalar> newstage;
-        stages.push_back(newstage);
-        s = &stages.back();
-        s->seq_set = seq;
-      }
+    // update and return the stage
+    for (unsigned int i = 0; i < ext.size(); i++)
+      s->ext_set.insert(ext[i]);
+    for (unsigned int i = 0; i < u_ext.size(); i++)
+      if (u_ext[i] != NULL)
+        s->ext_set.insert(u_ext[i]);
 
-      // update and return the stage
-      for (unsigned int i = 0; i < ext.size(); i++)
-        s->ext_set.insert(ext[i]);
-      for (unsigned int i = 0; i < u_ext.size(); i++)
-        if (u_ext[i] != NULL)
-          s->ext_set.insert(u_ext[i]);
+    for(unsigned int ii = 0; ii < coordinates.size(); ii++)
+      s->idx_set.insert(coordinates.at(ii));
 
-      for(unsigned int ii = 0; ii < coordinates.size(); ii++)
-        s->idx_set.insert(coordinates.at(ii));
-
-      return s;
+    return s;
 }
 
 template<typename Scalar>
@@ -686,13 +719,15 @@ bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks)
 {
   _F_
     bool** blocks = new_matrix<bool>(neq, neq);
-  for (unsigned int i = 0; i < neq; i++) {
+  for (unsigned int i = 0; i < neq; i++) 
+  {
     for (unsigned int j = 0; j < neq; j++)
       blocks[i][j] = false;
     if (force_diagonal_blocks)
       blocks[i][i] = true;
   }
-  for (unsigned i = 0; i < mfvol.size(); i++) {
+  for (unsigned i = 0; i < mfvol.size(); i++) 
+  {
     if (fabs(mfvol[i]->scaling_factor) > 1e-12)
       blocks[mfvol[i]->i][mfvol[i]->j] = true;
     if (mfvol[i]->sym)
@@ -700,7 +735,8 @@ bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks)
         blocks[mfvol[i]->j][mfvol[i]->i] = true;
   }
 
-  for (unsigned i = 0; i < mfvol_mc.size(); i++) {
+  for (unsigned i = 0; i < mfvol_mc.size(); i++) 
+  {
     if (fabs(mfvol_mc[i]->scaling_factor) > 1e-12)
       for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
         blocks[mfvol_mc[i]->coordinates[component_i].first][mfvol_mc[i]->coordinates[component_i].second] = true;

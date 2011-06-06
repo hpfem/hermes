@@ -22,22 +22,22 @@
 template<typename Scalar>
 Filter<Scalar>::Filter(Hermes::vector<MeshFunction<Scalar>*> solutions) : MeshFunction<Scalar>()
 {
-	this->num = solutions.size();
-	if(num > 10)
-		error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-	for(int i = 0; i < this->num; i++)
-		this->sln[i] = solutions.at(i);
+  this->num = solutions.size();
+  if(num > 10)
+    error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+  for(int i = 0; i < this->num; i++)
+    this->sln[i] = solutions.at(i);
   this->init();
 }
 
 template<typename Scalar>
 void Filter<Scalar>::init(Hermes::vector<MeshFunction<Scalar>*> solutions)
 {
-	this->num = solutions.size();
-	if(num > 10)
-		error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-	for(int i = 0; i < this->num; i++)
-		this->sln[i] = solutions.at(i);
+  this->num = solutions.size();
+  if(num > 10)
+    error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+  for(int i = 0; i < this->num; i++)
+    this->sln[i] = solutions.at(i);
   this->init();
 }
 
@@ -46,22 +46,24 @@ void Filter<Scalar>::init()
 {
   // construct the union mesh, if necessary
   Mesh* meshes[10];
-	for(int i = 0; i < this->num; i++)
-		meshes[i] = this->sln[i]->get_mesh();
+  for(int i = 0; i < this->num; i++)
+    meshes[i] = this->sln[i]->get_mesh();
   this->mesh = meshes[0];
   unimesh = false;
 
   for (int i = 1; i < num; i++)
-	{
-    if (meshes[i] == NULL) {
+
+  {
+    if (meshes[i] == NULL) 
+    {
       warn("You may be initializing a Filter with Solution that is missing a Mesh.");
       error("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
     }
     if (meshes[i]->get_seq() != this->mesh->get_seq())
     {
-			unimesh = true;
-			break;
-		}
+      unimesh = true;
+      break;
+    }
   }
 
   if (unimesh)
@@ -78,7 +80,7 @@ void Filter<Scalar>::init()
   this->order = 0;
 
   for(int i = 0; i < 10; i++)
-      tables[i] = new std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>;
+    tables[i] = new std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>;
 
   memset(sln_sub, 0, sizeof(sln_sub));
   set_quad_2d(&g_quad_2d_std);
@@ -117,20 +119,23 @@ void Filter<Scalar>::set_active_element(Element* e)
   }
   else
   {
-    for (int i = 0; i < num; i++) {
+    for (int i = 0; i < num; i++) 
+    {
       this->sln[i]->set_active_element(unidata[i][e->id].e);
       this->sln[i]->set_transform(unidata[i][e->id].idx);
       sln_sub[i] = this->sln[i]->get_transform();
     }
   }
 
-  if (tables[this->cur_quad] != NULL) {
-    for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad]->begin(); it != tables[this->cur_quad]->end(); it++) {
+  if (tables[this->cur_quad] != NULL) 
+  {
+    for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad]->begin(); it != tables[this->cur_quad]->end(); it++) 
+    {
       for(unsigned int l = 0; l < it->second->get_size(); l++)
         if(it->second->present(l))
           ::free(it->second->get(l));
       delete it->second;
-      }
+    }
     delete tables[this->cur_quad];
   }
 
@@ -146,15 +151,17 @@ template<typename Scalar>
 void Filter<Scalar>::free()
 {
   for (int i = 0; i < num; i++)
-    if (tables[i] != NULL) {
-    for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i]->begin(); it != tables[i]->end(); it++) {
-      for(unsigned int l = 0; l < it->second->get_size(); l++)
-        if(it->second->present(l))
-          ::free(it->second->get(l));
-      delete it->second;
+    if (tables[i] != NULL) 
+    {
+      for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i]->begin(); it != tables[i]->end(); it++) 
+      {
+        for(unsigned int l = 0; l < it->second->get_size(); l++)
+          if(it->second->present(l))
+            ::free(it->second->get(l));
+        delete it->second;
+      }
+      delete tables[i];
     }
-    delete tables[i];
-  }
 }
 
 template<typename Scalar>
@@ -202,23 +209,24 @@ void Filter<Scalar>::pop_transform()
 template<typename Scalar>
 SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
 {
-	this->num = solutions.size();
-	if(this->num > 10)
-		error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-	if(items.size() != (unsigned) this->num)
-		if(items.size() > 0)
-			error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+  this->num = solutions.size();
+  if(this->num > 10)
+    error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+  if(items.size() != (unsigned) this->num)
+    if(items.size() > 0)
+      error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
 
-	for(int i = 0; i < this->num; i++)
-	{
-		this->sln[i] = solutions.at(i);
-		if(items.size() > 0)
-			this->item[i] = items.at(i);
-		else
-			this->item[i] =	H2D_FN_VAL;
-	}
-	this->init();
-	init_components();
+  for(int i = 0; i < this->num; i++)
+
+  {
+    this->sln[i] = solutions.at(i);
+    if(items.size() > 0)
+      this->item[i] = items.at(i);
+    else
+      this->item[i] =	H2D_FN_VAL;
+  }
+  this->init();
+  init_components();
 }
 
 template<typename Scalar>
@@ -230,17 +238,17 @@ SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, 
   if(items.size() != (unsigned) this->num)
     if(items.size() > 0)
       error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
-    
-    for(int i = 0; i < this->num; i++)
-    {
-      this->sln[i] = solutions.at(i);
-      if(items.size() > 0)
-        this->item[i] = items.at(i);
-      else
-        this->item[i] = H2D_FN_VAL;
-    }
-    this->init();
-    init_components();
+
+  for(int i = 0; i < this->num; i++)
+  {
+    this->sln[i] = solutions.at(i);
+    if(items.size() > 0)
+      this->item[i] = items.at(i);
+    else
+      this->item[i] = H2D_FN_VAL;
+  }
+  this->init();
+  init_components();
 }
 
 template<typename Scalar>
@@ -284,15 +292,16 @@ void SimpleFilter<Scalar>::precalculate(int order, int mask)
       if (tab[i] == NULL) error("Value of 'item%d' is incorrect in filter definition.", i+1);
     }
 
-		Hermes::vector<Scalar*> values;
-		for(int i = 0; i < this->num; i++)
-			values.push_back(tab[i]);
+    Hermes::vector<Scalar*> values;
+    for(int i = 0; i < this->num; i++)
+      values.push_back(tab[i]);
 
     // apply the filter
-		filter_fn(np, values, node->values[j][0]);
+    filter_fn(np, values, node->values[j][0]);
   }
 
-  if(this->nodes->present(order)) {
+  if(this->nodes->present(order)) 
+  {
     assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
@@ -310,14 +319,14 @@ Scalar SimpleFilter<Scalar>::get_pt_value(double x, double y, int it)
     val[i] = this->sln[i]->get_pt_value(x, y, item[i]);
 
   Scalar result;
-	Hermes::vector<Scalar*> values;
-	for(int i = 0; i < this->num; i++)
-		values.push_back(&val[i]);
+  Hermes::vector<Scalar*> values;
+  for(int i = 0; i < this->num; i++)
+    values.push_back(&val[i]);
 
-	// apply the filter
-	filter_fn(1, values, &result);
+  // apply the filter
+  filter_fn(1, values, &result);
 
-	return result;
+  return result;
 }
 
 //// DXDYFilter ////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +335,7 @@ Scalar SimpleFilter<Scalar>::get_pt_value(double x, double y, int it)
 template<typename Scalar>
 DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions) : Filter<Scalar>(solutions)
 {
-	init_components();
+  init_components();
 }
 
 template<typename Scalar>
@@ -371,18 +380,20 @@ void DXDYFilter<Scalar>::precalculate(int order, int mask)
     Hermes::vector<Scalar *> dx_vector;
     Hermes::vector<Scalar *> dy_vector;
 
-		for(int i = 0; i < this->num; i++)
-		{
+    for(int i = 0; i < this->num; i++)
+
+    {
       values_vector.push_back(val[i]);
       dx_vector.push_back(dx[i]);
       dy_vector.push_back(dy[i]);
-		}
+    }
 
     // apply the filter
     filter_fn(np, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
   }
 
-  if(this->nodes->present(order)) {
+  if(this->nodes->present(order)) 
+  {
     assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
@@ -397,12 +408,13 @@ template<typename Scalar>
 void MagFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
 {
   for (int i = 0; i < n; i++)
-	{
-		result[i] = 0;
-		for(unsigned int j = 0; j < values.size(); j++)
-			result[i] += sqr(values.at(j)[i]);
-		result[i] = sqrt(result[i]);
-	}
+
+  {
+    result[i] = 0;
+    for(unsigned int j = 0; j < values.size(); j++)
+      result[i] += sqr(values.at(j)[i]);
+    result[i] = sqrt(result[i]);
+  }
 };
 
 template<typename Scalar>
@@ -412,8 +424,8 @@ MagFilter<Scalar>::MagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, He
 
 template<typename Scalar>
 MagFilter<Scalar>::MagFilter(MeshFunction<Scalar>* sln1, int item1)
-         : SimpleFilter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(sln1, sln1), 
-                        Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
+  : SimpleFilter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(sln1, sln1), 
+  Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
 {
   if (sln1->get_num_components() < 2)
     error("The single-argument constructor is intended for vector-valued solutions.");
@@ -433,10 +445,11 @@ DiffFilter<Scalar>::DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, 
 template<typename Scalar>
 void SumFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
 {
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) 
+  {
     result[i] = 0;
-		for (unsigned int j = 0; j < values.size(); j++)
-			result[i] += values.at(j)[i];
+    for (unsigned int j = 0; j < values.size(); j++)
+      result[i] += values.at(j)[i];
   }
 };
 
@@ -455,98 +468,74 @@ template<>
 void SquareFilter<std::complex<double> >::filter_fn(int n, Hermes::vector<std::complex<double> *> v1, std::complex<double> * result)
 {
   for (int i = 0; i < n; i++)
-		result[i] = std::norm(v1.at(0)[i]);
+    result[i] = std::norm(v1.at(0)[i]);
 };
 
 template<typename Scalar>
 SquareFilter<Scalar>::SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
-          : SimpleFilter<Scalar>(solutions, items)
+  : SimpleFilter<Scalar>(solutions, items)
 {
-	if (solutions.size() > 1)
+  if (solutions.size() > 1)
     error("SquareFilter only supports one MeshFunction.");
 };
 
 
 void RealFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
 {
-#ifndef H2D_COMPLEX
-  memcpy(result, v1.at(0), sizeof(std::complex<double>) * n);
-#else
   for (int i = 0; i < n; i++)
     result[i] = v1.at(0)[i].real();
-#endif
 };
 
 RealFilter::RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter<std::complex<double> >(solutions, items)
+  : SimpleFilter<std::complex<double> >(solutions, items)
 {
-	if (solutions.size() > 1)
-		error("RealFilter only supports one MeshFunction.");
+  if (solutions.size() > 1)
+    error("RealFilter only supports one MeshFunction.");
 };
 
 
 void ImagFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
 {
-#ifndef H2D_COMPLEX
-  memset(result, 0, sizeof(std::complex<double>) * n);
-#else
   for (int i = 0; i < n; i++)
     result[i] = v1.at(0)[i].imag();
-#endif
 };
 
 ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-          : SimpleFilter<std::complex<double> >(solutions, items)
+  : SimpleFilter<std::complex<double> >(solutions, items)
 {
-	if (solutions.size() > 1)
-		error("RealFilter only supports one MeshFunction.");
+  if (solutions.size() > 1)
+    error("RealFilter only supports one MeshFunction.");
 };
 
 
-void AbsFilter::filter_fn(int n,  Hermes::vector<scalar*> v1, double* result)
+void AbsFilter::filter_fn(int n,  Hermes::vector<std::complex<double>*> v1, double* result)
 {
   for (int i = 0; i < n; i++)
-#ifndef H2D_COMPLEX
-		result[i] = fabs(v1.at(0)[i]);
-#else
-		result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));
-#endif
+    result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));
 };
 
-AbsFilter::AbsFilter(Hermes::vector<MeshFunction<scalar>*> solutions, Hermes::vector<int> items)
-          : SimpleFilter<scalar>(solutions, items)
+AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
+  : SimpleFilter<std::complex<double> >(solutions, items)
 {
-		if (solutions.size() > 1)
-		error("RealFilter only supports one MeshFunction.");
+  if (solutions.size() > 1)
+    error("RealFilter only supports one MeshFunction.");
 };
 
 
 void AngleFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
 {
-#ifndef H2D_COMPLEX
-  for (int i = 0; i < n; i++)
-    result[i] = 0.0;
-#else
   for (int i = 0; i < n; i++)
     result[i] = atan2( v1.at(0)[i].imag(), v1.at(0)[i].real() );
-#endif
 };
 
 AngleFilter::AngleFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
   : SimpleFilter<std::complex<double> >(solutions, items)
 {
-	if (solutions.size() > 1)
-		error("RealFilter only supports one MeshFunction.");
+  if (solutions.size() > 1)
+    error("RealFilter only supports one MeshFunction.");
 };
 
 //// VonMisesFilter ////////////////////////////////////////////////////////////////////////////////
-
-#ifndef H2D_COMPLEX
-  #define getval(exp) (exp)
-#else
-  #define getval(exp) (exp.real())
-#endif
-
 void VonMisesFilter::precalculate(int order, int mask)
 {
   if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
@@ -554,15 +543,15 @@ void VonMisesFilter::precalculate(int order, int mask)
 
   Quad2D* quad = this->quads[this->cur_quad];
   int np = quad->get_num_points(order);
-  Filter<scalar>::Node* node = new_node(H2D_FN_VAL_0, np);
+  Filter<double>::Node* node = new_node(H2D_FN_VAL_0, np);
 
   this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
   this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
 
-  scalar *dudx, *dudy, *dvdx, *dvdy;
+  double *dudx, *dudy, *dvdx, *dvdy;
   this->sln[0]->get_dx_dy_values(dudx, dudy);
   this->sln[1]->get_dx_dy_values(dvdx, dvdy);
-  scalar *uval = this->sln[0]->get_fn_values();
+  double *uval = this->sln[0]->get_fn_values();
   update_refmap();
   double *x = refmap->get_phys_x(order);
 
@@ -570,17 +559,18 @@ void VonMisesFilter::precalculate(int order, int mask)
   for (int i = 0; i < np; i++)
   {
     // stress tensor
-    double tz = lambda*(getval(dudx[i]) + getval(dvdy[i]));
-    double tx = tz + 2*mu*getval(dudx[i]);
-    double ty = tz + 2*mu*getval(dvdy[i]);
-    if (cyl) tz += 2*mu*getval(uval[i]) / x[i];
-    double txy = mu*(getval(dudy[i]) + getval(dvdx[i]));
+    double tz = lambda*(dudx[i] + dvdy[i]);
+    double tx = tz + 2*mu*dudx[i];
+    double ty = tz + 2*mu*dvdy[i];
+    if (cyl) tz += 2*mu*uval[i] / x[i];
+    double txy = mu*(dudy[i] + dvdx[i]);
 
     // Von Mises stress
     node->values[0][0][i] = 1.0/sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6*sqr(txy));
   }
 
-  if(this->nodes->present(order)) {
+  if(this->nodes->present(order)) 
+  {
     assert(this->nodes->get(order) == cur_node);
     ::free(this->nodes->get(order));
   }
@@ -588,9 +578,9 @@ void VonMisesFilter::precalculate(int order, int mask)
   cur_node = node;
 }
 
-VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunction<scalar>*> solutions, double lambda, double mu,
-                               int cyl, int item1, int item2)
-       : Filter<scalar>(solutions)
+VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
+  int cyl, int item1, int item2)
+  : Filter<double>(solutions)
 {
   this->mu = mu;
   this->lambda = lambda;
@@ -616,7 +606,7 @@ void LinearFilter<Scalar>::precalculate(int order, int mask)
   for (int j = 0; j < this->num_components; j++)
   {
     // obtain solution tables
-    scalar *val[4], *dx[4], *dy[4];
+    Scalar *val[4], *dx[4], *dy[4];
     for (int i = 0; i < this->num; i++)
     {
       val[i] = this->sln[i]->get_fn_values(j);
@@ -640,7 +630,8 @@ void LinearFilter<Scalar>::precalculate(int order, int mask)
 
   }
 
-  if(this->nodes->present(order)) {
+  if(this->nodes->present(order)) 
+  {
     assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
@@ -650,17 +641,17 @@ void LinearFilter<Scalar>::precalculate(int order, int mask)
 
 template<typename Scalar>
 LinearFilter<Scalar>::LinearFilter(MeshFunction<Scalar>* old) // : Filter(old)
- {
-   init_components();
- }
+{
+  init_components();
+}
 
 template<typename Scalar>
 LinearFilter<Scalar>::LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac)
-          : Filter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(older, old))
- {
-   this->tau_frac = tau_frac;
-   init_components();
- }
+  : Filter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(older, old))
+{
+  this->tau_frac = tau_frac;
+  init_components();
+}
 
 template<typename Scalar>
 void LinearFilter<Scalar>::init_components()

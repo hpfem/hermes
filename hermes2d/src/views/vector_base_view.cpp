@@ -78,18 +78,18 @@ void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
 {
   switch (key)
   {
-    case GLUT_KEY_LEFT:
-      if (base_index > -1) base_index--;
-      update_solution();
-      break;
+  case GLUT_KEY_LEFT:
+    if (base_index > -1) base_index--;
+    update_solution();
+    break;
 
-    case GLUT_KEY_RIGHT:
-      if (base_index < ndof-1) base_index++;
-      update_solution();
-      break;
+  case GLUT_KEY_RIGHT:
+    if (base_index < ndof-1) base_index++;
+    update_solution();
+    break;
 
-    default:
-      VectorView<Scalar>::on_special_key(key, x, y);
+  default:
+    VectorView<Scalar>::on_special_key(key, x, y);
   }
 }
 
@@ -98,24 +98,25 @@ template<typename Scalar>
 const char* VectorBaseView<Scalar>::get_help_text() const
 {
   return
-  "VectorBaseView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  Left arrow - previous basis function\n"
-  "  Right arrow - next basis function\n"
-  "  C - center image\n"
-  "  F - toggle smooth palette\n"
-  "  X - toggle hexagonal grid\n"
-  "  H - render high-quality frame\n"
-  "  M - toggle mesh\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit";
+    "VectorBaseView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  Left arrow - previous basis function\n"
+    "  Right arrow - next basis function\n"
+    "  C - center image\n"
+    "  F - toggle smooth palette\n"
+    "  X - toggle hexagonal grid\n"
+    "  H - render high-quality frame\n"
+    "  M - toggle mesh\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit";
 }
 
 #endif // NOGLUT
 
-template class HERMES_API VectorBaseView<scalar>;
+template class HERMES_API VectorBaseView<double>;
+template class HERMES_API VectorBaseView<std::complex<double> >;
 

@@ -23,7 +23,7 @@
 //// StreamView /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 StreamView<Scalar>::StreamView(const char* title, WinGeom* wg)
-          : View(title, wg)
+  : View(title, wg)
 {
   lines = false;
   pmode = false;
@@ -37,7 +37,7 @@ StreamView<Scalar>::StreamView(const char* title, WinGeom* wg)
 
 template<typename Scalar>
 StreamView<Scalar>::StreamView(char* title, WinGeom* wg)
-          : View(title, wg)
+  : View(title, wg)
 {
   lines = false;
   pmode = false;
@@ -418,7 +418,8 @@ void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* 
   vec.process_solution(xsln, xitem, ysln, yitem, eps);
 
   vec.lock_data();
-  if (range_auto) {
+  if (range_auto) 
+  {
     range_min = vec.get_min_value();
     range_max = vec.get_max_value();
   }
@@ -584,38 +585,38 @@ void StreamView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
-    case 'm':
-      lines = !lines;
-      refresh();
-      break;
+  case 'm':
+    lines = !lines;
+    refresh();
+    break;
 
-    case 'l':
-      pmode = !pmode;
-      refresh();
-      break;
+  case 'l':
+    pmode = !pmode;
+    refresh();
+    break;
 
-    case 'c':
-      reset_view(true);
-      refresh();
-      break;
+  case 'c':
+    reset_view(true);
+    refresh();
+    break;
 
-    case 'f':
-      set_palette_filter(pal_filter != GL_LINEAR);
-      break;
+  case 'f':
+    set_palette_filter(pal_filter != GL_LINEAR);
+    break;
 
     // delete last streamline
-    case 26: // ctrl z
-      if (num_stream > 0)
-      {
-        num_stream--;
-        delete [] streamlines[num_stream];
-        refresh();
-      }
-      break;
+  case 26: // ctrl z
+    if (num_stream > 0)
+    {
+      num_stream--;
+      delete [] streamlines[num_stream];
+      refresh();
+    }
+    break;
 
-    default:
-      View::on_key_down(key, x, y);
-      break;
+  default:
+    View::on_key_down(key, x, y);
+    break;
   }
 }
 
@@ -643,20 +644,20 @@ template<typename Scalar>
 const char* StreamView<Scalar>::get_help_text() const
 {
   return
-  "StreamView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  CTRL + Left mouse click - add steamline\n"
-  "  CTRL z - delete last streamline\n"
-  "  C - center image\n"
-  "  F - toggle smooth palette\n"
-  "  H - render high-quality frame\n"
-  "  M - toggle mesh\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit";
+    "StreamView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  CTRL + Left mouse click - add steamline\n"
+    "  CTRL z - delete last streamline\n"
+    "  C - center image\n"
+    "  F - toggle smooth palette\n"
+    "  H - render high-quality frame\n"
+    "  M - toggle mesh\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit";
 }
 
 
@@ -673,4 +674,5 @@ StreamView<Scalar>::~StreamView()
 
 #endif // NOGLUT
 
-template class HERMES_API StreamView<scalar>;
+template class HERMES_API StreamView<double>;
+template class HERMES_API StreamView<std::complex<double> >;

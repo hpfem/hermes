@@ -21,7 +21,7 @@
 #include <cmath>
 #include <list>
 #include "h2d_common.h"
-#include "scalar_view.h"
+#include "Scalar_view.h"
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -72,18 +72,18 @@ void ScalarView<Scalar>::init()
 #ifndef _MSC_VER
 template<typename Scalar>
 ScalarView<Scalar>::ScalarView(const char* title, WinGeom* wg) :
-    View(title, wg),
-    vertex_nodes(0),
-    pointed_vertex_node(NULL),
-    allow_node_selection(false),
-    pointed_node_widget(0),
-    selected_node_widget(0),
-    node_pixel_radius(10),
-    node_widget_vert_cnt(32),
-    element_id_widget(0),
-    show_element_info(false)
+View(title, wg),
+  vertex_nodes(0),
+  pointed_vertex_node(NULL),
+  allow_node_selection(false),
+  pointed_node_widget(0),
+  selected_node_widget(0),
+  node_pixel_radius(10),
+  node_widget_vert_cnt(32),
+  element_id_widget(0),
+  show_element_info(false)
 #ifdef ENABLE_VIEWER_GUI
-           , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
+  , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
 #endif
 {
   init();
@@ -92,18 +92,18 @@ ScalarView<Scalar>::ScalarView(const char* title, WinGeom* wg) :
 
 template<typename Scalar>
 ScalarView<Scalar>::ScalarView(char* title, WinGeom* wg) :
-    View(title, wg),
-    vertex_nodes(0),
-    pointed_vertex_node(NULL),
-    allow_node_selection(false),
-    pointed_node_widget(0),
-    selected_node_widget(0),
-    node_pixel_radius(10),
-    node_widget_vert_cnt(32),
-    element_id_widget(0),
-    show_element_info(false)
+View(title, wg),
+  vertex_nodes(0),
+  pointed_vertex_node(NULL),
+  allow_node_selection(false),
+  pointed_node_widget(0),
+  selected_node_widget(0),
+  node_pixel_radius(10),
+  node_widget_vert_cnt(32),
+  element_id_widget(0),
+  show_element_info(false)
 #ifdef ENABLE_VIEWER_GUI
-           , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
+  , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
 #endif
 {
   init();
@@ -139,7 +139,8 @@ void ScalarView<Scalar>::on_create(int output_id)
       tw_wnd_id = TwGetCurrentWndID();
       create_setup_bar();
     }
-    else {
+    else 
+    {
       error("TW init failed: %s", TwGetLastError());
     }
   }
@@ -175,11 +176,13 @@ void ScalarView<Scalar>::on_close()
     glDeleteLists(element_id_widget, 1);
     element_id_widget = 0;
   }
-  if (gl_coord_buffer != 0) {
+  if (gl_coord_buffer != 0) 
+  {
     glDeleteBuffersARB(1, &gl_coord_buffer);
     gl_coord_buffer = 0;
   }
-  if (gl_index_buffer != 0) {
+  if (gl_index_buffer != 0) 
+  {
     glDeleteBuffersARB(1, &gl_index_buffer);
     gl_index_buffer = 0;
   }
@@ -223,7 +226,7 @@ void ScalarView<Scalar>::create_setup_bar()
 
 template<typename Scalar>
 void ScalarView<Scalar>::show(MeshFunction<Scalar>* sln, double eps, int item,
-                      MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
+  MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
 {
   // For preservation of the sln's active element. Will be set back after the visualization.
   Element* active_element = sln->get_active_element();
@@ -246,13 +249,13 @@ void ScalarView<Scalar>::show(MeshFunction<Scalar>* sln, double eps, int item,
   wait_for_draw();
   // FIXME: find out why this has to be called after wait_for_draw in order for the view to be reset initially.
   reset_view(false); // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
-                     // it would disallow the observation of the process from a manually set viewpoint.
+  // it would disallow the observation of the process from a manually set viewpoint.
   refresh();
 
   verbose("Showing data in view \"%s\"", title.c_str());
   verbose(" Used value range [%g; %g]", range_min, range_max);
   verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
-  
+
   // Now we reset the active element if it was set before the MeshFunction sln entered this method.
   // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
   if(dynamic_cast<Solution<Scalar>*>(sln) != NULL)
@@ -275,7 +278,7 @@ void ScalarView<Scalar>::show_linearizer_data(double eps, int item)
   wait_for_draw();
   // FIXME: find out why this has to be called after wait_for_draw in order for the view to be reset initially.
   reset_view(false); // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
-                     // it would disallow the observation of the process from a manually set viewpoint.
+  // it would disallow the observation of the process from a manually set viewpoint.
   refresh();
 
   verbose("Showing data in view \"%s\"", title.c_str());
@@ -284,11 +287,13 @@ void ScalarView<Scalar>::show_linearizer_data(double eps, int item)
 }
 
 template<typename Scalar>
-void ScalarView<Scalar>::update_mesh_info() {
+void ScalarView<Scalar>::update_mesh_info() 
+{
   // Calculate normals if necessary.
   if (mode3d)
     calculate_normals(lin.get_vertices(), lin.get_num_vertices(), lin.get_triangles(), lin.get_num_triangles());
-  else {
+  else 
+  {
     delete[] normals;
     normals = NULL;
   }
@@ -298,12 +303,14 @@ void ScalarView<Scalar>::update_mesh_info() {
   double vert_max = lin.get_max_value();
   // Special case: constant function; offset the lower limit of range so that the domain is drawn under the
   // function and also the scale is drawn correctly.
-  if ((vert_max - vert_min) < 1e-8) {
+  if ((vert_max - vert_min) < 1e-8) 
+  {
     is_constant = true;
     vert_min -= 0.5;
   }
 
-  if (range_auto) {
+  if (range_auto) 
+  {
     range_min = vert_min;
     range_max = vert_max;
   }
@@ -327,9 +334,9 @@ void ScalarView<Scalar>::update_mesh_info() {
       value_range_avg += range_min;
     else
       value_range_avg += verts[i][2];
-  value_range_avg /= num_verts;
+    value_range_avg /= num_verts;
 
-  lin_updated = true;
+    lin_updated = true;
 }
 
 template<typename Scalar>
@@ -719,7 +726,7 @@ void ScalarView<Scalar>::draw_tri_contours(double3* vert, int3* tri)
     cont_step *= 10;
   while(std::abs(val - vert[idx[r2]][2]) < 2E-2 * cont_step)
     cont_step /= 10;
- 
+
   while (val < vert[idx[r2]][2])
   {
     double ld = vert[idx[l2]][2] - vert[idx[l1]][2];
@@ -737,7 +744,7 @@ void ScalarView<Scalar>::draw_tri_contours(double3* vert, int3* tri)
       double y2 = (1.0 - rt) * vert[idx[r1]][1] + rt * vert[idx[r2]][1];
 
       if (perm & 1) { glVertex2d(x1, y1); glVertex2d(x2, y2); }
-               else { glVertex2d(x2, y2); glVertex2d(x1, y1); }
+      else { glVertex2d(x2, y2); glVertex2d(x1, y1); }
 
       val += cont_step;
     }
@@ -753,7 +760,8 @@ void ScalarView<Scalar>::prepare_gl_geometry()
   {
     lin_updated = false;
 
-    try {
+    try 
+    {
       //get input data
       int vert_cnt = lin.get_num_vertices();
       double3* verts = lin.get_vertices();
@@ -765,7 +773,8 @@ void ScalarView<Scalar>::prepare_gl_geometry()
         throw std::runtime_error("ARB_vertex_buffer_object not supported");
 
       //reallocate indices
-      if (gl_index_buffer == 0 || tri_cnt > max_gl_tris) {
+      if (gl_index_buffer == 0 || tri_cnt > max_gl_tris) 
+      {
         if (gl_index_buffer == 0)
           glGenBuffersARB(1, &gl_index_buffer);
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, gl_index_buffer);
@@ -775,14 +784,15 @@ void ScalarView<Scalar>::prepare_gl_geometry()
           throw std::runtime_error("unable to allocate vertex buffer: " + err);
         max_gl_tris = tri_cnt;
       }
-      else {
+      else 
+      {
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, gl_index_buffer);
       }
 
       //fill indices
       GLuint* gl_triangle = (GLuint*)glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
       if (gl_triangle == NULL)
-          throw std::runtime_error("unable to map index buffer: " + glGetError());
+        throw std::runtime_error("unable to map index buffer: " + glGetError());
       gl_tri_cnt = 0;
       for(int i = 0; i < tri_cnt; i++)
       {
@@ -802,7 +812,8 @@ void ScalarView<Scalar>::prepare_gl_geometry()
       glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
 
       //reallocate vertices
-      if (gl_coord_buffer == 0 || vert_cnt > max_gl_verts) {
+      if (gl_coord_buffer == 0 || vert_cnt > max_gl_verts) 
+      {
         if (gl_coord_buffer == 0)
           glGenBuffersARB(1, &gl_coord_buffer);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
@@ -812,20 +823,22 @@ void ScalarView<Scalar>::prepare_gl_geometry()
           throw std::runtime_error("unable to allocate coord buffer: " + err);
         max_gl_verts = vert_cnt;
       }
-      else {
+      else 
+      {
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
       }
 
       //fill vertices
       GLVertex2* gl_verts = (GLVertex2*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
       if (gl_verts == NULL)
-          throw std::runtime_error("unable to map coord buffer: " + glGetError());
+        throw std::runtime_error("unable to map coord buffer: " + glGetError());
       for(int i = 0; i < vert_cnt; i++)
         gl_verts[i] = GLVertex2((float)verts[i][0], (float)verts[i][1], (float)((verts[i][2] - range_min) * value_irange));
       glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 
       //allocate edge indices
-      if (gl_edge_inx_buffer == 0) {
+      if (gl_edge_inx_buffer == 0) 
+      {
         glGenBuffersARB(1, &gl_edge_inx_buffer);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_edge_inx_buffer);
         glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLuint) * H2DV_GL_MAX_EDGE_BUFFER * 2, NULL, GL_DYNAMIC_DRAW_ARB);
@@ -894,7 +907,8 @@ void ScalarView<Scalar>::draw_values_2d()
     glEnd();
   }
   else { //render using vertex buffer object
-    if (gl_tri_cnt > 0) {
+    if (gl_tri_cnt > 0) 
+    {
       //bind vertices
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
       glVertexPointer(2, GL_FLOAT, sizeof(GLVertex2), GL_BUFFER_OFFSET(0));
@@ -921,7 +935,8 @@ void ScalarView<Scalar>::draw_values_2d()
 }
 
 template<typename Scalar>
-void ScalarView<Scalar>::draw_edges_2d() {
+void ScalarView<Scalar>::draw_edges_2d() 
+{
   glColor3fv(edges_color);
   bool displayed = false;
   if (gl_edge_inx_buffer != 0) {//VBO
@@ -946,7 +961,8 @@ void ScalarView<Scalar>::draw_edges_2d() {
         }
 
         //render buffer if it is full or if this is the last edge processed
-        if (buffer_inx == (2*H2DV_GL_MAX_EDGE_BUFFER) || (buffer_inx > 0 && i == (edge_cnt-1))) {
+        if (buffer_inx == (2*H2DV_GL_MAX_EDGE_BUFFER) || (buffer_inx > 0 && i == (edge_cnt-1))) 
+        {
           glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 
           //bind vertices and buffers
@@ -982,31 +998,33 @@ void ScalarView<Scalar>::draw_edges_2d() {
 }
 
 template<typename Scalar>
-void ScalarView<Scalar>::draw_normals_3d() {
-    double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
+void ScalarView<Scalar>::draw_normals_3d() 
+{
+  double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
-    glPushAttrib(GL_ENABLE_BIT);
-    glPushMatrix();
+  glPushAttrib(GL_ENABLE_BIT);
+  glPushMatrix();
 
-    const int num_vert = lin.get_num_vertices();
-    double3* vert = lin.get_vertices();
+  const int num_vert = lin.get_num_vertices();
+  double3* vert = lin.get_vertices();
 
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_1D);
-    glScaled(1, 1, -1);
-    glColor3f(0.8f, 0.5f, 0.5f);
-    glBegin(GL_LINES);
-    for(int i = 0; i < num_vert; i++) {
-      double x = (vert[i][0] - xctr) * xzscale;
-      double y = (vert[i][2] - yctr) * yscale;
-      double z = (vert[i][1] - zctr) * xzscale;
-      glVertex3d(x, y, z);
-      glVertex3d(x + 0.1*normals[i][0]*normal_xzscale, y + 0.1*normals[i][2]*normal_yscale, z + 0.1*normals[i][1]*normal_xzscale);
-    }
-    glEnd();
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_1D);
+  glScaled(1, 1, -1);
+  glColor3f(0.8f, 0.5f, 0.5f);
+  glBegin(GL_LINES);
+  for(int i = 0; i < num_vert; i++) 
+  {
+    double x = (vert[i][0] - xctr) * xzscale;
+    double y = (vert[i][2] - yctr) * yscale;
+    double z = (vert[i][1] - zctr) * xzscale;
+    glVertex3d(x, y, z);
+    glVertex3d(x + 0.1*normals[i][0]*normal_xzscale, y + 0.1*normals[i][2]*normal_yscale, z + 0.1*normals[i][1]*normal_xzscale);
+  }
+  glEnd();
 
-    glPopMatrix();
-    glPopAttrib();
+  glPopMatrix();
+  glPopAttrib();
 }
 
 template<typename Scalar>
@@ -1158,7 +1176,8 @@ void ScalarView<Scalar>::on_display()
     // Initialize light and material.
     init_lighting();
 
-    if (do_zoom_to_fit) {
+    if (do_zoom_to_fit) 
+    {
       // If the user presses 'c' to center the view automatically, calculate how far to move
       // the visualized model away from the viewer so that it is completely visible in current window.
       ztrans = calculate_ztrans_to_fit_view();
@@ -1187,8 +1206,8 @@ void ScalarView<Scalar>::on_display()
         glNormal3d(normals[tris[i][j]][0] * normal_xzscale, normals[tris[i][j]][2] * normal_yscale, -normals[tris[i][j]][1] * normal_xzscale);
         glTexCoord2d((vert[tris[i][j]][2] - range_min) * value_irange * tex_scale + tex_shift, 0.0);
         glVertex3d((vert[tris[i][j]][0] - xctr) * xzscale,
-                   (vert[tris[i][j]][2] - yctr) * yscale,
-                   -(vert[tris[i][j]][1] - zctr) * xzscale);
+          (vert[tris[i][j]][2] - yctr) * yscale,
+          -(vert[tris[i][j]][1] - zctr) * xzscale);
       }
     }
     glEnd();
@@ -1204,11 +1223,11 @@ void ScalarView<Scalar>::on_display()
       for (i = 0; i < lin.get_num_edges(); i++)
       {
         glVertex3d((vert[edges[i][0]][0] - xctr) * xzscale,
-                   (vert[edges[i][0]][2] - yctr) * yscale,
-                  -(vert[edges[i][0]][1] - zctr) * xzscale);
+          (vert[edges[i][0]][2] - yctr) * yscale,
+          -(vert[edges[i][0]][1] - zctr) * xzscale);
         glVertex3d((vert[edges[i][1]][0] - xctr) * xzscale,
-                   (vert[edges[i][1]][2] - yctr) * yscale,
-                  -(vert[edges[i][1]][1] - zctr) * xzscale);
+          (vert[edges[i][1]][2] - yctr) * yscale,
+          -(vert[edges[i][1]][1] - zctr) * xzscale);
       }
       glEnd();
     }
@@ -1216,7 +1235,8 @@ void ScalarView<Scalar>::on_display()
     // Draw the whole bounding box or only the boundary edges.
     if (show_aabb)
       draw_aabb();
-    else {
+    else 
+    {
       glColor3fv(edges_color);
       glBegin(GL_LINES);
       for (i = 0; i < lin.get_num_edges(); i++)
@@ -1227,9 +1247,9 @@ void ScalarView<Scalar>::on_display()
         if (edge[2])
         {
           glVertex3d((vert[edge[0]][0] - xctr) * xzscale, y_coord,
-                    -(vert[edge[0]][1] - zctr) * xzscale);
+            -(vert[edge[0]][1] - zctr) * xzscale);
           glVertex3d((vert[edge[1]][0] - xctr) * xzscale, y_coord,
-                    -(vert[edge[1]][1] - zctr) * xzscale);
+            -(vert[edge[1]][1] - zctr) * xzscale);
         }
       }
       glEnd();
@@ -1291,7 +1311,8 @@ void ScalarView<Scalar>::calculate_normals(double3* vert, int num_verts, int3* t
 }
 
 template<typename Scalar>
-void ScalarView<Scalar>::update_layout() {
+void ScalarView<Scalar>::update_layout() 
+{
   View::update_layout();
   // (x,y,-z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
   // and vertically at the position of the average value of all vertices. This point will be the origin for all
@@ -1302,7 +1323,8 @@ void ScalarView<Scalar>::update_layout() {
 }
 
 template<typename Scalar>
-void ScalarView<Scalar>::reset_view(bool force_reset) {
+void ScalarView<Scalar>::reset_view(bool force_reset) 
+{
   if (force_reset || view_not_reset) { // Reset 3d view.
     xrot = 40.0; yrot = 0.0;
     xtrans = ytrans = ztrans = 0.0;
@@ -1359,16 +1381,16 @@ double ScalarView<Scalar>::calculate_ztrans_to_fit_view()
   {
     {
       V0, 1,
-      V1, 1,
-      V2, 1,
-      V3, 1
+        V1, 1,
+        V2, 1,
+        V3, 1
     },
     {
       V4, 1,
-      V5, 1,
-      V6, 1,
-      V7, 1
-    }
+        V5, 1,
+        V6, 1,
+        V7, 1
+      }
   };
   GLdouble aabb_base[16];
 
@@ -1392,7 +1414,8 @@ double ScalarView<Scalar>::calculate_ztrans_to_fit_view()
   // As far as I know, OpenGL can only perform 4x4 matrix multiplication, so we find the 8 transformed bounding box corners by
   // first multiplying the transformation matrix with a matrix having as its 4 columns the coordinates of the bottom base corners
   // and then with a matrix created from the top base corners.
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) 
+  {
     glPushMatrix();
     glMultMatrixd(aabb[i]);
     glGetDoublev( GL_MODELVIEW_MATRIX, aabb_base );
@@ -1400,7 +1423,8 @@ double ScalarView<Scalar>::calculate_ztrans_to_fit_view()
 
     // Go through the transformed corners and find the biggest distance of its perspective projection center to the origin.
     GLdouble *coord_ptr = &aabb_base[0];
-    for (int j = 0; j < 4; j++) {
+    for (int j = 0; j < 4; j++) 
+    {
       double perspective_center_to_origin_dist = fabs(coord_ptr[0]) / tan_fovx_half + coord_ptr[2];
       if (perspective_center_to_origin_dist > optimal_viewpoint_pos)
         optimal_viewpoint_pos = perspective_center_to_origin_dist;
@@ -1433,7 +1457,8 @@ template<typename Scalar>
 void ScalarView<Scalar>::set_min_max_range(double min, double max)
 {
   // TODO: allow settin min = max, in which case draw the corresponding contour.
-  if (fabs(max-min) < 1e-8) {
+  if (fabs(max-min) < 1e-8) 
+  {
     warn("Range (%f,%f) is too narrow: adjusted to (%f,%f)", min, max, min-0.5, max);
     min -= 0.5;
   }
@@ -1452,7 +1477,7 @@ void ScalarView<Scalar>::init_lighting()
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
   glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-//  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  //  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   float material_ambient[]  = { 0.5f, 0.5f, 0.5f, 1.0f };
   float material_diffuse[]  = { 0.8f, 0.8f, 0.8f, 1.0f };
@@ -1466,7 +1491,8 @@ void ScalarView<Scalar>::init_lighting()
 
   glShadeModel(GL_SMOOTH);
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
-  if (GLEW_EXT_separate_specular_color) {
+  if (GLEW_EXT_separate_specular_color) 
+  {
     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
   }
 }
@@ -1480,49 +1506,50 @@ void ScalarView<Scalar>::on_key_down(unsigned char key, int x, int y)
   {
     switch (key)
     {
-      case 'm':
-        show_edges = !show_edges;
-        refresh();
-        break;
+    case 'm':
+      show_edges = !show_edges;
+      refresh();
+      break;
 
-      case 'l':
-        pmode = !pmode;
-        refresh();
-        break;
+    case 'l':
+      pmode = !pmode;
+      refresh();
+      break;
 
-      case 'c':
+    case 'c':
       {
         reset_view(true);
         refresh();
         break;
       }
 
-      case 'f':
-        set_palette_filter(pal_filter != GL_LINEAR);
-        break;
+    case 'f':
+      set_palette_filter(pal_filter != GL_LINEAR);
+      break;
 
-      case 'k':
-        contours = !contours;
+    case 'k':
+      contours = !contours;
+      refresh();
+      break;
+
+    case 'i':
+      show_element_info = !show_element_info;
+      if (!mode3d)
         refresh();
-        break;
+      break;
 
-      case 'i':
-        show_element_info = !show_element_info;
-        if (!mode3d)
-          refresh();
-        break;
+    case 'b':
+      show_aabb = !show_aabb;
+      if (mode3d)
+        refresh();
+      break;
 
-      case 'b':
-        show_aabb = !show_aabb;
-        if (mode3d)
-          refresh();
-        break;
-
-      case '3':
+    case '3':
       {
         mode3d = !mode3d;
         dragging = scaling = false;
-        if (mode3d) {
+        if (mode3d) 
+        {
           lin.lock_data();
           if (normals == NULL)
             calculate_normals(lin.get_vertices(), lin.get_num_vertices(), lin.get_triangles(), lin.get_num_triangles());
@@ -1532,29 +1559,29 @@ void ScalarView<Scalar>::on_key_down(unsigned char key, int x, int y)
         break;
       }
 
-      case '*':
-        lin.lock_data();
-        if (mode3d)
-          yscale *= D3DV_SCALE_STEP_COEF;
-        else if (contours)
-          cont_step *= D3DV_SCALE_STEP_COEF;
-        lin.unlock_data();
-        refresh();
-        break;
+    case '*':
+      lin.lock_data();
+      if (mode3d)
+        yscale *= D3DV_SCALE_STEP_COEF;
+      else if (contours)
+        cont_step *= D3DV_SCALE_STEP_COEF;
+      lin.unlock_data();
+      refresh();
+      break;
 
-      case '/':
-        lin.lock_data();
-        if (mode3d)
-          yscale /= D3DV_SCALE_STEP_COEF;
-        else if (contours)
-          cont_step /= D3DV_SCALE_STEP_COEF;
-        lin.unlock_data();
-        refresh();
-        break;
+    case '/':
+      lin.lock_data();
+      if (mode3d)
+        yscale /= D3DV_SCALE_STEP_COEF;
+      else if (contours)
+        cont_step /= D3DV_SCALE_STEP_COEF;
+      lin.unlock_data();
+      refresh();
+      break;
 
-      default:
-        View::on_key_down(key, x, y);
-        break;
+    default:
+      View::on_key_down(key, x, y);
+      break;
     }
   }
 }
@@ -1574,20 +1601,24 @@ template<typename Scalar>
 void ScalarView<Scalar>::on_mouse_move(int x, int y)
 {
   VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-  if (mode3d && (dragging || scaling || panning)) {
-    if (dragging) {
+  if (mode3d && (dragging || scaling || panning)) 
+  {
+    if (dragging) 
+    {
       yrot += 0.4 * (x - mouse_x);
       xrot += 0.4 * (y - mouse_y);
 
       if (xrot < -90) xrot = -90;
       else if (xrot > 90) xrot = 90;
     }
-    else if (scaling) {
+    else if (scaling) 
+    {
       ztrans += 0.01 * (mouse_y - y);
       if (ztrans > -0.25) ztrans = -0.25;
       else if (ztrans < -7) ztrans = -7;
     }
-    else {
+    else 
+    {
       xtrans += 0.002 * (x - mouse_x);
       ytrans += 0.002 * (mouse_y - y);
     }
@@ -1597,11 +1628,14 @@ void ScalarView<Scalar>::on_mouse_move(int x, int y)
     mouse_y = y;
     return;
   }
-  else {
+  else 
+  {
     VIEWER_GUI_CALLBACK(TwEventMouseMotionGLUT(x, y))
     {
-      if (!mode3d && show_edges && !dragging && !scaling && !panning) {
-        if (allow_node_selection) {
+      if (!mode3d && show_edges && !dragging && !scaling && !panning) 
+      {
+        if (allow_node_selection) 
+        {
           VertexNodeInfo* found_node = find_nearest_node_in_range((float)untransform_x(x), (float)untransform_y(y), (float)(node_pixel_radius / scale));
           if (found_node != pointed_vertex_node)
             pointed_vertex_node = found_node;
@@ -1610,7 +1644,8 @@ void ScalarView<Scalar>::on_mouse_move(int x, int y)
           pointed_vertex_node = NULL;
         refresh();
       }
-      else {
+      else 
+      {
         View::on_mouse_move(x, y);
       }
     }
@@ -1820,31 +1855,32 @@ template<typename Scalar>
 const char* ScalarView<Scalar>::get_help_text() const
 {
   return
-  "ScalarView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  3 - toggle 3D mode\n"
-  "  C - center image\n"
-  "  F - toggle smooth palette\n"
-  "  H - render high-quality frame\n"
-  "  K - toggle contours\n"
-  "  M - toggle mesh\n"
-  "  B - toggle bounding box\n"
-  "  I - toggle element IDs (2d only)\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  * - increase contour density\n"
-  "  / - decrease contour density\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit\n\n"
-  "3D mode:\n"
-  "  Left mouse - rotate\n"
-  "  Right mouse - zoom\n"
-  "  Middle mouse - pan\n"
-  "  * - increase Z scale\n"
-  "  / - decrease Z scale";
+    "ScalarView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  3 - toggle 3D mode\n"
+    "  C - center image\n"
+    "  F - toggle smooth palette\n"
+    "  H - render high-quality frame\n"
+    "  K - toggle contours\n"
+    "  M - toggle mesh\n"
+    "  B - toggle bounding box\n"
+    "  I - toggle element IDs (2d only)\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  * - increase contour density\n"
+    "  / - decrease contour density\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit\n\n"
+    "3D mode:\n"
+    "  Left mouse - rotate\n"
+    "  Right mouse - zoom\n"
+    "  Middle mouse - pan\n"
+    "  * - increase Z scale\n"
+    "  / - decrease Z scale";
 }
-template class HERMES_API ScalarView<scalar>;
+template class HERMES_API ScalarView<double>;
+template class HERMES_API ScalarView<std::complex<double> >;
 
 #endif // NOGLUT

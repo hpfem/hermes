@@ -95,14 +95,14 @@ static void move_to_son(Rect* rnew, Rect* rold, int son)
 
   switch (son)
   {
-    case 0: rnew->r = hmid; rnew->t = vmid; break;
-    case 1: rnew->l = hmid; rnew->t = vmid; break;
-    case 2: rnew->l = hmid; rnew->b = vmid; break;
-    case 3: rnew->r = hmid; rnew->b = vmid; break;
-    case 4: rnew->t = vmid; break;
-    case 5: rnew->b = vmid; break;
-    case 6: rnew->r = hmid; break;
-    case 7: rnew->l = hmid; break;
+  case 0: rnew->r = hmid; rnew->t = vmid; break;
+  case 1: rnew->l = hmid; rnew->t = vmid; break;
+  case 2: rnew->l = hmid; rnew->b = vmid; break;
+  case 3: rnew->r = hmid; rnew->b = vmid; break;
+  case 4: rnew->t = vmid; break;
+  case 5: rnew->b = vmid; break;
+  case 6: rnew->r = hmid; break;
+  case 7: rnew->l = hmid; break;
   }
 }
 
@@ -183,11 +183,11 @@ void Traverse::set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos)
 
   for (unsigned int i = 0; i < base->nvert; i++)
   {
-      int j = base->next_vert(i);
-      surf_pos[i].v1 = base->vn[i]->id;
-      surf_pos[i].v2 = base->vn[j]->id;
-      surf_pos[i].marker = e->en[i]->marker;
-      surf_pos[i].surf_num = i;
+    int j = base->next_vert(i);
+    surf_pos[i].v1 = base->vn[i]->id;
+    surf_pos[i].v2 = base->vn[j]->id;
+    surf_pos[i].marker = e->en[i]->marker;
+    surf_pos[i].surf_num = i;
   }
 }
 
@@ -197,7 +197,7 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
   while (1)
   {
     int i, j, son;
-		// When the stack of states is not empty (i.e. not at the beginning) the function starts here.
+    // When the stack of states is not empty (i.e. not at the beginning) the function starts here.
     // If the top state was visited already, we are returning through it:
     // undo all its transformations, pop it and continue with a non-visited one
     State* s;
@@ -205,11 +205,11 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     {
       if (fn != NULL)
       {
-				// For every mesh.
+        // For every mesh.
         for (i = 0; i < num; i++)
           if (s->e[i] != NULL)
           {
-						// If the element on i-th mesh is transformed to a subelement.
+            // If the element on i-th mesh is transformed to a subelement.
             if (s->trans[i] > 0)
             {
               if (fn[i]->get_transform() == subs[i])
@@ -221,56 +221,57 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
               fn[i]->reset_transform();
           }
       }
-			// Since we are about to process this state and return its elements, we want to take it out of the stack,
-			// i.e. to lower the stack's top.
+      // Since we are about to process this state and return its elements, we want to take it out of the stack,
+      // i.e. to lower the stack's top.
       top--;
     }
 
     // The stack is empty, take next base element
-		// The process starts here (at the beginning the stack is always empty, i.e. top == 0)
+    // The process starts here (at the beginning the stack is always empty, i.e. top == 0)
     if (top <= 0)
     {
       // Push the state of a new base element.
-			// This function only allocates memory for the new state,
-			// with as many Elements* as there are meshes in this stage.
-			// (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
+      // This function only allocates memory for the new state,
+      // with as many Elements* as there are meshes in this stage.
+      // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
       s = push_state();
       static const Rect H2D_UNITY = { 0, 0, ONE, ONE };
       s->cr = H2D_UNITY;
       while (1)
       {
         // No more base elements? we're finished.
-				// Id is set to zero at the beginning by the function trav.begin(..).
+        // Id is set to zero at the beginning by the function trav.begin(..).
         if (id >= meshes[0]->get_num_base_elements())
           return NULL;
         int nused = 0;
-				// The variable num is the number of meshes in the stage
+        // The variable num is the number of meshes in the stage
         for (i = 0; i < num; i++)
         {
-					// Retrieve the Element with this id on the i-th mesh.
+          // Retrieve the Element with this id on the i-th mesh.
           s->e[i] = meshes[i]->get_element(id);
           if (!s->e[i]->used)
-					{
-						s->e[i] = NULL;
-						continue;
-					}
+
+          {
+            s->e[i] = NULL;
+            continue;
+          }
           if (s->e[i]->active && fn != NULL)
-						// Important, sets the active element for all functions that share the i-th mesh
+            // Important, sets the active element for all functions that share the i-th mesh
             // (PrecalcShapesets, Solutions from previous time/Newton iterations)
-						fn[i]->set_active_element(s->e[i]);
+            fn[i]->set_active_element(s->e[i]);
           s->er[i] = H2D_UNITY;
           subs[i] = 0;
           nused++;
           base = s->e[i];
         }
-				// If there is any used element in this stage we continue with the calculation
-				// (break this cycle looking for such an element id).
+        // If there is any used element in this stage we continue with the calculation
+        // (break this cycle looking for such an element id).
         if (nused)
-					break;
+          break;
         id++;
       }
 
-			// Sets necessary things for when the new base element is a triangle.
+      // Sets necessary things for when the new base element is a triangle.
       tri = base->is_triangle();
       id++;
 
@@ -289,25 +290,25 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     s->visited = true;
     if (fn != NULL)
     {
-			// For every mesh of this stage..
+      // For every mesh of this stage..
       for (i = 0; i < num; i++)
-				// ..where the element is used ..
+        // ..where the element is used ..
         if (s->e[i] != NULL)
         {
-					// ..if the element on i-th mesh is inactive (we have to go down)..
+          // ..if the element on i-th mesh is inactive (we have to go down)..
           if (s->trans[i] > 0)
           {
             if (fn[i]->get_transform() == subs[i])
               fn[i]->push_transform(s->trans[i]-1);
             subs[i] = fn[i]->get_transform();
           }
-					// ..and when it is active we have to activate on it all functions on i-th mesh
+          // ..and when it is active we have to activate on it all functions on i-th mesh
           // (PrecalcShapesets, Solutions from previous time/Newton iterations)
           else if (s->trans[i] < 0)
           {
             fn[i]->set_active_element(s->e[i]);
             if (!tri)
-							init_transforms(fn[i], &s->cr, s->er + i);
+              init_transforms(fn[i], &s->cr, s->er + i);
             subs[i] = fn[i]->get_transform();
           }
         }
@@ -318,168 +319,169 @@ Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     for (i = 0; i < num; i++)
       if (s->e[i] != NULL)
         if (!s->e[i]->active)
-				{
-					leaf = false;
-					break;
-				}
 
-    // if yes, set boundary flags and return the state
-    if (leaf)
-    {
-      if (bnd != NULL)
-        set_boundary_info(s, bnd, surf_pos);
-      return s->e;
-    }
-
-    // Triangle: push son states
-    if (tri)
-    {
-			// Triangle always has 4 sons.
-      for (son = 0; son <= 3; son++)
-      {
-        State* ns = push_state();
-				// For every mesh..
-        for (i = 0; i < num; i++)
         {
-					// ..if the element is not used.
-          if (s->e[i] == NULL)
-          {
-            ns->e[i] = NULL;
-          }
-					// ..if the current element is active.
-          else if (s->e[i]->active)
-          {
-            ns->e[i] = s->e[i];
-            ns->trans[i] = son+1;
-          }
-					// ..we move to the son.
-          else
-          {
-            ns->e[i] = s->e[i]->sons[son];
-						// If the son's element is active.
-            if (ns->e[i]->active)
-							ns->trans[i] = -1;
-          }
+          leaf = false;
+          break;
         }
 
-        // Determine boundary flags and positions for the new state.
-        if (son < 3)
+        // if yes, set boundary flags and return the state
+        if (leaf)
         {
-          memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
-          memcpy(ns->lo, s->lo, sizeof(ns->lo));
-          memcpy(ns->hi, s->hi, sizeof(ns->hi));
+          if (bnd != NULL)
+            set_boundary_info(s, bnd, surf_pos);
+          return s->e;
+        }
 
-          #define mid(n) ((s->lo[n] + s->hi[n]) / 2)
-          switch (son)
+        // Triangle: push son states
+        if (tri)
+        {
+          // Triangle always has 4 sons.
+          for (son = 0; son <= 3; son++)
           {
-            case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
-            case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
-            case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+            State* ns = push_state();
+            // For every mesh..
+            for (i = 0; i < num; i++)
+            {
+              // ..if the element is not used.
+              if (s->e[i] == NULL)
+              {
+                ns->e[i] = NULL;
+              }
+              // ..if the current element is active.
+              else if (s->e[i]->active)
+              {
+                ns->e[i] = s->e[i];
+                ns->trans[i] = son+1;
+              }
+              // ..we move to the son.
+              else
+              {
+                ns->e[i] = s->e[i]->sons[son];
+                // If the son's element is active.
+                if (ns->e[i]->active)
+                  ns->trans[i] = -1;
+              }
+            }
+
+            // Determine boundary flags and positions for the new state.
+            if (son < 3)
+            {
+              memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
+              memcpy(ns->lo, s->lo, sizeof(ns->lo));
+              memcpy(ns->hi, s->hi, sizeof(ns->hi));
+
+#define mid(n) ((s->lo[n] + s->hi[n]) / 2)
+              switch (son)
+              {
+              case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
+              case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
+              case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+              }
+            }
+            else
+            {
+              memset(ns->bnd, 0, sizeof(ns->bnd));
+            }
           }
         }
+        // Quad: this is a little more complicated, same principle, though.
         else
         {
-          memset(ns->bnd, 0, sizeof(ns->bnd));
-        }
-      }
-    }
-    // Quad: this is a little more complicated, same principle, though.
-    else
-    {
-      // Obtain split types and son numbers for the current rectangle on all elements.
-      int split = 0;
-      for (i = 0; i < num; i++)
-        if (s->e[i] != NULL && !s->e[i]->active)
-          split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, sons[i]);
-
-      // Both splits: recur to four sons, similar to triangles.
-      if (split == 3)
-      {
-        for (son = 0; son <= 3; son++)
-        {
-          State* ns = push_state();
-					// Sets the son's "base" rectangle to the correct one.
-          move_to_son(&ns->cr, &s->cr, son);
-
+          // Obtain split types and son numbers for the current rectangle on all elements.
+          int split = 0;
           for (i = 0; i < num; i++)
-          {
-            if (s->e[i] == NULL)
-            {
-              ns->e[i] = NULL;
-            }
-            else if (s->e[i]->active)
-            {
-              ns->e[i] = s->e[i];
-              ns->trans[i] = son+1;
-            }
-            else
-            {
-              ns->e[i] = s->e[i]->sons[sons[i][son] & 3];
-							// Sets the son's "current mesh" rectangle correctly.
-              move_to_son(ns->er + i, s->er + i, sons[i][son]);
-              if (ns->e[i]->active)
-								ns->trans[i] = -1;
-            }
-          }
-        }
-      }
-      // V or h split, recur to two sons.
-      else if (split > 0)
-      {
-        int son0 = 4, son1 = 5;
-        if (split == 2) { son0 = 6; son1 = 7; }
+            if (s->e[i] != NULL && !s->e[i]->active)
+              split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, sons[i]);
 
-        for (son = son0; son <= son1; son++)
-        {
-          State* ns = push_state();
-          move_to_son(&ns->cr, &s->cr, son);
+          // Both splits: recur to four sons, similar to triangles.
+          if (split == 3)
+          {
+            for (son = 0; son <= 3; son++)
+            {
+              State* ns = push_state();
+              // Sets the son's "base" rectangle to the correct one.
+              move_to_son(&ns->cr, &s->cr, son);
 
-          j = (son == 4 || son == 6) ? 0 : 2;
-          for (i = 0; i < num; i++)
-          {
-            if (s->e[i] == NULL)
-            {
-              ns->e[i] = NULL;
-            }
-            else if (s->e[i]->active)
-            {
-              ns->e[i] = s->e[i];
-              ns->trans[i] = son+1;
-            }
-            else
-            {
-              ns->e[i] = s->e[i]->sons[sons[i][j] & 3];
-              move_to_son(ns->er + i, s->er + i, sons[i][j]);
-              if (ns->e[i]->active) ns->trans[i] = -1;
+              for (i = 0; i < num; i++)
+              {
+                if (s->e[i] == NULL)
+                {
+                  ns->e[i] = NULL;
+                }
+                else if (s->e[i]->active)
+                {
+                  ns->e[i] = s->e[i];
+                  ns->trans[i] = son+1;
+                }
+                else
+                {
+                  ns->e[i] = s->e[i]->sons[sons[i][son] & 3];
+                  // Sets the son's "current mesh" rectangle correctly.
+                  move_to_son(ns->er + i, s->er + i, sons[i][son]);
+                  if (ns->e[i]->active)
+                    ns->trans[i] = -1;
+                }
+              }
             }
           }
-        }
-      }
-      // No splits, recur to one son.
-      else
-      {
-        State* ns = push_state();
-        memcpy(&ns->cr, &s->cr, sizeof(Rect));
+          // V or h split, recur to two sons.
+          else if (split > 0)
+          {
+            int son0 = 4, son1 = 5;
+            if (split == 2) { son0 = 6; son1 = 7; }
 
-        for (i = 0; i < num; i++)
-        {
-          if (s->e[i] == NULL)
-          {
-            ns->e[i] = NULL;
+            for (son = son0; son <= son1; son++)
+            {
+              State* ns = push_state();
+              move_to_son(&ns->cr, &s->cr, son);
+
+              j = (son == 4 || son == 6) ? 0 : 2;
+              for (i = 0; i < num; i++)
+              {
+                if (s->e[i] == NULL)
+                {
+                  ns->e[i] = NULL;
+                }
+                else if (s->e[i]->active)
+                {
+                  ns->e[i] = s->e[i];
+                  ns->trans[i] = son+1;
+                }
+                else
+                {
+                  ns->e[i] = s->e[i]->sons[sons[i][j] & 3];
+                  move_to_son(ns->er + i, s->er + i, sons[i][j]);
+                  if (ns->e[i]->active) ns->trans[i] = -1;
+                }
+              }
+            }
           }
-          else if (s->e[i]->active)
-          {
-            ns->e[i] = s->e[i];
-          }
+          // No splits, recur to one son.
           else
           {
-            ns->e[i] = s->e[i]->sons[sons[i][0] & 3];
-            move_to_son(ns->er + i, s->er + i, sons[i][0]);
-            if (ns->e[i]->active) ns->trans[i] = -1;
+            State* ns = push_state();
+            memcpy(&ns->cr, &s->cr, sizeof(Rect));
+
+            for (i = 0; i < num; i++)
+            {
+              if (s->e[i] == NULL)
+              {
+                ns->e[i] = NULL;
+              }
+              else if (s->e[i]->active)
+              {
+                ns->e[i] = s->e[i];
+              }
+              else
+              {
+                ns->e[i] = s->e[i]->sons[sons[i][0] & 3];
+                move_to_son(ns->er + i, s->er + i, sons[i][0]);
+                if (ns->e[i]->active) ns->trans[i] = -1;
+              }
+            }
           }
         }
-      }
-    }
   }
 }
 
@@ -527,11 +529,13 @@ void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
   }
   // take one mesh at a time and compare element areas to the areas[] array
   double tolerance = min_elem_area/100.;
-  for (int i = 1; i < n; i++) {
+  for (int i = 1; i < n; i++) 
+  {
     counter = 0;
     for_all_base_elements(e, meshes[i])
     {
-      if (fabs(areas[counter] - e->get_area()) > tolerance) {
+      if (fabs(areas[counter] - e->get_area()) > tolerance) 
+      {
         printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
         error("Meshes not compatible in Traverse::begin().");
       }
@@ -608,123 +612,129 @@ void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, E
   for (i = 0; i < num; i++)
     if (!e[i]->active) { leaf = false; break; }
 
-  // if yes, store the element transformation indices
-  if (leaf)
-  {
-    if (udsize <= uni->id)
+    // if yes, store the element transformation indices
+    if (leaf)
     {
-      if (!udsize) udsize = 1024;
-      while (udsize <= uni->id) udsize *= 2;
-      for (i = 0; i < num; i++)
-        unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
-    }
-    for (i = 0; i < num; i++)
-    {
-      unidata[i][uni->id].e = e[i];
-      unidata[i][uni->id].idx = idx[i];
-    }
-    return;
-  }
-
-  // state arrays
-  Element** e_new = new Element*[num];
-  Rect* er_new = new Rect[num];
-  Rect cr_new;
-
-  int4* sons = new int4[num];
-  uint64_t* idx_new = new uint64_t[num];
-  memcpy(idx_new, idx, num*sizeof(uint64_t));
-
-  if (tri)
-  {
-    // visit all sons of the triangle
-    unimesh->refine_element_id(uni->id);
-    for (son = 0; son <= 3; son++)
-    {
+      if (udsize <= uni->id)
+      {
+        if (!udsize) udsize = 1024;
+        while (udsize <= uni->id) udsize *= 2;
+        for (i = 0; i < num; i++)
+          unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
+      }
       for (i = 0; i < num; i++)
       {
-        if (e[i]->active) {
-          e_new[i] = e[i];
-          idx_new[i] = (idx[i] << 3) + son + 1;
-        } else
-          e_new[i] = e[i]->sons[son];
+        unidata[i][uni->id].e = e[i];
+        unidata[i][uni->id].idx = idx[i];
       }
-      union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
+      return;
     }
-  }
-  else
-  {
-    // obtain split types and son numbers for the current rectangle on all elements
-    int split = 0;
-    for (i = 0; i < num; i++)
-      if (!e[i]->active)
-        split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
 
-    // both splits: recur to four sons
-    if (split == 3)
+    // state arrays
+    Element** e_new = new Element*[num];
+    Rect* er_new = new Rect[num];
+    Rect cr_new;
+
+    int4* sons = new int4[num];
+    uint64_t* idx_new = new uint64_t[num];
+    memcpy(idx_new, idx, num*sizeof(uint64_t));
+
+    if (tri)
     {
-      unimesh->refine_element_id(uni->id, 0);
-
+      // visit all sons of the triangle
+      unimesh->refine_element_id(uni->id);
       for (son = 0; son <= 3; son++)
       {
-        move_to_son(&cr_new, cr, son);
         for (i = 0; i < num; i++)
         {
-          if (e[i]->active) {
+          if (e[i]->active) 
+          {
             e_new[i] = e[i];
             idx_new[i] = (idx[i] << 3) + son + 1;
-          } else {
-            e_new[i] = e[i]->sons[sons[i][son] & 3];
-            move_to_son(&(er_new[i]), er+i, sons[i][son]);
-            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-          }
+          } else
+            e_new[i] = e[i]->sons[son];
         }
-        union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
+        union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
       }
     }
-    // v or h split, recur to two sons
-    else if (split > 0)
-    {
-      unimesh->refine_element_id(uni->id, split);
-
-      int son0 = 4, son1 = 5;
-      if (split == 2) { son0 = 6; son1 = 7; }
-
-      for (son = son0; son <= son1; son++)
-      {
-        move_to_son(&cr_new, cr, son);
-        j = (son == 4 || son == 6) ? 0 : 2;
-        for (i = 0; i < num; i++)
-        {
-          if (e[i]->active) {
-            e_new[i] = e[i];
-            idx_new[i] = (idx[i] << 3) + son + 1;
-          } else {
-            e_new[i] = e[i]->sons[sons[i][j] & 3];
-            move_to_son(&(er_new[i]), er+i, sons[i][j]);
-            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-          }
-        }
-        union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
-      }
-    }
-    // no splits, recur to one son
     else
     {
-      memcpy(&cr_new, cr, sizeof(Rect));
+      // obtain split types and son numbers for the current rectangle on all elements
+      int split = 0;
       for (i = 0; i < num; i++)
+        if (!e[i]->active)
+          split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
+
+      // both splits: recur to four sons
+      if (split == 3)
       {
-        if (e[i]->active)
-          e_new[i] = e[i];
-        else {
-          e_new[i] = e[i]->sons[sons[i][0] & 3];
-          move_to_son(&(er_new[i]), er+i, sons[i][0]);
-          if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+        unimesh->refine_element_id(uni->id, 0);
+
+        for (son = 0; son <= 3; son++)
+        {
+          move_to_son(&cr_new, cr, son);
+          for (i = 0; i < num; i++)
+          {
+            if (e[i]->active) 
+            {
+              e_new[i] = e[i];
+              idx_new[i] = (idx[i] << 3) + son + 1;
+            } else 
+            {
+              e_new[i] = e[i]->sons[sons[i][son] & 3];
+              move_to_son(&(er_new[i]), er+i, sons[i][son]);
+              if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+            }
+          }
+          union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
         }
       }
-      union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
+      // v or h split, recur to two sons
+      else if (split > 0)
+      {
+        unimesh->refine_element_id(uni->id, split);
+
+        int son0 = 4, son1 = 5;
+        if (split == 2) { son0 = 6; son1 = 7; }
+
+        for (son = son0; son <= son1; son++)
+        {
+          move_to_son(&cr_new, cr, son);
+          j = (son == 4 || son == 6) ? 0 : 2;
+          for (i = 0; i < num; i++)
+          {
+            if (e[i]->active) 
+            {
+              e_new[i] = e[i];
+              idx_new[i] = (idx[i] << 3) + son + 1;
+            } else 
+            {
+              e_new[i] = e[i]->sons[sons[i][j] & 3];
+              move_to_son(&(er_new[i]), er+i, sons[i][j]);
+              if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+            }
+          }
+          union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
+        }
+      }
+      // no splits, recur to one son
+      else
+      {
+        memcpy(&cr_new, cr, sizeof(Rect));
+        for (i = 0; i < num; i++)
+        {
+          if (e[i]->active)
+            e_new[i] = e[i];
+          else 
+          {
+            e_new[i] = e[i]->sons[sons[i][0] & 3];
+            move_to_son(&(er_new[i]), er+i, sons[i][0]);
+            if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+          }
+        }
+        union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
+      }
     }
-  }
 }
 
 

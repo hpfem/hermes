@@ -16,15 +16,15 @@
 #include "precond_ifpack.h"
 
 #ifdef HAVE_IFPACK
-  #include <Ifpack_PointRelaxation.h>
-  #include <Ifpack_BlockRelaxation.h>
-  #include <Ifpack_DenseContainer.h>
-  #include <Ifpack_AdditiveSchwarz.h>
-  #include <Ifpack_ILU.h>
-  #include <Ifpack_ILUT.h>
-  #include <Ifpack_IC.h>
-  #include <Ifpack_ICT.h>
-  #include <Ifpack_Graph_Epetra_CrsGraph.h>
+#include <Ifpack_PointRelaxation.h>
+#include <Ifpack_BlockRelaxation.h>
+#include <Ifpack_DenseContainer.h>
+#include <Ifpack_AdditiveSchwarz.h>
+#include <Ifpack_ILU.h>
+#include <Ifpack_ILUT.h>
+#include <Ifpack_IC.h>
+#include <Ifpack_ICT.h>
+#include <Ifpack_Graph_Epetra_CrsGraph.h>
 #endif
 
 template<typename Scalar>
@@ -112,16 +112,19 @@ void IfpackPrecond<Scalar>::create(Matrix<Scalar> *m)
   EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
   assert(mt != NULL);
   mat = mt;
-  if (strcmp(cls, "point-relax") == 0) {
+  if (strcmp(cls, "point-relax") == 0) 
+  {
     create_point_relax(mat, type);
     apply_params();
     initialize();
   }
-  else if (strcmp(cls, "block-relax") == 0) {
+  else if (strcmp(cls, "block-relax") == 0) 
+  {
     create_block_relax(mat, type);
     apply_params();
   }
-  else if (strcmp(cls, "add-schwartz") == 0) {
+  else if (strcmp(cls, "add-schwartz") == 0) 
+  {
     create_add_schwartz(mat, type, overlap);
     apply_params();
     initialize();
@@ -166,16 +169,20 @@ void IfpackPrecond<Scalar>::create_add_schwartz(EpetraMatrix<Scalar> *a, const c
 {
 
 #ifdef HAVE_IFPACK
-  if (strcasecmp(name, "ilu") == 0) {
+  if (strcasecmp(name, "ilu") == 0) 
+  {
     prec = new Ifpack_AdditiveSchwarz<Ifpack_ILU>(a->mat, overlap);
   }
-  else if (strcasecmp(name, "ilut") == 0) {
+  else if (strcasecmp(name, "ilut") == 0) 
+  {
     prec = new Ifpack_AdditiveSchwarz<Ifpack_ILUT>(a->mat, overlap);
   }
-  else if (strcasecmp(name, "ic") == 0) {
+  else if (strcasecmp(name, "ic") == 0) 
+  {
     prec = new Ifpack_AdditiveSchwarz<Ifpack_IC>(a->mat, overlap);
   }
-  else if (strcasecmp(name, "ict") == 0) {
+  else if (strcasecmp(name, "ict") == 0) 
+  {
     prec = new Ifpack_AdditiveSchwarz<Ifpack_ICT>(a->mat, overlap);
   }
   else

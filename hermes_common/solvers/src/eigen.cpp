@@ -3,7 +3,7 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #ifndef Py_PYTHON_H
-    #error Python headers needed to compile C extensions, please install development version of Python.
+#error Python headers needed to compile C extensions, please install development version of Python.
 #else
 
 #include <stddef.h> /* For offsetof */
@@ -12,122 +12,123 @@
 #endif
 
 #if !defined(WIN32) && !defined(MS_WINDOWS)
-  #ifndef __stdcall
-    #define __stdcall
-  #endif
-  #ifndef __cdecl
-    #define __cdecl
-  #endif
-  #ifndef __fastcall
-    #define __fastcall
-  #endif
+#ifndef __stdcall
+#define __stdcall
+#endif
+#ifndef __cdecl
+#define __cdecl
+#endif
+#ifndef __fastcall
+#define __fastcall
+#endif
 #endif
 
 #ifndef DL_IMPORT
-  #define DL_IMPORT(t) t
+#define DL_IMPORT(t) t
 #endif
 #ifndef DL_EXPORT
-  #define DL_EXPORT(t) t
+#define DL_EXPORT(t) t
 #endif
 
 #ifndef PY_LONG_LONG
-  #define PY_LONG_LONG LONG_LONG
+#define PY_LONG_LONG LONG_LONG
 #endif
 
 #if PY_VERSION_HEX < 0x02040000
-  #define METH_COEXIST 0
-  #define PyDict_CheckExact(op) (Py_TYPE(op) == &PyDict_Type)
-  #define PyDict_Contains(d,o)   PySequence_Contains(d,o)
+#define METH_COEXIST 0
+#define PyDict_CheckExact(op) (Py_TYPE(op) == &PyDict_Type)
+#define PyDict_Contains(d,o)   PySequence_Contains(d,o)
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
-  typedef int Py_ssize_t;
-  #define PY_SSIZE_T_MAX INT_MAX
-  #define PY_SSIZE_T_MIN INT_MIN
-  #define PY_FORMAT_SIZE_T ""
-  #define PyInt_FromSsize_t(z) PyInt_FromLong(z)
-  #define PyInt_AsSsize_t(o)   PyInt_AsLong(o)
-  #define PyNumber_Index(o)    PyNumber_Int(o)
-  #define PyIndex_Check(o)     PyNumber_Check(o)
-  #define PyErr_WarnEx(category, message, stacklevel) PyErr_Warn(category, message)
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#define PY_FORMAT_SIZE_T ""
+#define PyInt_FromSsize_t(z) PyInt_FromLong(z)
+#define PyInt_AsSsize_t(o)   PyInt_AsLong(o)
+#define PyNumber_Index(o)    PyNumber_Int(o)
+#define PyIndex_Check(o)     PyNumber_Check(o)
+#define PyErr_WarnEx(category, message, stacklevel) PyErr_Warn(category, message)
 #endif
 
 #if PY_VERSION_HEX < 0x02060000
-  #define Py_REFCNT(ob) (((PyObject*)(ob))->ob_refcnt)
-  #define Py_TYPE(ob)   (((PyObject*)(ob))->ob_type)
-  #define Py_SIZE(ob)   (((PyVarObject*)(ob))->ob_size)
-  #define PyVarObject_HEAD_INIT(type, size) \
-          PyObject_HEAD_INIT(type) size,
-  #define PyType_Modified(t)
+#define Py_REFCNT(ob) (((PyObject*)(ob))->ob_refcnt)
+#define Py_TYPE(ob)   (((PyObject*)(ob))->ob_type)
+#define Py_SIZE(ob)   (((PyVarObject*)(ob))->ob_size)
+#define PyVarObject_HEAD_INIT(type, size) \
+  PyObject_HEAD_INIT(type) size,
+#define PyType_Modified(t)
 
-  typedef struct {
-     void *buf;
-     PyObject *obj;
-     Py_ssize_t len;
-     Py_ssize_t itemsize;
-     int readonly;
-     int ndim;
-     char *format;
-     Py_ssize_t *shape;
-     Py_ssize_t *strides;
-     Py_ssize_t *suboffsets;
-     void *internal;
-  } Py_buffer;
+typedef struct 
+{
+  void *buf;
+  PyObject *obj;
+  Py_ssize_t len;
+  Py_ssize_t itemsize;
+  int readonly;
+  int ndim;
+  char *format;
+  Py_ssize_t *shape;
+  Py_ssize_t *strides;
+  Py_ssize_t *suboffsets;
+  void *internal;
+} Py_buffer;
 
-  #define PyBUF_SIMPLE 0
-  #define PyBUF_WRITABLE 0x0001
-  #define PyBUF_FORMAT 0x0004
-  #define PyBUF_ND 0x0008
-  #define PyBUF_STRIDES (0x0010 | PyBUF_ND)
-  #define PyBUF_C_CONTIGUOUS (0x0020 | PyBUF_STRIDES)
-  #define PyBUF_F_CONTIGUOUS (0x0040 | PyBUF_STRIDES)
-  #define PyBUF_ANY_CONTIGUOUS (0x0080 | PyBUF_STRIDES)
-  #define PyBUF_INDIRECT (0x0100 | PyBUF_STRIDES)
+#define PyBUF_SIMPLE 0
+#define PyBUF_WRITABLE 0x0001
+#define PyBUF_FORMAT 0x0004
+#define PyBUF_ND 0x0008
+#define PyBUF_STRIDES (0x0010 | PyBUF_ND)
+#define PyBUF_C_CONTIGUOUS (0x0020 | PyBUF_STRIDES)
+#define PyBUF_F_CONTIGUOUS (0x0040 | PyBUF_STRIDES)
+#define PyBUF_ANY_CONTIGUOUS (0x0080 | PyBUF_STRIDES)
+#define PyBUF_INDIRECT (0x0100 | PyBUF_STRIDES)
 
 #endif
 
 #if PY_MAJOR_VERSION < 3
-  #define __Pyx_BUILTIN_MODULE_NAME "__builtin__"
+#define __Pyx_BUILTIN_MODULE_NAME "__builtin__"
 #else
-  #define __Pyx_BUILTIN_MODULE_NAME "builtins"
+#define __Pyx_BUILTIN_MODULE_NAME "builtins"
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-  #define Py_TPFLAGS_CHECKTYPES 0
-  #define Py_TPFLAGS_HAVE_INDEX 0
+#define Py_TPFLAGS_CHECKTYPES 0
+#define Py_TPFLAGS_HAVE_INDEX 0
 #endif
 
 #if (PY_VERSION_HEX < 0x02060000) || (PY_MAJOR_VERSION >= 3)
-  #define Py_TPFLAGS_HAVE_NEWBUFFER 0
+#define Py_TPFLAGS_HAVE_NEWBUFFER 0
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-  #define PyBaseString_Type            PyUnicode_Type
-  #define PyStringObject               PyUnicodeObject
-  #define PyString_Type                PyUnicode_Type
-  #define PyString_Check               PyUnicode_Check
-  #define PyString_CheckExact          PyUnicode_CheckExact
+#define PyBaseString_Type            PyUnicode_Type
+#define PyStringObject               PyUnicodeObject
+#define PyString_Type                PyUnicode_Type
+#define PyString_Check               PyUnicode_Check
+#define PyString_CheckExact          PyUnicode_CheckExact
 #endif
 
 #if PY_VERSION_HEX < 0x02060000
-  #define PyBytesObject                PyStringObject
-  #define PyBytes_Type                 PyString_Type
-  #define PyBytes_Check                PyString_Check
-  #define PyBytes_CheckExact           PyString_CheckExact
-  #define PyBytes_FromString           PyString_FromString
-  #define PyBytes_FromStringAndSize    PyString_FromStringAndSize
-  #define PyBytes_FromFormat           PyString_FromFormat
-  #define PyBytes_DecodeEscape         PyString_DecodeEscape
-  #define PyBytes_AsString             PyString_AsString
-  #define PyBytes_AsStringAndSize      PyString_AsStringAndSize
-  #define PyBytes_Size                 PyString_Size
-  #define PyBytes_AS_STRING            PyString_AS_STRING
-  #define PyBytes_GET_SIZE             PyString_GET_SIZE
-  #define PyBytes_Repr                 PyString_Repr
-  #define PyBytes_Concat               PyString_Concat
-  #define PyBytes_ConcatAndDel         PyString_ConcatAndDel
-  #define PySet_Check(obj)             PyObject_TypeCheck(obj, &PySet_Type)
-  #define PyFrozenSet_Check(obj)       PyObject_TypeCheck(obj, &PyFrozenSet_Type)
+#define PyBytesObject                PyStringObject
+#define PyBytes_Type                 PyString_Type
+#define PyBytes_Check                PyString_Check
+#define PyBytes_CheckExact           PyString_CheckExact
+#define PyBytes_FromString           PyString_FromString
+#define PyBytes_FromStringAndSize    PyString_FromStringAndSize
+#define PyBytes_FromFormat           PyString_FromFormat
+#define PyBytes_DecodeEscape         PyString_DecodeEscape
+#define PyBytes_AsString             PyString_AsString
+#define PyBytes_AsStringAndSize      PyString_AsStringAndSize
+#define PyBytes_Size                 PyString_Size
+#define PyBytes_AS_STRING            PyString_AS_STRING
+#define PyBytes_GET_SIZE             PyString_GET_SIZE
+#define PyBytes_Repr                 PyString_Repr
+#define PyBytes_Concat               PyString_Concat
+#define PyBytes_ConcatAndDel         PyString_ConcatAndDel
+#define PySet_Check(obj)             PyObject_TypeCheck(obj, &PySet_Type)
+#define PyFrozenSet_Check(obj)       PyObject_TypeCheck(obj, &PyFrozenSet_Type)
 #endif
 
 #ifndef PySet_CheckExact
@@ -135,74 +136,74 @@
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-  #define PyIntObject                  PyLongObject
-  #define PyInt_Type                   PyLong_Type
-  #define PyInt_Check(op)              PyLong_Check(op)
-  #define PyInt_CheckExact(op)         PyLong_CheckExact(op)
-  #define PyInt_FromString             PyLong_FromString
-  #define PyInt_FromUnicode            PyLong_FromUnicode
-  #define PyInt_FromLong               PyLong_FromLong
-  #define PyInt_FromSize_t             PyLong_FromSize_t
-  #define PyInt_FromSsize_t            PyLong_FromSsize_t
-  #define PyInt_AsLong                 PyLong_AsLong
-  #define PyInt_AS_LONG                PyLong_AS_LONG
-  #define PyInt_AsSsize_t              PyLong_AsSsize_t
-  #define PyInt_AsUnsignedLongMask     PyLong_AsUnsignedLongMask
-  #define PyInt_AsUnsignedLongLongMask PyLong_AsUnsignedLongLongMask
+#define PyIntObject                  PyLongObject
+#define PyInt_Type                   PyLong_Type
+#define PyInt_Check(op)              PyLong_Check(op)
+#define PyInt_CheckExact(op)         PyLong_CheckExact(op)
+#define PyInt_FromString             PyLong_FromString
+#define PyInt_FromUnicode            PyLong_FromUnicode
+#define PyInt_FromLong               PyLong_FromLong
+#define PyInt_FromSize_t             PyLong_FromSize_t
+#define PyInt_FromSsize_t            PyLong_FromSsize_t
+#define PyInt_AsLong                 PyLong_AsLong
+#define PyInt_AS_LONG                PyLong_AS_LONG
+#define PyInt_AsSsize_t              PyLong_AsSsize_t
+#define PyInt_AsUnsignedLongMask     PyLong_AsUnsignedLongMask
+#define PyInt_AsUnsignedLongLongMask PyLong_AsUnsignedLongLongMask
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-  #define PyBoolObject PyLongObject
+#define PyBoolObject PyLongObject
 #endif
 
 
 #if PY_MAJOR_VERSION >= 3
-  #define __Pyx_PyNumber_Divide(x,y)         PyNumber_TrueDivide(x,y)
-  #define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceTrueDivide(x,y)
+#define __Pyx_PyNumber_Divide(x,y)         PyNumber_TrueDivide(x,y)
+#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceTrueDivide(x,y)
 #else
-  #define __Pyx_PyNumber_Divide(x,y)         PyNumber_Divide(x,y)
-  #define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceDivide(x,y)
+#define __Pyx_PyNumber_Divide(x,y)         PyNumber_Divide(x,y)
+#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceDivide(x,y)
 #endif
 
 #if (PY_MAJOR_VERSION < 3) || (PY_VERSION_HEX >= 0x03010300)
-  #define __Pyx_PySequence_GetSlice(obj, a, b) PySequence_GetSlice(obj, a, b)
-  #define __Pyx_PySequence_SetSlice(obj, a, b, value) PySequence_SetSlice(obj, a, b, value)
-  #define __Pyx_PySequence_DelSlice(obj, a, b) PySequence_DelSlice(obj, a, b)
+#define __Pyx_PySequence_GetSlice(obj, a, b) PySequence_GetSlice(obj, a, b)
+#define __Pyx_PySequence_SetSlice(obj, a, b, value) PySequence_SetSlice(obj, a, b, value)
+#define __Pyx_PySequence_DelSlice(obj, a, b) PySequence_DelSlice(obj, a, b)
 #else
-  #define __Pyx_PySequence_GetSlice(obj, a, b) (unlikely(!(obj)) ? \
-        (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), (PyObject*)0) : \
-        (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_GetSlice(obj, a, b)) : \
-            (PyErr_Format(PyExc_TypeError, "'%.200s' object is unsliceable", (obj)->ob_type->tp_name), (PyObject*)0)))
-  #define __Pyx_PySequence_SetSlice(obj, a, b, value) (unlikely(!(obj)) ? \
-        (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), -1) : \
-        (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_SetSlice(obj, a, b, value)) : \
-            (PyErr_Format(PyExc_TypeError, "'%.200s' object doesn't support slice assignment", (obj)->ob_type->tp_name), -1)))
-  #define __Pyx_PySequence_DelSlice(obj, a, b) (unlikely(!(obj)) ? \
-        (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), -1) : \
-        (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_DelSlice(obj, a, b)) : \
-            (PyErr_Format(PyExc_TypeError, "'%.200s' object doesn't support slice deletion", (obj)->ob_type->tp_name), -1)))
+#define __Pyx_PySequence_GetSlice(obj, a, b) (unlikely(!(obj)) ? \
+  (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), (PyObject*)0) : \
+  (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_GetSlice(obj, a, b)) : \
+  (PyErr_Format(PyExc_TypeError, "'%.200s' object is unsliceable", (obj)->ob_type->tp_name), (PyObject*)0)))
+#define __Pyx_PySequence_SetSlice(obj, a, b, value) (unlikely(!(obj)) ? \
+  (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), -1) : \
+  (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_SetSlice(obj, a, b, value)) : \
+  (PyErr_Format(PyExc_TypeError, "'%.200s' object doesn't support slice assignment", (obj)->ob_type->tp_name), -1)))
+#define __Pyx_PySequence_DelSlice(obj, a, b) (unlikely(!(obj)) ? \
+  (PyErr_SetString(PyExc_SystemError, "null argument to internal routine"), -1) : \
+  (likely((obj)->ob_type->tp_as_mapping) ? (PySequence_DelSlice(obj, a, b)) : \
+  (PyErr_Format(PyExc_TypeError, "'%.200s' object doesn't support slice deletion", (obj)->ob_type->tp_name), -1)))
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-  #define PyMethod_New(func, self, klass) ((self) ? PyMethod_New(func, self) : PyInstanceMethod_New(func))
+#define PyMethod_New(func, self, klass) ((self) ? PyMethod_New(func, self) : PyInstanceMethod_New(func))
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
-  #define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),((char *)(n)))
-  #define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),((char *)(n)),(a))
-  #define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),((char *)(n)))
+#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),((char *)(n)))
+#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),((char *)(n)),(a))
+#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),((char *)(n)))
 #else
-  #define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),(n))
-  #define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),(n),(a))
-  #define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),(n))
+#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),(n))
+#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),(n),(a))
+#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),(n))
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
-  #define __Pyx_NAMESTR(n) ((char *)(n))
-  #define __Pyx_DOCSTR(n)  ((char *)(n))
+#define __Pyx_NAMESTR(n) ((char *)(n))
+#define __Pyx_DOCSTR(n)  ((char *)(n))
 #else
-  #define __Pyx_NAMESTR(n) (n)
-  #define __Pyx_DOCSTR(n)  (n)
+#define __Pyx_NAMESTR(n) (n)
+#define __Pyx_DOCSTR(n)  (n)
 #endif
 
 #ifdef __cplusplus
@@ -224,15 +225,15 @@
 
 /* inline attribute */
 #ifndef CYTHON_INLINE
-  #if defined(__GNUC__)
-    #define CYTHON_INLINE __inline__
-  #elif defined(_MSC_VER)
-    #define CYTHON_INLINE __inline
-  #elif defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-    #define CYTHON_INLINE inline
-  #else
-    #define CYTHON_INLINE 
-  #endif
+#if defined(__GNUC__)
+#define CYTHON_INLINE __inline__
+#elif defined(_MSC_VER)
+#define CYTHON_INLINE __inline
+#elif defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define CYTHON_INLINE inline
+#else
+#define CYTHON_INLINE 
+#endif
 #endif
 
 /* unused attribute */
@@ -282,7 +283,7 @@ static CYTHON_INLINE size_t __Pyx_PyInt_AsSize_t(PyObject*);
 #define likely(x)   (x)
 #define unlikely(x) (x)
 #endif /* __GNUC__ */
-    
+
 static PyObject *__pyx_m;
 static PyObject *__pyx_b;
 static PyObject *__pyx_empty_tuple;
@@ -293,54 +294,57 @@ static const char * __pyx_cfilenm= __FILE__;
 static const char *__pyx_filename;
 
 
-static const char *__pyx_f[] = {
+static const char *__pyx_f[] = 
+{
   "eigen.pyx",
 };
 
 /* Type declarations */
 
 #ifndef CYTHON_REFNANNY
-  #define CYTHON_REFNANNY 0
+#define CYTHON_REFNANNY 0
 #endif
 
 #if CYTHON_REFNANNY
-  typedef struct {
-    void (*INCREF)(void*, PyObject*, int);
-    void (*DECREF)(void*, PyObject*, int);
-    void (*GOTREF)(void*, PyObject*, int);
-    void (*GIVEREF)(void*, PyObject*, int);
-    void* (*SetupContext)(const char*, int, const char*);
-    void (*FinishContext)(void**);
-  } __Pyx_RefNannyAPIStruct;
-  static __Pyx_RefNannyAPIStruct *__Pyx_RefNanny = NULL;
-  static __Pyx_RefNannyAPIStruct * __Pyx_RefNannyImportAPI(const char *modname) {
-    PyObject *m = NULL, *p = NULL;
-    void *r = NULL;
-    m = PyImport_ImportModule((char *)modname);
-    if (!m) goto end;
-    p = PyObject_GetAttrString(m, (char *)"RefNannyAPI");
-    if (!p) goto end;
-    r = PyLong_AsVoidPtr(p);
-  end:
-    Py_XDECREF(p);
-    Py_XDECREF(m);
-    return (__Pyx_RefNannyAPIStruct *)r;
-  }
-  #define __Pyx_RefNannySetupContext(name)           void *__pyx_refnanny = __Pyx_RefNanny->SetupContext((name), __LINE__, __FILE__)
-  #define __Pyx_RefNannyFinishContext()           __Pyx_RefNanny->FinishContext(&__pyx_refnanny)
-  #define __Pyx_INCREF(r) __Pyx_RefNanny->INCREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
-  #define __Pyx_DECREF(r) __Pyx_RefNanny->DECREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
-  #define __Pyx_GOTREF(r) __Pyx_RefNanny->GOTREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
-  #define __Pyx_GIVEREF(r) __Pyx_RefNanny->GIVEREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
-  #define __Pyx_XDECREF(r) do { if((r) != NULL) {__Pyx_DECREF(r);} } while(0)
+typedef struct 
+{
+  void (*INCREF)(void*, PyObject*, int);
+  void (*DECREF)(void*, PyObject*, int);
+  void (*GOTREF)(void*, PyObject*, int);
+  void (*GIVEREF)(void*, PyObject*, int);
+  void* (*SetupContext)(const char*, int, const char*);
+  void (*FinishContext)(void**);
+} __Pyx_RefNannyAPIStruct;
+static __Pyx_RefNannyAPIStruct *__Pyx_RefNanny = NULL;
+static __Pyx_RefNannyAPIStruct * __Pyx_RefNannyImportAPI(const char *modname) 
+{
+  PyObject *m = NULL, *p = NULL;
+  void *r = NULL;
+  m = PyImport_ImportModule((char *)modname);
+  if (!m) goto end;
+  p = PyObject_GetAttrString(m, (char *)"RefNannyAPI");
+  if (!p) goto end;
+  r = PyLong_AsVoidPtr(p);
+end:
+  Py_XDECREF(p);
+  Py_XDECREF(m);
+  return (__Pyx_RefNannyAPIStruct *)r;
+}
+#define __Pyx_RefNannySetupContext(name)           void *__pyx_refnanny = __Pyx_RefNanny->SetupContext((name), __LINE__, __FILE__)
+#define __Pyx_RefNannyFinishContext()           __Pyx_RefNanny->FinishContext(&__pyx_refnanny)
+#define __Pyx_INCREF(r) __Pyx_RefNanny->INCREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
+#define __Pyx_DECREF(r) __Pyx_RefNanny->DECREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
+#define __Pyx_GOTREF(r) __Pyx_RefNanny->GOTREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
+#define __Pyx_GIVEREF(r) __Pyx_RefNanny->GIVEREF(__pyx_refnanny, (PyObject *)(r), __LINE__)
+#define __Pyx_XDECREF(r) do { if((r) != NULL) {__Pyx_DECREF(r);} } while(0)
 #else
-  #define __Pyx_RefNannySetupContext(name)
-  #define __Pyx_RefNannyFinishContext()
-  #define __Pyx_INCREF(r) Py_INCREF(r)
-  #define __Pyx_DECREF(r) Py_DECREF(r)
-  #define __Pyx_GOTREF(r)
-  #define __Pyx_GIVEREF(r)
-  #define __Pyx_XDECREF(r) Py_XDECREF(r)
+#define __Pyx_RefNannySetupContext(name)
+#define __Pyx_RefNannyFinishContext()
+#define __Pyx_INCREF(r) Py_INCREF(r)
+#define __Pyx_DECREF(r) Py_DECREF(r)
+#define __Pyx_GOTREF(r)
+#define __Pyx_GIVEREF(r)
+#define __Pyx_XDECREF(r) Py_XDECREF(r)
 #endif /* CYTHON_REFNANNY */
 #define __Pyx_XGIVEREF(r) do { if((r) != NULL) {__Pyx_GIVEREF(r);} } while(0)
 #define __Pyx_XGOTREF(r) do { if((r) != NULL) {__Pyx_GOTREF(r);} } while(0)
@@ -348,84 +352,98 @@ static const char *__pyx_f[] = {
 static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name); /*proto*/
 
 
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
-    PyObject *r;
-    if (!j) return NULL;
-    r = PyObject_GetItem(o, j);
-    Py_DECREF(j);
-    return r;
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) 
+{
+  PyObject *r;
+  if (!j) return NULL;
+  r = PyObject_GetItem(o, j);
+  Py_DECREF(j);
+  return r;
 }
 
 
 #define __Pyx_GetItemInt_List(o, i, size, to_py_func) (((size) <= sizeof(Py_ssize_t)) ? \
-                                                    __Pyx_GetItemInt_List_Fast(o, i) : \
-                                                    __Pyx_GetItemInt_Generic(o, to_py_func(i)))
+  __Pyx_GetItemInt_List_Fast(o, i) : \
+  __Pyx_GetItemInt_Generic(o, to_py_func(i)))
 
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i) {
-    if (likely(o != Py_None)) {
-        if (likely((0 <= i) & (i < PyList_GET_SIZE(o)))) {
-            PyObject *r = PyList_GET_ITEM(o, i);
-            Py_INCREF(r);
-            return r;
-        }
-        else if ((-PyList_GET_SIZE(o) <= i) & (i < 0)) {
-            PyObject *r = PyList_GET_ITEM(o, PyList_GET_SIZE(o) + i);
-            Py_INCREF(r);
-            return r;
-        }
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i) 
+{
+  if (likely(o != Py_None)) 
+  {
+    if (likely((0 <= i) & (i < PyList_GET_SIZE(o)))) 
+    {
+      PyObject *r = PyList_GET_ITEM(o, i);
+      Py_INCREF(r);
+      return r;
     }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+    else if ((-PyList_GET_SIZE(o) <= i) & (i < 0)) 
+    {
+      PyObject *r = PyList_GET_ITEM(o, PyList_GET_SIZE(o) + i);
+      Py_INCREF(r);
+      return r;
+    }
+  }
+  return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
 #define __Pyx_GetItemInt_Tuple(o, i, size, to_py_func) (((size) <= sizeof(Py_ssize_t)) ? \
-                                                    __Pyx_GetItemInt_Tuple_Fast(o, i) : \
-                                                    __Pyx_GetItemInt_Generic(o, to_py_func(i)))
+  __Pyx_GetItemInt_Tuple_Fast(o, i) : \
+  __Pyx_GetItemInt_Generic(o, to_py_func(i)))
 
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i) {
-    if (likely(o != Py_None)) {
-        if (likely((0 <= i) & (i < PyTuple_GET_SIZE(o)))) {
-            PyObject *r = PyTuple_GET_ITEM(o, i);
-            Py_INCREF(r);
-            return r;
-        }
-        else if ((-PyTuple_GET_SIZE(o) <= i) & (i < 0)) {
-            PyObject *r = PyTuple_GET_ITEM(o, PyTuple_GET_SIZE(o) + i);
-            Py_INCREF(r);
-            return r;
-        }
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i) 
+{
+  if (likely(o != Py_None)) 
+  {
+    if (likely((0 <= i) & (i < PyTuple_GET_SIZE(o)))) 
+    {
+      PyObject *r = PyTuple_GET_ITEM(o, i);
+      Py_INCREF(r);
+      return r;
     }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+    else if ((-PyTuple_GET_SIZE(o) <= i) & (i < 0)) 
+    {
+      PyObject *r = PyTuple_GET_ITEM(o, PyTuple_GET_SIZE(o) + i);
+      Py_INCREF(r);
+      return r;
+    }
+  }
+  return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
 
 #define __Pyx_GetItemInt(o, i, size, to_py_func) (((size) <= sizeof(Py_ssize_t)) ? \
-                                                    __Pyx_GetItemInt_Fast(o, i) : \
-                                                    __Pyx_GetItemInt_Generic(o, to_py_func(i)))
+  __Pyx_GetItemInt_Fast(o, i) : \
+  __Pyx_GetItemInt_Generic(o, to_py_func(i)))
 
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i) {
-    PyObject *r;
-    if (PyList_CheckExact(o) && ((0 <= i) & (i < PyList_GET_SIZE(o)))) {
-        r = PyList_GET_ITEM(o, i);
-        Py_INCREF(r);
-    }
-    else if (PyTuple_CheckExact(o) && ((0 <= i) & (i < PyTuple_GET_SIZE(o)))) {
-        r = PyTuple_GET_ITEM(o, i);
-        Py_INCREF(r);
-    }
-    else if (Py_TYPE(o)->tp_as_sequence && Py_TYPE(o)->tp_as_sequence->sq_item && (likely(i >= 0))) {
-        r = PySequence_GetItem(o, i);
-    }
-    else {
-        r = __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-    }
-    return r;
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i) 
+{
+  PyObject *r;
+  if (PyList_CheckExact(o) && ((0 <= i) & (i < PyList_GET_SIZE(o)))) 
+  {
+    r = PyList_GET_ITEM(o, i);
+    Py_INCREF(r);
+  }
+  else if (PyTuple_CheckExact(o) && ((0 <= i) & (i < PyTuple_GET_SIZE(o)))) 
+  {
+    r = PyTuple_GET_ITEM(o, i);
+    Py_INCREF(r);
+  }
+  else if (Py_TYPE(o)->tp_as_sequence && Py_TYPE(o)->tp_as_sequence->sq_item && (likely(i >= 0))) 
+  {
+    r = PySequence_GetItem(o, i);
+  }
+  else 
+  {
+    r = __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+  }
+  return r;
 }
 
 static void __Pyx_RaiseDoubleKeywordsError(
-    const char* func_name, PyObject* kw_name); /*proto*/
+  const char* func_name, PyObject* kw_name); /*proto*/
 
 static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
-    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found); /*proto*/
+  Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found); /*proto*/
 
 static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,     const char* function_name); /*proto*/
 
@@ -436,20 +454,23 @@ static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
 static PyObject *__Pyx_UnpackItem(PyObject *, Py_ssize_t index); /*proto*/
 static int __Pyx_EndUnpack(PyObject *, Py_ssize_t expected); /*proto*/
 
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Append(PyObject* L, PyObject* x) {
-    if (likely(PyList_CheckExact(L))) {
-        if (PyList_Append(L, x) < 0) return NULL;
-        Py_INCREF(Py_None);
-        return Py_None; /* this is just to have an accurate signature */
-    }
-    else {
-        PyObject *r, *m;
-        m = __Pyx_GetAttrString(L, "append");
-        if (!m) return NULL;
-        r = PyObject_CallFunctionObjArgs(m, x, NULL);
-        Py_DECREF(m);
-        return r;
-    }
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Append(PyObject* L, PyObject* x) 
+{
+  if (likely(PyList_CheckExact(L))) 
+  {
+    if (PyList_Append(L, x) < 0) return NULL;
+    Py_INCREF(Py_None);
+    return Py_None; /* this is just to have an accurate signature */
+  }
+  else 
+  {
+    PyObject *r, *m;
+    m = __Pyx_GetAttrString(L, "append");
+    if (!m) return NULL;
+    r = PyObject_CallFunctionObjArgs(m, x, NULL);
+    Py_DECREF(m);
+    return r;
+  }
 }
 
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list); /*proto*/
@@ -464,8 +485,9 @@ static int __Pyx_PrintOne(PyObject* stream, PyObject *o); /*proto*/
 
 #define __pyx_binding_PyCFunctionType_USED 1
 
-typedef struct {
-    PyCFunctionObject func;
+typedef struct 
+{
+  PyCFunctionObject func;
 } __pyx_binding_PyCFunctionType_object;
 
 PyTypeObject __pyx_binding_PyCFunctionType_type;
@@ -643,16 +665,17 @@ static PyObject *__pyx_k_5;
 static PyObject *__pyx_k_6;
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":28
- *         vec = v[:, i]
- *         r.append((w[i], vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     print "eigenvalues:"
- *     eigs = []
- */
+*         vec = v[:, i]
+*         r.append((w[i], vec))
+*     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+*     print "eigenvalues:"
+*     eigs = []
+*/
 
 static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1(PyObject *__pyx_self, PyObject *__pyx_v_x); /*proto*/
 static PyMethodDef __pyx_lambda_methdef5eigen_15solve_eig_numpy_lambda1 = {__Pyx_NAMESTR("__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1"), (PyCFunction)__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1, METH_O, __Pyx_DOCSTR(0)};
-static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1(PyObject *__pyx_self, PyObject *__pyx_v_x) {
+static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1(PyObject *__pyx_self, PyObject *__pyx_v_x) 
+{
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1");
@@ -666,28 +689,29 @@ static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_numpy_lambda1(PyObject *
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("eigen.solve_eig_numpy.lambda1");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":7
- * import warnings
- * 
- * def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
- *     """
- *     A, B .... scipy sparse matrices
- */
+* import warnings
+* 
+* def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
+*     """
+*     A, B .... scipy sparse matrices
+*/
 
 static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static char __pyx_doc_5eigen_0solve_eig_numpy[] = "\n    A, B .... scipy sparse matrices\n\n    Uses numpy to solve the A*x = lambda*B*x eigenproblem.\n    ";
 static PyMethodDef __pyx_mdef_5eigen_0solve_eig_numpy = {__Pyx_NAMESTR("solve_eig_numpy"), (PyCFunction)__pyx_pf_5eigen_0solve_eig_numpy, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_5eigen_0solve_eig_numpy)};
-static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) 
+{
   PyObject *__pyx_v_A = 0;
   PyObject *__pyx_v_B = 0;
   PyObject *__pyx_v_array;
@@ -713,46 +737,53 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,0};
   __Pyx_RefNannySetupContext("solve_eig_numpy");
   __pyx_self = __pyx_self;
-  if (unlikely(__pyx_kwds)) {
+  if (unlikely(__pyx_kwds)) 
+  {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
     PyObject* values[2] = {0,0};
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      case  0: break;
-      default: goto __pyx_L5_argtuple_error;
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+    case  0: break;
+    default: goto __pyx_L5_argtuple_error;
     }
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  0:
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  0:
       values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__A);
       if (likely(values[0])) kw_args--;
       else goto __pyx_L5_argtuple_error;
-      case  1:
+    case  1:
       values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__B);
       if (likely(values[1])) kw_args--;
-      else {
+      else 
+      {
         __Pyx_RaiseArgtupleInvalid("solve_eig_numpy", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     }
-    if (unlikely(kw_args > 0)) {
+    if (unlikely(kw_args > 0)) 
+    {
       if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "solve_eig_numpy") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_A = values[0];
     __pyx_v_B = values[1];
-  } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+  } else if (PyTuple_GET_SIZE(__pyx_args) != 2) 
+  {
     goto __pyx_L5_argtuple_error;
-  } else {
+  } else 
+  {
     __pyx_v_A = PyTuple_GET_ITEM(__pyx_args, 0);
     __pyx_v_B = PyTuple_GET_ITEM(__pyx_args, 1);
   }
   goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
+__pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("solve_eig_numpy", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  __pyx_L3_error:;
+__pyx_L3_error:;
   __Pyx_AddTraceback("eigen.solve_eig_numpy");
   __Pyx_RefNannyFinishContext();
   return NULL;
-  __pyx_L4_argument_unpacking_done:;
+__pyx_L4_argument_unpacking_done:;
   __Pyx_INCREF(__pyx_v_A);
   __Pyx_INCREF(__pyx_v_B);
   __pyx_v_array = Py_None; __Pyx_INCREF(Py_None);
@@ -768,12 +799,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_v_eigs = Py_None; __Pyx_INCREF(Py_None);
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":13
- *     Uses numpy to solve the A*x = lambda*B*x eigenproblem.
- *     """
- *     from numpy import array, dot             # <<<<<<<<<<<<<<
- *     from numpy.linalg import inv, eig
- *     A = A.todense()
- */
+  *     Uses numpy to solve the A*x = lambda*B*x eigenproblem.
+  *     """
+  *     from numpy import array, dot             # <<<<<<<<<<<<<<
+  *     from numpy.linalg import inv, eig
+  *     A = A.todense()
+  */
   __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 13; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__array));
@@ -800,12 +831,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":14
- *     """
- *     from numpy import array, dot
- *     from numpy.linalg import inv, eig             # <<<<<<<<<<<<<<
- *     A = A.todense()
- *     B = B.todense()
- */
+  *     """
+  *     from numpy import array, dot
+  *     from numpy.linalg import inv, eig             # <<<<<<<<<<<<<<
+  *     A = A.todense()
+  *     B = B.todense()
+  */
   __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__inv));
@@ -832,12 +863,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":15
- *     from numpy import array, dot
- *     from numpy.linalg import inv, eig
- *     A = A.todense()             # <<<<<<<<<<<<<<
- *     B = B.todense()
- * 
- */
+  *     from numpy import array, dot
+  *     from numpy.linalg import inv, eig
+  *     A = A.todense()             # <<<<<<<<<<<<<<
+  *     B = B.todense()
+  * 
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__todense); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyObject_Call(__pyx_t_1, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -848,12 +879,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":16
- *     from numpy.linalg import inv, eig
- *     A = A.todense()
- *     B = B.todense()             # <<<<<<<<<<<<<<
- * 
- *     print "inverting"
- */
+  *     from numpy.linalg import inv, eig
+  *     A = A.todense()
+  *     B = B.todense()             # <<<<<<<<<<<<<<
+  * 
+  *     print "inverting"
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_B, __pyx_n_s__todense); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -864,21 +895,21 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":18
- *     B = B.todense()
- * 
- *     print "inverting"             # <<<<<<<<<<<<<<
- *     M = dot(inv(B), A)
- *     print "solving"
- */
+  *     B = B.todense()
+  * 
+  *     print "inverting"             # <<<<<<<<<<<<<<
+  *     M = dot(inv(B), A)
+  *     print "solving"
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__inverting)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":19
- * 
- *     print "inverting"
- *     M = dot(inv(B), A)             # <<<<<<<<<<<<<<
- *     print "solving"
- *     w, v = eig(M)
- */
+  * 
+  *     print "inverting"
+  *     M = dot(inv(B), A)             # <<<<<<<<<<<<<<
+  *     print "solving"
+  *     w, v = eig(M)
+  */
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_INCREF(__pyx_v_B);
@@ -903,21 +934,21 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":20
- *     print "inverting"
- *     M = dot(inv(B), A)
- *     print "solving"             # <<<<<<<<<<<<<<
- *     w, v = eig(M)
- *     print "sorting the eigenvalues"
- */
+  *     print "inverting"
+  *     M = dot(inv(B), A)
+  *     print "solving"             # <<<<<<<<<<<<<<
+  *     w, v = eig(M)
+  *     print "sorting the eigenvalues"
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__solving)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":21
- *     M = dot(inv(B), A)
- *     print "solving"
- *     w, v = eig(M)             # <<<<<<<<<<<<<<
- *     print "sorting the eigenvalues"
- * 
- */
+  *     M = dot(inv(B), A)
+  *     print "solving"
+  *     w, v = eig(M)             # <<<<<<<<<<<<<<
+  *     print "sorting the eigenvalues"
+  * 
+  */
   __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_INCREF(__pyx_v_M);
@@ -926,7 +957,8 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_1 = PyObject_Call(__pyx_v_eig, ((PyObject *)__pyx_t_2), NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(((PyObject *)__pyx_t_2)); __pyx_t_2 = 0;
-  if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) {
+  if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) 
+  {
     PyObject* tuple = __pyx_t_1;
     __pyx_t_2 = PyTuple_GET_ITEM(tuple, 0); __Pyx_INCREF(__pyx_t_2);
     __pyx_t_3 = PyTuple_GET_ITEM(tuple, 1); __Pyx_INCREF(__pyx_t_3);
@@ -937,7 +969,8 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __Pyx_DECREF(__pyx_v_v);
     __pyx_v_v = __pyx_t_3;
     __pyx_t_3 = 0;
-  } else {
+  } else 
+  {
     __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -956,21 +989,21 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   }
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":22
- *     print "solving"
- *     w, v = eig(M)
- *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
- * 
- *     r = []
- */
+  *     print "solving"
+  *     w, v = eig(M)
+  *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
+  * 
+  *     r = []
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_2)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":24
- *     print "sorting the eigenvalues"
- * 
- *     r = []             # <<<<<<<<<<<<<<
- *     for i in range(len(w)):
- *         vec = v[:, i]
- */
+  *     print "sorting the eigenvalues"
+  * 
+  *     r = []             # <<<<<<<<<<<<<<
+  *     for i in range(len(w)):
+  *         vec = v[:, i]
+  */
   __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_DECREF(__pyx_v_r);
@@ -978,12 +1011,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":25
- * 
- *     r = []
- *     for i in range(len(w)):             # <<<<<<<<<<<<<<
- *         vec = v[:, i]
- *         r.append((w[i], vec))
- */
+  * 
+  *     r = []
+  *     for i in range(len(w)):             # <<<<<<<<<<<<<<
+  *         vec = v[:, i]
+  *         r.append((w[i], vec))
+  */
   __pyx_t_6 = PyObject_Length(__pyx_v_w); if (unlikely(__pyx_t_6 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -995,23 +1028,30 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_1 = PyObject_Call(__pyx_builtin_range, ((PyObject *)__pyx_t_3), NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(((PyObject *)__pyx_t_3)); __pyx_t_3 = 0;
-  if (PyList_CheckExact(__pyx_t_1) || PyTuple_CheckExact(__pyx_t_1)) {
+  if (PyList_CheckExact(__pyx_t_1) || PyTuple_CheckExact(__pyx_t_1)) 
+  {
     __pyx_t_5 = 0; __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3);
-  } else {
+  } else 
+  {
     __pyx_t_5 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_3))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_3))) 
+    {
       if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_3)) break;
       __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_3))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_3))) 
+    {
       if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
       __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else {
+    } else 
+    {
       __pyx_t_1 = PyIter_Next(__pyx_t_3);
-      if (!__pyx_t_1) {
+      if (!__pyx_t_1) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
@@ -1022,12 +1062,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __pyx_t_1 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":26
- *     r = []
- *     for i in range(len(w)):
- *         vec = v[:, i]             # <<<<<<<<<<<<<<
- *         r.append((w[i], vec))
- *     r.sort(key=lambda x: x[0])
- */
+    *     r = []
+    *     for i in range(len(w)):
+    *         vec = v[:, i]             # <<<<<<<<<<<<<<
+    *         r.append((w[i], vec))
+    *     r.sort(key=lambda x: x[0])
+    */
     __pyx_t_1 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1046,12 +1086,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     __pyx_t_1 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":27
- *     for i in range(len(w)):
- *         vec = v[:, i]
- *         r.append((w[i], vec))             # <<<<<<<<<<<<<<
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"
- */
+    *     for i in range(len(w)):
+    *         vec = v[:, i]
+    *         r.append((w[i], vec))             # <<<<<<<<<<<<<<
+    *     r.sort(key=lambda x: x[0])
+    *     print "eigenvalues:"
+    */
     __pyx_t_1 = PyObject_GetItem(__pyx_v_w, __pyx_v_i); if (!__pyx_t_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1070,12 +1110,12 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":28
- *         vec = v[:, i]
- *         r.append((w[i], vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     print "eigenvalues:"
- *     eigs = []
- */
+  *         vec = v[:, i]
+  *         r.append((w[i], vec))
+  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+  *     print "eigenvalues:"
+  *     eigs = []
+  */
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_r, __pyx_n_s__sort); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1091,21 +1131,21 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":29
- *         r.append((w[i], vec))
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"             # <<<<<<<<<<<<<<
- *     eigs = []
- *     for w, vec in r:
- */
+  *         r.append((w[i], vec))
+  *     r.sort(key=lambda x: x[0])
+  *     print "eigenvalues:"             # <<<<<<<<<<<<<<
+  *     eigs = []
+  *     for w, vec in r:
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_3)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":30
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"
- *     eigs = []             # <<<<<<<<<<<<<<
- *     for w, vec in r:
- *         if w > 0:
- */
+  *     r.sort(key=lambda x: x[0])
+  *     print "eigenvalues:"
+  *     eigs = []             # <<<<<<<<<<<<<<
+  *     for w, vec in r:
+  *         if w > 0:
+  */
   __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_DECREF(__pyx_v_eigs);
@@ -1113,34 +1153,42 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":31
- *     print "eigenvalues:"
- *     eigs = []
- *     for w, vec in r:             # <<<<<<<<<<<<<<
- *         if w > 0:
- *             break
- */
-  if (PyList_CheckExact(__pyx_v_r) || PyTuple_CheckExact(__pyx_v_r)) {
+  *     print "eigenvalues:"
+  *     eigs = []
+  *     for w, vec in r:             # <<<<<<<<<<<<<<
+  *         if w > 0:
+  *             break
+  */
+  if (PyList_CheckExact(__pyx_v_r) || PyTuple_CheckExact(__pyx_v_r)) 
+  {
     __pyx_t_5 = 0; __pyx_t_2 = __pyx_v_r; __Pyx_INCREF(__pyx_t_2);
-  } else {
+  } else 
+  {
     __pyx_t_5 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_r); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
   }
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_2))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else {
+    } else 
+    {
       __pyx_t_1 = PyIter_Next(__pyx_t_2);
-      if (!__pyx_t_1) {
+      if (!__pyx_t_1) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
       __Pyx_GOTREF(__pyx_t_1);
     }
-    if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) {
+    if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) 
+    {
       PyObject* tuple = __pyx_t_1;
       __pyx_t_3 = PyTuple_GET_ITEM(tuple, 0); __Pyx_INCREF(__pyx_t_3);
       __pyx_t_4 = PyTuple_GET_ITEM(tuple, 1); __Pyx_INCREF(__pyx_t_4);
@@ -1151,7 +1199,8 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
       __Pyx_DECREF(__pyx_v_vec);
       __pyx_v_vec = __pyx_t_4;
       __pyx_t_4 = 0;
-    } else {
+    } else 
+    {
       __pyx_t_7 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1170,60 +1219,61 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
     }
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":32
- *     eigs = []
- *     for w, vec in r:
- *         if w > 0:             # <<<<<<<<<<<<<<
- *             break
- *         print w
- */
+    *     eigs = []
+    *     for w, vec in r:
+    *         if w > 0:             # <<<<<<<<<<<<<<
+    *             break
+    *         print w
+    */
     __pyx_t_1 = PyObject_RichCompare(__pyx_v_w, __pyx_int_0, Py_GT); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_8 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_8) {
+    if (__pyx_t_8) 
+    {
 
       /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":33
- *     for w, vec in r:
- *         if w > 0:
- *             break             # <<<<<<<<<<<<<<
- *         print w
- *         eigs.append(vec)
- */
+      *     for w, vec in r:
+      *         if w > 0:
+      *             break             # <<<<<<<<<<<<<<
+      *         print w
+      *         eigs.append(vec)
+      */
       goto __pyx_L9_break;
       goto __pyx_L10;
     }
-    __pyx_L10:;
+__pyx_L10:;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":34
- *         if w > 0:
- *             break
- *         print w             # <<<<<<<<<<<<<<
- *         eigs.append(vec)
- *     return r
- */
+    *         if w > 0:
+    *             break
+    *         print w             # <<<<<<<<<<<<<<
+    *         eigs.append(vec)
+    *     return r
+    */
     if (__Pyx_PrintOne(0, __pyx_v_w) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":35
- *             break
- *         print w
- *         eigs.append(vec)             # <<<<<<<<<<<<<<
- *     return r
- * 
- */
+    *             break
+    *         print w
+    *         eigs.append(vec)             # <<<<<<<<<<<<<<
+    *     return r
+    * 
+    */
     __pyx_t_1 = __Pyx_PyObject_Append(__pyx_v_eigs, __pyx_v_vec); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_L9_break:;
+__pyx_L9_break:;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":36
- *         print w
- *         eigs.append(vec)
- *     return r             # <<<<<<<<<<<<<<
- * 
- * def solve_eig_scipy(A, B):
- */
+  *         print w
+  *         eigs.append(vec)
+  *     return r             # <<<<<<<<<<<<<<
+  * 
+  * def solve_eig_scipy(A, B):
+  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_r);
   __pyx_r = __pyx_v_r;
@@ -1231,7 +1281,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
@@ -1239,7 +1289,7 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("eigen.solve_eig_numpy");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_DECREF(__pyx_v_array);
   __Pyx_DECREF(__pyx_v_dot);
   __Pyx_DECREF(__pyx_v_inv);
@@ -1259,16 +1309,17 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":58
- *         E = w[i]
- *         r.append((E, vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     print "eigenvalues:"
- *     eigs = []
- */
+*         E = w[i]
+*         r.append((E, vec))
+*     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+*     print "eigenvalues:"
+*     eigs = []
+*/
 
 static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2(PyObject *__pyx_self, PyObject *__pyx_v_x); /*proto*/
 static PyMethodDef __pyx_lambda_methdef5eigen_15solve_eig_scipy_lambda2 = {__Pyx_NAMESTR("__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2"), (PyCFunction)__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2, METH_O, __Pyx_DOCSTR(0)};
-static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2(PyObject *__pyx_self, PyObject *__pyx_v_x) {
+static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2(PyObject *__pyx_self, PyObject *__pyx_v_x) 
+{
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2");
@@ -1282,28 +1333,29 @@ static PyObject *__pyx_lambda_funcdef5eigen_15solve_eig_scipy_lambda2(PyObject *
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("eigen.solve_eig_scipy.lambda2");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":38
- *     return r
- * 
- * def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
- *     """
- *     A, B .... scipy sparse matrices
- */
+*     return r
+* 
+* def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
+*     """
+*     A, B .... scipy sparse matrices
+*/
 
 static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static char __pyx_doc_5eigen_1solve_eig_scipy[] = "\n    A, B .... scipy sparse matrices\n\n    Uses scipy to solve the A*x = lambda*B*x eigenproblem.\n    ";
 static PyMethodDef __pyx_mdef_5eigen_1solve_eig_scipy = {__Pyx_NAMESTR("solve_eig_scipy"), (PyCFunction)__pyx_pf_5eigen_1solve_eig_scipy, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_5eigen_1solve_eig_scipy)};
-static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) 
+{
   PyObject *__pyx_v_A = 0;
   PyObject *__pyx_v_B = 0;
   PyObject *__pyx_v_array;
@@ -1326,46 +1378,53 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,0};
   __Pyx_RefNannySetupContext("solve_eig_scipy");
   __pyx_self = __pyx_self;
-  if (unlikely(__pyx_kwds)) {
+  if (unlikely(__pyx_kwds)) 
+  {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
     PyObject* values[2] = {0,0};
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      case  0: break;
-      default: goto __pyx_L5_argtuple_error;
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+    case  0: break;
+    default: goto __pyx_L5_argtuple_error;
     }
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  0:
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  0:
       values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__A);
       if (likely(values[0])) kw_args--;
       else goto __pyx_L5_argtuple_error;
-      case  1:
+    case  1:
       values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__B);
       if (likely(values[1])) kw_args--;
-      else {
+      else 
+      {
         __Pyx_RaiseArgtupleInvalid("solve_eig_scipy", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     }
-    if (unlikely(kw_args > 0)) {
+    if (unlikely(kw_args > 0)) 
+    {
       if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "solve_eig_scipy") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_A = values[0];
     __pyx_v_B = values[1];
-  } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+  } else if (PyTuple_GET_SIZE(__pyx_args) != 2) 
+  {
     goto __pyx_L5_argtuple_error;
-  } else {
+  } else 
+  {
     __pyx_v_A = PyTuple_GET_ITEM(__pyx_args, 0);
     __pyx_v_B = PyTuple_GET_ITEM(__pyx_args, 1);
   }
   goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
+__pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("solve_eig_scipy", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  __pyx_L3_error:;
+__pyx_L3_error:;
   __Pyx_AddTraceback("eigen.solve_eig_scipy");
   __Pyx_RefNannyFinishContext();
   return NULL;
-  __pyx_L4_argument_unpacking_done:;
+__pyx_L4_argument_unpacking_done:;
   __Pyx_INCREF(__pyx_v_A);
   __Pyx_INCREF(__pyx_v_B);
   __pyx_v_array = Py_None; __Pyx_INCREF(Py_None);
@@ -1379,12 +1438,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_v_eigs = Py_None; __Pyx_INCREF(Py_None);
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":44
- *     Uses scipy to solve the A*x = lambda*B*x eigenproblem.
- *     """
- *     from numpy import array             # <<<<<<<<<<<<<<
- *     from scipy.linalg import eigh
- *     A = A.todense()
- */
+  *     Uses scipy to solve the A*x = lambda*B*x eigenproblem.
+  *     """
+  *     from numpy import array             # <<<<<<<<<<<<<<
+  *     from scipy.linalg import eigh
+  *     A = A.todense()
+  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__array));
@@ -1402,12 +1461,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":45
- *     """
- *     from numpy import array
- *     from scipy.linalg import eigh             # <<<<<<<<<<<<<<
- *     A = A.todense()
- *     B = B.todense()
- */
+  *     """
+  *     from numpy import array
+  *     from scipy.linalg import eigh             # <<<<<<<<<<<<<<
+  *     A = A.todense()
+  *     B = B.todense()
+  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__eigh));
@@ -1425,12 +1484,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":46
- *     from numpy import array
- *     from scipy.linalg import eigh
- *     A = A.todense()             # <<<<<<<<<<<<<<
- *     B = B.todense()
- * 
- */
+  *     from numpy import array
+  *     from scipy.linalg import eigh
+  *     A = A.todense()             # <<<<<<<<<<<<<<
+  *     B = B.todense()
+  * 
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__todense); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyObject_Call(__pyx_t_1, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1441,12 +1500,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":47
- *     from scipy.linalg import eigh
- *     A = A.todense()
- *     B = B.todense()             # <<<<<<<<<<<<<<
- * 
- *     print "solving"
- */
+  *     from scipy.linalg import eigh
+  *     A = A.todense()
+  *     B = B.todense()             # <<<<<<<<<<<<<<
+  * 
+  *     print "solving"
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_B, __pyx_n_s__todense); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1457,21 +1516,21 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":49
- *     B = B.todense()
- * 
- *     print "solving"             # <<<<<<<<<<<<<<
- *     w, v = eigh(A, B)
- *     print "sorting the eigenvalues"
- */
+  *     B = B.todense()
+  * 
+  *     print "solving"             # <<<<<<<<<<<<<<
+  *     w, v = eigh(A, B)
+  *     print "sorting the eigenvalues"
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_n_s__solving)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":50
- * 
- *     print "solving"
- *     w, v = eigh(A, B)             # <<<<<<<<<<<<<<
- *     print "sorting the eigenvalues"
- * 
- */
+  * 
+  *     print "solving"
+  *     w, v = eigh(A, B)             # <<<<<<<<<<<<<<
+  *     print "sorting the eigenvalues"
+  * 
+  */
   __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_INCREF(__pyx_v_A);
@@ -1483,7 +1542,8 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = PyObject_Call(__pyx_v_eigh, ((PyObject *)__pyx_t_1), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
-  if (PyTuple_CheckExact(__pyx_t_2) && likely(PyTuple_GET_SIZE(__pyx_t_2) == 2)) {
+  if (PyTuple_CheckExact(__pyx_t_2) && likely(PyTuple_GET_SIZE(__pyx_t_2) == 2)) 
+  {
     PyObject* tuple = __pyx_t_2;
     __pyx_t_1 = PyTuple_GET_ITEM(tuple, 0); __Pyx_INCREF(__pyx_t_1);
     __pyx_t_3 = PyTuple_GET_ITEM(tuple, 1); __Pyx_INCREF(__pyx_t_3);
@@ -1494,7 +1554,8 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __Pyx_DECREF(__pyx_v_v);
     __pyx_v_v = __pyx_t_3;
     __pyx_t_3 = 0;
-  } else {
+  } else 
+  {
     __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1513,21 +1574,21 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   }
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":51
- *     print "solving"
- *     w, v = eigh(A, B)
- *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
- * 
- *     r = []
- */
+  *     print "solving"
+  *     w, v = eigh(A, B)
+  *     print "sorting the eigenvalues"             # <<<<<<<<<<<<<<
+  * 
+  *     r = []
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_2)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":53
- *     print "sorting the eigenvalues"
- * 
- *     r = []             # <<<<<<<<<<<<<<
- *     for i in range(len(w)):
- *         vec = v[:, i]
- */
+  *     print "sorting the eigenvalues"
+  * 
+  *     r = []             # <<<<<<<<<<<<<<
+  *     for i in range(len(w)):
+  *         vec = v[:, i]
+  */
   __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_DECREF(__pyx_v_r);
@@ -1535,12 +1596,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":54
- * 
- *     r = []
- *     for i in range(len(w)):             # <<<<<<<<<<<<<<
- *         vec = v[:, i]
- *         E = w[i]
- */
+  * 
+  *     r = []
+  *     for i in range(len(w)):             # <<<<<<<<<<<<<<
+  *         vec = v[:, i]
+  *         E = w[i]
+  */
   __pyx_t_6 = PyObject_Length(__pyx_v_w); if (unlikely(__pyx_t_6 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -1552,23 +1613,30 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = PyObject_Call(__pyx_builtin_range, ((PyObject *)__pyx_t_3), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(((PyObject *)__pyx_t_3)); __pyx_t_3 = 0;
-  if (PyList_CheckExact(__pyx_t_2) || PyTuple_CheckExact(__pyx_t_2)) {
+  if (PyList_CheckExact(__pyx_t_2) || PyTuple_CheckExact(__pyx_t_2)) 
+  {
     __pyx_t_5 = 0; __pyx_t_3 = __pyx_t_2; __Pyx_INCREF(__pyx_t_3);
-  } else {
+  } else 
+  {
     __pyx_t_5 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_3))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_3))) 
+    {
       if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_3)) break;
       __pyx_t_2 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_2); __pyx_t_5++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_3))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_3))) 
+    {
       if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
       __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_2); __pyx_t_5++;
-    } else {
+    } else 
+    {
       __pyx_t_2 = PyIter_Next(__pyx_t_3);
-      if (!__pyx_t_2) {
+      if (!__pyx_t_2) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
@@ -1579,12 +1647,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_t_2 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":55
- *     r = []
- *     for i in range(len(w)):
- *         vec = v[:, i]             # <<<<<<<<<<<<<<
- *         E = w[i]
- *         r.append((E, vec))
- */
+    *     r = []
+    *     for i in range(len(w)):
+    *         vec = v[:, i]             # <<<<<<<<<<<<<<
+    *         E = w[i]
+    *         r.append((E, vec))
+    */
     __pyx_t_2 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1603,12 +1671,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_t_2 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":56
- *     for i in range(len(w)):
- *         vec = v[:, i]
- *         E = w[i]             # <<<<<<<<<<<<<<
- *         r.append((E, vec))
- *     r.sort(key=lambda x: x[0])
- */
+    *     for i in range(len(w)):
+    *         vec = v[:, i]
+    *         E = w[i]             # <<<<<<<<<<<<<<
+    *         r.append((E, vec))
+    *     r.sort(key=lambda x: x[0])
+    */
     __pyx_t_2 = PyObject_GetItem(__pyx_v_w, __pyx_v_i); if (!__pyx_t_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_v_E);
@@ -1616,12 +1684,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     __pyx_t_2 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":57
- *         vec = v[:, i]
- *         E = w[i]
- *         r.append((E, vec))             # <<<<<<<<<<<<<<
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"
- */
+    *         vec = v[:, i]
+    *         E = w[i]
+    *         r.append((E, vec))             # <<<<<<<<<<<<<<
+    *     r.sort(key=lambda x: x[0])
+    *     print "eigenvalues:"
+    */
     __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(((PyObject *)__pyx_t_2));
     __Pyx_INCREF(__pyx_v_E);
@@ -1638,12 +1706,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":58
- *         E = w[i]
- *         r.append((E, vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     print "eigenvalues:"
- *     eigs = []
- */
+  *         E = w[i]
+  *         r.append((E, vec))
+  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+  *     print "eigenvalues:"
+  *     eigs = []
+  */
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_r, __pyx_n_s__sort); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1659,21 +1727,21 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":59
- *         r.append((E, vec))
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"             # <<<<<<<<<<<<<<
- *     eigs = []
- *     for w, vec in r:
- */
+  *         r.append((E, vec))
+  *     r.sort(key=lambda x: x[0])
+  *     print "eigenvalues:"             # <<<<<<<<<<<<<<
+  *     eigs = []
+  *     for w, vec in r:
+  */
   if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_3)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":60
- *     r.sort(key=lambda x: x[0])
- *     print "eigenvalues:"
- *     eigs = []             # <<<<<<<<<<<<<<
- *     for w, vec in r:
- *         #if w > 0:
- */
+  *     r.sort(key=lambda x: x[0])
+  *     print "eigenvalues:"
+  *     eigs = []             # <<<<<<<<<<<<<<
+  *     for w, vec in r:
+  *         #if w > 0:
+  */
   __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_DECREF(__pyx_v_eigs);
@@ -1681,34 +1749,42 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":61
- *     print "eigenvalues:"
- *     eigs = []
- *     for w, vec in r:             # <<<<<<<<<<<<<<
- *         #if w > 0:
- *         #    break
- */
-  if (PyList_CheckExact(__pyx_v_r) || PyTuple_CheckExact(__pyx_v_r)) {
+  *     print "eigenvalues:"
+  *     eigs = []
+  *     for w, vec in r:             # <<<<<<<<<<<<<<
+  *         #if w > 0:
+  *         #    break
+  */
+  if (PyList_CheckExact(__pyx_v_r) || PyTuple_CheckExact(__pyx_v_r)) 
+  {
     __pyx_t_5 = 0; __pyx_t_2 = __pyx_v_r; __Pyx_INCREF(__pyx_t_2);
-  } else {
+  } else 
+  {
     __pyx_t_5 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_r); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
   }
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_2))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++;
-    } else {
+    } else 
+    {
       __pyx_t_1 = PyIter_Next(__pyx_t_2);
-      if (!__pyx_t_1) {
+      if (!__pyx_t_1) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
       __Pyx_GOTREF(__pyx_t_1);
     }
-    if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) {
+    if (PyTuple_CheckExact(__pyx_t_1) && likely(PyTuple_GET_SIZE(__pyx_t_1) == 2)) 
+    {
       PyObject* tuple = __pyx_t_1;
       __pyx_t_3 = PyTuple_GET_ITEM(tuple, 0); __Pyx_INCREF(__pyx_t_3);
       __pyx_t_4 = PyTuple_GET_ITEM(tuple, 1); __Pyx_INCREF(__pyx_t_4);
@@ -1719,7 +1795,8 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
       __Pyx_DECREF(__pyx_v_vec);
       __pyx_v_vec = __pyx_t_4;
       __pyx_t_4 = 0;
-    } else {
+    } else 
+    {
       __pyx_t_7 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1738,12 +1815,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
     }
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":65
- *         #    break
- *         #print w
- *         eigs.append(vec)             # <<<<<<<<<<<<<<
- *     return r
- * 
- */
+    *         #    break
+    *         #print w
+    *         eigs.append(vec)             # <<<<<<<<<<<<<<
+    *     return r
+    * 
+    */
     __pyx_t_1 = __Pyx_PyObject_Append(__pyx_v_eigs, __pyx_v_vec); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1751,12 +1828,12 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":66
- *         #print w
- *         eigs.append(vec)
- *     return r             # <<<<<<<<<<<<<<
- * 
- * def convert_mat(mtx):
- */
+  *         #print w
+  *         eigs.append(vec)
+  *     return r             # <<<<<<<<<<<<<<
+  * 
+  * def convert_mat(mtx):
+  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_r);
   __pyx_r = __pyx_v_r;
@@ -1764,7 +1841,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
@@ -1772,7 +1849,7 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("eigen.solve_eig_scipy");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_DECREF(__pyx_v_array);
   __Pyx_DECREF(__pyx_v_eigh);
   __Pyx_DECREF(__pyx_v_w);
@@ -1790,17 +1867,18 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":68
- *     return r
- * 
- * def convert_mat(mtx):             # <<<<<<<<<<<<<<
- *     """
- *     Converts a scipy matrix "mtx" to a pysparse matrix.
- */
+*     return r
+* 
+* def convert_mat(mtx):             # <<<<<<<<<<<<<<
+*     """
+*     Converts a scipy matrix "mtx" to a pysparse matrix.
+*/
 
 static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__pyx_v_mtx); /*proto*/
 static char __pyx_doc_5eigen_2convert_mat[] = "\n    Converts a scipy matrix \"mtx\" to a pysparse matrix.\n    ";
 static PyMethodDef __pyx_mdef_5eigen_2convert_mat = {__Pyx_NAMESTR("convert_mat"), (PyCFunction)__pyx_pf_5eigen_2convert_mat, METH_O, __Pyx_DOCSTR(__pyx_doc_5eigen_2convert_mat)};
-static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__pyx_v_mtx) {
+static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__pyx_v_mtx) 
+{
   PyObject *__pyx_v_spmatrix;
   PyObject *__pyx_v_A;
   PyObject *__pyx_v_i;
@@ -1824,12 +1902,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_v_n_in_row = Py_None; __Pyx_INCREF(Py_None);
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":72
- *     Converts a scipy matrix "mtx" to a pysparse matrix.
- *     """
- *     from pysparse import spmatrix             # <<<<<<<<<<<<<<
- *     mtx = mtx.tocsr()
- *     A = spmatrix.ll_mat(*mtx.shape)
- */
+  *     Converts a scipy matrix "mtx" to a pysparse matrix.
+  *     """
+  *     from pysparse import spmatrix             # <<<<<<<<<<<<<<
+  *     mtx = mtx.tocsr()
+  *     A = spmatrix.ll_mat(*mtx.shape)
+  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__spmatrix));
@@ -1847,12 +1925,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":73
- *     """
- *     from pysparse import spmatrix
- *     mtx = mtx.tocsr()             # <<<<<<<<<<<<<<
- *     A = spmatrix.ll_mat(*mtx.shape)
- *     for i in xrange( mtx.indptr.shape[0] - 1 ):
- */
+  *     """
+  *     from pysparse import spmatrix
+  *     mtx = mtx.tocsr()             # <<<<<<<<<<<<<<
+  *     A = spmatrix.ll_mat(*mtx.shape)
+  *     for i in xrange( mtx.indptr.shape[0] - 1 ):
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_mtx, __pyx_n_s__tocsr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1863,12 +1941,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":74
- *     from pysparse import spmatrix
- *     mtx = mtx.tocsr()
- *     A = spmatrix.ll_mat(*mtx.shape)             # <<<<<<<<<<<<<<
- *     for i in xrange( mtx.indptr.shape[0] - 1 ):
- *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
- */
+  *     from pysparse import spmatrix
+  *     mtx = mtx.tocsr()
+  *     A = spmatrix.ll_mat(*mtx.shape)             # <<<<<<<<<<<<<<
+  *     for i in xrange( mtx.indptr.shape[0] - 1 ):
+  *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_spmatrix, __pyx_n_s__ll_mat); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_mtx, __pyx_n_s__shape); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1885,12 +1963,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":75
- *     mtx = mtx.tocsr()
- *     A = spmatrix.ll_mat(*mtx.shape)
- *     for i in xrange( mtx.indptr.shape[0] - 1 ):             # <<<<<<<<<<<<<<
- *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
- *         n_in_row = ii.stop - ii.start
- */
+  *     mtx = mtx.tocsr()
+  *     A = spmatrix.ll_mat(*mtx.shape)
+  *     for i in xrange( mtx.indptr.shape[0] - 1 ):             # <<<<<<<<<<<<<<
+  *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
+  *         n_in_row = ii.stop - ii.start
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_mtx, __pyx_n_s__indptr); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = PyObject_GetAttr(__pyx_t_2, __pyx_n_s__shape); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1910,23 +1988,30 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __pyx_t_3 = PyObject_Call(__pyx_builtin_xrange, ((PyObject *)__pyx_t_2), NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(((PyObject *)__pyx_t_2)); __pyx_t_2 = 0;
-  if (PyList_CheckExact(__pyx_t_3) || PyTuple_CheckExact(__pyx_t_3)) {
+  if (PyList_CheckExact(__pyx_t_3) || PyTuple_CheckExact(__pyx_t_3)) 
+  {
     __pyx_t_4 = 0; __pyx_t_2 = __pyx_t_3; __Pyx_INCREF(__pyx_t_2);
-  } else {
+  } else 
+  {
     __pyx_t_4 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_2))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_2))) 
+    {
       if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
       __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++;
-    } else {
+    } else 
+    {
       __pyx_t_3 = PyIter_Next(__pyx_t_2);
-      if (!__pyx_t_3) {
+      if (!__pyx_t_3) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
@@ -1937,12 +2022,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_t_3 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":76
- *     A = spmatrix.ll_mat(*mtx.shape)
- *     for i in xrange( mtx.indptr.shape[0] - 1 ):
- *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )             # <<<<<<<<<<<<<<
- *         n_in_row = ii.stop - ii.start
- *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
- */
+    *     A = spmatrix.ll_mat(*mtx.shape)
+    *     for i in xrange( mtx.indptr.shape[0] - 1 ):
+    *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )             # <<<<<<<<<<<<<<
+    *         n_in_row = ii.stop - ii.start
+    *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
+    */
     __pyx_t_3 = PyObject_GetAttr(__pyx_v_mtx, __pyx_n_s__indptr); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_1 = PyObject_GetItem(__pyx_t_3, __pyx_v_i); if (!__pyx_t_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1972,12 +2057,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_t_6 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":77
- *     for i in xrange( mtx.indptr.shape[0] - 1 ):
- *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
- *         n_in_row = ii.stop - ii.start             # <<<<<<<<<<<<<<
- *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
- *     return A
- */
+    *     for i in xrange( mtx.indptr.shape[0] - 1 ):
+    *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
+    *         n_in_row = ii.stop - ii.start             # <<<<<<<<<<<<<<
+    *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
+    *     return A
+    */
     __pyx_t_6 = PyObject_GetAttr(__pyx_v_ii, __pyx_n_s__stop); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_5 = PyObject_GetAttr(__pyx_v_ii, __pyx_n_s__start); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1991,12 +2076,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
     __pyx_t_1 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":78
- *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
- *         n_in_row = ii.stop - ii.start
- *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )             # <<<<<<<<<<<<<<
- *     return A
- * 
- */
+    *         ii = slice( mtx.indptr[i], mtx.indptr[i+1] )
+    *         n_in_row = ii.stop - ii.start
+    *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )             # <<<<<<<<<<<<<<
+    *     return A
+    * 
+    */
     __pyx_t_1 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__update_add_at); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_5 = PyObject_GetAttr(__pyx_v_mtx, __pyx_n_s__data); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2037,12 +2122,12 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":79
- *         n_in_row = ii.stop - ii.start
- *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
- *     return A             # <<<<<<<<<<<<<<
- * 
- * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
- */
+  *         n_in_row = ii.stop - ii.start
+  *         A.update_add_at( mtx.data[ii], [i] * n_in_row, mtx.indices[ii] )
+  *     return A             # <<<<<<<<<<<<<<
+  * 
+  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
+  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_A);
   __pyx_r = __pyx_v_A;
@@ -2050,7 +2135,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
@@ -2059,7 +2144,7 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("eigen.convert_mat");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_DECREF(__pyx_v_spmatrix);
   __Pyx_DECREF(__pyx_v_A);
   __Pyx_DECREF(__pyx_v_i);
@@ -2072,16 +2157,17 @@ static PyObject *__pyx_pf_5eigen_2convert_mat(PyObject *__pyx_self, PyObject *__
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":117
- *         vec = Q[:, i]
- *         r.append((lmbd[i], vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     #print "eigenvalues:"
- *     #eigs = []
- */
+*         vec = Q[:, i]
+*         r.append((lmbd[i], vec))
+*     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+*     #print "eigenvalues:"
+*     #eigs = []
+*/
 
 static PyObject *__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3(PyObject *__pyx_self, PyObject *__pyx_v_x); /*proto*/
 static PyMethodDef __pyx_lambda_methdef5eigen_18solve_eig_pysparse_lambda3 = {__Pyx_NAMESTR("__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3"), (PyCFunction)__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3, METH_O, __Pyx_DOCSTR(0)};
-static PyObject *__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3(PyObject *__pyx_self, PyObject *__pyx_v_x) {
+static PyObject *__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3(PyObject *__pyx_self, PyObject *__pyx_v_x) 
+{
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3");
@@ -2095,28 +2181,29 @@ static PyObject *__pyx_lambda_funcdef5eigen_18solve_eig_pysparse_lambda3(PyObjec
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("eigen.solve_eig_pysparse.lambda3");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
- *     return A
- * 
- * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
- *         jdtol=1e-6, max_iter=150):
- *     """
- */
+*     return A
+* 
+* def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
+*         jdtol=1e-6, max_iter=150):
+*     """
+*/
 
 static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static char __pyx_doc_5eigen_3solve_eig_pysparse[] = "\n    Solves the generalized eigenvalue problem.\n\n    A, B ..... scipy matrices\n    n_eigs ... number of eigenvalues to solve for\n\n    returns a list of (lmbd, vec), where lmbd is the eigenvalue and vec is the\n        eigenvector\n    ";
 static PyMethodDef __pyx_mdef_5eigen_3solve_eig_pysparse = {__Pyx_NAMESTR("solve_eig_pysparse"), (PyCFunction)__pyx_pf_5eigen_3solve_eig_pysparse, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_5eigen_3solve_eig_pysparse)};
-static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) 
+{
   PyObject *__pyx_v_A = 0;
   PyObject *__pyx_v_B = 0;
   PyObject *__pyx_v_n_eigs = 0;
@@ -2153,7 +2240,8 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,&__pyx_n_s__n_eigs,&__pyx_n_s__target_value,&__pyx_n_s__verbose,&__pyx_n_s__jdtol,&__pyx_n_s__max_iter,0};
   __Pyx_RefNannySetupContext("solve_eig_pysparse");
   __pyx_self = __pyx_self;
-  if (unlikely(__pyx_kwds)) {
+  if (unlikely(__pyx_kwds)) 
+  {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
     PyObject* values[7] = {0,0,0,0,0,0,0};
     values[2] = ((PyObject *)__pyx_int_4);
@@ -2161,55 +2249,64 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     values[4] = __pyx_k_5;
     values[5] = __pyx_k_6;
     values[6] = ((PyObject *)__pyx_int_150);
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-      case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-      case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-      case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
-      case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      case  0: break;
-      default: goto __pyx_L5_argtuple_error;
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
+    case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+    case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+    case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+    case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+    case  0: break;
+    default: goto __pyx_L5_argtuple_error;
     }
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  0:
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  0:
       values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__A);
       if (likely(values[0])) kw_args--;
       else goto __pyx_L5_argtuple_error;
-      case  1:
+    case  1:
       values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__B);
       if (likely(values[1])) kw_args--;
-      else {
+      else 
+      {
         __Pyx_RaiseArgtupleInvalid("solve_eig_pysparse", 0, 2, 7, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      case  2:
-      if (kw_args > 0) {
+    case  2:
+      if (kw_args > 0) 
+      {
         PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s__n_eigs);
         if (value) { values[2] = value; kw_args--; }
       }
-      case  3:
-      if (kw_args > 0) {
+    case  3:
+      if (kw_args > 0) 
+      {
         PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s__target_value);
         if (value) { values[3] = value; kw_args--; }
       }
-      case  4:
-      if (kw_args > 0) {
+    case  4:
+      if (kw_args > 0) 
+      {
         PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s__verbose);
         if (value) { values[4] = value; kw_args--; }
       }
-      case  5:
-      if (kw_args > 0) {
+    case  5:
+      if (kw_args > 0) 
+      {
         PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s__jdtol);
         if (value) { values[5] = value; kw_args--; }
       }
-      case  6:
-      if (kw_args > 0) {
+    case  6:
+      if (kw_args > 0) 
+      {
         PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s__max_iter);
         if (value) { values[6] = value; kw_args--; }
       }
     }
-    if (unlikely(kw_args > 0)) {
+    if (unlikely(kw_args > 0)) 
+    {
       if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "solve_eig_pysparse") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_A = values[0];
@@ -2219,38 +2316,40 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_v_verbose = values[4];
     __pyx_v_jdtol = values[5];
     __pyx_v_max_iter = values[6];
-  } else {
+  } else 
+  {
     __pyx_v_n_eigs = ((PyObject *)__pyx_int_4);
     __pyx_v_target_value = ((PyObject *)__pyx_int_neg_1);
     __pyx_v_verbose = __pyx_k_5;
     __pyx_v_jdtol = __pyx_k_6;
     __pyx_v_max_iter = ((PyObject *)__pyx_int_150);
-    switch (PyTuple_GET_SIZE(__pyx_args)) {
-      case  7:
+    switch (PyTuple_GET_SIZE(__pyx_args)) 
+    {
+    case  7:
       __pyx_v_max_iter = PyTuple_GET_ITEM(__pyx_args, 6);
-      case  6:
+    case  6:
       __pyx_v_jdtol = PyTuple_GET_ITEM(__pyx_args, 5);
-      case  5:
+    case  5:
       __pyx_v_verbose = PyTuple_GET_ITEM(__pyx_args, 4);
-      case  4:
+    case  4:
       __pyx_v_target_value = PyTuple_GET_ITEM(__pyx_args, 3);
-      case  3:
+    case  3:
       __pyx_v_n_eigs = PyTuple_GET_ITEM(__pyx_args, 2);
-      case  2:
+    case  2:
       __pyx_v_B = PyTuple_GET_ITEM(__pyx_args, 1);
       __pyx_v_A = PyTuple_GET_ITEM(__pyx_args, 0);
       break;
-      default: goto __pyx_L5_argtuple_error;
+    default: goto __pyx_L5_argtuple_error;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
+__pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("solve_eig_pysparse", 0, 2, 7, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  __pyx_L3_error:;
+__pyx_L3_error:;
   __Pyx_AddTraceback("eigen.solve_eig_pysparse");
   __Pyx_RefNannyFinishContext();
   return NULL;
-  __pyx_L4_argument_unpacking_done:;
+__pyx_L4_argument_unpacking_done:;
   __Pyx_INCREF(__pyx_v_A);
   __Pyx_INCREF(__pyx_v_B);
   __pyx_v_jdsym = Py_None; __Pyx_INCREF(Py_None);
@@ -2270,12 +2369,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_v_vec = Py_None; __Pyx_INCREF(Py_None);
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":93
- *     """
- *     # Suppress the pysparse numpy warnings:
- *     warnings.simplefilter("ignore", DeprecationWarning)             # <<<<<<<<<<<<<<
- *     from pysparse import jdsym, precon, itsolvers
- *     if verbose:
- */
+  *     """
+  *     # Suppress the pysparse numpy warnings:
+  *     warnings.simplefilter("ignore", DeprecationWarning)             # <<<<<<<<<<<<<<
+  *     from pysparse import jdsym, precon, itsolvers
+  *     if verbose:
+  */
   __pyx_t_1 = __Pyx_GetName(__pyx_m, __pyx_n_s__warnings); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyObject_GetAttr(__pyx_t_1, __pyx_n_s__simplefilter); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2296,12 +2395,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":94
- *     # Suppress the pysparse numpy warnings:
- *     warnings.simplefilter("ignore", DeprecationWarning)
- *     from pysparse import jdsym, precon, itsolvers             # <<<<<<<<<<<<<<
- *     if verbose:
- *         print "converting to pysparse"
- */
+  *     # Suppress the pysparse numpy warnings:
+  *     warnings.simplefilter("ignore", DeprecationWarning)
+  *     from pysparse import jdsym, precon, itsolvers             # <<<<<<<<<<<<<<
+  *     if verbose:
+  *         print "converting to pysparse"
+  */
   __pyx_t_3 = PyList_New(3); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_3));
   __Pyx_INCREF(((PyObject *)__pyx_n_s__jdsym));
@@ -2337,34 +2436,35 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":95
- *     warnings.simplefilter("ignore", DeprecationWarning)
- *     from pysparse import jdsym, precon, itsolvers
- *     if verbose:             # <<<<<<<<<<<<<<
- *         print "converting to pysparse"
- *     n = A.shape[0]
- */
+  *     warnings.simplefilter("ignore", DeprecationWarning)
+  *     from pysparse import jdsym, precon, itsolvers
+  *     if verbose:             # <<<<<<<<<<<<<<
+  *         print "converting to pysparse"
+  *     n = A.shape[0]
+  */
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_t_4) {
+  if (__pyx_t_4) 
+  {
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":96
- *     from pysparse import jdsym, precon, itsolvers
- *     if verbose:
- *         print "converting to pysparse"             # <<<<<<<<<<<<<<
- *     n = A.shape[0]
- *     A = convert_mat(A)
- */
+    *     from pysparse import jdsym, precon, itsolvers
+    *     if verbose:
+    *         print "converting to pysparse"             # <<<<<<<<<<<<<<
+    *     n = A.shape[0]
+    *     A = convert_mat(A)
+    */
     if (__Pyx_PrintOne(0, ((PyObject *)__pyx_kp_s_7)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     goto __pyx_L6;
   }
-  __pyx_L6:;
+__pyx_L6:;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":97
- *     if verbose:
- *         print "converting to pysparse"
- *     n = A.shape[0]             # <<<<<<<<<<<<<<
- *     A = convert_mat(A)
- *     B = convert_mat(B)
- */
+  *     if verbose:
+  *         print "converting to pysparse"
+  *     n = A.shape[0]             # <<<<<<<<<<<<<<
+  *     A = convert_mat(A)
+  *     B = convert_mat(B)
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__shape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, 0, sizeof(long), PyInt_FromLong); if (!__pyx_t_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2375,12 +2475,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":98
- *         print "converting to pysparse"
- *     n = A.shape[0]
- *     A = convert_mat(A)             # <<<<<<<<<<<<<<
- *     B = convert_mat(B)
- *     if verbose:
- */
+  *         print "converting to pysparse"
+  *     n = A.shape[0]
+  *     A = convert_mat(A)             # <<<<<<<<<<<<<<
+  *     B = convert_mat(B)
+  *     if verbose:
+  */
   __pyx_t_3 = __Pyx_GetName(__pyx_m, __pyx_n_s__convert_mat); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2397,12 +2497,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":99
- *     n = A.shape[0]
- *     A = convert_mat(A)
- *     B = convert_mat(B)             # <<<<<<<<<<<<<<
- *     if verbose:
- *         print "solving (%d x %d)" % (n, n)
- */
+  *     n = A.shape[0]
+  *     A = convert_mat(A)
+  *     B = convert_mat(B)             # <<<<<<<<<<<<<<
+  *     if verbose:
+  *         print "solving (%d x %d)" % (n, n)
+  */
   __pyx_t_2 = __Pyx_GetName(__pyx_m, __pyx_n_s__convert_mat); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2419,22 +2519,23 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":100
- *     A = convert_mat(A)
- *     B = convert_mat(B)
- *     if verbose:             # <<<<<<<<<<<<<<
- *         print "solving (%d x %d)" % (n, n)
- *     Atau = A.copy()
- */
+  *     A = convert_mat(A)
+  *     B = convert_mat(B)
+  *     if verbose:             # <<<<<<<<<<<<<<
+  *         print "solving (%d x %d)" % (n, n)
+  *     Atau = A.copy()
+  */
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_t_4) {
+  if (__pyx_t_4) 
+  {
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":101
- *     B = convert_mat(B)
- *     if verbose:
- *         print "solving (%d x %d)" % (n, n)             # <<<<<<<<<<<<<<
- *     Atau = A.copy()
- *     tau = target_value
- */
+    *     B = convert_mat(B)
+    *     if verbose:
+    *         print "solving (%d x %d)" % (n, n)             # <<<<<<<<<<<<<<
+    *     Atau = A.copy()
+    *     tau = target_value
+    */
     __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(((PyObject *)__pyx_t_3));
     __Pyx_INCREF(__pyx_v_n);
@@ -2450,15 +2551,15 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
     goto __pyx_L7;
   }
-  __pyx_L7:;
+__pyx_L7:;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":102
- *     if verbose:
- *         print "solving (%d x %d)" % (n, n)
- *     Atau = A.copy()             # <<<<<<<<<<<<<<
- *     tau = target_value
- *     Atau.shift(-tau, B)
- */
+  *     if verbose:
+  *         print "solving (%d x %d)" % (n, n)
+  *     Atau = A.copy()             # <<<<<<<<<<<<<<
+  *     tau = target_value
+  *     Atau.shift(-tau, B)
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__copy); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = PyObject_Call(__pyx_t_1, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2469,23 +2570,23 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":103
- *         print "solving (%d x %d)" % (n, n)
- *     Atau = A.copy()
- *     tau = target_value             # <<<<<<<<<<<<<<
- *     Atau.shift(-tau, B)
- *     K = precon.jacobi(Atau)
- */
+  *         print "solving (%d x %d)" % (n, n)
+  *     Atau = A.copy()
+  *     tau = target_value             # <<<<<<<<<<<<<<
+  *     Atau.shift(-tau, B)
+  *     K = precon.jacobi(Atau)
+  */
   __Pyx_INCREF(__pyx_v_target_value);
   __Pyx_DECREF(__pyx_v_tau);
   __pyx_v_tau = __pyx_v_target_value;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":104
- *     Atau = A.copy()
- *     tau = target_value
- *     Atau.shift(-tau, B)             # <<<<<<<<<<<<<<
- *     K = precon.jacobi(Atau)
- *     A = A.to_sss()
- */
+  *     Atau = A.copy()
+  *     tau = target_value
+  *     Atau.shift(-tau, B)             # <<<<<<<<<<<<<<
+  *     K = precon.jacobi(Atau)
+  *     A = A.to_sss()
+  */
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_Atau, __pyx_n_s__shift); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_1 = PyNumber_Negative(__pyx_v_tau); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2505,12 +2606,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":105
- *     tau = target_value
- *     Atau.shift(-tau, B)
- *     K = precon.jacobi(Atau)             # <<<<<<<<<<<<<<
- *     A = A.to_sss()
- *     B = B.to_sss()
- */
+  *     tau = target_value
+  *     Atau.shift(-tau, B)
+  *     K = precon.jacobi(Atau)             # <<<<<<<<<<<<<<
+  *     A = A.to_sss()
+  *     B = B.to_sss()
+  */
   __pyx_t_1 = PyObject_GetAttr(__pyx_v_precon, __pyx_n_s__jacobi); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2527,12 +2628,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":106
- *     Atau.shift(-tau, B)
- *     K = precon.jacobi(Atau)
- *     A = A.to_sss()             # <<<<<<<<<<<<<<
- *     B = B.to_sss()
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
- */
+  *     Atau.shift(-tau, B)
+  *     K = precon.jacobi(Atau)
+  *     A = A.to_sss()             # <<<<<<<<<<<<<<
+  *     B = B.to_sss()
+  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
+  */
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_A, __pyx_n_s__to_sss); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = PyObject_Call(__pyx_t_3, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2543,12 +2644,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":107
- *     K = precon.jacobi(Atau)
- *     A = A.to_sss()
- *     B = B.to_sss()             # <<<<<<<<<<<<<<
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
- *             max_iter, itsolvers.qmrs)
- */
+  *     K = precon.jacobi(Atau)
+  *     A = A.to_sss()
+  *     B = B.to_sss()             # <<<<<<<<<<<<<<
+  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
+  *             max_iter, itsolvers.qmrs)
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_B, __pyx_n_s__to_sss); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_empty_tuple), NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2559,22 +2660,22 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_3 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":108
- *     A = A.to_sss()
- *     B = B.to_sss()
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
- *             max_iter, itsolvers.qmrs)
- *     if verbose:
- */
+  *     A = A.to_sss()
+  *     B = B.to_sss()
+  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
+  *             max_iter, itsolvers.qmrs)
+  *     if verbose:
+  */
   __pyx_t_3 = PyObject_GetAttr(__pyx_v_jdsym, __pyx_n_s__jdsym); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":109
- *     B = B.to_sss()
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
- *             max_iter, itsolvers.qmrs)             # <<<<<<<<<<<<<<
- *     if verbose:
- *         print "number of converged eigenvalues:", kconv
- */
+  *     B = B.to_sss()
+  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
+  *             max_iter, itsolvers.qmrs)             # <<<<<<<<<<<<<<
+  *     if verbose:
+  *         print "number of converged eigenvalues:", kconv
+  */
   __pyx_t_2 = PyObject_GetAttr(__pyx_v_itsolvers, __pyx_n_s__qmrs); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = PyTuple_New(8); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2607,7 +2708,8 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
-  if (PyTuple_CheckExact(__pyx_t_2) && likely(PyTuple_GET_SIZE(__pyx_t_2) == 5)) {
+  if (PyTuple_CheckExact(__pyx_t_2) && likely(PyTuple_GET_SIZE(__pyx_t_2) == 5)) 
+  {
     PyObject* tuple = __pyx_t_2;
     __pyx_t_1 = PyTuple_GET_ITEM(tuple, 0); __Pyx_INCREF(__pyx_t_1);
     __pyx_t_3 = PyTuple_GET_ITEM(tuple, 1); __Pyx_INCREF(__pyx_t_3);
@@ -2616,12 +2718,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_t_7 = PyTuple_GET_ITEM(tuple, 4); __Pyx_INCREF(__pyx_t_7);
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":108
- *     A = A.to_sss()
- *     B = B.to_sss()
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
- *             max_iter, itsolvers.qmrs)
- *     if verbose:
- */
+    *     A = A.to_sss()
+    *     B = B.to_sss()
+    *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,             # <<<<<<<<<<<<<<
+    *             max_iter, itsolvers.qmrs)
+    *     if verbose:
+    */
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_v_kconv);
     __pyx_v_kconv = __pyx_t_1;
@@ -2638,7 +2740,8 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __Pyx_DECREF(__pyx_v_it_in);
     __pyx_v_it_in = __pyx_t_7;
     __pyx_t_7 = 0;
-  } else {
+  } else 
+  {
     __pyx_t_8 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -2672,22 +2775,23 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   }
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":110
- *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
- *             max_iter, itsolvers.qmrs)
- *     if verbose:             # <<<<<<<<<<<<<<
- *         print "number of converged eigenvalues:", kconv
- * 
- */
+  *     kconv, lmbd, Q, it, it_in = jdsym.jdsym(A, B, K, n_eigs, tau, jdtol,
+  *             max_iter, itsolvers.qmrs)
+  *     if verbose:             # <<<<<<<<<<<<<<
+  *         print "number of converged eigenvalues:", kconv
+  * 
+  */
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_t_4) {
+  if (__pyx_t_4) 
+  {
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":111
- *             max_iter, itsolvers.qmrs)
- *     if verbose:
- *         print "number of converged eigenvalues:", kconv             # <<<<<<<<<<<<<<
- * 
- *     r = []
- */
+    *             max_iter, itsolvers.qmrs)
+    *     if verbose:
+    *         print "number of converged eigenvalues:", kconv             # <<<<<<<<<<<<<<
+    * 
+    *     r = []
+    */
     __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(((PyObject *)__pyx_t_2));
     __Pyx_INCREF(((PyObject *)__pyx_kp_s_9));
@@ -2700,15 +2804,15 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __Pyx_DECREF(((PyObject *)__pyx_t_2)); __pyx_t_2 = 0;
     goto __pyx_L8;
   }
-  __pyx_L8:;
+__pyx_L8:;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":113
- *         print "number of converged eigenvalues:", kconv
- * 
- *     r = []             # <<<<<<<<<<<<<<
- *     for i in range(len(lmbd)):
- *         vec = Q[:, i]
- */
+  *         print "number of converged eigenvalues:", kconv
+  * 
+  *     r = []             # <<<<<<<<<<<<<<
+  *     for i in range(len(lmbd)):
+  *         vec = Q[:, i]
+  */
   __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
   __Pyx_DECREF(__pyx_v_r);
@@ -2716,12 +2820,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_2 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":114
- * 
- *     r = []
- *     for i in range(len(lmbd)):             # <<<<<<<<<<<<<<
- *         vec = Q[:, i]
- *         r.append((lmbd[i], vec))
- */
+  * 
+  *     r = []
+  *     for i in range(len(lmbd)):             # <<<<<<<<<<<<<<
+  *         vec = Q[:, i]
+  *         r.append((lmbd[i], vec))
+  */
   __pyx_t_10 = PyObject_Length(__pyx_v_lmbd); if (unlikely(__pyx_t_10 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_10); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -2733,23 +2837,30 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __pyx_t_2 = PyObject_Call(__pyx_builtin_range, ((PyObject *)__pyx_t_7), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(((PyObject *)__pyx_t_7)); __pyx_t_7 = 0;
-  if (PyList_CheckExact(__pyx_t_2) || PyTuple_CheckExact(__pyx_t_2)) {
+  if (PyList_CheckExact(__pyx_t_2) || PyTuple_CheckExact(__pyx_t_2)) 
+  {
     __pyx_t_9 = 0; __pyx_t_7 = __pyx_t_2; __Pyx_INCREF(__pyx_t_7);
-  } else {
+  } else 
+  {
     __pyx_t_9 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  for (;;) {
-    if (likely(PyList_CheckExact(__pyx_t_7))) {
+  for (;;) 
+  {
+    if (likely(PyList_CheckExact(__pyx_t_7))) 
+    {
       if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_7)) break;
       __pyx_t_2 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_9); __Pyx_INCREF(__pyx_t_2); __pyx_t_9++;
-    } else if (likely(PyTuple_CheckExact(__pyx_t_7))) {
+    } else if (likely(PyTuple_CheckExact(__pyx_t_7))) 
+    {
       if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_7)) break;
       __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_9); __Pyx_INCREF(__pyx_t_2); __pyx_t_9++;
-    } else {
+    } else 
+    {
       __pyx_t_2 = PyIter_Next(__pyx_t_7);
-      if (!__pyx_t_2) {
+      if (!__pyx_t_2) 
+      {
         if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         break;
       }
@@ -2760,12 +2871,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_t_2 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":115
- *     r = []
- *     for i in range(len(lmbd)):
- *         vec = Q[:, i]             # <<<<<<<<<<<<<<
- *         r.append((lmbd[i], vec))
- *     r.sort(key=lambda x: x[0])
- */
+    *     r = []
+    *     for i in range(len(lmbd)):
+    *         vec = Q[:, i]             # <<<<<<<<<<<<<<
+    *         r.append((lmbd[i], vec))
+    *     r.sort(key=lambda x: x[0])
+    */
     __pyx_t_2 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 115; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 115; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2784,12 +2895,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
     __pyx_t_2 = 0;
 
     /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":116
- *     for i in range(len(lmbd)):
- *         vec = Q[:, i]
- *         r.append((lmbd[i], vec))             # <<<<<<<<<<<<<<
- *     r.sort(key=lambda x: x[0])
- *     #print "eigenvalues:"
- */
+    *     for i in range(len(lmbd)):
+    *         vec = Q[:, i]
+    *         r.append((lmbd[i], vec))             # <<<<<<<<<<<<<<
+    *     r.sort(key=lambda x: x[0])
+    *     #print "eigenvalues:"
+    */
     __pyx_t_2 = PyObject_GetItem(__pyx_v_lmbd, __pyx_v_i); if (!__pyx_t_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2808,12 +2919,12 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":117
- *         vec = Q[:, i]
- *         r.append((lmbd[i], vec))
- *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
- *     #print "eigenvalues:"
- *     #eigs = []
- */
+  *         vec = Q[:, i]
+  *         r.append((lmbd[i], vec))
+  *     r.sort(key=lambda x: x[0])             # <<<<<<<<<<<<<<
+  *     #print "eigenvalues:"
+  *     #eigs = []
+  */
   __pyx_t_7 = PyObject_GetAttr(__pyx_v_r, __pyx_n_s__sort); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2829,10 +2940,10 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":125
- *     #    print w
- *     #    eigs.append(vec)
- *     return r             # <<<<<<<<<<<<<<
- */
+  *     #    print w
+  *     #    eigs.append(vec)
+  *     return r             # <<<<<<<<<<<<<<
+  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_r);
   __pyx_r = __pyx_v_r;
@@ -2840,7 +2951,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
@@ -2850,7 +2961,7 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_AddTraceback("eigen.solve_eig_pysparse");
   __pyx_r = NULL;
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_DECREF(__pyx_v_jdsym);
   __Pyx_DECREF(__pyx_v_precon);
   __Pyx_DECREF(__pyx_v_itsolvers);
@@ -2873,25 +2984,28 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   return __pyx_r;
 }
 
-static PyMethodDef __pyx_methods[] = {
+static PyMethodDef __pyx_methods[] = 
+{
   {0, 0, 0, 0}
 };
 
 #if PY_MAJOR_VERSION >= 3
-static struct PyModuleDef __pyx_moduledef = {
-    PyModuleDef_HEAD_INIT,
-    __Pyx_NAMESTR("eigen"),
-    0, /* m_doc */
-    -1, /* m_size */
-    __pyx_methods /* m_methods */,
-    NULL, /* m_reload */
-    NULL, /* m_traverse */
-    NULL, /* m_clear */
-    NULL /* m_free */
+static struct PyModuleDef __pyx_moduledef = 
+{
+  PyModuleDef_HEAD_INIT,
+  __Pyx_NAMESTR("eigen"),
+  0, /* m_doc */
+  -1, /* m_size */
+  __pyx_methods /* m_methods */,
+  NULL, /* m_reload */
+  NULL, /* m_traverse */
+  NULL, /* m_clear */
+  NULL /* m_free */
 };
 #endif
 
-static __Pyx_StringTabEntry __pyx_string_tab[] = {
+static __Pyx_StringTabEntry __pyx_string_tab[] = 
+{
   {&__pyx_n_s_1, __pyx_k_1, sizeof(__pyx_k_1), 0, 0, 1, 1},
   {&__pyx_kp_s_2, __pyx_k_2, sizeof(__pyx_k_2), 0, 0, 1, 0},
   {&__pyx_kp_s_3, __pyx_k_3, sizeof(__pyx_k_3), 0, 0, 1, 0},
@@ -2951,26 +3065,29 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s__xrange, __pyx_k__xrange, sizeof(__pyx_k__xrange), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
-static int __Pyx_InitCachedBuiltins(void) {
+static int __Pyx_InitCachedBuiltins(void) 
+{
   __pyx_builtin_range = __Pyx_GetName(__pyx_b, __pyx_n_s__range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  #if PY_MAJOR_VERSION >= 3
+#if PY_MAJOR_VERSION >= 3
   __pyx_builtin_xrange = __Pyx_GetName(__pyx_b, __pyx_n_s__range); if (!__pyx_builtin_xrange) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  #else
+#else
   __pyx_builtin_xrange = __Pyx_GetName(__pyx_b, __pyx_n_s__xrange); if (!__pyx_builtin_xrange) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  #endif
+#endif
   __pyx_builtin_DeprecationWarning = __Pyx_GetName(__pyx_b, __pyx_n_s__DeprecationWarning); if (!__pyx_builtin_DeprecationWarning) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   return -1;
 }
 
-static int __Pyx_InitCachedConstants(void) {
+static int __Pyx_InitCachedConstants(void) 
+{
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants");
   __Pyx_RefNannyFinishContext();
   return 0;
 }
 
-static int __Pyx_InitGlobals(void) {
+static int __Pyx_InitGlobals(void) 
+{
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
@@ -2978,7 +3095,7 @@ static int __Pyx_InitGlobals(void) {
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __pyx_int_150 = PyInt_FromLong(150); if (unlikely(!__pyx_int_150)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   return 0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   return -1;
 }
 
@@ -2991,45 +3108,47 @@ PyMODINIT_FUNC PyInit_eigen(void)
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
-  #if CYTHON_REFNANNY
+#if CYTHON_REFNANNY
   void* __pyx_refnanny = NULL;
   __Pyx_RefNanny = __Pyx_RefNannyImportAPI("refnanny");
-  if (!__Pyx_RefNanny) {
-      PyErr_Clear();
-      __Pyx_RefNanny = __Pyx_RefNannyImportAPI("Cython.Runtime.refnanny");
-      if (!__Pyx_RefNanny)
-          Py_FatalError("failed to import 'refnanny' module");
+  if (!__Pyx_RefNanny) 
+  {
+    PyErr_Clear();
+    __Pyx_RefNanny = __Pyx_RefNannyImportAPI("Cython.Runtime.refnanny");
+    if (!__Pyx_RefNanny)
+      Py_FatalError("failed to import 'refnanny' module");
   }
   __pyx_refnanny = __Pyx_RefNanny->SetupContext("PyMODINIT_FUNC PyInit_eigen(void)", __LINE__, __FILE__);
-  #endif
+#endif
   __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  #ifdef __pyx_binding_PyCFunctionType_USED
+#ifdef __pyx_binding_PyCFunctionType_USED
   if (__pyx_binding_PyCFunctionType_init() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  #endif
+#endif
   /*--- Library function declarations ---*/
   /*--- Threads initialization code ---*/
-  #if defined(__PYX_FORCE_INIT_THREADS) && __PYX_FORCE_INIT_THREADS
-  #ifdef WITH_THREAD /* Python build with threading support? */
+#if defined(__PYX_FORCE_INIT_THREADS) && __PYX_FORCE_INIT_THREADS
+#ifdef WITH_THREAD /* Python build with threading support? */
   PyEval_InitThreads();
-  #endif
-  #endif
+#endif
+#endif
   /*--- Module creation code ---*/
-  #if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION < 3
   __pyx_m = Py_InitModule4(__Pyx_NAMESTR("eigen"), __pyx_methods, 0, 0, PYTHON_API_VERSION);
-  #else
+#else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
-  #endif
+#endif
   if (!__pyx_m) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-  #if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION < 3
   Py_INCREF(__pyx_m);
-  #endif
+#endif
   __pyx_b = PyImport_AddModule(__Pyx_NAMESTR(__Pyx_BUILTIN_MODULE_NAME));
   if (!__pyx_b) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   if (__Pyx_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   /*--- Initialize various global constants etc. ---*/
   if (unlikely(__Pyx_InitGlobals() < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_module_is_main_eigen) {
+  if (__pyx_module_is_main_eigen) 
+  {
     if (__Pyx_SetAttrString(__pyx_m, "__name__", __pyx_n_s____main__) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   }
   /*--- Builtin init code ---*/
@@ -3044,60 +3163,60 @@ PyMODINIT_FUNC PyInit_eigen(void)
   /*--- Execution code ---*/
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":5
- * # cython --cplus eigen.pyx
- * 
- * import warnings             # <<<<<<<<<<<<<<
- * 
- * def solve_eig_numpy(A, B):
- */
+  * # cython --cplus eigen.pyx
+  * 
+  * import warnings             # <<<<<<<<<<<<<<
+  * 
+  * def solve_eig_numpy(A, B):
+  */
   __pyx_t_1 = __Pyx_Import(((PyObject *)__pyx_n_s__warnings), 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__warnings, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 5; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":7
- * import warnings
- * 
- * def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
- *     """
- *     A, B .... scipy sparse matrices
- */
+  * import warnings
+  * 
+  * def solve_eig_numpy(A, B):             # <<<<<<<<<<<<<<
+  *     """
+  *     A, B .... scipy sparse matrices
+  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5eigen_0solve_eig_numpy, NULL, __pyx_n_s__eigen); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_numpy, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":38
- *     return r
- * 
- * def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
- *     """
- *     A, B .... scipy sparse matrices
- */
+  *     return r
+  * 
+  * def solve_eig_scipy(A, B):             # <<<<<<<<<<<<<<
+  *     """
+  *     A, B .... scipy sparse matrices
+  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5eigen_1solve_eig_scipy, NULL, __pyx_n_s__eigen); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_scipy, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":68
- *     return r
- * 
- * def convert_mat(mtx):             # <<<<<<<<<<<<<<
- *     """
- *     Converts a scipy matrix "mtx" to a pysparse matrix.
- */
+  *     return r
+  * 
+  * def convert_mat(mtx):             # <<<<<<<<<<<<<<
+  *     """
+  *     Converts a scipy matrix "mtx" to a pysparse matrix.
+  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5eigen_2convert_mat, NULL, __pyx_n_s__eigen); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__convert_mat, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
- *     return A
- * 
- * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
- *         jdtol=1e-6, max_iter=150):
- *     """
- */
+  *     return A
+  * 
+  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
+  *         jdtol=1e-6, max_iter=150):
+  *     """
+  */
   __pyx_t_1 = __Pyx_PyBool_FromLong(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k_5 = __pyx_t_1;
@@ -3105,12 +3224,12 @@ PyMODINIT_FUNC PyInit_eigen(void)
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":82
- * 
- * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
- *         jdtol=1e-6, max_iter=150):             # <<<<<<<<<<<<<<
- *     """
- *     Solves the generalized eigenvalue problem.
- */
+  * 
+  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,
+  *         jdtol=1e-6, max_iter=150):             # <<<<<<<<<<<<<<
+  *     """
+  *     Solves the generalized eigenvalue problem.
+  */
   __pyx_t_1 = PyFloat_FromDouble(1e-6); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k_6 = __pyx_t_1;
@@ -3118,826 +3237,966 @@ PyMODINIT_FUNC PyInit_eigen(void)
   __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":81
- *     return A
- * 
- * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
- *         jdtol=1e-6, max_iter=150):
- *     """
- */
+  *     return A
+  * 
+  * def solve_eig_pysparse(A, B, n_eigs=4, target_value=-1, verbose=False,             # <<<<<<<<<<<<<<
+  *         jdtol=1e-6, max_iter=150):
+  *     """
+  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5eigen_3solve_eig_pysparse, NULL, __pyx_n_s__eigen); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__solve_eig_pysparse, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 81; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "/home/ondrej/repos/hermes/hermes_common/solvers/eigen.pyx":1
- * # Compile with:             # <<<<<<<<<<<<<<
- * #
- * # cython --cplus eigen.pyx
- */
+  * # Compile with:             # <<<<<<<<<<<<<<
+  * #
+  * # cython --cplus eigen.pyx
+  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s____test__, ((PyObject *)__pyx_t_1)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
   goto __pyx_L0;
-  __pyx_L1_error:;
+__pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  if (__pyx_m) {
+  if (__pyx_m) 
+  {
     __Pyx_AddTraceback("init eigen");
     Py_DECREF(__pyx_m); __pyx_m = 0;
-  } else if (!PyErr_Occurred()) {
+  } else if (!PyErr_Occurred()) 
+  {
     PyErr_SetString(PyExc_ImportError, "init eigen");
   }
-  __pyx_L0:;
+__pyx_L0:;
   __Pyx_RefNannyFinishContext();
-  #if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION < 3
   return;
-  #else
+#else
   return __pyx_m;
-  #endif
+#endif
 }
 
 /* Runtime support code */
 
-static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) {
-    PyObject *result;
-    result = PyObject_GetAttr(dict, name);
-    if (!result)
-        PyErr_SetObject(PyExc_NameError, name);
-    return result;
+static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) 
+{
+  PyObject *result;
+  result = PyObject_GetAttr(dict, name);
+  if (!result)
+    PyErr_SetObject(PyExc_NameError, name);
+  return result;
 }
 
 
 static void __Pyx_RaiseDoubleKeywordsError(
-    const char* func_name,
-    PyObject* kw_name)
+  const char* func_name,
+  PyObject* kw_name)
 {
-    PyErr_Format(PyExc_TypeError,
-        #if PY_MAJOR_VERSION >= 3
-        "%s() got multiple values for keyword argument '%U'", func_name, kw_name);
-        #else
-        "%s() got multiple values for keyword argument '%s'", func_name,
-        PyString_AS_STRING(kw_name));
-        #endif
+  PyErr_Format(PyExc_TypeError,
+#if PY_MAJOR_VERSION >= 3
+    "%s() got multiple values for keyword argument '%U'", func_name, kw_name);
+#else
+    "%s() got multiple values for keyword argument '%s'", func_name,
+    PyString_AS_STRING(kw_name));
+#endif
 }
 
 static void __Pyx_RaiseArgtupleInvalid(
-    const char* func_name,
-    int exact,
-    Py_ssize_t num_min,
-    Py_ssize_t num_max,
-    Py_ssize_t num_found)
+  const char* func_name,
+  int exact,
+  Py_ssize_t num_min,
+  Py_ssize_t num_max,
+  Py_ssize_t num_found)
 {
-    Py_ssize_t num_expected;
-    const char *number, *more_or_less;
+  Py_ssize_t num_expected;
+  const char *number, *more_or_less;
 
-    if (num_found < num_min) {
-        num_expected = num_min;
-        more_or_less = "at least";
-    } else {
-        num_expected = num_max;
-        more_or_less = "at most";
-    }
-    if (exact) {
-        more_or_less = "exactly";
-    }
-    number = (num_expected == 1) ? "" : "s";
-    PyErr_Format(PyExc_TypeError,
-        #if PY_VERSION_HEX < 0x02050000
-            "%s() takes %s %d positional argument%s (%d given)",
-        #else
-            "%s() takes %s %zd positional argument%s (%zd given)",
-        #endif
-        func_name, more_or_less, num_expected, number, num_found);
+  if (num_found < num_min) 
+  {
+    num_expected = num_min;
+    more_or_less = "at least";
+  } else 
+  {
+    num_expected = num_max;
+    more_or_less = "at most";
+  }
+  if (exact) 
+  {
+    more_or_less = "exactly";
+  }
+  number = (num_expected == 1) ? "" : "s";
+  PyErr_Format(PyExc_TypeError,
+#if PY_VERSION_HEX < 0x02050000
+    "%s() takes %s %d positional argument%s (%d given)",
+#else
+    "%s() takes %s %zd positional argument%s (%zd given)",
+#endif
+    func_name, more_or_less, num_expected, number, num_found);
 }
 
 static int __Pyx_ParseOptionalKeywords(
-    PyObject *kwds,
-    PyObject **argnames[],
-    PyObject *kwds2,
-    PyObject *values[],
-    Py_ssize_t num_pos_args,
-    const char* function_name)
+  PyObject *kwds,
+  PyObject **argnames[],
+  PyObject *kwds2,
+  PyObject *values[],
+  Py_ssize_t num_pos_args,
+  const char* function_name)
 {
-    PyObject *key = 0, *value = 0;
-    Py_ssize_t pos = 0;
-    PyObject*** name;
-    PyObject*** first_kw_arg = argnames + num_pos_args;
+  PyObject *key = 0, *value = 0;
+  Py_ssize_t pos = 0;
+  PyObject*** name;
+  PyObject*** first_kw_arg = argnames + num_pos_args;
 
-    while (PyDict_Next(kwds, &pos, &key, &value)) {
-        name = first_kw_arg;
-        while (*name && (**name != key)) name++;
-        if (*name) {
-            values[name-argnames] = value;
-        } else {
-            #if PY_MAJOR_VERSION < 3
-            if (unlikely(!PyString_CheckExact(key)) && unlikely(!PyString_Check(key))) {
-            #else
-            if (unlikely(!PyUnicode_CheckExact(key)) && unlikely(!PyUnicode_Check(key))) {
-            #endif
-                goto invalid_keyword_type;
-            } else {
-                for (name = first_kw_arg; *name; name++) {
-                    #if PY_MAJOR_VERSION >= 3
-                    if (PyUnicode_GET_SIZE(**name) == PyUnicode_GET_SIZE(key) &&
-                        PyUnicode_Compare(**name, key) == 0) break;
-                    #else
-                    if (PyString_GET_SIZE(**name) == PyString_GET_SIZE(key) &&
-                        _PyString_Eq(**name, key)) break;
-                    #endif
-                }
-                if (*name) {
-                    values[name-argnames] = value;
-                } else {
-                    /* unexpected keyword found */
-                    for (name=argnames; name != first_kw_arg; name++) {
-                        if (**name == key) goto arg_passed_twice;
-                        #if PY_MAJOR_VERSION >= 3
-                        if (PyUnicode_GET_SIZE(**name) == PyUnicode_GET_SIZE(key) &&
-                            PyUnicode_Compare(**name, key) == 0) goto arg_passed_twice;
-                        #else
-                        if (PyString_GET_SIZE(**name) == PyString_GET_SIZE(key) &&
-                            _PyString_Eq(**name, key)) goto arg_passed_twice;
-                        #endif
-                    }
-                    if (kwds2) {
-                        if (unlikely(PyDict_SetItem(kwds2, key, value))) goto bad;
-                    } else {
-                        goto invalid_keyword;
-                    }
-                }
-            }
+  while (PyDict_Next(kwds, &pos, &key, &value)) 
+  {
+    name = first_kw_arg;
+    while (*name && (**name != key)) name++;
+    if (*name) 
+    {
+      values[name-argnames] = value;
+    } else 
+    {
+#if PY_MAJOR_VERSION < 3
+      if (unlikely(!PyString_CheckExact(key)) && unlikely(!PyString_Check(key))) 
+      {
+#else
+      if (unlikely(!PyUnicode_CheckExact(key)) && unlikely(!PyUnicode_Check(key))) 
+      {
+#endif
+        goto invalid_keyword_type;
+      } else 
+      {
+        for (name = first_kw_arg; *name; name++) 
+        {
+#if PY_MAJOR_VERSION >= 3
+          if (PyUnicode_GET_SIZE(**name) == PyUnicode_GET_SIZE(key) &&
+            PyUnicode_Compare(**name, key) == 0) break;
+#else
+          if (PyString_GET_SIZE(**name) == PyString_GET_SIZE(key) &&
+            _PyString_Eq(**name, key)) break;
+#endif
         }
+        if (*name) 
+        {
+          values[name-argnames] = value;
+        } else 
+        {
+          /* unexpected keyword found */
+          for (name=argnames; name != first_kw_arg; name++) 
+          {
+            if (**name == key) goto arg_passed_twice;
+#if PY_MAJOR_VERSION >= 3
+            if (PyUnicode_GET_SIZE(**name) == PyUnicode_GET_SIZE(key) &&
+              PyUnicode_Compare(**name, key) == 0) goto arg_passed_twice;
+#else
+            if (PyString_GET_SIZE(**name) == PyString_GET_SIZE(key) &&
+              _PyString_Eq(**name, key)) goto arg_passed_twice;
+#endif
+          }
+          if (kwds2) 
+          {
+            if (unlikely(PyDict_SetItem(kwds2, key, value))) goto bad;
+          } else 
+          {
+            goto invalid_keyword;
+          }
+        }
+      }
     }
-    return 0;
+  }
+  return 0;
 arg_passed_twice:
-    __Pyx_RaiseDoubleKeywordsError(function_name, **name);
-    goto bad;
+  __Pyx_RaiseDoubleKeywordsError(function_name, **name);
+  goto bad;
 invalid_keyword_type:
-    PyErr_Format(PyExc_TypeError,
-        "%s() keywords must be strings", function_name);
-    goto bad;
+  PyErr_Format(PyExc_TypeError,
+    "%s() keywords must be strings", function_name);
+  goto bad;
 invalid_keyword:
-    PyErr_Format(PyExc_TypeError,
-    #if PY_MAJOR_VERSION < 3
-        "%s() got an unexpected keyword argument '%s'",
-        function_name, PyString_AsString(key));
-    #else
-        "%s() got an unexpected keyword argument '%U'",
-        function_name, key);
-    #endif
+  PyErr_Format(PyExc_TypeError,
+#if PY_MAJOR_VERSION < 3
+    "%s() got an unexpected keyword argument '%s'",
+    function_name, PyString_AsString(key));
+#else
+    "%s() got an unexpected keyword argument '%U'",
+    function_name, key);
+#endif
 bad:
+  return -1;
+}
+
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) 
+{
+  PyErr_Format(PyExc_ValueError,
+#if PY_VERSION_HEX < 0x02050000
+    "need more than %d value%s to unpack", (int)index,
+#else
+    "need more than %zd value%s to unpack", index,
+#endif
+    (index == 1) ? "" : "s");
+}
+
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) 
+{
+  PyErr_Format(PyExc_ValueError,
+#if PY_VERSION_HEX < 0x02050000
+    "too many values to unpack (expected %d)", (int)expected);
+#else
+    "too many values to unpack (expected %zd)", expected);
+#endif
+}
+
+static PyObject *__Pyx_UnpackItem(PyObject *iter, Py_ssize_t index) 
+{
+  PyObject *item;
+  if (!(item = PyIter_Next(iter))) 
+  {
+    if (!PyErr_Occurred()) 
+    {
+      __Pyx_RaiseNeedMoreValuesError(index);
+    }
+  }
+  return item;
+}
+
+static int __Pyx_EndUnpack(PyObject *iter, Py_ssize_t expected) 
+{
+  PyObject *item;
+  if ((item = PyIter_Next(iter))) 
+  {
+    Py_DECREF(item);
+    __Pyx_RaiseTooManyValuesError(expected);
+    return -1;
+  }
+  else if (!PyErr_Occurred())
+    return 0;
+  else
     return -1;
 }
 
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
-    PyErr_Format(PyExc_ValueError,
-        #if PY_VERSION_HEX < 0x02050000
-                 "need more than %d value%s to unpack", (int)index,
-        #else
-                 "need more than %zd value%s to unpack", index,
-        #endif
-                 (index == 1) ? "" : "s");
-}
-
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
-    PyErr_Format(PyExc_ValueError,
-        #if PY_VERSION_HEX < 0x02050000
-            "too many values to unpack (expected %d)", (int)expected);
-        #else
-            "too many values to unpack (expected %zd)", expected);
-        #endif
-}
-
-static PyObject *__Pyx_UnpackItem(PyObject *iter, Py_ssize_t index) {
-    PyObject *item;
-    if (!(item = PyIter_Next(iter))) {
-        if (!PyErr_Occurred()) {
-            __Pyx_RaiseNeedMoreValuesError(index);
-        }
-    }
-    return item;
-}
-
-static int __Pyx_EndUnpack(PyObject *iter, Py_ssize_t expected) {
-    PyObject *item;
-    if ((item = PyIter_Next(iter))) {
-        Py_DECREF(item);
-        __Pyx_RaiseTooManyValuesError(expected);
-        return -1;
-    }
-    else if (!PyErr_Occurred())
-        return 0;
-    else
-        return -1;
-}
-
-static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list) {
-    PyObject *py_import = 0;
-    PyObject *empty_list = 0;
-    PyObject *module = 0;
-    PyObject *global_dict = 0;
-    PyObject *empty_dict = 0;
-    PyObject *list;
-    py_import = __Pyx_GetAttrString(__pyx_b, "__import__");
-    if (!py_import)
-        goto bad;
-    if (from_list)
-        list = from_list;
-    else {
-        empty_list = PyList_New(0);
-        if (!empty_list)
-            goto bad;
-        list = empty_list;
-    }
-    global_dict = PyModule_GetDict(__pyx_m);
-    if (!global_dict)
-        goto bad;
-    empty_dict = PyDict_New();
-    if (!empty_dict)
-        goto bad;
-    module = PyObject_CallFunctionObjArgs(py_import,
-        name, global_dict, empty_dict, list, NULL);
+static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list) 
+{
+  PyObject *py_import = 0;
+  PyObject *empty_list = 0;
+  PyObject *module = 0;
+  PyObject *global_dict = 0;
+  PyObject *empty_dict = 0;
+  PyObject *list;
+  py_import = __Pyx_GetAttrString(__pyx_b, "__import__");
+  if (!py_import)
+    goto bad;
+  if (from_list)
+    list = from_list;
+  else 
+  {
+    empty_list = PyList_New(0);
+    if (!empty_list)
+      goto bad;
+    list = empty_list;
+  }
+  global_dict = PyModule_GetDict(__pyx_m);
+  if (!global_dict)
+    goto bad;
+  empty_dict = PyDict_New();
+  if (!empty_dict)
+    goto bad;
+  module = PyObject_CallFunctionObjArgs(py_import,
+    name, global_dict, empty_dict, list, NULL);
 bad:
-    Py_XDECREF(empty_list);
-    Py_XDECREF(py_import);
-    Py_XDECREF(empty_dict);
-    return module;
+  Py_XDECREF(empty_list);
+  Py_XDECREF(py_import);
+  Py_XDECREF(empty_dict);
+  return module;
 }
 
 #if PY_MAJOR_VERSION < 3
-static PyObject *__Pyx_GetStdout(void) {
-    PyObject *f = PySys_GetObject((char *)"stdout");
-    if (!f) {
-        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
-    }
-    return f;
+static PyObject *__Pyx_GetStdout(void) 
+{
+  PyObject *f = PySys_GetObject((char *)"stdout");
+  if (!f) 
+  {
+    PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
+  }
+  return f;
 }
 
-static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
-    PyObject* v;
-    int i;
+static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) 
+{
+  PyObject* v;
+  int i;
 
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
+  if (!f) 
+  {
+    if (!(f = __Pyx_GetStdout()))
+      return -1;
+  }
+  for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) 
+  {
+    if (PyFile_SoftSpace(f, 1)) 
+    {
+      if (PyFile_WriteString(" ", f) < 0)
+        return -1;
     }
-    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
-        if (PyFile_SoftSpace(f, 1)) {
-            if (PyFile_WriteString(" ", f) < 0)
-                return -1;
-        }
-        v = PyTuple_GET_ITEM(arg_tuple, i);
-        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
-            return -1;
-        if (PyString_Check(v)) {
-            char *s = PyString_AsString(v);
-            Py_ssize_t len = PyString_Size(v);
-            if (len > 0 &&
-                isspace(Py_CHARMASK(s[len-1])) &&
-                s[len-1] != ' ')
-                    PyFile_SoftSpace(f, 0);
-        }
-    }
-    if (newline) {
-        if (PyFile_WriteString("\n", f) < 0)
-            return -1;
+    v = PyTuple_GET_ITEM(arg_tuple, i);
+    if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
+      return -1;
+    if (PyString_Check(v)) 
+    {
+      char *s = PyString_AsString(v);
+      Py_ssize_t len = PyString_Size(v);
+      if (len > 0 &&
+        isspace(Py_CHARMASK(s[len-1])) &&
+        s[len-1] != ' ')
         PyFile_SoftSpace(f, 0);
     }
-    return 0;
+  }
+  if (newline) 
+  {
+    if (PyFile_WriteString("\n", f) < 0)
+      return -1;
+    PyFile_SoftSpace(f, 0);
+  }
+  return 0;
 }
 
 #else /* Python 3 has a print function */
 
-static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
-    PyObject* kwargs = 0;
-    PyObject* result = 0;
-    PyObject* end_string;
-    if (unlikely(!__pyx_print)) {
-        __pyx_print = __Pyx_GetAttrString(__pyx_b, "print");
-        if (!__pyx_print)
-            return -1;
+static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) 
+{
+  PyObject* kwargs = 0;
+  PyObject* result = 0;
+  PyObject* end_string;
+  if (unlikely(!__pyx_print)) 
+  {
+    __pyx_print = __Pyx_GetAttrString(__pyx_b, "print");
+    if (!__pyx_print)
+      return -1;
+  }
+  if (stream) 
+  {
+    kwargs = PyDict_New();
+    if (unlikely(!kwargs))
+      return -1;
+    if (unlikely(PyDict_SetItemString(kwargs, "file", stream) < 0))
+      goto bad;
+    if (!newline) 
+    {
+      end_string = PyUnicode_FromStringAndSize(" ", 1);
+      if (unlikely(!end_string))
+        goto bad;
+      if (PyDict_SetItemString(kwargs, "end", end_string) < 0) 
+      {
+        Py_DECREF(end_string);
+        goto bad;
+      }
+      Py_DECREF(end_string);
     }
-    if (stream) {
-        kwargs = PyDict_New();
-        if (unlikely(!kwargs))
-            return -1;
-        if (unlikely(PyDict_SetItemString(kwargs, "file", stream) < 0))
-            goto bad;
-        if (!newline) {
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                goto bad;
-            if (PyDict_SetItemString(kwargs, "end", end_string) < 0) {
-                Py_DECREF(end_string);
-                goto bad;
-            }
-            Py_DECREF(end_string);
-        }
-    } else if (!newline) {
-        if (unlikely(!__pyx_print_kwargs)) {
-            __pyx_print_kwargs = PyDict_New();
-            if (unlikely(!__pyx_print_kwargs))
-                return -1;
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                return -1;
-            if (PyDict_SetItemString(__pyx_print_kwargs, "end", end_string) < 0) {
-                Py_DECREF(end_string);
-                return -1;
-            }
-            Py_DECREF(end_string);
-        }
-        kwargs = __pyx_print_kwargs;
-    }
-    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
-    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
-        Py_DECREF(kwargs);
-    if (!result)
+  } else if (!newline) 
+  {
+    if (unlikely(!__pyx_print_kwargs)) 
+    {
+      __pyx_print_kwargs = PyDict_New();
+      if (unlikely(!__pyx_print_kwargs))
         return -1;
-    Py_DECREF(result);
-    return 0;
-bad:
-    if (kwargs != __pyx_print_kwargs)
-        Py_XDECREF(kwargs);
+      end_string = PyUnicode_FromStringAndSize(" ", 1);
+      if (unlikely(!end_string))
+        return -1;
+      if (PyDict_SetItemString(__pyx_print_kwargs, "end", end_string) < 0) 
+      {
+        Py_DECREF(end_string);
+        return -1;
+      }
+      Py_DECREF(end_string);
+    }
+    kwargs = __pyx_print_kwargs;
+  }
+  result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
+  if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
+    Py_DECREF(kwargs);
+  if (!result)
     return -1;
+  Py_DECREF(result);
+  return 0;
+bad:
+  if (kwargs != __pyx_print_kwargs)
+    Py_XDECREF(kwargs);
+  return -1;
 }
 
 #endif
 
 #if PY_MAJOR_VERSION < 3
 
-static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    if (PyFile_SoftSpace(f, 0)) {
-        if (PyFile_WriteString(" ", f) < 0)
-            return -1;
-    }
-    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
-        return -1;
-    if (PyFile_WriteString("\n", f) < 0)
-        return -1;
-    return 0;
-    /* the line below is just to avoid compiler
-     * compiler warnings about unused functions */
-    return __Pyx_Print(f, NULL, 0);
+static int __Pyx_PrintOne(PyObject* f, PyObject *o) 
+{
+  if (!f) 
+  {
+    if (!(f = __Pyx_GetStdout()))
+      return -1;
+  }
+  if (PyFile_SoftSpace(f, 0)) 
+  {
+    if (PyFile_WriteString(" ", f) < 0)
+      return -1;
+  }
+  if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
+    return -1;
+  if (PyFile_WriteString("\n", f) < 0)
+    return -1;
+  return 0;
+  /* the line below is just to avoid compiler
+  * compiler warnings about unused functions */
+  return __Pyx_Print(f, NULL, 0);
 }
 
 #else /* Python 3 has a print function */
 
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
-    int res;
-    PyObject* arg_tuple = PyTuple_New(1);
-    if (unlikely(!arg_tuple))
-        return -1;
-    Py_INCREF(o);
-    PyTuple_SET_ITEM(arg_tuple, 0, o);
-    res = __Pyx_Print(stream, arg_tuple, 1);
-    Py_DECREF(arg_tuple);
-    return res;
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o) 
+{
+  int res;
+  PyObject* arg_tuple = PyTuple_New(1);
+  if (unlikely(!arg_tuple))
+    return -1;
+  Py_INCREF(o);
+  PyTuple_SET_ITEM(arg_tuple, 0, o);
+  res = __Pyx_Print(stream, arg_tuple, 1);
+  Py_DECREF(arg_tuple);
+  return res;
 }
 
 #endif
 
 
-PyObject *__pyx_binding_PyCFunctionType_NewEx(PyMethodDef *ml, PyObject *self, PyObject *module) {
-	__pyx_binding_PyCFunctionType_object *op = PyObject_GC_New(__pyx_binding_PyCFunctionType_object, __pyx_binding_PyCFunctionType);
-    if (op == NULL)
-        return NULL;
-	op->func.m_ml = ml;
-	Py_XINCREF(self);
-	op->func.m_self = self;
-	Py_XINCREF(module);
-	op->func.m_module = module;
-	PyObject_GC_Track(op);
-	return (PyObject *)op;
+PyObject *__pyx_binding_PyCFunctionType_NewEx(PyMethodDef *ml, PyObject *self, PyObject *module) 
+{
+  __pyx_binding_PyCFunctionType_object *op = PyObject_GC_New(__pyx_binding_PyCFunctionType_object, __pyx_binding_PyCFunctionType);
+  if (op == NULL)
+    return NULL;
+  op->func.m_ml = ml;
+  Py_XINCREF(self);
+  op->func.m_self = self;
+  Py_XINCREF(module);
+  op->func.m_module = module;
+  PyObject_GC_Track(op);
+  return (PyObject *)op;
 }
 
-static void __pyx_binding_PyCFunctionType_dealloc(__pyx_binding_PyCFunctionType_object *m) {
-	PyObject_GC_UnTrack(m);
-	Py_XDECREF(m->func.m_self);
-	Py_XDECREF(m->func.m_module);
-    PyObject_GC_Del(m);
+static void __pyx_binding_PyCFunctionType_dealloc(__pyx_binding_PyCFunctionType_object *m) 
+{
+  PyObject_GC_UnTrack(m);
+  Py_XDECREF(m->func.m_self);
+  Py_XDECREF(m->func.m_module);
+  PyObject_GC_Del(m);
 }
 
-static PyObject *__pyx_binding_PyCFunctionType_descr_get(PyObject *func, PyObject *obj, PyObject *type) {
-	if (obj == Py_None)
-		obj = NULL;
-	return PyMethod_New(func, obj, type);
+static PyObject *__pyx_binding_PyCFunctionType_descr_get(PyObject *func, PyObject *obj, PyObject *type) 
+{
+  if (obj == Py_None)
+    obj = NULL;
+  return PyMethod_New(func, obj, type);
 }
 
-int __pyx_binding_PyCFunctionType_init(void) {
-    __pyx_binding_PyCFunctionType_type = PyCFunction_Type;
-    __pyx_binding_PyCFunctionType_type.tp_name = __Pyx_NAMESTR("cython_binding_builtin_function_or_method");
-    __pyx_binding_PyCFunctionType_type.tp_dealloc = (destructor)__pyx_binding_PyCFunctionType_dealloc;
-    __pyx_binding_PyCFunctionType_type.tp_descr_get = __pyx_binding_PyCFunctionType_descr_get;
-    if (PyType_Ready(&__pyx_binding_PyCFunctionType_type) < 0) {
-        return -1;
+int __pyx_binding_PyCFunctionType_init(void) 
+{
+  __pyx_binding_PyCFunctionType_type = PyCFunction_Type;
+  __pyx_binding_PyCFunctionType_type.tp_name = __Pyx_NAMESTR("cython_binding_builtin_function_or_method");
+  __pyx_binding_PyCFunctionType_type.tp_dealloc = (destructor)__pyx_binding_PyCFunctionType_dealloc;
+  __pyx_binding_PyCFunctionType_type.tp_descr_get = __pyx_binding_PyCFunctionType_descr_get;
+  if (PyType_Ready(&__pyx_binding_PyCFunctionType_type) < 0) 
+  {
+    return -1;
+  }
+  __pyx_binding_PyCFunctionType = &__pyx_binding_PyCFunctionType_type;
+  return 0;
+
+}
+
+static CYTHON_INLINE unsigned char __Pyx_PyInt_AsUnsignedChar(PyObject* x) 
+{
+  const unsigned char neg_one = (unsigned char)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(unsigned char) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(unsigned char)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to unsigned char" :
+        "value too large to convert to unsigned char");
+      }
+      return (unsigned char)-1;
     }
-    __pyx_binding_PyCFunctionType = &__pyx_binding_PyCFunctionType_type;
-    return 0;
-
+    return (unsigned char)val;
+  }
+  return (unsigned char)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE unsigned char __Pyx_PyInt_AsUnsignedChar(PyObject* x) {
-    const unsigned char neg_one = (unsigned char)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned char) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to unsigned char" :
-                    "value too large to convert to unsigned char");
-            }
-            return (unsigned char)-1;
-        }
-        return (unsigned char)val;
+static CYTHON_INLINE unsigned short __Pyx_PyInt_AsUnsignedShort(PyObject* x) 
+{
+  const unsigned short neg_one = (unsigned short)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(unsigned short) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(unsigned short)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to unsigned short" :
+        "value too large to convert to unsigned short");
+      }
+      return (unsigned short)-1;
     }
-    return (unsigned char)__Pyx_PyInt_AsUnsignedLong(x);
+    return (unsigned short)val;
+  }
+  return (unsigned short)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE unsigned short __Pyx_PyInt_AsUnsignedShort(PyObject* x) {
-    const unsigned short neg_one = (unsigned short)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned short) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to unsigned short" :
-                    "value too large to convert to unsigned short");
-            }
-            return (unsigned short)-1;
-        }
-        return (unsigned short)val;
+static CYTHON_INLINE unsigned int __Pyx_PyInt_AsUnsignedInt(PyObject* x) 
+{
+  const unsigned int neg_one = (unsigned int)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(unsigned int) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(unsigned int)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to unsigned int" :
+        "value too large to convert to unsigned int");
+      }
+      return (unsigned int)-1;
     }
-    return (unsigned short)__Pyx_PyInt_AsUnsignedLong(x);
+    return (unsigned int)val;
+  }
+  return (unsigned int)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE unsigned int __Pyx_PyInt_AsUnsignedInt(PyObject* x) {
-    const unsigned int neg_one = (unsigned int)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned int) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to unsigned int" :
-                    "value too large to convert to unsigned int");
-            }
-            return (unsigned int)-1;
-        }
-        return (unsigned int)val;
+static CYTHON_INLINE char __Pyx_PyInt_AsChar(PyObject* x) 
+{
+  const char neg_one = (char)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(char) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(char)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to char" :
+        "value too large to convert to char");
+      }
+      return (char)-1;
     }
-    return (unsigned int)__Pyx_PyInt_AsUnsignedLong(x);
+    return (char)val;
+  }
+  return (char)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE char __Pyx_PyInt_AsChar(PyObject* x) {
-    const char neg_one = (char)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(char) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to char" :
-                    "value too large to convert to char");
-            }
-            return (char)-1;
-        }
-        return (char)val;
+static CYTHON_INLINE short __Pyx_PyInt_AsShort(PyObject* x) 
+{
+  const short neg_one = (short)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(short) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(short)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to short" :
+        "value too large to convert to short");
+      }
+      return (short)-1;
     }
-    return (char)__Pyx_PyInt_AsLong(x);
+    return (short)val;
+  }
+  return (short)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE short __Pyx_PyInt_AsShort(PyObject* x) {
-    const short neg_one = (short)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(short) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to short" :
-                    "value too large to convert to short");
-            }
-            return (short)-1;
-        }
-        return (short)val;
+static CYTHON_INLINE int __Pyx_PyInt_AsInt(PyObject* x) 
+{
+  const int neg_one = (int)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(int) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(int)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to int" :
+        "value too large to convert to int");
+      }
+      return (int)-1;
     }
-    return (short)__Pyx_PyInt_AsLong(x);
+    return (int)val;
+  }
+  return (int)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE int __Pyx_PyInt_AsInt(PyObject* x) {
-    const int neg_one = (int)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(int) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to int" :
-                    "value too large to convert to int");
-            }
-            return (int)-1;
-        }
-        return (int)val;
+static CYTHON_INLINE signed char __Pyx_PyInt_AsSignedChar(PyObject* x) 
+{
+  const signed char neg_one = (signed char)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(signed char) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(signed char)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to signed char" :
+        "value too large to convert to signed char");
+      }
+      return (signed char)-1;
     }
-    return (int)__Pyx_PyInt_AsLong(x);
+    return (signed char)val;
+  }
+  return (signed char)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE signed char __Pyx_PyInt_AsSignedChar(PyObject* x) {
-    const signed char neg_one = (signed char)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed char) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to signed char" :
-                    "value too large to convert to signed char");
-            }
-            return (signed char)-1;
-        }
-        return (signed char)val;
+static CYTHON_INLINE signed short __Pyx_PyInt_AsSignedShort(PyObject* x) 
+{
+  const signed short neg_one = (signed short)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(signed short) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(signed short)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to signed short" :
+        "value too large to convert to signed short");
+      }
+      return (signed short)-1;
     }
-    return (signed char)__Pyx_PyInt_AsSignedLong(x);
+    return (signed short)val;
+  }
+  return (signed short)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE signed short __Pyx_PyInt_AsSignedShort(PyObject* x) {
-    const signed short neg_one = (signed short)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed short) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to signed short" :
-                    "value too large to convert to signed short");
-            }
-            return (signed short)-1;
-        }
-        return (signed short)val;
+static CYTHON_INLINE signed int __Pyx_PyInt_AsSignedInt(PyObject* x) 
+{
+  const signed int neg_one = (signed int)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(signed int) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(signed int)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to signed int" :
+        "value too large to convert to signed int");
+      }
+      return (signed int)-1;
     }
-    return (signed short)__Pyx_PyInt_AsSignedLong(x);
+    return (signed int)val;
+  }
+  return (signed int)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE signed int __Pyx_PyInt_AsSignedInt(PyObject* x) {
-    const signed int neg_one = (signed int)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed int) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to signed int" :
-                    "value too large to convert to signed int");
-            }
-            return (signed int)-1;
-        }
-        return (signed int)val;
+static CYTHON_INLINE int __Pyx_PyInt_AsLongDouble(PyObject* x) 
+{
+  const int neg_one = (int)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
+  if (sizeof(int) < sizeof(long)) 
+  {
+    long val = __Pyx_PyInt_AsLong(x);
+    if (unlikely(val != (long)(int)val)) 
+    {
+      if (!unlikely(val == -1 && PyErr_Occurred())) 
+      {
+        PyErr_SetString(PyExc_OverflowError,
+          (is_unsigned && unlikely(val < 0)) ?
+          "can't convert negative value to int" :
+        "value too large to convert to int");
+      }
+      return (int)-1;
     }
-    return (signed int)__Pyx_PyInt_AsSignedLong(x);
+    return (int)val;
+  }
+  return (int)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE int __Pyx_PyInt_AsLongDouble(PyObject* x) {
-    const int neg_one = (int)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (sizeof(int) < sizeof(long)) {
-        long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
-                PyErr_SetString(PyExc_OverflowError,
-                    (is_unsigned && unlikely(val < 0)) ?
-                    "can't convert negative value to int" :
-                    "value too large to convert to int");
-            }
-            return (int)-1;
-        }
-        return (int)val;
-    }
-    return (int)__Pyx_PyInt_AsLong(x);
-}
-
-static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) {
-    const unsigned long neg_one = (unsigned long)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) 
+{
+  const unsigned long neg_one = (unsigned long)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to unsigned long");
-            return (unsigned long)-1;
-        }
-        return (unsigned long)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to unsigned long");
+      return (unsigned long)-1;
+    }
+    return (unsigned long)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to unsigned long");
-                return (unsigned long)-1;
-            }
-            return PyLong_AsUnsignedLong(x);
-        } else {
-            return PyLong_AsLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to unsigned long");
+          return (unsigned long)-1;
         }
-    } else {
-        unsigned long val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (unsigned long)-1;
-        val = __Pyx_PyInt_AsUnsignedLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLong(x);
+      } else 
+      {
+        return PyLong_AsLong(x);
+      }
+    } else 
+    {
+      unsigned long val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (unsigned long)-1;
+      val = __Pyx_PyInt_AsUnsignedLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
-static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObject* x) {
-    const unsigned PY_LONG_LONG neg_one = (unsigned PY_LONG_LONG)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObject* x) 
+{
+  const unsigned PY_LONG_LONG neg_one = (unsigned PY_LONG_LONG)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to unsigned PY_LONG_LONG");
-            return (unsigned PY_LONG_LONG)-1;
-        }
-        return (unsigned PY_LONG_LONG)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to unsigned PY_LONG_LONG");
+      return (unsigned PY_LONG_LONG)-1;
+    }
+    return (unsigned PY_LONG_LONG)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to unsigned PY_LONG_LONG");
-                return (unsigned PY_LONG_LONG)-1;
-            }
-            return PyLong_AsUnsignedLongLong(x);
-        } else {
-            return PyLong_AsLongLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to unsigned PY_LONG_LONG");
+          return (unsigned PY_LONG_LONG)-1;
         }
-    } else {
-        unsigned PY_LONG_LONG val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (unsigned PY_LONG_LONG)-1;
-        val = __Pyx_PyInt_AsUnsignedLongLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLongLong(x);
+      } else 
+      {
+        return PyLong_AsLongLong(x);
+      }
+    } else 
+    {
+      unsigned PY_LONG_LONG val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (unsigned PY_LONG_LONG)-1;
+      val = __Pyx_PyInt_AsUnsignedLongLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
-static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) {
-    const long neg_one = (long)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) 
+{
+  const long neg_one = (long)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to long");
-            return (long)-1;
-        }
-        return (long)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to long");
+      return (long)-1;
+    }
+    return (long)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to long");
-                return (long)-1;
-            }
-            return PyLong_AsUnsignedLong(x);
-        } else {
-            return PyLong_AsLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to long");
+          return (long)-1;
         }
-    } else {
-        long val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (long)-1;
-        val = __Pyx_PyInt_AsLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLong(x);
+      } else 
+      {
+        return PyLong_AsLong(x);
+      }
+    } else 
+    {
+      long val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (long)-1;
+      val = __Pyx_PyInt_AsLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
-static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) {
-    const PY_LONG_LONG neg_one = (PY_LONG_LONG)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) 
+{
+  const PY_LONG_LONG neg_one = (PY_LONG_LONG)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to PY_LONG_LONG");
-            return (PY_LONG_LONG)-1;
-        }
-        return (PY_LONG_LONG)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to PY_LONG_LONG");
+      return (PY_LONG_LONG)-1;
+    }
+    return (PY_LONG_LONG)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to PY_LONG_LONG");
-                return (PY_LONG_LONG)-1;
-            }
-            return PyLong_AsUnsignedLongLong(x);
-        } else {
-            return PyLong_AsLongLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to PY_LONG_LONG");
+          return (PY_LONG_LONG)-1;
         }
-    } else {
-        PY_LONG_LONG val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (PY_LONG_LONG)-1;
-        val = __Pyx_PyInt_AsLongLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLongLong(x);
+      } else 
+      {
+        return PyLong_AsLongLong(x);
+      }
+    } else 
+    {
+      PY_LONG_LONG val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (PY_LONG_LONG)-1;
+      val = __Pyx_PyInt_AsLongLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
-static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) {
-    const signed long neg_one = (signed long)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) 
+{
+  const signed long neg_one = (signed long)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to signed long");
-            return (signed long)-1;
-        }
-        return (signed long)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to signed long");
+      return (signed long)-1;
+    }
+    return (signed long)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to signed long");
-                return (signed long)-1;
-            }
-            return PyLong_AsUnsignedLong(x);
-        } else {
-            return PyLong_AsLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to signed long");
+          return (signed long)-1;
         }
-    } else {
-        signed long val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (signed long)-1;
-        val = __Pyx_PyInt_AsSignedLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLong(x);
+      } else 
+      {
+        return PyLong_AsLong(x);
+      }
+    } else 
+    {
+      signed long val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (signed long)-1;
+      val = __Pyx_PyInt_AsSignedLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
-static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* x) {
-    const signed PY_LONG_LONG neg_one = (signed PY_LONG_LONG)-1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
+static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* x) 
+{
+  const signed PY_LONG_LONG neg_one = (signed PY_LONG_LONG)-1, const_zero = 0;
+  const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
-        long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
-            PyErr_SetString(PyExc_OverflowError,
-                            "can't convert negative value to signed PY_LONG_LONG");
-            return (signed PY_LONG_LONG)-1;
-        }
-        return (signed PY_LONG_LONG)val;
-    } else
+  if (likely(PyInt_Check(x))) 
+  {
+    long val = PyInt_AS_LONG(x);
+    if (is_unsigned && unlikely(val < 0)) 
+    {
+      PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to signed PY_LONG_LONG");
+      return (signed PY_LONG_LONG)-1;
+    }
+    return (signed PY_LONG_LONG)val;
+  } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to signed PY_LONG_LONG");
-                return (signed PY_LONG_LONG)-1;
-            }
-            return PyLong_AsUnsignedLongLong(x);
-        } else {
-            return PyLong_AsLongLong(x);
+    if (likely(PyLong_Check(x))) 
+    {
+      if (is_unsigned) 
+      {
+        if (unlikely(Py_SIZE(x) < 0)) 
+        {
+          PyErr_SetString(PyExc_OverflowError,
+            "can't convert negative value to signed PY_LONG_LONG");
+          return (signed PY_LONG_LONG)-1;
         }
-    } else {
-        signed PY_LONG_LONG val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (signed PY_LONG_LONG)-1;
-        val = __Pyx_PyInt_AsSignedLongLong(tmp);
-        Py_DECREF(tmp);
-        return val;
+        return PyLong_AsUnsignedLongLong(x);
+      } else 
+      {
+        return PyLong_AsLongLong(x);
+      }
+    } else 
+    {
+      signed PY_LONG_LONG val;
+      PyObject *tmp = __Pyx_PyNumber_Int(x);
+      if (!tmp) return (signed PY_LONG_LONG)-1;
+      val = __Pyx_PyInt_AsSignedLongLong(tmp);
+      Py_DECREF(tmp);
+      return val;
     }
 }
 
@@ -3945,111 +4204,126 @@ static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* 
 #include "frameobject.h"
 #include "traceback.h"
 
-static void __Pyx_AddTraceback(const char *funcname) {
-    PyObject *py_srcfile = 0;
-    PyObject *py_funcname = 0;
-    PyObject *py_globals = 0;
-    PyCodeObject *py_code = 0;
-    PyFrameObject *py_frame = 0;
+static void __Pyx_AddTraceback(const char *funcname) 
+{
+  PyObject *py_srcfile = 0;
+  PyObject *py_funcname = 0;
+  PyObject *py_globals = 0;
+  PyCodeObject *py_code = 0;
+  PyFrameObject *py_frame = 0;
 
-    #if PY_MAJOR_VERSION < 3
-    py_srcfile = PyString_FromString(__pyx_filename);
-    #else
-    py_srcfile = PyUnicode_FromString(__pyx_filename);
-    #endif
-    if (!py_srcfile) goto bad;
-    if (__pyx_clineno) {
-        #if PY_MAJOR_VERSION < 3
-        py_funcname = PyString_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
-        #else
-        py_funcname = PyUnicode_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
-        #endif
-    }
-    else {
-        #if PY_MAJOR_VERSION < 3
-        py_funcname = PyString_FromString(funcname);
-        #else
-        py_funcname = PyUnicode_FromString(funcname);
-        #endif
-    }
-    if (!py_funcname) goto bad;
-    py_globals = PyModule_GetDict(__pyx_m);
-    if (!py_globals) goto bad;
-    py_code = PyCode_New(
-        0,            /*int argcount,*/
-        #if PY_MAJOR_VERSION >= 3
-        0,            /*int kwonlyargcount,*/
-        #endif
-        0,            /*int nlocals,*/
-        0,            /*int stacksize,*/
-        0,            /*int flags,*/
-        __pyx_empty_bytes, /*PyObject *code,*/
-        __pyx_empty_tuple,  /*PyObject *consts,*/
-        __pyx_empty_tuple,  /*PyObject *names,*/
-        __pyx_empty_tuple,  /*PyObject *varnames,*/
-        __pyx_empty_tuple,  /*PyObject *freevars,*/
-        __pyx_empty_tuple,  /*PyObject *cellvars,*/
-        py_srcfile,   /*PyObject *filename,*/
-        py_funcname,  /*PyObject *name,*/
-        __pyx_lineno,   /*int firstlineno,*/
-        __pyx_empty_bytes  /*PyObject *lnotab*/
+#if PY_MAJOR_VERSION < 3
+  py_srcfile = PyString_FromString(__pyx_filename);
+#else
+  py_srcfile = PyUnicode_FromString(__pyx_filename);
+#endif
+  if (!py_srcfile) goto bad;
+  if (__pyx_clineno) 
+  {
+#if PY_MAJOR_VERSION < 3
+    py_funcname = PyString_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
+#else
+    py_funcname = PyUnicode_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
+#endif
+  }
+  else 
+  {
+#if PY_MAJOR_VERSION < 3
+    py_funcname = PyString_FromString(funcname);
+#else
+    py_funcname = PyUnicode_FromString(funcname);
+#endif
+  }
+  if (!py_funcname) goto bad;
+  py_globals = PyModule_GetDict(__pyx_m);
+  if (!py_globals) goto bad;
+  py_code = PyCode_New(
+    0,            /*int argcount,*/
+#if PY_MAJOR_VERSION >= 3
+    0,            /*int kwonlyargcount,*/
+#endif
+    0,            /*int nlocals,*/
+    0,            /*int stacksize,*/
+    0,            /*int flags,*/
+    __pyx_empty_bytes, /*PyObject *code,*/
+    __pyx_empty_tuple,  /*PyObject *consts,*/
+    __pyx_empty_tuple,  /*PyObject *names,*/
+    __pyx_empty_tuple,  /*PyObject *varnames,*/
+    __pyx_empty_tuple,  /*PyObject *freevars,*/
+    __pyx_empty_tuple,  /*PyObject *cellvars,*/
+    py_srcfile,   /*PyObject *filename,*/
+    py_funcname,  /*PyObject *name,*/
+    __pyx_lineno,   /*int firstlineno,*/
+    __pyx_empty_bytes  /*PyObject *lnotab*/
     );
-    if (!py_code) goto bad;
-    py_frame = PyFrame_New(
-        PyThreadState_GET(), /*PyThreadState *tstate,*/
-        py_code,             /*PyCodeObject *code,*/
-        py_globals,          /*PyObject *globals,*/
-        0                    /*PyObject *locals*/
+  if (!py_code) goto bad;
+  py_frame = PyFrame_New(
+    PyThreadState_GET(), /*PyThreadState *tstate,*/
+    py_code,             /*PyCodeObject *code,*/
+    py_globals,          /*PyObject *globals,*/
+    0                    /*PyObject *locals*/
     );
-    if (!py_frame) goto bad;
-    py_frame->f_lineno = __pyx_lineno;
-    PyTraceBack_Here(py_frame);
+  if (!py_frame) goto bad;
+  py_frame->f_lineno = __pyx_lineno;
+  PyTraceBack_Here(py_frame);
 bad:
-    Py_XDECREF(py_srcfile);
-    Py_XDECREF(py_funcname);
-    Py_XDECREF(py_code);
-    Py_XDECREF(py_frame);
+  Py_XDECREF(py_srcfile);
+  Py_XDECREF(py_funcname);
+  Py_XDECREF(py_code);
+  Py_XDECREF(py_frame);
 }
 
-static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) {
-    while (t->p) {
-        #if PY_MAJOR_VERSION < 3
-        if (t->is_unicode) {
-            *t->p = PyUnicode_DecodeUTF8(t->s, t->n - 1, NULL);
-        } else if (t->intern) {
-            *t->p = PyString_InternFromString(t->s);
-        } else {
-            *t->p = PyString_FromStringAndSize(t->s, t->n - 1);
-        }
-        #else  /* Python 3+ has unicode identifiers */
-        if (t->is_unicode | t->is_str) {
-            if (t->intern) {
-                *t->p = PyUnicode_InternFromString(t->s);
-            } else if (t->encoding) {
-                *t->p = PyUnicode_Decode(t->s, t->n - 1, t->encoding, NULL);
-            } else {
-                *t->p = PyUnicode_FromStringAndSize(t->s, t->n - 1);
-            }
-        } else {
-            *t->p = PyBytes_FromStringAndSize(t->s, t->n - 1);
-        }
-        #endif
-        if (!*t->p)
-            return -1;
-        ++t;
+static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) 
+{
+  while (t->p) 
+  {
+#if PY_MAJOR_VERSION < 3
+    if (t->is_unicode) 
+    {
+      *t->p = PyUnicode_DecodeUTF8(t->s, t->n - 1, NULL);
+    } else if (t->intern) 
+    {
+      *t->p = PyString_InternFromString(t->s);
+    } else 
+    {
+      *t->p = PyString_FromStringAndSize(t->s, t->n - 1);
     }
-    return 0;
+#else  /* Python 3+ has unicode identifiers */
+    if (t->is_unicode | t->is_str) 
+    {
+      if (t->intern) 
+      {
+        *t->p = PyUnicode_InternFromString(t->s);
+      } else if (t->encoding) 
+      {
+        *t->p = PyUnicode_Decode(t->s, t->n - 1, t->encoding, NULL);
+      } else 
+      {
+        *t->p = PyUnicode_FromStringAndSize(t->s, t->n - 1);
+      }
+    } else 
+    {
+      *t->p = PyBytes_FromStringAndSize(t->s, t->n - 1);
+    }
+#endif
+    if (!*t->p)
+      return -1;
+    ++t;
+  }
+  return 0;
 }
 
 /* Type Conversion Functions */
 
-static CYTHON_INLINE int __Pyx_PyObject_IsTrue(PyObject* x) {
-   int is_true = x == Py_True;
-   if (is_true | (x == Py_False) | (x == Py_None)) return is_true;
-   else return PyObject_IsTrue(x);
+static CYTHON_INLINE int __Pyx_PyObject_IsTrue(PyObject* x) 
+{
+  int is_true = x == Py_True;
+  if (is_true | (x == Py_False) | (x == Py_None)) return is_true;
+  else return PyObject_IsTrue(x);
 }
 
-static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) {
+static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) 
+{
   PyNumberMethods *m;
   const char *name = NULL;
   PyObject *res = NULL;
@@ -4061,41 +4335,49 @@ static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) {
     return Py_INCREF(x), x;
   m = Py_TYPE(x)->tp_as_number;
 #if PY_VERSION_HEX < 0x03000000
-  if (m && m->nb_int) {
+  if (m && m->nb_int) 
+  {
     name = "int";
     res = PyNumber_Int(x);
   }
-  else if (m && m->nb_long) {
+  else if (m && m->nb_long) 
+  {
     name = "long";
     res = PyNumber_Long(x);
   }
 #else
-  if (m && m->nb_int) {
+  if (m && m->nb_int) 
+  {
     name = "int";
     res = PyNumber_Long(x);
   }
 #endif
-  if (res) {
+  if (res) 
+  {
 #if PY_VERSION_HEX < 0x03000000
-    if (!PyInt_Check(res) && !PyLong_Check(res)) {
+    if (!PyInt_Check(res) && !PyLong_Check(res)) 
+    {
 #else
-    if (!PyLong_Check(res)) {
+    if (!PyLong_Check(res)) 
+    {
 #endif
       PyErr_Format(PyExc_TypeError,
-                   "__%s__ returned non-%s (type %.200s)",
-                   name, name, Py_TYPE(res)->tp_name);
+        "__%s__ returned non-%s (type %.200s)",
+        name, name, Py_TYPE(res)->tp_name);
       Py_DECREF(res);
       return NULL;
     }
   }
-  else if (!PyErr_Occurred()) {
+  else if (!PyErr_Occurred()) 
+  {
     PyErr_SetString(PyExc_TypeError,
-                    "an integer is required");
+      "an integer is required");
   }
   return res;
 }
 
-static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
+static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) 
+{
   Py_ssize_t ival;
   PyObject* x = PyNumber_Index(b);
   if (!x) return -1;
@@ -4104,30 +4386,35 @@ static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
   return ival;
 }
 
-static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) {
+static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) 
+{
 #if PY_VERSION_HEX < 0x02050000
-   if (ival <= LONG_MAX)
-       return PyInt_FromLong((long)ival);
-   else {
-       unsigned char *bytes = (unsigned char *) &ival;
-       int one = 1; int little = (int)*(unsigned char*)&one;
-       return _PyLong_FromByteArray(bytes, sizeof(size_t), little, 0);
-   }
+  if (ival <= LONG_MAX)
+    return PyInt_FromLong((long)ival);
+  else 
+  {
+    unsigned char *bytes = (unsigned char *) &ival;
+    int one = 1; int little = (int)*(unsigned char*)&one;
+    return _PyLong_FromByteArray(bytes, sizeof(size_t), little, 0);
+  }
 #else
-   return PyInt_FromSize_t(ival);
+  return PyInt_FromSize_t(ival);
 #endif
 }
 
-static CYTHON_INLINE size_t __Pyx_PyInt_AsSize_t(PyObject* x) {
-   unsigned PY_LONG_LONG val = __Pyx_PyInt_AsUnsignedLongLong(x);
-   if (unlikely(val == (unsigned PY_LONG_LONG)-1 && PyErr_Occurred())) {
-       return (size_t)-1;
-   } else if (unlikely(val != (unsigned PY_LONG_LONG)(size_t)val)) {
-       PyErr_SetString(PyExc_OverflowError,
-                       "value too large to convert to size_t");
-       return (size_t)-1;
-   }
-   return (size_t)val;
+static CYTHON_INLINE size_t __Pyx_PyInt_AsSize_t(PyObject* x) 
+{
+  unsigned PY_LONG_LONG val = __Pyx_PyInt_AsUnsignedLongLong(x);
+  if (unlikely(val == (unsigned PY_LONG_LONG)-1 && PyErr_Occurred())) 
+  {
+    return (size_t)-1;
+  } else if (unlikely(val != (unsigned PY_LONG_LONG)(size_t)val)) 
+  {
+    PyErr_SetString(PyExc_OverflowError,
+      "value too large to convert to size_t");
+    return (size_t)-1;
+  }
+  return (size_t)val;
 }
 
 

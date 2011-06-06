@@ -117,7 +117,8 @@ void HashTable::free()
 
 void HashTable::dump_hash_stat()
 {
-  if (ncollisions > 2*nqueries) {
+  if (ncollisions > 2*nqueries) 
+  {
     warn("Hashtable: nqueries=%d ncollisions=%d", nqueries, ncollisions);
   }
 }

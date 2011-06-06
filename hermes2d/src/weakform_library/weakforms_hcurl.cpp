@@ -36,7 +36,8 @@ namespace WeakFormsHcurl
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_e_f<double, Scalar>(n, wt, u, v);
     }
     else error("Axisymmetric Hcurl forms not implemented yet.");
@@ -49,7 +50,8 @@ namespace WeakFormsHcurl
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_e_f<Ord, Ord>(n, wt, u, v);
     }
     else error("Axisymmetric Hcurl forms not implemented yet.");
@@ -99,7 +101,8 @@ namespace WeakFormsHcurl
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_curl_e_curl_f<double, Scalar>(n, wt, u, v);
     }
     else error("Axisymmetric Hcurl forms not implemented yet.");
@@ -112,7 +115,8 @@ namespace WeakFormsHcurl
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_curl_e_curl_f<Ord, Ord>(n, wt, u, v);
     }
     else error("Axisymmetric Hcurl forms not implemented yet.");
@@ -133,7 +137,7 @@ namespace WeakFormsHcurl
     GeomType gt)
     : VectorFormVol<Scalar>(i, area), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
     function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
-  { 
+  {
     // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
     if (f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new DefaultFunction<Scalar>(1.0);
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
@@ -148,7 +152,7 @@ namespace WeakFormsHcurl
     GeomType gt)
     : VectorFormVol<Scalar>(i, areas), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
     function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
-  { 
+  {
     // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
     if (f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new DefaultFunction<Scalar>(1.0);
     else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
@@ -225,8 +229,10 @@ namespace WeakFormsHcurl
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * (u_ext[idx_i]->val0[i] * v->val0[i] +
           u_ext[idx_i]->val1[i] * v->val1[i]);
       }
@@ -241,8 +247,10 @@ namespace WeakFormsHcurl
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         result += wt[i] * function_coeff->ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
       }
     }
@@ -294,8 +302,10 @@ namespace WeakFormsHcurl
   {
     Func<Scalar>* u_prev = u_ext[idx_i];
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         double mag0_i = std::abs(u_prev->val0[i]);
         double mag1_i = std::abs(u_prev->val1[i]);
         double mag_i = sqrt(sqr(mag0_i) + sqr(mag1_i));
@@ -314,8 +324,10 @@ namespace WeakFormsHcurl
   {
     Func<Ord>* u_prev = u_ext[idx_i];
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         Ord mag0_i = u_prev->val0[i];
         Ord mag1_i = u_prev->val1[i];
         Ord mag_i = sqrt(sqr(mag0_i) + sqr(mag1_i));
@@ -368,7 +380,8 @@ namespace WeakFormsHcurl
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_e_tau_f_tau<double, Scalar>(n, wt, u, v, e);
     }
     else error("Axisymmetric Hcurl forms not implemnted yet.");
@@ -381,7 +394,8 @@ namespace WeakFormsHcurl
     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       result = const_coeff * int_e_tau_f_tau<Ord, Ord>(n, wt, u, v, e);
     }
     else error("Axisymmetric Hcurl forms not implemnted yet.");
@@ -429,7 +443,8 @@ namespace WeakFormsHcurl
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       for (int i = 0; i < n; i++)
         result += wt[i] * (    (u_ext[0]->val0[i] * e->tx[i] + u_ext[0]->val1[i] * e->ty[i]) *
         conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
@@ -445,7 +460,8 @@ namespace WeakFormsHcurl
     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
+    if (gt == HERMES_PLANAR) 
+    {
       for (int i = 0; i < n; i++)
         result += wt[i] * (  (u_ext[0]->val0[i] * e->tx[i] + u_ext[0]->val1[i] * e->ty[i]) *
         conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
@@ -495,8 +511,10 @@ namespace WeakFormsHcurl
     Geom<double> *e, ExtData<Scalar> *ext) const 
   {
     Scalar result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         result += wt[i] * conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]);
       }
     }
@@ -510,8 +528,10 @@ namespace WeakFormsHcurl
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    if (gt == HERMES_PLANAR) {
-      for (int i = 0; i < n; i++) {
+    if (gt == HERMES_PLANAR) 
+    {
+      for (int i = 0; i < n; i++) 
+      {
         result += wt[i] * conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]);
       }
     }

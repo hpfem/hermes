@@ -57,7 +57,8 @@ HERMES_API void update_limit_table(int mode)
   g_order_table = (mode == HERMES_MODE_TRIANGLE) ? g_order_table_tri : g_order_table_quad;
 }
 
-HERMES_API void reset_warn_order() {
+HERMES_API void reset_warn_order() 
+{
   warned_order = false;
 }
 

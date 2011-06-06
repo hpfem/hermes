@@ -21,7 +21,6 @@
 
 struct UniData;
 
-
 /// Filter is a general postprocessing class, intended for visualization.
 /// The output of Filter is an arbitrary combination of up to three input functions,
 /// which usually are Solutions to PDEs, but can also be other Filters.
@@ -90,7 +89,7 @@ protected:
 ///
 /// SimpleFilter is vector-valued, if at least one input function is vector-valued and
 /// both components are specified in 'item', e.g., item1 = H2D_FN_DX (which is H2D_FN_DX_0 | H2D_FN_DX_1).
-/// Otherwise it is scalar-valued.
+/// Otherwise it is Scalar-valued.
 ///
 template<typename Scalar>
 class HERMES_API SimpleFilter : public Filter<Scalar>
@@ -213,12 +212,12 @@ protected:
 
 
 /// Computes the absolute value of a complex solution.
-class HERMES_API AbsFilter : public SimpleFilter<scalar >
+class HERMES_API AbsFilter : public SimpleFilter<std::complex<double> >
 {
 public: 
-  AbsFilter(Hermes::vector<MeshFunction<scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+  AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 protected:
-  virtual void filter_fn(int n, Hermes::vector<scalar*> values, double* result);
+  virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
 };
 
 /// Computes the angle of a complex solution.
@@ -235,13 +234,13 @@ protected:
 /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
 /// to obtain the resulting stress measure.
 /// \brief Calculates the Von Mises stress.
-class HERMES_API VonMisesFilter : public Filter<scalar>
+class HERMES_API VonMisesFilter : public Filter<double>
 {
 public: // TODO: cylindrical coordinates
 
-  VonMisesFilter(Hermes::vector<MeshFunction<scalar>*> solutions, double lambda, double mu,
+  VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
                  int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
-  virtual scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
+  virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
   { error("Not implemented yet"); return 0; }
 
 protected:

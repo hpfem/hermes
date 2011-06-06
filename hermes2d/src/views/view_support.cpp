@@ -33,7 +33,8 @@
 #include "view_support.h"
 
 /* monitor */
-ViewMonitor::ViewMonitor() {
+ViewMonitor::ViewMonitor() 
+{
   pthread_mutexattr_init(&mutex_attr);
   pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&mutex, &mutex_attr);
@@ -44,7 +45,8 @@ ViewMonitor::ViewMonitor() {
   pthread_cond_init(&cond_cross_thread_call, NULL);
 }
 
-ViewMonitor::~ViewMonitor() {
+ViewMonitor::~ViewMonitor() 
+{
   pthread_mutex_destroy(&mutex);
   pthread_mutexattr_destroy(&mutex_attr);
   pthread_cond_destroy(&cond_keypress);
@@ -150,15 +152,18 @@ static void* view_thread_func(void* param)
 static bool need_safe_call() { return pthread_equal(view_thread->thread, pthread_self()) == 0; }
 
 /// Does a cross thread call.
-static int call_in_thread(CTC_FUNC func, void* param) {
+static int call_in_thread(CTC_FUNC func, void* param) 
+{
   //check whether the thread is running if not start it
   view_sync.enter();
-  if (view_thread == NULL) {
+  if (view_thread == NULL) 
+  {
     ThreadInfo* new_thread_info = NULL;
     try { new_thread_info = new ThreadInfo(); }
     catch(std::bad_alloc&) { error("Failed to allocate structure for view thread"); }
     int err = pthread_create(&new_thread_info->thread, NULL, view_thread_func, new_thread_info);
-    if (err) {
+    if (err) 
+    {
       delete new_thread_info;
       error("Failed to create main thread, error: %d", err);
     }
@@ -167,7 +172,8 @@ static int call_in_thread(CTC_FUNC func, void* param) {
   view_sync.leave();
 
   //make call
-  if (need_safe_call()) {
+  if (need_safe_call()) 
+  {
     view_sync.enter();
     ctc_function = func;
     ctc_param = param;
@@ -186,7 +192,8 @@ static int set_view_title_in_thread(void* title_pars_ptr)
   error_if(need_safe_call(), "Calling set_view_title_in_thread from other thread.");
   TitleParams& title_params = *((TitleParams*)title_pars_ptr);
   std::map<int, View*>::iterator found_view = view_instances.find(title_params.view_id);
-  if (found_view == view_instances.end()) {
+  if (found_view == view_instances.end()) 
+  {
     debug_log("Settings title of a view that is not registered.");
     return -1;
   }
@@ -241,7 +248,8 @@ int remove_view_in_thread(void* remove_params_ptr)
   error_if(need_safe_call(), "Calling remove_view_in_thread from other thread.");
   RemoveParams& params = *(RemoveParams*)remove_params_ptr;
   std::map<int, View*>::iterator found_view = view_instances.find(params.view_id);
-  if (found_view == view_instances.end()) {
+  if (found_view == view_instances.end()) 
+  {
     debug_log("Removing of a view that is not registered");
     return -1;
   }
@@ -279,14 +287,16 @@ int remove_view_in_thread(void* remove_params_ptr)
 }
 
 /// Forces a redisplay of a view. Function has to be called just from the inside of view thread.
-static int refresh_view_in_thread(void* view_id_ptr) {
+static int refresh_view_in_thread(void* view_id_ptr) 
+{
   error_if(need_safe_call(), "Calling refresh_view_in_thread from other thread.");
   int view_id = *((int*)view_id_ptr);
   std::map<int, View*>::iterator found_view = view_instances.find(view_id);
   assert_msg(found_view != view_instances.end(), "Refreshing a view that is not registered");
 
   //redisplay
-  if (found_view != view_instances.end()) {
+  if (found_view != view_instances.end()) 
+  {
     glutSetWindow(view_id);
     glutPostRedisplay();
   }
@@ -306,7 +316,8 @@ void on_mouse_move_stub(int x, int y) { STUB_CALL( wnd->on_mouse_move(x, y) ); }
 void on_key_down_stub(unsigned char key, int x, int y) { STUB_CALL( wnd->on_key_down(key, x, y) ); }
 void on_special_key_stub(int key, int x, int y) { STUB_CALL( wnd->on_special_key(key, x, y) ); }
 void on_entry_stub(int state) { STUB_CALL( wnd->on_entry(state) ); }
-void on_mouse_click_stub(int button, int state, int x, int y) {
+void on_mouse_click_stub(int button, int state, int x, int y) 
+{
   STUB_GET_VIEW();
   if (wnd == NULL)
     return;
@@ -355,7 +366,8 @@ void on_mouse_click_stub(int button, int state, int x, int y) {
       wnd->on_middle_mouse_up(x, y);
   }
 }
-void on_close_stub() {
+void on_close_stub() 
+{
   STUB_GET_VIEW();
   if (wnd == NULL)
     return;
@@ -378,7 +390,8 @@ bool init_glut()
   static const char* argv[1] = { "x" };
 
   //prepare GLUT environment
-  if (!glut_initialized) {
+  if (!glut_initialized) 
+  {
     glutInit(&argc, (char**) argv);
     glut_initialized = true;
   }
@@ -400,24 +413,28 @@ bool shutdown_glut()
 }
 
 /* public functions */
-void set_view_title(int view_id, const char* title) {
+void set_view_title(int view_id, const char* title) 
+{
   TitleParams params(view_id, title);
   call_in_thread(set_view_title_in_thread, &params);
 }
 
-int add_view(View* view, int x, int y, int width, int height, const char* title) {
+int add_view(View* view, int x, int y, int width, int height, const char* title) 
+{
   ViewParams params(view, x, y, width, height, title);
   return call_in_thread(add_view_in_thread, &params);
 }
 
 void refresh_view(int view_id) { call_in_thread(refresh_view_in_thread, &view_id); }
 
-void remove_view(int view_id) {
+void remove_view(int view_id) 
+{
   RemoveParams params(view_id, true);
   call_in_thread(remove_view_in_thread, &params);
 }
 
-void force_view_thread_shutdown() {
+void force_view_thread_shutdown() 
+{
   pthread_t current_thread;
   bool should_wait = false;
 
@@ -425,14 +442,16 @@ void force_view_thread_shutdown() {
 
   //destroy all views
   std::map<int, View*>::const_iterator iter = view_instances.begin();
-  while (iter != view_instances.end()) {
+  while (iter != view_instances.end()) 
+  {
     glutDestroyWindow(iter->first);
     iter++;
   }
   view_instances.clear();
 
   //tell thread to finish
-  if (view_thread != NULL) {
+  if (view_thread != NULL) 
+  {
     current_thread = view_thread->thread;
     view_thread->should_quit = true;
     view_thread = NULL;
@@ -440,35 +459,41 @@ void force_view_thread_shutdown() {
   view_sync.leave();
 
   //wait for thread to finish
-  if (should_wait) {
+  if (should_wait) 
+  {
     glew_initialized = false;
     pthread_join(current_thread, NULL);
   }
 }
 
-void wait_for_all_views_close(const char* text) {
+void wait_for_all_views_close(const char* text) 
+{
   pthread_t current_thread;
   bool should_wait = false;
 
   //tell thread to finish
   view_sync.enter();
-  if (view_thread != NULL) {
+  if (view_thread != NULL) 
+  {
     current_thread = view_thread->thread;
     should_wait = true;
   }
   view_sync.leave();
 
   //wait for thread to finish
-  if (should_wait) {
+  if (should_wait) 
+  {
     fprintf(stdout, "%s", text); fflush(stdout);
     pthread_join(current_thread, NULL);
   }
 }
 
-void wait_for_any_key(const char* text) {
+void wait_for_any_key(const char* text) 
+{
   //wait for key
   view_sync.enter();
-  if (view_thread != NULL) {
+  if (view_thread != NULL) 
+  {
     fprintf(stdout, "%s", text); fflush(stdout);
     view_sync.wait_keypress();
   }

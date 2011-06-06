@@ -58,7 +58,7 @@ void RefMap::set_active_element(Element* e)
   update_cur_node();
 
   is_const = !element->is_curved() &&
-             (element->is_triangle() || is_parallelogram());
+    (element->is_triangle() || is_parallelogram());
 
   // prepare the shapes and coefficients of the reference map
   int j, k = 0;
@@ -85,7 +85,7 @@ void RefMap::set_active_element(Element* e)
 
     if (e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
     memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o),
-           ref_map_shapeset.get_num_bubbles(o) * sizeof(int));
+      ref_map_shapeset.get_num_bubbles(o) * sizeof(int));
 
     coeffs = e->cm->coeffs;
     nc = e->cm->nc;
@@ -229,7 +229,7 @@ bool RefMap::is_parallelogram()
   Element* e = element;
   assert(e->is_quad());
   return fabs(e->vn[2]->x - (e->vn[1]->x + e->vn[3]->x - e->vn[0]->x)) < eps &&
-         fabs(e->vn[2]->y - (e->vn[1]->y + e->vn[3]->y - e->vn[0]->y)) < eps;
+    fabs(e->vn[2]->y - (e->vn[1]->y + e->vn[3]->y - e->vn[0]->y)) < eps;
 }
 
 
@@ -240,14 +240,14 @@ bool RefMap::is_parallelogram()
 void RefMap::calc_const_inv_ref_map()
 {
   if (element == NULL)
-      error("The element variable must not be NULL.");
+    error("The element variable must not be NULL.");
   int k = element->is_triangle() ? 2 : 3;
   double m[2][2] = { { element->vn[1]->x - element->vn[0]->x,  element->vn[k]->x - element->vn[0]->x },
-                     { element->vn[1]->y - element->vn[0]->y,  element->vn[k]->y - element->vn[0]->y } };
+  { element->vn[1]->y - element->vn[0]->y,  element->vn[k]->y - element->vn[0]->y } };
 
   const_jacobian = 0.25 * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
   if (const_jacobian <= 0.0)
-      error("Element #%d is concave or badly oriented.", element->id);
+    error("Element #%d is concave or badly oriented.", element->id);
 
   double ij = 0.5 / const_jacobian;
 
@@ -395,9 +395,10 @@ int RefMap::calc_inv_ref_order()
       result2 += pt[i][2] / jac[i] ;
     }
     if ((fabs((exact1 - result1) / exact1) < 1e-8) &&
-        (fabs((exact2 - result2) / exact2) < 1e-8)) break;
+      (fabs((exact2 - result2) / exact2) < 1e-8)) break;
   }
-  if (o >= 10) {
+  if (o >= 10) 
+  {
     warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
   }
   return o;
@@ -504,7 +505,8 @@ void RefMap::free()
   for (it = nodes.begin(); it != nodes.end(); it++)
     free_node(it->second);
   nodes.clear();
-  if (overflow != NULL) {
+  if (overflow != NULL) 
+  {
     free_node(overflow); overflow = NULL;
   }
 }

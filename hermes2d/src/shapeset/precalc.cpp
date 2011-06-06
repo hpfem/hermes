@@ -58,7 +58,8 @@ void PrecalcShapeset::set_quad_2d(Quad2D* quad_2d)
 
 void PrecalcShapeset::handle_overflow_idx()
 {
-  if(overflow_nodes != NULL) {
+  if(overflow_nodes != NULL) 
+  {
     for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
       if(overflow_nodes->present(i))
         ::free(overflow_nodes->get(i));
@@ -73,12 +74,14 @@ void PrecalcShapeset::set_active_shape(int index)
   // Key creation.
   unsigned key = cur_quad | (mode << 3) | ((unsigned) (max_index[mode] - index) << 4);
 
-  if(master_pss == NULL) {
+  if(master_pss == NULL) 
+  {
     if(!tables.present(key))
       tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
     sub_tables = tables.get(key);
   }
-  else {
+  else 
+  {
     if(!master_pss->tables.present(key))
       master_pss->tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
     sub_tables = master_pss->tables.get(key);
@@ -130,17 +133,19 @@ void PrecalcShapeset::precalculate(int order, int mask)
   {
     for (k = 0; k < 6; k++)
     {
-      if (newmask & idx2mask[k][j]) {
+      if (newmask & idx2mask[k][j]) 
+      {
         if (oldmask & idx2mask[k][j])
           memcpy(node->values[j][k], cur_node->values[j][k], np * sizeof(double));
         else
           for (i = 0; i < np; i++)
             node->values[j][k][i] = shapeset->get_value(k, index, ctm->m[0] * pt[i][0] + ctm->t[0],
-                                                                  ctm->m[1] * pt[i][1] + ctm->t[1], j);
+            ctm->m[1] * pt[i][1] + ctm->t[1], j);
       }
     }
   }
-  if(nodes->present(order)) {
+  if(nodes->present(order)) 
+  {
     assert(nodes->get(order) == cur_node);
     ::free(nodes->get(order));
   }
@@ -154,8 +159,10 @@ void PrecalcShapeset::free()
   if (master_pss != NULL) return;
 
   for(unsigned int i = 0; i < tables.get_size(); i++)
-    if(tables.present(i)) {
-      for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++) {
+    if(tables.present(i)) 
+    {
+      for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++) 
+      {
         for(unsigned int k = 0; k < it->second->get_size(); k++)
           if(it->second->present(k))
             ::free(it->second->get(k));
@@ -164,12 +171,13 @@ void PrecalcShapeset::free()
       delete tables.get(i);
     }
 
-  if(overflow_nodes != NULL) {
-    for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
-      if(overflow_nodes->present(i))
-        ::free(overflow_nodes->get(i));
-    delete overflow_nodes;
-  }
+    if(overflow_nodes != NULL) 
+    {
+      for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+        if(overflow_nodes->present(i))
+          ::free(overflow_nodes->get(i));
+      delete overflow_nodes;
+    }
 }
 
 extern PrecalcShapeset ref_map_pss;

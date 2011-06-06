@@ -129,7 +129,8 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 
     if (n_elem_nodes == 3) n_tri += n_elems_in_blk;
     else if (n_elem_nodes == 4) n_quad += n_elems_in_blk;
-    else {
+    else 
+    {
       error("Unknown type of element");
       return false;
     }
@@ -153,12 +154,12 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
     // read connectivity array
     int *connect = new int [n_elem_nodes * n_elems_in_blk];
     err = ex_get_elem_conn(exoid, id, connect);
-    
+
     // Update the mesh' internal array element_markers_conversion.
     std::ostringstream string_stream;
     string_stream << id;
     std::string el_marker = string_stream.str();
-    
+
     // This functions check if the user-supplied marker on this element has been
     // already used, and if not, inserts it in the appropriate structure.
     mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
@@ -224,12 +225,12 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
     int *elem_list = new int [num_elem_in_set];
     int *side_list = new int [n_sides_in_set];
     err = ex_get_side_set(exoid, sid, elem_list, side_list);
-    
+
     // Update the mesh' internal array boundary_markers_conversion.
     std::ostringstream string_stream;
     string_stream << sid;
     std::string bnd_marker = string_stream.str();
-    
+
     // This functions check if the user-supplied marker on this element has been
     // already used, and if not, inserts it in the appropriate structure.
     mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
@@ -252,7 +253,7 @@ bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
 
   // we are done
   err = ex_close(exoid);
-  
+
   mesh->create(n_vtx, vtx, n_tri, tri, n_quad, quad, n_mark, marks);
 
   // clean-up

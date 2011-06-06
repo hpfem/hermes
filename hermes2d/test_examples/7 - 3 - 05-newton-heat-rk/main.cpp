@@ -34,7 +34,7 @@ const double T_FINAL = 5.0;                        // Time interval length.
 const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;   // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
 // in the name of each method is its order. The one before last, if present, is the number of stages.
@@ -114,14 +114,15 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
-         current_time, time_step, bt.get_size());
+      current_time, time_step, bt.get_size());
     bool verbose = true;
     Hermes::vector<Solution*> slns_time_prev;
     slns_time_prev.push_back(&sln_time_prev);
     Hermes::vector<Solution*> slns_time_new;
     slns_time_new.push_back(&sln_time_new);
 
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, true, verbose, NEWTON_TOL, NEWTON_MAX_ITER)) {
+    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, true, verbose, NEWTON_TOL, NEWTON_MAX_ITER)) 
+    {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 

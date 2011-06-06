@@ -41,36 +41,43 @@
 void ludcmp(double **a, int n, int *indx, double *d)
 {
   _F_
-  int i, imax = 0, j, k;
+    int i, imax = 0, j, k;
   double big, dum, sum, temp;
   double *vv = new double[n];
   MEM_CHECK(vv);
 
   *d = 1.0;
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) 
+  {
     big=0.0;
     for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
     if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
     vv[i] = 1.0 / big;
   }
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < j; i++) {
+  for (j = 0; j < n; j++) 
+  {
+    for (i = 0; i < j; i++) 
+    {
       sum = a[i][j];
       for (k = 0; k < i; k++) sum -= a[i][k]*a[k][j];
       a[i][j] = sum;
     }
     big = 0.0;
-    for (i = j; i < n; i++) {
+    for (i = j; i < n; i++) 
+    {
       sum = a[i][j];
       for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
       a[i][j] = sum;
-      if ((dum = vv[i]*fabs(sum)) >= big) {
+      if ((dum = vv[i]*fabs(sum)) >= big) 
+      {
         big = dum;
         imax = i;
       }
     }
-    if (j != imax) {
-      for (k = 0; k < n; k++) {
+    if (j != imax) 
+    {
+      for (k = 0; k < n; k++) 
+      {
         dum = a[imax][k];
         a[imax][k] = a[j][k];
         a[j][k] = dum;
@@ -80,7 +87,8 @@ void ludcmp(double **a, int n, int *indx, double *d)
     }
     indx[j] = imax;
     if (a[j][j] == 0.0) a[j][j] = HERMES_TINY;
-    if (j != n-1) {
+    if (j != n-1) 
+    {
       dum = 1.0 / (a[j][j]);
       for (i = j+1; i < n; i++) a[i][j] *= dum;
     }
@@ -94,15 +102,18 @@ void ludcmp(double **a, int n, int *indx, double *d)
 void choldc(double **a, int n, double p[])
 {
   _F_
-  int i, j, k;
-  for (i = 0; i < n; i++) {
-    for (j = i; j < n; j++) {
+    int i, j, k;
+  for (i = 0; i < n; i++) 
+  {
+    for (j = i; j < n; j++) 
+    {
       double sum = a[i][j];
       k = i;
       while (--k >= 0) sum -= a[i][k] * a[j][k];
-      if (i == j) {
-	if (sum <= 0.0) EXIT("CHOLDC failed!");
-	else p[i] = sqrt(sum);
+      if (i == j) 
+      {
+        if (sum <= 0.0) EXIT("CHOLDC failed!");
+        else p[i] = sqrt(sum);
       }
       else a[j][i] = sum / p[i];
     }
@@ -134,7 +145,7 @@ template<typename Scalar>
 SparseMatrix<Scalar>::SparseMatrix()
 {
   _F_
-  this->size = 0;
+    this->size = 0;
   pages = NULL;
 
   row_storage = false;
@@ -145,7 +156,7 @@ template<typename Scalar>
 SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 {
   _F_
-  this->size = size;
+    this->size = size;
   pages = NULL;
 
   row_storage = false;
@@ -156,14 +167,14 @@ template<typename Scalar>
 SparseMatrix<Scalar>::~SparseMatrix()
 {
   _F_
-  delete [] pages;
+    delete [] pages;
 }
 
 template<typename Scalar>
 void SparseMatrix<Scalar>::prealloc(unsigned int n)
 {
   _F_
-  this->size = n;
+    this->size = n;
 
   pages = new Page *[n];
   MEM_CHECK(pages);
@@ -174,23 +185,25 @@ template<typename Scalar>
 void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
-  if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) {
-    Page *new_page = new Page;
-    MEM_CHECK(new_page);
-    new_page->count = 0;
-    new_page->next = pages[col];
-    pages[col] = new_page;
-  }
-  pages[col]->idx[pages[col]->count++] = row;
+    if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) 
+    {
+      Page *new_page = new Page;
+      MEM_CHECK(new_page);
+      new_page->count = 0;
+      new_page->next = pages[col];
+      pages[col] = new_page;
+    }
+    pages[col]->idx[pages[col]->count++] = row;
 }
 
 template<typename Scalar>
 int SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
 {
   _F_
-  // gather all pages in the buffer, deleting them along the way
-  int *end = buffer;
-  while (page != NULL) {
+    // gather all pages in the buffer, deleting them along the way
+    int *end = buffer;
+  while (page != NULL) 
+  {
     memcpy(end, page->idx, sizeof(int) * page->count);
     end += page->count;
     Page *tmp = page;
@@ -210,7 +223,7 @@ template<typename Scalar>
 int SparseMatrix<Scalar>::get_num_indices()
 {
   _F_
-  int total = 0;
+    int total = 0;
   for (unsigned int i = 0; i < this->size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
       total += page->count;
@@ -222,7 +235,7 @@ template<typename Scalar>
 SparseMatrix<Scalar>* create_matrix(MatrixSolverType matrix_solver)
 {
   _F_
-  switch (matrix_solver) 
+    switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
     case SOLVER_AZTECOO:
@@ -246,10 +259,10 @@ SparseMatrix<Scalar>* create_matrix(MatrixSolverType matrix_solver)
         break;
       }
     case SOLVER_SUPERLU: 
-    {
-      return new SuperLUMatrix<Scalar>;
-      break;
-    }
+      {
+        return new SuperLUMatrix<Scalar>;
+        break;
+      }
     default: 
       error("Unknown matrix solver requested.");
   }
@@ -260,53 +273,53 @@ template<typename Scalar>
 Solver<Scalar>* create_linear_solver(MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
 {
   _F_
-  Vector<Scalar>* rhs_dummy = NULL;
+    Vector<Scalar>* rhs_dummy = NULL;
   switch (matrix_solver) 
   {
-    case SOLVER_AZTECOO:
-      {
-        info("Using AztecOO."); 
-        if (rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-        else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
-        break;
-      }
-    case SOLVER_AMESOS:
-      {
-        info("Using Amesos.");         
-        if (rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-        else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
-        break;
-      }
-    case SOLVER_MUMPS: 
-      {
-        info("Using Mumps.");         
-        if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
-        else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
-        break;
-      }
-    case SOLVER_PETSC: 
-      {
-        info("Using PETSc.");        
-        if (rhs != NULL) return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs)); 
-        else return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy)); 
-        break;
-      }
-    case SOLVER_UMFPACK: 
-      {
-        info("Using UMFPack.");
-        if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
-        else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
-        break;
-      }
-    case SOLVER_SUPERLU: 
+  case SOLVER_AZTECOO:
+    {
+      info("Using AztecOO."); 
+      if (rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
+      else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+      break;
+    }
+  case SOLVER_AMESOS:
+    {
+      info("Using Amesos.");         
+      if (rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
+      else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+      break;
+    }
+  case SOLVER_MUMPS: 
+    {
+      info("Using Mumps.");         
+      if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
+      else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
+      break;
+    }
+  case SOLVER_PETSC: 
+    {
+      info("Using PETSc.");        
+      if (rhs != NULL) return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs)); 
+      else return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy)); 
+      break;
+    }
+  case SOLVER_UMFPACK: 
+    {
+      info("Using UMFPack.");
+      if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
+      else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
+      break;
+    }
+  case SOLVER_SUPERLU: 
     {
       info("Using SuperLU.");       
       if (rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs)); 
       else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy)); 
       break;
     }
-    default: 
-      error("Unknown matrix solver requested.");
+  default: 
+    error("Unknown matrix solver requested.");
   }
   return NULL;
 }
@@ -315,7 +328,7 @@ template<typename Scalar>
 Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
 {
   _F_
-  switch (matrix_solver) 
+    switch (matrix_solver) 
   {
     case SOLVER_AMESOS:
     case SOLVER_AZTECOO:
@@ -339,10 +352,10 @@ Vector<Scalar>* create_vector(MatrixSolverType matrix_solver)
         break;
       }
     case SOLVER_SUPERLU: 
-    {
-      return new SuperLUVector<Scalar>;
-      break;
-    }
+      {
+        return new SuperLUVector<Scalar>;
+        break;
+      }
     default: 
       error("Unknown matrix solver requested.");
   }
@@ -355,11 +368,11 @@ template class SparseMatrix<std::complex<double> >;
 template HERMES_API Vector<double>* create_vector(MatrixSolverType matrix_solver);
 template HERMES_API SparseMatrix<double>*  create_matrix(MatrixSolverType matrix_solver);
 template HERMES_API Solver<double>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<double>* matrix, Vector<double>* rhs);
+  Matrix<double>* matrix, Vector<double>* rhs);
 
 template HERMES_API Vector<std::complex<double> >* create_vector(MatrixSolverType matrix_solver);
 template HERMES_API SparseMatrix<std::complex<double> >*  create_matrix(MatrixSolverType matrix_solver);
 template HERMES_API Solver<std::complex<double> >*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
+  Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
 
 

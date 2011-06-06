@@ -29,11 +29,13 @@ static int num_petsc_objects = 0;
 CommandLineArgs cmd_line_args;
 
 #ifdef WITH_PETSC
-inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[]) {
+inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[]) 
+{
   VecGetValues(x, ni, ix, y);
 }
 
-void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],double y[]){
+void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],double y[])
+{
   PetscScalar *py=new PetscScalar[ni];
   VecGetValues(x, ni, ix, py);
   for (int i=0;i<ni;i++) y[i]=py[i].real();
@@ -45,7 +47,7 @@ int remove_petsc_object()
 {
   _F_  
 #ifdef WITH_PETSC  
-  PetscTruth petsc_initialized, petsc_finalized;
+    PetscTruth petsc_initialized, petsc_finalized;
   int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
   ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
   if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE) 
@@ -66,61 +68,64 @@ int add_petsc_object()
 {
   _F_
 #ifdef WITH_PETSC
-  int ierr;
+    int ierr;
   PetscTruth petsc_initialized, petsc_finalized;
   ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
-  
+
   if (petsc_finalized == PETSC_TRUE)
     error("PETSc cannot be used once it has been finalized. You must restart the application.");
-  
+
   ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
-  
+
   if (petsc_initialized != PETSC_TRUE)
   {
     bool have_args = cmd_line_args.check();
-    
+
     if (have_args)
       ierr = PetscInitialize(&cmd_line_args.get_argc(), 
-                             &cmd_line_args.get_argv(), 
-                             PETSC_NULL, PETSC_NULL);
+      &cmd_line_args.get_argv(), 
+      PETSC_NULL, PETSC_NULL);
     else
-    #ifdef WITH_MPI
+#ifdef WITH_MPI
       cmd_line_args.missing_error();
-    #else
+#else
       ierr = PetscInitializeNoArguments();  
-    #endif
-    
+#endif
+
     CHKERRQ(ierr);
   }
-  
+
   num_petsc_objects++;
 #endif 
   return 0;
 }
 
 template<typename Scalar>
-PetscMatrix<Scalar>::PetscMatrix() {
+PetscMatrix<Scalar>::PetscMatrix() 
+{
   _F_
 #ifdef WITH_PETSC
-  inited = false;
+    inited = false;
   add_petsc_object();
 #else
-  error(PETSC_NOT_COMPILED);
+    error(PETSC_NOT_COMPILED);
 #endif
 }
 
 template<typename Scalar>
-PetscMatrix<Scalar>::~PetscMatrix() {
+PetscMatrix<Scalar>::~PetscMatrix() 
+{
   _F_
-  free();
+    free();
   remove_petsc_object();
 }
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::alloc() {
+void PetscMatrix<Scalar>::alloc() 
+{
   _F_
 #ifdef WITH_PETSC
-  assert(this->pages != NULL);
+    assert(this->pages != NULL);
 
   // calc nnz
   int *nnz_array = new int[this->size];
@@ -133,7 +138,8 @@ void PetscMatrix<Scalar>::alloc() {
 
   // sort the indices and remove duplicities, insert into ai
   int pos = 0;
-  for (unsigned int i = 0; i < this->size; i++) {
+  for (unsigned int i = 0; i < this->size; i++) 
+  {
     nnz_array[i] = sort_and_store_indices(this->pages[i], ai + pos, ai + aisize);
     pos += nnz_array[i];
   }
@@ -144,8 +150,8 @@ void PetscMatrix<Scalar>::alloc() {
 
   //
   MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
-//	MatSetOption(matrix, MAT_ROW_ORIENTED);
-//	MatSetOption(matrix, MAT_ROWS_SORTED);
+  //	MatSetOption(matrix, MAT_ROW_ORIENTED);
+  //	MatSetOption(matrix, MAT_ROWS_SORTED);
 
   delete [] nnz_array;
 
@@ -154,10 +160,11 @@ void PetscMatrix<Scalar>::alloc() {
 }
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::free() {
+void PetscMatrix<Scalar>::free() 
+{
   _F_
 #ifdef WITH_PETSC
-  if (inited) MatDestroy(matrix);
+    if (inited) MatDestroy(matrix);
   inited = false;
 #endif
 }
@@ -167,7 +174,7 @@ void PetscMatrix<Scalar>::finish()
 {
   _F_
 #ifdef WITH_PETSC
-  MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
+    MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(matrix, MAT_FINAL_ASSEMBLY);
 #endif
 }
@@ -176,7 +183,7 @@ template<>
 double PetscMatrix<double>::get(unsigned int m, unsigned int n)
 {
   _F_
-  double v = 0.0;
+    double v = 0.0;
 #ifdef WITH_PETSC
   PetscScalar pv;
   MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
@@ -189,7 +196,7 @@ template<>
 std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n)
 {
   _F_
-  std::complex<double> v = 0.0;
+    std::complex<double> v = 0.0;
 #ifdef WITH_PETSC
   MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
 #endif
@@ -197,10 +204,11 @@ std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, uns
 }
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::zero() {
+void PetscMatrix<Scalar>::zero() 
+{
   _F_
 #ifdef WITH_PETSC
-  MatZeroEntries(matrix);
+    MatZeroEntries(matrix);
 #endif
 }
 
@@ -215,12 +223,13 @@ inline PetscScalar to_petsc(std::complex<double> x){  //unused
 #endif
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
+void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) 
+{
   _F_
 #ifdef WITH_PETSC
-  if (v != 0.0){		// ignore zero values.
-    MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
-  }
+    if (v != 0.0){		// ignore zero values.
+      MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
+    }
 #endif
 }
 
@@ -229,85 +238,100 @@ void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) {
 template<typename Scalar>
 void PetscMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i = 0; i<this->size; i++) {
+  for (unsigned int i = 0; i<this->size; i++) 
+  {
     add(i, i, v);
   }
 };
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) {
+void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) 
+{
   _F_
 #ifdef WITH_PETSC
-  // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
-  // row and cols for -1)
-  for (unsigned int i = 0; i < m; i++)				// rows
-    for (unsigned int j = 0; j < n; j++)			// cols
-      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-        add(rows[i], cols[j], mat[i][j]);
+    // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+    // row and cols for -1)
+    for (unsigned int i = 0; i < m; i++)				// rows
+      for (unsigned int j = 0; j < n; j++)			// cols
+        if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+          add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
 template<typename Scalar>
-bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
+bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) 
+{
   _F_
 #ifdef WITH_PETSC
 #endif
-  return false;
+    return false;
 }
 
 template<typename Scalar>
-unsigned int PetscMatrix<Scalar>::get_matrix_size() const {
+unsigned int PetscMatrix<Scalar>::get_matrix_size() const 
+{
   _F_
-  return this->size;
+    return this->size;
 }
 
 template<typename Scalar>
-unsigned int PetscMatrix<Scalar>::get_nnz() const {
+unsigned int PetscMatrix<Scalar>::get_nnz() const 
+{
   _F_
-  return nnz;
+    return nnz;
 }
 
 template<typename Scalar>
-double PetscMatrix<Scalar>::get_fill_in() const {
+double PetscMatrix<Scalar>::get_fill_in() const 
+{
   _F_
-  return (double) nnz / ((double)this->size*this->size);
+    return (double) nnz / ((double)this->size*this->size);
 }
 
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
-  for (unsigned int i=0;i<this->size;i++){
+void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+{
+  for (unsigned int i=0;i<this->size;i++)
+  {
     vector_out[i]=0;
-    for (unsigned int j=0;j<this->size;j++){
-        vector_out[i]+=vector_in[j]*get(i,j);
+    for (unsigned int j=0;j<this->size;j++)
+    {
+      vector_out[i]+=vector_in[j]*get(i,j);
     }
   }
 }
 #ifdef WITH_PETSC
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::add_matrix(PetscMatrix<Scalar>* mat){
-        MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
+void PetscMatrix<Scalar>::add_matrix(PetscMatrix<Scalar>* mat)
+{
+  MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
 }
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat){
+void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat)
+{
   _F_
-  int ndof = mat->get_size();
+    int ndof = mat->get_size();
   if (this->get_size() != (unsigned int) num_stages * ndof) 
     error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
-  for (int i = 0; i < num_stages; i++) {
+  for (int i = 0; i < num_stages; i++) 
+  {
     this->add_as_block(ndof*i, ndof*i, mat);
   }
 }
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat){
+void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
+{
   _F_
-  unsigned int block_size=mat->get_size();
-  for (unsigned int r=0;r<block_size;r++){
-    for (unsigned int c=0;c<block_size;c++){
+    unsigned int block_size=mat->get_size();
+  for (unsigned int r=0;r<block_size;r++)
+  {
+    for (unsigned int c=0;c<block_size;c++)
+    {
       this->add(i+r,j+c,mat->get(i,j));
     }
   }
@@ -316,16 +340,18 @@ void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatr
 // Multiplies matrix with a Scalar.
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::multiply_with_scalar(Scalar value){
+void PetscMatrix<Scalar>::multiply_with_scalar(Scalar value)
+{
   _F_
-  MatScale(matrix,to_petsc(value));
+    MatScale(matrix,to_petsc(value));
 }
 // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
 template<typename Scalar>
-void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax){
+void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
+{
   _F_
-  this->size=size;
+    this->size=size;
   this->nnz=nnz;
   PetscScalar* pax = new PetscScalar[nnz];
   for (unsigned i=0;i<nnz;i++)
@@ -336,9 +362,10 @@ void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
 // Duplicates a matrix (including allocation).
 
 template<typename Scalar>
-PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate(){
+PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate()
+{
   _F_
-  PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();        
+    PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();        
   MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
   ptscmatrix->size=this->size;
   ptscmatrix->nnz=nnz;
@@ -349,28 +376,31 @@ PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate(){
 // PETSc vector //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename Scalar>
-PetscVector<Scalar>::PetscVector() {
+PetscVector<Scalar>::PetscVector() 
+{
   _F_
 #ifdef WITH_PETSC
-  inited = false;
+    inited = false;
   add_petsc_object();
 #else
-  error(PETSC_NOT_COMPILED);
+    error(PETSC_NOT_COMPILED);
 #endif
 }
 
 template<typename Scalar>
-PetscVector<Scalar>::~PetscVector() {
+PetscVector<Scalar>::~PetscVector() 
+{
   _F_
-  free();
+    free();
   remove_petsc_object();
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::alloc(unsigned int n) {
+void PetscVector<Scalar>::alloc(unsigned int n) 
+{
   _F_
 #ifdef WITH_PETSC
-  free();
+    free();
   this->size = n;
   VecCreateSeq(PETSC_COMM_SELF, this->size, &vec);
   inited = true;
@@ -378,10 +408,11 @@ void PetscVector<Scalar>::alloc(unsigned int n) {
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::free() {
+void PetscVector<Scalar>::free() 
+{
   _F_
 #ifdef WITH_PETSC
-  if (inited) VecDestroy(vec);
+    if (inited) VecDestroy(vec);
   inited = false;
 #endif
 }
@@ -391,15 +422,16 @@ void PetscVector<Scalar>::finish()
 {
   _F_
 #ifdef WITH_PETSC
-  VecAssemblyBegin(vec);
+    VecAssemblyBegin(vec);
   VecAssemblyEnd(vec);
 #endif
 }
 
 template<>
-double PetscVector<double>::get(unsigned int idx) {
+double PetscVector<double>::get(unsigned int idx) 
+{
   _F_
-  double y = 0;
+    double y = 0;
 #ifdef WITH_PETSC
   PetscScalar py;
   VecGetValues(vec, 1, (PetscInt*) &idx, &py);
@@ -409,9 +441,10 @@ double PetscVector<double>::get(unsigned int idx) {
 }
 
 template<>
-std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) {
+std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) 
+{
   _F_
-  std::complex<double> y = 0;
+    std::complex<double> y = 0;
 #ifdef WITH_PETSC
   VecGetValues(vec, 1, (PetscInt*) &idx, &y);
 #endif
@@ -419,10 +452,11 @@ std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) {
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::extract(Scalar *v) const {
+void PetscVector<Scalar>::extract(Scalar *v) const 
+{
   _F_
 #ifdef WITH_PETSC
-  int *idx = new int [this->size];
+    int *idx = new int [this->size];
   for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
   vec_get_value(vec, this->size, idx, v);
   delete [] idx;
@@ -430,18 +464,20 @@ void PetscVector<Scalar>::extract(Scalar *v) const {
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::zero() {
+void PetscVector<Scalar>::zero() 
+{
   _F_
 #ifdef WITH_PETSC
-  VecZeroEntries(vec);
+    VecZeroEntries(vec);
 #endif
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::change_sign() {
+void PetscVector<Scalar>::change_sign() 
+{
   _F_
 #ifdef WITH_PETSC
-  PetscScalar* y = new PetscScalar [this->size];
+    PetscScalar* y = new PetscScalar [this->size];
   int *idx = new int [this->size];
   for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
   VecGetValues(vec, this->size, idx, y);
@@ -454,38 +490,43 @@ void PetscVector<Scalar>::change_sign() {
 
 
 template<typename Scalar>
-void PetscVector<Scalar>::set(unsigned int idx, Scalar y) {
+void PetscVector<Scalar>::set(unsigned int idx, Scalar y) 
+{
   _F_
 #ifdef WITH_PETSC
-  VecSetValue(vec, idx, to_petsc(y), INSERT_VALUES);
+    VecSetValue(vec, idx, to_petsc(y), INSERT_VALUES);
 #endif
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::add(unsigned int idx, Scalar y) {
+void PetscVector<Scalar>::add(unsigned int idx, Scalar y) 
+{
   _F_
 #ifdef WITH_PETSC
-  VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
+    VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
 #endif
 }
 
 template<typename Scalar>
-void PetscVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) {
+void PetscVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) 
+{
   _F_
 #ifdef WITH_PETSC
-  PetscScalar py;
-  for (unsigned int i = 0; i < n; i++){
+    PetscScalar py;
+  for (unsigned int i = 0; i < n; i++)
+  {
     VecSetValue(vec, idx[i],to_petsc(y[i]), ADD_VALUES);
   }
 #endif
 }
 
 template<typename Scalar>
-bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) {
+bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) 
+{
   _F_
 #ifdef WITH_PETSC
 #endif
-  return false;
+    return false;
 }
 
 // PETSc linear solver ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -496,25 +537,27 @@ PetscLinearSolver<Scalar>::PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVect
 {
   _F_
 #ifdef WITH_PETSC
-  add_petsc_object();
+    add_petsc_object();
 #else
-  error(PETSC_NOT_COMPILED);
+    error(PETSC_NOT_COMPILED);
 #endif
 }
 
 template<typename Scalar>
-PetscLinearSolver<Scalar>::~PetscLinearSolver() {
+PetscLinearSolver<Scalar>::~PetscLinearSolver() 
+{
   _F_
 #ifdef WITH_PETSC
-  remove_petsc_object();
+    remove_petsc_object();
 #endif
 }
 
 template<typename Scalar>
-bool PetscLinearSolver<Scalar>::solve() {
+bool PetscLinearSolver<Scalar>::solve() 
+{
   _F_
 #ifdef WITH_PETSC
-  assert(m != NULL);
+    assert(m != NULL);
   assert(rhs != NULL);
 
   PetscErrorCode ec;
@@ -555,7 +598,7 @@ bool PetscLinearSolver<Scalar>::solve() {
 
   return true;
 #else
-  return false;
+    return false;
 #endif
 }
 

@@ -7,125 +7,16 @@
 //
 // Hermes2D is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
-#include "linear.h"
-#include "refmap.h"
+#include "linearizer.h"
 
-
-//// linearization "quadrature" ////////////////////////////////////////////////////////////////////
-
-// The tables with index zero are for obtaining solution values at the element
-// vertices. Index one tables serve for the retrieval of interior values. Index one tables
-// are used for adaptive approximation of the solution by transforming their points to sub-elements.
-// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
-// the number of calls to sln->get_values().
-
-static double3 lin_pts_0_tri[] =
-{
-  { -1.0, -1.0, 0.0 },
-  {  1.0, -1.0, 0.0 },
-  { -1.0,  1.0, 0.0 }
-};
-
-static double3 lin_pts_0_quad[] =
-{
-  { -1.0, -1.0, 0.0 },
-  {  1.0, -1.0, 0.0 },
-  {  1.0,  1.0, 0.0 },
-  { -1.0,  1.0, 0.0 }
-};
-
-static double3 lin_pts_1_tri[12] =
-{
-  {  0.0, -1.0, 0.0 }, // 0
-  {  0.0,  0.0, 0.0 }, // 1
-  { -1.0,  0.0, 0.0 }, // 2
-  { -0.5, -1.0, 0.0 }, // 3
-  { -0.5, -0.5, 0.0 }, // 4
-  { -1.0, -0.5, 0.0 }, // 5
-  {  0.5, -1.0, 0.0 }, // 6
-  {  0.5, -0.5, 0.0 }, // 7
-  {  0.0, -0.5, 0.0 }, // 8
-  { -0.5,  0.0, 0.0 }, // 9
-  { -0.5,  0.5, 0.0 }, // 10
-  { -1.0,  0.5, 0.0 }  // 11
-};
-
-static double3 lin_pts_1_quad[21] =
-{
-  {  0.0, -1.0, 0.0 }, // 0
-  {  1.0,  0.0, 0.0 }, // 1
-  {  0.0,  1.0, 0.0 }, // 2
-  { -1.0,  0.0, 0.0 }, // 3
-  {  0.0,  0.0, 0.0 }, // 4
-  { -0.5, -1.0, 0.0 }, // 5
-  {  0.0, -0.5, 0.0 }, // 6
-  { -0.5,  0.0, 0.0 }, // 7
-  { -1.0, -0.5, 0.0 }, // 8
-  { -0.5, -0.5, 0.0 }, // 9
-  {  0.5, -1.0, 0.0 }, // 10
-  {  1.0, -0.5, 0.0 }, // 11
-  {  0.5,  0.0, 0.0 }, // 12
-  {  0.5, -0.5, 0.0 }, // 13
-  {  1.0,  0.5, 0.0 }, // 14
-  {  0.5,  1.0, 0.0 }, // 15
-  {  0.0,  0.5, 0.0 }, // 16
-  {  0.5,  0.5, 0.0 }, // 17
-  { -0.5,  1.0, 0.0 }, // 18
-  { -1.0,  0.5, 0.0 }, // 19
-  { -0.5,  0.5, 0.0 }  // 20
-};
-
-int quad_indices[9][5] =
-{
-  { 0, 1, 2, 3, 4 },
-  { 5, 6, 7, 8, 9 }, { 10, 11, 12, 6, 13 },
-  { 12, 14, 15, 16, 17 }, { 7, 16, 18, 19, 20 },
-  { 0, 11, 4, 8, 6 }, { 4, 14, 2, 19, 16 },
-  { 5, 4, 18, 3, 7 }, { 10, 1, 15, 4, 12 }
-};
-
-int tri_indices[5][3] =
-{
-  { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
-};
-
-int lin_np_tri[2]   = { 3, 12 };
-int lin_np_quad[2]  = { 4, 21 };
-static int* lin_np[2] = { lin_np_tri, lin_np_quad };
-
-static double3*  lin_tables_tri[2]  = { lin_pts_0_tri, lin_pts_1_tri };
-static double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
-static double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
-
-
-class Quad2DLin : public Quad2D
-{
-public:
-
-  Quad2DLin()
-  {
-    mode = HERMES_MODE_TRIANGLE;
-    max_order[0]  = max_order[1]  = 1;
-    num_tables[0] = num_tables[1] = 2;
-    tables = lin_tables;
-    np = lin_np;
-  };
-
-  virtual void dummy_fn() {}
-
-} quad_lin;
-
-
-
-//// vertices and triangles ////////////////////////////////////////////////////////////////////////
-Linearizer::Linearizer()
+template<typename Scalar>
+Linearizer<Scalar>::Linearizer() 
 {
   nv = nt = cv = ct = ce = 0;
   verts = NULL;
@@ -139,8 +30,8 @@ Linearizer::Linearizer()
   pthread_mutexattr_destroy(&attr);
 }
 
-
-int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
+template<typename Scalar>
+int Linearizer<Scalar>::get_vertex(int p1, int p2, double x, double y, double value) 
 {
   // search for an existing vertex
   if (p1 > p2) std::swap(p1, p2);
@@ -149,7 +40,7 @@ int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
   while (i >= 0)
   {
     if (info[i][0] == p1 && info[i][1] == p2 &&
-       (value == verts[i][2] || fabs(value - verts[i][2]) < max*1e-4)) return i;
+      (value == verts[i][2] || fabs(value - verts[i][2]) < max*1e-4)) return i;
     // note that we won't return a vertex with a different value than the required one;
     // this takes care for discontinuities in the solution, where more vertices
     // with different values will be created
@@ -168,13 +59,15 @@ int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
   return i;
 }
 
-int Linearizer::get_top_vertex(int id, double value)
+template<typename Scalar>
+int Linearizer<Scalar>::get_top_vertex(int id, double value)
 {
   if (fabs(value - verts[id][2]) < max*1e-24) return id;
   return get_vertex(-rand(), -rand(), verts[id][0], verts[id][1], value);
 }
 
-int Linearizer::peek_vertex(int p1, int p2)
+template<typename Scalar>
+int Linearizer<Scalar>::peek_vertex(int p1, int p2)
 {
   // search for a vertex with parents p1, p2
   if (p1 > p2) std::swap(p1, p2);
@@ -188,7 +81,8 @@ int Linearizer::peek_vertex(int p1, int p2)
   return -1;
 }
 
-void Linearizer::add_triangle(int iv0, int iv1, int iv2)
+template<typename Scalar>
+void Linearizer<Scalar>::add_triangle(int iv0, int iv1, int iv2)
 {
   int index;
   if (del_slot >= 0) // reuse a slot after a deleted triangle
@@ -198,9 +92,10 @@ void Linearizer::add_triangle(int iv0, int iv1, int iv2)
   }
   else
   {
-    if (nt >= ct) {
+    if (nt >= ct) 
+    {
       tris = (int3*) realloc(tris, sizeof(int3) * (ct = ct * 2));
-      verbose("Linearizer::add_triangle(): realloc to %d", ct);
+      verbose("Linearizer<Scalar>::add_triangle(): realloc to %d", ct);
     }
     index = nt++;
   }
@@ -209,7 +104,8 @@ void Linearizer::add_triangle(int iv0, int iv1, int iv2)
   tris[index][2] = iv2;
 }
 
-void Linearizer::print_hash_stats()
+template<typename Scalar>
+void Linearizer<Scalar>::print_hash_stats()
 {
   const int nh = 10;
   int i, hist[nh] = { 0, };
@@ -225,18 +121,9 @@ void Linearizer::print_hash_stats()
   printf("\n");
 }
 
-
-//// process_triangle & process_quad ///////////////////////////////////////////////////////////////
-#ifndef H2D_COMPLEX
-  #define getval(i) (val[i])
-  #define realpart(x) (x)
-#else
-  #define getval(i) (val[i].real())
-  #define realpart(x) (x.real())
-#endif
-
-void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
-                                  scalar* val, double* phx, double* phy, int* idx)
+template<typename Scalar>
+void Linearizer<Scalar>::process_triangle(int iv0, int iv1, int iv2, int level,
+  Scalar* val, double* phx, double* phy, int* idx)
 {
   double midval[3][3];
 
@@ -249,31 +136,33 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       sln->set_quad_order(1, item);
       val = sln->get_values(ia, ib);
       if (auto_max)
-        for (i = 0; i < lin_np_tri[1]; i++) {
+        for (i = 0; i < lin_np_tri[1]; i++) 
+        {
           double v = getval(i);
           if (finite(v) && fabs(v) > max) max = fabs(v);
         }
 
-      // obtain physical element coordinates
-      if (curved || disp)
-      {
-        RefMap* refmap = sln->get_refmap();
-        phx = refmap->get_phys_x(1);
-        phy = refmap->get_phys_y(1);
-
-        if (disp)
+        // obtain physical element coordinates
+        if (curved || disp)
         {
-          xdisp->set_quad_order(1, H2D_FN_VAL);
-          ydisp->set_quad_order(1, H2D_FN_VAL);
-          scalar* dx = xdisp->get_fn_values();
-          scalar* dy = ydisp->get_fn_values();
-          for (i = 0; i < lin_np_tri[1]; i++) {
-            phx[i] += dmult*realpart(dx[i]);
-            phy[i] += dmult*realpart(dy[i]);
+          RefMap* refmap = sln->get_refmap();
+          phx = refmap->get_phys_x(1);
+          phy = refmap->get_phys_y(1);
+
+          if (disp)
+          {
+            xdisp->set_quad_order(1, H2D_FN_VAL);
+            ydisp->set_quad_order(1, H2D_FN_VAL);
+            Scalar* dx = xdisp->get_fn_values();
+            Scalar* dy = ydisp->get_fn_values();
+            for (i = 0; i < lin_np_tri[1]; i++) 
+            {
+              phx[i] += dmult*realpart(dx[i]);
+              phy[i] += dmult*realpart(dy[i]);
+            }
           }
         }
-      }
-      idx = tri_indices[0];
+        idx = tri_indices[0];
     }
 
     // obtain linearized values and coordinates at the midpoints
@@ -302,8 +191,8 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       {
         // calculate the approximate error of linearizing the normalized solution
         double err = fabs(getval(idx[0]) - midval[2][0]) +
-                     fabs(getval(idx[1]) - midval[2][1]) +
-                     fabs(getval(idx[2]) - midval[2][2]);
+          fabs(getval(idx[1]) - midval[2][1]) +
+          fabs(getval(idx[2]) - midval[2][2]);
         split = !finite(err) || err > max*3*eps;
       }
 
@@ -312,15 +201,15 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
       {
         for (i = 0; i < 3; i++)
           if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1.5e-3))
-            { split = true; break; }
+          { split = true; break; }
       }
 
       // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
       if (level == 0 && !split)
       {
         split = (fabs(getval(8) - 0.5*(midval[2][0] + midval[2][1])) +
-                 fabs(getval(9) - 0.5*(midval[2][1] + midval[2][2])) +
-                 fabs(getval(4) - 0.5*(midval[2][2] + midval[2][0]))) > max*3*eps;
+          fabs(getval(9) - 0.5*(midval[2][1] + midval[2][2])) +
+          fabs(getval(4) - 0.5*(midval[2][2] + midval[2][0]))) > max*3*eps;
       }
     }
 
@@ -328,33 +217,34 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
     if (split)
     {
       if (curved || disp)
-        for (i = 0; i < 3; i++) {
+        for (i = 0; i < 3; i++) 
+        {
           midval[0][i] = phx[idx[i]];
           midval[1][i] = phy[idx[i]];
         }
 
-      // obtain mid-edge vertices
-      int mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], getval(idx[0]));
-      int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], getval(idx[1]));
-      int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], getval(idx[2]));
+        // obtain mid-edge vertices
+        int mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], getval(idx[0]));
+        int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], getval(idx[1]));
+        int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], getval(idx[2]));
 
-      // recur to sub-elements
-      sln->push_transform(0);
-      process_triangle(iv0, mid0, mid2,  level+1, val, phx, phy, tri_indices[1]);
-      sln->pop_transform();
-      
-      sln->push_transform(1);
-      process_triangle(mid0, iv1, mid1,  level+1, val, phx, phy, tri_indices[2]);
-      sln->pop_transform();
+        // recur to sub-elements
+        sln->push_transform(0);
+        process_triangle(iv0, mid0, mid2,  level+1, val, phx, phy, tri_indices[1]);
+        sln->pop_transform();
 
-      sln->push_transform(2);
-      process_triangle(mid2, mid1, iv2,  level+1, val, phx, phy, tri_indices[3]);
-      sln->pop_transform();
+        sln->push_transform(1);
+        process_triangle(mid0, iv1, mid1,  level+1, val, phx, phy, tri_indices[2]);
+        sln->pop_transform();
 
-      sln->push_transform(3);
-      process_triangle(mid1, mid2, mid0, level+1, val, phx, phy, tri_indices[4]);
-      sln->pop_transform();
-      return;
+        sln->push_transform(2);
+        process_triangle(mid2, mid1, iv2,  level+1, val, phx, phy, tri_indices[3]);
+        sln->pop_transform();
+
+        sln->push_transform(3);
+        process_triangle(mid1, mid2, mid0, level+1, val, phx, phy, tri_indices[4]);
+        sln->pop_transform();
+        return;
     }
   }
 
@@ -363,8 +253,9 @@ void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
 }
 
 
-void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
-                              scalar* val, double* phx, double* phy, int* idx)
+template<typename Scalar>
+void Linearizer<Scalar>::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
+  Scalar* val, double* phx, double* phy, int* idx)
 {
   double midval[3][5];
 
@@ -383,31 +274,33 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       sln->set_quad_order(1, item);
       val = sln->get_values(ia, ib);
       if (auto_max)
-        for (i = 0; i < lin_np_quad[1]; i++) {
+        for (i = 0; i < lin_np_quad[1]; i++) 
+        {
           double v = getval(i);
           if (finite(v) && fabs(v) > max) max = fabs(v);
         }
 
-      // obtain physical element coordinates
-      if (curved || disp)
-      {
-        RefMap* refmap = sln->get_refmap();
-        phx = refmap->get_phys_x(1);
-        phy = refmap->get_phys_y(1);
-
-        if (disp)
+        // obtain physical element coordinates
+        if (curved || disp)
         {
-          xdisp->set_quad_order(1, H2D_FN_VAL);
-          ydisp->set_quad_order(1, H2D_FN_VAL);
-          scalar* dx = xdisp->get_fn_values();
-          scalar* dy = ydisp->get_fn_values();
-          for (i = 0; i < lin_np_quad[1]; i++) {
-            phx[i] += dmult*realpart(dx[i]);
-            phy[i] += dmult*realpart(dy[i]);
+          RefMap* refmap = sln->get_refmap();
+          phx = refmap->get_phys_x(1);
+          phy = refmap->get_phys_y(1);
+
+          if (disp)
+          {
+            xdisp->set_quad_order(1, H2D_FN_VAL);
+            ydisp->set_quad_order(1, H2D_FN_VAL);
+            Scalar* dx = xdisp->get_fn_values();
+            Scalar* dy = ydisp->get_fn_values();
+            for (i = 0; i < lin_np_quad[1]; i++) 
+            {
+              phx[i] += dmult*realpart(dx[i]);
+              phy[i] += dmult*realpart(dy[i]);
+            }
           }
         }
-      }
-      idx = quad_indices[0];
+        idx = quad_indices[0];
     }
 
     // obtain linearized values and coordinates at the midpoints
@@ -434,7 +327,7 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
     else
     {
       if (!auto_max && fabs(verts[iv0][2]) > max && fabs(verts[iv1][2]) > max
-                         && fabs(verts[iv2][2]) > max && fabs(verts[iv3][2]) > max)
+        && fabs(verts[iv2][2]) > max && fabs(verts[iv3][2]) > max)
       {
         // do not split if the whole quad is above the specified maximum value
         split = 0;
@@ -448,7 +341,8 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
         split = (!finite(err) || err > max*4*eps) ? 3 : 0;
 
         // decide whether to split horizontally or vertically only
-        if (level > 0 && split) {
+        if (level > 0 && split) 
+        {
           if (herr > 5*verr)
             split = 1; // h-split
           else if (verr > 5*herr)
@@ -461,22 +355,22 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
       {
         double cm2 = sqr(cmax*5e-4);
         if (sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
-            sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split |= 1;
+          sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split |= 1;
         if (sqr(phx[idx[0]] - midval[0][0]) + sqr(phy[idx[0]] - midval[1][0]) > cm2 ||
-            sqr(phx[idx[2]] - midval[0][2]) + sqr(phy[idx[2]] - midval[1][2]) > cm2) split |= 2;
+          sqr(phx[idx[2]] - midval[0][2]) + sqr(phy[idx[2]] - midval[1][2]) > cm2) split |= 2;
 
         /*for (i = 0; i < 5; i++)
-          if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1e-3))
-            { split = 1; break; }*/
+        if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1e-3))
+        { split = 1; break; }*/
       }
 
       // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
       if (level == 0 && !split)
       {
         split = ((fabs(getval(13) - 0.5*(midval[2][0] + midval[2][1])) +
-                  fabs(getval(17) - 0.5*(midval[2][1] + midval[2][2])) +
-                  fabs(getval(20) - 0.5*(midval[2][2] + midval[2][3])) +
-                  fabs(getval(9)  - 0.5*(midval[2][3] + midval[2][0]))) > max*4*eps) ? 3 : 0;
+          fabs(getval(17) - 0.5*(midval[2][1] + midval[2][2])) +
+          fabs(getval(20) - 0.5*(midval[2][2] + midval[2][3])) +
+          fabs(getval(9)  - 0.5*(midval[2][3] + midval[2][0]))) > max*4*eps) ? 3 : 0;
       }
     }
 
@@ -484,59 +378,60 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
     if (split)
     {
       if (curved || disp)
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < 5; i++) 
+        {
           midval[0][i] = phx[idx[i]];
           midval[1][i] = phy[idx[i]];
         }
 
-      // obtain mid-edge and mid-element vertices
-      int mid0, mid1, mid2, mid3, mid4;
-      if (split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], getval(idx[0]));
-      if (split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], getval(idx[1]));
-      if (split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], getval(idx[2]));
-      if (split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], getval(idx[3]));
-      if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], getval(idx[4]));
+        // obtain mid-edge and mid-element vertices
+        int mid0, mid1, mid2, mid3, mid4;
+        if (split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], getval(idx[0]));
+        if (split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], getval(idx[1]));
+        if (split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], getval(idx[2]));
+        if (split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], getval(idx[3]));
+        if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], getval(idx[4]));
 
-      // recur to sub-elements
-      if (split == 3)
-      {
-        sln->push_transform(0);
-        process_quad(iv0, mid0, mid4, mid3, level+1, val, phx, phy, quad_indices[1]);
-        sln->pop_transform();
+        // recur to sub-elements
+        if (split == 3)
+        {
+          sln->push_transform(0);
+          process_quad(iv0, mid0, mid4, mid3, level+1, val, phx, phy, quad_indices[1]);
+          sln->pop_transform();
 
-        sln->push_transform(1);
-        process_quad(mid0, iv1, mid1, mid4, level+1, val, phx, phy, quad_indices[2]);
-        sln->pop_transform();
+          sln->push_transform(1);
+          process_quad(mid0, iv1, mid1, mid4, level+1, val, phx, phy, quad_indices[2]);
+          sln->pop_transform();
 
-        sln->push_transform(2);
-        process_quad(mid4, mid1, iv2, mid2, level+1, val, phx, phy, quad_indices[3]);
-        sln->pop_transform();
+          sln->push_transform(2);
+          process_quad(mid4, mid1, iv2, mid2, level+1, val, phx, phy, quad_indices[3]);
+          sln->pop_transform();
 
-        sln->push_transform(3);
-        process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);
-        sln->pop_transform();
-      }
-      else if (split == 1) // h-split
-      {
-        sln->push_transform(4);
-        process_quad(iv0, iv1, mid1, mid3, level+1, val, phx, phy, quad_indices[5]);
-        sln->pop_transform();
+          sln->push_transform(3);
+          process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);
+          sln->pop_transform();
+        }
+        else if (split == 1) // h-split
+        {
+          sln->push_transform(4);
+          process_quad(iv0, iv1, mid1, mid3, level+1, val, phx, phy, quad_indices[5]);
+          sln->pop_transform();
 
-        sln->push_transform(5);
-        process_quad(mid3, mid1, iv2, iv3, level+1, val, phx, phy, quad_indices[6]);
-        sln->pop_transform();
-      }
-      else // v-split
-      {
-        sln->push_transform(6);
-        process_quad(iv0, mid0, mid2, iv3, level+1, val, phx, phy, quad_indices[7]);
-        sln->pop_transform();
+          sln->push_transform(5);
+          process_quad(mid3, mid1, iv2, iv3, level+1, val, phx, phy, quad_indices[6]);
+          sln->pop_transform();
+        }
+        else // v-split
+        {
+          sln->push_transform(6);
+          process_quad(iv0, mid0, mid2, iv3, level+1, val, phx, phy, quad_indices[7]);
+          sln->pop_transform();
 
-        sln->push_transform(7);
-        process_quad(mid0, iv1, iv2, mid2, level+1, val, phx, phy, quad_indices[8]);
-        sln->pop_transform();
-      }
-      return;
+          sln->push_transform(7);
+          process_quad(mid0, iv1, iv2, mid2, level+1, val, phx, phy, quad_indices[8]);
+          sln->pop_transform();
+        }
+        return;
     }
   }
 
@@ -553,8 +448,8 @@ void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
   }
 }
 
-
-void Linearizer::process_edge(int iv1, int iv2, int marker)
+template<typename Scalar>
+void Linearizer<Scalar>::process_edge(int iv1, int iv2, int marker)
 {
   int mid = peek_vertex(iv1, iv2);
   if (mid != -1)
@@ -567,9 +462,8 @@ void Linearizer::process_edge(int iv1, int iv2, int marker)
 }
 
 
-//// regularization ////////////////////////////////////////////////////////////////////////////////
-
-void Linearizer::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2)
+template<typename Scalar>
+void Linearizer<Scalar>::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2)
 {
   // count the number of hanging mid-edge vertices
   int n = 0;
@@ -633,8 +527,8 @@ void Linearizer::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mi
   }
 }
 
-
-void Linearizer::find_min_max()
+template<typename Scalar>
+void Linearizer<Scalar>::find_min_max()
 {
   // find min & max vertex values
   min_val =  1e100;
@@ -646,11 +540,9 @@ void Linearizer::find_min_max()
   }
 }
 
-
-//// process_solution //////////////////////////////////////////////////////////////////////////////
-
-void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double eps, double max_abs,
-                                  MeshFunction<scalar>* xdisp, MeshFunction<scalar>* ydisp, double dmult)
+template<typename Scalar>
+void Linearizer<Scalar>::process_solution(MeshFunction<Scalar>* sln, int item, double eps, double max_abs,
+  MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
 {
   // sanity check
   if (sln == NULL) error("Solution is NULL in Linearizer:process_solution().");
@@ -678,17 +570,19 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
 
   // estimate the required number of vertices and triangles
   Mesh* mesh = sln->get_mesh();
-  if (mesh == NULL) {
+  if (mesh == NULL) 
+  {
     warn("Have you used Solution::set_coeff_vector() ?");
     error("Mesh is NULL in Linearizer:process_solution().");
   }
   int nn = mesh->get_num_elements();
   /*
-  if(disp) {
-    if(xdisp->get_mesh()->get_num_elements() > nn)
-      nn = xdisp->get_mesh()->get_num_elements();
-    if(ydisp->get_mesh()->get_num_elements() > nn)
-      nn = ydisp->get_mesh()->get_num_elements();
+  if(disp) 
+  {
+  if(xdisp->get_mesh()->get_num_elements() > nn)
+  nn = xdisp->get_mesh()->get_num_elements();
+  if(ydisp->get_mesh()->get_num_elements() > nn)
+  nn = ydisp->get_mesh()->get_num_elements();
   }
   */
   int ev = std::max(32 * nn, 10000);  // todo: check this
@@ -721,9 +615,9 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
   old_quad = sln->get_quad_2d();
   sln->set_quad_2d(&quad_lin);
   if (disp) { old_quad_x = xdisp->get_quad_2d();
-              old_quad_y = ydisp->get_quad_2d();
-              xdisp->set_quad_2d(&quad_lin);
-              ydisp->set_quad_2d(&quad_lin); }
+  old_quad_y = ydisp->get_quad_2d();
+  xdisp->set_quad_2d(&quad_lin);
+  ydisp->set_quad_2d(&quad_lin); }
 
   // create all top-level vertices (corresponding to vertex nodes), with
   // all parent-son relations preserved; this is necessary for regularization to
@@ -742,7 +636,8 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
     meshes = new Mesh*[1];
 
   meshes[0] = sln->get_mesh();
-  if(disp) {
+  if(disp) 
+  {
     meshes[1] = xdisp->get_mesh();
     meshes[2] = ydisp->get_mesh();
   }
@@ -752,7 +647,8 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
   else
     trfs = new Transformable*[1];
   trfs[0] = sln;
-  if(disp) {
+  if(disp) 
+  {
     trfs[1] = xdisp;
     trfs[2] = ydisp;
   }
@@ -762,13 +658,15 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
   // Loop through all elements.
   Element **e;
   // Loop through all elements.
-  while ((e = trav.get_next_state(NULL, NULL)) != NULL) {
+  while ((e = trav.get_next_state(NULL, NULL)) != NULL) 
+  {
     sln->set_quad_order(0, item);
-    scalar* val = sln->get_values(ia, ib);
+    Scalar* val = sln->get_values(ia, ib);
     if (val == NULL) error("Item not defined in the solution.");
 
-    scalar *dx = NULL, *dy = NULL;
-    if (disp) {
+    Scalar *dx = NULL, *dy = NULL;
+    if (disp) 
+    {
       xdisp->set_quad_order(0, H2D_FN_VAL);
       ydisp->set_quad_order(0, H2D_FN_VAL);
       dx = xdisp->get_fn_values();
@@ -785,7 +683,8 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
       double x_disp = sln->get_refmap()->get_phys_x(0)[i];
       double y_disp = sln->get_refmap()->get_phys_y(0)[i];
 
-      if (disp) {
+      if (disp) 
+      {
         x_disp += dmult*realpart(dx[i]);
         y_disp += dmult*realpart(dy[i]);
       }
@@ -815,15 +714,15 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
   int num = nt;
   for (int i = 0; i < num; i++)
   {
-    int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
-    int mid0 = peek_vertex(iv0, iv1);
-    int mid1 = peek_vertex(iv1, iv2);
-    int mid2 = peek_vertex(iv2, iv0);
-    if (mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
-    {
-      del_triangle(i);
-      regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
-    }
+  int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
+  int mid0 = peek_vertex(iv0, iv1);
+  int mid1 = peek_vertex(iv1, iv2);
+  int mid2 = peek_vertex(iv2, iv0);
+  if (mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
+  {
+  del_triangle(i);
+  regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
+  }
   }
   */
 
@@ -835,43 +734,42 @@ void Linearizer::process_solution(MeshFunction<scalar>* sln, int item, double ep
   // select old quadratrues
   sln->set_quad_2d(old_quad);
   if (disp) { xdisp->set_quad_2d(old_quad_x);
-              ydisp->set_quad_2d(old_quad_y); }
+  ydisp->set_quad_2d(old_quad_y); }
 
   // clean up
   ::free(hash_table);
   ::free(info);
 }
 
-void Linearizer::free()
+template<typename Scalar>
+void Linearizer<Scalar>::free()
 {
   lin_free_array(verts, nv, cv);
   lin_free_array(tris, nt, ct);
   lin_free_array(edges, ne, ce);
 }
 
-
-Linearizer::~Linearizer()
+template<typename Scalar>
+Linearizer<Scalar>::~Linearizer()
 {
   free();
   pthread_mutex_destroy(&data_mutex);
 }
 
-
-//// save & load ///////////////////////////////////////////////////////////////////////////////////
-
-void Linearizer::save_data(const char* filename)
+template<typename Scalar>
+void Linearizer<Scalar>::save_data(const char* filename)
 {
   FILE* f = fopen(filename, "wb");
   if (f == NULL) error("Could not open %s for writing.", filename);
   lock_data();
 
   if (fwrite("H2DL\001\000\000\000", 1, 8, f) != 8 ||
-      fwrite(&nv, sizeof(int), 1, f) != 1 ||
-      fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
-      fwrite(&nt, sizeof(int), 1, f) != 1 ||
-      fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
-      fwrite(&ne, sizeof(int), 1, f) != 1 ||
-      fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne)
+    fwrite(&nv, sizeof(int), 1, f) != 1 ||
+    fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
+    fwrite(&nt, sizeof(int), 1, f) != 1 ||
+    fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
+    fwrite(&ne, sizeof(int), 1, f) != 1 ||
+    fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne)
   {
     error("Error writing data to %s", filename);
   }
@@ -880,23 +778,25 @@ void Linearizer::save_data(const char* filename)
   fclose(f);
 }
 
-void Linearizer::save_solution_vtk(MeshFunction<scalar>* meshfn, const char* file_name, const char *quantity_name,
-                                   bool mode_3D, int item, double eps, double max_abs,
-                                   MeshFunction<scalar>* xdisp, MeshFunction<scalar>* ydisp,
-                                   double dmult)
+template<typename Scalar>
+void Linearizer<Scalar>::save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char *quantity_name,
+  bool mode_3D, int item, double eps, double max_abs,
+  MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp,
+  double dmult)
 {
   // Create a linearizer. This class uses automatic adaptivity 
   // to approximate higher-order polynomial elements via linear
   // triangles for visualization purposes. Accuracy of this 
   // approximation is set through the parameter "eps" below.
-  Linearizer lin;
+  Linearizer<Scalar> lin;
 
   // Create a piecewise-linear approximation, and save it to a file in VTK format.
   lin.process_solution(meshfn, item, eps, max_abs, xdisp, ydisp, dmult);
   lin.save_data_vtk(file_name, quantity_name, mode_3D);
 }
 
-void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode_3D)
+template<typename Scalar>
+void Linearizer<Scalar>::save_data_vtk(const char* filename, const char *name, bool mode_3D)
 {
   FILE* f = fopen(filename, "wb");
   if (f == NULL) error("Could not open %s for writing.", filename);
@@ -910,7 +810,8 @@ void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode
 
   // Output vertices.
   fprintf(f, "POINTS %d %s\n", this->nv, "float");
-  for (int i=0; i < this->nv; i++) {
+  for (int i=0; i < this->nv; i++) 
+  {
     if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
     else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
   }
@@ -918,14 +819,16 @@ void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode
   // Output elements.
   fprintf(f, "\n");
   fprintf(f, "CELLS %d %d\n", this->nt, 4 * this->nt);
-  for (int i=0; i < this->nt; i++) {
+  for (int i=0; i < this->nt; i++) 
+  {
     fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
   }
 
   // Output cell types.
   fprintf(f, "\n");
   fprintf(f, "CELL_TYPES %d\n", this->nt);
-  for (int i=0; i < this->nt; i++) {
+  for (int i=0; i < this->nt; i++) 
+  {
     fprintf(f, "5\n");    // The "5" means triangle in VTK.
   }
 
@@ -935,7 +838,8 @@ void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode
   fprintf(f, "POINT_DATA %d\n", this->nv);
   fprintf(f, "doubleS %s %s %d\n", name, "float", 1);
   fprintf(f, "LOOKUP_TABLE %s\n", "default");
-  for (int i=0; i < this->nv; i++) {
+  for (int i=0; i < this->nv; i++) 
+  {
     fprintf(f, "%g\n", this->verts[i][2]);
   }
 
@@ -943,7 +847,8 @@ void Linearizer::save_data_vtk(const char* filename, const char *name, bool mode
   fclose(f);
 }
 
-void Linearizer::load_data(const char* filename)
+template<typename Scalar>
+void Linearizer<Scalar>::load_data(const char* filename)
 {
   FILE* f = fopen(filename, "rb");
   if (f == NULL) error("Could not open %s for reading.", filename);
@@ -954,16 +859,16 @@ void Linearizer::load_data(const char* filename)
     error("Error reading %s", filename);
 
   if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'L')
-    error("File %s is not a Hermes2D Linearizer file.", filename);
+    error("File %s is not a Hermes2D Linearizer<Scalar> file.", filename);
   if (hdr.ver > 1)
     error("File %s -- unsupported file version.", filename);
 
-  #define read_array(array, type, n, c, what) \
-    if (fread(&n, sizeof(int), 1, f) != 1) \
-      error("Error reading the number of " what " from %s", filename); \
-    lin_init_array(array, type, c, n); \
-    if (fread(array, sizeof(type), n, f) != (unsigned) n) \
-      error("Error reading " what " from %s", filename);
+#define read_array(array, type, n, c, what) \
+  if (fread(&n, sizeof(int), 1, f) != 1) \
+  error("Error reading the number of " what " from %s", filename); \
+  lin_init_array(array, type, c, n); \
+  if (fread(array, sizeof(type), n, f) != (unsigned) n) \
+  error("Error reading " what " from %s", filename);
 
   read_array(verts, double3, nv, cv, "vertices");
   read_array(tris,  int3,    nt, ct, "triangles");
@@ -974,23 +879,29 @@ void Linearizer::load_data(const char* filename)
   fclose(f);
 }
 
-//// others ///////////////////////////////////////////////////////////////////////////////////
-
-void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const {
+template<typename Scalar>
+void Linearizer<Scalar>::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+{
   assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
   calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), nv, min_x, max_x, min_y, max_y);
 }
 
-void Linearizer::calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y) {
+template<typename Scalar>
+void Linearizer<Scalar>::calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y) 
+{
   *min_x = *max_x = *x;
   *min_y = *max_y = *y;
 
   uint8_t* ptr_x = (uint8_t*)x;
   uint8_t* ptr_y = (uint8_t*)y;
-  for(int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride) {
+  for(int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride) 
+  {
     *min_x = std::min(*min_x, *((double*)ptr_x));
     *min_y = std::min(*min_y, *((double*)ptr_y));
     *max_x = std::max(*max_x, *((double*)ptr_x));
     *max_y = std::max(*max_y, *((double*)ptr_y));
   }
 }
+
+template class HERMES_API Linearizer<double>;
+template class HERMES_API Linearizer<std::complex<double> >;

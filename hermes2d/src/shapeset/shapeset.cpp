@@ -20,23 +20,23 @@
 
 /*    numbering of edge intervals: (the variable 'part')
 
-        -+-        -+-         -+-
-         |          |        13 |
-         |        5 |          -+-
-         |          |        12 |
-       1 |         -+-         -+-                  finer interval:
-         |          |        11 |
-         |        4 |          -+-                  p = (p + 1) * 2   (+1)
-         |          |        10 |
-        -+-        -+-         -+-   ... etc.
-         |          |         9 |
-         |        3 |          -+-
-         |          |         8 |
-       0 |         -+-         -+-
-         |          |         7 |
-         |        2 |          -+-
-         |          |         6 |
-        -+-        -+-         -+-            */
+-+-        -+-         -+-
+|          |        13 |
+|        5 |          -+-
+|          |        12 |
+1 |         -+-         -+-                  finer interval:
+|          |        11 |
+|        4 |          -+-                  p = (p + 1) * 2   (+1)
+|          |        10 |
+-+-        -+-         -+-   ... etc.
+|          |         9 |
+|        3 |          -+-
+|          |         8 |
+0 |         -+-         -+-
+|          |         7 |
+|        2 |          -+-
+|          |         6 |
+-+-        -+-         -+-            */
 
 
 /// Constrained edge functions are constructed by subtracting the linear part (ie., two
@@ -176,10 +176,10 @@ void Shapeset::free_constrained_edge_combinations()
 
 
 #define parse_index \
-    int part = (unsigned) index >> 7, \
-        order = (index >> 3) & 15, \
-        edge = (index >> 1) & 3, \
-        ori = index & 1;
+  int part = (unsigned) index >> 7, \
+  order = (index >> 3) & 15, \
+  edge = (index >> 1) & 3, \
+  ori = index & 1;
 
 
 /// Constructs the linear combination of edge functions, forming a constrained edge function.

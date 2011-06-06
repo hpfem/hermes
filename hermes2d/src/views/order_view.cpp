@@ -28,7 +28,7 @@
 
 template<typename Scalar>
 OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
-         : View(title, wg)
+  : View(title, wg)
 {
   b_scale = true;
   b_orders = false;
@@ -40,20 +40,20 @@ OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
 /*
 #ifndef _MSC_VER
 OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
-         : View(title, wg)
+: View(title, wg)
 {
-  b_scale = true;
-  b_orders = false;
-  scale_width = 36;
-  scale_box_height = 25;
-  scale_box_skip = 9;
+b_scale = true;
+b_orders = false;
+scale_width = 36;
+scale_box_height = 25;
+scale_box_skip = 9;
 }
 #endif
 */
 
 template<typename Scalar>
 OrderView<Scalar>::OrderView(char* title, WinGeom* wg)
-         : View(title, wg)
+  : View(title, wg)
 {
   b_scale = true;
   b_orders = false;
@@ -98,7 +98,8 @@ void OrderView<Scalar>::show(Space<Scalar>* space)
 }
 
 template<typename Scalar>
-void OrderView<Scalar>::init_order_palette(double3* vert) {
+void OrderView<Scalar>::init_order_palette(double3* vert) 
+{
   int min = 1, max = (int) vert[0][2];
   for (int i = 0; i < ord.get_num_vertices(); i++)
   {
@@ -111,12 +112,14 @@ void OrderView<Scalar>::init_order_palette(double3* vert) {
   char* buf = text_buffer;
   for (int i = 0; i < num_boxes; i++)
   {
-    if (pal_type == H2DV_PT_DEFAULT) {
+    if (pal_type == H2DV_PT_DEFAULT) 
+    {
       order_colors[i+min][0] = (float) (order_palette[i+min] >> 16) / 0xff;
       order_colors[i+min][1] = (float) ((order_palette[i+min] >> 8) & 0xff) / 0xff;
       order_colors[i+min][2] = (float) (order_palette[i+min] & 0xff) / 0xff;
     }
-    else {
+    else 
+    {
       get_palette_color((i + min) / (double)H2DV_MAX_VIEWABLE_ORDER, &order_colors[i+min][0]);
     }
 
@@ -188,7 +191,7 @@ void OrderView<Scalar>::on_display()
     int nl = ord.get_labels(lvert, ltext, lbox);
     for (i = 0; i < nl; i++)
       if (lbox[i][0] * scale > get_text_width(ltext[i]) &&
-          lbox[i][1] * scale > 13)
+        lbox[i][1] * scale > 13)
       {
         //color = get_palette_color((vert[lvert[i]][2] - 1) / 9.0);
         const float* color = order_colors[(int) vert[lvert[i]][2]];
@@ -224,24 +227,25 @@ void OrderView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
-    case 'c':
-      reset_view(true);
-      refresh();
-      break;
+  case 'c':
+    reset_view(true);
+    refresh();
+    break;
 
-    case 'm':
-      b_orders = !b_orders;
-      refresh();
-      break;
+  case 'm':
+    b_orders = !b_orders;
+    refresh();
+    break;
 
-    case 'p':
+  case 'p':
     {
-      switch(pal_type) {
-        case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
-        case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-        case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-        case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
-        default: error("Invalid palette type");
+      switch(pal_type) 
+      {
+      case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
+      case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+      case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+      case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
+      default: error("Invalid palette type");
       }
       debug_log("Switched to palette type %d in view \"%s\"", (int)pal_type, title.c_str());
       ord.lock_data();
@@ -251,9 +255,9 @@ void OrderView<Scalar>::on_key_down(unsigned char key, int x, int y)
       break;
     }
 
-    default:
-      View::on_key_down(key, x, y);
-      break;
+  default:
+    View::on_key_down(key, x, y);
+    break;
   }
 }
 
@@ -297,17 +301,17 @@ template<typename Scalar>
 const char* OrderView<Scalar>::get_help_text() const
 {
   return
-  "OrderView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  C - center image\n"
-  "  M - toggle element orders\n"
-  "  H - render high-quality frame\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit";
+    "OrderView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  C - center image\n"
+    "  M - toggle element orders\n"
+    "  H - render high-quality frame\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit";
 }
 
 #endif // NOGLUT

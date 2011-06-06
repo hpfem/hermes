@@ -23,7 +23,7 @@ const int NUMBER_OF_EIGENVALUES = 50;             // Desired number of eigenvalu
 const int P_INIT = 4;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
 const double TARGET_VALUE = 2.0;                  // PySparse parameter: Eigenvalues in the vicinity of 
-                                                  // this number will be computed. 
+// this number will be computed. 
 const double TOL = 1e-10;                         // Pysparse parameter: Error tolerance.
 const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
 
@@ -84,7 +84,8 @@ int main(int argc, char* argv[])
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
   int neig = es.get_n_eigs();
   if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
-  for (int ieig = 0; ieig < neig; ieig++) {
+  for (int ieig = 0; ieig < neig; ieig++) 
+  {
     eigenval[ieig] = es.get_eigenvalue(ieig);
     int n;
     es.get_eigenvector(ieig, &coeff_vec, &n);

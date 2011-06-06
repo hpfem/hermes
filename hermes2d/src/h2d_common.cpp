@@ -27,7 +27,8 @@ template<typename Scalar> class MeshFunction;
 class Transformable;
 
 template<typename Scalar>
-const std::string Hermes2D<Scalar>::get_quad_order_str(const int quad_order) {
+const std::string Hermes2D<Scalar>::get_quad_order_str(const int quad_order) 
+{
   std::stringstream str;
   str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
   return str.str();
@@ -48,8 +49,9 @@ template<typename Scalar>
 double Hermes2D<Scalar>::get_l2_norm(Vector<Scalar>* vec) const 
 {
   _F_
-  Scalar val = 0;
-  for (unsigned int i = 0; i < vec->length(); i++) {
+    Scalar val = 0;
+  for (unsigned int i = 0; i < vec->length(); i++) 
+  {
     Scalar inc = vec->get(i);
     val = val + inc*conj(inc);
   }
@@ -58,15 +60,16 @@ double Hermes2D<Scalar>::get_l2_norm(Vector<Scalar>* vec) const
 
 template<typename Scalar>
 bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
-                  Vector<Scalar>* rhs, bool jacobian_changed, double newton_tol, int newton_max_iter, bool verbose,
-                  bool residual_as_function,
-                  double damping_coeff, double max_allowed_residual_norm) const
+  Vector<Scalar>* rhs, bool jacobian_changed, double newton_tol, int newton_max_iter, bool verbose,
+  bool residual_as_function,
+  double damping_coeff, double max_allowed_residual_norm) const
 {
   // Prepare solutions for measuring residual norm.
   int num_spaces = dp->get_spaces().size();
   Hermes::vector<Solution<Scalar>*> solutions;
   Hermes::vector<bool> dir_lift_false;
-  for (int i=0; i < num_spaces; i++) {
+  for (int i=0; i < num_spaces; i++) 
+  {
     if (residual_as_function) solutions.push_back(new Solution<Scalar>());
     dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
   }
@@ -81,9 +84,10 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
 
     // Assemble the residual vector.
     dp->assemble(coeff_vec, NULL, rhs); // NULL = we do not want the Jacobian.
- 
+
     // Measure the residual norm.
-    if (residual_as_function) {
+    if (residual_as_function) 
+    {
       // Translate the residual vector into a residual function (or multiple functions)
       // in the corresponding finite element space(s) and measure their norm(s) there.
       // This is more meaningful than just measuring the l2-norm of the residual vector,
@@ -93,7 +97,8 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
       Solution<Scalar>::vector_to_solutions(rhs, dp->get_spaces(), solutions, dir_lift_false);
       residual_norm = calc_norms(solutions);
     }
-    else {
+    else 
+    {
       // Calculate the l2-norm of residual vector, this is the traditional way.
       residual_norm = get_l2_norm(rhs);
     }
@@ -105,10 +110,12 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
       else 
         if(verbose)
           info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
- 
+
     // If maximum allowed residual norm is exceeded, fail.
-    if (residual_norm > max_allowed_residual_norm) {
-      if (verbose) {
+    if (residual_norm > max_allowed_residual_norm) 
+    {
+      if (verbose) 
+      {
         info("Current residual norm: %g", residual_norm);
         info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
         info("Newton solve not successful, returning false.");
@@ -141,7 +148,8 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
   for (unsigned int i = 0; i < solutions.size(); i++)
     delete solutions[i];
 
-  if (it >= newton_max_iter) {
+  if (it >= newton_max_iter) 
+  {
     if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
     return false;
   }
@@ -152,8 +160,8 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
 // Perform Picard's iteration.
 template<typename Scalar>
 bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter,
-                  MatrixSolverType matrix_solver, double tol,
-                  int max_iter, bool verbose) const
+  MatrixSolverType matrix_solver, double tol,
+  int max_iter, bool verbose) const
 {
   // Instantiate a class with global functions.
   Hermes2D hermes2d;
@@ -170,29 +178,31 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
   int ndof = Space<Scalar>::get_num_dofs(space);
   Scalar* coeff_vec = new Scalar[ndof];
   memset(coeff_vec, 0, ndof * sizeof(Scalar));
- 
+
   int iter_count = 0;
-  while (true) {
+  while (true) 
+  {
     // Assemble the stiffness matrix and right-hand side.
     dp.assemble(matrix, rhs);
     // Perform Newton's iteration to solve the linear problem.
     bool jacobian_changed = true;
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-                               jacobian_changed, tol, max_iter)) 
-        error("Newton's iteration failed.");
+      jacobian_changed, tol, max_iter)) 
+      error("Newton's iteration failed.");
 
     // Solve the linear system and if successful, obtain the solution.
     // Translate the resulting coefficient vector into the Solution sln.
     Solution<Scalar> sln_new;
     Solution<Scalar>::vector_to_solution(coeff_vec, space, &sln_new);
- 
+
     double rel_error = calc_abs_error(sln_prev_iter, &sln_new, HERMES_H1_NORM)
-                       / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
+      / calc_norm(&sln_new, HERMES_H1_NORM) * 100;
     if (verbose) info("---- Picard iter %d, ndof %d, rel. error %g%%",
       iter_count+1, space->get_num_dofs(), rel_error);
 
     // Stopping criterion.
-    if (rel_error < tol) {
+    if (rel_error < tol) 
+    {
       sln_prev_iter->copy(&sln_new);
       delete [] coeff_vec;
       delete matrix;
@@ -201,7 +211,8 @@ bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, 
       return true;
     }
 
-    if (iter_count >= max_iter) {
+    if (iter_count >= max_iter) 
+    {
       delete [] coeff_vec;
       delete matrix;
       delete rhs;
@@ -242,20 +253,21 @@ double Hermes2D<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction
 
     RefMap* ru = sln1->get_refmap();
     RefMap* rv = sln2->get_refmap();
-    switch (norm_type) {
-      case HERMES_L2_NORM:
-        error += error_fn_l2(sln1, sln2, ru, rv);
-        break;
-      case HERMES_H1_NORM:
-        error += error_fn_h1(sln1, sln2, ru, rv);
-        break;
-      case HERMES_HCURL_NORM:
-        error += error_fn_hc(sln1, sln2, ru, rv);
-        break;
-      case HERMES_HDIV_NORM:
-        error += error_fn_hdiv(sln1, sln2, ru, rv);
-        break;
-      default: error("Unknown norm in calc_error().");
+    switch (norm_type) 
+    {
+    case HERMES_L2_NORM:
+      error += error_fn_l2(sln1, sln2, ru, rv);
+      break;
+    case HERMES_H1_NORM:
+      error += error_fn_h1(sln1, sln2, ru, rv);
+      break;
+    case HERMES_HCURL_NORM:
+      error += error_fn_hc(sln1, sln2, ru, rv);
+      break;
+    case HERMES_HDIV_NORM:
+      error += error_fn_hdiv(sln1, sln2, ru, rv);
+      break;
+    default: error("Unknown norm in calc_error().");
     }
   }
   trav.finish();
@@ -280,20 +292,21 @@ double Hermes2D<Scalar>::calc_norm(MeshFunction<Scalar>* sln, int norm_type) con
     sln->set_active_element(e);
     RefMap* ru = sln->get_refmap();
 
-    switch (norm_type) {
-      case HERMES_L2_NORM:
-        norm += norm_fn_l2(sln, ru);
-        break;
-      case HERMES_H1_NORM:
-        norm += norm_fn_h1(sln, ru);
-        break;
-      case HERMES_HCURL_NORM:
-        norm += norm_fn_hc(sln, ru);
-        break;
-      case HERMES_HDIV_NORM:
-        norm += norm_fn_hdiv(sln, ru);
-        break;
-      default: error("Unknown norm in calc_norm().");
+    switch (norm_type) 
+    {
+    case HERMES_L2_NORM:
+      norm += norm_fn_l2(sln, ru);
+      break;
+    case HERMES_H1_NORM:
+      norm += norm_fn_h1(sln, ru);
+      break;
+    case HERMES_HCURL_NORM:
+      norm += norm_fn_hc(sln, ru);
+      break;
+    case HERMES_HDIV_NORM:
+      norm += norm_fn_hdiv(sln, ru);
+      break;
+    default: error("Unknown norm in calc_norm().");
     }
   }
   return sqrt(norm);
@@ -307,13 +320,15 @@ double Hermes2D<Scalar>::calc_norms(Hermes::vector<Solution<Scalar>*> slns) cons
   // Calculate norms for all solutions.
   Hermes::vector<double> norms;
   int n = slns.size();
-  for (int i=0; i<n; i++) {
-    switch (slns[i]->get_space_type()) {
-      case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
-      case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
-      case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
-      case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
-      default: error("Internal in calc_norms(): unknown space type.");
+  for (int i=0; i<n; i++) 
+  {
+    switch (slns[i]->get_space_type()) 
+    {
+    case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
+    case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
+    case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
+    case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
+    default: error("Internal in calc_norms(): unknown space type.");
     }
   }
   // Calculate the resulting norm.
@@ -325,7 +340,7 @@ double Hermes2D<Scalar>::calc_norms(Hermes::vector<Solution<Scalar>*> slns) cons
 
 template<typename Scalar>
 bool Hermes2D<Scalar>::calc_errors(Hermes::vector<Solution<Scalar>* > left, Hermes::vector<Solution<Scalar>*> right, Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
-                 double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::vector<ProjNormType> norms) const
+  double & err_abs_total, double & norm_total, double & err_rel_total, Hermes::vector<ProjNormType> norms) const
 {
   bool default_norms = false;
   // Checks.
@@ -369,7 +384,7 @@ bool Hermes2D<Scalar>::calc_errors(Hermes::vector<Solution<Scalar>* > left, Herm
 /// Calculates the absolute error between sln1 and sln2 using function fn
 template<typename Scalar>
 double Hermes2D<Scalar>::calc_abs_error(double (*fn)(MeshFunction<Scalar>*, MeshFunction<Scalar>*, RefMap*, RefMap*), MeshFunction<Scalar>* sln1,
-                      MeshFunction<Scalar>* sln2) const
+  MeshFunction<Scalar>* sln2) const
 {
   // sanity checks
   if (fn == NULL) error("error norm function is NULL in calc_abs_error().");
@@ -455,7 +470,7 @@ double Hermes2D<Scalar>::error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Sc
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval[i] - vval[i]) +
-                          sqr(dudx[i] - dvdx[i]) + sqr(dudy[i] - dvdy[i]));
+    sqr(dudx[i] - dvdx[i]) + sqr(dudy[i] - dvdy[i]));
   return result;
 }
 
@@ -540,7 +555,7 @@ double Hermes2D<Scalar>::error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Sc
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i] - vval0[i]) + sqr(uval1[i] - vval1[i]) +
-                          sqr((udx1[i] - udy0[i]) - (vdx1[i] - vdy0[i])));
+    sqr((udx1[i] - udy0[i]) - (vdx1[i] - vdy0[i])));
   return result;
 }
 
@@ -627,7 +642,7 @@ double Hermes2D<Scalar>::error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<
 
   double result = 0.0;
   h1_integrate_expression(sqr(uval0[i] - vval0[i]) + sqr(uval1[i] - vval1[i]) +
-                          sqr((udx1[i] - udy0[i]) - (vdx1[i] - vdy0[i])));
+    sqr((udx1[i] - udy0[i]) - (vdx1[i] - vdy0[i])));
   return result;
 }
 

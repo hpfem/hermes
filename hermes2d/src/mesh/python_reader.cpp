@@ -60,7 +60,8 @@
           PyObject_HEAD_INIT(type) size,
   #define PyType_Modified(t)
 
-  typedef struct {
+  typedef struct 
+{
      void *buf;
      PyObject *obj;
      Py_ssize_t len;
@@ -293,7 +294,8 @@ static const char * __pyx_cfilenm= __FILE__;
 static const char *__pyx_filename;
 
 
-static const char *__pyx_f[] = {
+static const char *__pyx_f[] = 
+{
   "python_reader.pyx",
 };
 
@@ -304,7 +306,8 @@ static const char *__pyx_f[] = {
 #endif
 
 #if CYTHON_REFNANNY
-  typedef struct {
+  typedef struct 
+{
     void (*INCREF)(void*, PyObject*, int);
     void (*DECREF)(void*, PyObject*, int);
     void (*GOTREF)(void*, PyObject*, int);
@@ -313,7 +316,8 @@ static const char *__pyx_f[] = {
     void (*FinishContext)(void**);
   } __Pyx_RefNannyAPIStruct;
   static __Pyx_RefNannyAPIStruct *__Pyx_RefNanny = NULL;
-  static __Pyx_RefNannyAPIStruct * __Pyx_RefNannyImportAPI(const char *modname) {
+  static __Pyx_RefNannyAPIStruct * __Pyx_RefNannyImportAPI(const char *modname) 
+{
     PyObject *m = NULL, *p = NULL;
     void *r = NULL;
     m = PyImport_ImportModule((char *)modname);
@@ -527,7 +531,8 @@ static PyObject *__pyx_k_tuple_25;
 static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, PyObject *__pyx_v_s); /*proto*/
 static char __pyx_doc_13python_reader_0convert2tuple[] = "\n    Converts any iterable to a tuple recursively.\n\n    Insert your iterable into parameter \"s\".\n\n    Example:\n\n    >>> convert2tuple([[0,0],[0,1],[1,1],[1,0],[0.25,0.25],[0.25,0.75],[0.75,0.75],[0.75,0.25]]) \n    ((0, 0), (0, 1), (1, 1), (1, 0), (0.25, 0.25), (0.25, 0.75), (0.75,\n    0.75), (0.75, 0.25)) \n    >>> convert2tuple([[0,0],[0,1],[1,1],[1,0],[0.25,0.25],[0.25,0.75],[0.75,0.5]]) \n    ((0, 0), (0, 1), (1, 1), (1, 0), (0.25, 0.25), (0.25, 0.75), (0.75,\n    0.5)) \n\n    ";
 static PyMethodDef __pyx_mdef_13python_reader_0convert2tuple = {__Pyx_NAMESTR("convert2tuple"), (PyCFunction)__pyx_pf_13python_reader_0convert2tuple, METH_O, __Pyx_DOCSTR(__pyx_doc_13python_reader_0convert2tuple)};
-static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, PyObject *__pyx_v_s) {
+static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, PyObject *__pyx_v_s) 
+{
   PyObject *__pyx_v_y;
   PyObject *__pyx_r = NULL;
   int __pyx_t_1;
@@ -549,7 +554,8 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
  *     else:
  */
   __pyx_t_1 = PyObject_HasAttr(__pyx_v_s, ((PyObject *)__pyx_n_s____iter__)); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_t_1) {
+  if (__pyx_t_1) 
+{
 
     /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":23
  *     """
@@ -561,22 +567,29 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(((PyObject *)__pyx_t_2));
-    if (PyList_CheckExact(__pyx_v_s) || PyTuple_CheckExact(__pyx_v_s)) {
+    if (PyList_CheckExact(__pyx_v_s) || PyTuple_CheckExact(__pyx_v_s)) 
+{
       __pyx_t_3 = 0; __pyx_t_4 = __pyx_v_s; __Pyx_INCREF(__pyx_t_4);
-    } else {
+    } else 
+{
       __pyx_t_3 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_s); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_4);
     }
-    for (;;) {
-      if (likely(PyList_CheckExact(__pyx_t_4))) {
+    for (;;) 
+{
+      if (likely(PyList_CheckExact(__pyx_t_4))) 
+{
         if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_4)) break;
         __pyx_t_5 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++;
-      } else if (likely(PyTuple_CheckExact(__pyx_t_4))) {
+      } else if (likely(PyTuple_CheckExact(__pyx_t_4))) 
+{
         if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
         __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++;
-      } else {
+      } else 
+{
         __pyx_t_5 = PyIter_Next(__pyx_t_4);
-        if (!__pyx_t_5) {
+        if (!__pyx_t_5) 
+{
           if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           break;
         }
@@ -608,7 +621,8 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
     goto __pyx_L0;
     goto __pyx_L5;
   }
-  /*else*/ {
+  /*else*/ 
+{
 
     /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":25
  *         return tuple([convert2tuple(y) for y in s])
@@ -652,7 +666,8 @@ static PyObject *__pyx_pf_13python_reader_0convert2tuple(PyObject *__pyx_self, P
 static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_self, PyObject *__pyx_v_filename); /*proto*/
 static char __pyx_doc_13python_reader_1read_hermes_format[] = "\n    Reads a mesh from a file in a hermes format.\n\n    Returns nodes, elements, boundary, nurbs or raises a ParseError if the\n    syntax is invalid.\n    ";
 static PyMethodDef __pyx_mdef_13python_reader_1read_hermes_format = {__Pyx_NAMESTR("read_hermes_format"), (PyCFunction)__pyx_pf_13python_reader_1read_hermes_format, METH_O, __Pyx_DOCSTR(__pyx_doc_13python_reader_1read_hermes_format)};
-static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_self, PyObject *__pyx_v_filename) {
+static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_self, PyObject *__pyx_v_filename) 
+{
   PyObject *__pyx_v_m;
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
@@ -736,7 +751,8 @@ static PyObject *__pyx_pf_13python_reader_1read_hermes_format(PyObject *__pyx_se
 static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__pyx_self, PyObject *__pyx_v_m); /*proto*/
 static char __pyx_doc_13python_reader_2read_hermes_format_str[] = "\n    Reads a mesh from a string in a hermes format.\n\n    Returns nodes, elements, boundary, nurbs or raises a ParseError if the\n    syntax is invalid.\n    ";
 static PyMethodDef __pyx_mdef_13python_reader_2read_hermes_format_str = {__Pyx_NAMESTR("read_hermes_format_str"), (PyCFunction)__pyx_pf_13python_reader_2read_hermes_format_str, METH_O, __Pyx_DOCSTR(__pyx_doc_13python_reader_2read_hermes_format_str)};
-static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__pyx_self, PyObject *__pyx_v_m) {
+static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__pyx_self, PyObject *__pyx_v_m) 
+{
   PyObject *__pyx_v_namespace;
   PyObject *__pyx_v_e;
   PyObject *__pyx_v_nodes;
@@ -897,13 +913,14 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *         exec m in math.__dict__, namespace
  *     except (SyntaxError, NameError), e:
  */
-  {
+{
     PyObject *__pyx_save_exc_type, *__pyx_save_exc_value, *__pyx_save_exc_tb;
     __Pyx_ExceptionSave(&__pyx_save_exc_type, &__pyx_save_exc_value, &__pyx_save_exc_tb);
     __Pyx_XGOTREF(__pyx_save_exc_type);
     __Pyx_XGOTREF(__pyx_save_exc_value);
     __Pyx_XGOTREF(__pyx_save_exc_tb);
-    /*try:*/ {
+    /*try:*/ 
+{
 
       /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":54
  *     namespace = {}
@@ -939,7 +956,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *         raise ParseError(str(e))
  */
     __pyx_t_3 = PyErr_ExceptionMatches(__pyx_builtin_SyntaxError) || PyErr_ExceptionMatches(__pyx_builtin_NameError);
-    if (__pyx_t_3) {
+    if (__pyx_t_3) 
+{
       __Pyx_AddTraceback("python_reader.read_hermes_format_str");
       if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_2, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L7_except_error;}
       __Pyx_GOTREF(__pyx_t_1);
@@ -1094,19 +1112,24 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     return convert2tuple(nodes), convert2tuple(elements), \
  */
   __pyx_t_8 = (__pyx_v_nodes == Py_None);
-  if (!__pyx_t_8) {
+  if (!__pyx_t_8) 
+{
     __pyx_t_9 = (__pyx_v_elements == Py_None);
-    if (!__pyx_t_9) {
+    if (!__pyx_t_9) 
+{
       __pyx_t_10 = (__pyx_v_boundary == Py_None);
       __pyx_t_11 = __pyx_t_10;
-    } else {
+    } else 
+{
       __pyx_t_11 = __pyx_t_9;
     }
     __pyx_t_9 = __pyx_t_11;
-  } else {
+  } else 
+{
     __pyx_t_9 = __pyx_t_8;
   }
-  if (__pyx_t_9) {
+  if (__pyx_t_9) 
+{
 
     /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":64
  *     refinements = namespace.pop("refinements", None)
@@ -1250,12 +1273,14 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   return __pyx_r;
 }
 
-static PyMethodDef __pyx_methods[] = {
+static PyMethodDef __pyx_methods[] = 
+{
   {0, 0, 0, 0}
 };
 
 #if PY_MAJOR_VERSION >= 3
-static struct PyModuleDef __pyx_moduledef = {
+static struct PyModuleDef __pyx_moduledef = 
+{
     PyModuleDef_HEAD_INIT,
     __Pyx_NAMESTR("python_reader"),
     0, /* m_doc */
@@ -1268,7 +1293,8 @@ static struct PyModuleDef __pyx_moduledef = {
 };
 #endif
 
-static __Pyx_StringTabEntry __pyx_string_tab[] = {
+static __Pyx_StringTabEntry __pyx_string_tab[] = 
+{
   {&__pyx_n_s_1, __pyx_k_1, sizeof(__pyx_k_1), 0, 0, 1, 1},
   {&__pyx_kp_s_11, __pyx_k_11, sizeof(__pyx_k_11), 0, 0, 1, 0},
   {&__pyx_kp_s_12, __pyx_k_12, sizeof(__pyx_k_12), 0, 0, 1, 0},
@@ -1309,7 +1335,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s__vertices, __pyx_k__vertices, sizeof(__pyx_k__vertices), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
-static int __Pyx_InitCachedBuiltins(void) {
+static int __Pyx_InitCachedBuiltins(void) 
+{
   __pyx_builtin_Exception = __Pyx_GetName(__pyx_b, __pyx_n_s__Exception); if (!__pyx_builtin_Exception) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 3; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_open = __Pyx_GetName(__pyx_b, __pyx_n_s__open); if (!__pyx_builtin_open) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_SyntaxError = __Pyx_GetName(__pyx_b, __pyx_n_s__SyntaxError); if (!__pyx_builtin_SyntaxError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -1319,7 +1346,8 @@ static int __Pyx_InitCachedBuiltins(void) {
   return -1;
 }
 
-static int __Pyx_InitCachedConstants(void) {
+static int __Pyx_InitCachedConstants(void) 
+{
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants");
 
   /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":45
@@ -1512,7 +1540,8 @@ static int __Pyx_InitCachedConstants(void) {
   return -1;
 }
 
-static int __Pyx_InitGlobals(void) {
+static int __Pyx_InitGlobals(void) 
+{
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   return 0;
   __pyx_L1_error:;
@@ -1533,7 +1562,8 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   #if CYTHON_REFNANNY
   void* __pyx_refnanny = NULL;
   __Pyx_RefNanny = __Pyx_RefNannyImportAPI("refnanny");
-  if (!__Pyx_RefNanny) {
+  if (!__Pyx_RefNanny) 
+{
       PyErr_Clear();
       __Pyx_RefNanny = __Pyx_RefNannyImportAPI("Cython.Runtime.refnanny");
       if (!__Pyx_RefNanny)
@@ -1568,7 +1598,8 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   if (__Pyx_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   /*--- Initialize various global constants etc. ---*/
   if (unlikely(__Pyx_InitGlobals() < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__pyx_module_is_main_python_reader) {
+  if (__pyx_module_is_main_python_reader) 
+{
     if (__Pyx_SetAttrString(__pyx_m, "__name__", __pyx_n_s____main__) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   }
   /*--- Builtin init code ---*/
@@ -1664,10 +1695,12 @@ PyMODINIT_FUNC PyInit_python_reader(void)
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  if (__pyx_m) {
+  if (__pyx_m) 
+{
     __Pyx_AddTraceback("init python_reader");
     Py_DECREF(__pyx_m); __pyx_m = 0;
-  } else if (!PyErr_Occurred()) {
+  } else if (!PyErr_Occurred()) 
+{
     PyErr_SetString(PyExc_ImportError, "init python_reader");
   }
   __pyx_L0:;
@@ -1681,7 +1714,8 @@ PyMODINIT_FUNC PyInit_python_reader(void)
 
 /* Runtime support code */
 
-static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) {
+static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) 
+{
     PyObject *result;
     result = PyObject_GetAttr(dict, name);
     if (!result)
@@ -1689,7 +1723,8 @@ static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) {
     return result;
 }
 
-static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb) {
+static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb) 
+{
     PyObject *local_type, *local_value, *local_tb;
     PyObject *tmp_type, *tmp_value, *tmp_tb;
     PyThreadState *tstate = PyThreadState_GET();
@@ -1735,7 +1770,8 @@ bad:
 }
 
 
-static CYTHON_INLINE void __Pyx_ExceptionSave(PyObject **type, PyObject **value, PyObject **tb) {
+static CYTHON_INLINE void __Pyx_ExceptionSave(PyObject **type, PyObject **value, PyObject **tb) 
+{
     PyThreadState *tstate = PyThreadState_GET();
     *type = tstate->exc_type;
     *value = tstate->exc_value;
@@ -1745,7 +1781,8 @@ static CYTHON_INLINE void __Pyx_ExceptionSave(PyObject **type, PyObject **value,
     Py_XINCREF(*tb);
 }
 
-static void __Pyx_ExceptionReset(PyObject *type, PyObject *value, PyObject *tb) {
+static void __Pyx_ExceptionReset(PyObject *type, PyObject *value, PyObject *tb) 
+{
     PyObject *tmp_type, *tmp_value, *tmp_tb;
     PyThreadState *tstate = PyThreadState_GET();
     tmp_type = tstate->exc_type;
@@ -1759,7 +1796,8 @@ static void __Pyx_ExceptionReset(PyObject *type, PyObject *value, PyObject *tb) 
     Py_XDECREF(tmp_tb);
 }
 
-static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list) {
+static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list) 
+{
     PyObject *py_import = 0;
     PyObject *empty_list = 0;
     PyObject *module = 0;
@@ -1771,7 +1809,8 @@ static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list) {
         goto bad;
     if (from_list)
         list = from_list;
-    else {
+    else 
+{
         empty_list = PyList_New(0);
         if (!empty_list)
             goto bad;
@@ -1792,25 +1831,31 @@ bad:
     return module;
 }
 
-static PyObject *__Pyx_FindPy2Metaclass(PyObject *bases) {
+static PyObject *__Pyx_FindPy2Metaclass(PyObject *bases) 
+{
     PyObject *metaclass;
     /* Default metaclass */
 #if PY_MAJOR_VERSION < 3
-    if (PyTuple_Check(bases) && PyTuple_GET_SIZE(bases) > 0) {
+    if (PyTuple_Check(bases) && PyTuple_GET_SIZE(bases) > 0) 
+{
         PyObject *base = PyTuple_GET_ITEM(bases, 0);
         metaclass = PyObject_GetAttrString(base, "__class__");
-        if (!metaclass) {
+        if (!metaclass) 
+{
             PyErr_Clear();
             metaclass = (PyObject*) Py_TYPE(base);
         }
-    } else {
+    } else 
+{
         metaclass = (PyObject *) &PyClass_Type;
     }
 #else
-    if (PyTuple_Check(bases) && PyTuple_GET_SIZE(bases) > 0) {
+    if (PyTuple_Check(bases) && PyTuple_GET_SIZE(bases) > 0) 
+{
         PyObject *base = PyTuple_GET_ITEM(bases, 0);
         metaclass = (PyObject*) Py_TYPE(base);
-    } else {
+    } else 
+{
         metaclass = (PyObject *) &PyType_Type;
     }
 #endif
@@ -1819,7 +1864,8 @@ static PyObject *__Pyx_FindPy2Metaclass(PyObject *bases) {
 }
 
 static PyObject *__Pyx_CreateClass(PyObject *bases, PyObject *dict, PyObject *name,
-                                   PyObject *modname) {
+                                   PyObject *modname) 
+{
     PyObject *result;
     PyObject *metaclass;
 
@@ -1828,9 +1874,11 @@ static PyObject *__Pyx_CreateClass(PyObject *bases, PyObject *dict, PyObject *na
 
     /* Python2 __metaclass__ */
     metaclass = PyDict_GetItemString(dict, "__metaclass__");
-    if (metaclass) {
+    if (metaclass) 
+{
         Py_INCREF(metaclass);
-    } else {
+    } else 
+{
         metaclass = __Pyx_FindPy2Metaclass(bases);
     }
     result = PyObject_CallFunctionObjArgs(metaclass, name, bases, dict, NULL);
@@ -1838,35 +1886,43 @@ static PyObject *__Pyx_CreateClass(PyObject *bases, PyObject *dict, PyObject *na
     return result;
 }
 
-static CYTHON_INLINE PyObject* __Pyx_PyRun2(PyObject* o, PyObject* globals) {
+static CYTHON_INLINE PyObject* __Pyx_PyRun2(PyObject* o, PyObject* globals) 
+{
     return __Pyx_PyRun(o, globals, NULL);
 }
 
-static PyObject* __Pyx_PyRun(PyObject* o, PyObject* globals, PyObject* locals) {
+static PyObject* __Pyx_PyRun(PyObject* o, PyObject* globals, PyObject* locals) 
+{
     PyObject* result;
     PyObject* s = 0;
     char *code = 0;
 
-    if (!globals || globals == Py_None) {
+    if (!globals || globals == Py_None) 
+{
         globals = PyModule_GetDict(__pyx_m);
         if (!globals)
             goto bad;
-    } else if (!PyDict_Check(globals)) {
+    } else if (!PyDict_Check(globals)) 
+{
         PyErr_Format(PyExc_TypeError, "exec() arg 2 must be a dict, not %.100s",
                      globals->ob_type->tp_name);
         goto bad;
     }
-    if (!locals || locals == Py_None) {
+    if (!locals || locals == Py_None) 
+{
         locals = globals;
     }
 
 
-    if (PyDict_GetItemString(globals, "__builtins__") == NULL) {
+    if (PyDict_GetItemString(globals, "__builtins__") == NULL) 
+{
         PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());
     }
 
-    if (PyCode_Check(o)) {
-        if (PyCode_GetNumFree((PyCodeObject *)o) > 0) {
+    if (PyCode_Check(o)) 
+{
+        if (PyCode_GetNumFree((PyCodeObject *)o) > 0) 
+{
             PyErr_SetString(PyExc_TypeError,
                 "code object passed to exec() may not contain free variables");
             goto bad;
@@ -1876,18 +1932,22 @@ static PyObject* __Pyx_PyRun(PyObject* o, PyObject* globals, PyObject* locals) {
         #else
         result = PyEval_EvalCode(o, globals, locals);
         #endif
-    } else {
+    } else 
+{
         PyCompilerFlags cf;
         cf.cf_flags = 0;
-        if (PyUnicode_Check(o)) {
+        if (PyUnicode_Check(o)) 
+{
             cf.cf_flags = PyCF_SOURCE_IS_UTF8;
             s = PyUnicode_AsUTF8String(o);
             if (!s) goto bad;
             o = s;
         #if PY_MAJOR_VERSION >= 3
-        } else if (!PyBytes_Check(o)) {
+        } else if (!PyBytes_Check(o)) 
+{
         #else
-        } else if (!PyString_Check(o)) {
+        } else if (!PyString_Check(o)) 
+{
         #endif
             PyErr_SetString(PyExc_TypeError,
                 "exec: arg 1 must be string, bytes or code object");
@@ -1898,9 +1958,11 @@ static PyObject* __Pyx_PyRun(PyObject* o, PyObject* globals, PyObject* locals) {
         #else
         code = PyString_AS_STRING(o);
         #endif
-        if (PyEval_MergeCompilerFlags(&cf)) {
+        if (PyEval_MergeCompilerFlags(&cf)) 
+{
             result = PyRun_StringFlags(code, Py_file_input, globals, locals, &cf);
-        } else {
+        } else 
+{
             result = PyRun_String(code, Py_file_input, globals, locals);
         }
         Py_XDECREF(s);
@@ -1913,31 +1975,38 @@ bad:
 }
 
 #if PY_MAJOR_VERSION < 3
-static PyObject *__Pyx_GetStdout(void) {
+static PyObject *__Pyx_GetStdout(void) 
+{
     PyObject *f = PySys_GetObject((char *)"stdout");
-    if (!f) {
+    if (!f) 
+{
         PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
     }
     return f;
 }
 
-static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
+static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) 
+{
     PyObject* v;
     int i;
 
-    if (!f) {
+    if (!f) 
+{
         if (!(f = __Pyx_GetStdout()))
             return -1;
     }
-    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
-        if (PyFile_SoftSpace(f, 1)) {
+    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) 
+{
+        if (PyFile_SoftSpace(f, 1)) 
+{
             if (PyFile_WriteString(" ", f) < 0)
                 return -1;
         }
         v = PyTuple_GET_ITEM(arg_tuple, i);
         if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
             return -1;
-        if (PyString_Check(v)) {
+        if (PyString_Check(v)) 
+{
             char *s = PyString_AsString(v);
             Py_ssize_t len = PyString_Size(v);
             if (len > 0 &&
@@ -1946,7 +2015,8 @@ static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
                     PyFile_SoftSpace(f, 0);
         }
     }
-    if (newline) {
+    if (newline) 
+{
         if (PyFile_WriteString("\n", f) < 0)
             return -1;
         PyFile_SoftSpace(f, 0);
@@ -1956,40 +2026,48 @@ static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
 
 #else /* Python 3 has a print function */
 
-static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
+static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) 
+{
     PyObject* kwargs = 0;
     PyObject* result = 0;
     PyObject* end_string;
-    if (unlikely(!__pyx_print)) {
+    if (unlikely(!__pyx_print)) 
+{
         __pyx_print = __Pyx_GetAttrString(__pyx_b, "print");
         if (!__pyx_print)
             return -1;
     }
-    if (stream) {
+    if (stream) 
+{
         kwargs = PyDict_New();
         if (unlikely(!kwargs))
             return -1;
         if (unlikely(PyDict_SetItemString(kwargs, "file", stream) < 0))
             goto bad;
-        if (!newline) {
+        if (!newline) 
+{
             end_string = PyUnicode_FromStringAndSize(" ", 1);
             if (unlikely(!end_string))
                 goto bad;
-            if (PyDict_SetItemString(kwargs, "end", end_string) < 0) {
+            if (PyDict_SetItemString(kwargs, "end", end_string) < 0) 
+{
                 Py_DECREF(end_string);
                 goto bad;
             }
             Py_DECREF(end_string);
         }
-    } else if (!newline) {
-        if (unlikely(!__pyx_print_kwargs)) {
+    } else if (!newline) 
+{
+        if (unlikely(!__pyx_print_kwargs)) 
+{
             __pyx_print_kwargs = PyDict_New();
             if (unlikely(!__pyx_print_kwargs))
                 return -1;
             end_string = PyUnicode_FromStringAndSize(" ", 1);
             if (unlikely(!end_string))
                 return -1;
-            if (PyDict_SetItemString(__pyx_print_kwargs, "end", end_string) < 0) {
+            if (PyDict_SetItemString(__pyx_print_kwargs, "end", end_string) < 0) 
+{
                 Py_DECREF(end_string);
                 return -1;
             }
@@ -2014,12 +2092,15 @@ bad:
 
 #if PY_MAJOR_VERSION < 3
 
-static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
-    if (!f) {
+static int __Pyx_PrintOne(PyObject* f, PyObject *o) 
+{
+    if (!f) 
+{
         if (!(f = __Pyx_GetStdout()))
             return -1;
     }
-    if (PyFile_SoftSpace(f, 0)) {
+    if (PyFile_SoftSpace(f, 0)) 
+{
         if (PyFile_WriteString(" ", f) < 0)
             return -1;
     }
@@ -2035,7 +2116,8 @@ static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
 
 #else /* Python 3 has a print function */
 
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o) 
+{
     int res;
     PyObject* arg_tuple = PyTuple_New(1);
     if (unlikely(!arg_tuple))
@@ -2049,7 +2131,8 @@ static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
 
 #endif
 
-static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb) {
+static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb) 
+{
     PyObject *tmp_type, *tmp_value, *tmp_tb;
     PyThreadState *tstate = PyThreadState_GET();
 
@@ -2064,7 +2147,8 @@ static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyOb
     Py_XDECREF(tmp_tb);
 }
 
-static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb) {
+static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb) 
+{
     PyThreadState *tstate = PyThreadState_GET();
     *type = tstate->curexc_type;
     *value = tstate->curexc_value;
@@ -2077,22 +2161,26 @@ static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyOb
 
 
 #if PY_MAJOR_VERSION < 3
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) 
+{
     Py_XINCREF(type);
     Py_XINCREF(value);
     Py_XINCREF(tb);
     /* First, check the traceback argument, replacing None with NULL. */
-    if (tb == Py_None) {
+    if (tb == Py_None) 
+{
         Py_DECREF(tb);
         tb = 0;
     }
-    else if (tb != NULL && !PyTraceBack_Check(tb)) {
+    else if (tb != NULL && !PyTraceBack_Check(tb)) 
+{
         PyErr_SetString(PyExc_TypeError,
             "raise: arg 3 must be a traceback or None");
         goto raise_error;
     }
     /* Next, replace a missing value with None */
-    if (value == NULL) {
+    if (value == NULL) 
+{
         value = Py_None;
         Py_INCREF(value);
     }
@@ -2101,9 +2189,10 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
     #else
     if (!PyType_Check(type))
     #endif
-    {
+{
         /* Raising an instance.  The value should be a dummy. */
-        if (value != Py_None) {
+        if (value != Py_None) 
+{
             PyErr_SetString(PyExc_TypeError,
                 "instance exception may not have a separate value");
             goto raise_error;
@@ -2112,11 +2201,13 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
         Py_DECREF(value);
         value = type;
         #if PY_VERSION_HEX < 0x02050000
-            if (PyInstance_Check(type)) {
+            if (PyInstance_Check(type)) 
+{
                 type = (PyObject*) ((PyInstanceObject*)type)->in_class;
                 Py_INCREF(type);
             }
-            else {
+            else 
+{
                 type = 0;
                 PyErr_SetString(PyExc_TypeError,
                     "raise: exception must be an old-style class or instance");
@@ -2125,7 +2216,8 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
         #else
             type = (PyObject*) Py_TYPE(type);
             Py_INCREF(type);
-            if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) {
+            if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) 
+{
                 PyErr_SetString(PyExc_TypeError,
                     "raise: exception class must be a subclass of BaseException");
                 goto raise_error;
@@ -2144,10 +2236,13 @@ raise_error:
 
 #else /* Python 3+ */
 
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
-    if (tb == Py_None) {
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) 
+{
+    if (tb == Py_None) 
+{
         tb = 0;
-    } else if (tb && !PyTraceBack_Check(tb)) {
+    } else if (tb && !PyTraceBack_Check(tb)) 
+{
         PyErr_SetString(PyExc_TypeError,
             "raise: arg 3 must be a traceback or None");
         goto bad;
@@ -2155,15 +2250,18 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
     if (value == Py_None)
         value = 0;
 
-    if (PyExceptionInstance_Check(type)) {
-        if (value) {
+    if (PyExceptionInstance_Check(type)) 
+{
+        if (value) 
+{
             PyErr_SetString(PyExc_TypeError,
                 "instance exception may not have a separate value");
             goto bad;
         }
         value = type;
         type = (PyObject*) Py_TYPE(value);
-    } else if (!PyExceptionClass_Check(type)) {
+    } else if (!PyExceptionClass_Check(type)) 
+{
         PyErr_SetString(PyExc_TypeError,
             "raise: exception class must be a subclass of BaseException");
         goto bad;
@@ -2171,10 +2269,12 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb) {
 
     PyErr_SetObject(type, value);
 
-    if (tb) {
+    if (tb) 
+{
         PyThreadState *tstate = PyThreadState_GET();
         PyObject* tmp_tb = tstate->curexc_traceback;
-        if (tb != tmp_tb) {
+        if (tb != tmp_tb) 
+{
             Py_INCREF(tb);
             tstate->curexc_traceback = tb;
             Py_XDECREF(tmp_tb);
@@ -2186,13 +2286,17 @@ bad:
 }
 #endif
 
-static CYTHON_INLINE unsigned char __Pyx_PyInt_AsUnsignedChar(PyObject* x) {
+static CYTHON_INLINE unsigned char __Pyx_PyInt_AsUnsignedChar(PyObject* x) 
+{
     const unsigned char neg_one = (unsigned char)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned char) < sizeof(long)) {
+    if (sizeof(unsigned char) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(unsigned char)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to unsigned char" :
@@ -2205,13 +2309,17 @@ static CYTHON_INLINE unsigned char __Pyx_PyInt_AsUnsignedChar(PyObject* x) {
     return (unsigned char)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE unsigned short __Pyx_PyInt_AsUnsignedShort(PyObject* x) {
+static CYTHON_INLINE unsigned short __Pyx_PyInt_AsUnsignedShort(PyObject* x) 
+{
     const unsigned short neg_one = (unsigned short)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned short) < sizeof(long)) {
+    if (sizeof(unsigned short) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(unsigned short)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to unsigned short" :
@@ -2224,13 +2332,17 @@ static CYTHON_INLINE unsigned short __Pyx_PyInt_AsUnsignedShort(PyObject* x) {
     return (unsigned short)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE unsigned int __Pyx_PyInt_AsUnsignedInt(PyObject* x) {
+static CYTHON_INLINE unsigned int __Pyx_PyInt_AsUnsignedInt(PyObject* x) 
+{
     const unsigned int neg_one = (unsigned int)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(unsigned int) < sizeof(long)) {
+    if (sizeof(unsigned int) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(unsigned int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(unsigned int)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to unsigned int" :
@@ -2243,13 +2355,17 @@ static CYTHON_INLINE unsigned int __Pyx_PyInt_AsUnsignedInt(PyObject* x) {
     return (unsigned int)__Pyx_PyInt_AsUnsignedLong(x);
 }
 
-static CYTHON_INLINE char __Pyx_PyInt_AsChar(PyObject* x) {
+static CYTHON_INLINE char __Pyx_PyInt_AsChar(PyObject* x) 
+{
     const char neg_one = (char)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(char) < sizeof(long)) {
+    if (sizeof(char) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(char)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to char" :
@@ -2262,13 +2378,17 @@ static CYTHON_INLINE char __Pyx_PyInt_AsChar(PyObject* x) {
     return (char)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE short __Pyx_PyInt_AsShort(PyObject* x) {
+static CYTHON_INLINE short __Pyx_PyInt_AsShort(PyObject* x) 
+{
     const short neg_one = (short)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(short) < sizeof(long)) {
+    if (sizeof(short) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(short)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to short" :
@@ -2281,13 +2401,17 @@ static CYTHON_INLINE short __Pyx_PyInt_AsShort(PyObject* x) {
     return (short)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE int __Pyx_PyInt_AsInt(PyObject* x) {
+static CYTHON_INLINE int __Pyx_PyInt_AsInt(PyObject* x) 
+{
     const int neg_one = (int)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(int) < sizeof(long)) {
+    if (sizeof(int) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(int)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to int" :
@@ -2300,13 +2424,17 @@ static CYTHON_INLINE int __Pyx_PyInt_AsInt(PyObject* x) {
     return (int)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE signed char __Pyx_PyInt_AsSignedChar(PyObject* x) {
+static CYTHON_INLINE signed char __Pyx_PyInt_AsSignedChar(PyObject* x) 
+{
     const signed char neg_one = (signed char)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed char) < sizeof(long)) {
+    if (sizeof(signed char) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed char)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(signed char)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to signed char" :
@@ -2319,13 +2447,17 @@ static CYTHON_INLINE signed char __Pyx_PyInt_AsSignedChar(PyObject* x) {
     return (signed char)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE signed short __Pyx_PyInt_AsSignedShort(PyObject* x) {
+static CYTHON_INLINE signed short __Pyx_PyInt_AsSignedShort(PyObject* x) 
+{
     const signed short neg_one = (signed short)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed short) < sizeof(long)) {
+    if (sizeof(signed short) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed short)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(signed short)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to signed short" :
@@ -2338,13 +2470,17 @@ static CYTHON_INLINE signed short __Pyx_PyInt_AsSignedShort(PyObject* x) {
     return (signed short)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE signed int __Pyx_PyInt_AsSignedInt(PyObject* x) {
+static CYTHON_INLINE signed int __Pyx_PyInt_AsSignedInt(PyObject* x) 
+{
     const signed int neg_one = (signed int)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(signed int) < sizeof(long)) {
+    if (sizeof(signed int) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(signed int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(signed int)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to signed int" :
@@ -2357,13 +2493,17 @@ static CYTHON_INLINE signed int __Pyx_PyInt_AsSignedInt(PyObject* x) {
     return (signed int)__Pyx_PyInt_AsSignedLong(x);
 }
 
-static CYTHON_INLINE int __Pyx_PyInt_AsLongDouble(PyObject* x) {
+static CYTHON_INLINE int __Pyx_PyInt_AsLongDouble(PyObject* x) 
+{
     const int neg_one = (int)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
-    if (sizeof(int) < sizeof(long)) {
+    if (sizeof(int) < sizeof(long)) 
+{
         long val = __Pyx_PyInt_AsLong(x);
-        if (unlikely(val != (long)(int)val)) {
-            if (!unlikely(val == -1 && PyErr_Occurred())) {
+        if (unlikely(val != (long)(int)val)) 
+{
+            if (!unlikely(val == -1 && PyErr_Occurred())) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                     (is_unsigned && unlikely(val < 0)) ?
                     "can't convert negative value to int" :
@@ -2376,13 +2516,16 @@ static CYTHON_INLINE int __Pyx_PyInt_AsLongDouble(PyObject* x) {
     return (int)__Pyx_PyInt_AsLong(x);
 }
 
-static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) {
+static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) 
+{
     const unsigned long neg_one = (unsigned long)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to unsigned long");
             return (unsigned long)-1;
@@ -2390,18 +2533,23 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) {
         return (unsigned long)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to unsigned long");
                 return (unsigned long)-1;
             }
             return PyLong_AsUnsignedLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLong(x);
         }
-    } else {
+    } else 
+{
         unsigned long val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (unsigned long)-1;
@@ -2411,13 +2559,16 @@ static CYTHON_INLINE unsigned long __Pyx_PyInt_AsUnsignedLong(PyObject* x) {
     }
 }
 
-static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObject* x) {
+static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObject* x) 
+{
     const unsigned PY_LONG_LONG neg_one = (unsigned PY_LONG_LONG)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to unsigned PY_LONG_LONG");
             return (unsigned PY_LONG_LONG)-1;
@@ -2425,18 +2576,23 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObje
         return (unsigned PY_LONG_LONG)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to unsigned PY_LONG_LONG");
                 return (unsigned PY_LONG_LONG)-1;
             }
             return PyLong_AsUnsignedLongLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLongLong(x);
         }
-    } else {
+    } else 
+{
         unsigned PY_LONG_LONG val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (unsigned PY_LONG_LONG)-1;
@@ -2446,13 +2602,16 @@ static CYTHON_INLINE unsigned PY_LONG_LONG __Pyx_PyInt_AsUnsignedLongLong(PyObje
     }
 }
 
-static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) {
+static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) 
+{
     const long neg_one = (long)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to long");
             return (long)-1;
@@ -2460,18 +2619,23 @@ static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) {
         return (long)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to long");
                 return (long)-1;
             }
             return PyLong_AsUnsignedLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLong(x);
         }
-    } else {
+    } else 
+{
         long val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (long)-1;
@@ -2481,13 +2645,16 @@ static CYTHON_INLINE long __Pyx_PyInt_AsLong(PyObject* x) {
     }
 }
 
-static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) {
+static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) 
+{
     const PY_LONG_LONG neg_one = (PY_LONG_LONG)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to PY_LONG_LONG");
             return (PY_LONG_LONG)-1;
@@ -2495,18 +2662,23 @@ static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) {
         return (PY_LONG_LONG)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to PY_LONG_LONG");
                 return (PY_LONG_LONG)-1;
             }
             return PyLong_AsUnsignedLongLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLongLong(x);
         }
-    } else {
+    } else 
+{
         PY_LONG_LONG val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (PY_LONG_LONG)-1;
@@ -2516,13 +2688,16 @@ static CYTHON_INLINE PY_LONG_LONG __Pyx_PyInt_AsLongLong(PyObject* x) {
     }
 }
 
-static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) {
+static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) 
+{
     const signed long neg_one = (signed long)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to signed long");
             return (signed long)-1;
@@ -2530,18 +2705,23 @@ static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) {
         return (signed long)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to signed long");
                 return (signed long)-1;
             }
             return PyLong_AsUnsignedLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLong(x);
         }
-    } else {
+    } else 
+{
         signed long val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (signed long)-1;
@@ -2551,13 +2731,16 @@ static CYTHON_INLINE signed long __Pyx_PyInt_AsSignedLong(PyObject* x) {
     }
 }
 
-static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* x) {
+static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* x) 
+{
     const signed PY_LONG_LONG neg_one = (signed PY_LONG_LONG)-1, const_zero = 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_VERSION_HEX < 0x03000000
-    if (likely(PyInt_Check(x))) {
+    if (likely(PyInt_Check(x))) 
+{
         long val = PyInt_AS_LONG(x);
-        if (is_unsigned && unlikely(val < 0)) {
+        if (is_unsigned && unlikely(val < 0)) 
+{
             PyErr_SetString(PyExc_OverflowError,
                             "can't convert negative value to signed PY_LONG_LONG");
             return (signed PY_LONG_LONG)-1;
@@ -2565,18 +2748,23 @@ static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* 
         return (signed PY_LONG_LONG)val;
     } else
 #endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-            if (unlikely(Py_SIZE(x) < 0)) {
+    if (likely(PyLong_Check(x))) 
+{
+        if (is_unsigned) 
+{
+            if (unlikely(Py_SIZE(x) < 0)) 
+{
                 PyErr_SetString(PyExc_OverflowError,
                                 "can't convert negative value to signed PY_LONG_LONG");
                 return (signed PY_LONG_LONG)-1;
             }
             return PyLong_AsUnsignedLongLong(x);
-        } else {
+        } else 
+{
             return PyLong_AsLongLong(x);
         }
-    } else {
+    } else 
+{
         signed PY_LONG_LONG val;
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (signed PY_LONG_LONG)-1;
@@ -2590,7 +2778,8 @@ static CYTHON_INLINE signed PY_LONG_LONG __Pyx_PyInt_AsSignedLongLong(PyObject* 
 #include "frameobject.h"
 #include "traceback.h"
 
-static void __Pyx_AddTraceback(const char *funcname) {
+static void __Pyx_AddTraceback(const char *funcname) 
+{
     PyObject *py_srcfile = 0;
     PyObject *py_funcname = 0;
     PyObject *py_globals = 0;
@@ -2603,14 +2792,16 @@ static void __Pyx_AddTraceback(const char *funcname) {
     py_srcfile = PyUnicode_FromString(__pyx_filename);
     #endif
     if (!py_srcfile) goto bad;
-    if (__pyx_clineno) {
+    if (__pyx_clineno) 
+{
         #if PY_MAJOR_VERSION < 3
         py_funcname = PyString_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
         #else
         py_funcname = PyUnicode_FromFormat( "%s (%s:%d)", funcname, __pyx_cfilenm, __pyx_clineno);
         #endif
     }
-    else {
+    else 
+{
         #if PY_MAJOR_VERSION < 3
         py_funcname = PyString_FromString(funcname);
         #else
@@ -2656,26 +2847,36 @@ bad:
     Py_XDECREF(py_frame);
 }
 
-static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) {
-    while (t->p) {
+static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) 
+{
+    while (t->p) 
+{
         #if PY_MAJOR_VERSION < 3
-        if (t->is_unicode) {
+        if (t->is_unicode) 
+{
             *t->p = PyUnicode_DecodeUTF8(t->s, t->n - 1, NULL);
-        } else if (t->intern) {
+        } else if (t->intern) 
+{
             *t->p = PyString_InternFromString(t->s);
-        } else {
+        } else 
+{
             *t->p = PyString_FromStringAndSize(t->s, t->n - 1);
         }
         #else  /* Python 3+ has unicode identifiers */
-        if (t->is_unicode | t->is_str) {
-            if (t->intern) {
+        if (t->is_unicode | t->is_str) 
+{
+            if (t->intern) 
+{
                 *t->p = PyUnicode_InternFromString(t->s);
-            } else if (t->encoding) {
+            } else if (t->encoding) 
+{
                 *t->p = PyUnicode_Decode(t->s, t->n - 1, t->encoding, NULL);
-            } else {
+            } else 
+{
                 *t->p = PyUnicode_FromStringAndSize(t->s, t->n - 1);
             }
-        } else {
+        } else 
+{
             *t->p = PyBytes_FromStringAndSize(t->s, t->n - 1);
         }
         #endif
@@ -2688,13 +2889,15 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) {
 
 /* Type Conversion Functions */
 
-static CYTHON_INLINE int __Pyx_PyObject_IsTrue(PyObject* x) {
+static CYTHON_INLINE int __Pyx_PyObject_IsTrue(PyObject* x) 
+{
    int is_true = x == Py_True;
    if (is_true | (x == Py_False) | (x == Py_None)) return is_true;
    else return PyObject_IsTrue(x);
 }
 
-static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) {
+static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) 
+{
   PyNumberMethods *m;
   const char *name = NULL;
   PyObject *res = NULL;
@@ -2706,25 +2909,31 @@ static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) {
     return Py_INCREF(x), x;
   m = Py_TYPE(x)->tp_as_number;
 #if PY_VERSION_HEX < 0x03000000
-  if (m && m->nb_int) {
+  if (m && m->nb_int) 
+{
     name = "int";
     res = PyNumber_Int(x);
   }
-  else if (m && m->nb_long) {
+  else if (m && m->nb_long) 
+{
     name = "long";
     res = PyNumber_Long(x);
   }
 #else
-  if (m && m->nb_int) {
+  if (m && m->nb_int) 
+{
     name = "int";
     res = PyNumber_Long(x);
   }
 #endif
-  if (res) {
+  if (res) 
+{
 #if PY_VERSION_HEX < 0x03000000
-    if (!PyInt_Check(res) && !PyLong_Check(res)) {
+    if (!PyInt_Check(res) && !PyLong_Check(res)) 
+{
 #else
-    if (!PyLong_Check(res)) {
+    if (!PyLong_Check(res)) 
+{
 #endif
       PyErr_Format(PyExc_TypeError,
                    "__%s__ returned non-%s (type %.200s)",
@@ -2733,14 +2942,16 @@ static CYTHON_INLINE PyObject* __Pyx_PyNumber_Int(PyObject* x) {
       return NULL;
     }
   }
-  else if (!PyErr_Occurred()) {
+  else if (!PyErr_Occurred()) 
+{
     PyErr_SetString(PyExc_TypeError,
                     "an integer is required");
   }
   return res;
 }
 
-static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
+static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) 
+{
   Py_ssize_t ival;
   PyObject* x = PyNumber_Index(b);
   if (!x) return -1;
@@ -2749,11 +2960,13 @@ static CYTHON_INLINE Py_ssize_t __Pyx_PyIndex_AsSsize_t(PyObject* b) {
   return ival;
 }
 
-static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) {
+static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) 
+{
 #if PY_VERSION_HEX < 0x02050000
    if (ival <= LONG_MAX)
        return PyInt_FromLong((long)ival);
-   else {
+   else 
+{
        unsigned char *bytes = (unsigned char *) &ival;
        int one = 1; int little = (int)*(unsigned char*)&one;
        return _PyLong_FromByteArray(bytes, sizeof(size_t), little, 0);
@@ -2763,11 +2976,14 @@ static CYTHON_INLINE PyObject * __Pyx_PyInt_FromSize_t(size_t ival) {
 #endif
 }
 
-static CYTHON_INLINE size_t __Pyx_PyInt_AsSize_t(PyObject* x) {
+static CYTHON_INLINE size_t __Pyx_PyInt_AsSize_t(PyObject* x) 
+{
    unsigned PY_LONG_LONG val = __Pyx_PyInt_AsUnsignedLongLong(x);
-   if (unlikely(val == (unsigned PY_LONG_LONG)-1 && PyErr_Occurred())) {
+   if (unlikely(val == (unsigned PY_LONG_LONG)-1 && PyErr_Occurred())) 
+{
        return (size_t)-1;
-   } else if (unlikely(val != (unsigned PY_LONG_LONG)(size_t)val)) {
+   } else if (unlikely(val != (unsigned PY_LONG_LONG)(size_t)val)) 
+{
        PyErr_SetString(PyExc_OverflowError,
                        "value too large to convert to size_t");
        return (size_t)-1;

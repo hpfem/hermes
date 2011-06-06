@@ -60,7 +60,7 @@ protected:
     int num_elem;
   };
 
-  Vectorizer vec;
+  Vectorizer<Scalar> vec;
   double max_mag;
   bool lines, pmode;
 

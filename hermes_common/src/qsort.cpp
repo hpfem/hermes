@@ -71,10 +71,10 @@ void qsort_int(int* pbase, size_t total_elems)
       if (*hi < *mid)
         SWAP (mid, hi)
       else
-        goto jump_over;
+      goto jump_over;
       if (*mid < *lo)
         SWAP(mid, lo);
-      jump_over:
+jump_over:
 
       left_ptr  = lo + 1;
       right_ptr = hi - 1;
@@ -146,7 +146,6 @@ void qsort_int(int* pbase, size_t total_elems)
   // for partitions below MAX_THRESH size. BASE_PTR points to the beginning
   // of the array to sort, and END_PTR points at the very last element in
   // the array (*not* one beyond it!).
-
   {
     int *const end_ptr = base_ptr + total_elems - 1;
     int *tmp_ptr = base_ptr;
@@ -189,21 +188,21 @@ void qsort_int(int* pbase, size_t total_elems)
 
 /* test code
 
-  const int max = 10000;
-  int array[max];
-  int i, j, n;
-  for (i = 0; i < 1000; i++)
-  {
-    n = rand() % max;
-    for (j = 0; j < n; j++)
-      array[j] = j;
-    for (j = 0; j < n; j++)
-      swap(array[j], array[rand() % n]);
-    qsort_int(array, n);
-    for (j = 0; j < n; j++)
-      if (array[j] != j)
-        error("failed.");
-  }
-  info("passed");
+const int max = 10000;
+int array[max];
+int i, j, n;
+for (i = 0; i < 1000; i++)
+{
+n = rand() % max;
+for (j = 0; j < n; j++)
+array[j] = j;
+for (j = 0; j < n; j++)
+swap(array[j], array[rand() % n]);
+qsort_int(array, n);
+for (j = 0; j < n; j++)
+if (array[j] != j)
+error("failed.");
+}
+info("passed");
 
 */

@@ -33,30 +33,30 @@ using namespace RefinementSelectors;
 // The following parameters can be changed:
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
-                                                  // discontinuous L2 elements (making the velocity discreetely
-                                                  // divergence-free, more accurate than using a continuous
-                                                  // pressure approximation). Otherwise the standard continuous
-                                                  // elements are used. The results are striking - check the
-                                                  // tutorial for comparisons.
+// discontinuous L2 elements (making the velocity discreetely
+// divergence-free, more accurate than using a continuous
+// pressure approximation). Otherwise the standard continuous
+// elements are used. The results are striking - check the
+// tutorial for comparisons.
 const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
-                                                  // in every time step. Otherwise the convective term is linearized
-                                                  // using the velocities from the previous time step.
+// in every time step. Otherwise the convective term is linearized
+// using the velocities from the previous time step.
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
-                                                  // Note: P_INIT_VEL should always be greater than
-                                                  // P_INIT_PRESSURE because of the inf-sup condition.
+// Note: P_INIT_VEL should always be greater than
+// P_INIT_PRESSURE because of the inf-sup condition.
 const double RE = 200.0;                          // Reynolds number.
 const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
 const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
-                                                  // from 0 to VEL_INLET, then it stays constant.
+// from 0 to VEL_INLET, then it stays constant.
 const double TAU = 0.1;                           // Time step.
 const double T_FINAL = 30000.0;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
-                                                  // velocity profile at inlet).
+// velocity profile at inlet).
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -151,13 +151,14 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
-  if (NEWTON) {
+  Scalar* coeff_vec = new Scalar[Space::get_num_dofs(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space))];
+  if (NEWTON) 
+  {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
     OGProjection::project_global(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                   Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-                   coeff_vec, matrix_solver, 
-                   Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+      Hermes::vector<MeshFunction *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+      coeff_vec, matrix_solver, 
+      Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -169,7 +170,8 @@ int main(int argc, char* argv[])
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME) {
+    if (current_time <= STARTUP_TIME) 
+    {
       info("Updating time-dependent essential BC.");
       Space::update_essential_bc_values(Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
@@ -179,20 +181,21 @@ int main(int argc, char* argv[])
       info("Solving nonlinear problem:");
       bool verbose = true;
       if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-          NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
 
       // Update previous time level solutions.
       Solution::vector_to_solutions(coeff_vec, Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                                    Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
     }
-    else {
+    else 
+    {
       // Linear solve.
       info("Assembling and solving linear problem.");
       dp.assemble(matrix, rhs, false);
       if(solver->solve()) 
         Solution::vector_to_solutions(solver->get_solution(), 
-                  Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
-                  Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+        Hermes::vector<Space *>(&xvel_space, &yvel_space, &p_space), 
+        Hermes::vector<Solution *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
       else 
         error ("Matrix solver failed.\n");
     }
@@ -204,13 +207,13 @@ int main(int argc, char* argv[])
     sprintf(title, "Pressure, time %g", current_time);
     pview.set_title(title);
     pview.show(&p_prev_time);
- }
+  }
 
   delete [] coeff_vec;
   delete matrix;
   delete rhs;
   delete solver;
-  
+
   // Wait for all views to be closed.
   View::wait();
   return 0;

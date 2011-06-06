@@ -33,10 +33,6 @@ set(SRC
    function/solution.cpp 
    function/filter.cpp
 	   
-   linearizer/linear1.cpp 
-   linearizer/linear2.cpp 
-   linearizer/linear3.cpp 
-
    mesh/refmap.cpp 
    mesh/curved.cpp
    mesh/refinement_type.cpp 
@@ -88,6 +84,9 @@ set(SRC
    views/view.cpp 
    views/view_data.cpp 
    views/view_support.cpp
+   views/linearizer.cpp
+   views/orderizer.cpp
+   views/vectorizer.cpp
 
    weakform/weakform.cpp 
 

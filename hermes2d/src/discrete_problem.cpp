@@ -25,7 +25,7 @@
 #include "function/solution.h"
 #include "config.h"
 #include "neighbor.h"
-#include "views/scalar_view.h"
+#include "views/Scalar_view.h"
 #include "base_view.h"
 #include "boundary_conditions/essential_bcs.h"
 
@@ -72,7 +72,8 @@ void DiscreteProblem<Scalar>::init()
   pss = new PrecalcShapeset*[wf->get_neq()];
   for (unsigned int i = 0; i < wf->get_neq(); i++) pss[i] = NULL;
   num_user_pss = 0;
-  for (unsigned int i = 0; i < wf->get_neq(); i++){
+  for (unsigned int i = 0; i < wf->get_neq(); i++)
+  {
     Shapeset *shapeset = spaces[i]->get_shapeset();
     if (shapeset == NULL) error("Internal in DiscreteProblem<Scalar>::init_spaces().");
     PrecalcShapeset *p = new PrecalcShapeset(shapeset);
@@ -108,7 +109,8 @@ DiscreteProblem<Scalar>::~DiscreteProblem()
   _F_;
   free();
   if (sp_seq != NULL) delete [] sp_seq;
-  if (pss != NULL) {
+  if (pss != NULL) 
+  {
     for(int i = 0; i < num_user_pss; i++)
       delete pss[i];
     delete [] pss;
@@ -155,8 +157,10 @@ bool DiscreteProblem<Scalar>::is_up_to_date()
   bool up_to_date = true;
   if (!have_matrix) up_to_date = false;
 
-  for (unsigned int i = 0; i < wf->get_neq(); i++) {
-    if (spaces[i]->get_seq() != sp_seq[i]) {
+  for (unsigned int i = 0; i < wf->get_neq(); i++) 
+  {
+    if (spaces[i]->get_seq() != sp_seq[i]) 
+    {
       up_to_date = false;
       break;
     }
@@ -188,26 +192,34 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
   // For DG, the sparse structure is different as we have to 
   // account for over-edge calculations.
   bool is_DG = false;
-  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) {
-    if(this->wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++) 
+  {
+    if(this->wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       is_DG = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++) {
-    if(this->wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++) 
+  {
+    if(this->wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       is_DG = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < this->wf->mfsurf_mc.size(); i++) {
-    if(this->wf->mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < this->wf->mfsurf_mc.size(); i++) 
+  {
+    if(this->wf->mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       is_DG = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < this->wf->vfsurf_mc.size(); i++) {
-    if(this->wf->vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < this->wf->vfsurf_mc.size(); i++) 
+  {
+    if(this->wf->vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       is_DG = true;
       break;
     }
@@ -234,14 +246,17 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
 
     // Loop through all elements.
     Element **e;
-    while ((e = trav.get_next_state(NULL, NULL)) != NULL) {
+    while ((e = trav.get_next_state(NULL, NULL)) != NULL) 
+    {
       // Obtain assembly lists for the element at all spaces.
-      for (unsigned int i = 0; i < wf->get_neq(); i++) {
+      for (unsigned int i = 0; i < wf->get_neq(); i++) 
+      {
         // TODO: do not get the assembly list again if the element was not changed.
         if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], &(al[i]));
       }
 
-      if(is_DG) {
+      if(is_DG) 
+      {
         // Number of edges (= number of vertices).
         int num_edges = e[0]->get_num_surf();
 
@@ -256,13 +271,15 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
           neighbor_elems_counts[i] = new int [num_edges];
 
         // Get the neighbors.
-        for(unsigned int el = 0; el < wf->get_neq(); el++) {
+        for(unsigned int el = 0; el < wf->get_neq(); el++) 
+        {
           NeighborSearch<Scalar> ns(e[el], meshes[el]);
 
           // Ignoring errors (and doing nothing) in case the edge is a boundary one.
           ns.set_ignore_errors(true);
 
-          for(int ed = 0; ed < num_edges; ed++) {
+          for(int ed = 0; ed < num_edges; ed++) 
+          {
             ns.set_active_edge(ed);
             std::vector<Element *> *neighbors = ns.get_neighbors();
 
@@ -274,31 +291,42 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
         }
 
         // Pre-add into the stiffness matrix.
-        for (unsigned int m = 0; m < wf->get_neq(); m++) {
-          for(unsigned int el = 0; el < wf->get_neq(); el++) {
+        for (unsigned int m = 0; m < wf->get_neq(); m++) 
+        {
+          for(unsigned int el = 0; el < wf->get_neq(); el++) 
+          {
 
             // Do not include blocks with zero weight except if
             // (force_diagonal_blocks == true && this is a diagonal block).
             bool is_diagonal_block = (m == el);
-            if (is_diagonal_block == false || force_diagonal_blocks == false) {
-              if (block_weights != NULL) {
+            if (is_diagonal_block == false || force_diagonal_blocks == false) 
+            {
+              if (block_weights != NULL) 
+              {
                 if (fabs(block_weights->get_A(m, el)) < 1e-12) continue;
               }
             }
 
-            for(int ed = 0; ed < num_edges; ed++) {
-              for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++) {
-                if ((blocks[m][el] || blocks[el][m]) && e[m] != NULL)  {
+            for(int ed = 0; ed < num_edges; ed++) 
+            {
+              for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++) 
+              {
+                if ((blocks[m][el] || blocks[el][m]) && e[m] != NULL)  
+                {
                   AsmList<Scalar>*am = &(al[m]);
                   AsmList<Scalar>*an = new AsmList<Scalar>;
                   spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
 
                   // pretend assembling of the element stiffness matrix
                   // register nonzero elements
-                  for (unsigned int i = 0; i < am->cnt; i++) {
-                    if (am->dof[i] >= 0) {
-                      for (unsigned int j = 0; j < an->cnt; j++) {
-                        if (an->dof[j] >= 0) {
+                  for (unsigned int i = 0; i < am->cnt; i++) 
+                  {
+                    if (am->dof[i] >= 0) 
+                    {
+                      for (unsigned int j = 0; j < an->cnt; j++) 
+                      {
+                        if (an->dof[j] >= 0) 
+                        {
                           if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
                           if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
                         }
@@ -314,7 +342,8 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
 
         // Deallocation an array of arrays of neighboring elements 
         // for every mesh x edge.
-        for(unsigned int el = 0; el < wf->get_neq(); el++) {
+        for(unsigned int el = 0; el < wf->get_neq(); el++) 
+        {
           for(int ed = 0; ed < num_edges; ed++)
             delete [] neighbor_elems_arrays[el][ed];
           delete [] neighbor_elems_arrays[el];
@@ -328,27 +357,36 @@ void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat,
       }
 
       // Go through all equation-blocks of the local stiffness matrix.
-      for (unsigned int m = 0; m < wf->get_neq(); m++) {
-        for (unsigned int n = 0; n < wf->get_neq(); n++) {
+      for (unsigned int m = 0; m < wf->get_neq(); m++) 
+      {
+        for (unsigned int n = 0; n < wf->get_neq(); n++) 
+        {
 
           // Do not include blocks with zero weight except if
           // (force_diagonal_blocks == true && this is a diagonal block).
           bool is_diagonal_block = (m == n);
-          if (is_diagonal_block == false || force_diagonal_blocks == false) {
-            if (block_weights != NULL) {
+          if (is_diagonal_block == false || force_diagonal_blocks == false) 
+          {
+            if (block_weights != NULL) 
+            {
               if (fabs(block_weights->get_A(m, n)) < 1e-12) continue;
             }
           }
 
-          if (blocks[m][n] && e[m] != NULL && e[n] != NULL) {
+          if (blocks[m][n] && e[m] != NULL && e[n] != NULL) 
+          {
             AsmList<Scalar>*am = &(al[m]);
             AsmList<Scalar>*an = &(al[n]);
 
             // Pretend assembling of the element stiffness matrix.
-            for (unsigned int i = 0; i < am->cnt; i++) {
-              if (am->dof[i] >= 0) {
-                for (unsigned int j = 0; j < an->cnt; j++) {
-                  if (an->dof[j] >= 0) {
+            for (unsigned int i = 0; i < am->cnt; i++) 
+            {
+              if (am->dof[i] >= 0) 
+              {
+                for (unsigned int j = 0; j < an->cnt; j++) 
+                {
+                  if (an->dof[j] >= 0) 
+                  {
                     mat->pre_add_ij(am->dof[i], an->dof[j]);
                   }
                 }
@@ -410,8 +448,10 @@ void DiscreteProblem<Scalar>::convert_coeff_vec(Scalar* coeff_vec, Hermes::vecto
   bool add_dir_lift) 
 {
   _F_;
-  if (coeff_vec != NULL) {
-    for (unsigned int i = 0; i < wf->get_neq(); i++) {
+  if (coeff_vec != NULL) 
+  {
+    for (unsigned int i = 0; i < wf->get_neq(); i++) 
+    {
       Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
       Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift);
       u_ext.push_back(external_solution_i);
@@ -426,7 +466,8 @@ template<typename Scalar>
 void DiscreteProblem<Scalar>::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss) 
 {
   _F_;
-  for (unsigned int i = 0; i < wf->get_neq(); i++) {
+  for (unsigned int i = 0; i < wf->get_neq(); i++) 
+  {
     spss.push_back(new PrecalcShapeset(pss[i]));
     spss[i]->set_quad_2d(&g_quad_2d_std);
   }
@@ -436,7 +477,8 @@ template<typename Scalar>
 void DiscreteProblem<Scalar>::initialize_refmaps(Hermes::vector<RefMap *>& refmap) 
 {
   _F_;
-  for (unsigned int i = 0; i < wf->get_neq(); i++) {
+  for (unsigned int i = 0; i < wf->get_neq(); i++) 
+  {
     refmap.push_back(new RefMap());
     refmap[i]->set_quad_2d(&g_quad_2d_std);
   }
@@ -542,26 +584,34 @@ void DiscreteProblem<Scalar>::assemble_one_stage(Stage<Scalar>& stage,
   // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
   DG_matrix_forms_present = false;
   DG_vector_forms_present = false;
-  for(unsigned int i = 0; i < stage.mfsurf.size(); i++) {
-    if (stage.mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < stage.mfsurf.size(); i++) 
+  {
+    if (stage.mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       DG_matrix_forms_present = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < stage.vfsurf.size(); i++) {
-    if (stage.vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < stage.vfsurf.size(); i++) 
+  {
+    if (stage.vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       DG_vector_forms_present = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < stage.mfsurf_mc.size(); i++) {
-    if (stage.mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < stage.mfsurf_mc.size(); i++) 
+  {
+    if (stage.mfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       DG_matrix_forms_present = true;
       break;
     }
   }
-  for(unsigned int i = 0; i < stage.vfsurf_mc.size(); i++) {
-    if (stage.vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) {
+  for(unsigned int i = 0; i < stage.vfsurf_mc.size(); i++) 
+  {
+    if (stage.vfsurf_mc[i]->areas[0] == H2D_DG_INNER_EDGE) 
+    {
       DG_vector_forms_present = true;
       break;
     }
@@ -587,7 +637,8 @@ void DiscreteProblem<Scalar>::assemble_one_stage(Stage<Scalar>& stage,
     rhs->finish();
   trav.finish();
 
-  if(DG_matrix_forms_present || DG_vector_forms_present) {
+  if(DG_matrix_forms_present || DG_vector_forms_present) 
+  {
     Element* element_to_set_nonvisited;
     for(unsigned int mesh_i = 0; mesh_i < stage.meshes.size(); mesh_i++)
       for_all_elements(element_to_set_nonvisited, stage.meshes[mesh_i])
@@ -615,9 +666,11 @@ Element* DiscreteProblem<Scalar>::init_state(Stage<Scalar>& stage, Hermes::vecto
   // NOTE: Active elements and transformations for external functions (including the solutions from previous
   // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in
   // trav.get_next_state(...).
-  for (unsigned int i = 0; i < stage.idx.size(); i++) {
+  for (unsigned int i = 0; i < stage.idx.size(); i++) 
+  {
     int j = stage.idx[i];
-    if (e[i] == NULL) {
+    if (e[i] == NULL) 
+    {
       isempty[j] = true;
       continue;
     }
@@ -681,11 +734,13 @@ void DiscreteProblem<Scalar>::assemble_one_state(Stage<Scalar>& stage,
     rep_element->marker, al);
 
   /// Assemble volume vector forms.
-  if (rhs != NULL) {
+  if (rhs != NULL) 
+  {
     assemble_volume_vector_forms(stage, mat, rhs, force_diagonal_blocks,
       block_weights, spss, refmap, u_ext, isempty,
       rep_element->marker, al);
-    if(!stage.vfvol_mc.empty()) {
+    if(!stage.vfvol_mc.empty()) 
+    {
       assemble_multicomponent_volume_vector_forms(stage, mat, rhs, force_diagonal_blocks,
         block_weights, spss, refmap, u_ext, isempty,
         rep_element->marker, al);
@@ -693,7 +748,8 @@ void DiscreteProblem<Scalar>::assemble_one_state(Stage<Scalar>& stage,
   }
 
   // Assemble surface integrals now: loop through surfaces of the element.
-  for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++) {
+  for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++) 
+  {
     assemble_surface_integrals(stage, mat, rhs, force_diagonal_blocks,
       block_weights, spss, refmap, u_ext, isempty,
       surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf],
@@ -716,7 +772,8 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
   int marker, Hermes::vector<AsmList<Scalar>*>& al)
 {
   _F_;
-  for (unsigned ww = 0; ww < stage.mfvol.size(); ww++) {
+  for (unsigned ww = 0; ww < stage.mfvol.size(); ww++) 
+  {
     MatrixFormVol<Scalar>* mfv = stage.mfvol[ww];
     int m = mfv->i;
     int n = mfv->j;
@@ -726,8 +783,10 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
     // Assemble this form only if one of its areas is HERMES_ANY
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) {
-      if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
+    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) 
+    {
+      if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) 
+      {
         assemble_this_form = true;
         break;
       }
@@ -738,7 +797,8 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
     double block_scaling_coeff = 1.;
-    if (block_weights != NULL) {
+    if (block_weights != NULL) 
+    {
       block_scaling_coeff = block_weights->get_A(m, n);
       if (fabs(block_scaling_coeff) < 1e-12)
         continue;
@@ -750,19 +810,25 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
     Scalar **local_stiffness_matrix = NULL;
     local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (!tra && al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
       // Unsymmetric block.
-      if (!sym) {
-        for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      if (!sym) 
+      {
+        for (unsigned int j = 0; j < al[n]->cnt; j++) 
+        {
           pss[n]->set_active_shape(al[n]->idx[j]);
-          if (al[n]->dof[j] >= 0) {
-            if (mat != NULL) {  
+          if (al[n]->dof[j] >= 0) 
+          {
+            if (mat != NULL) 
+            {
               Scalar val = 0;
               // Numerical integration performed only if all 
               // coefficients multiplying the form are nonzero.
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) 
+              {
                 val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
                   refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
               }
@@ -772,12 +838,16 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
         }
       }
       // Symmetric block.
-      else {
-        for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      else 
+      {
+        for (unsigned int j = 0; j < al[n]->cnt; j++) 
+        {
           if (j < i && al[n]->dof[j] >= 0) continue;
           pss[n]->set_active_shape(al[n]->idx[j]);
-          if (al[n]->dof[j] >= 0) { 
-            if (mat != NULL) {
+          if (al[n]->dof[j] >= 0) 
+          {
+            if (mat != NULL) 
+            {
 
               Scalar val = 0;
               // Numerical integration performed only if all coefficients 
@@ -792,12 +862,14 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
       }
 
       // Insert the local stiffness matrix into the global one.
-      if (mat != NULL) {
+      if (mat != NULL) 
+      {
         mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
       }
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if (tra) {
+      if (tra) 
+      {
         if (mfv->sym < 0)
           chsgn(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
@@ -818,18 +890,21 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_volume_matrix_forms(Stage<
   int marker, Hermes::vector<AsmList<Scalar>*>& al)
 {
   _F_;
-  for (unsigned ww = 0; ww < stage.mfvol_mc.size(); ww++) {
+  for (unsigned ww = 0; ww < stage.mfvol_mc.size(); ww++) 
+  {
     MultiComponentMatrixFormVol<Scalar>* mfv = stage.mfvol_mc[ww];
     if(fabs(mfv->scaling_factor) < 1e-12) continue;
 
     // Assemble this form only if one of its areas is HERMES_ANY
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < mfv->areas.size(); ss++) 
+    {
       if ((mfv->areas[ss] == HERMES_ANY) || 
-        (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) {
-          assemble_this_form = true;
-          break;
+        (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss]))) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue;
@@ -853,19 +928,26 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_volume_matrix_forms(Stage<
         if(mfv->coordinates[coordinate_i].first != mfv->coordinates[coordinate_i].second)
           error("Symmetric multicomponent forms must take both the basis function and the test function from the same space.");
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       spss[m]->set_active_shape(al[m]->idx[i]);
       if(al[m]->dof[i] < 0 && mfv->sym == HERMES_NONSYM)
         continue;
-      if(mfv->sym == HERMES_NONSYM) {
-        for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      if(mfv->sym == HERMES_NONSYM) 
+      {
+        for (unsigned int j = 0; j < al[n]->cnt; j++) 
+        {
           pss[n]->set_active_shape(al[n]->idx[j]);
-          if (al[n]->dof[j] >= 0) {
-            if (mat != NULL) {
-              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+          if (al[n]->dof[j] >= 0) 
+          {
+            if (mat != NULL) 
+            {
+              if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) 
+              {
                 Hermes::vector<Scalar> result;
                 eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) 
+                {
                   mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], al[mfv->coordinates[coordinate_i].second]->dof[j],
                     result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
                 }
@@ -874,18 +956,25 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_volume_matrix_forms(Stage<
           }
         }
       }
-      else {
-        for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      else 
+      {
+        for (unsigned int j = 0; j < al[n]->cnt; j++) 
+        {
           if(j < i && al[n]->dof[j] >= 0) continue;
           pss[n]->set_active_shape(al[n]->idx[j]);
 
-          if (al[n]->dof[j] >= 0) {
-            if (al[m]->dof[i] >= 0) {
-              if (mat != NULL) {
-                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+          if (al[n]->dof[j] >= 0) 
+          {
+            if (al[m]->dof[i] >= 0) 
+            {
+              if (mat != NULL) 
+              {
+                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) 
+                {
                   Hermes::vector<Scalar> result;
                   eval_form(mfv, u_ext, pss[n], spss[m], refmap[n], refmap[m], result);
-                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) {
+                  for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++) 
+                  {
                     mat->add(al[mfv->coordinates[coordinate_i].first]->dof[i], 
                       al[mfv->coordinates[coordinate_i].second]->dof[j],
                       result[coordinate_i] * block_scaling_coeffs[coordinate_i] * al[n]->coef[j] * al[m]->coef[i]);
@@ -915,7 +1004,8 @@ void DiscreteProblem<Scalar>::assemble_volume_vector_forms(Stage<Scalar>& stage,
 
   if(rhs == NULL)
     return;
-  for (unsigned int ww = 0; ww < stage.vfvol.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfvol.size(); ww++) 
+  {
     VectorFormVol<Scalar>* vfv = stage.vfvol[ww];
     int m = vfv->i;
     if (isempty[vfv->i]) continue;
@@ -924,23 +1014,27 @@ void DiscreteProblem<Scalar>::assemble_volume_vector_forms(Stage<Scalar>& stage,
     // Assemble this form only if one of its areas is HERMES_ANY
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) 
+    {
       if ((vfv->areas[ss] == HERMES_ANY) || 
-        (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
-          assemble_this_form = true;
-          break;
+        (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue;
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
 
       spss[m]->set_active_shape(al[m]->idx[i]);
 
       // Numerical integration performed only if the coefficient 
       // multiplying the form is nonzero.
-      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+      if (std::abs(al[m]->coef[i]) > 1e-12) 
+      {
         rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
       }
     }
@@ -957,32 +1051,37 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_volume_vector_forms(Stage<
 
   if (rhs == NULL) return;
 
-  for (unsigned int ww = 0; ww < stage.vfvol_mc.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfvol_mc.size(); ww++) 
+  {
     MultiComponentVectorFormVol<Scalar>* vfv = stage.vfvol_mc[ww];
     if (fabs(vfv->scaling_factor) < 1e-12) continue;
 
     // Assemble this form only if one of its areas is HERMES_ANY
     // of if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < vfv->areas.size(); ss++) 
+    {
       if ((vfv->areas[ss] == HERMES_ANY) || 
-        (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) {
-          assemble_this_form = true;
-          break;
+        (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss]))) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue; 
 
     unsigned int m = vfv->coordinates[0];
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
 
       spss[m]->set_active_shape(al[m]->idx[i]);
 
       // Numerical integration performed only if the coefficient 
       // multiplying the form is nonzero.
-      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+      if (std::abs(al[m]->coef[i]) > 1e-12) 
+      {
         Hermes::vector<Scalar> result;
         eval_form(vfv, u_ext, spss[m], refmap[m], result);
         for(unsigned int coordinate_i = 0; coordinate_i < vfv->coordinates.size(); coordinate_i++)
@@ -1004,11 +1103,13 @@ void DiscreteProblem<Scalar>::assemble_surface_integrals(Stage<Scalar>& stage,
 {
   _F_;
   // Obtain the list of shape functions which are nonzero on this surface.
-  for (unsigned int i = 0; i < stage.idx.size(); i++) {
+  for (unsigned int i = 0; i < stage.idx.size(); i++) 
+  {
     int j = stage.idx[i];
     if (isempty[j])
       continue;
-    if(marker > 0) {
+    if(marker > 0) 
+    {
       nat[j] = true;
       if(spaces[j]->get_essential_bcs() != NULL)
         if(spaces[j]->get_essential_bcs()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker)) != NULL)
@@ -1018,7 +1119,8 @@ void DiscreteProblem<Scalar>::assemble_surface_integrals(Stage<Scalar>& stage,
   }
 
   // Assemble boundary edges: 
-  if(bnd == 1) {
+  if(bnd == 1) 
+  {
     assemble_surface_matrix_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, 
       spss, refmap, u_ext, isempty, 
       marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
@@ -1026,7 +1128,8 @@ void DiscreteProblem<Scalar>::assemble_surface_integrals(Stage<Scalar>& stage,
       assemble_multicomponent_surface_matrix_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, 
       spss, refmap, u_ext, isempty, 
       marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
-    if (rhs != NULL) {
+    if (rhs != NULL) 
+    {
       assemble_surface_vector_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, 
         spss, refmap, u_ext, isempty, 
         marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
@@ -1076,7 +1179,8 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
   // Also check that every NeighborSearch has the same number of neighbor elements.
   unsigned int num_neighbors = 0;
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
-    if(neighbor_searches.present(i)) {
+    if(neighbor_searches.present(i)) 
+    {
       NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
       update_neighbor_search(ns, root);
       if(num_neighbors == 0)
@@ -1093,7 +1197,8 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
     // Initialize neighbor precalc shapesets and refmaps.      
     // This is only needed when there are matrix DG forms present.
     if(DG_matrix_forms_present)
-      for (unsigned int i = 0; i < stage.idx.size(); i++) {
+      for (unsigned int i = 0; i < stage.idx.size(); i++) 
+      {
         PrecalcShapeset* new_ps = new PrecalcShapeset(pss[i]->get_shapeset());
         new_ps->set_quad_2d(&g_quad_2d_std);
         npss.insert(std::pair<unsigned int, PrecalcShapeset*>(stage.idx[i], new_ps));
@@ -1107,14 +1212,16 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
         nrefmap.insert(std::pair<unsigned int, RefMap*>(stage.idx[i], new_rm));
       }
 
-      for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) {
+      for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++) 
+      {
         // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
         // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
         // will be marked as visited, even though the edge was not calculated.
         bool processed = true;
         for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
           if(neighbor_searches.present(i))
-            if(!neighbor_searches.get(i)->neighbors.at(neighbor_i)->visited) {
+            if(!neighbor_searches.get(i)->neighbors.at(neighbor_i)->visited) 
+            {
               processed = false;
               break;
             }
@@ -1124,7 +1231,8 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
 
             // For every neighbor we want to delete the geometry caches and create new ones.
             for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
-              if (cache_e[i] != NULL) {
+              if (cache_e[i] != NULL) 
+              {
                 cache_e[i]->free(); 
                 delete cache_e[i];
                 cache_e[i] = NULL;
@@ -1141,7 +1249,8 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
       delete root;
 
       // Deinitialize neighbor pss's, refmaps.
-      if(DG_matrix_forms_present) {
+      if(DG_matrix_forms_present) 
+      {
         for(std::map<unsigned int, PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
           delete it->second;
         for(std::map<unsigned int, PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
@@ -1160,15 +1269,16 @@ void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
 template<typename Scalar>
 void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, Stage<Scalar>& stage, 
   SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-       Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
-       std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+  Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
+  std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
+  Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
   int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_;
   // Set the active segment in all NeighborSearches
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
-    if(neighbor_searches.present(i)) {
+    if(neighbor_searches.present(i)) 
+    {
       neighbor_searches.get(i)->active_segment = neighbor_i;
       neighbor_searches.get(i)->neighb_el = neighbor_searches.get(i)->neighbors[neighbor_i];
       neighbor_searches.get(i)->neighbor_edge = neighbor_searches.get(i)->neighbor_edges[neighbor_i];
@@ -1182,21 +1292,24 @@ void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsi
 
     // For neighbor psss.
     if(DG_matrix_forms_present && !edge_processed)
-      for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) {
+      for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++) 
+      {
         npss[stage.idx[idx_i]]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->get_neighbors())[neighbor_i]);
         for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_n_trans[neighbor_i]; trf_i++)
           npss[stage.idx[idx_i]]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_transformations[neighbor_i][trf_i]);
       }
 
       // Also push the transformations to the slave psss and refmaps.
-      for (unsigned int i = 0; i < stage.idx.size(); i++) {
+      for (unsigned int i = 0; i < stage.idx.size(); i++) 
+      {
         if(isempty[stage.idx[i]])
           continue;
         spss[stage.idx[i]]->set_master_transform();
         refmap[stage.idx[i]]->force_transform(pss[stage.idx[i]]->get_transform(), pss[stage.idx[i]]->get_ctm());
 
         // Neighbor.
-        if(DG_matrix_forms_present && !edge_processed) {
+        if(DG_matrix_forms_present && !edge_processed) 
+        {
           nspss[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
           nspss[stage.idx[i]]->set_master_transform();
           nrefmap[stage.idx[i]]->set_active_element(npss[stage.idx[i]]->get_active_element());
@@ -1207,14 +1320,16 @@ void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsi
       /***/
 
       // The computation takes place here.
-      if(DG_matrix_forms_present && !edge_processed) {
+      if(DG_matrix_forms_present && !edge_processed) 
+      {
         assemble_DG_matrix_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
           marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
         if(!stage.mfsurf_mc.empty())
           assemble_multicomponent_DG_matrix_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, spss, refmap, npss, nspss, nrefmap, neighbor_searches, u_ext, isempty, 
           marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
       }
-      if (DG_vector_forms_present && rhs != NULL) {
+      if (DG_vector_forms_present && rhs != NULL) 
+      {
         assemble_DG_vector_forms(stage, mat, rhs, force_diagonal_blocks, block_weights, spss, refmap, neighbor_searches, u_ext, isempty, 
           marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
         if(!stage.vfsurf_mc.empty())
@@ -1229,7 +1344,8 @@ void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsi
         stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->original_central_el_transform);
 
       // Also clear the transformations from the slave psss and refmaps.
-      for (unsigned int i = 0; i < stage.idx.size(); i++) {
+      for (unsigned int i = 0; i < stage.idx.size(); i++) 
+      {
         if(isempty[stage.idx[i]])
           continue;
         spss[stage.idx[i]]->set_master_transform();
@@ -1243,8 +1359,10 @@ void DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>
 {
   _F_;
   // Initialize the NeighborSearches.
-  for(unsigned int i = 0; i < stage.meshes.size(); i++) {
-    if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq)) {
+  for(unsigned int i = 0; i < stage.meshes.size(); i++) 
+  {
+    if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq)) 
+    {
       NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(stage.fns[i]->get_active_element(), stage.meshes[i]);
       ns->original_central_el_transform = stage.fns[i]->get_transform();
       neighbor_searches.add(ns, stage.meshes[i]->get_seq() - min_dg_mesh_seq);
@@ -1255,7 +1373,8 @@ void DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>
   // Also clear the initial_sub_idxs from the central element transformations 
   // of NeighborSearches with multiple neighbors.
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
-    if(neighbor_searches.present(i)) {
+    if(neighbor_searches.present(i)) 
+    {
       neighbor_searches.get(i)->set_active_edge_multimesh(isurf);
       neighbor_searches.get(i)->clear_initial_sub_idx();
     }
@@ -1268,7 +1387,8 @@ void DiscreteProblem<Scalar>::build_multimesh_tree(NeighborNode* root,
 {
   _F_;
   for(unsigned int i = 0; i < neighbor_searches.get_size(); i++) 
-    if(neighbor_searches.present(i)) {
+    if(neighbor_searches.present(i)) 
+    {
       NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
       if(ns->n_neighbors == 1 && ns->central_n_trans[0] == 0)
         continue;
@@ -1287,24 +1407,28 @@ void DiscreteProblem<Scalar>::insert_into_multimesh_tree(NeighborNode* node,
   if(transformation_count == 0)
     return;
   // Both sons are null. We have to add a new Node. Let us do it for the left sone of node.
-  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) 
+  {
     node->set_left_son(new NeighborNode(node, transformations[0]));
     insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
   }
   // At least the left son is not null (it is impossible only for the right one to be not null, because
   // the left one always gets into the tree first, as seen above).
-  else {
+  else 
+  {
     // The existing left son is the right one to continue through.
     if(node->get_left_son()->get_transformation() == transformations[0])
       insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
     // The right one also exists, check that it is the right one, or return an error.
-    else if(node->get_right_son() != NULL) {
+    else if(node->get_right_son() != NULL) 
+    {
       if(node->get_right_son()->get_transformation() == transformations[0])
         insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
       else error("More than two possible sons in insert_into_multimesh_tree().");
     }
     // If the right one does not exist and the left one was not correct, create a right son and continue this way.
-    else {
+    else 
+    {
       node->set_right_son(new NeighborNode(node, transformations[0]));
       insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
     }
@@ -1330,7 +1454,8 @@ void DiscreteProblem<Scalar>::traverse_multimesh_tree(NeighborNode* node,
 {
   _F_;
   // If we are in the root.
-  if(node->get_transformation() == 0) {
+  if(node->get_transformation() == 0) 
+  {
     if(node->get_left_son() != NULL)
       traverse_multimesh_tree(node->get_left_son(), running_transformations);
     if(node->get_right_son() != NULL)
@@ -1340,7 +1465,8 @@ void DiscreteProblem<Scalar>::traverse_multimesh_tree(NeighborNode* node,
     return;
   }
   // If we are in a leaf.
-  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) 
+  {
     // Create a vector for the new neighbor.
     Hermes::vector<unsigned int>* new_neighbor_transformations = new Hermes::vector<unsigned int>;
     // Copy there the whole path except for this leaf.
@@ -1352,7 +1478,8 @@ void DiscreteProblem<Scalar>::traverse_multimesh_tree(NeighborNode* node,
     running_transformations.push_back(new_neighbor_transformations);
     return;
   }
-  else {
+  else 
+  {
     running_transformations.back()->push_back(node->get_transformation());
     if(node->get_left_son() != NULL)
       traverse_multimesh_tree(node->get_left_son(), running_transformations);
@@ -1371,7 +1498,8 @@ void DiscreteProblem<Scalar>::update_neighbor_search(NeighborSearch<Scalar>* ns,
   // This has to be done, because we pass ns by reference and the number of neighbors is changing.
   unsigned int num_neighbors = ns->get_num_neighbors();
 
-  for(unsigned int i = 0; i < num_neighbors; i++) {
+  for(unsigned int i = 0; i < num_neighbors; i++) 
+  {
     // Find the node corresponding to this neighbor in the tree.
     NeighborNode* node = find_node(ns->central_transformations[i], ns->central_n_trans[i], multimesh_tree);
     // Update the NeighborSearch.
@@ -1390,12 +1518,15 @@ NeighborNode* DiscreteProblem<Scalar>::find_node(unsigned int* transformations,
   // If there are no transformations left.
   if(transformation_count == 0)
     return node;
-  else {
-    if(node->get_left_son() != NULL) {
+  else 
+  {
+    if(node->get_left_son() != NULL) 
+    {
       if(node->get_left_son()->get_transformation() == transformations[0])
         return find_node(transformations + 1, transformation_count - 1, node->get_left_son());
     }
-    if(node->get_right_son() != NULL) {
+    if(node->get_right_son() != NULL) 
+    {
       if(node->get_right_son()->get_transformation() == transformations[0])
         return find_node(transformations + 1, transformation_count - 1, node->get_right_son());
     }
@@ -1412,7 +1543,8 @@ unsigned int DiscreteProblem<Scalar>::update_ns_subtree(NeighborSearch<Scalar>* 
   _F_;
   // No subtree => no work.
   // Also check the assertion that if one son is null, then the other too.
-  if(node->get_left_son() == NULL) {
+  if(node->get_left_son() == NULL) 
+  {
     if(node->get_right_son() != NULL)
       error("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
     return 0;
@@ -1455,7 +1587,8 @@ unsigned int DiscreteProblem<Scalar>::update_ns_subtree(NeighborSearch<Scalar>* 
   running_neighbor_transformations.pop_back();
 
   // Insert new neighbors.
-  for(unsigned int i = 0; i < running_central_transformations.size(); i++) {
+  for(unsigned int i = 0; i < running_central_transformations.size(); i++) 
+  {
     ns->neighbors.push_back(neighbor);
     ns->neighbor_edges.push_back(edge_info);
     ns->central_n_trans[ns->n_neighbors] = running_central_transformations[i]->size();
@@ -1479,7 +1612,8 @@ void DiscreteProblem<Scalar>::traverse_multimesh_subtree(NeighborNode* node,
 {
   _F_;
   // If we are in a leaf.
-  if(node->get_left_son() == NULL && node->get_right_son() == NULL) {
+  if(node->get_left_son() == NULL && node->get_right_son() == NULL) 
+  {
     // Create vectors for the new neighbor.
     Hermes::vector<unsigned int>* new_neighbor_central_transformations = new Hermes::vector<unsigned int>;
     Hermes::vector<unsigned int>* new_neighbor_neighbor_transformations = new Hermes::vector<unsigned int>;
@@ -1520,7 +1654,8 @@ void DiscreteProblem<Scalar>::traverse_multimesh_subtree(NeighborNode* node,
 
     return;
   }
-  else {
+  else 
+  {
     // Insert this leaf into the current running central transformation, thus complete it.
     running_central_transformations.back()->push_back(node->get_transformation());
 
@@ -1569,7 +1704,8 @@ void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage
   int isurf, Element** e, Element* trav_base)
 {
   _F_;
-  for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) 
+  {
     MatrixFormSurf<Scalar>* mfs = stage.mfsurf[ww];
     int m = mfs->i;
     int n = mfs->j;
@@ -1581,11 +1717,13 @@ void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage
     // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) 
+    {
       if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
-        || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
-          assemble_this_form = true;
-          break;
+        || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue;
@@ -1593,7 +1731,8 @@ void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
     double block_scaling_coeff = 1.;
-    if (block_weights != NULL) {
+    if (block_weights != NULL) 
+    {
       block_scaling_coeff = block_weights->get_A(m, n);
       if (fabs(block_scaling_coeff) < 1e-12) 
         continue;
@@ -1602,16 +1741,21 @@ void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage
     surf_pos.base = trav_base;
 
     Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-      for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      for (unsigned int j = 0; j < al[n]->cnt; j++) 
+      {
         pss[n]->set_active_shape(al[n]->idx[j]);
-        if (al[n]->dof[j] >= 0) {
-          if (mat != NULL) {
+        if (al[n]->dof[j] >= 0) 
+        {
+          if (mat != NULL) 
+          {
             Scalar val = 0;
             // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) 
+            {
               val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
                 refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
             }
@@ -1634,7 +1778,8 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_matrix_forms(Stage
   int isurf, Element** e, Element* trav_base)
 {
   _F_;
-  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) 
+  {
     MultiComponentMatrixFormSurf<Scalar>* mfs = stage.mfsurf_mc[ww];
     unsigned int m = mfs->coordinates[0].first;
     unsigned int n = mfs->coordinates[0].second;
@@ -1646,11 +1791,13 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_matrix_forms(Stage
     // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < mfs->areas.size(); ss++) 
+    {
       if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
-        || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
-          assemble_this_form = true;
-          break;
+        || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue; 
@@ -1669,15 +1816,20 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_matrix_forms(Stage
 
     surf_pos.base = trav_base;
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
-      for (unsigned int j = 0; j < al[n]->cnt; j++) {
+      for (unsigned int j = 0; j < al[n]->cnt; j++) 
+      {
         pss[n]->set_active_shape(al[n]->idx[j]);
-        if (al[n]->dof[j] >= 0) {
-          if (mat != NULL) {
+        if (al[n]->dof[j] >= 0) 
+        {
+          if (mat != NULL) 
+          {
             // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) {
+            if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12) 
+            {
               Hermes::vector<Scalar> result;
               eval_form(mfs, u_ext, pss[n], spss[m], refmap[n], refmap[m], &surf_pos, result);
               for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
@@ -1703,7 +1855,8 @@ void DiscreteProblem<Scalar>::assemble_surface_vector_forms(Stage<Scalar>& stage
   _F_;
   if(rhs == NULL)
     return;
-  for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) 
+  {
     VectorFormSurf<Scalar>* vfs = stage.vfsurf[ww];
     int m = vfs->i;
     if (isempty[m]) continue;
@@ -1713,11 +1866,13 @@ void DiscreteProblem<Scalar>::assemble_surface_vector_forms(Stage<Scalar>& stage
     // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) 
+    {
       if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
-        || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
-          assemble_this_form = true;
-          break;
+        || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue; 
@@ -1726,13 +1881,15 @@ void DiscreteProblem<Scalar>::assemble_surface_vector_forms(Stage<Scalar>& stage
 
     surf_pos.base = trav_base;
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
 
       spss[m]->set_active_shape(al[m]->idx[i]);
 
       // Numerical integration performed only if the coefficient multiplying the form is nonzero.
-      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+      if (std::abs(al[m]->coef[i]) > 1e-12) 
+      {
         rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
       }
     }
@@ -1751,7 +1908,8 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_vector_forms(Stage
 
   if (rhs == NULL) return;
 
-  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) 
+  {
     MultiComponentVectorFormSurf<Scalar>* vfs = stage.vfsurf_mc[ww];
     unsigned int m = vfs->coordinates[0];
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
@@ -1760,11 +1918,13 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_vector_forms(Stage
     // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
     // or if the element marker coincides with one of the form's areas.
     bool assemble_this_form = false;
-    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) {
+    for (unsigned int ss = 0; ss < vfs->areas.size(); ss++) 
+    {
       if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
-        || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) {
-          assemble_this_form = true;
-          break;
+        || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)) 
+      {
+        assemble_this_form = true;
+        break;
       }
     }
     if (assemble_this_form == false) continue; 
@@ -1773,13 +1933,15 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_surface_vector_forms(Stage
 
     surf_pos.base = trav_base;
 
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
 
       spss[m]->set_active_shape(al[m]->idx[i]);
 
       // Numerical integration performed only if the coefficient multiplying the form is nonzero.
-      if (std::abs(al[m]->coef[i]) > 1e-12) {   
+      if (std::abs(al[m]->coef[i]) > 1e-12) 
+      {
         Hermes::vector<Scalar> result;
         eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, result);
         for(unsigned int coordinate_i = 0; coordinate_i < vfs->coordinates.size(); coordinate_i++)
@@ -1799,9 +1961,10 @@ void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
   Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, 
   SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 
   Element* trav_base, Element* rep_element)
-{ 
+{
   _F_;
-  for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.mfsurf.size(); ww++) 
+  {
     MatrixFormSurf<Scalar>* mfs = stage.mfsurf[ww];
     if (mfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     int m = mfs->i;
@@ -1819,7 +1982,8 @@ void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
     // If a block scaling table is provided, and if the scaling coefficient
     // A_mn for this block is zero, then the form does not need to be assembled.
     double block_scaling_coeff = 1.;
-    if (block_weights != NULL) {
+    if (block_weights != NULL) 
+    {
       block_scaling_coeff = block_weights->get_A(m, n);
       if (fabs(block_scaling_coeff) < 1e-12) 
         continue;
@@ -1833,39 +1997,47 @@ void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
     bool support_neigh_u, support_neigh_v;
 
     Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
-    for (int i = 0; i < ext_asmlist_v->cnt; i++) {
+    for (int i = 0; i < ext_asmlist_v->cnt; i++) 
+    {
       if (ext_asmlist_v->dof[i] < 0) 
         continue;
       // Choose the correct shapeset for the test function.
-      if (!ext_asmlist_v->has_support_on_neighbor(i)) {
+      if (!ext_asmlist_v->has_support_on_neighbor(i)) 
+      {
         spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
         fv = spss[m];
         rv = refmap[m];
         support_neigh_v = false;
       }
-      else {
+      else 
+      {
         nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
         fv = nspss[m];
         rv = nrefmap[m];
         support_neigh_v = true;
       }
-      for (int j = 0; j < ext_asmlist_u->cnt; j++) {
+      for (int j = 0; j < ext_asmlist_u->cnt; j++) 
+      {
         // Choose the correct shapeset for the solution function.
-        if (!ext_asmlist_u->has_support_on_neighbor(j)) {
+        if (!ext_asmlist_u->has_support_on_neighbor(j)) 
+        {
           pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
           fu = pss[n];
           ru = refmap[n];
           support_neigh_u = false;
         }
-        else {
+        else 
+        {
           npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
           fu = npss[n];
           ru = nrefmap[n];
           support_neigh_u = true;
         }
 
-        if (ext_asmlist_u->dof[j] >= 0) {
-          if (mat != NULL) {
+        if (ext_asmlist_u->dof[j] >= 0) 
+        {
+          if (mat != NULL) 
+          {
             Scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
               * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
               * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
@@ -1888,9 +2060,10 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
   Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, 
   SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf, Element** e, 
   Element* trav_base, Element* rep_element)
-{ 
+{
   _F_;
-  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.mfsurf_mc.size(); ww++) 
+  {
     MultiComponentMatrixFormSurf<Scalar>* mfs = stage.mfsurf_mc[ww];
     if (mfs->areas[0] != H2D_DG_INNER_EDGE) continue;
 
@@ -1904,12 +2077,14 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
     // Create the extended shapeset on the union of the central element and its current neighbor.
     Hermes::vector<typename NeighborSearch<Scalar>::ExtendedShapeset*> ext_asmlists;
     Hermes::vector<unsigned int> coordinates_processed;
-    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++) {
+    for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++) 
+    {
       bool new_coordinate = true;
       for(unsigned int i = 0; i < coordinates_processed.size(); i++)
         if(coordinates_processed[i] == mfs->coordinates[coordinate_i].first)
           new_coordinate = false;
-      if(new_coordinate) {
+      if(new_coordinate) 
+      {
         coordinates_processed.push_back(mfs->coordinates[coordinate_i].first);
         ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].first]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist_multicomponent(spaces[mfs->coordinates[coordinate_i].first], al[mfs->coordinates[coordinate_i].first]));
       }
@@ -1918,7 +2093,8 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
       for(unsigned int i = 0; i < coordinates_processed.size(); i++)
         if(coordinates_processed[i] == mfs->coordinates[coordinate_i].second)
           new_coordinate = false;
-      if(new_coordinate) {
+      if(new_coordinate) 
+      {
         coordinates_processed.push_back(mfs->coordinates[coordinate_i].second);
         ext_asmlists.push_back(neighbor_searches.get(stage.meshes[mfs->coordinates[coordinate_i].second]->get_seq() - min_dg_mesh_seq)->create_extended_asmlist_multicomponent(spaces[mfs->coordinates[coordinate_i].second], al[mfs->coordinates[coordinate_i].second]));
       }
@@ -1943,39 +2119,47 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
     RefMap* rv;
     bool support_neigh_u, support_neigh_v;
 
-    for (int i = 0; i < ext_asmlist_v->cnt; i++) {
+    for (int i = 0; i < ext_asmlist_v->cnt; i++) 
+    {
       if (ext_asmlist_v->dof[i] < 0) 
         continue;
       // Choose the correct shapeset for the test function.
-      if (!ext_asmlist_v->has_support_on_neighbor(i)) {
+      if (!ext_asmlist_v->has_support_on_neighbor(i)) 
+      {
         spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
         fv = spss[m];
         rv = refmap[m];
         support_neigh_v = false;
       }
-      else {
+      else 
+      {
         nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
         fv = nspss[m];
         rv = nrefmap[m];
         support_neigh_v = true;
       }
-      for (int j = 0; j < ext_asmlist_u->cnt; j++) {
+      for (int j = 0; j < ext_asmlist_u->cnt; j++) 
+      {
         // Choose the correct shapeset for the solution function.
-        if (!ext_asmlist_u->has_support_on_neighbor(j)) {
+        if (!ext_asmlist_u->has_support_on_neighbor(j)) 
+        {
           pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
           fu = pss[n];
           ru = refmap[n];
           support_neigh_u = false;
         }
-        else {
+        else 
+        {
           npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
           fu = npss[n];
           ru = nrefmap[n];
           support_neigh_u = true;
         }
 
-        if (ext_asmlist_u->dof[j] >= 0) {
-          if (mat != NULL) {
+        if (ext_asmlist_u->dof[j] >= 0) 
+        {
+          if (mat != NULL) 
+          {
             Hermes::vector<Scalar> result;
             eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq, result);
             for(unsigned int coordinate_i = 0; coordinate_i < mfs->coordinates.size(); coordinate_i++)
@@ -1988,7 +2172,8 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_matrix_forms(Stage<Scal
       }
     }
 
-    for(unsigned int ext_asms_i = 0; ext_asms_i < ext_asmlists.size(); ext_asms_i++) {
+    for(unsigned int ext_asms_i = 0; ext_asms_i < ext_asmlists.size(); ext_asms_i++) 
+    {
       ext_asmlists[ext_asms_i]->free_central_al();
       delete ext_asmlists[ext_asms_i];
     }
@@ -2003,7 +2188,8 @@ void DiscreteProblem<Scalar>::assemble_DG_vector_forms(Stage<Scalar>& stage,
   int isurf, Element** e, Element* trav_base, Element* rep_element)
 {
   _F_;
-  for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfsurf.size(); ww++) 
+  {
     VectorFormSurf<Scalar>* vfs = stage.vfsurf[ww];
     if (vfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     int m = vfs->i;
@@ -2011,7 +2197,8 @@ void DiscreteProblem<Scalar>::assemble_DG_vector_forms(Stage<Scalar>& stage,
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
 
     // Here we use the standard pss, possibly just transformed by NeighborSearch.
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
       spss[m]->set_active_shape(al[m]->idx[i]);
       rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, stage.meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
@@ -2029,14 +2216,16 @@ void DiscreteProblem<Scalar>::assemble_multicomponent_DG_vector_forms(Stage<Scal
 
   if (rhs == NULL) return;
 
-  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) {
+  for (unsigned int ww = 0; ww < stage.vfsurf_mc.size(); ww++) 
+  {
     MultiComponentVectorFormSurf<Scalar>* vfs = stage.vfsurf_mc[ww];
     if (vfs->areas[0] != H2D_DG_INNER_EDGE) continue;
     if (fabs(vfs->scaling_factor) < 1e-12) continue;
 
     // Here we use the standard pss, possibly just transformed by NeighborSearch.
     unsigned int m = vfs->coordinates[0];
-    for (unsigned int i = 0; i < al[m]->cnt; i++) {
+    for (unsigned int i = 0; i < al[m]->cnt; i++) 
+    {
       if (al[m]->dof[i] < 0) continue;
       Hermes::vector<Scalar> result;
       spss[m]->set_active_shape(al[m]->idx[i]);
@@ -2072,7 +2261,8 @@ ExtData<Scalar>* DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFuncti
 
   // Copy external functions.
   Func<Scalar>** ext_fn = new Func<Scalar>*[ext.size()];
-  for (unsigned i = 0; i < ext.size(); i++) {
+  for (unsigned i = 0; i < ext.size(); i++) 
+  {
     if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
     else ext_fn[i] = NULL;
   }
@@ -2105,7 +2295,8 @@ ExtData<Scalar>* DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFuncti
 {
   _F_;
   Func<Scalar>** ext_fns = new Func<Scalar>*[ext.size()];
-  for(unsigned int j = 0; j < ext.size(); j++) {
+  for(unsigned int j = 0; j < ext.size(); j++) 
+  {
     neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
     ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j]);
   }
@@ -2137,28 +2328,34 @@ template<typename Scalar>
 Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   _F_;
-  if(rm->is_jacobian_const()) {
+  if(rm->is_jacobian_const()) 
+  {
     typename AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
-    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
+    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) 
+    {
       if(assembling_caches.const_cache_fn_triangles.find(key) == assembling_caches.const_cache_fn_triangles.end())
         assembling_caches.const_cache_fn_triangles[key] = init_fn(fu, rm, order);
       return assembling_caches.const_cache_fn_triangles[key];
     }
-    else {
+    else 
+    {
       if(assembling_caches.const_cache_fn_quads.find(key) == assembling_caches.const_cache_fn_quads.end())
         assembling_caches.const_cache_fn_quads[key] = init_fn(fu, rm, order);
       return assembling_caches.const_cache_fn_quads[key];
     }
   }
-  else {
+  else 
+  {
     typename AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order, 
       fu->get_transform(), fu->get_shapeset()->get_id());
-    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) {
+    if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE) 
+    {
       if(assembling_caches.cache_fn_triangles.find(key) == assembling_caches.cache_fn_triangles.end())
         assembling_caches.cache_fn_triangles[key] = init_fn(fu, rm, order);
       return assembling_caches.cache_fn_triangles[key];
     }
-    else {
+    else 
+    {
       if(assembling_caches.cache_fn_quads.find(key) == assembling_caches.cache_fn_quads.end())
         assembling_caches.cache_fn_quads[key] = init_fn(fu, rm, order);
       return assembling_caches.cache_fn_quads[key];
@@ -2191,7 +2388,8 @@ void DiscreteProblem<Scalar>::init_cache()
 template<typename Scalar>
 void DiscreteProblem<Scalar>::delete_single_geom_cache(int order)
 {
-  if (cache_e[order] != NULL) {
+  if (cache_e[order] != NULL) 
+  {
     cache_e[order]->free();
     delete cache_e[order];
     cache_e[order] = NULL;
@@ -2246,13 +2444,15 @@ Scalar DiscreteProblem<Scalar>::eval_form(MatrixFormVol<Scalar> *mfv,
   _F_;
   Scalar result = 0;
 
-  if (mfv->adapt_eval == false) {
+  if (mfv->adapt_eval == false) 
+  {
     // Determine the integration order by parsing the form.
     int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
     // Perform non-adaptive numerical quadrature of order "order".
     result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
   }
-  else {
+  else 
+  {
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
@@ -2305,7 +2505,8 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentMatrixFormVol<Scalar>*mfv,
     if(!ru->is_jacobian_const()) 
       jac = ru->get_jacobian(order);
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) {
+    for(int i = 0; i < np; i++) 
+    {
       if(ru->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
       else
@@ -2342,13 +2543,15 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentMatrixFormVol<Scalar>*mfv,
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -2363,7 +2566,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MatrixFormVol<Scalar> *m
 
   if(is_fvm) 
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = mfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -2404,7 +2608,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MatrixFormVol<Scalar> *m
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -2421,7 +2626,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MultiComponentMatrixForm
 
   if(is_fvm) 
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = mfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -2462,7 +2668,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MultiComponentMatrixForm
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -2488,7 +2695,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, MatrixFormVol<Sc
     if(!ru->is_jacobian_const()) 
       jac = ru->get_jacobian(order);
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) {
+    for(int i = 0; i < np; i++) 
+    {
       if(ru->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
       else
@@ -2522,13 +2730,15 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, MatrixFormVol<Sc
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -2563,7 +2773,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+  {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -2593,14 +2804,16 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   if (rel_error < mfv->adapt_rel_error_tol)
     // Relative error in tolerance.
     return result_current_subelements;
-  else {
+  else 
+  {
     Scalar result_recursion = 0;
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
 
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+    {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -2626,13 +2839,15 @@ Scalar DiscreteProblem<Scalar>::eval_form(VectorFormVol<Scalar> *vfv,
   _F_;
   Scalar result = 0;
 
-  if (vfv->adapt_eval == false) {
+  if (vfv->adapt_eval == false) 
+  {
     // Determine the integration order by parsing the form.
     int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
     // Perform non-adaptive numerical quadrature of order "order".
     result = eval_form_subelement(order, vfv, u_ext, fv, rv);
   }
-  else {
+  else 
+  {
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
@@ -2678,7 +2893,8 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormVol<Scalar>*vfv,
     if(!rv->is_jacobian_const()) 
       jac = rv->get_jacobian(order);
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) {
+    for(int i = 0; i < np; i++) 
+    {
       if(rv->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
       else
@@ -2712,13 +2928,15 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormVol<Scalar>*vfv,
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -2735,7 +2953,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_vol(VectorFormVol<Scalar> *v
 
   if(is_fvm) 
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = vfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -2776,7 +2995,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_vol(VectorFormVol<Scalar> *v
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -2794,7 +3014,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_vol(MultiComponentVectorForm
 
   if(is_fvm) 
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = vfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -2835,7 +3056,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_vol(MultiComponentVectorForm
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -2862,7 +3084,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormVol<Sc
     if(!rv->is_jacobian_const()) 
       jac = rv->get_jacobian(order);
     cache_jwt[order] = new double[np];
-    for(int i = 0; i < np; i++) {
+    for(int i = 0; i < np; i++) 
+    {
       if(rv->is_jacobian_const())
         cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
       else
@@ -2893,13 +3116,15 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormVol<Sc
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -2930,7 +3155,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+  {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -2960,14 +3186,16 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   if (rel_error < vfv->adapt_rel_error_tol)
     // Relative error in tolerance.
     return result_current_subelements;
-  else {
+  else 
+  {
     Scalar result_recursion = 0;
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
 
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+    {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -2993,13 +3221,15 @@ Scalar DiscreteProblem<Scalar>::eval_form(MatrixFormSurf<Scalar> *mfs,
   _F_;
   Scalar result = 0;
 
-  if (mfs->adapt_eval == false) {
+  if (mfs->adapt_eval == false) 
+  {
     // Determine the integration order by parsing the form.
     int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
     // Perform non-adaptive numerical quadrature of order "order".
     result = eval_form_subelement(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
   }
-  else {
+  else 
+  {
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
@@ -3071,13 +3301,15 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentMatrixFormSurf<Scalar>*mfs
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -3093,7 +3325,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MatrixFormSurf<Scalar> 
 
   if(is_fvm)
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -3134,7 +3367,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MatrixFormSurf<Scalar> 
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -3151,7 +3385,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MultiComponentMatrixFor
 
   if(is_fvm)
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -3192,7 +3427,8 @@ int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MultiComponentMatrixFor
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -3246,13 +3482,15 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, MatrixFormSurf<S
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -3287,7 +3525,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+  {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -3317,14 +3556,16 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   if (rel_error < mfs->adapt_rel_error_tol)
     // Relative error in tolerance.
     return result_current_subelements;
-  else {
+  else 
+  {
     Scalar result_recursion = 0;
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
 
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+    {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -3350,13 +3591,15 @@ Scalar DiscreteProblem<Scalar>::eval_form(VectorFormSurf<Scalar> *vfs,
   _F_;
   Scalar result = 0;
 
-  if (vfs->adapt_eval == false) {
+  if (vfs->adapt_eval == false) 
+  {
     // Determine the integration order by parsing the form.
     int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
     // Perform non-adaptive numerical quadrature of order "order".
     result = eval_form_subelement(order, vfs, u_ext, fv, rv, surf_pos);
   }
-  else {
+  else 
+  {
     // Perform adaptive numerical quadrature starting with order = 2.
     // TODO: The choice of initial order matters a lot for efficiency,
     //       this needs more research.
@@ -3393,7 +3636,8 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormSurf<Scalar>*vfs
   int np = quad->get_num_points(eo);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -3427,13 +3671,15 @@ void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormSurf<Scalar>*vfs
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -3449,7 +3695,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_surf(VectorFormSurf<Scalar> 
 
   if(is_fvm) 
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = vfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -3489,7 +3736,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_surf(VectorFormSurf<Scalar> 
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -3506,7 +3754,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_surf(MultiComponentVectorFor
 
   if(is_fvm) 
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     int u_ext_length = u_ext.size();      // Number of external solutions.
     int u_ext_offset = vfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
     // and there will be only u_ext_length - u_ext_offset of them.
@@ -3546,7 +3795,8 @@ int DiscreteProblem<Scalar>::calc_order_vector_form_surf(MultiComponentVectorFor
     // Cleanup.
     delete [] oi;
 
-    if (fake_ext != NULL) {
+    if (fake_ext != NULL) 
+    {
       fake_ext->free_ord(); 
       delete fake_ext;
     }
@@ -3567,7 +3817,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormSurf<S
   int np = quad->get_num_points(eo);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -3598,13 +3849,15 @@ Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormSurf<S
 
   // Clean up.
   for(int i = 0; i < prev_size; i++)
-    if (prev[i] != NULL) { 
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i]; 
     }
     delete [] prev;
 
-    if (ext != NULL) {
+    if (ext != NULL) 
+    {
       ext->free(); 
       delete ext;
     }
@@ -3637,7 +3890,8 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
   // as the further division to subelements must be only local.
   this->delete_single_geom_cache(order_init + order_increase);
-  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+  for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+  {
     // Push the transformation to the current son to all functions and reference mappings involved.
     Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -3667,14 +3921,16 @@ Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result
   if (rel_error < vfs->adapt_rel_error_tol)
     // Relative error in tolerance.
     return result_current_subelements;
-  else {
+  else 
+  {
     Scalar result_recursion = 0;
     // Relative error exceeds allowed tolerance: Call the function 
     // eval_form_adaptive() in each subelement, with initial values
     // subs_value[sons_i].
 
     // Call the function eval_form_adaptive() recursively in all sons.
-    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) {
+    for(unsigned int sons_i = 0; sons_i < 4; sons_i++) 
+    {
       // Push the transformation to the current son to all functions and reference mappings involved.
       Transformable::push_transforms(transformable_entities, sons_i);
 
@@ -3703,7 +3959,8 @@ int DiscreteProblem<Scalar>::calc_order_dg_matrix_form(MatrixFormSurf<Scalar> *m
 
   if(this->is_fvm)
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     // Order of solutions from the previous Newton iteration.
     int prev_size = u_ext.size() - mfs->u_ext_offset;
     Func<Ord>** oi = new Func<Ord>*[prev_size];
@@ -3748,8 +4005,10 @@ int DiscreteProblem<Scalar>::calc_order_dg_matrix_form(MatrixFormSurf<Scalar> *m
     delete fake_e;
     delete ou;
     delete ov;
-    if (fake_ext != NULL) {
-      for (int i = 0; i < fake_ext->nf; i++) {
+    if (fake_ext != NULL) 
+    {
+      for (int i = 0; i < fake_ext->nf; i++) 
+      {
         delete fake_ext->fn[i];
       }
       fake_ext->free_ord(); 
@@ -3769,7 +4028,8 @@ int DiscreteProblem<Scalar>::calc_order_dg_matrix_form(MultiComponentMatrixFormS
 
   if(this->is_fvm)
     order = ru->get_inv_ref_order();
-  else {
+  else 
+  {
     // Order of solutions from the previous Newton iteration.
     int prev_size = u_ext.size() - mfs->u_ext_offset;
     Func<Ord>** oi = new Func<Ord>*[prev_size];
@@ -3814,8 +4074,10 @@ int DiscreteProblem<Scalar>::calc_order_dg_matrix_form(MultiComponentMatrixFormS
     delete fake_e;
     delete ou;
     delete ov;
-    if (fake_ext != NULL) {
-      for (int i = 0; i < fake_ext->nf; i++) {
+    if (fake_ext != NULL) 
+    {
+      for (int i = 0; i < fake_ext->nf; i++) 
+      {
         delete fake_ext->fn[i];
       }
       fake_ext->free_ord(); 
@@ -3849,7 +4111,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes
   assert(surf_pos->surf_num == neighbor_searches.get(neighbor_index_u)->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(ru_central, surf_pos, eo);
     double3* tan = ru_central->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -3866,7 +4129,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes
   Func<Scalar>** prev = new Func<Scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution<Scalar>*>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + mfs->u_ext_offset] != NULL) {
+      if (u_ext[i + mfs->u_ext_offset] != NULL) 
+      {
         neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
         prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
       }
@@ -3888,8 +4152,10 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes
   Scalar res = mfs->value(np, jwt, prev, u, v, e, ext);
 
   // Clean up.
-  for (int i = 0; i < prev_size; i++) {
-    if (prev[i] != NULL) {
+  for (int i = 0; i < prev_size; i++) 
+  {
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn();
       delete prev[i];
     }
@@ -3898,7 +4164,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes
   delete [] prev;
 
 
-  if (ext != NULL) {
+  if (ext != NULL) 
+  {
     ext->free(); 
     delete ext;
   }
@@ -3938,7 +4205,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentMatrixFormSurf<Scalar>*
   assert(surf_pos->surf_num == neighbor_searches.get(neighbor_index_u)->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(ru_central, surf_pos, eo);
     double3* tan = ru_central->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -3955,7 +4223,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentMatrixFormSurf<Scalar>*
   Func<Scalar>** prev = new Func<Scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution<Scalar>*>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + mfs->u_ext_offset] != NULL) {
+      if (u_ext[i + mfs->u_ext_offset] != NULL) 
+      {
         neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
         prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
       }
@@ -3980,8 +4249,10 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentMatrixFormSurf<Scalar>*
     result[i] *= mfs->scaling_factor * 0.5;
 
   // Clean up.
-  for (int i = 0; i < prev_size; i++) {
-    if (prev[i] != NULL) {
+  for (int i = 0; i < prev_size; i++) 
+  {
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn();
       delete prev[i];
     }
@@ -3990,7 +4261,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentMatrixFormSurf<Scalar>*
   delete [] prev;
 
 
-  if (ext != NULL) {
+  if (ext != NULL) 
+  {
     ext->free(); 
     delete ext;
   }
@@ -4013,7 +4285,8 @@ int DiscreteProblem<Scalar>::calc_order_dg_vector_form(VectorFormSurf<Scalar> *v
   // and there will be only u_ext_length - u_ext_offset of them.
   if(this->is_fvm)
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     // Order of solutions from the previous Newton iteration.
     int prev_size = u_ext.size() - vfs->u_ext_offset;
     Func<Ord>** oi = new Func<Ord>*[prev_size];
@@ -4054,8 +4327,10 @@ int DiscreteProblem<Scalar>::calc_order_dg_vector_form(VectorFormSurf<Scalar> *v
         if (u_ext[i + vfs->u_ext_offset] != NULL) 
           delete oi[i];
     delete [] oi;
-    if (fake_ext != NULL) {
-      for (int i = 0; i < fake_ext->nf; i++) {
+    if (fake_ext != NULL) 
+    {
+      for (int i = 0; i < fake_ext->nf; i++) 
+      {
         delete fake_ext->fn[i];
       }
       fake_ext->free_ord(); 
@@ -4078,7 +4353,8 @@ int DiscreteProblem<Scalar>::calc_order_dg_vector_form(VectorFormSurf<Scalar> *v
   // and there will be only u_ext_length - u_ext_offset of them.
   if(this->is_fvm)
     order = rv->get_inv_ref_order();
-  else {
+  else 
+  {
     // Order of solutions from the previous Newton iteration.
     int prev_size = u_ext.size() - vfs->u_ext_offset;
     Func<Ord>** oi = new Func<Ord>*[prev_size];
@@ -4119,8 +4395,10 @@ int DiscreteProblem<Scalar>::calc_order_dg_vector_form(VectorFormSurf<Scalar> *v
         if (u_ext[i + vfs->u_ext_offset] != NULL) 
           delete oi[i];
     delete [] oi;
-    if (fake_ext != NULL) {
-      for (int i = 0; i < fake_ext->nf; i++) {
+    if (fake_ext != NULL) 
+    {
+      for (int i = 0; i < fake_ext->nf; i++) 
+      {
         delete fake_ext->fn[i];
       }
       fake_ext->free_ord(); 
@@ -4151,7 +4429,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes
   assert(surf_pos->surf_num == nbs_v->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -4168,7 +4447,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes
   Func<Scalar>** prev = new Func<Scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution<Scalar>*>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + vfs->u_ext_offset] != NULL) {
+      if (u_ext[i + vfs->u_ext_offset] != NULL) 
+      {
         neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
         prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
       }
@@ -4183,8 +4463,10 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes
   Scalar res = vfs->value(np, jwt, prev, v, e, ext);
 
   // Clean up.
-  for (int i = 0; i < prev_size; i++) {
-    if (prev[i] != NULL) {
+  for (int i = 0; i < prev_size; i++) 
+  {
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i];
     }
@@ -4192,7 +4474,8 @@ Scalar DiscreteProblem<Scalar>::eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes
 
   delete [] prev;
 
-  if (ext != NULL) {
+  if (ext != NULL) 
+  {
     ext->free(); 
     delete ext;
   }
@@ -4225,7 +4508,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentVectorFormSurf<Scalar>*
   assert(surf_pos->surf_num == nbs_v->active_edge);
 
   // Init geometry and jacobian*weights.
-  if (cache_e[eo] == NULL) {
+  if (cache_e[eo] == NULL) 
+  {
     cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
     double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
     cache_jwt[eo] = new double[np];
@@ -4242,7 +4526,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentVectorFormSurf<Scalar>*
   Func<Scalar>** prev = new Func<Scalar>*[prev_size];
   if (u_ext != Hermes::vector<Solution<Scalar>*>())
     for (int i = 0; i < prev_size; i++)
-      if (u_ext[i + vfs->u_ext_offset] != NULL) {
+      if (u_ext[i + vfs->u_ext_offset] != NULL) 
+      {
         neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
         prev[i]  = neighbor_searches.get(u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(u_ext[i]);
       }
@@ -4260,8 +4545,10 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentVectorFormSurf<Scalar>*
     result[i] *= vfs->scaling_factor * 0.5;
 
   // Clean up.
-  for (int i = 0; i < prev_size; i++) {
-    if (prev[i] != NULL) {
+  for (int i = 0; i < prev_size; i++) 
+  {
+    if (prev[i] != NULL) 
+    {
       prev[i]->free_fn(); 
       delete prev[i];
     }
@@ -4269,7 +4556,8 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentVectorFormSurf<Scalar>*
 
   delete [] prev;
 
-  if (ext != NULL) {
+  if (ext != NULL) 
+  {
     ext->free(); 
     delete ext;
   }
@@ -4284,11 +4572,13 @@ NeighborNode::NeighborNode(NeighborNode* parent, unsigned int transformation) : 
 
 NeighborNode::~NeighborNode()
 {
-  if(left_son != NULL) {
+  if(left_son != NULL) 
+  {
     delete left_son;
     left_son = NULL;
   }
-  if(right_son != NULL) {
+  if(right_son != NULL) 
+  {
     delete right_son;
     right_son = NULL;
   }
@@ -4344,7 +4634,8 @@ DiscreteProblem<Scalar>::AssemblingCaches::~AssemblingCaches()
   const_cache_fn_quads.clear();
 
   for(unsigned int i = 0; i < cache_fn_ord.get_size(); i++)
-    if(cache_fn_ord.present(i)) {
+    if(cache_fn_ord.present(i)) 
+    {
       cache_fn_ord.get(i)->free_ord(); 
       delete cache_fn_ord.get(i);
     }

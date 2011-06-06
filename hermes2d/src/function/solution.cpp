@@ -33,17 +33,18 @@ MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
 template<typename Scalar>
 MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>()
 {
-	this->mesh = mesh;
-	this->refmap = new RefMap;
-	// FIXME - this was in H3D: MEM_CHECK(this->refmap);
-	this->element = NULL;		// this comes with Transformable
+  this->mesh = mesh;
+  this->refmap = new RefMap;
+  // FIXME - this was in H3D: MEM_CHECK(this->refmap);
+  this->element = NULL;		// this comes with Transformable
 }
 
 template<typename Scalar>
 MeshFunction<Scalar>::~MeshFunction()
 {
   delete refmap;
-  if(this->overflow_nodes != NULL) {
+  if(this->overflow_nodes != NULL) 
+  {
     for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
       if(this->overflow_nodes->present(i))
         ::free(this->overflow_nodes->get(i));
@@ -72,7 +73,8 @@ void MeshFunction<Scalar>::set_active_element(Element* e)
 template<typename Scalar>
 void MeshFunction<Scalar>::handle_overflow_idx()
 {
-  if(this->overflow_nodes != NULL) {
+  if(this->overflow_nodes != NULL) 
+  {
     for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
       if(this->overflow_nodes->present(i))
         ::free(this->overflow_nodes->get(i));
@@ -135,7 +137,8 @@ public:
         tables[mode][k] = pt = new double3[n];
 
         for (i = k, m = 0; i >= 0; i--)
-          for (j = k; j >= (mode ? 0 : k-i); j--, m++) {
+          for (j = k; j >= (mode ? 0 : k-i); j--, m++) 
+          {
             pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
             pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
             pt[m][2] = 1.0;
@@ -216,7 +219,7 @@ void Solution<Scalar>::init()
 
 template<typename Scalar>
 Solution<Scalar>::Solution()
-        : MeshFunction<Scalar>()
+  : MeshFunction<Scalar>()
 {
   space_type = HERMES_INVALID_SPACE;
   this->init();
@@ -324,7 +327,8 @@ void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     mono_coefs = new Scalar[num_coefs];
     memcpy(mono_coefs, sln->mono_coefs, sizeof(Scalar) * num_coefs);
 
-    for (int l = 0; l < this->num_components; l++) {
+    for (int l = 0; l < this->num_components; l++) 
+    {
       elem_coefs[l] = new int[num_elems];
       memcpy(elem_coefs[l], sln->elem_coefs[l], sizeof(int) * num_elems);
     }
@@ -350,8 +354,10 @@ void Solution<Scalar>::free_tables()
 {
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++)
-      if(tables[i][j] != NULL) {
-        for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
+      if(tables[i][j] != NULL) 
+      {
+        for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) 
+        {
           for(unsigned int l = 0; l < it->second->get_size(); l++)
             if(it->second->present(l))
               ::free(it->second->get(l));
@@ -372,18 +378,18 @@ void Solution<Scalar>::free()
 
   for (int i = 0; i < this->num_components; i++)
     if (elem_coefs[i] != NULL)
-      { delete [] elem_coefs[i];  elem_coefs[i] = NULL; }
+    { delete [] elem_coefs[i];  elem_coefs[i] = NULL; }
 
-  if (own_mesh == true && this->mesh != NULL)
-  {
-    //printf("Deleting mesh in Solution (own_mesh == true).\n");
-    delete this->mesh;
-    own_mesh = false;
-  }
+    if (own_mesh == true && this->mesh != NULL)
+    {
+      //printf("Deleting mesh in Solution (own_mesh == true).\n");
+      delete this->mesh;
+      own_mesh = false;
+    }
 
-  e_last = NULL;
+    e_last = NULL;
 
-  free_tables();
+    free_tables();
 }
 
 template<typename Scalar>
@@ -413,7 +419,8 @@ public:
   {
     for (int m = 0; m <= 1; m++)
       for (int i = 0; i <= 10; i++)
-        if (mat[m][i] != NULL) {
+        if (mat[m][i] != NULL) 
+        {
           delete [] mat[m][i];
           delete [] perm[m][i];
         }
@@ -431,9 +438,11 @@ double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
 
   // loop through all chebyshev points
   double** mat = new_matrix<double>(n, n);
-  for (k = o, row = 0; k >= 0; k--) {
+  for (k = o, row = 0; k >= 0; k--) 
+  {
     y = o ? cos(k * M_PI / o) : 1.0;
-    for (l = o; l >= (this->mode ? 0 : o-k); l--, row++) {
+    for (l = o; l >= (this->mode ? 0 : o-k); l--, row++) 
+    {
       x = o ? cos(l * M_PI / o) : 1.0;
 
       // each row of the matrix contains all the monomials x^i*y^j
@@ -453,36 +462,36 @@ double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
 template<typename Scalar>
 void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift)
 {
-    // sanity check
-    if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
+  // sanity check
+  if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
-    space_type = space->get_type();
-    Scalar* coeffs = new Scalar [vec->length()];
-    vec->extract(coeffs);
-    // debug
-    //printf("coeffs:\n");
-    //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
-    //printf("\n");
-    this->set_coeff_vector(space, coeffs, add_dir_lift);
-    delete [] coeffs;
+  space_type = space->get_type();
+  Scalar* coeffs = new Scalar [vec->length()];
+  vec->extract(coeffs);
+  // debug
+  //printf("coeffs:\n");
+  //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
+  //printf("\n");
+  this->set_coeff_vector(space, coeffs, add_dir_lift);
+  delete [] coeffs;
 }
 
 // using coefficient array (no pss)
 template<typename Scalar>
 void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift)
 {
-    // sanity check
-    if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
+  // sanity check
+  if (space == NULL) error("Space == NULL in Solutin::set_coeff_vector().");
 
-    // initialize precalc shapeset using the space's shapeset
-    Shapeset *shapeset = space->get_shapeset();
-    if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
-    PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-    if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
+  // initialize precalc shapeset using the space's shapeset
+  Shapeset *shapeset = space->get_shapeset();
+  if (space->get_shapeset() == NULL) error("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
+  PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
+  if (pss == NULL) error("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
 
-    set_coeff_vector(space, pss, coeffs, add_dir_lift);
+  set_coeff_vector(space, pss, coeffs, add_dir_lift);
 
-    delete pss;
+  delete pss;
 }
 
 // using pss and coefficient array
@@ -502,7 +511,7 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* p
     error("Provided 'space' and 'pss' must have the same shapesets.");
 
   free();
- 
+
   space_type = space->get_type();
 
   this->num_components = pss->get_num_components();
@@ -518,7 +527,8 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* p
     delete [] elem_orders;
   elem_orders = new int[num_elems];
   memset(elem_orders, 0, sizeof(int) * num_elems);
-  for (int l = 0; l < this->num_components; l++) {
+  for (int l = 0; l < this->num_components; l++) 
+  {
     if(elem_coefs[l] != NULL)
       delete [] elem_coefs[l];
     elem_coefs[l] = new int[num_elems];
@@ -533,7 +543,8 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* p
     this->mode = e->get_mode();
     o = space->get_element_order(e->id);
     o = std::max(H2D_GET_H_ORDER(o), H2D_GET_V_ORDER(o));
-    for (unsigned int k = 0; k < e->nvert; k++) {
+    for (unsigned int k = 0; k < e->nvert; k++) 
+    {
       int eo = space->get_edge_order(e, k);
       if (eo > o) o = eo;
     }
@@ -635,9 +646,9 @@ void Solution<Scalar>::set_zero_2(Mesh* mesh)
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
-                                   Hermes::vector<Space<Scalar>*> spaces,
-                                   Hermes::vector<Solution<Scalar>*> solutions,
-                                   Hermes::vector<bool> add_dir_lift)
+  Hermes::vector<Space<Scalar>*> spaces,
+  Hermes::vector<Solution<Scalar>*> solutions,
+  Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -645,13 +656,13 @@ void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
       solutions[i]->set_coeff_vector(spaces[i], solution_vector,
-              add_dir_lift.at(i));
+      add_dir_lift.at(i));
   return;
 }
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space,
-                                  Solution<Scalar>* solution, bool add_dir_lift)
+  Solution<Scalar>* solution, bool add_dir_lift)
 {
   Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
@@ -667,8 +678,8 @@ void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-                                   Hermes::vector<Solution<Scalar>*> solutions,
-                                   Hermes::vector<bool> add_dir_lift)
+  Hermes::vector<Solution<Scalar>*> solutions,
+  Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -676,13 +687,13 @@ void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Herm
       solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
     else
       solutions[i]->set_coeff_vector(spaces[i], solution_vector,
-              add_dir_lift.at(i));
+      add_dir_lift.at(i));
   return;
 }
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solution(Vector<Scalar>* solution_vector, Space<Scalar>* space,
-                                  Solution<Scalar>* solution, bool add_dir_lift)
+  Solution<Scalar>* solution, bool add_dir_lift)
 {
   Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
@@ -698,9 +709,9 @@ void Solution<Scalar>::vector_to_solution(Vector<Scalar>* solution_vector, Space
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-                                   Hermes::vector<Solution<Scalar>*> solutions,
-                                   Hermes::vector<PrecalcShapeset *> pss,
-                                   Hermes::vector<bool> add_dir_lift)
+  Hermes::vector<Solution<Scalar>*> solutions,
+  Hermes::vector<PrecalcShapeset *> pss,
+  Hermes::vector<bool> add_dir_lift)
 {
   assert(spaces.size() == solutions.size());
   for(unsigned int i = 0; i < solutions.size(); i++)
@@ -708,13 +719,13 @@ void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vect
       solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, true);
     else
       solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector,
-              add_dir_lift.at(i));
+      add_dir_lift.at(i));
   return;
 }
 
 template<typename Scalar>
 void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
-                                  PrecalcShapeset* pss, bool add_dir_lift)
+  PrecalcShapeset* pss, bool add_dir_lift)
 {
   Hermes::vector<Space<Scalar>*> spaces_to_pass;
   spaces_to_pass.push_back(space);
@@ -778,7 +789,8 @@ template<typename Scalar>
 static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
   int i, j, k;
-  for (i = 0; i <= o; i++) {
+  for (i = 0; i <= o; i++) 
+  {
     *result++ = 0.0;
     k = mode ? o : i;
     for (j = 0; j < k; j++)
@@ -792,15 +804,18 @@ template<typename Scalar>
 static void make_dy_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
   int i, j;
-  if (mode) {
+  if (mode) 
+  {
     for (j = 0; j <= o; j++)
       *result++ = 0.0;
     for (i = 0; i < o; i++)
       for (j = 0; j <= o; j++)
         *result++ = (Scalar) (o-i) * (*mono++);
   }
-  else {
-    for (i = 0; i <= o; i++) {
+  else 
+  {
+    for (i = 0; i <= o; i++) 
+    {
       *result++ = 0.0;
       for (j = 0; j < i; j++)
         *result++ = (Scalar) (o+1-i) * (*mono++);
@@ -811,7 +826,8 @@ static void make_dy_coefs(int mode, int o, Scalar* mono, Scalar* result)
 template<typename Scalar>
 void Solution<Scalar>::init_dxdy_buffer()
 {
-  if (dxdy_buffer != NULL) {
+  if (dxdy_buffer != NULL) 
+  {
     delete [] dxdy_buffer;
     dxdy_buffer = NULL;
   }
@@ -834,17 +850,19 @@ void Solution<Scalar>::set_active_element(Element* e)
   // if not found, free the oldest one and use its slot
   if (cur_elem >= 4)
   {
-    if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL) {
-        for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[this->cur_quad][oldest[this->cur_quad]]->begin(); it != tables[this->cur_quad][oldest[this->cur_quad]]->end(); it++) {
-          for(unsigned int l = 0; l < it->second->get_size(); l++)
-            if(it->second->present(l))
-              ::free(it->second->get(l));
-          delete it->second;
-        }
-        delete tables[this->cur_quad][oldest[this->cur_quad]];
-        tables[this->cur_quad][oldest[this->cur_quad]] = NULL;
-        elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
+    if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL) 
+    {
+      for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[this->cur_quad][oldest[this->cur_quad]]->begin(); it != tables[this->cur_quad][oldest[this->cur_quad]]->end(); it++) 
+      {
+        for(unsigned int l = 0; l < it->second->get_size(); l++)
+          if(it->second->present(l))
+            ::free(it->second->get(l));
+        delete it->second;
       }
+      delete tables[this->cur_quad][oldest[this->cur_quad]];
+      tables[this->cur_quad][oldest[this->cur_quad]] = NULL;
+      elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
+    }
 
     tables[this->cur_quad][oldest[this->cur_quad]] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
 
@@ -1025,9 +1043,11 @@ int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element*
 {
   if (e == NULL) e = this->element;
 
-  if (sln_type == HERMES_SLN && space != NULL) {
+  if (sln_type == HERMES_SLN && space != NULL) 
+  {
     return space->get_edge_order(e, edge);
-  } else {
+  } else 
+  {
     return Function<Scalar>::get_edge_fn_order(edge);
   }
 }
@@ -1057,10 +1077,10 @@ void Solution<Scalar>::precalculate(int order, int mask)
         if ((mask & H2D_FN_DXX_0)  || (mask & H2D_FN_DXY_0) || (mask & H2D_FN_DYY_0))  mask |= H2D_SECOND;
       }
       else if (space_type == HERMES_HCURL_SPACE)                                           // Hcurl space
-        { if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL;
-          if ((mask & H2D_FN_DX_1)  || (mask & H2D_FN_DY_0))  mask |= H2D_CURL; }
+      { if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL;
+      if ((mask & H2D_FN_DX_1)  || (mask & H2D_FN_DY_0))  mask |= H2D_CURL; }
       else                                                                // Hdiv space
-        { if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL; }
+      { if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL; }
     }
 
     int oldmask = (this->cur_node != NULL) ? this->cur_node->mask : 0;
@@ -1103,7 +1123,7 @@ void Solution<Scalar>::precalculate(int order, int mask)
                 vec_x_vec_p_num(np, tx, x, *mono++);
 
               if (!i) memcpy(result, tx, sizeof(Scalar)*np);
-                 else vec_x_vec_p_vec(np, result, y, tx);
+              else vec_x_vec_p_vec(np, result, y, tx);
             }
           }
         }
@@ -1167,7 +1187,8 @@ void Solution<Scalar>::precalculate(int order, int mask)
       {
         Scalar2<Scalar> dx ( 0.0, 0.0 ), dy ( 0.0, 0.0 );
         Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-        for (j = 0; j < 2; j++) {
+        for (j = 0; j < 2; j++) 
+        {
           node->values[j][0][i] = val[j] * exact_mult;
           node->values[j][1][i] = dx[j] * exact_mult;
           node->values[j][2][i] = dy[j] * exact_mult;
@@ -1192,11 +1213,12 @@ void Solution<Scalar>::precalculate(int order, int mask)
   else
   {
     error("Cannot obtain values -- uninitialized solution. The solution was either "
-          "not calculated yet or you used the assignment operator which destroys "
-          "the solution on its right-hand side.");
+      "not calculated yet or you used the assignment operator which destroys "
+      "the solution on its right-hand side.");
   }
 
-  if(this->nodes->present(order)) {
+  if(this->nodes->present(order)) 
+  {
     assert(this->nodes->get(order) == this->cur_node);
     ::free(this->nodes->get(order));
   }
@@ -1244,7 +1266,8 @@ void Solution<Scalar>::save(const char* filename, bool compress)
 
   // write element orders
   char* temp_orders = new char[num_elems];
-  for (i = 0; i < num_elems; i++) {
+  for (i = 0; i < num_elems; i++) 
+  {
     temp_orders[i] = elem_orders[i];
   }
   hermes_fwrite(temp_orders, sizeof(char), num_elems, f);
@@ -1286,7 +1309,8 @@ void Solution<Scalar>::load(const char* filename)
   }
 
   // load header
-  struct {
+  struct 
+  {
     char magic[4];
     int  ver, ss, nc, ne, nf;
   } hdr;
@@ -1314,16 +1338,16 @@ void Solution<Scalar>::load(const char* filename)
   {
     /*
     #ifndef H2D_COMPLEX
-      warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
-      Scalar* temp = new Scalar[num_coefs*2];
-      for (int temp_i = 0; temp_i < num_coefs*2; temp_i++)
-        temp[temp_i] = (Scalar)0.0;
+    warn("Ignoring imaginary part of the complex solution since this is not H2D_COMPLEX code.");
+    Scalar* temp = new Scalar[num_coefs*2];
+    for (int temp_i = 0; temp_i < num_coefs*2; temp_i++)
+    temp[temp_i] = (Scalar)0.0;
 
-      hermes_fread(temp, sizeof(Scalar), num_coefs*2, f);
-      mono_coefs = new double[num_coefs];
-      for (i = 0; i < num_coefs; i++)
-        mono_coefs[i] = temp[2*i];
-      delete [] temp;
+    hermes_fread(temp, sizeof(Scalar), num_coefs*2, f);
+    mono_coefs = new double[num_coefs];
+    for (i = 0; i < num_coefs; i++)
+    mono_coefs[i] = temp[2*i];
+    delete [] temp;
 
     #else
     */
@@ -1473,8 +1497,8 @@ Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
   else if (sln_type == HERMES_UNDEF)
   {
     error("Cannot obtain values -- uninitialized solution. The solution was either "
-          "not calculated yet or you used the assignment operator which destroys "
-          "the solution on its right-hand side.");
+      "not calculated yet or you used the assignment operator which destroys "
+      "the solution on its right-hand side.");
   }
 
   // try the last visited element and its neighbours
@@ -1544,7 +1568,7 @@ unsigned int ExactSolutionScalar<Scalar>::get_dimension() const
 {
   return 1;
 }
- 
+
 template<typename Scalar>
 ExactSolutionVector<Scalar>::ExactSolutionVector(Mesh* mesh) : ExactSolution<Scalar>(mesh)
 {

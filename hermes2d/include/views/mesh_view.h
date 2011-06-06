@@ -44,7 +44,7 @@ public:
 
 protected:
 
-  Linearizer lin;
+  Linearizer<double> lin;
 
   bool b_ids, b_markers, b_elem_mrk;
 

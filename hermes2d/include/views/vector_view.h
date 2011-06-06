@@ -50,7 +50,7 @@ public:
   void save_numbered(const char* format, int number);
 
 protected:
-  Vectorizer vec;
+  Vectorizer<Scalar> vec;
 
   double gx, gy, gs;
   bool hexa; // false - quad grid, true - hexa grid

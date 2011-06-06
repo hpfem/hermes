@@ -16764,7 +16764,7 @@ static void check_leg_tri(Shapeset* shapeset)
 {
   shapeset->set_mode(HERMES_MODE_TRIANGLE);
   for (int i = 1; i <= 10; i++)
-  {
+{
     int nb = shapeset->get_num_bubbles(i);
     if (nb != 3*(i-1) + (i-1)*(i-2))
       error("Wrong bubble count");

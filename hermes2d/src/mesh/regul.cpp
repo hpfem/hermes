@@ -36,8 +36,8 @@ void Mesh::regularize_triangle(Element* e)
   Element* t[3];
 
   int eo[3] = { get_edge_degree(e->vn[0], e->vn[1]),
-                get_edge_degree(e->vn[1], e->vn[2]),
-                get_edge_degree(e->vn[2], e->vn[0]) };
+    get_edge_degree(e->vn[1], e->vn[2]),
+    get_edge_degree(e->vn[2], e->vn[0]) };
 
   int sum = eo[0] + eo[1] + eo[2];
   if (sum == 3)
@@ -119,13 +119,13 @@ void Mesh::regularize_triangle(Element* e)
 void Mesh::regularize_quad(Element* e)
 {
   int i, k = 0, k1, k2, k3, n = 0, m = 0;
- Node *v4, *v5;
+  Node *v4, *v5;
   Element* t[4];
 
   int eo[4] = { get_edge_degree(e->vn[0], e->vn[1]),
-                get_edge_degree(e->vn[1], e->vn[2]),
-                get_edge_degree(e->vn[2], e->vn[3]),
-                get_edge_degree(e->vn[3], e->vn[0]) };
+    get_edge_degree(e->vn[1], e->vn[2]),
+    get_edge_degree(e->vn[2], e->vn[3]),
+    get_edge_degree(e->vn[3], e->vn[0]) };
 
   int sum = eo[0] + eo[1] + eo[2] + eo[3];
   if (sum == 4)
@@ -205,23 +205,23 @@ void Mesh::regularize_quad(Element* e)
     }
     else //sum = 3
     {
-       if (eo[0] == 1 && eo[2] == 1)
-       {
-         refine_element_id(e->id, 2);
-         for (i = 0; i < 4; i++)
-           assign_parent(e, i);
-         n = 2; m = 3;
-       }
-       else if (eo[1] == 1 && eo[3] == 1)
-       {
-         refine_element_id(e->id, 1);
-         for (i = 0; i < 4; i++)
-           assign_parent(e, i);
-         n = 0; m = 1;
-       }
+      if (eo[0] == 1 && eo[2] == 1)
+      {
+        refine_element_id(e->id, 2);
+        for (i = 0; i < 4; i++)
+          assign_parent(e, i);
+        n = 2; m = 3;
+      }
+      else if (eo[1] == 1 && eo[3] == 1)
+      {
+        refine_element_id(e->id, 1);
+        for (i = 0; i < 4; i++)
+          assign_parent(e, i);
+        n = 0; m = 1;
+      }
 
-       regularize_quad(e->sons[n]);
-       regularize_quad(e->sons[m]);
+      regularize_quad(e->sons[n]);
+      regularize_quad(e->sons[m]);
 
     }
 
@@ -315,24 +315,24 @@ int* Mesh::regularize(int n)
         {
           j = e->next_vert(i);
           if (get_edge_degree(e->vn[i], e->vn[j]) > n)
-            { iso = 0; ok = false; break; }
+          { iso = 0; ok = false; break; }
         }
       }
       else
       {
         if (   ((get_edge_degree(e->vn[0], e->vn[1]) > n)  || (get_edge_degree(e->vn[2], e->vn[3]) > n))
-            && (get_edge_degree(e->vn[1], e->vn[2]) <= n) && (get_edge_degree(e->vn[3], e->vn[0]) <= n) )
-          { iso = 2; ok = false; }
+          && (get_edge_degree(e->vn[1], e->vn[2]) <= n) && (get_edge_degree(e->vn[3], e->vn[0]) <= n) )
+        { iso = 2; ok = false; }
         else if (    (get_edge_degree(e->vn[0], e->vn[1]) <= n)  && (get_edge_degree(e->vn[2], e->vn[3]) <= n)
-                  && ((get_edge_degree(e->vn[1], e->vn[2]) > n) || (get_edge_degree(e->vn[3], e->vn[0]) > n)) )
-          { iso = 1; ok = false; }
+          && ((get_edge_degree(e->vn[1], e->vn[2]) > n) || (get_edge_degree(e->vn[3], e->vn[0]) > n)) )
+        { iso = 1; ok = false; }
         else
         {
           for(unsigned int i = 0; i < e->nvert; i++)
           {
             j = e->next_vert(i);
             if (get_edge_degree(e->vn[i], e->vn[j]) > n)
-              { iso = 0; ok = false; break; }
+            { iso = 0; ok = false; break; }
           }
         }
       }

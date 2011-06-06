@@ -20,7 +20,7 @@ const int P_INIT = 6;                             // Uniform polynomial degree o
 const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 const int CORNER_REF_LEVEL = 12;                  // Number of mesh refinements towards the re-entrant corner.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1", BDY_OUTER = "2", BDY_LEFT = "3", BDY_INNER = "4";
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
   // corner needs to be truncated for visualization purposes.)
   ScalarView gradview("Gradient", new WinGeom(450, 0, 400, 350));
   MagFilter grad(Hermes::vector<MeshFunction *>(&sln, &sln), 
-                 Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
+    Hermes::vector<int>(H2D_FN_DX, H2D_FN_DY));
   gradview.show(&grad);
 
   // Wait for all views to be closed.

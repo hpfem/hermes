@@ -24,7 +24,7 @@
 #include "form/forms.h"
 #include "weakform/weakform.h"
 #include "views/view.h"
-#include "views/scalar_view.h"
+#include "views/Scalar_view.h"
 #include "views/vector_view.h"
 #include "views/order_view.h"
 #include "function/function.h"

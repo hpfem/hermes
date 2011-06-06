@@ -131,8 +131,10 @@ Nurbs* H2DReader::load_nurbs(Mesh *mesh, Python &p, int id, Node** en, int &p1, 
   nurbs->kv = new double[nurbs->nk];
   for (i = 0; i < outer/2; i++)
     nurbs->kv[i] = 0.0;
-  if (inner) {
-    for (i = outer/2; i < inner + outer/2; i++) {
+  if (inner) 
+  {
+    for (i = outer/2; i < inner + outer/2; i++) 
+    {
       p.push_int("i", i-outer/2);
       p.exec("val = inner[i]");
       nurbs->kv[i] = p.pull_double("val");
@@ -155,15 +157,15 @@ bool H2DReader::load(const char *filename, Mesh *mesh)
 
 std::string read_file(std::istream &is)
 {
-    std::ostringstream s;
-    s << is.rdbuf();
-    return s.str();
+  std::ostringstream s;
+  s << is.rdbuf();
+  return s.str();
 }
 
 PyMODINIT_FUNC initpython_reader(void); /*proto*/
 
 bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
-        const char *filename)
+  const char *filename)
 {
   int i, j, k, n;
   Node* en;
@@ -178,7 +180,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
   p.exec("from python_reader import read_hermes_format_str");
   p.push_str("s", mesh_str);
   p.exec("vertices, elements, boundaries, curves, refinements"
-          " = read_hermes_format_str(s)");
+    " = read_hermes_format_str(s)");
 
   //// vertices ////////////////////////////////////////////////////////////////
 
@@ -226,13 +228,15 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     int nv = p.pull_int("nv");
     int idx[5];
     std::string el_marker;
-    if (!nv) { 
+    if (!nv) 
+    {
       mesh->elements.skip_slot(); 
       continue; 
     }
     if (nv < 4 || nv > 5)
       error("File %s: element #%d: wrong number of vertex indices.", filename, i);
-    if (nv == 4) {
+    if (nv == 4) 
+    {
       p.exec("n1, n2, n3, marker = elements[i]");
       idx[0] = p.pull_int("n1");
       idx[1] = p.pull_int("n2");
@@ -240,13 +244,15 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       p.exec("marker_str = 1 if isinstance(marker, str) else 0");
       if (p.pull_int("marker_str"))
         el_marker = p.pull_str("marker");
-      else {
+      else 
+      {
         std::ostringstream string_stream;
         string_stream << p.pull_int("marker");
         el_marker = string_stream.str();
       }
     } 
-    else {
+    else 
+    {
       p.exec("n1, n2, n3, n4, marker = elements[i]");
       idx[0] = p.pull_int("n1");
       idx[1] = p.pull_int("n2");
@@ -255,7 +261,8 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       p.exec("marker_str = 1 if isinstance(marker, str) else 0");
       if (p.pull_int("marker_str"))
         el_marker = p.pull_str("marker");
-      else {
+      else 
+      {
         std::ostringstream string_stream;
         string_stream << p.pull_int("marker");
         el_marker = string_stream.str();
@@ -266,7 +273,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
         error("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
 
     Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
-    
+
     int marker;
 
     // This functions check if the user-supplied marker on this element has been
@@ -274,15 +281,17 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
     mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
     marker = mesh->element_markers_conversion.get_internal_marker(el_marker);
 
-    if(nv == 4) {
-        check_triangle(i, v0, v1, v2);
-        create_triangle(mesh, marker, v0, v1, v2, NULL);
-      }
-      else {
-        Node *v3 = &mesh->nodes[idx[3]];
-        check_quad(i, v0, v1, v2, v3);
-        create_quad(mesh, marker, v0, v1, v2, v3, NULL);
-      }
+    if(nv == 4) 
+    {
+      check_triangle(i, v0, v1, v2);
+      create_triangle(mesh, marker, v0, v1, v2, NULL);
+    }
+    else 
+    {
+      Node *v3 = &mesh->nodes[idx[3]];
+      check_quad(i, v0, v1, v2, v3);
+      create_quad(mesh, marker, v0, v1, v2, v3, NULL);
+    }
 
     mesh->nactive++;
   }
@@ -313,7 +322,8 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 
       if (p.pull_int("marker_str"))
         bnd_marker = p.pull_str("marker");
-      else {
+      else 
+      {
         std::ostringstream string_stream;
         string_stream << p.pull_int("marker");
         bnd_marker = string_stream.str();
@@ -323,7 +333,7 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
       // already used, and if not, inserts it in the appropriate structure.
       mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
       marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker);
-      
+
       en->marker = marker;
 
       // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
@@ -340,95 +350,96 @@ bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
 #ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
   // check that all boundary edges have a marker assigned
   for_all_edge_nodes(en, mesh)
-    if (en->ref < 2 && en->marker == 0) {
+    if (en->ref < 2 && en->marker == 0) 
+    {
       warn("Boundary edge node does not have a boundary marker");
     }
 #endif
 
-  //// curves //////////////////////////////////////////////////////////////////
-  p.exec("have_curves = 1 if curves else 0");
-  if (p.pull_int("have_curves"))
-  {
-    p.exec("n = len(curves)");
-    n = p.pull_int("n");
-    if (n < 0) error("File %s: 'curves' must be a list.", filename);
-
-    // load curved edges
-    for (i = 0; i < n; i++)
+    //// curves //////////////////////////////////////////////////////////////////
+    p.exec("have_curves = 1 if curves else 0");
+    if (p.pull_int("have_curves"))
     {
-      // load the control points, knot vector, etc.
-      Node* en;
-      int p1, p2;
-      p.push_int("i", i);
-      p.exec("curve = curves[i]");
-      Nurbs* nurbs = load_nurbs(mesh, p, i, &en, p1, p2);
+      p.exec("n = len(curves)");
+      n = p.pull_int("n");
+      if (n < 0) error("File %s: 'curves' must be a list.", filename);
 
-      // assign the nurbs to the elements sharing the edge node
-      for (k = 0; k < 2; k++)
+      // load curved edges
+      for (i = 0; i < n; i++)
       {
-        Element* e = en->elem[k];
-        if (e == NULL) continue;
+        // load the control points, knot vector, etc.
+        Node* en;
+        int p1, p2;
+        p.push_int("i", i);
+        p.exec("curve = curves[i]");
+        Nurbs* nurbs = load_nurbs(mesh, p, i, &en, p1, p2);
 
-        if (e->cm == NULL)
+        // assign the nurbs to the elements sharing the edge node
+        for (k = 0; k < 2; k++)
         {
-          e->cm = new CurvMap;
-          memset(e->cm, 0, sizeof(CurvMap));
-          e->cm->toplevel = 1;
-          e->cm->order = 4;
-        }
+          Element* e = en->elem[k];
+          if (e == NULL) continue;
 
-        int idx = -1;
-        for (unsigned j = 0; j < e->nvert; j++)
-          if (e->en[j] == en) { idx = j; break; }
-        assert(idx >= 0);
+          if (e->cm == NULL)
+          {
+            e->cm = new CurvMap;
+            memset(e->cm, 0, sizeof(CurvMap));
+            e->cm->toplevel = 1;
+            e->cm->order = 4;
+          }
 
-        if (e->vn[idx]->id == p1)
-        {
-          e->cm->nurbs[idx] = nurbs;
-          nurbs->ref++;
+          int idx = -1;
+          for (unsigned j = 0; j < e->nvert; j++)
+            if (e->en[j] == en) { idx = j; break; }
+            assert(idx >= 0);
+
+            if (e->vn[idx]->id == p1)
+            {
+              e->cm->nurbs[idx] = nurbs;
+              nurbs->ref++;
+            }
+            else
+            {
+              Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
+              e->cm->nurbs[idx] = nurbs_rev;
+              nurbs_rev->ref++;
+            }
         }
-        else
-        {
-          Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-          e->cm->nurbs[idx] = nurbs_rev;
-          nurbs_rev->ref++;
-        }
+        if (!nurbs->ref) delete nurbs;
       }
-      if (!nurbs->ref) delete nurbs;
     }
-  }
 
-  // update refmap coeffs of curvilinear elements
-  Element* e;
-  for_all_elements(e, mesh)
-    if (e->cm != NULL)
-      e->cm->update_refmap_coeffs(e);
+    // update refmap coeffs of curvilinear elements
+    Element* e;
+    for_all_elements(e, mesh)
+      if (e->cm != NULL)
+        e->cm->update_refmap_coeffs(e);
 
-  //// refinements /////////////////////////////////////////////////////////////
-  p.exec("have_refinements = 1 if refinements else 0");
-  if (p.pull_int("have_refinements"))
-  {
-    p.exec("n = len(refinements)");
-    n = p.pull_int("n");
-    if (n < 0) error("File %s: 'refinements' must be a list.", filename);
-
-    // perform initial refinements
-    for (i = 0; i < n; i++)
+    //// refinements /////////////////////////////////////////////////////////////
+    p.exec("have_refinements = 1 if refinements else 0");
+    if (p.pull_int("have_refinements"))
     {
-      int id, ref;
-      p.push_int("i", i);
-      p.exec("id, ref = refinements[i]");
-      id = p.pull_int("id");
-      ref = p.pull_int("ref");
-      mesh->refine_element_id(id, ref);
+      p.exec("n = len(refinements)");
+      n = p.pull_int("n");
+      if (n < 0) error("File %s: 'refinements' must be a list.", filename);
+
+      // perform initial refinements
+      for (i = 0; i < n; i++)
+      {
+        int id, ref;
+        p.push_int("i", i);
+        p.exec("id, ref = refinements[i]");
+        id = p.pull_int("id");
+        ref = p.pull_int("ref");
+        mesh->refine_element_id(id, ref);
+      }
     }
-  }
-  mesh->ninitial = mesh->elements.get_num_items();
+    mesh->ninitial = mesh->elements.get_num_items();
 
-  mesh->seq = g_mesh_seq++;
+    mesh->seq = g_mesh_seq++;
 
 
-  return true;
+    return true;
 }
 
 //// save ////////////////////////////////////////////////////////////////////////////////////
@@ -474,8 +485,8 @@ void H2DReader::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
     fprintf(f, "  { %d, %d, %d, { ", p1, p2, nurbs->degree);
     for (int i = 1; i < nurbs->np-1; i++)
       fprintf(f, "{ %.16g, %.16g, %.16g }%s ",
-                 nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
-                 i < nurbs->np-2 ? "," : "");
+      nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
+      i < nurbs->np-2 ? "," : "");
 
     fprintf(f, "}, { ");
     int max = nurbs->nk - (nurbs->degree+1);
@@ -527,33 +538,35 @@ bool H2DReader::save(const char* filename, Mesh *mesh)
   first = true;
   for_all_base_elements(e, mesh)
     for (unsigned i = 0; i < e->nvert; i++)
-      if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
+      if ((mrk = mesh->get_base_edge_node(e, i)->marker)) 
+      {
         const char* nl = first ? "\n" : ",\n";  first = false;
         fprintf(f, "%s  { %d, %d, \"%s\" }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).c_str());
       }
-  fprintf(f, "\n}\n\n");
+      fprintf(f, "\n}\n\n");
 
-  // save curved edges
-  first = true;
-  for_all_base_elements(e, mesh)
-    if (e->is_curved())
-      for (unsigned i = 0; i < e->nvert; i++)
-        if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
-          fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
-          save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
-        }
-  if (!first) fprintf(f, "\n}\n\n");
+      // save curved edges
+      first = true;
+      for_all_base_elements(e, mesh)
+        if (e->is_curved())
+          for (unsigned i = 0; i < e->nvert; i++)
+            if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) 
+            {
+              fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
+              save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
+            }
+            if (!first) fprintf(f, "\n}\n\n");
 
-  // save refinements
-  unsigned temp = mesh->seq;
-  mesh->seq = mesh->nbase;
-  first = true;
-  for_all_base_elements(e, mesh)
-    save_refinements(mesh, f, e, e->id, first);
-  if (!first) fprintf(f, "\n}\n\n");
+            // save refinements
+            unsigned temp = mesh->seq;
+            mesh->seq = mesh->nbase;
+            first = true;
+            for_all_base_elements(e, mesh)
+              save_refinements(mesh, f, e, e->id, first);
+            if (!first) fprintf(f, "\n}\n\n");
 
-  mesh->seq = temp;
-  fclose(f);
+            mesh->seq = temp;
+            fclose(f);
 
-  return true;
+            return true;
 }

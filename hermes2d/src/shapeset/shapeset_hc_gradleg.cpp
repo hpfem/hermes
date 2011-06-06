@@ -6753,7 +6753,8 @@ static Shapeset::shape_fn_t gradleg_tri_fn_by[] =
 
 };
 
-static int gradleg_tri_bubble_indices_all_orders[] = {
+static int gradleg_tri_bubble_indices_all_orders[] = 
+{
  66, 67, 68,
  69, 70, 71, 93, 94,
  72, 73, 74, 95, 96, 97, 98,
@@ -7036,7 +7037,7 @@ static double gradleg_quad_p0_e4_by_0(double x, double y)
   return -(l0(x) * Legendre0x(y));
 }
 
-/* Edge fns - gradients of scalar lobatto edge functions */
+/* Edge fns - gradients of Scalar lobatto edge functions */
 
 static double gradleg_quad_l0_l2_a(double x, double y)
 {
@@ -15816,7 +15817,7 @@ static void check_gradleg_tri(Shapeset* shapeset)
 {
   shapeset->set_mode(HERMES_MODE_TRIANGLE);
   for (int i = 1; i <= 10; i++)
-  {
+{
     int nb = shapeset->get_num_bubbles(i);
     if (nb != 3*(i-1) + (i-1)*(i-2))
       error("Wrong bubble count");

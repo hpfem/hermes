@@ -23,7 +23,7 @@
 //// VectorView /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 VectorView<Scalar>::VectorView(const char* title, WinGeom* wg)
-          : View(title, wg)
+  : View(title, wg)
 {
   gx = gy = 0.0;
   gs = 20.0;
@@ -36,7 +36,7 @@ VectorView<Scalar>::VectorView(const char* title, WinGeom* wg)
 
 template<typename Scalar>
 VectorView<Scalar>::VectorView(char* title, WinGeom* wg)
-          : View(title, wg)
+  : View(title, wg)
 {
   gx = gy = 0.0;
   gs = 20.0;
@@ -71,7 +71,7 @@ void VectorView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* 
   vec.lock_data();
   vec.process_solution(xsln, xitem, ysln, yitem, eps);
   if (range_auto) { range_min = vec.get_min_value();
-                    range_max = vec.get_max_value(); }
+  range_max = vec.get_max_value(); }
   vec.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
   vec.unlock_data();
 
@@ -313,11 +313,12 @@ void VectorView<Scalar>::on_display()
       bool shift = hexa && (s & 1);
 
       // if there are two points with min y-coordinate, switch to the next segment
-      if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1])) {
+      if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1])) 
+      {
         if (tvert[l1][1] == tvert[l2][1])
-          {l1 = l2; l2 = r2;}
+        {l1 = l2; l2 = r2;}
         else if (tvert[r1][1] == tvert[r2][1])
-          {r1 = r2; r2 = l2;}
+        {r1 = r2; r2 = l2;}
       }
 
       // slope of the left and right segment
@@ -367,12 +368,14 @@ void VectorView<Scalar>::on_display()
           lry += gt;
         }
         // change segment
-        if (lry >= tvert[l2][1]) {
+        if (lry >= tvert[l2][1]) 
+        {
           l1 = l2; l2 = r2;
           ml = (tvert[l1][0] - tvert[l2][0])/(tvert[l1][1] - tvert[l2][1]);
           lx = tvert[l1][0] + ml * (lry - (tvert[l1][1]));
         }
-        else {
+        else 
+        {
           r1 = r2; r2 = l2;
           mr = (tvert[r1][0] - tvert[r2][0])/(tvert[r1][1] - tvert[r2][1]);
           rx = tvert[r1][0] + mr * (lry - (tvert[r1][1]));
@@ -403,44 +406,44 @@ void VectorView<Scalar>::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
-    case 'm':
-      lines = !lines;
-      refresh();
-      break;
+  case 'm':
+    lines = !lines;
+    refresh();
+    break;
 
-    case 'l':
-      pmode = !pmode;
-      refresh();
-      break;
+  case 'l':
+    pmode = !pmode;
+    refresh();
+    break;
 
-    case 'c':
-      reset_view(true);
-      refresh();
-      break;
+  case 'c':
+    reset_view(true);
+    refresh();
+    break;
 
-   case 'f':
-      set_palette_filter(pal_filter != GL_LINEAR);
-      break;
+  case 'f':
+    set_palette_filter(pal_filter != GL_LINEAR);
+    break;
 
-    case 'x':
-      set_grid_type(!hexa);
-      break;
+  case 'x':
+    set_grid_type(!hexa);
+    break;
 
-    case 'b':
-      mode++;
-      if (mode > 2) mode = 0;
-      refresh();
-      break;
+  case 'b':
+    mode++;
+    if (mode > 2) mode = 0;
+    refresh();
+    break;
 
-    case '*':
-    case '/':
-      if (key == '*') length_coef *= 1.1; else length_coef /= 1.1;
-      refresh();
-      break;
+  case '*':
+  case '/':
+    if (key == '*') length_coef *= 1.1; else length_coef /= 1.1;
+    refresh();
+    break;
 
-    default:
-      View::on_key_down(key, x, y);
-      break;
+  default:
+    View::on_key_down(key, x, y);
+    break;
   }
 }
 
@@ -456,7 +459,8 @@ void VectorView<Scalar>::load_data(const char* filename)
   vec.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
   vec.unlock_data();
 
-  if (range_auto) {
+  if (range_auto) 
+  {
     range_min = vec.get_min_value();
     range_max = vec.get_max_value();
   }
@@ -494,25 +498,26 @@ template<typename Scalar>
 const char* VectorView<Scalar>::get_help_text() const
 {
   return
-  "VectorView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  B - toggle view mode (type of arrows x no arrows)\n"
-  "  * - extend arrows\n"
-  "  / - shorten arrows\n"
-  "  C - center image\n"
-  "  F - toggle smooth palette\n"
-  "  X - toggle hexagonal grid\n"
-  "  H - render high-quality frame\n"
-  "  M - toggle mesh\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit";
+    "VectorView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  B - toggle view mode (type of arrows x no arrows)\n"
+    "  * - extend arrows\n"
+    "  / - shorten arrows\n"
+    "  C - center image\n"
+    "  F - toggle smooth palette\n"
+    "  X - toggle hexagonal grid\n"
+    "  H - render high-quality frame\n"
+    "  M - toggle mesh\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit";
 }
 
 
 #endif // NOGLUT
 
-template class HERMES_API VectorView<scalar>;
+template class HERMES_API VectorView<double>;
+template class HERMES_API VectorView<std::complex<double> >;

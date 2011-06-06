@@ -23,7 +23,7 @@ const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Weak forms.
 #include "definitions.cpp"
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf(CONST_F);
-  
+
   // Initialize boundary conditions.
   DefaultEssentialBCConst<double> bc_essential("Dirichlet", 0.0);
   EssentialBCs<double> bcs(&bc_essential);
@@ -72,7 +72,8 @@ int main(int argc, char* argv[])
   else error ("Matrix solver failed.\n");
 
   // VTK output.
-  if (VTK_VISUALIZATION) {
+  if (VTK_VISUALIZATION) 
+  {
     // Output solution in VTK format.
     Linearizer lin;
     bool mode_3D = true;
@@ -86,7 +87,8 @@ int main(int argc, char* argv[])
   }
 
   // Visualize the solution.
-  if (HERMES_VISUALIZATION) {
+  if (HERMES_VISUALIZATION) 
+  {
     ScalarView<double> view("Solution", new WinGeom(0, 0, 440, 350));
     view.show(&sln);
     View::wait();

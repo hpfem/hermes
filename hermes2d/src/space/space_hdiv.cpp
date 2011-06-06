@@ -55,18 +55,18 @@ void HdivSpace<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 
 template<typename Scalar>
 HdivSpace<Scalar>::HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-    : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+  : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
-  init(shapeset, Ord2(p_init, p_init));
+    init(shapeset, Ord2(p_init, p_init));
 }
 
 template<typename Scalar>
 HdivSpace<Scalar>::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
-    : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
+  : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
-  init(shapeset, Ord2(p_init, p_init));
+    init(shapeset, Ord2(p_init, p_init));
 }
 
 template<typename Scalar>
@@ -122,15 +122,18 @@ void HdivSpace<Scalar>::assign_edge_dofs()
         if(this->essential_bcs != NULL)
           if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker)) != NULL)
             this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
-          else {
+          else 
+          {
             this->ndata[en->id].dof = this->next_dof;
             this->next_dof += ndofs * this->stride;
           }
-        else {
+        else 
+        {
           this->ndata[en->id].dof = this->next_dof;
           this->next_dof += ndofs * this->stride;
         }
-      else {
+      else 
+      {
         this->ndata[en->id].dof = this->next_dof;
         this->next_dof += ndofs * this->stride;
       }
@@ -240,7 +243,7 @@ Scalar* HdivSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
       if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
         rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 1)
-        * bc->value_const * el;
+          * bc->value_const * el;
       }
       // If the BC is not constant.
       else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)

@@ -35,7 +35,8 @@
 int View::screenshot_no = 1;
 
 ///////////////// methods /////////////////
-void View::init() {
+void View::init() 
+{
   jitter_x = jitter_y = 0.0;
   dragging = scaling = false;
   hq_frame = false;
@@ -65,32 +66,34 @@ void View::init() {
 
 /*
 View::View(const char* title, int x, int y, int width, int height)
-  : gl_pallete_tex_id(0)
-  , title(title), output_id(-1), output_x(x), output_y(y), output_width(width), output_height(height)
-  , vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0)
-  , view_not_reset(true)
+: gl_pallete_tex_id(0)
+, title(title), output_id(-1), output_x(x), output_y(y), output_width(width), output_height(height)
+, vertices_min_x(0), vertices_max_x(0), vertices_min_y(0), vertices_max_y(0)
+, view_not_reset(true)
 {
-  init();
+init();
 }
 */
 
 View::View(const char* title, WinGeom* wg) :
-    view_not_reset(true),
-    vertices_min_x(0),
-    vertices_max_x(0),
-    vertices_min_y(0),
-    vertices_max_y(0),
-    title(title),
-    output_id(-1),
-    gl_pallete_tex_id(0)
+view_not_reset(true),
+  vertices_min_x(0),
+  vertices_max_x(0),
+  vertices_min_y(0),
+  vertices_max_y(0),
+  title(title),
+  output_id(-1),
+  gl_pallete_tex_id(0)
 {
-  if (wg == NULL) {
+  if (wg == NULL) 
+  {
     output_x = H2D_DEFAULT_X_POS;
     output_y = H2D_DEFAULT_Y_POS;
     output_width = H2D_DEFAULT_WIDTH;
     output_height = H2D_DEFAULT_HEIGHT;
   }
-  else {
+  else 
+  {
     output_x = wg->x;
     output_y = wg->y;
     output_width = wg->width;
@@ -101,22 +104,24 @@ View::View(const char* title, WinGeom* wg) :
 }
 
 View::View(char* title, WinGeom* wg) :
-    view_not_reset(true),
-    vertices_min_x(0),
-    vertices_max_x(0),
-    vertices_min_y(0),
-    vertices_max_y(0),
-    title(title),
-    output_id(-1),
-    gl_pallete_tex_id(0)
+view_not_reset(true),
+  vertices_min_x(0),
+  vertices_max_x(0),
+  vertices_min_y(0),
+  vertices_max_y(0),
+  title(title),
+  output_id(-1),
+  gl_pallete_tex_id(0)
 {
-  if (wg == NULL) {
+  if (wg == NULL) 
+  {
     output_x = H2D_DEFAULT_X_POS;
     output_y = H2D_DEFAULT_Y_POS;
     output_width = H2D_DEFAULT_WIDTH;
     output_height = H2D_DEFAULT_HEIGHT;
   }
-  else {
+  else 
+  {
     output_x = wg->x;
     output_y = wg->y;
     output_width = wg->width;
@@ -156,31 +161,36 @@ void View::wait(const char* text)
   wait(HERMES_WAIT_CLOSE, text);
 }
 
-void View::wait(ViewWaitEvent wait_event, const char* text) {
+void View::wait(ViewWaitEvent wait_event, const char* text) 
+{
   //prepare message
   std::stringstream str;
   str << "  << ";
   if (text != NULL)
     str << text;
-  else {
-    switch(wait_event) {
-      case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
-      case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
-      default: error("Unknown wait event"); break;
+  else 
+  {
+    switch(wait_event) 
+    {
+    case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
+    case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
+    default: error("Unknown wait event"); break;
     }
   }
   str << " >>" << std::endl;
 
   //do something
-  switch(wait_event) {
-    case HERMES_WAIT_CLOSE: wait_for_all_views_close(str.str().c_str()); break;
-    case HERMES_WAIT_KEYPRESS: wait_for_any_key(str.str().c_str()); break;
-    default: error("Unknown wait event"); break;
+  switch(wait_event) 
+  {
+  case HERMES_WAIT_CLOSE: wait_for_all_views_close(str.str().c_str()); break;
+  case HERMES_WAIT_KEYPRESS: wait_for_any_key(str.str().c_str()); break;
+  default: error("Unknown wait event"); break;
   }
 }
 
 
-void View::refresh() {
+void View::refresh() 
+{
   bool do_refresh = true;
   view_sync.enter();
   if (output_id < 0)
@@ -190,8 +200,10 @@ void View::refresh() {
     refresh_view(output_id);
 }
 
-void View::reset_view(bool force_reset) {
-  if (force_reset || view_not_reset) {
+void View::reset_view(bool force_reset) 
+{
+  if (force_reset || view_not_reset) 
+  {
     double mesh_width  = vertices_max_x - vertices_min_x;
     double mesh_height = vertices_max_y - vertices_min_y;
 
@@ -337,8 +349,8 @@ void View::set_3d_projection(int fov, double znear, double zfar)
   double right = (double) output_width / output_height * top;
   double left = -right;
   double bottom = -top;
-	double offsx = (right - left) / output_width * jitter_x;
-	double offsy = (top - bottom) / output_height * jitter_y;
+  double offsx = (right - left) / output_width * jitter_x;
+  double offsy = (top - bottom) / output_height * jitter_y;
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -412,7 +424,8 @@ void View::on_mouse_move(int x, int y)
     int oldv = pos_vert, oldh = pos_horz;
     pos_horz = (x > output_width/2);
     pos_vert = (y < output_height/2);
-    if (pos_horz != oldh || pos_vert != oldv) {
+    if (pos_horz != oldh || pos_vert != oldv) 
+    {
       update_layout();
       refresh();
     }
@@ -421,7 +434,7 @@ void View::on_mouse_move(int x, int y)
   {
     bool oldf = scale_focused;
     scale_focused = (x >= scale_x && x <= scale_x + scale_width &&
-                     y >= scale_y && y <= scale_y + scale_height);
+      y >= scale_y && y <= scale_y + scale_height);
     if (oldf != scale_focused)
       refresh();
   }
@@ -474,21 +487,21 @@ void View::on_key_down(unsigned char key, int x, int y)
 
   switch (key)
   {
-    case 'h':
+  case 'h':
     {
       hq_frame = true;
       refresh();
       break;
     }
 
-    case 27:
-    case 'q':
+  case 27:
+  case 'q':
     {
       close();
       break;
     }
 
-    case 's':
+  case 's':
     {
       const char *file_name = get_screenshot_file_name();
       glReadBuffer(GL_FRONT_LEFT);
@@ -496,23 +509,25 @@ void View::on_key_down(unsigned char key, int x, int y)
       break;
     }
 
-    case 'p':
+  case 'p':
     {
       // There used to be a type called default, but it caused some weird behavior.
       /*
-      switch(pal_type) {
-        case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
-        case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-        case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-        case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
-        default: error("Invalid palette type");
+      switch(pal_type) 
+      {
+      case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
+      case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+      case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+      case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
+      default: error("Invalid palette type");
       }
       */
-      switch(pal_type) {
-        case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-        case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-        case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
-        default: error("Invalid palette type");
+      switch(pal_type) 
+      {
+      case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+      case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+      case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
+      default: error("Invalid palette type");
       }
       debug_log("Switched to a palette type %d in view \"%s\"", (int)pal_type, title.c_str());
       create_gl_palette();
@@ -520,11 +535,11 @@ void View::on_key_down(unsigned char key, int x, int y)
       break;
     }
 
-    default:
-      view_sync.enter();
-      view_sync.signal_keypress();
-      view_sync.leave();
-      break;
+  default:
+    view_sync.enter();
+    view_sync.signal_keypress();
+    view_sync.leave();
+    break;
   }
 }
 
@@ -533,10 +548,10 @@ void View::on_special_key(int key, int x, int y)
 {
   switch (key)
   {
-    case GLUT_KEY_F1:
-      b_help = !b_help;
-      refresh();
-      break;
+  case GLUT_KEY_F1:
+    b_help = !b_help;
+    refresh();
+    break;
   }
 }
 
@@ -688,7 +703,7 @@ void View::set_palette_filter(bool linear)
     glGenTextures(1, &gl_pallete_tex_id);
   glBindTexture(GL_TEXTURE_1D, gl_pallete_tex_id);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, pal_filter);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, pal_filter);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, pal_filter);
   update_tex_adjust();
 
   view_sync.leave(); //unlock
@@ -729,7 +744,8 @@ void View::update_tex_adjust()
 
 void View::set_min_max_range(double min, double max)
 {
-  if (max < min) {
+  if (max < min) 
+  {
     std::swap(min, max);
     warn("Upper bound set below the lower bound: reversing to (%f,%f).", min, max);
   }
@@ -770,7 +786,7 @@ void View::draw_text(double x, double y, const char* text, int align)
   {
     int width = glutBitmapLength(font, (const unsigned char*) text);
     if (align == 1) x -= width; // align right
-               else x -= (double) width / 2; // center
+    else x -= (double) width / 2; // center
   }
   y += 5; //(double) glutBitmapHeight(font) / 2 - 1;
 
@@ -811,10 +827,10 @@ void View::draw_help()
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor4f(1.0f, 1.0f, 1.0f, 0.65f);
   glBegin(GL_QUADS);
-    glVertex2d(x, y+height+2*b);
-    glVertex2d(x+width+2*b, y+height+2*b);
-    glVertex2d(x+width+2*b, y);
-    glVertex2d(x, y);
+  glVertex2d(x, y+height+2*b);
+  glVertex2d(x+width+2*b, y+height+2*b);
+  glVertex2d(x+width+2*b, y);
+  glVertex2d(x, y);
   glEnd();
 
   glDisable(GL_BLEND);
@@ -832,12 +848,12 @@ char* View::get_screenshot_file_name()
   do
   {
     sprintf(file_name, "screen%03d.bmp", screenshot_no);
-	  FILE *f = fopen(file_name, "r");
-	  if (f == NULL)
-	    got_file_name = true;
-	  else
-  	  fclose(f);
-	  screenshot_no++;
+    FILE *f = fopen(file_name, "r");
+    if (f == NULL)
+      got_file_name = true;
+    else
+      fclose(f);
+    screenshot_no++;
   }
   while (!got_file_name);
   return file_name;
@@ -902,7 +918,7 @@ void View::save_screenshot_internal(const char *file_name)
   // fill in bitmap header
   file_header.type = BITMAP_ID;
   file_header.size = sizeof(BitmapFileHeader) +  sizeof(BitmapInfoHeader) +
-                     4 * output_width * output_height;
+    4 * output_width * output_height;
   file_header.reserved1 = file_header.reserved2 = 0;
   file_header.off_bits = 14 + 40; // length of both headers
 
@@ -1103,7 +1119,8 @@ void View::draw_discrete_scale(int numboxes, const char* boxnames[], const float
 
     const float* color = boxcolors[numboxes-1-i];
     float bcolor[3] = { color[0], color[1], color[2] };
-    if (scale_focused) {
+    if (scale_focused) 
+    {
       bcolor[0] = color[0]*0.7f + 1.0f*0.3f;
       bcolor[1] = color[1]*0.7f + 1.0f*0.3f;
       bcolor[2] = color[2]*0.7f + 1.0f*0.3f;
@@ -1147,9 +1164,9 @@ void View::update_layout()
     if (labels_width < 0) labels_width = measure_scale_labels();
     int space = scale_width + 8 + labels_width + margin;
     if (pos_horz == 0)
-      { lspace = space;  scale_x = margin; }
+    { lspace = space;  scale_x = margin; }
     else
-      { rspace = space;  scale_x = output_width - margin - scale_width; }
+    { rspace = space;  scale_x = output_width - margin - scale_width; }
 
     if (pos_vert == 0)
       scale_y = output_height - margin - scale_height;

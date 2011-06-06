@@ -29,7 +29,7 @@
 //// MeshView //////////////////////////////////////////////////////////////////////////////////////
 
 MeshView::MeshView(const char* title, WinGeom* wg)
-        : View(title, wg)
+  : View(title, wg)
 {
   nodes = elems = NULL;
   b_scale = false;
@@ -39,7 +39,7 @@ MeshView::MeshView(const char* title, WinGeom* wg)
 }
 
 MeshView::MeshView(char* title, WinGeom* wg)
-        : View(title, wg)
+  : View(title, wg)
 {
   nodes = elems = NULL;
   b_scale = false;
@@ -50,7 +50,7 @@ MeshView::MeshView(char* title, WinGeom* wg)
 
 void MeshView::show(Mesh* mesh)
 {
-  Solution<scalar> sln;
+  Solution<double> sln;
   if (mesh == NULL) error("mesh == NULL in MeshView::show().");
   if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
 
@@ -79,7 +79,8 @@ void MeshView::show(Mesh* mesh)
     oi->id = e->id;
     oi->type = e->marker;
     oi->x = oi->y = 0.0;
-    for (unsigned i = 0; i < e->nvert; i++) {
+    for (unsigned i = 0; i < e->nvert; i++) 
+    {
       oi->x += e->vn[i]->x;
       oi->y += e->vn[i]->y;
     }
@@ -133,16 +134,16 @@ void MeshView::on_display()
     int mrk = b_markers ? edges[i][2] : 0;
 
     if (!edges[i][2] &&
-        ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
-          tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
-         tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;
+      ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
+      tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
+      tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;
 
     float* color = get_marker_color(mrk);
     glColor3f(color[0], color[1], color[2]);
     glLineWidth(mrk ? 1.5f : 1.0f);
     glBegin(GL_LINES);
-      glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
-      glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
+    glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
+    glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
     glEnd();
 
     if (mrk)
@@ -150,8 +151,8 @@ void MeshView::on_display()
       glEnable(GL_LINE_STIPPLE);
       glColor3f(0.4f, 0.4f, 0.4f);
       glBegin(GL_LINES);
-        glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
-        glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
+      glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
+      glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
       glEnd();
       glDisable(GL_LINE_STIPPLE);
     }
@@ -190,31 +191,31 @@ void MeshView::on_key_down(unsigned char key, int x, int y)
 {
   switch (key)
   {
-    case 'c':
-      reset_view(true);
-      refresh();
-      break;
+  case 'c':
+    reset_view(true);
+    refresh();
+    break;
 
-    case 'b':
-      b_markers = !b_markers;
-      refresh();
-      break;
+  case 'b':
+    b_markers = !b_markers;
+    refresh();
+    break;
 
-    case 'i':
-      if (b_elem_mrk) b_elem_mrk = false;
-      b_ids = !b_ids;
-      refresh();
-      break;
+  case 'i':
+    if (b_elem_mrk) b_elem_mrk = false;
+    b_ids = !b_ids;
+    refresh();
+    break;
 
-    case 'm':
-      if (b_ids) b_ids = false;
-      b_elem_mrk = !b_elem_mrk;
-      refresh();
-      break;
+  case 'm':
+    if (b_ids) b_ids = false;
+    b_elem_mrk = !b_elem_mrk;
+    refresh();
+    break;
 
-    default:
-      View::on_key_down(key, x, y);
-      break;
+  default:
+    View::on_key_down(key, x, y);
+    break;
   }
 }
 
@@ -239,7 +240,8 @@ float* MeshView::get_marker_color(int marker)
     return edgecol;
   else if (marker > 0 && marker < 8)
     return mc[marker];
-  else {
+  else 
+  {
     srand(marker+2);
     randcol[0] = (float) rand() / RAND_MAX;
     randcol[1] = (float) rand() / RAND_MAX;
@@ -259,18 +261,18 @@ MeshView::~MeshView()
 const char* MeshView::get_help_text() const
 {
   return
-  "MeshView\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  C - center image\n"
-  "  H - render high-quality frame\n"
-  "  B - toggle boundary markers\n"
-  "  I - toggle element IDs\n"
-  "  M - toggle element markers\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit";
+    "MeshView\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  C - center image\n"
+    "  H - render high-quality frame\n"
+    "  B - toggle boundary markers\n"
+    "  I - toggle element IDs\n"
+    "  M - toggle element markers\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit";
 }
 
 #endif // NOGLUT

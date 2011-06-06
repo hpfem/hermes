@@ -28,7 +28,7 @@
 
 template<typename Scalar>
 BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
-        : ScalarView<Scalar>((char*) title, wg)
+  : ScalarView<Scalar>((char*) title, wg)
 {
   pss = NULL;
   sln = NULL;
@@ -39,7 +39,7 @@ BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
 
 template<typename Scalar>
 BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
-        : ScalarView<Scalar>(title, wg)
+  : ScalarView<Scalar>(title, wg)
 {
   pss = NULL;
   sln = NULL;
@@ -107,18 +107,18 @@ void BaseView<Scalar>::on_special_key(int key, int x, int y)
 {
   switch (key)
   {
-    case GLUT_KEY_LEFT:
-      if (base_index > -1) base_index--;
-      update_solution();
-      break;
+  case GLUT_KEY_LEFT:
+    if (base_index > -1) base_index--;
+    update_solution();
+    break;
 
-    case GLUT_KEY_RIGHT:
-      if (base_index < ndof-1) base_index++;
-      update_solution();
-      break;
+  case GLUT_KEY_RIGHT:
+    if (base_index < ndof-1) base_index++;
+    update_solution();
+    break;
 
-    default:
-      ScalarView<Scalar>::on_special_key(key, x, y);
+  default:
+    ScalarView<Scalar>::on_special_key(key, x, y);
   }
 }
 
@@ -127,30 +127,31 @@ template<typename Scalar>
 const char* BaseView<Scalar>::get_help_text() const
 {
   return
-  "BaseView\n\n"
-  "Controls:\n"
-  "  Left mouse - pan\n"
-  "  Right mouse - zoom\n"
-  "  Left arrow - previous basis function\n"
-  "  Right arrow - next basis function\n"
-  "  3 - toggle 3D mode\n"
-  "  C - center image\n"
-  "  F - toggle smooth palette\n"
-  "  H - render high-quality frame\n"
-  "  M - toggle mesh\n"
-  "  P - cycle palettes\n"
-  "  S - save screenshot\n"
-  "  F1 - this help\n"
-  "  Esc, Q - quit\n\n"
-  "3D mode:\n"
-  "  Left mouse - rotate\n"
-  "  Right mouse - zoom\n"
-  "  Middle mouse - pan\n"
-  "  * - increase Z scale\n"
-  "  / - decrease Z scale";
+    "BaseView\n\n"
+    "Controls:\n"
+    "  Left mouse - pan\n"
+    "  Right mouse - zoom\n"
+    "  Left arrow - previous basis function\n"
+    "  Right arrow - next basis function\n"
+    "  3 - toggle 3D mode\n"
+    "  C - center image\n"
+    "  F - toggle smooth palette\n"
+    "  H - render high-quality frame\n"
+    "  M - toggle mesh\n"
+    "  P - cycle palettes\n"
+    "  S - save screenshot\n"
+    "  F1 - this help\n"
+    "  Esc, Q - quit\n\n"
+    "3D mode:\n"
+    "  Left mouse - rotate\n"
+    "  Right mouse - zoom\n"
+    "  Middle mouse - pan\n"
+    "  * - increase Z scale\n"
+    "  / - decrease Z scale";
 }
 
 #endif // NOGLUT
 
-template class HERMES_API BaseView<scalar>;
+template class HERMES_API BaseView<double>;
+template class HERMES_API BaseView<std::complex<double> >;
 

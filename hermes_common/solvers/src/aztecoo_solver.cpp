@@ -32,11 +32,11 @@ AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scala
 {
   _F_
 #ifdef HAVE_AZTECOO
-  #ifndef HAVE_TEUCHOS
+#ifndef HAVE_TEUCHOS
     pc = NULL;
-  #endif
+#endif
 #else
-  error(AZTECOO_NOT_COMPILED);
+    error(AZTECOO_NOT_COMPILED);
 #endif
 }
 
@@ -45,8 +45,8 @@ AztecOOSolver<Scalar>::~AztecOOSolver()
 {
   _F_
 #ifdef HAVE_AZTECOO
-  //if (m != NULL) delete m;
-  //if (rhs != NULL) delete rhs;
+    //if (m != NULL) delete m;
+    //if (rhs != NULL) delete rhs;
 #endif
 }
 
@@ -55,7 +55,7 @@ void AztecOOSolver<Scalar>::set_solver(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
-  int az_solver;
+    int az_solver;
   if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
   else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
   else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
@@ -72,13 +72,13 @@ void AztecOOSolver<Scalar>::set_precond(const char *name)
 {
   _F_
 #ifdef HAVE_AZTECOO
-  int az_precond;
+    int az_precond;
   if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
   else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
   else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
   else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
   else az_precond = AZ_none;
-  
+
   this->precond_yes = (az_precond != AZ_none);
   aztec.SetAztecOption(AZ_precond, az_precond);
 #endif
@@ -89,7 +89,7 @@ void AztecOOSolver<Scalar>::set_option(int option, int value)
 {
   _F_
 #ifdef HAVE_AZTECOO
-  aztec.SetAztecOption(option, value);
+    aztec.SetAztecOption(option, value);
 #endif
 }
 
@@ -98,7 +98,7 @@ void AztecOOSolver<Scalar>::set_param(int param, double value)
 {
   _F_
 #ifdef HAVE_AZTECOO
-  aztec.SetAztecParam(param, value);
+    aztec.SetAztecParam(param, value);
 #endif
 }
 
@@ -107,7 +107,7 @@ bool AztecOOSolver<double>::solve()
 {
   _F_
 #ifdef HAVE_AZTECOO
-  assert(m != NULL);
+    assert(m != NULL);
   assert(rhs != NULL);
   assert(m->size == rhs->size);
 
@@ -148,7 +148,7 @@ bool AztecOOSolver<double>::solve()
   for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
   return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
@@ -157,7 +157,7 @@ bool AztecOOSolver<std::complex<double> >::solve()
 {
   _F_
 #ifdef HAVE_AZTECOO
-  assert(m != NULL);
+    assert(m != NULL);
   assert(rhs != NULL);
   assert(m->size == rhs->size);
 
@@ -190,7 +190,7 @@ bool AztecOOSolver<std::complex<double> >::solve()
   for (unsigned int i = 0; i < m->size; i++) this->sln[i] = std::complex<double>(xr[i], xi[i]);
   return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
@@ -199,9 +199,9 @@ int AztecOOSolver<Scalar>::get_num_iters()
 {
   _F_
 #ifdef HAVE_AZTECOO
-  return aztec.NumIters();
+    return aztec.NumIters();
 #else
-  return -1;
+    return -1;
 #endif
 }
 
@@ -210,9 +210,9 @@ double AztecOOSolver<Scalar>::get_residual()
 {
   _F_
 #ifdef HAVE_AZTECOO
-  return aztec.TrueResidual();
+    return aztec.TrueResidual();
 #else
-  return -1.0;
+    return -1.0;
 #endif
 }
 

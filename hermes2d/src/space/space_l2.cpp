@@ -41,18 +41,18 @@ void L2Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
 
 template<typename Scalar>
 L2Space<Scalar>::L2Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-    : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+  : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
 {
   _F_
-  init(shapeset, Ord2(p_init, p_init));
+    init(shapeset, Ord2(p_init, p_init));
 }
 
 template<typename Scalar>
 L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-    : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
+  : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
 {
   _F_
-  init(shapeset, Ord2(p_init, p_init));
+    init(shapeset, Ord2(p_init, p_init));
 }
 
 template<typename Scalar>
@@ -125,7 +125,7 @@ void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
     error("Uninitialized element order (id = #%d).", e->id);
   if (!this->is_up_to_date())
     error("The space is out of date. You need to update it with assign_dofs()"
-          " any time the mesh changes.");
+    " any time the mesh changes.");
 
   // add bubble functions to the assembly list
   al->clear();
@@ -140,7 +140,8 @@ void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
   if (!ed->n) return;
 
   int* indices = this->shapeset->get_bubble_indices(ed->order);
-  for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride) {
+  for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride) 
+  {
     //printf("triplet: %d, %d, %f\n", *indices, dof, 1.0);
     al->add_triplet(*indices++, dof, 1.0);
   }
@@ -151,14 +152,14 @@ void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
 template<typename Scalar>
 void L2Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
 {
-    this->get_bubble_assembly_list(e, al);
+  this->get_bubble_assembly_list(e, al);
 }
 
 template<typename Scalar>
 Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
 {
   _F_
-  assert(order >= 1);
+    assert(order >= 1);
   Scalar* proj = new Scalar[order + 1];
 
   // Obtain linear part of the projection.
@@ -210,7 +211,7 @@ Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
         if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
         {
           rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-          * (bc->value_const - l);
+            * (bc->value_const - l);
         }
         // If the BC is not constant.
         else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)

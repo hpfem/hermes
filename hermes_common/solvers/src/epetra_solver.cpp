@@ -23,8 +23,8 @@
 
 // EpetraMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
 #ifdef HAVE_EPETRA
-  // A communicator for Epetra objects (serial version)
-  static Epetra_SerialComm seq_comm;
+// A communicator for Epetra objects (serial version)
+static Epetra_SerialComm seq_comm;
 #endif
 
 template<typename Scalar>
@@ -32,7 +32,7 @@ EpetraMatrix<Scalar>::EpetraMatrix()
 {
   _F_
 #ifdef HAVE_EPETRA
-  this->mat = NULL;
+    this->mat = NULL;
   this->mat_im = NULL;
   this->grph = NULL;
   this->std_map = NULL;
@@ -41,7 +41,7 @@ EpetraMatrix<Scalar>::EpetraMatrix()
   this->row_storage = true;
   this->col_storage = false;
 #else
-  error(EPETRA_NOT_COMPILED);
+    error(EPETRA_NOT_COMPILED);
 #endif
 }
 
@@ -50,7 +50,7 @@ template<typename Scalar>
 EpetraMatrix<Scalar>::EpetraMatrix(Epetra_RowMatrix &op)
 {
   _F_
-  this->mat = dynamic_cast<Epetra_CrsMatrix *>(&op);
+    this->mat = dynamic_cast<Epetra_CrsMatrix *>(&op);
   assert(mat != NULL);
   this->grph = (Epetra_CrsGraph *) &this->mat->Graph();
   this->std_map = (Epetra_BlockMap *) &this->grph->Map();
@@ -66,7 +66,7 @@ EpetraMatrix<Scalar>::~EpetraMatrix()
 {
   _F_
 #ifdef HAVE_EPETRA
-  free();
+    free();
 #endif
 }
 
@@ -75,7 +75,7 @@ void EpetraMatrix<Scalar>::prealloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
-  this->size = n;
+    this->size = n;
   // alloc trilinos structs
   std_map = new Epetra_Map(n, 0, seq_comm); MEM_CHECK(std_map);
   grph = new Epetra_CrsGraph(Copy, *std_map, 0); MEM_CHECK(grph);
@@ -87,7 +87,7 @@ void EpetraMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
 #ifdef HAVE_EPETRA
-  int col_to_pass = col;
+    int col_to_pass = col;
   grph->InsertGlobalIndices(row, 1, &col_to_pass);
 #endif
 }
@@ -97,7 +97,7 @@ void EpetraMatrix<double>::finish()
 {
   _F_
 #ifdef HAVE_EPETRA
-  mat->FillComplete();
+    mat->FillComplete();
 #endif
 }
 
@@ -106,7 +106,7 @@ void EpetraMatrix<std::complex<double> >::finish()
 {
   _F_
 #ifdef HAVE_EPETRA
-  mat->FillComplete();
+    mat->FillComplete();
   mat_im->FillComplete();
 #endif
 }
@@ -116,7 +116,7 @@ void EpetraMatrix<double>::alloc()
 {
   _F_
 #ifdef HAVE_EPETRA
-  grph->FillComplete();
+    grph->FillComplete();
   // create the matrix
   mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
 #endif
@@ -127,7 +127,7 @@ void EpetraMatrix<std::complex<double> >::alloc()
 {
   _F_
 #ifdef HAVE_EPETRA
-  grph->FillComplete();
+    grph->FillComplete();
   // create the matrix
   mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
   mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
@@ -139,11 +139,12 @@ void EpetraMatrix<double>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (owner) {
-    delete mat; mat = NULL;
-    delete grph; grph = NULL;
-    delete std_map; std_map = NULL;
-  }
+    if (owner) 
+    {
+      delete mat; mat = NULL;
+      delete grph; grph = NULL;
+      delete std_map; std_map = NULL;
+    }
 #endif
 }
 
@@ -152,12 +153,13 @@ void EpetraMatrix<std::complex<double> >::free()
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (owner) {
-    delete mat; mat = NULL;
-    delete mat_im; mat_im = NULL;
-    delete grph; grph = NULL;
-    delete std_map; std_map = NULL;
-  }
+    if (owner) 
+    {
+      delete mat; mat = NULL;
+      delete mat_im; mat_im = NULL;
+      delete grph; grph = NULL;
+      delete std_map; std_map = NULL;
+    }
 #endif
 }
 
@@ -167,12 +169,12 @@ Scalar EpetraMatrix<Scalar>::get(unsigned int m, unsigned int n)
   _F_
 #ifdef HAVE_EPETRA
     int n_entries = mat->NumGlobalEntries(m);
-    std::vector<double> vals(n_entries);
-    std::vector<int> idxs(n_entries);
-    mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
-    for (int i = 0; i < n_entries; i++) if (idxs[i] == (int)n) return vals[i];
+  std::vector<double> vals(n_entries);
+  std::vector<int> idxs(n_entries);
+  mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
+  for (int i = 0; i < n_entries; i++) if (idxs[i] == (int)n) return vals[i];
 #endif
-    return 0.0;
+  return 0.0;
 }
 
 template<typename Scalar>
@@ -182,7 +184,7 @@ int EpetraMatrix<Scalar>::get_num_row_entries(unsigned int row)
 #ifdef HAVE_EPETRA
     return mat->NumGlobalEntries(row);
 #else
-  return 0;
+    return 0;
 #endif
 }
 
@@ -191,7 +193,7 @@ void EpetraMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len, 
 {
   _F_
 #ifdef HAVE_EPETRA
-  int* idxs_to_pass = new int[len];
+    int* idxs_to_pass = new int[len];
   for(unsigned int i = 0; i < len; i++)
     idxs_to_pass[i] = idxs[i];
   int n_entries_to_pass = n_entries;
@@ -205,7 +207,7 @@ void EpetraMatrix<double>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
-  mat->PutScalar(0.0);
+    mat->PutScalar(0.0);
 #endif
 }
 
@@ -214,7 +216,7 @@ void EpetraMatrix<std::complex<double> >::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
-  mat->PutScalar(0.0);
+    mat->PutScalar(0.0);
   mat_im->PutScalar(0.0);
 #endif
 }
@@ -224,11 +226,11 @@ void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (v != 0.0) {		// ignore zero values
-    int n_to_pass = n;
-    int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
-    if (ierr != 0) error("Failed to insert into Epetra matrix");
-  }
+    if (v != 0.0) {		// ignore zero values
+      int n_to_pass = n;
+      int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
+      if (ierr != 0) error("Failed to insert into Epetra matrix");
+    }
 #endif
 }
 
@@ -237,16 +239,16 @@ void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, st
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (v != 0.0) {		// ignore zero values
-    double v_r = std::real<double>(v);
-    int n_to_pass = n;
-    int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
-    if (ierr != 0) error("Failed to insert into Epetra matrix");
-    assert(ierr == 0);
-    double v_i = std::imag<double>(v);
-    ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
-    assert(ierr == 0);
-  }
+    if (v != 0.0) {		// ignore zero values
+      double v_r = std::real<double>(v);
+      int n_to_pass = n;
+      int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
+      if (ierr != 0) error("Failed to insert into Epetra matrix");
+      assert(ierr == 0);
+      double v_i = std::imag<double>(v);
+      ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
+      assert(ierr == 0);
+    }
 #endif
 }
 
@@ -254,7 +256,8 @@ void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, st
 template<typename Scalar>
 void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
-  for (unsigned int i=0; i < this->size; i++) {
+  for (unsigned int i=0; i < this->size; i++) 
+  {
     add(i, i, v);
   }
 };
@@ -264,10 +267,10 @@ void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < m; i++)				// rows
-    for (unsigned int j = 0; j < n; j++)			// cols
-      if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-        add(rows[i], cols[j], mat[i][j]);
+    for (unsigned int i = 0; i < m; i++)				// rows
+      for (unsigned int j = 0; j < n; j++)			// cols
+        if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+          add(rows[i], cols[j], mat[i][j]);
 #endif
 }
 
@@ -277,7 +280,7 @@ template<typename Scalar>
 bool EpetraMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
-  return false;
+    return false;
 }
 
 template<typename Scalar>
@@ -285,9 +288,9 @@ unsigned int EpetraMatrix<Scalar>::get_matrix_size() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return this->size;
+    return this->size;
 #else
-  return -1;
+    return -1;
 #endif
 }
 
@@ -296,9 +299,9 @@ double EpetraMatrix<Scalar>::get_fill_in() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros() / ((double)this->size*this->size);
+    return mat->NumGlobalNonzeros() / ((double)this->size*this->size);
 #else
-  return -1;
+    return -1;
 #endif
 }
 
@@ -307,9 +310,9 @@ unsigned int EpetraMatrix<Scalar>::get_nnz() const
 {
   _F_
 #ifdef HAVE_EPETRA
-  return mat->NumGlobalNonzeros();
+    return mat->NumGlobalNonzeros();
 #else
-  return -1;
+    return -1;
 #endif
 }
 
@@ -320,7 +323,7 @@ EpetraVector<Scalar>::EpetraVector()
 {
   _F_
 #ifdef HAVE_EPETRA
-  this->std_map = NULL;
+    this->std_map = NULL;
   this->vec = NULL;
   this->vec_im = NULL;
   this->size = 0;
@@ -333,7 +336,7 @@ template<typename Scalar>
 EpetraVector<Scalar>::EpetraVector(const Epetra_Vector &v)
 {
   _F_
-  this->vec = (Epetra_Vector *) &v;
+    this->vec = (Epetra_Vector *) &v;
   this->std_map = (Epetra_BlockMap *) &v.Map();
   this->size = v.MyLength();
   this->owner = false;
@@ -345,7 +348,7 @@ EpetraVector<Scalar>::~EpetraVector()
 {
   _F_
 #ifdef HAVE_EPETRA
-  if (owner) free();
+    if (owner) free();
 #endif
 }
 
@@ -354,7 +357,7 @@ void EpetraVector<Scalar>::alloc(unsigned int n)
 {
   _F_
 #ifdef HAVE_EPETRA
-  free();
+    free();
   this->size = n;
   std_map = new Epetra_Map(this->size, 0, seq_comm); MEM_CHECK(std_map);
   vec = new Epetra_Vector(*std_map); MEM_CHECK(vec);
@@ -368,7 +371,7 @@ void EpetraVector<Scalar>::zero()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
+    for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
   for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
 #endif
 }
@@ -378,7 +381,7 @@ void EpetraVector<Scalar>::change_sign()
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < this->size; i++) (*vec)[i] *= -1.;
+    for (unsigned int i = 0; i < this->size; i++) (*vec)[i] *= -1.;
   for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] *= -1.;
 #endif
 }
@@ -388,12 +391,13 @@ void EpetraVector<Scalar>::free()
 {
   _F_
 #ifdef HAVE_EPETRA
-  if(this->owner) {
-    delete std_map; std_map = NULL;
-    delete vec; vec = NULL;
-    delete vec_im; vec_im = NULL;
-    this->size = 0;
-  }
+    if(this->owner) 
+    {
+      delete std_map; std_map = NULL;
+      delete vec; vec = NULL;
+      delete vec_im; vec_im = NULL;
+      this->size = 0;
+    }
 #endif
 }
 
@@ -402,7 +406,7 @@ void EpetraVector<double>::set(unsigned int idx, double y)
 {
   _F_
 #ifdef HAVE_EPETRA
-  (*vec)[idx] = y;
+    (*vec)[idx] = y;
 #endif
 }
 
@@ -411,7 +415,7 @@ void EpetraVector<std::complex<double> >::set(unsigned int idx, std::complex<dou
 {
   _F_
 #ifdef HAVE_EPETRA
-  (*vec)[idx] = std::real(y);
+    (*vec)[idx] = std::real(y);
   (*vec_im)[idx] = std::imag(y);
 #endif
 }
@@ -421,7 +425,7 @@ void EpetraVector<double>::add(unsigned int idx, double y)
 {
   _F_
 #ifdef HAVE_EPETRA
-  (*vec)[idx] += y;
+    (*vec)[idx] += y;
 #endif
 }
 
@@ -430,7 +434,7 @@ void EpetraVector<std::complex<double> >::add(unsigned int idx, std::complex<dou
 {
   _F_
 #ifdef HAVE_EPETRA
-  (*vec)[idx] += std::real(y);
+    (*vec)[idx] += std::real(y);
   (*vec_im)[idx] += std::imag(y);
 #endif
 }
@@ -440,8 +444,8 @@ void EpetraVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
 {
   _F_
 #ifdef HAVE_EPETRA
-  for (unsigned int i = 0; i < n; i++)
-    add(idx[i], y[i]);
+    for (unsigned int i = 0; i < n; i++)
+      add(idx[i], y[i]);
 #endif
 }
 
@@ -449,7 +453,7 @@ template<typename Scalar>
 bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
   _F_
-  return false;
+    return false;
 }
 template class HERMES_API EpetraMatrix<double>;
 template class HERMES_API EpetraMatrix<std::complex<double> >;
