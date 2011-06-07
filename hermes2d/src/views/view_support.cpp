@@ -498,6 +498,6 @@ namespace Hermes
       view_sync.leave();
     }
 
-#endif // NOGLUT
   }
 }
+#endif // NOGLUT

@@ -72,21 +72,6 @@ namespace Hermes
       virtual const char* get_help_text() const;
 
     };
-
-#else // NOGLUT
-
-    class HERMES_API OrderView : public View
-    {
-    public:
-      OrderView(const char* title = "OrderView", WinGeom* wg = NULL) {}
-      void show(Space<Scalar>* space)
-      { verbose("OrderView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-      void load_data(const char* filename) {}
-      void save_data(const char* filename) {}
-      void save_numbered(const char* format, int number) {}
-    };
-
-
 #endif // NOGLUT
   }
 }

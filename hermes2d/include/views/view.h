@@ -237,39 +237,6 @@ namespace Hermes
       friend int remove_view_in_thread(void*);
       friend void on_create(int);
     };
-
-#else // NOGLUT
-
-    class HERMES_API View
-    {
-    public:
-      View() {}
-      View(const char* title, int x, int y, int width, int height) {}
-      View(const char* title, int win_geom[4]) {}
-      ~View() {}
-      int  create() { return 0; }
-      void close() {}
-      void set_title(const char* title) {}
-      void set_min_max_range(double min, double max) {}
-      void auto_min_max_range() {}
-      void get_min_max_range(double& min, double& max) {}
-      void show_scale(bool show = true) {}
-      void set_scale_position(int horz, int vert) {}
-      void set_scale_size(int width, int height, int numticks) {}
-      void set_scale_format(const char* fmt) {}
-      void fix_scale_width(int width = 80) {}
-      void save_screenshot(const char* bmpname, bool high_quality = false) {}
-      void save_numbered_screenshot(const char* format, int number, bool high_quality = false) {}
-      void set_palette(ViewPaletteType type) {}
-      void set_num_palette_steps(int num) {}
-      void set_palette_filter(bool linear) {}
-      void wait_for_keypress(const char* text = NULL) {}
-      void wait_for_close() {}
-      void wait_for_draw() {}
-      static void wait(const char* text) {}
-      static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL) {}
-    };
-
 #endif // NOGLUT
   }
 }

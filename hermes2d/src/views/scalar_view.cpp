@@ -21,7 +21,7 @@
 #include <cmath>
 #include <list>
 #include "hermes2d_common_defs.h"
-#include "Scalar_view.h"
+#include "scalar_view.h"
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 

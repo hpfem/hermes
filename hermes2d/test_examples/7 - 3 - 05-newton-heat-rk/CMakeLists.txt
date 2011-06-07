@@ -1,7 +1,3 @@
-if(NOT H2D_REAL)
-    return()
-endif(NOT H2D_REAL)
-
 project(P03-05-newton-heat-rk)
 
 add_executable(${PROJECT_NAME} main.cpp)

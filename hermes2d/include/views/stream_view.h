@@ -98,24 +98,6 @@ namespace Hermes
       virtual const char* get_help_text() const;
 
     };
-
-#else // NOGLUT
-
-    /* Empty dummy implementation in a case GLUT is not used */
-    template<typename Scalar>
-    class HERMES_API StreamView : public View
-    {
-    public:
-
-      StreamView(const char* title = "StreamView", WinGeom* wg = NULL) : View(title, wg->x, wg->y, wg->width, wg->height) {};
-      virtual ~StreamView() {};
-
-      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
-      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem) {};
-
-      void add_streamline(double x, double y) {};
-    };
-
 #endif // NOGLUT
   }
 }

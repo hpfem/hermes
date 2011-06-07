@@ -71,18 +71,6 @@ namespace Hermes
       Mesh* mesh;
 
     };
-
-#else // NOGLUT
-
-    class HERMES_API MeshView : public View
-    {
-    public:
-      MeshView(const char* title = "MeshView", WinGeom* wg = NULL) {}
-      virtual ~MeshView() {}
-      void show(Mesh* mesh)
-      { verbose("MeshView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-    };
-
 #endif // NOGLUT
   }
 }

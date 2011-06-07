@@ -18,7 +18,7 @@
 namespace WeakFormsH1 
 {
   template<typename Scalar>
-  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
+  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
     (int i, int j, std::string area, Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, 
     GeomType gt)
@@ -29,7 +29,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol<Scalar>
+  DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
     (int i, int j, Hermes::vector<std::string> areas,Scalar const_coeff, 
     DefaultFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
     : MatrixFormVol<Scalar>(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -39,7 +39,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol<Scalar>() 
+  DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
@@ -314,7 +314,7 @@ namespace WeakFormsH1
 
 
   template<typename Scalar>
-  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, std::string area, Scalar const_coeff,
+  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormVol<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -324,7 +324,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormVol<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -334,7 +334,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol<Scalar>() 
+  DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
@@ -674,7 +674,7 @@ namespace WeakFormsH1
 
 
   template<typename Scalar>
-  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area,
+  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::string area,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -684,7 +684,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+  DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
     Scalar const_coeff, DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -694,7 +694,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf<Scalar>() 
+  DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
@@ -773,7 +773,7 @@ namespace WeakFormsH1
 
 
   template<typename Scalar>
-  DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf<Scalar>(int i, int j, std::string area, Scalar const_coeff,
+  DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, std::string area, Scalar const_coeff,
     CubicSpline* c_spline,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, area),
@@ -784,7 +784,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff,
+  DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff,
     CubicSpline* c_spline,
     GeomType gt)
     : MatrixFormSurf<Scalar>(i, j, areas), const_coeff(const_coeff), spline_coeff(spline_coeff), gt(gt)
@@ -794,7 +794,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf<Scalar>() 
+  DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf() 
   {
     if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
   };
@@ -835,7 +835,7 @@ namespace WeakFormsH1
 
 
   template<typename Scalar>
-  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, std::string area, Scalar const_coeff,
+  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::string area, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -845,7 +845,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+  DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
     DefaultFunction<Scalar>* f_coeff,
     GeomType gt)
     : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -855,7 +855,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf<Scalar>() 
+  DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf() 
   {
     if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
   };
@@ -934,7 +934,7 @@ namespace WeakFormsH1
 
 
   template<typename Scalar>
-  DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
+  DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
     std::string area,
     Hermes::vector<Scalar> coeffs,
     GeomType gt)
@@ -943,7 +943,7 @@ namespace WeakFormsH1
   }
 
   template<typename Scalar>
-  DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
+  DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
     Hermes::vector<std::string> areas,
     Hermes::vector<Scalar> coeffs, GeomType gt)
     : WeakForm::MultiComponentVectorFormSurf<Scalar>(coordinates, areas), coeffs(coeffs), gt(gt) 

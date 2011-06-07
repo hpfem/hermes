@@ -68,26 +68,6 @@ namespace Hermes
       virtual const char* get_help_text() const;
 
     };
-
-#else // NOGLUT
-
-    template<typename Scalar>
-    class HERMES_API VectorView : public View
-    {
-    public:
-      VectorView(const char* title = "VectorView", WinGeom* wg = NULL) {}
-      void show(MeshFunction<Scalar>* vsln, double eps = HERMES_EPS_NORMAL)
-      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps = HERMES_EPS_NORMAL)
-      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
-      { verbose("VectorView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-      void set_grid_type(bool hexa) {}
-      void load_data(const char* filename) {}
-      void save_data(const char* filename) {}
-      void save_numbered(const char* format, int number) {}
-    };
-
 #endif // NOGLUT
   }
 }

@@ -71,19 +71,6 @@ namespace Hermes
       virtual const char* get_help_text() const;
 
     };
-
-#else // NOGLUT
-
-    class HERMES_API BaseView : public ScalarView
-    {
-    public:
-      BaseView(const char* title = "BaseView", WinGeom* wg = NULL) {};
-      BaseView(char* title, WinGeom* wg = NULL) {};
-      virtual ~BaseView() {}
-      void show(Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0)
-      { verbose("BaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-    };
-
 #endif
   }
 }

@@ -69,18 +69,6 @@ namespace Hermes
       virtual const char* get_help_text() const;
 
     };
-
-#else // NOGLUT
-
-    class HERMES_API VectorBaseView : public VectorView
-    {
-    public:
-      VectorBaseView(char* title = "BaseView", WinGeom* wg = NULL) {}
-      virtual ~VectorBaseView() {}
-      void show(Space<Scalar>* space)
-      { verbose("VectorBaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-    };
-
 #endif // NOGLUT
   }
 }

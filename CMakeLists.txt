@@ -433,7 +433,7 @@ message("\n")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FILE(WRITE config_real.cmake 
-"# HERMES-REAL CMAKE CONFIGURATION FILE\n
+"# HERMES CMAKE CONFIGURATION FILE\n
 SET(WITH_UMFPACK        ${WITH_UMFPACK})
 SET(WITH_SUPERLU        ${WITH_SUPERLU})
 SET(SUPERLU_MT          ${SUPERLU_MT})

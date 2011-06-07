@@ -1,7 +1,3 @@
-if(NOT H2D_COMPLEX)
-    return()
-endif(NOT H2D_COMPLEX)
-
 project(P04-04-complex-adapt)
 
 add_executable(${PROJECT_NAME} main.cpp)

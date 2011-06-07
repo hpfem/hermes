@@ -241,27 +241,6 @@ namespace Hermes
       virtual void on_reshape(int width, int height);
 
     };
-
-#else // NOGLUT
-
-    template<typename Scalar>
-    class HERMES_API ScalarView : public View
-    {
-    public:
-      ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) {}
-      virtual ~ScalarView() {}
-      void show(MeshFunction<Scalar>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-        MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL, double dmult = 1.0)
-      { verbose("ScalarView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-      void show_mesh(bool show = true) {}
-      void show_contours(double step, double orig = 0.0) {}
-      void hide_contours() {}
-      void set_3d_mode(bool enable = true) {}
-      void load_data(const char* filename) {}
-      void save_data(const char* filename) {}
-      void save_numbered(const char* format, int number) {}
-    };
-
 #endif // NOGLUT
   }
 }
