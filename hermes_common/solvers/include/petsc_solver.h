@@ -30,6 +30,8 @@
   #include <petscksp.h>
 #endif
 
+using namespace Hermes::Solvers;
+
 /// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
 ///
 
@@ -64,7 +66,7 @@ public:
 
 #ifdef WITH_PETSC
   // Multiplies matrix with a Scalar.
-  void multiply_with_scalar(Scalar value);
+  void multiply_with_Scalar(Scalar value);
   // Creates matrix in PETSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).

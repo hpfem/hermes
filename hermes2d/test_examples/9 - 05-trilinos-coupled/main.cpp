@@ -50,7 +50,7 @@ Scalar conc_ic(double x, double y, Scalar& dx, Scalar& dy)
 int main(int argc, char* argv[])
 {
   // Time measurement.
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
   cpu_time.tick();
 
   // Load the mesh.

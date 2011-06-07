@@ -61,7 +61,7 @@
 ///         existing on each element. Such a list is called an "assembly list" and is represented
 ///         by the class AsmList. The assembly list contains the triplets (idx, dof, coef).
 ///         'idx' is the shape function index, as understood by the Shapeset. 'dof' is the number
-///         of the basis function, whose part the shape function forms. 'coef' is a real constant,
+///         of the basis function, whose part the shape function forms. 'coef' is a Real constant,
 ///         with which the shape function must be multiplied in order to fit into the basis
 ///         function. This is typically 1, but can be less than that for constrained functions.
 ///         Constrained vertex functions can belong to more than one basis functions. This
@@ -77,14 +77,6 @@
 ///
 /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.
 ///
-class Ord2
-{
-  public:
-    Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
-    Ord2(int order) : order_h(order), order_v(order) {};
-    int order_h;
-    int order_v;
-};
 
 template<typename Scalar>
 class HERMES_API Space
@@ -324,7 +316,7 @@ public:
 
   /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
   /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
-  virtual ESpaceType get_type() const = 0;
+  virtual SpaceType get_type() const = 0;
 
   /// Create globally refined space.
   static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1) {

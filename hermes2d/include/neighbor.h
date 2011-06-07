@@ -84,7 +84,7 @@ public:
   /// according to whether we can find a vertex in the middle of the active edge - if we can, then we go down and the
   /// corresponding transformations will be filled for the bigger central element. This is performed by the method
   /// \c find_act_elem_down. Otherwise, we go up and will later push the transformations from \c transfomations to
-  /// functions on the bigger neighboring element. Way up is realized by the method \c find_act_elem_up.
+  /// functions on the bigger neighboring element. Way up is Realized by the method \c find_act_elem_up.
   ///
   /// \param[in] edge Local (element dependent) number of the edge.
   /// \param[in] ignore_visited_segments   If true, it indicates that an edge-based discontinuous Galerkin formulation

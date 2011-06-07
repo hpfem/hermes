@@ -19,7 +19,7 @@
 
 template<typename Scalar>
 void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm<Scalar>* wf,
-  Scalar* target_vec, MatrixSolverType matrix_solver)
+  Scalar* target_vec, Hermes::MatrixSolverType matrix_solver)
 {
   _F_
     // Instantiate a class with global functions.
@@ -62,7 +62,7 @@ void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> space
 
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-  Scalar* target_vec, MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
+  Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
 {
   _F_
     int n = spaces.size();
@@ -76,7 +76,7 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
     ProjNormType norm = HERMES_UNSET_NORM;
     if (proj_norms == Hermes::vector<ProjNormType>()) 
     {
-      ESpaceType space_type = spaces[i]->get_type();
+      SpaceType space_type = spaces[i]->get_type();
       switch (space_type) 
       {
       case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
@@ -110,7 +110,7 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
 
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
-  Scalar* target_vec, MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
+  Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
 {
   Hermes::vector<MeshFunction<Scalar>*> mesh_fns;
   for(unsigned int i = 0; i < source_sols.size(); i++)
@@ -120,7 +120,7 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
 
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-  Scalar* target_vec, MatrixSolverType matrix_solver,
+  Scalar* target_vec, Hermes::MatrixSolverType matrix_solver,
   ProjNormType proj_norm)
 {
   Hermes::vector<Space<Scalar>*> spaces;
@@ -135,7 +135,7 @@ void OGProjection<Scalar>::project_global(Space<Scalar>* space, MeshFunction<Sca
 
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
-  Hermes::vector<Solution<Scalar>*> sols_dest, MatrixSolverType matrix_solver,
+  Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver,
   Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
 {
   _F_
@@ -162,7 +162,7 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
 template<typename Scalar>
 void OGProjection<Scalar>::project_global(Space<Scalar>* space,
   Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-  MatrixSolverType matrix_solver,
+  Hermes::MatrixSolverType matrix_solver,
   ProjNormType proj_norm)
 {
   Hermes::vector<Space<Scalar>*> spaces;
@@ -183,7 +183,7 @@ void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
   Hermes::vector<MatrixFormVol<Scalar> *> mfvol,
   Hermes::vector<VectorFormVol<Scalar> *> vfvol,
   Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-  Scalar* target_vec, MatrixSolverType matrix_solver)
+  Scalar* target_vec, Hermes::MatrixSolverType matrix_solver)
 {
   _F_
     unsigned int n = spaces.size();

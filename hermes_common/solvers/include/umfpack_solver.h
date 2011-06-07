@@ -23,6 +23,7 @@
 #include "solver.h"
 #include "matrix.h"
 
+using namespace Hermes::Solvers;
 
 // General CSC Matrix class (can be used in umfpack, in that case use the
 // UMFPackMatrix subclass, or with EigenSolver, or anything else)
@@ -55,7 +56,7 @@ public:
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
   // Multiplies matrix with a Scalar.
-  void multiply_with_scalar(Scalar value);
+  void multiply_with_Scalar(Scalar value);
   // Creates matrix in CSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).

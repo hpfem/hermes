@@ -3,10 +3,10 @@
 
 
 
-scalar bilinear_form(RealFunction* fu, RealFunction* fv, RefMap* ru, RefMap* rv)
+Scalar bilinear_form(RealFunction* fu, RealFunction* fv, RefMap* ru, RefMap* rv)
   { return int_grad_u_grad_v_2(fu, fv, ru, rv); }
 
-scalar linear_form(RealFunction* fv, RefMap* refmap)
+Scalar linear_form(RealFunction* fv, RefMap* refmap)
   { return int_v(fv, refmap); }
 
 

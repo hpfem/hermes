@@ -26,7 +26,7 @@ class HERMES_API HdivShapesetLegendre : public Shapeset
 {
   public: HdivShapesetLegendre();
   virtual int get_id() const { return 20; }
-  virtual ESpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
+  virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
 };
 
 

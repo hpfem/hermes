@@ -71,7 +71,7 @@ public:
   Shapeset* get_shapeset() const { return shapeset; }
 
   /// Returns type of space
-  ESpaceType get_space_type() const { return shapeset->get_space_type(); }
+  SpaceType get_space_type() const { return shapeset->get_space_type(); }
 
   /// Internal. Use set_active_element() instead.
   void set_mode(int mode);

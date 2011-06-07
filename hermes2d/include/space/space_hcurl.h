@@ -40,7 +40,7 @@ public:
 
   virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
-  virtual ESpaceType get_type() const { return HERMES_HCURL_SPACE; }
+  virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
   virtual void set_shapeset(Shapeset* shapeset);
 

@@ -56,6 +56,7 @@ extern ViewMonitor view_sync; ///< synchronization between all views. Used to ac
 
 /* exported functions */
 class View;
+
 HERMES_API bool init_glut(); ///Initialize GLUT.
 HERMES_API bool shutdown_glut(); ///Shutdown GLUT.
 extern "C"

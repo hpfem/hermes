@@ -70,7 +70,7 @@ const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN
 /// get_dx_values(), etc.
 ///
 /// This class is a template for RealFunction and ScalarFunction, depending of which type the
-/// function values are. For example, shape functions are always real (see PrecalcShapeset), while
+/// function values are. For example, shape functions are always Real (see PrecalcShapeset), while
 /// the solution can be complex (see Solution).
 ///
 /// The design goal for this class is to define a single common interface for functions used as
@@ -78,8 +78,8 @@ const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN
 /// function or, for example, a previous solution of the PDE in time-dependent problems.
 /// Ideally, you should also be able to apply the bilinear form not only to shape functions
 /// during assembling, but also to the solution when calculating energy norms etc. The last
-/// feature is unfortunately limited to real code, because a PDE solution can be complex (hence
-/// Solution inherits from ScalarFunction), but shape functions are real and for efficiency
+/// feature is unfortunately limited to Real code, because a PDE solution can be complex (hence
+/// Solution inherits from ScalarFunction), but shape functions are Real and for efficiency
 /// the bilinear form only takes RealFunction arguments.
 ///
 /// Since this class inherits from Transformable, you can obtain function values in integration

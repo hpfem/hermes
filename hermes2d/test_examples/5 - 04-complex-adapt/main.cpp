@@ -73,7 +73,7 @@ const int BDY_TOP = 3;
 const int BDY_LEFT = 4;
 
 // Essential (Dirichlet) boundary condition values.
-scalar essential_bc_values(int ess_bdy_marker, double x, double y)
+Scalar essential_bc_values(int ess_bdy_marker, double x, double y)
 {
   return cplx(0.0,0.0);
 }

@@ -240,7 +240,7 @@ bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
         {
           fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
-          fprint_num(file, Ax[i]);
+          Hermes::Helpers::fprint_num(file, Ax[i]);
           fprintf(file,"\n");
         }
         fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -354,7 +354,7 @@ void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vect
 // Multiplies matrix with a Scalar.
 
 template<typename Scalar>
-void SuperLUMatrix<Scalar>::multiply_with_scalar(Scalar value)
+void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value)
 {
   _F_
     int n=nnz;
@@ -494,7 +494,7 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
     case DF_PLAIN_ASCII:
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file, v[i]);
+        Hermes::Helpers::fprint_num(file, v[i]);
         fprintf(file, "\n");
       }
 
@@ -504,7 +504,7 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file, v[i]);
+        Hermes::Helpers::fprint_num(file, v[i]);
         fprintf(file, "\n");
       }
       fprintf(file, " ];\n");
@@ -624,14 +624,14 @@ SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Sca
 
 
 #ifdef WITH_SUPERLU
-inline SuperLuType<std::complex<double> >::scalar to_superlu(SuperLuType<std::complex<double> >::scalar &a,std::complex<double>b)
+inline SuperLuType<std::complex<double> >::Scalar to_superlu(SuperLuType<std::complex<double> >::Scalar &a,std::complex<double>b)
 {
   a.r=b.real();
   a.i=b.imag();
   return a;
 }
 
-inline SuperLuType<double>::scalar to_superlu(SuperLuType<double>::scalar &a,double b)
+inline SuperLuType<double>::Scalar to_superlu(SuperLuType<double>::Scalar &a,double b)
 {
   a=b;
   return a;
@@ -662,7 +662,7 @@ bool SuperLUSolver<Scalar>::solve()
     assert(m != NULL);
   assert(rhs != NULL);
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   // Initialize the statistics variable.
   slu_stat_t stat;
@@ -714,7 +714,7 @@ bool SuperLUSolver<Scalar>::solve()
       memcpy(local_Ap, m->Ap, (m->size+1) * sizeof(int));
 
       if (local_Ax) delete [] local_Ax;
-      local_Ax = new typename SuperLuType<Scalar>::scalar[m->nnz];
+      local_Ax = new typename SuperLuType<Scalar>::Scalar[m->nnz];
       for (unsigned int i=0;i<m->nnz;i++)
         to_superlu(local_Ax[i],m->Ax[i]);
 
@@ -729,7 +729,7 @@ bool SuperLUSolver<Scalar>::solve()
   free_rhs();
 
   if (local_rhs) delete [] local_rhs;
-  local_rhs = new typename SuperLuType<Scalar>::scalar[rhs->size];
+  local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->size];
   for (unsigned int i=0;i<rhs->size;i++)
     to_superlu(local_rhs[i],rhs->v[i]);
 
@@ -739,8 +739,8 @@ bool SuperLUSolver<Scalar>::solve()
 
   // Initialize the solution variable.
   SuperMatrix X;
-  typename SuperLuType<Scalar>::scalar *x;
-  if ( !(x = new typename SuperLuType<Scalar>::scalar[m->size]) ) 
+  typename SuperLuType<Scalar>::Scalar *x;
+  if ( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) ) 
     error("Malloc fails for x[].");
   create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
 

@@ -22,9 +22,9 @@
 
 #include "precond.h"
 #include "dpinterface.h"
-                        
+
 #ifdef HAVE_TEUCHOS
-  #include <Teuchos_RefCountPtr.hpp>
+#include <Teuchos_RefCountPtr.hpp>
 #endif
 
 /// @defgroup solvers Solvers
@@ -68,124 +68,126 @@
 /// When \c rhsonly was set to \c true for the assembly phase, 
 /// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following solution phase.
 ///
-enum FactorizationScheme
+namespace Hermes
 {
-  HERMES_FACTORIZE_FROM_SCRATCH,              ///< Perform new factorization, don't reuse
-                                              ///< existing factorization data.
-  HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix with the same sparsity
-                                              ///< pattern as the one already factorized.
-  HERMES_REUSE_MATRIX_REORDERING_AND_SCALING, ///< Factorize matrix with the same sparsity 
-                                              ///< pattern and similar numerical values
-                                              ///< as the one already factorized.
-  HERMES_REUSE_FACTORIZATION_COMPLETELY       ///< Completely reuse the already performed
-                                              ///< factorization.
-};
+  namespace Solvers
+  {
+    enum FactorizationScheme
+    {
+      HERMES_FACTORIZE_FROM_SCRATCH,              ///< Perform new factorization, don't reuse
+      ///< existing factorization data.
+      HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix with the same sparsity
+      ///< pattern as the one already factorized.
+      HERMES_REUSE_MATRIX_REORDERING_AND_SCALING, ///< Factorize matrix with the same sparsity 
+      ///< pattern and similar numerical values
+      ///< as the one already factorized.
+      HERMES_REUSE_FACTORIZATION_COMPLETELY       ///< Completely reuse the already performed
+      ///< factorization.
+    };
 
-/// Abstract class for defining solver interface.
-///
-/// TODO: Adjust interface to support faster update of matrix and rhs
-///
-template <typename Scalar>
-class Solver {
-public:
-  Solver() { sln = NULL; time = -1.0; }
-  virtual ~Solver() { if (sln != NULL) delete [] sln; }
+    /// Abstract class for defining solver interface.
+    ///
+    /// TODO: Adjust interface to support faster update of matrix and rhs
+    ///
+    template <typename Scalar>
+    class Solver {
+    public:
+      Solver() { sln = NULL; time = -1.0; }
+      virtual ~Solver() { if (sln != NULL) delete [] sln; }
 
-  virtual bool solve() = 0;
-  Scalar *get_solution() { return sln; }
+      virtual bool solve() = 0;
+      Scalar *get_solution() { return sln; }
 
-  int get_error() { return error; }
-  double get_time() { return time; }
-  
-  virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
-  virtual void set_factorization_scheme() {
-    set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 
-  }
+      int get_error() { return error; }
+      double get_time() { return time; }
 
-protected:
-  Scalar *sln;
-  int error;
-  double time;  ///< time spent on solving (in secs)
-};
+      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
+      virtual void set_factorization_scheme() {
+        set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 
+      }
 
-
-/// Abstract class for defining interface for linear solvers.
-///
-template <typename Scalar>
-class LinearSolver : public Solver<Scalar>
-{
-  public:
-    LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
-      : Solver<Scalar>(), factorization_scheme(factorization_scheme) {};
-    
-  protected:
-    virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { 
-      factorization_scheme = reuse_scheme;
-    }
-        
-    unsigned int factorization_scheme;
-};
-
-/// Abstract class for defining interface for nonlinear solvers.
-///
-template <typename Scalar>
-class NonlinearSolver : public Solver<Scalar> 
-{
-  public:
-    NonlinearSolver() : Solver<Scalar>() { dp = NULL; }
-    NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver<Scalar>() { this->dp = dp; }
-    
-  protected:
-    DiscreteProblemInterface<Scalar>* dp; // FE problem being solved (not NULL in case of using
-                                  // NonlinearProblem(DiscreteProblemInterface *) ctor
-};
-
-/// Abstract class for defining interface for iterative solvers.
-///
-
-template <typename Scalar> class Precond;
+    protected:
+      Scalar *sln;
+      int error;
+      double time;  ///< time spent on solving (in secs)
+    };
 
 
-template <typename Scalar>
-class IterSolver : public Solver<Scalar>
-{
-  public:
-    IterSolver() : Solver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
-    
-    virtual int get_num_iters() = 0;
-    virtual double get_residual() = 0;
-    
-    /// Set the convergence tolerance
-    /// @param[in] tol - the tolerance to set
-    void set_tolerance(double tol) { this->tolerance = tol; }
-    /// Set maximum number of iterations to perform
-    /// @param[in] iters - number of iterations
-    void set_max_iters(int iters) { this->max_iters = iters; }
-    
-    virtual void set_precond(const char *name) = 0;
+    /// Abstract class for defining interface for linear solvers.
+    ///
+    template <typename Scalar>
+    class LinearSolver : public Solver<Scalar>
+    {
+    public:
+      LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
+        : Solver<Scalar>(), factorization_scheme(factorization_scheme) {};
+
+    protected:
+      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { 
+        factorization_scheme = reuse_scheme;
+      }
+
+      unsigned int factorization_scheme;
+    };
+
+    /// Abstract class for defining interface for nonlinear solvers.
+    ///
+    template <typename Scalar>
+    class NonlinearSolver : public Solver<Scalar> 
+    {
+    public:
+      NonlinearSolver() : Solver<Scalar>() { dp = NULL; }
+      NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver<Scalar>() { this->dp = dp; }
+
+    protected:
+      DiscreteProblemInterface<Scalar>* dp; // FE problem being solved (not NULL in case of using
+      // NonlinearProblem(DiscreteProblemInterface *) ctor
+    };
+
+    template <typename Scalar>
+    class IterSolver : public Solver<Scalar>
+    {
+    public:
+      IterSolver() : Solver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
+
+      virtual int get_num_iters() = 0;
+      virtual double get_residual() = 0;
+
+      /// Set the convergence tolerance
+      /// @param[in] tol - the tolerance to set
+      void set_tolerance(double tol) { this->tolerance = tol; }
+      /// Set maximum number of iterations to perform
+      /// @param[in] iters - number of iterations
+      void set_max_iters(int iters) { this->max_iters = iters; }
+
+      virtual void set_precond(const char *name) = 0;
 
 #ifdef HAVE_TEUCHOS
       virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc) = 0;
 #else
       virtual void set_precond(Precond<Scalar> *pc) = 0;
 #endif            
-      
-  protected:    
-    int max_iters;          ///< Maximum number of iterations.
-    double tolerance;       ///< Convergence tolerance.
-    bool precond_yes;
-};
 
-template class HERMES_API Solver<double>;
-template class HERMES_API Solver<std::complex<double> >;
-template class HERMES_API LinearSolver<double>;
-template class HERMES_API LinearSolver<std::complex<double> >;
-template class HERMES_API NonlinearSolver<double>;
-template class HERMES_API NonlinearSolver<std::complex<double> >;
-template class HERMES_API IterSolver<double>;
-template class HERMES_API IterSolver<std::complex<double> >;
+    protected:    
+      int max_iters;          ///< Maximum number of iterations.
+      double tolerance;       ///< Convergence tolerance.
+      bool precond_yes;
+    };
+
+    template class HERMES_API Solver<double>;
+    template class HERMES_API Solver<std::complex<double> >;
+    template class HERMES_API LinearSolver<double>;
+    template class HERMES_API LinearSolver<std::complex<double> >;
+    template class HERMES_API NonlinearSolver<double>;
+    template class HERMES_API NonlinearSolver<std::complex<double> >;
+    template class HERMES_API IterSolver<double>;
+    template class HERMES_API IterSolver<std::complex<double> >;
 
 
-/*@}*/ // End of documentation group Solvers.
+    /*@}*/ // End of documentation group Solvers.
+  }
+}
 
+template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
+  Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 #endif

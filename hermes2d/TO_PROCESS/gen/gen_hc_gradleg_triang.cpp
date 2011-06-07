@@ -1,5 +1,5 @@
 // This utility generates edge shape functions for triangles in the
-// space Hcurl. Edge functions are the gradients of scalar Lobatto
+// space Hcurl. Edge functions are the gradients of Scalar Lobatto
 // edge functions, bubble functions are the Legendre-based functions
 // from Higher-Order Finite Element Method (Solin, Segeth, Dolezel).
 

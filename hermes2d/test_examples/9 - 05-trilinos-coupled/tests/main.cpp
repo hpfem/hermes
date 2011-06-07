@@ -32,10 +32,10 @@ const double x1    = 9.0;
 const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
 
 // Initial conditions.
-scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
+Scalar temp_ic(double x, double y, Scalar& dx, Scalar& dy)
   { return (x <= x1) ? 1.0 : exp(x1 - x); }
 
-scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
+Scalar conc_ic(double x, double y, Scalar& dx, Scalar& dy)
   { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
 // Weak forms. 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
-  scalar* coeff_vec = new scalar[ndof];
+  Scalar* coeff_vec = new Scalar[ndof];
   OGProjection::project_global(Hermes::vector<Space *>(t_space, c_space), Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
     coeff_vec);
 

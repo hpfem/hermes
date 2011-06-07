@@ -200,7 +200,7 @@ protected:
 };
 
 
-/// ImagFilter puts the imaginary part of the input function to the real part of the
+/// ImagFilter puts the imaginary part of the input function to the Real part of the
 /// output, allowing it to be visualized.
 class HERMES_API ImagFilter : public SimpleFilter<std::complex<double> >
 {

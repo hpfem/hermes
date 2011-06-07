@@ -77,6 +77,13 @@ public:
 
 };
 
+enum SolutionType {
+  HERMES_UNDEF = -1,
+  HERMES_SLN = 0,
+  HERMES_EXACT = 1,
+  HERMES_CONST = 2
+};
+
 /// \brief Represents the solution of a PDE.
 ///
 /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
@@ -188,10 +195,10 @@ public:
   void multiply(Scalar coef);
 
   /// Returns solution type.
-  ESolutionType get_type() const { return sln_type; };
+  SolutionType get_type() const { return sln_type; };
 
   /// Returns space type.
-  ESpaceType get_space_type() const { return space_type; };
+  SpaceType get_space_type() const { return space_type; };
 
 public:
   /// Internal.
@@ -224,7 +231,7 @@ protected:
   virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
   virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift);
 
-  ESolutionType sln_type;
+  SolutionType sln_type;
 
   bool transform;
 
@@ -247,7 +254,7 @@ protected:
   int num_coefs, num_elems;
   int num_dofs;
 
-  ESpaceType space_type;
+  SpaceType space_type;
   void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
 
   Scalar   cnst[2];

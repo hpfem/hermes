@@ -63,18 +63,20 @@
 
     template<>
     struct SuperLuType<double>{
-      typedef double scalar;
+      typedef double Scalar;
     };
 
     template<>
     struct SuperLuType<std::complex<double> >{
-      typedef struct { double r, i; } scalar;
+      typedef struct { double r, i; } Scalar;
     };
 
   #endif
 #endif
 
 template <typename Scalar> class SuperLUSolver;
+
+using namespace Hermes::Solvers;
 
 template <typename Scalar>
 class SuperLUMatrix : public SparseMatrix<Scalar> {
@@ -100,7 +102,7 @@ public:
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
   // Multiplies matrix with a Scalar.
-  void multiply_with_scalar(Scalar value);
+  void multiply_with_Scalar(Scalar value);
   // Creates matrix using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
@@ -156,12 +158,12 @@ class HERMES_API SuperLUSolver : public LinearSolver<Scalar> {
 private:
 #ifdef WITH_SUPERLU  
 #ifndef SLU_MT
-  void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::scalar *nzval, int *rowind, int *colptr, 
+  void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr, 
                        Stype_t stype, Dtype_t dtype, Mtype_t mtype);
   void  solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
                          double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth, 
                          double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
-  void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
+  void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  
 #endif  
 public:
@@ -186,7 +188,7 @@ protected:
   // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
   int *local_Ai, *local_Ap;
 #ifdef WITH_SUPERLU  
-  typename SuperLuType<Scalar>::scalar *local_Ax, *local_rhs;
+  typename SuperLuType<Scalar>::Scalar *local_Ax, *local_rhs;
 #endif  
   
   bool setup_factorization();

@@ -26,7 +26,7 @@ class HERMES_API HcurlShapesetLegendre : public Shapeset
 {
   public: HcurlShapesetLegendre();
   virtual int get_id() const { return 10; }
-  virtual ESpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
 };
 
 
@@ -35,7 +35,7 @@ class HERMES_API HcurlShapesetEigen2 : public Shapeset
 {
   public: HcurlShapesetEigen2();
   virtual int get_id() const { return 11; }
-  virtual ESpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
 };
 
 
@@ -44,7 +44,7 @@ class HERMES_API HcurlShapesetGradEigen : public Shapeset
 {
   public: HcurlShapesetGradEigen();
   virtual int get_id() const { return 12; }
-  virtual ESpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
 };
 
 
@@ -53,7 +53,7 @@ class HERMES_API HcurlShapesetGradLeg : public Shapeset
 {
   public: HcurlShapesetGradLeg();
   virtual int get_id() const { return 13; }
-  virtual ESpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
 };
 
 

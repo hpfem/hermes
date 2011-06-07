@@ -1,7 +1,7 @@
 // Bessel function of the first kind, order n, defined in bessel.cpp
 double jv(double n, double x);
 
-static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
+static void exact_sol_val(double x, double y, Scalar& e0, Scalar& e1)
 {
   double t1 = x*x;
   double t2 = y*y;
@@ -22,7 +22,7 @@ static void exact_sol_val(double x, double y, scalar& e0, scalar& e1)
   e1 = -t11*x*t14-2.0/3.0*t18*y*t20*t23;
 }
 
-static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, scalar& e0dy)
+static void exact_sol(double x, double y, Scalar& e0, Scalar& e1, Scalar& e1dx, Scalar& e0dy)
 {
   exact_sol_val(x,y,e0,e1);
 
@@ -62,9 +62,9 @@ static void exact_sol(double x, double y, scalar& e0, scalar& e1, scalar& e1dx, 
 }
 
 // exact solution
-scalar2 exact(double x, double y, scalar2& dx, scalar2& dy)
+Scalar2 exact(double x, double y, Scalar2& dx, Scalar2& dy)
 {
-  static scalar2 ex(0.0, 0.0);
+  static Scalar2 ex(0.0, 0.0);
   exact_sol(x,y, ex[0], ex[1], dx[1], dy[0]);
   return ex;
 }
@@ -83,9 +83,9 @@ Scalar bilinear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *
   return ii * (-kappa) * int_e_tau_f_tau<Real, Scalar>(n, wt, u, v, e);
 }
 
-scalar linear_form_surf(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext)
+Scalar linear_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext)
 {
-  scalar result = 0;
+  Scalar result = 0;
   for (int i = 0; i < n; i++)
   {
     double r = sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);

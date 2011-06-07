@@ -30,6 +30,8 @@
   #include <NOX_Epetra.H>
 #endif
 
+using namespace Hermes::Solvers;
+
 template<typename Scalar> class NoxProblemInterface;
 
 /// Encapsulation of NOX nonlinear solver

@@ -73,7 +73,7 @@
 #include "views/base_view.h"
 #include "views/mesh_view.h"
 #include "views/order_view.h"
-#include "views/scalar_view.h"
+#include "views/Scalar_view.h"
 #include "views/stream_view.h"
 #include "views/vector_base_view.h"
 #include "views/vector_view.h"
@@ -175,7 +175,7 @@ exclusively.
 
 <img src="classShapeset.png">
 
-Shapeset is a base class for all shapesets, both scalar (H1) and vector-valued (H(curl)). It defines
+Shapeset is a base class for all shapesets, both Scalar (H1) and vector-valued (H(curl)). It defines
 the interface (basically it is just a bunch of tables) and the functionality for constrained shape
 functions.
 

@@ -296,7 +296,7 @@ static const char **__pyx_f;
     typedef double _Complex __pyx_t_double_complex;
   #endif
 #else
-    typedef struct { double real, imag; } __pyx_t_double_complex;
+    typedef struct { double Real, imag; } __pyx_t_double_complex;
 #endif
 
 /* Type declarations */
@@ -1018,16 +1018,16 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb); /*proto*
     #define __Pyx_CREAL(z) ((z).real())
     #define __Pyx_CIMAG(z) ((z).imag())
   #else
-    #define __Pyx_CREAL(z) (__real__(z))
+    #define __Pyx_CREAL(z) (__Real__(z))
     #define __Pyx_CIMAG(z) (__imag__(z))
   #endif
 #else
-    #define __Pyx_CREAL(z) ((z).real)
+    #define __Pyx_CREAL(z) ((z).Real)
     #define __Pyx_CIMAG(z) ((z).imag)
 #endif
 
 #if defined(_WIN32) && defined(__cplusplus) && CYTHON_CCOMPLEX
-    #define __Pyx_SET_CREAL(z,x) ((z).real(x))
+    #define __Pyx_SET_CREAL(z,x) ((z).Real(x))
     #define __Pyx_SET_CIMAG(z,y) ((z).imag(y))
 #else
     #define __Pyx_SET_CREAL(z,x) __Pyx_CREAL(z) = (x)
@@ -1318,7 +1318,7 @@ static char __pyx_k__ignore[] = "ignore";
 static char __pyx_k__marker[] = "marker";
 static char __pyx_k__option[] = "option";
 static char __pyx_k__p_init[] = "p_init";
-static char __pyx_k__scalar[] = "scalar";
+static char __pyx_k__Scalar[] = "Scalar";
 static char __pyx_k__stride[] = "stride";
 static char __pyx_k__values[] = "values";
 static char __pyx_k__L2Space[] = "L2Space";
@@ -1672,7 +1672,7 @@ static PyObject *__pyx_n_s__s1;
 static PyObject *__pyx_n_s__s2;
 static PyObject *__pyx_n_s__save;
 static PyObject *__pyx_n_s__save_data;
-static PyObject *__pyx_n_s__scalar;
+static PyObject *__pyx_n_s__Scalar;
 static PyObject *__pyx_n_s__scipy;
 static PyObject *__pyx_n_s__selector;
 static PyObject *__pyx_n_s__set_const;
@@ -9136,7 +9136,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_zero(PyObject *__py
  *     def set_zero(self, Mesh m):
  *         (<c_Solution *>(self.thisptr)).set_zero(m.thisptr)             # <<<<<<<<<<<<<<
  * 
- *     def set_const(self, Mesh m, scalar):
+ *     def set_const(self, Mesh m, Scalar):
  */
   ((struct Solution *)((struct __pyx_obj_8hermes2d_9_hermes2d_Solution *)__pyx_v_self)->__pyx_base.__pyx_base.__pyx_base.thisptr)->set_zero(((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)__pyx_v_m)->thisptr);
 
@@ -9154,18 +9154,18 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_zero(PyObject *__py
 /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":1009
  *         (<c_Solution *>(self.thisptr)).set_zero(m.thisptr)
  * 
- *     def set_const(self, Mesh m, scalar):             # <<<<<<<<<<<<<<
- *         (<c_Solution *>(self.thisptr)).set_const(m.thisptr, scalar)
+ *     def set_const(self, Mesh m, Scalar):             # <<<<<<<<<<<<<<
+ *         (<c_Solution *>(self.thisptr)).set_const(m.thisptr, Scalar)
  * 
  */
 
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_const(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_const(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *__pyx_v_m = 0;
-  PyObject *__pyx_v_scalar = 0;
+  PyObject *__pyx_v_Scalar = 0;
   PyObject *__pyx_r = NULL;
-  scalar __pyx_t_1;
-  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__m,&__pyx_n_s__scalar,0};
+  Scalar __pyx_t_1;
+  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__m,&__pyx_n_s__Scalar,0};
   __Pyx_RefNannySetupContext("set_const");
   if (unlikely(__pyx_kwds)) {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
@@ -9182,7 +9182,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_const(PyObject *__p
       if (likely(values[0])) kw_args--;
       else goto __pyx_L5_argtuple_error;
       case  1:
-      values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__scalar);
+      values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s__Scalar);
       if (likely(values[1])) kw_args--;
       else {
         __Pyx_RaiseArgtupleInvalid("set_const", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1009; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -9192,12 +9192,12 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_const(PyObject *__p
       if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, PyTuple_GET_SIZE(__pyx_args), "set_const") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1009; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     }
     __pyx_v_m = ((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)values[0]);
-    __pyx_v_scalar = values[1];
+    __pyx_v_Scalar = values[1];
   } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
     goto __pyx_L5_argtuple_error;
   } else {
     __pyx_v_m = ((struct __pyx_obj_8hermes2d_9_hermes2d_Mesh *)PyTuple_GET_ITEM(__pyx_args, 0));
-    __pyx_v_scalar = PyTuple_GET_ITEM(__pyx_args, 1);
+    __pyx_v_Scalar = PyTuple_GET_ITEM(__pyx_args, 1);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -9210,12 +9210,12 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_const(PyObject *__p
 
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":1010
  * 
- *     def set_const(self, Mesh m, scalar):
- *         (<c_Solution *>(self.thisptr)).set_const(m.thisptr, scalar)             # <<<<<<<<<<<<<<
+ *     def set_const(self, Mesh m, Scalar):
+ *         (<c_Solution *>(self.thisptr)).set_const(m.thisptr, Scalar)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_scalar); if (unlikely((__pyx_t_1 == (scalar)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1010; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_Scalar); if (unlikely((__pyx_t_1 == (Scalar)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1010; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   ((struct Solution *)((struct __pyx_obj_8hermes2d_9_hermes2d_Solution *)__pyx_v_self)->__pyx_base.__pyx_base.__pyx_base.thisptr)->set_const(__pyx_v_m->thisptr, __pyx_t_1);
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
@@ -9246,7 +9246,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_fe_solution(PyObjec
   int __pyx_v_n;
   PyObject *__pyx_v_array;
   PyArrayObject *__pyx_v_vec = 0;
-  scalar *__pyx_v_pvec;
+  Scalar *__pyx_v_pvec;
   PyObject *__pyx_r = NULL;
   Py_ssize_t __pyx_t_1;
   PyObject *__pyx_t_2 = NULL;
@@ -9322,7 +9322,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_fe_solution(PyObjec
  *         cdef int i
  *         from numpy import array             # <<<<<<<<<<<<<<
  *         cdef ndarray vec = array(v, dtype="double")
- *         cdef scalar *pvec = <scalar *>vec.data
+ *         cdef Scalar *pvec = <Scalar *>vec.data
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1019; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
@@ -9344,7 +9344,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_fe_solution(PyObjec
  *         cdef int i
  *         from numpy import array
  *         cdef ndarray vec = array(v, dtype="double")             # <<<<<<<<<<<<<<
- *         cdef scalar *pvec = <scalar *>vec.data
+ *         cdef Scalar *pvec = <Scalar *>vec.data
  *         #(<c_Solution *>(self.thisptr)).set_fe_solution(s.thisptr, pss.thisptr,
  */
   __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1020; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -9366,11 +9366,11 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_8Solution_set_fe_solution(PyObjec
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":1021
  *         from numpy import array
  *         cdef ndarray vec = array(v, dtype="double")
- *         cdef scalar *pvec = <scalar *>vec.data             # <<<<<<<<<<<<<<
+ *         cdef Scalar *pvec = <Scalar *>vec.data             # <<<<<<<<<<<<<<
  *         #(<c_Solution *>(self.thisptr)).set_fe_solution(s.thisptr, pss.thisptr,
  *         #        pvec)
  */
-  __pyx_v_pvec = ((scalar *)__pyx_v_vec->data);
+  __pyx_v_pvec = ((Scalar *)__pyx_v_vec->data);
 
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
@@ -10281,7 +10281,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_solve_system(PyObject 
   struct __pyx_obj_8hermes2d_9_hermes2d_Solution *__pyx_v_s2;
   struct __pyx_obj_8hermes2d_9_hermes2d_Solution *__pyx_v_s3;
   PyArrayObject *__pyx_v_vec;
-  scalar *__pyx_v_pvec;
+  Scalar *__pyx_v_pvec;
   PyObject *__pyx_v_warnings;
   PyObject *__pyx_v_cg;
   PyObject *__pyx_v_spsolve;
@@ -10920,7 +10920,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_solve_system(PyObject 
  *                 warnings.simplefilter('ignore')
  *                 x = spsolve(A, rhs)
  *             vec = array(x, dtype="double")             # <<<<<<<<<<<<<<
- *             pvec = <scalar *>vec.data
+ *             pvec = <Scalar *>vec.data
  * 
  */
     __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1262; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -10943,11 +10943,11 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_solve_system(PyObject 
     /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":1263
  *                 x = spsolve(A, rhs)
  *             vec = array(x, dtype="double")
- *             pvec = <scalar *>vec.data             # <<<<<<<<<<<<<<
+ *             pvec = <Scalar *>vec.data             # <<<<<<<<<<<<<<
  * 
  *             #for i, sln in enumerate(args):
  */
-    __pyx_v_pvec = ((scalar *)__pyx_v_vec->data);
+    __pyx_v_pvec = ((Scalar *)__pyx_v_vec->data);
     goto __pyx_L6;
   }
   /*else*/ {
@@ -11041,7 +11041,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_get_matrix_csc(PyObjec
   int *__pyx_v_Ai;
   int __pyx_v_n;
   int __pyx_v_nnz;
-  scalar *__pyx_v_Ax;
+  Scalar *__pyx_v_Ax;
   PyObject *__pyx_v_aAp;
   PyObject *__pyx_v_aAi;
   PyObject *__pyx_v_aAx;
@@ -11053,7 +11053,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_get_matrix_csc(PyObjec
   __pyx_v_aAx = Py_None; __Pyx_INCREF(Py_None);
 
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":1286
- *         cdef scalar *Ax
+ *         cdef Scalar *Ax
  *         #self.thisptr.get_matrix(Ap, Ai, Ax, n)
  *         nnz = Ap[n]             # <<<<<<<<<<<<<<
  *         aAp = c2numpy_int(Ap, n+1)
@@ -11300,7 +11300,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_get_matrix(PyObject *_
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_get_rhs(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
 static char __pyx_doc_8hermes2d_9_hermes2d_9LinSystem_get_rhs[] = "\n        Return the RHS as a numpy array\n        ";
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_9LinSystem_get_rhs(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  scalar *__pyx_v_rhs;
+  Scalar *__pyx_v_rhs;
   int __pyx_v_n;
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
@@ -21553,7 +21553,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s__s2, __pyx_k__s2, sizeof(__pyx_k__s2), 0, 0, 1, 1},
   {&__pyx_n_s__save, __pyx_k__save, sizeof(__pyx_k__save), 0, 0, 1, 1},
   {&__pyx_n_s__save_data, __pyx_k__save_data, sizeof(__pyx_k__save_data), 0, 0, 1, 1},
-  {&__pyx_n_s__scalar, __pyx_k__scalar, sizeof(__pyx_k__scalar), 0, 0, 1, 1},
+  {&__pyx_n_s__Scalar, __pyx_k__Scalar, sizeof(__pyx_k__Scalar), 0, 0, 1, 1},
   {&__pyx_n_s__scipy, __pyx_k__scipy, sizeof(__pyx_k__scipy), 0, 0, 1, 1},
   {&__pyx_n_s__selector, __pyx_k__selector, sizeof(__pyx_k__selector), 0, 0, 1, 1},
   {&__pyx_n_s__set_const, __pyx_k__set_const, sizeof(__pyx_k__set_const), 0, 0, 1, 1},
@@ -24049,7 +24049,7 @@ bad:
 #else
     static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(double x, double y) {
       __pyx_t_double_complex z;
-      z.real = x;
+      z.Real = x;
       z.imag = y;
       return z;
     }
@@ -24058,54 +24058,54 @@ bad:
 #if CYTHON_CCOMPLEX
 #else
     static CYTHON_INLINE int __Pyx_c_eq(__pyx_t_double_complex a, __pyx_t_double_complex b) {
-       return (a.real == b.real) && (a.imag == b.imag);
+       return (a.Real == b.Real) && (a.imag == b.imag);
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_sum(__pyx_t_double_complex a, __pyx_t_double_complex b) {
         __pyx_t_double_complex z;
-        z.real = a.real + b.real;
+        z.Real = a.Real + b.Real;
         z.imag = a.imag + b.imag;
         return z;
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_diff(__pyx_t_double_complex a, __pyx_t_double_complex b) {
         __pyx_t_double_complex z;
-        z.real = a.real - b.real;
+        z.Real = a.Real - b.Real;
         z.imag = a.imag - b.imag;
         return z;
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_prod(__pyx_t_double_complex a, __pyx_t_double_complex b) {
         __pyx_t_double_complex z;
-        z.real = a.real * b.real - a.imag * b.imag;
-        z.imag = a.real * b.imag + a.imag * b.real;
+        z.Real = a.Real * b.Real - a.imag * b.imag;
+        z.imag = a.Real * b.imag + a.imag * b.Real;
         return z;
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_quot(__pyx_t_double_complex a, __pyx_t_double_complex b) {
         __pyx_t_double_complex z;
-        double denom = b.real * b.real + b.imag * b.imag;
-        z.real = (a.real * b.real + a.imag * b.imag) / denom;
-        z.imag = (a.imag * b.real - a.real * b.imag) / denom;
+        double denom = b.Real * b.Real + b.imag * b.imag;
+        z.Real = (a.Real * b.Real + a.imag * b.imag) / denom;
+        z.imag = (a.imag * b.Real - a.Real * b.imag) / denom;
         return z;
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_neg(__pyx_t_double_complex a) {
         __pyx_t_double_complex z;
-        z.real = -a.real;
+        z.Real = -a.Real;
         z.imag = -a.imag;
         return z;
     }
     static CYTHON_INLINE int __Pyx_c_is_zero(__pyx_t_double_complex a) {
-       return (a.real == 0) && (a.imag == 0);
+       return (a.Real == 0) && (a.imag == 0);
     }
     static CYTHON_INLINE __pyx_t_double_complex __Pyx_c_conj(__pyx_t_double_complex a) {
         __pyx_t_double_complex z;
-        z.real =  a.real;
+        z.Real =  a.Real;
         z.imag = -a.imag;
         return z;
     }
 /*
     static CYTHON_INLINE double __Pyx_c_abs(__pyx_t_double_complex z) {
 #if HAVE_HYPOT
-        return hypot(z.real, z.imag);
+        return hypot(z.Real, z.imag);
 #else
-        return sqrt(z.real*z.real + z.imag*z.imag);
+        return sqrt(z.Real*z.Real + z.imag*z.imag);
 #endif
     }
 */

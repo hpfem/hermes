@@ -116,7 +116,7 @@ void MumpsMatrix<Scalar>::alloc()
 
   nnz = Ap[this->size];
 
-  Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz];
+  Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz];
   memset(Ax, 0, sizeof(Scalar) * nnz);
 
   irn = new int[nnz];
@@ -148,8 +148,8 @@ void MumpsMatrix<Scalar>::free()
 }
 
 #ifdef WITH_MUMPS
-inline double mumps_to_scalar(double x){return x;}
-inline std::complex<double> mumps_to_scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r,x.i);}
+inline double mumps_to_Scalar(double x){return x;}
+inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r,x.i);}
 #endif
 
 template<typename Scalar>
@@ -163,7 +163,7 @@ Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
   if (mid < 0) return 0.0;
   // Otherwise, add offset to the n-th column and return the value.
   if (mid >= 0) mid += Ap[n];
-  return mumps_to_scalar(Ax[mid]);
+  return mumps_to_Scalar(Ax[mid]);
 #else
     return 0;
 #endif
@@ -246,7 +246,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       for (unsigned int i = 0; i < nnz; i++)
       {
         fprintf(file, "%d %d ", irn[i], jcn[i]);
-        fprint_num(file,mumps_to_scalar(Ax[i]));
+        fprint_num(file,mumps_to_Scalar(Ax[i]));
         fprintf(file, "\n");
       }
       return true;
@@ -257,7 +257,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
         {
           fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-          fprint_num(file, mumps_to_scalar(Ax[i]));
+          fprint_num(file, mumps_to_Scalar(Ax[i]));
           fprintf(file, "\n");
         }
         fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -379,14 +379,14 @@ void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector
     Scalar a;
     for (unsigned int i=0;i<nnz;i++)
     {
-      a=mumps_to_scalar(Ax[i]);
+      a=mumps_to_Scalar(Ax[i]);
       vector_out[jcn[i]]+=vector_in[irn[i]]*a;
     }
 #endif
 }
 // Multiplies matrix with a Scalar.
 template<>
-void MumpsMatrix<double>::multiply_with_scalar(double value)
+void MumpsMatrix<double>::multiply_with_Scalar(double value)
 {
   _F_
 #ifdef WITH_MUMPS
@@ -399,7 +399,7 @@ void MumpsMatrix<double>::multiply_with_scalar(double value)
 }
 
 template<>
-void MumpsMatrix<std::complex<double> >::multiply_with_scalar(std::complex<double> value)
+void MumpsMatrix<std::complex<double> >::multiply_with_Scalar(std::complex<double> value)
 {
   _F_
 #ifdef WITH_MUMPS
@@ -416,13 +416,13 @@ void MumpsMatrix<std::complex<double> >::multiply_with_scalar(std::complex<doubl
 }
 
 #ifdef WITH_MUMPS
-inline void mumps_assign_scalar(ZMUMPS_COMPLEX & a,std::complex<double> b)
+inline void mumps_assign_Scalar(ZMUMPS_COMPLEX & a,std::complex<double> b)
 {
   a.r=b.real();
   a.i=b.imag();
 }
 
-inline void mumps_assign_scalar(double & a,double b)
+inline void mumps_assign_Scalar(double & a,double b)
 {
   a=b;
 }
@@ -437,7 +437,7 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   this->size = size;
   this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
   this->Ai = new int[nnz];    assert(this->Ai != NULL);
-  this->Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz]; assert(this->Ax != NULL);
+  this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(this->Ax != NULL);
   irn=new int[nnz];           assert(this->irn !=NULL);     // Row indices.
   jcn=new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
 
@@ -449,7 +449,7 @@ void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, i
   this->Ap[this->size]=ap[this->size];
   for (unsigned int i = 0; i < nnz; i++) 
   {
-    mumps_assign_scalar(this->Ax[i],ax[i]);
+    mumps_assign_Scalar(this->Ax[i],ax[i]);
     this->Ai[i] = ai[i];
     irn[i]=ai[i];
   } 
@@ -466,7 +466,7 @@ MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate()
   nmat->size = this->size;
   nmat->Ap = new unsigned int[this->size+1]; assert(nmat->Ap != NULL);
   nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-  nmat->Ax = new typename mumps_type<Scalar>::mumps_scalar[nnz]; assert(nmat->Ax != NULL);
+  nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(nmat->Ax != NULL);
   nmat->irn=new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
   nmat->jcn=new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
   for (unsigned int i = 0;i<nnz;i++)
@@ -570,7 +570,7 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
     case DF_PLAIN_ASCII:
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file, v[i]);
+        Hermes::Helpers::fprint_num(file, v[i]);
         fprintf(file, "\n");
       }
 
@@ -580,7 +580,7 @@ bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file, v[i]);
+        Hermes::Helpers::fprint_num(file, v[i]);
         fprintf(file, "\n");
       }
       fprintf(file, " ];\n");
@@ -735,7 +735,7 @@ bool MumpsSolver<Scalar>::solve()
   assert(m != NULL);
   assert(rhs != NULL);
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   // Prepare the MUMPS data structure with input for the solver driver 
   // (according to the chosen factorization reuse strategy), as well as
@@ -747,7 +747,7 @@ bool MumpsSolver<Scalar>::solve()
   }
 
   // Specify the right-hand side (will be replaced by the solution).
-  param.rhs = new typename mumps_type<Scalar>::mumps_scalar[m->size];
+  param.rhs = new typename mumps_type<Scalar>::mumps_Scalar[m->size];
   memcpy(param.rhs, rhs->v, m->size * sizeof(Scalar));
 
   // Do the jobs specified in setup_factorization().
@@ -760,7 +760,7 @@ bool MumpsSolver<Scalar>::solve()
     delete [] this->sln;
     this->sln = new Scalar[m->size];
     for (unsigned int i = 0; i < rhs->size; i++)
-      this->sln[i] = mumps_to_scalar(param.rhs[i]);
+      this->sln[i] = mumps_to_Scalar(param.rhs[i]);
   }
 
   tmr.tick();

@@ -229,8 +229,6 @@ void cholsl(double **a, int n, double p[], T b[], T x[])
   }
 }
 
-//  ///////
-
 enum EMatrixDumpFormat {
 	DF_MATLAB_SPARSE,
 	DF_PLAIN_ASCII,
@@ -360,7 +358,7 @@ public:
   virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) { };
 	
   /// Multiply with a Scalar.
-  virtual void multiply_with_scalar(Scalar value) { };
+  virtual void multiply_with_Scalar(Scalar value) { };
 
   /// Duplicate sparse matrix (including allocation).
   virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
@@ -452,10 +450,8 @@ protected:
   unsigned int size;
 };
 
-template<typename Scalar> class Solver;
-enum MatrixSolverType;
-template<typename Scalar> Vector<Scalar>* create_vector(MatrixSolverType matrix_solver);
-template<typename Scalar> SparseMatrix<Scalar>*  create_matrix(MatrixSolverType matrix_solver);
-template<typename Scalar> Solver<Scalar>*  create_linear_solver(MatrixSolverType matrix_solver, 
-                                         Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+template<typename Scalar> HERMES_API Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver);
+template<typename Scalar> HERMES_API SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver);
+
+
 #endif

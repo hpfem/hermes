@@ -1,5 +1,5 @@
 // This utility generates edge shape functions for quads in the
-// space Hcurl. Edge functions are the gradients of scalar Lobatto
+// space Hcurl. Edge functions are the gradients of Scalar Lobatto
 // edge functions, bubble functions are the Legendre-based functions
 // from Higher-Order Finite Element Method (Solin, Segeth, Dolezel).
 
@@ -536,7 +536,7 @@ int main(int argc, char* argv[])
   printf("/* Whitney fns - constant tangential component */\n\n");
   whitney(0);
 
-  printf("/* Edge fns - gradients of scalar lobatto edge functions */\n\n");
+  printf("/* Edge fns - gradients of Scalar lobatto edge functions */\n\n");
   for (i = 0; i <= 1; i++)
     for (j = 2; j <= 11; j++)
       edge_fn(i, j);

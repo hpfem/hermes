@@ -98,14 +98,14 @@ void VectorView<Scalar>::plot_arrow(double x, double y, double xval, double yval
     glColor3f(0.5f,0.5f,0.5f);
 
   // magnitude
-  double real_mag = sqrt(sqr(xval) + sqr(yval));
-  double mag = real_mag;
-  if (real_mag > max) mag = max;
+  double Real_mag = sqrt(sqr(xval) + sqr(yval));
+  double mag = Real_mag;
+  if (Real_mag > max) mag = max;
   double length = mag/max * gs * length_coef;
   double width = 0.1 * gs;
   if (mode == 1) width *= 1.2;
-  double xnew = x + gs * xval * mag / (max * real_mag) * length_coef;
-  double ynew = y - gs * yval * mag / (max * real_mag) * length_coef;
+  double xnew = x + gs * xval * mag / (max * Real_mag) * length_coef;
+  double ynew = y - gs * yval * mag / (max * Real_mag) * length_coef;
 
 
   if ((mag)/(max - min) < 1e-5)

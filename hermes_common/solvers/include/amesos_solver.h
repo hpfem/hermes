@@ -20,14 +20,18 @@
 #ifndef __HERMES_COMMON_AMESOS_SOLVER_H_
 #define __HERMES_COMMON_AMESOS_SOLVER_H_
 
+#include "../include/config.h"
+
+#ifdef HAVE_AMESOS
+
 #include "solver.h"
 #include "epetra_solver.h"
 #include "compat.h"
 
-#ifdef HAVE_AMESOS
-  #include <Amesos.h>
-  #include <Amesos_BaseSolver.h>
-#endif
+#include <Amesos.h>
+#include <Amesos_BaseSolver.h>
+
+using namespace Hermes::Solvers;
 
 /// Encapsulation of Amesos linear solver
 ///
@@ -47,15 +51,14 @@ public:
   virtual bool solve();
 
 protected:
-#ifdef HAVE_AMESOS
   static Amesos factory;
   Amesos_BaseSolver *solver;
   Epetra_LinearProblem problem;
-#endif
   EpetraMatrix<Scalar> *m;
   EpetraVector<Scalar> *rhs;
   
   bool setup_factorization();
 };
+#endif
 
 #endif

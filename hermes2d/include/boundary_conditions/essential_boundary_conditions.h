@@ -87,7 +87,7 @@ public:
   typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
 };
 
-/// Class representing non-constant essential boundary condition for scalar approximation.
+/// Class representing non-constant essential boundary condition for Scalar approximation.
 template<typename Scalar>
 class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
 {

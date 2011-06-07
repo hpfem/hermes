@@ -39,17 +39,18 @@ template <typename Scalar> struct mumps_type;
 template <>
 struct mumps_type<std::complex<double> >{
   typedef ZMUMPS_STRUC_C mumps_struct;
-  typedef ZMUMPS_COMPLEX mumps_scalar;
+  typedef ZMUMPS_COMPLEX mumps_Scalar;
 };
 template <>
 struct mumps_type<double>{
   typedef DMUMPS_STRUC_C mumps_struct;
-  typedef double mumps_scalar;
+  typedef double mumps_Scalar;
 };
 #endif
 
 template <typename Scalar> class MumpsSolver;
 
+using namespace Hermes::Solvers;
 
 template <typename Scalar>
 class MumpsMatrix : public SparseMatrix<Scalar> 
@@ -76,7 +77,7 @@ public:
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
   // Multiplies matrix with a Scalar.
-  void multiply_with_scalar(Scalar value);
+  void multiply_with_Scalar(Scalar value);
   // Creates matrix using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
@@ -88,7 +89,7 @@ protected:
   int *irn;         // Row indices.
   int *jcn;         // Column indices.
 #ifdef WITH_MUMPS
-  typename mumps_type<Scalar>::mumps_scalar *Ax; // Matrix entries (column-wise).
+  typename mumps_type<Scalar>::mumps_Scalar *Ax; // Matrix entries (column-wise).
 #endif
   int *Ai;          // Row indices of values in Ax.
   unsigned int *Ap;          // Index to Ax/Ai, where each column starts.

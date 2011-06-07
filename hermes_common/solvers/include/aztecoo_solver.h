@@ -26,7 +26,8 @@
 
 #ifdef HAVE_AZTECOO
   #include <AztecOO.h>
-#endif
+
+using namespace Hermes::Solvers;
 
 /// Encapsulation of AztecOO linear solver
 ///
@@ -73,9 +74,7 @@ public:
   void set_param(int param, double value);
 
 protected:
-#ifdef HAVE_AZTECOO
   AztecOO aztec;    ///< Instance of the Aztec solver.
-#endif
   EpetraMatrix<Scalar> *m;
   EpetraVector<Scalar> *rhs;
   
@@ -87,4 +86,5 @@ protected:
 };
 
 
+#endif
 #endif

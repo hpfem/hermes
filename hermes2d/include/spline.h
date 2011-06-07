@@ -45,8 +45,8 @@ public:
   double get_value(double x_in);
 #ifdef H2D_COMPLEX
   // This is a hack for Hermes to build in complex mode.
-  double get_value(scalar x_in_scalar) {
-    double x_in = std::real(x_in_scalar); 
+  double get_value(Scalar x_in_Scalar) {
+    double x_in = std::Real(x_in_Scalar); 
     return get_value(x_in);
   };
 #endif
@@ -57,8 +57,8 @@ public:
   double get_derivative(double x_in);
 #ifdef H2D_COMPLEX
   // This is a hack for Hermes to build in complex mode.
-  double get_derivative(scalar x_in_scalar) {
-    double x_in = std::real(x_in_scalar); 
+  double get_derivative(Scalar x_in_Scalar) {
+    double x_in = std::Real(x_in_Scalar); 
     return get_derivative(x_in);
   };
 #endif

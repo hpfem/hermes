@@ -41,7 +41,7 @@ public:
 
   virtual void set_shapeset(Shapeset* shapeset);
 
-  virtual ESpaceType get_type() const { return HERMES_HDIV_SPACE; }
+  virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
 
 protected:
 

@@ -440,7 +440,7 @@ void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* 
   min_tau = initial_tau / 50;
   max_mag = vec.get_max_value();
 
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
   root = new Node;
   build_tree();
   report_time("Time to build searching tree: %g s", cpu_time.tick().last());
@@ -472,7 +472,7 @@ void StreamView<Scalar>::add_streamline(double x, double y)
 {
   if (root == NULL)
     error("Function add_streamline must be called after StreamView<Scalar>::show().");
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
   streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
   streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
   streamlength[num_stream] = create_streamline(x, y, num_stream);
@@ -629,7 +629,7 @@ void StreamView<Scalar>::on_left_mouse_down(int x, int y)
   // adding streamline (initial point set at (x,y))
   if (!scale_focused && glutGetModifiers() == GLUT_ACTIVE_CTRL)
   {
-    TimePeriod cpu_time;
+    Hermes::TimePeriod cpu_time;
     streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
     streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
     streamlength[num_stream] = create_streamline(untransform_x(x), untransform_y(y), num_stream);

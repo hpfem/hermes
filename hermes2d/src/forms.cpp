@@ -108,7 +108,7 @@ Func<Ord>* init_fn_ord(const int order)
 Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
 {
   int nc = fu->get_num_components();
-  ESpaceType space_type = fu->get_space_type();
+  SpaceType space_type = fu->get_space_type();
   Quad2D* quad = fu->get_quad_2d();
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
   if (space_type == HERMES_H1_SPACE)
@@ -378,8 +378,8 @@ Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order)
   if (fu == NULL) error("NULL MeshFunction in Func<Scalar>*::init_fn().");
   if (fu->get_mesh() == NULL) error("Uninitialized MeshFunction used.");
 
-  ESpaceType space_type = fu->get_space_type();
-  ESolutionType sln_type = fu->get_type();
+  SpaceType space_type = fu->get_space_type();
+  SolutionType sln_type = fu->get_type();
 
   int nc = fu->get_num_components();
   Quad2D* quad = fu->get_quad_2d();

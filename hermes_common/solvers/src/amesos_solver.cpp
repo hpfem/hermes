@@ -17,16 +17,15 @@
 // along with Hermes3D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+
 #include "amesos_solver.h"
 #include "callstack.h"
 
-#ifdef HAVE_AMESOS
 #include <Amesos_ConfigDefs.h>
-#endif
 
 #ifdef HAVE_AMESOS
+
 template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
-#endif
 
 // Amesos solver ///////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
@@ -34,69 +33,52 @@ AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar>
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
 {
   _F_
-#ifdef HAVE_AMESOS
     solver = factory.Create(solver_type, problem);
   assert(solver != NULL);
   // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
   //          so don't forget to delete it!
   //          ( Amesos.cpp, line 88, called from factory.Create(): 
   //            return new Amesos_Klu(LinearProblem); )
-#else
-    error(AMESOS_NOT_COMPILED);
-#endif
 }
 
 template<typename Scalar>
 AmesosSolver<Scalar>::~AmesosSolver()
 {
   _F_
-#ifdef HAVE_AMESOS
-    delete solver;
-#endif
+  delete solver;
 }
 
 template<typename Scalar>
 bool AmesosSolver<Scalar>::is_available(const char *name)
 {
   _F_
-#ifdef HAVE_AMESOS
-    return factory.Query(name);
-#else
-    return false;
-#endif
+  return factory.Query(name);
 }
 
 template<typename Scalar>
 void AmesosSolver<Scalar>::set_use_transpose(bool use_transpose)
 {
   _F_
-#ifdef HAVE_AMESOS
-    solver->SetUseTranspose(use_transpose);
-#endif
+  solver->SetUseTranspose(use_transpose);
 }
 
 template<typename Scalar>
 bool AmesosSolver<Scalar>::use_transpose()
 {
   _F_
-#ifdef HAVE_AMESOS
-    return solver->UseTranspose();
-#else
-    return false;
-#endif
+  return solver->UseTranspose();
 }
 
 template<>
 bool AmesosSolver<double>::solve()
 {
   _F_
-#ifdef HAVE_AMESOS
-    assert(m != NULL);
+  assert(m != NULL);
   assert(rhs != NULL);
 
   assert(m->size == rhs->size);
 
-  TimePeriod tmr;  
+  Hermes::TimePeriod tmr;  
 
   problem.SetOperator(m->mat);
   problem.SetRHS(rhs->vec);
@@ -127,22 +109,18 @@ bool AmesosSolver<double>::solve()
   for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<>
 bool AmesosSolver<std::complex<double> >::solve()
 {
   _F_
-#ifdef HAVE_AMESOS
-    assert(m != NULL);
+  assert(m != NULL);
   assert(rhs != NULL);
 
   assert(m->size == rhs->size);
 
-  TimePeriod tmr;  
+  Hermes::TimePeriod tmr;  
 
   error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
@@ -168,18 +146,14 @@ bool AmesosSolver<std::complex<double> >::solve()
   memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<typename Scalar>
 bool AmesosSolver<Scalar>::setup_factorization()
 {
   _F_
-#ifdef HAVE_AMESOS
-    // Perform both factorization phases for the first time.
-    int eff_fact_scheme;
+  // Perform both factorization phases for the first time.
+  int eff_fact_scheme;
   if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
     solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
     eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
@@ -209,11 +183,9 @@ bool AmesosSolver<Scalar>::setup_factorization()
   }
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template class HERMES_API AmesosSolver<double>;
 template class HERMES_API AmesosSolver<std::complex<double> >;
 
+#endif

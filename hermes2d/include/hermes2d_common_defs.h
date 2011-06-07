@@ -16,11 +16,38 @@
 #ifndef __H2D_COMMON_H_
 #define __H2D_COMMON_H_
 
-#include "common.h"
-#include "matrix.h"
+#include "../../hermes_common/include/hermes_common.h"
 
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
+
+enum // node types
+{
+  HERMES_TYPE_VERTEX = 0,
+  HERMES_TYPE_EDGE = 1
+};
+
+enum ElementMode2D {
+	HERMES_MODE_TRIANGLE = 0,
+	HERMES_MODE_QUAD = 1
+};
+
+class Ord2
+{
+  public:
+    Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
+    Ord2(int order) : order_h(order), order_v(order) {};
+    int order_h;
+    int order_v;
+};
+
+enum SpaceType {
+  HERMES_H1_SPACE = 0,
+  HERMES_HCURL_SPACE = 1,
+  HERMES_HDIV_SPACE = 2,
+  HERMES_L2_SPACE = 3,
+  HERMES_INVALID_SPACE = -9999
+};
 
 #define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
 
@@ -116,14 +143,14 @@ public:
 
   double get_l2_norm(Vector<Scalar>* vec) const;
 
-  bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
+  bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Hermes::Solvers::Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
 			       Vector<Scalar>* rhs, bool jacobian_changed = true, double newton_tol = 1e-8, 
                     int newton_max_iter = 100, bool verbose = false,
                     bool residual_as_function = false,
                     double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
 
   bool solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter, 
-                    MatrixSolverType matrix_solver, double tol = 1e-8, 
+                    Hermes::MatrixSolverType matrix_solver, double tol = 1e-8, 
                     int max_iter = 100, bool verbose = false) const;
 };
 #endif

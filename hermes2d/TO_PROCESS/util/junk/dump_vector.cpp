@@ -1,8 +1,8 @@
 void dump_element_sln(FILE* f, Solution* sln, int level)
 {
   sln->set_quad_order(1, H2D_FN_VAL);
-  scalar* v0 = sln->get_fn_values(0);
-  scalar* v1 = sln->get_fn_values(1);
+  Scalar* v0 = sln->get_fn_values(0);
+  Scalar* v1 = sln->get_fn_values(1);
   double* x  = sln->get_refmap()->get_phys_x(1);
   double* y  = sln->get_refmap()->get_phys_y(1);
 

@@ -21,7 +21,7 @@
 #include <cmath>
 #include <list>
 #include "hermes2d_common_defs.h"
-#include "scalar_view.h"
+#include "Scalar_view.h"
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -609,7 +609,7 @@ void ScalarView<Scalar>::draw_element_infos_2d()
   glDisable(GL_BLEND);
 
   //draw element IDs
-  typename vector<ElementInfo>::const_iterator iter = element_infos.begin();
+  typename Hermes::vector<ElementInfo>::const_iterator iter = element_infos.begin();
   while (iter != element_infos.end())
   {
     //check element dimension in pixels

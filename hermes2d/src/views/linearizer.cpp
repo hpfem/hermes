@@ -951,7 +951,7 @@ void Linearizer<double>::process_solution(MeshFunction<double>* sln, int item, d
   if (sln == NULL) error("Solution is NULL in Linearizer:process_solution().");
 
   lock_data();
-  TimePeriod time_period;
+  Hermes::TimePeriod time_period;
 
   // initialization
   this->sln = sln;
@@ -1132,7 +1132,7 @@ void Linearizer<std::complex<double> >::process_solution(MeshFunction<std::compl
   if (sln == NULL) error("Solution is NULL in Linearizer:process_solution().");
 
   lock_data();
-  TimePeriod time_period;
+  Hermes::TimePeriod time_period;
 
   // initialization
   this->sln = sln;

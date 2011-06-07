@@ -87,7 +87,7 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
   error_if (n != this->num,
     "Wrong number of solutions.");
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   for (int i = 0; i < n; i++)
   {

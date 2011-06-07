@@ -168,7 +168,7 @@ typedef struct
 #define VOLATILE
 
 /* For 12-byte long doubles on an i386, pad a 16-bit short 0
- * to the end of real constants initialized by integer arrays.
+ * to the end of Real constants initialized by integer arrays.
  *
  * #define XPD 0,
  *
@@ -2303,7 +2303,7 @@ return( q );
  * DESCRIPTION:
  *
  * Returns Bessel function of order v of the argument,
- * where v is real.  Negative x is allowed if v is an integer.
+ * where v is Real.  Negative x is allowed if v is an integer.
  *
  * Several expansions are included: the ascending power
  * series, the Hankel expansion, and two transitional

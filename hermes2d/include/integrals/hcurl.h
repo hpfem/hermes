@@ -23,8 +23,8 @@
 
 //// new volume integrals //////////////////////////////////////////////////////////////////////////////
 
-template<typename real, typename Scalar>
-Scalar int_e_f(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename Scalar>
+Scalar int_e_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -63,8 +63,8 @@ public:
     }
 };
 
-template<typename real, typename Scalar>
-Scalar int_curl_e_curl_f(int n, double *wt, Func<real> *u, Func<real> *v)
+template<typename Real, typename Scalar>
+Scalar int_curl_e_curl_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -81,8 +81,8 @@ Scalar int_v0(int n, double *wt, Func<Scalar> *v)
   return result;
 }
 
-template<typename real, typename Scalar>
-Scalar int_v1(int n, double *wt, Func<real> *v)
+template<typename Real, typename Scalar>
+Scalar int_v1(int n, double *wt, Func<Real> *v)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -90,8 +90,8 @@ Scalar int_v1(int n, double *wt, Func<real> *v)
   return result;
 }
 
-template<typename real, typename Scalar>
-Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, real x, real y), Func<real> *u, Func<real> *v, Geom<real> *e)
+template<typename Real, typename Scalar>
+Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, Real x, Real y), Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)
@@ -99,8 +99,8 @@ Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, real x, real y), Fun
   return result;
 }
 
-template<typename real, typename Scalar>
-Scalar int_e_tau_f_tau(int n, double *wt, Func<real> *u, Func<real> *v, Geom<real> *e)
+template<typename Real, typename Scalar>
+Scalar int_e_tau_f_tau(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
 {
   Scalar result = 0;
   for (int i = 0; i < n; i++)

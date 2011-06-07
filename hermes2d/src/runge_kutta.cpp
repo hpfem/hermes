@@ -20,12 +20,12 @@
 #include "weakform_library\weakforms_hcurl.h"
 
 template<typename Scalar>
-RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
+RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
   : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
   stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
 {
   // Check for not implemented features.
-  if (matrix_solver != SOLVER_UMFPACK)
+  if (matrix_solver != Hermes::SOLVER_UMFPACK)
     error("Sorry, rk_time_step() still only works with UMFpack.");
 
   // Create matrix solver.
@@ -101,7 +101,7 @@ bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Her
   // Project the previous time level solutions onto the actual spaces to be able to add the resulting vector to
   // the K_vector when passing the u_ext.
   Scalar* slns_prev_time_projection = new Scalar[ndof];
-  OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, SOLVER_UMFPACK);
+  OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, Hermes::SOLVER_UMFPACK);
 
   // Creates the stage weak formulation.
   create_stage_wf(dp->get_spaces().size(), current_time, time_step);

@@ -160,7 +160,7 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
 // Perform Picard's iteration.
 template<typename Scalar>
 bool Hermes2D<Scalar>::solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter,
-  MatrixSolverType matrix_solver, double tol,
+  Hermes::MatrixSolverType matrix_solver, double tol,
   int max_iter, bool verbose) const
 {
   // Instantiate a class with global functions.

@@ -18,7 +18,6 @@
 
 #include "../hermes2d_common_defs.h"
 
-
 #define H2D_CHECK_MODE      assert(mode == HERMES_MODE_TRIANGLE || mode == HERMES_MODE_QUAD)
 #define H2D_CHECK_VERTEX    assert(vertex >= 0 && vertex < nvert)
 #define H2D_CHECK_EDGE      assert(edge >= 0 && edge < nvert)
@@ -67,7 +66,7 @@ enum FunctionExpansionIndex {
 /// Vertex shape functions in H1 shapesets are also regarded as edge functions of orders 0
 /// and 1. This simplifies constraint calculations and BC projections.
 ///
-/// Shape functions are always real-valued.
+/// Shape functions are always Real-valued.
 ///
 class HERMES_API Shapeset
 {
@@ -154,7 +153,7 @@ public:
 
 
   /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
-  /// domain, component is 0 for scalar shapesets and 0 or 1 for vector shapesets.
+  /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
   inline double get_value(int n, int index, double x, double y, int component)
   {
     if (index >= 0)
@@ -195,7 +194,7 @@ public:
   virtual int get_id() const = 0;
 
   /// Returns space type.
-  virtual ESpaceType get_space_type() const = 0;
+  virtual SpaceType get_space_type() const = 0;
 
 protected:
 

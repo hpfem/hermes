@@ -39,7 +39,7 @@ L2OrthoHP::L2OrthoHP(int num, ...)
     for (int j = 0; j < num; j++)
     {
       if (i == j) {
-        form[i][j] = l2_form<double, scalar>;
+        form[i][j] = l2_form<double, Scalar>;
         ord[i][j]  = l2_form<Ord, Ord>;
       }
       else {
@@ -219,7 +219,7 @@ void L2OrthoHP::calc_projection_errors(Element* e, int order, Solution* rsln,
   int i, j, s, k, r, son;
   int m = e->get_mode();
   double error;
-  scalar prod;
+  Scalar prod;
 
   if (!obase_ready) calc_ortho_base();
 
@@ -235,7 +235,7 @@ void L2OrthoHP::calc_projection_errors(Element* e, int order, Solution* rsln,
   rsln->enable_transform(false);
 
   // obtain reference solution values on all four refined sons
-  scalar* rval[4][3];
+  Scalar* rval[4][3];
   Element* base = rsln->get_mesh()->get_element(e->id);
   assert(!base->active);
   for (son = 0; son < 4; son++)
@@ -251,7 +251,7 @@ void L2OrthoHP::calc_projection_errors(Element* e, int order, Solution* rsln,
 
   // h-cadidates: calculate products of the reference solution with orthonormal basis
   // functions on son elements, obtaining (partial) projections and their errors
-  scalar3 proj[4][121];
+  Scalar3 proj[4][121];
   for (son = 0; son < 4; son++)
   {
     memset(proj[0], 0, sizeof(proj[0]));
@@ -614,7 +614,7 @@ void L2OrthoHP::set_biform(int i, int j, biform_val_t bi_form, biform_ord_t bi_o
 }
 
 
-scalar L2OrthoHP::eval_error(biform_val_t bi_fn, biform_ord_t bi_ord,
+Scalar L2OrthoHP::eval_error(biform_val_t bi_fn, biform_ord_t bi_ord,
                              MeshFunction *sln1, MeshFunction *sln2, MeshFunction *rsln1, MeshFunction *rsln2,
                              RefMap *rv1,        RefMap *rv2,        RefMap *rrv1,        RefMap *rrv2)
 {
@@ -647,10 +647,10 @@ scalar L2OrthoHP::eval_error(biform_val_t bi_fn, biform_ord_t bi_ord,
     jwt[i] = pt[i][2] * jac[i];
 
   // function values and values of external functions
-  Func<scalar>* err1 = init_fn(sln1, rv1, order);
-  Func<scalar>* err2 = init_fn(sln2, rv2, order);
-  Func<scalar>* v1 = init_fn(rsln1, rrv1, order);
-  Func<scalar>* v2 = init_fn(rsln2, rrv2, order);
+  Func<Scalar>* err1 = init_fn(sln1, rv1, order);
+  Func<Scalar>* err2 = init_fn(sln2, rv2, order);
+  Func<Scalar>* v1 = init_fn(rsln1, rrv1, order);
+  Func<Scalar>* v2 = init_fn(rsln2, rrv2, order);
 
   for (int i = 0; i < np; i++)
   {
@@ -662,7 +662,7 @@ scalar L2OrthoHP::eval_error(biform_val_t bi_fn, biform_ord_t bi_ord,
     err2->dy[i] = err2->dy[i] - v2->dy[i];
   }
 
-  scalar res = bi_fn(np, jwt, err1, err2, e, NULL);
+  Scalar res = bi_fn(np, jwt, err1, err2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;
@@ -675,7 +675,7 @@ scalar L2OrthoHP::eval_error(biform_val_t bi_fn, biform_ord_t bi_ord,
 }
 
 
-scalar L2OrthoHP::eval_norm(biform_val_t bi_fn, biform_ord_t bi_ord,
+Scalar L2OrthoHP::eval_norm(biform_val_t bi_fn, biform_ord_t bi_ord,
                             MeshFunction *rsln1, MeshFunction *rsln2, RefMap *rrv1, RefMap *rrv2)
 {
   // determine the integration order
@@ -707,10 +707,10 @@ scalar L2OrthoHP::eval_norm(biform_val_t bi_fn, biform_ord_t bi_ord,
     jwt[i] = pt[i][2] * jac[i];
 
   // function values
-  Func<scalar>* v1 = init_fn(rsln1, rrv1, order);
-  Func<scalar>* v2 = init_fn(rsln2, rrv2, order);
+  Func<Scalar>* v1 = init_fn(rsln1, rrv1, order);
+  Func<Scalar>* v2 = init_fn(rsln2, rrv2, order);
 
-  scalar res = bi_fn(np, jwt, v1, v2, e, NULL);
+  Scalar res = bi_fn(np, jwt, v1, v2, e, NULL);
 
   e->free(); delete e;
   delete [] jwt;

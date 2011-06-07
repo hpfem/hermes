@@ -19,8 +19,8 @@ class DummySolver: public Solver
     virtual bool handles_symmetry() {
         return false;
     }
-    virtual bool solve(void* ctx, int n, int* Ap, int* Ai, scalar* Ax, bool
-            sym, scalar* RHS, scalar* vec) {
+    virtual bool solve(void* ctx, int n, int* Ap, int* Ai, Scalar* Ax, bool
+            sym, Scalar* RHS, Scalar* vec) {
         return true;
     }
 };

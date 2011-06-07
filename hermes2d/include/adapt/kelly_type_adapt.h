@@ -174,7 +174,7 @@ public:
     ///                                      switched off by a call to \c disable_aposteriori_interface_scaling.
     ///
     /// \param[in]  interface_scaling_fns_  Specifies functions used for scaling the interface error estimator for
-    ///                                     each component. The scale is defined as a real function of the element
+    ///                                     each component. The scale is defined as a Real function of the element
     ///                                     diameter and multiplies the result of the interface estimators.
     ///                                     It may thus be already present in the interface estimator forms
     ///                                     themselves, in which case call \c disable_aposteriori_interface_scaling.
@@ -286,11 +286,11 @@ public:
     }
 
   private:
-    template<typename real, typename scalar>
-    static scalar original_kelly_interface_estimator(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
-                                                     Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar original_kelly_interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                                                     Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      scalar result = 0.;
+      Scalar result = 0.;
       for (int i = 0; i < n; i++)
         result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
                                e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );

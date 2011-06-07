@@ -49,10 +49,10 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = int_grad_u_grad_v<double, Scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
-        result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
+        result += int_u_v<double, Scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
@@ -79,12 +79,12 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* xvel_prev_time = ext->fn[0];
-        Func<scalar>* yvel_prev_time = ext->fn[1];
-        result = int_w_nabla_u_v<double, scalar>(n, wt, xvel_prev_time, yvel_prev_time, u, v);
+        Func<Scalar>* xvel_prev_time = ext->fn[0];
+        Func<Scalar>* yvel_prev_time = ext->fn[1];
+        result = int_w_nabla_u_v<double, Scalar>(n, wt, xvel_prev_time, yvel_prev_time, u, v);
       }
       return result;
     }
@@ -112,8 +112,8 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return - int_u_dvdx<double, scalar>(n, wt, u, v);
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      return - int_u_dvdx<double, Scalar>(n, wt, u, v);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
@@ -130,8 +130,8 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return - int_u_dvdy<double, scalar>(n, wt, u, v);
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      return - int_u_dvdy<double, Scalar>(n, wt, u, v);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
@@ -147,11 +147,11 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
-        result = int_u_v<double, scalar>(n, wt, vel_prev_time, v) / time_step;
+        Func<Scalar>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
+        result = int_u_v<double, Scalar>(n, wt, vel_prev_time, v) / time_step;
       }
       return result;
     }
@@ -223,10 +223,10 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = int_grad_u_grad_v<double, scalar>(n, wt, u, v) / Reynolds;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = int_grad_u_grad_v<double, Scalar>(n, wt, u, v) / Reynolds;
       if(!Stokes)
-        result += int_u_v<double, scalar>(n, wt, u, v) / time_step;
+        result += int_u_v<double, Scalar>(n, wt, u, v) / time_step;
       return result;
     }
 
@@ -253,11 +253,11 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* xvel_prev_newton = u_ext[0];
-        Func<scalar>* yvel_prev_newton = u_ext[1];
+        Func<Scalar>* xvel_prev_newton = u_ext[0];
+        Func<Scalar>* yvel_prev_newton = u_ext[1];
         for (int i = 0; i < n; i++)
           result += wt[i] * ((xvel_prev_newton->val[i] * u->dx[i] + yvel_prev_newton->val[i]
                               * u->dy[i]) * v->val[i] + u->val[i] * v->val[i] * xvel_prev_newton->dx[i]);
@@ -290,10 +290,10 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* xvel_prev_newton = u_ext[0];
+        Func<Scalar>* xvel_prev_newton = u_ext[0];
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * v->val[i] * xvel_prev_newton->dy[i]);
       }
@@ -323,10 +323,10 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* yvel_prev_newton = u_ext[0];
+        Func<Scalar>* yvel_prev_newton = u_ext[0];
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * v->val[i] * yvel_prev_newton->dx[i]);
       }
@@ -356,11 +356,11 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
       if(!Stokes) {
-        Func<scalar>* xvel_prev_newton = u_ext[0];
-        Func<scalar>* yvel_prev_newton = u_ext[1];
+        Func<Scalar>* xvel_prev_newton = u_ext[0];
+        Func<Scalar>* yvel_prev_newton = u_ext[1];
         for (int i = 0; i < n; i++)
           result += wt[i] * ((xvel_prev_newton->val[i] * u->dx[i] + yvel_prev_newton->val[i] * u->dy[i]) * v->val[i] + u->val[i]
                              * v->val[i] * yvel_prev_newton->dy[i]);
@@ -393,8 +393,8 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return - int_u_dvdx<double, scalar>(n, wt, u, v);
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      return - int_u_dvdx<double, Scalar>(n, wt, u, v);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
@@ -411,8 +411,8 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      return - int_u_dvdy<double, scalar>(n, wt, u, v);
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      return - int_u_dvdy<double, Scalar>(n, wt, u, v);
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
@@ -428,13 +428,13 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
-      Func<scalar>* xvel_prev_time = ext->fn[0];  
-      Func<scalar>* yvel_prev_time = ext->fn[1];
-      Func<scalar>* xvel_prev_newton = u_ext[0];  
-      Func<scalar>* yvel_prev_newton = u_ext[1];  
-      Func<scalar>* p_prev_newton = u_ext[2];
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      Func<Scalar>* xvel_prev_time = ext->fn[0];  
+      Func<Scalar>* yvel_prev_time = ext->fn[1];
+      Func<Scalar>* xvel_prev_newton = u_ext[0];  
+      Func<Scalar>* yvel_prev_newton = u_ext[1];  
+      Func<Scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
@@ -473,13 +473,13 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
-      Func<scalar>* xvel_prev_time = ext->fn[0];  
-      Func<scalar>* yvel_prev_time = ext->fn[1];
-      Func<scalar>* xvel_prev_newton = u_ext[0];  
-      Func<scalar>* yvel_prev_newton = u_ext[1];  
-      Func<scalar>* p_prev_newton = u_ext[2];
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      Func<Scalar>* xvel_prev_time = ext->fn[0];  
+      Func<Scalar>* yvel_prev_time = ext->fn[1];
+      Func<Scalar>* xvel_prev_newton = u_ext[0];  
+      Func<Scalar>* yvel_prev_newton = u_ext[1];  
+      Func<Scalar>* p_prev_newton = u_ext[2];
       for (int i = 0; i < n; i++)
         result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dy[i]));
       if(!Stokes)
@@ -518,10 +518,10 @@ public:
       adapt_eval = false;
     }
 
-    scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) {
-      scalar result = 0;
-      Func<scalar>* xvel_prev_newton = u_ext[0];  
-      Func<scalar>* yvel_prev_newton = u_ext[1];  
+    Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) {
+      Scalar result = 0;
+      Func<Scalar>* xvel_prev_newton = u_ext[0];  
+      Func<Scalar>* yvel_prev_newton = u_ext[1];  
 
       for (int i = 0; i < n; i++)
         result += wt[i] * (xvel_prev_newton->dx[i] * v->val[i] + yvel_prev_newton->dy[i] * v->val[i]);
@@ -564,7 +564,7 @@ public:
     return BC_FUNCTION; 
   };
 
-  virtual scalar function(double x, double y) const {
+  virtual Scalar function(double x, double y) const {
     double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     if (current_time <= startup_time) 
       return val_y * current_time/startup_time;

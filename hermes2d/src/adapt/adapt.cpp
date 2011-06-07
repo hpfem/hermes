@@ -137,7 +137,7 @@ bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *
   error_if(!have_errors, "element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
   error_if(refinement_selectors == Hermes::vector<RefinementSelectors::Selector<Scalar> *>(), "selector not provided");
   if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
 
   //get meshes
   int max_id = -1;
@@ -434,7 +434,7 @@ const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const
 template<typename Scalar>
 void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
 {
-  for (vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
+  for (Hermes::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
     elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
       apply_refinement(*elem_ref);
   }
@@ -731,7 +731,7 @@ double Adapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, 
   int n = slns.size();
   if (n != this->num) EXIT("Wrong number of solutions.");
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
   Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
@@ -908,7 +908,7 @@ void Adapt<Scalar>::fill_regular_queue(Mesh** meshes)
   regular_queue.clear();
   if (num_act_elems < (int)regular_queue.capacity()) 
   {
-    vector<ElementReference> empty_refs;
+    Hermes::vector<ElementReference> empty_refs;
     regular_queue.swap(empty_refs); //deallocate
     regular_queue.reserve(num_act_elems); //allocate
   }

@@ -576,7 +576,7 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
 
 
   lock_data();
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
 
   // initialization
   this->xsln = xsln;
@@ -743,7 +743,7 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
 
 
   lock_data();
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
 
   // initialization
   this->xsln = xsln;

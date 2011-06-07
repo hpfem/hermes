@@ -32,11 +32,11 @@ public:
                     SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) {}
         
 
-    template<typename real, typename scalar>
-    scalar matrix_form(int n, double *wt, Func<scalar> *u_ext[], Func<real> *u,
-                       Func<real> *v, Geom<real> *e, ExtData<scalar> *ext) const
+    template<typename Real, typename Scalar>
+    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
+                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
     {
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;

@@ -23,8 +23,8 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 // the other solvers). 
 // Possibilities: none, jacobi, neumann, least-squares, or a
 // preconditioner from IFPACK (see hermes_common/solver/aztecoo.h).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
+// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
 
 // Flux definition.
 #include "fluxes.cpp"
@@ -48,7 +48,7 @@ Scalar g(int ess_bdy_marker, Real x, Real y)
 int main(int argc, char* argv[])
 {
   // Time measurement.
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
   cpu_time.tick();
 
   // Load the mesh.
@@ -82,8 +82,8 @@ int main(int argc, char* argv[])
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
-  // Initialize the preconditioner in the case of SOLVER_AZTECOO.
-  if (matrix_solver == SOLVER_AZTECOO) 
+  // Initialize the preconditioner in the case of Hermes::SOLVER_AZTECOO.
+  if (matrix_solver == Hermes::SOLVER_AZTECOO) 
   {
     ((AztecOOSolver*) solver)->set_solver(iterative_method);
     ((AztecOOSolver*) solver)->set_precond(preconditioner);

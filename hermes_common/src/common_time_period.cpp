@@ -10,7 +10,7 @@
 
 using namespace std;
 
-TimePeriod::TimePeriod(const char *name) : period_name(name == NULL ? "unnamed" : name) 
+Hermes::TimePeriod::TimePeriod(const char *name) : period_name(name == NULL ? "unnamed" : name) 
 {
   //initialization
 #ifdef WIN32 //Windows
@@ -23,7 +23,7 @@ TimePeriod::TimePeriod(const char *name) : period_name(name == NULL ? "unnamed" 
   tick_reset();
 }
 
-TimePeriod::SysTime TimePeriod::get_time() const 
+Hermes::TimePeriod::SysTime Hermes::TimePeriod::get_time() const 
 {
 #ifdef WIN32 //Windows
   if (frequency > 0) 
@@ -47,7 +47,7 @@ TimePeriod::SysTime TimePeriod::get_time() const
 #endif
 }
 
-double TimePeriod::period_in_seconds(const SysTime& begin, const SysTime& end) const 
+double Hermes::TimePeriod::period_in_seconds(const SysTime& begin, const SysTime& end) const 
 {
 #ifdef WIN32 //Windows
   uint64_t period = end - begin;
@@ -68,7 +68,7 @@ double TimePeriod::period_in_seconds(const SysTime& begin, const SysTime& end) c
 #endif
 }
 
-const TimePeriod& TimePeriod::tick(TimerPeriodTickType type) 
+const Hermes::TimePeriod& Hermes::TimePeriod::tick(TimerPeriodTickType type) 
 {
   SysTime cur_time = get_time();
   if (type == HERMES_ACCUMULATE) 
@@ -85,21 +85,21 @@ const TimePeriod& TimePeriod::tick(TimerPeriodTickType type)
   return *this;
 }
 
-const TimePeriod& TimePeriod::tick_reset() 
+const Hermes::TimePeriod& Hermes::TimePeriod::tick_reset() 
 {
   tick(HERMES_SKIP);
   reset();
   return *this;
 }
 
-const TimePeriod& TimePeriod::reset() 
+const Hermes::TimePeriod& Hermes::TimePeriod::reset() 
 {
   accum = 0;
   last_period = -1;
   return *this;
 }
 
-string TimePeriod::to_string(double secs) const 
+string Hermes::TimePeriod::to_string(double secs) const 
 {
   if (secs < 0)
     return "NO TIME";
@@ -120,7 +120,7 @@ string TimePeriod::to_string(double secs) const
   }
 }
 
-ostream& operator<<(ostream& stream, const TimePeriod& period) 
+ostream& operator<<(ostream& stream, const Hermes::TimePeriod& period) 
 {
   stream << period.accumulated_str();
   return stream;

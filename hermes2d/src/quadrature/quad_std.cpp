@@ -16,6 +16,7 @@
 #include "hermes2d_common_defs.h"
 #include "quad_all.h"
 
+using namespace Hermes;
 
 //// 1D quadrature tables //////////////////////////////////////////////////////////////////////////
 

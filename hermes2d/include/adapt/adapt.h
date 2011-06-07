@@ -16,15 +16,15 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "forms.h"
-#include "space.h"
-#include "vector.h"
-#include "weakform.h"
-#include "h1.h"
-#include "hcurl.h"
-#include "hdiv.h"
-#include "l2.h"
-#include "selector.h"
+#include "../form/forms.h"
+#include "../space/space.h"
+#include "../weakform/weakform.h"
+#include "../integrals/h1.h"
+#include "../integrals/hcurl.h"
+#include "../integrals/hdiv.h"
+#include "../integrals/l2.h"
+#include "../ogprojection.h"
+#include "../refinement_selectors/selector.h"
 
 /** \defgroup g_adapt Adaptivity
  *  \brief Adaptivity provides framework for modyfying elements in order to decrease errors of the solution.
@@ -131,55 +131,55 @@ public:
   private:
     ProjNormType projNormType;
 
-    template<typename real, typename scalar>
-    static scalar l2_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
-                   Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;
     }
 
-    template<typename real, typename scalar>
-    static scalar h1_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
-                   Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar h1_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
                            + u->dy[i] * conj(v->dy[i]));
       return result;
     }
 
-    template<typename real, typename scalar>
-    static scalar h1_error_semi_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u,
-                        Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar h1_error_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
+                        Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
       return result;
     }
 
-    template<typename real, typename scalar>
-    static scalar hdiv_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
 
       error("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
       return result;
     }
 
-    template<typename real, typename scalar>
-    static scalar hcurl_error_form(int n, double *wt, Func<scalar> *u_ext[], Func<scalar> *u, Func<scalar> *v, Geom<real> *e, ExtData<scalar> *ext)
+    template<typename Real, typename Scalar>
+    static Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
     {
-      scalar result = 0;
+      Scalar result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));

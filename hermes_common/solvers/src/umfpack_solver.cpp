@@ -103,7 +103,7 @@ void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_o
 }
 
 template<typename Scalar>
-void CSCMatrix<Scalar>::multiply_with_scalar(Scalar value) 
+void CSCMatrix<Scalar>::multiply_with_Scalar(Scalar value) 
 {
   for (unsigned int i = 0; i < this->nnz; i++) Ax[i] *= value;
 }
@@ -296,7 +296,7 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *r
 
 /// dumping matrix and right-hand side
 ///
-double inline real(double x)
+double inline Real(double x)
 {
   return x;
 }
@@ -307,7 +307,7 @@ double inline imag(double x)
 }
 
 
-double inline real(std::complex<double> x)
+double inline Real(std::complex<double> x)
 {
   return x.real();
 }
@@ -330,7 +330,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
         {
           fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-          fprint_num(file, Ax[i]);
+          Hermes::Helpers::fprint_num(file, Ax[i]);
           fprintf(file, "\n");
         }
         fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -339,7 +339,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
     case DF_MATRIX_MARKET:
       {
-        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate Real symmetric\n");
         int nnz_sym=0;
         for (unsigned int j = 0; j < this->size; j++)
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
@@ -353,7 +353,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
             if ((int)j <= Ai[i])
             {
               fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
-              fprint_num(file, Ax[i]);
+              Hermes::Helpers::fprint_num(file, Ax[i]);
               fprintf(file, "\n");
             }
 
@@ -374,7 +374,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
       }
 
     case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+      exit(1);
       {
         const double zero_cutoff = 1e-10;
         double *ascii_entry_buff = new double[nnz];
@@ -382,13 +382,13 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
         int *ascii_entry_j = new int[nnz];
         int k = 0;
 
-        // If real or imaginary part of scalar entry is below zero_cutoff
+        // If Real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
         for (unsigned int j = 0; j < size; j)
         {
           for (int i = Ap[j]; i < Ap[j + 1]; i)
           {
-            if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+            if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];
@@ -436,7 +436,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
         {
           fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-          fprint_num(file, Ax[i]);
+          Hermes::Helpers::fprint_num(file, Ax[i]);
           fprintf(file, "\n");
         }
         fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -445,7 +445,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
 
     case DF_MATRIX_MARKET:
       {
-        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate Real symmetric\n");
         int nnz_sym=0;
         for (unsigned int j = 0; j < this->size; j++)
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
@@ -459,7 +459,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
             if ((int)j <= Ai[i])
             {
               fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
-              fprint_num(file, Ax[i]);
+              Hermes::Helpers::fprint_num(file, Ax[i]);
               fprintf(file, "\n");
             }
 
@@ -480,7 +480,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
       }
 
     case DF_PLAIN_ASCII:
-      EXIT(HERMES_ERR_NOT_IMPLEMENTED);
+      exit(1);
       {
         const double zero_cutoff = 1e-10;
         std::complex<double> *ascii_entry_buff = new std::complex<double>[nnz];
@@ -488,13 +488,13 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
         int *ascii_entry_j = new int[nnz];
         int k = 0;
 
-        // If real or imaginary part of scalar entry is below zero_cutoff
+        // If Real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
         for (unsigned int j = 0; j < size; j)
         {
           for (int i = Ap[j]; i < Ap[j + 1]; i)
           {
-            if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+            if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];
@@ -509,7 +509,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
         fprintf(file, "%d\n", size);
         fprintf(file, "%d\n", nnz);
         for (unsigned int k = 0; k < nnz; k)
-          fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], REAL(ascii_entry_buff[k]), IMAG(ascii_entry_buff[k]));     
+          fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k].real(), ascii_entry_buff[k].imag());     
 
         //Free memory
         delete [] ascii_entry_buff;
@@ -671,7 +671,7 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file,v[i]);
+        Hermes::Helpers::fprint_num(file,v[i]);
         fprintf(file, "\n");
       }
       fprintf(file, " ];\n");
@@ -693,7 +693,7 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
         for (unsigned int i = 0; i < size; i) 
         {
 
-          fprint_num(file, v[i]);
+          Hermes::Helpers::fprint_num(file, v[i]);
           fprintf(file, "\n");
         }
 
@@ -716,7 +716,7 @@ bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name
       fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
       for (unsigned int i = 0; i < this->size; i++)
       {
-        fprint_num(file,v[i]);
+        Hermes::Helpers::fprint_num(file,v[i]);
         fprintf(file, "\n");
       }
       fprintf(file, " ];\n");
@@ -737,7 +737,7 @@ bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name
         fprintf(file, "\n");
         for (unsigned int i = 0; i < size; i) 
         {
-          fprintf(file, "%E %E\n", REAL(v[i]), IMAG(v[i]));     
+          fprintf(file, "%E %E\n", v[i].real(), v[i].imag());     
         }
 
         return true;
@@ -981,7 +981,7 @@ bool UMFPackLinearSolver<double>::solve()
 
   assert(m->get_size() == rhs->length());
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   int status;
 
@@ -1022,7 +1022,7 @@ bool UMFPackLinearSolver<std::complex<double> >::solve()
 
   assert(m->get_size() == rhs->length());
 
-  TimePeriod tmr;
+  Hermes::TimePeriod tmr;
 
   int status;
 

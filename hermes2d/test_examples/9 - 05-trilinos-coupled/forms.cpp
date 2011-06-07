@@ -1,46 +1,46 @@
 // definition of reaction rate omega
 
-void omega_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                      scalar* out, scalar* outdx, scalar* outdy)
+void omega_fn(int n, Hermes::vector<Scalar*> values, Hermes::vector<Scalar*> dx, Hermes::vector<Scalar*> dy,
+                      Scalar* out, Scalar* outdx, Scalar* outdy)
 {
   for (int i = 0; i < n; i++)
   {
-    scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
-    scalar t5 = (beta / (t3 * t3)) * values.at(1)[i];
+    Scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
+    Scalar t2 = t1 * beta;
+    Scalar t3 = 1.0 + t1 * alpha;
+    Scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+    Scalar t5 = (beta / (t3 * t3)) * values.at(1)[i];
     out[i] = t4 * values.at(1)[i];
     outdx[i] = t4 * (dx.at(1)[i] + dx.at(0)[i] * t5);
     outdy[i] = t4 * (dy.at(1)[i] + dy.at(0)[i] * t5);
   }
 }
 
-void omega_dt_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                        scalar* out, scalar* outdx, scalar* outdy)
+void omega_dt_fn(int n, Hermes::vector<Scalar*> values, Hermes::vector<Scalar*> dx, Hermes::vector<Scalar*> dy,
+                        Scalar* out, Scalar* outdx, Scalar* outdy)
 {
   for (int i = 0; i < n; i++)
   {
-    scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
-    scalar t5 = (beta / (t3 * t3));
+    Scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
+    Scalar t2 = t1 * beta;
+    Scalar t3 = 1.0 + t1 * alpha;
+    Scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+    Scalar t5 = (beta / (t3 * t3));
     out[i] = t4 * t5 * values.at(1)[i];
     outdx[i] = 0.0;
     outdy[i] = 0.0; // not important
   }
 }
 
-void omega_dc_fn(int n, Hermes::vector<scalar*> values, Hermes::vector<scalar*> dx, Hermes::vector<scalar*> dy,
-                        scalar* out, scalar* outdx, scalar* outdy)
+void omega_dc_fn(int n, Hermes::vector<Scalar*> values, Hermes::vector<Scalar*> dx, Hermes::vector<Scalar*> dy,
+                        Scalar* out, Scalar* outdx, Scalar* outdy)
 {
   for (int i = 0; i < n; i++)
   {
-    scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
-    scalar t2 = t1 * beta;
-    scalar t3 = 1.0 + t1 * alpha;
-    scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
+    Scalar t1 = std::max(values.at(0)[i],0.0) - 1.0;
+    Scalar t2 = t1 * beta;
+    Scalar t3 = 1.0 + t1 * alpha;
+    Scalar t4 = sqr(beta) / (2.0*Le) * exp(t2 / t3);
     out[i] = t4;
     outdx[i] = 0.0;
     outdy[i] = 0.0; // not important

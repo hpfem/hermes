@@ -554,7 +554,7 @@ namespace WeakFormsNeutronics
           template<typename Scalar>
           std::string get_material(int elem_marker, WeakForm<Scalar>*wf) const 
           { 
-            if (elem_marker == HERMES_DUMMY_ELEM_MARKER)
+            if (elem_marker == -9999)
               return matprop.get_D().begin()->first;
 
             return wf->get_element_markers_conversion()->get_user_marker(elem_marker); 
