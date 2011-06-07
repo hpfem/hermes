@@ -23,6 +23,7 @@
 #include "utils.h"
 #include "callstack.h"
 
+#ifdef WITH_SUPERLU  
 
 #ifdef SLU_MT
 template <>    
@@ -112,7 +113,7 @@ template<typename Scalar>
 SuperLUMatrix<Scalar>::SuperLUMatrix()
 {
   _F_
-    this->size = 0; nnz = 0;
+  this->size = 0; nnz = 0;
   Ax = NULL;
   Ap = NULL;
   Ai = NULL;
@@ -226,7 +227,6 @@ void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, in
 
 /// Save matrix and right-hand side to a file.
 ///
-
 template<typename Scalar>
 bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
 {
@@ -270,15 +270,6 @@ unsigned int SuperLUMatrix<Scalar>::get_matrix_size() const
 {
   return this->size;
 }
-
-/* THIS WAS WRONG
-int SuperLUMatrix<Scalar>::get_matrix_size() const
-{
-_F_
-//           Ax               Ai                 Ap                      nnz
-return (sizeof(Scalar) + sizeof(int)) * nnz + sizeof(int)*(size+1) + sizeof(int);
-}
-*/
 
 template<typename Scalar>
 unsigned int SuperLUMatrix<Scalar>::get_nnz() const
@@ -352,7 +343,6 @@ void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vect
 }
 
 // Multiplies matrix with a Scalar.
-
 template<typename Scalar>
 void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value)
 {
@@ -525,10 +515,6 @@ bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   }
 }
 
-// SUPERLU solver ////////////////////////////////////////////////////////////////////////////////////
-#ifndef SLU_MT
-#endif
-
 template<typename Scalar>
 bool SuperLUSolver<Scalar>::check_status(unsigned int info)
 {
@@ -559,15 +545,13 @@ bool SuperLUSolver<Scalar>::check_status(unsigned int info)
     return false;
 }
 
+
 template<typename Scalar>
 SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
-#ifdef WITH_SUPERLU  
   ,local_Ax(NULL),local_rhs(NULL)
-#endif
 {
   _F_
-#ifdef WITH_SUPERLU
     R = NULL;
   C = NULL;
   perm_r = NULL;
@@ -617,13 +601,8 @@ SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Sca
   options.PrintStat = YES;   // Set to NO to suppress output.
 
   has_A = has_B = inited = false;
-#else
-    error(SUPERLU_NOT_COMPILED);
-#endif
 }
 
-
-#ifdef WITH_SUPERLU
 inline SuperLuType<std::complex<double> >::Scalar to_superlu(SuperLuType<std::complex<double> >::Scalar &a,std::complex<double>b)
 {
   a.r=b.real();
@@ -636,13 +615,11 @@ inline SuperLuType<double>::Scalar to_superlu(SuperLuType<double>::Scalar &a,dou
   a=b;
   return a;
 }
-#endif
 
 template<typename Scalar>
 SuperLUSolver<Scalar>::~SuperLUSolver()
 {
   _F_
-#ifdef WITH_SUPERLU
     free_factorization_data();
   free_matrix();
   free_rhs();
@@ -651,14 +628,12 @@ SuperLUSolver<Scalar>::~SuperLUSolver()
   if (local_Ap)  delete [] local_Ap;
   if (local_Ax)  delete [] local_Ax;
   if (local_rhs) delete [] local_rhs;
-#endif
 }
 
 template<typename Scalar>
 bool SuperLUSolver<Scalar>::solve()
 {
   _F_
-#ifdef WITH_SUPERLU
     assert(m != NULL);
   assert(rhs != NULL);
 
@@ -828,16 +803,12 @@ bool SuperLUSolver<Scalar>::solve()
   this->time = tmr.accumulated();
 
   return factorized;
-#else
-    return false;
-#endif
 }
 
 template<typename Scalar>
 bool SuperLUSolver<Scalar>::setup_factorization()
 {
   _F_
-#ifdef WITH_SUPERLU
     unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
   if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
   {
@@ -930,49 +901,41 @@ bool SuperLUSolver<Scalar>::setup_factorization()
     options.refact = YES;
 #else      
     options.Fact = FACTORED;
-#endif      
+#endif     
     break;
   }
 
   inited = true;
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<typename Scalar>
 void SuperLUSolver<Scalar>::free_matrix()
 {
   _F_
-#ifdef WITH_SUPERLU  
     if (has_A)
     {
       Destroy_SuperMatrix_Store(&A);
       has_A = false;
     }
-#endif  
 }
 
 template<typename Scalar>
 void SuperLUSolver<Scalar>::free_rhs()
 {
   _F_
-#ifdef WITH_SUPERLU  
     if (has_B)
     {
       Destroy_SuperMatrix_Store(&B);
       has_B = false;
     }
-#endif  
 }
 
 template<typename Scalar>
 void SuperLUSolver<Scalar>::free_factorization_data()
 {
   _F_
-#ifdef WITH_SUPERLU
     if (inited)
     {
 #ifdef SLU_MT    
@@ -991,7 +954,6 @@ void SuperLUSolver<Scalar>::free_factorization_data()
       SLU_DESTROY_U(&U);
       inited = false;
     }
-#endif
 }
 
 #ifdef SLU_MT
@@ -1217,3 +1179,5 @@ template class HERMES_API SuperLUVector<double>;
 template class HERMES_API SuperLUVector<std::complex<double> >;
 template class HERMES_API SuperLUSolver<double>;
 template class HERMES_API SuperLUSolver<std::complex<double> >;
+
+#endif

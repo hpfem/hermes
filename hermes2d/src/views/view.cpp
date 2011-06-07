@@ -27,6 +27,8 @@
 #include "view.h"
 #include "solution.h"
 
+using namespace Hermes::Views;
+
 ///////////////// private constants /////////////////
 #define HERMES_WAIT_CLOSE_MSG "close all views to continue"
 #define HERMES_WAIT_KEYPRESS_MSG "press spacebar to continue"

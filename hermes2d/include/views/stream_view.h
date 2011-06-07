@@ -21,98 +21,102 @@
 
 #ifndef __H2D_STREAM_VIEW_H
 #define __H2D_STREAM_VIEW_H
-
 #include "view.h"
 
-// you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+namespace Hermes
+{
+  namespace Views
+  {
+    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-/// \brief Visualizes streamlines of a vector PDE solution.
-///
-/// StreamView is a visualization window for all vector-valued PDE solutions (especially for flow problems).
-///
-template<typename Scalar>
-class HERMES_API StreamView : public View
-{
-public:
+    /// \brief Visualizes streamlines of a vector PDE solution.
+    ///
+    /// StreamView is a visualization window for all vector-valued PDE solutions (especially for flow problems).
+    ///
+    template<typename Scalar>
+    class HERMES_API StreamView : public View
+    {
+    public:
 
-  StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
-  StreamView(char* title, WinGeom* wg = NULL);
-  virtual ~StreamView();
+      StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
+      StreamView(char* title, WinGeom* wg = NULL);
+      virtual ~StreamView();
 
-  /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
-  /// and the distance between starting points is "step"
-  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
-  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem);
+      /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
+      /// and the distance between starting points is "step"
+      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
+      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem);
 
-  /// Creates additional streamline with strarting point (x,y)
-  /// Note: Can be called only after StreamView::show
-  void add_streamline(double x, double y);
+      /// Creates additional streamline with strarting point (x,y)
+      /// Note: Can be called only after StreamView::show
+      void add_streamline(double x, double y);
 
-protected:
+    protected:
 
-  struct Node
-  {
-    bool leaf;
-    int level;
-    Node* sons[2];
-    int elements[100];
-    int num_elem;
-  };
+      struct Node
+      {
+        bool leaf;
+        int level;
+        Node* sons[2];
+        int elements[100];
+        int num_elem;
+      };
 
-  Vectorizer<Scalar> vec;
-  double max_mag;
-  bool lines, pmode;
+      Vectorizer<Scalar> vec;
+      double max_mag;
+      bool lines, pmode;
 
-  double initial_tau;
-  double min_tau;
-  double max_tau;
-  int num_stream;
-  double2** streamlines;
-  int* streamlength;
-  Node* root;
-  double root_x_min;
-  double root_x_max;
-  double root_y_min;
-  double root_y_max;
+      double initial_tau;
+      double min_tau;
+      double max_tau;
+      int num_stream;
+      double2** streamlines;
+      int* streamlength;
+      Node* root;
+      double root_x_min;
+      double root_x_max;
+      double root_y_min;
+      double root_y_max;
 
-  int find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar);
-  void add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max);
-  void build_tree();
-  void delete_tree(Node* father);
+      int find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar);
+      void add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max);
+      void build_tree();
+      void delete_tree(Node* father);
 
-  bool is_in_triangle(int idx, double x, double y, double3& bar);
-  bool get_solution_values(double x, double y, double& xval, double& yval);
+      bool is_in_triangle(int idx, double x, double y, double3& bar);
+      bool get_solution_values(double x, double y, double& xval, double& yval);
 
-  int create_streamline(double x_start, double y_start, int idx);
-  void find_initial_points(int marker, double step, double2*& initial_points);
-  int find_initial_edge(int num_edges, int3* edges);
+      int create_streamline(double x_start, double y_start, int idx);
+      void find_initial_points(int marker, double step, double2*& initial_points);
+      int find_initial_edge(int num_edges, int3* edges);
 
-  virtual void on_display();
-  virtual void on_mouse_move(int x, int y);
-  virtual void on_key_down(unsigned char key, int x, int y);
-  virtual void on_left_mouse_down(int x, int y);
-  virtual const char* get_help_text() const;
+      virtual void on_display();
+      virtual void on_mouse_move(int x, int y);
+      virtual void on_key_down(unsigned char key, int x, int y);
+      virtual void on_left_mouse_down(int x, int y);
+      virtual const char* get_help_text() const;
 
-};
+    };
 
 #else // NOGLUT
 
-/* Empty dummy implementation in a case GLUT is not used */
-template<typename Scalar>
-class HERMES_API StreamView : public View
-{
-public:
+    /* Empty dummy implementation in a case GLUT is not used */
+    template<typename Scalar>
+    class HERMES_API StreamView : public View
+    {
+    public:
 
- StreamView(const char* title = "StreamView", WinGeom* wg = NULL) : View(title, wg->x, wg->y, wg->width, wg->height) {};
-  virtual ~StreamView() {};
+      StreamView(const char* title = "StreamView", WinGeom* wg = NULL) : View(title, wg->x, wg->y, wg->width, wg->height) {};
+      virtual ~StreamView() {};
 
-  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
-  void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem) {};
+      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) {};
+      void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem) {};
 
-  void add_streamline(double x, double y) {};
-};
+      void add_streamline(double x, double y) {};
+    };
 
 #endif // NOGLUT
-
+  }
+}
 #endif

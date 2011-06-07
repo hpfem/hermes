@@ -27,6 +27,8 @@
 #include "space.h"
 #include "precalc.h"
 
+using namespace Hermes::Views;
+
 template<typename Scalar>
 void VectorBaseView<Scalar>::show(Space<Scalar>* space)
 {

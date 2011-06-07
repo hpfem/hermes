@@ -72,7 +72,6 @@
     };
 
   #endif
-#endif
 
 template <typename Scalar> class SuperLUSolver;
 
@@ -156,7 +155,6 @@ friend class SuperLUSolver<Scalar>;
 template <typename Scalar>
 class HERMES_API SuperLUSolver : public LinearSolver<Scalar> {
 private:
-#ifdef WITH_SUPERLU  
 #ifndef SLU_MT
   void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr, 
                        Stype_t stype, Dtype_t dtype, Mtype_t mtype);
@@ -164,7 +162,6 @@ private:
                          double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth, 
                          double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
   void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
-#endif  
 #endif  
 public:
   SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
@@ -187,16 +184,13 @@ protected:
   // Deep copies of matrix and rhs data vectors (they may be changed by the solver driver,
   // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
   int *local_Ai, *local_Ap;
-#ifdef WITH_SUPERLU  
   typename SuperLuType<Scalar>::Scalar *local_Ax, *local_rhs;
-#endif  
   
   bool setup_factorization();
   void free_factorization_data();
   void free_matrix();
   void free_rhs();
   
-#ifdef WITH_SUPERLU  
   SuperMatrix A, B;             // Native SuperLU representations of 'm' and 'rhs'.
   SuperMatrix L, U;             // L/U factors of A.
   double *R, *C;                // Row/column scaling factors of A.
@@ -212,7 +206,7 @@ protected:
     equed_t equed;              // Form of equilibration that was done on A.
     SuperMatrix AC;             // Matrix A permuted by perm_c.
   #endif  
-#endif 
 };
 
+#endif
 #endif

@@ -24,8 +24,6 @@
 #include "traverse.h"
 #include "element_to_refine.h"
 #include "refinement_selectors/selector.h"
-#include "Scalar_view.h"
-#include "order_view.h"
 #include "matrix.h"
 #include "common_time_period.h"
 

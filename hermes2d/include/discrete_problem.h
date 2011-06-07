@@ -23,10 +23,6 @@
 #include "graph.h"
 #include "form/forms.h"
 #include "weakform/weakform.h"
-#include "views/view.h"
-#include "views/Scalar_view.h"
-#include "views/vector_view.h"
-#include "views/order_view.h"
 #include "function/function.h"
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
@@ -34,7 +30,6 @@
 #include <map>
 
 class PrecalcShapeset;
-
 
 /// Multimesh neighbors traversal class.
 class NeighborNode

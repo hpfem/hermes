@@ -21,63 +21,67 @@
 
 #ifndef __H2D_VECTOR_BASE_VIEW_H
 #define __H2D_VECTOR_BASE_VIEW_H
-
 #include "vector_view.h"
 
-// you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
-#ifndef NOGLUT
-template<typename Scalar>
-class HERMES_API VectorBaseView : public VectorView<Scalar>
+namespace Hermes
 {
-public:
+  namespace Views
+  {
+    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+#ifndef NOGLUT
+    template<typename Scalar>
+    class HERMES_API VectorBaseView : public VectorView<Scalar>
+    {
+    public:
 
-  VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-		: VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+      VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
+        : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
-	VectorBaseView(char* title, WinGeom* wg = NULL)
-    : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+      VectorBaseView(char* title, WinGeom* wg = NULL)
+        : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
-  void show(Space<Scalar>* space);
+      void show(Space<Scalar>* space);
 
-  virtual void set_title(const char* t) {
-    if (basic_title.length() == 0)
-      basic_title.assign(t);
-    View::set_title(t);
-  }
+      virtual void set_title(const char* t) {
+        if (basic_title.length() == 0)
+          basic_title.assign(t);
+        View::set_title(t);
+      }
 
-  virtual ~VectorBaseView() { free(); }
+      virtual ~VectorBaseView() { free(); }
 
-protected:
+    protected:
 
-  Space<Scalar>* space;
-  PrecalcShapeset* pss;
-  Solution<Scalar>* sln;
+      Space<Scalar>* space;
+      PrecalcShapeset* pss;
+      Solution<Scalar>* sln;
 
-  int ndof, component;
-  int base_index;
+      int ndof, component;
+      int base_index;
 
-  std::string basic_title;
+      std::string basic_title;
 
-  void free();
-  void update_solution();
-  void update_title();
+      void free();
+      void update_solution();
+      void update_title();
 
-  virtual void on_special_key(int key, int x, int y);
-  virtual const char* get_help_text() const;
+      virtual void on_special_key(int key, int x, int y);
+      virtual const char* get_help_text() const;
 
-};
+    };
 
 #else // NOGLUT
 
-class HERMES_API VectorBaseView : public VectorView
-{
-public:
-  VectorBaseView(char* title = "BaseView", WinGeom* wg = NULL) {}
-  virtual ~VectorBaseView() {}
-  void show(Space<Scalar>* space)
-     { verbose("VectorBaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
-};
+    class HERMES_API VectorBaseView : public VectorView
+    {
+    public:
+      VectorBaseView(char* title = "BaseView", WinGeom* wg = NULL) {}
+      virtual ~VectorBaseView() {}
+      void show(Space<Scalar>* space)
+      { verbose("VectorBaseView: Hermes2D compiled without OpenGL support, skipping visualization."); }
+    };
 
 #endif // NOGLUT
-
+  }
+}
 #endif

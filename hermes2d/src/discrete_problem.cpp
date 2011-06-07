@@ -25,9 +25,6 @@
 #include "function/solution.h"
 #include "config.h"
 #include "neighbor.h"
-#include "views/Scalar_view.h"
-#include "base_view.h"
-#include "boundary_conditions/essential_boundary_conditions.h"
 
 template<typename Scalar>
 DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)

@@ -17,6 +17,8 @@
 #include "space.h"
 #include "refmap.h"
 
+using namespace Hermes::Views;
+
 #include "linear_data.cpp"
 
 // vertices

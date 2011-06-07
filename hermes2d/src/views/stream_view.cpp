@@ -14,11 +14,11 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef NOGLUT
-
 #include <GL/freeglut.h>
 #include "hermes2d_common_defs.h"
 #include "stream_view.h"
 
+using namespace Hermes::Views;
 
 //// StreamView /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>

@@ -17,14 +17,14 @@
 #include "refmap.h"
 #include "traverse.h"
 
+using namespace Hermes::Views;
+
 extern int tri_indices[5][3];
 extern int quad_indices[9][5];
 
-extern int lin_np_tri[2];
 extern int lin_np_quad[2];
 
 class Quad2DLin;
-extern Quad2DLin quad_lin;
 
 template<typename Scalar>
 Vectorizer<Scalar>::Vectorizer() : Linearizer()

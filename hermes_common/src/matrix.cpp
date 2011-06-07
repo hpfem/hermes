@@ -257,7 +257,11 @@ SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_MUMPS: 
       {
+#ifdef HAVE_MUMPS
         return new MumpsMatrix<Scalar>;
+#else
+        error("MUMPS not installed.");
+#endif
         break;
       }
     case Hermes::SOLVER_PETSC: 
@@ -271,12 +275,20 @@ SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_UMFPACK: 
       {
+#ifdef HAVE_UMFPACK
         return new UMFPackMatrix<Scalar>;
+#else
+        error("UMFPACK was not installed.");
+#endif
         break;
       }
     case Hermes::SOLVER_SUPERLU: 
       {
+#ifdef HAVE_SUPERLU
         return new SuperLUMatrix<Scalar>;
+#else
+        error("SuperLU was not installed.");
+#endif
         break;
       }
     default: 
@@ -316,9 +328,13 @@ Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Mat
     }
   case Hermes::SOLVER_MUMPS: 
     {
+#ifdef HAVE_MUMPS
       info("Using Mumps.");         
       if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
       else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
+#else
+      error("MUMPS was not installed.");
+#endif
       break;
     }
   case Hermes::SOLVER_PETSC: 
@@ -334,16 +350,24 @@ Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Mat
     }
   case Hermes::SOLVER_UMFPACK: 
     {
+#ifdef HAVE_UMFPACK
       info("Using UMFPack.");
       if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
       else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
+#else
+      error("UMFPACK was not installed.");
+#endif
       break;
     }
   case Hermes::SOLVER_SUPERLU: 
     {
+#ifdef HAVE_SUPERLU
       info("Using SuperLU.");       
       if (rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs)); 
       else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy)); 
+#else
+      error("SuperLU was not installed.");
+#endif
       break;
     }
   default: 
@@ -378,7 +402,11 @@ Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_MUMPS: 
       {
+#ifdef HAVE_MUMPS
         return new MumpsVector<Scalar>;
+#else
+        error("MUMPS was not installed.");
+#endif
         break;
       }
     case Hermes::SOLVER_PETSC: 
@@ -392,12 +420,20 @@ Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_UMFPACK: 
       {
+#ifdef HAVE_UMFPACK
         return new UMFPackVector<Scalar>;
+#else
+        error("UMFPACK was not installed.");
+#endif
         break;
       }
     case Hermes::SOLVER_SUPERLU: 
       {
+#ifdef HAVE_SUPERLU
         return new SuperLUVector<Scalar>;
+#else
+        error("SuperLU was not installed.");
+#endif
         break;
       }
     default: 

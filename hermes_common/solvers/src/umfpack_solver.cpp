@@ -26,14 +26,11 @@ extern "C"
 {
 #include <umfpack.h>
 }
-#endif
 
 #include "trace.h"
 #include "error.h"
 #include "utils.h"
 #include "callstack.h"
-
-
 
 static int find_position(int *Ai, int Alen, int idx) 
 {
@@ -535,16 +532,6 @@ unsigned int CSCMatrix<Scalar>::get_matrix_size() const
   return this->size;
 }
 
-/* THIS WAS WRONG
-int UMFPackMatrix<Scalar>::get_matrix_size() const 
-{
-_F_
-assert(Ap != NULL);
-//          Ai             Ax                      Ap                     nnz         
-return (sizeof(int) + sizeof(Scalar)) * nnz + sizeof(int)*(size+1) + sizeof(int);
-}
-*/
-
 template<typename Scalar>
 double CSCMatrix<Scalar>::get_fill_in() const 
 {
@@ -755,10 +742,6 @@ UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPa
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
-#ifdef WITH_UMFPACK
-#else
-    error(UMFPACK_NOT_COMPILED);
-#endif
 }
 
 
@@ -768,8 +751,6 @@ UMFPackLinearSolver<Scalar>::~UMFPackLinearSolver()
   _F_
     free_factorization_data();
 }
-
-#ifdef WITH_UMFPACK
 
 static void check_status(const char *fn_name, int status) 
 {
@@ -790,9 +771,6 @@ static void check_status(const char *fn_name, int status)
     default:                                    warning("%s: unknown error (%d)", fn_name, status); break;
   }
 }
-
-#endif
-
 
 /*** UMFPack matrix iterator ****/
 
@@ -857,7 +835,6 @@ template<>
 bool UMFPackLinearSolver<double>::setup_factorization()
 {
   _F_
-#ifdef WITH_UMFPACK
     // Perform both factorization phases for the first time.
     int eff_fact_scheme;
   if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
@@ -895,16 +872,12 @@ bool UMFPackLinearSolver<double>::setup_factorization()
   }
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<>
 bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
 {
   _F_
-#ifdef WITH_UMFPACK
     // Perform both factorization phases for the first time.
     int eff_fact_scheme;
   if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
@@ -942,40 +915,32 @@ bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
   }
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<>
 void UMFPackLinearSolver<double>::free_factorization_data()
 {
   _F_
-#ifdef WITH_UMFPACK
     if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
   symbolic = NULL;
   if (numeric != NULL) umfpack_di_free_numeric(&numeric);
   numeric = NULL;
-#endif
 }
 
 template<>
 void UMFPackLinearSolver<std::complex<double> >::free_factorization_data()
 {
   _F_
-#ifdef WITH_UMFPACK
     if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
   symbolic = NULL;
   if (numeric != NULL) umfpack_zi_free_numeric(&numeric);
   numeric = NULL;
-#endif
 }
 
 template<>
 bool UMFPackLinearSolver<double>::solve() 
 {
   _F_
-#ifdef WITH_UMFPACK
     assert(m != NULL);
   assert(rhs != NULL);
 
@@ -1007,16 +972,12 @@ bool UMFPackLinearSolver<double>::solve()
   time = tmr.accumulated();
 
   return true;
-#else
-    return false;
-#endif
 }
 
 template<>
 bool UMFPackLinearSolver<std::complex<double> >::solve() 
 {
   _F_
-#ifdef WITH_UMFPACK
     assert(m != NULL);
   assert(rhs != NULL);
 
@@ -1048,7 +1009,6 @@ bool UMFPackLinearSolver<std::complex<double> >::solve()
   time = tmr.accumulated();
 
   return true;
-#else
-    return false;
-#endif
 }
+
+#endif

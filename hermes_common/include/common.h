@@ -259,25 +259,5 @@ namespace Hermes
   extern HERMES_API void throw_exception(char *text);
 
 }
-
-// TO BE DELETED:
-
-#define UMFPACK_NOT_COMPILED   " was not built with UMFPACK support."
-#define PETSC_NOT_COMPILED    " was not built with PETSC support."
-#define MUMPS_NOT_COMPILED    " was not built with MUMPS support."
-#define SUPERLU_NOT_COMPILED  " was not built with SUPERLU support."
-#define NOX_NOT_COMPILED      " was not built with NOX support."
-#define AMESOS_NOT_COMPILED   " was not built with AMESOS support."
-#define AZTECOO_NOT_COMPILED  " was not built with AZTECOO support."
-#define EPETRA_NOT_COMPILED   " was not built with EPETRA support."
-#define IFPACK_NOT_COMPILED   " was not built with IFPACK support."
-#define ML_NOT_COMPILED       " was not built with ML support."
-
-
-
-
-
-
-
 #endif
 

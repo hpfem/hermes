@@ -23,6 +23,7 @@
 #include "solver.h"
 #include "matrix.h"
 
+#ifdef WITH_UMFPACK
 using namespace Hermes::Solvers;
 
 // General CSC Matrix class (can be used in umfpack, in that case use the
@@ -175,4 +176,5 @@ protected:
   int Ai_pos;
   int Ap_pos;
 };
+#endif
 #endif
