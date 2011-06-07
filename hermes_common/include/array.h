@@ -12,7 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
+/*! \file array.h
+    \brief File containing primarily the class Array<class TYPE> and LightArray<class TYPE>.
+*/
 #ifndef __HERMES_COMMON_ARRAY_H
 #define __HERMES_COMMON_ARRAY_H
 

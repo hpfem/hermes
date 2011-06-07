@@ -1,4 +1,4 @@
-// This file is part of Hermes2D.
+// This file is part of HermesCommon.
 //
 // Hermes2D is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
+/*! \file common.h
+    \brief File containing common definitions, and basic global enums etc. for HermesCommon.
+*/
 #ifndef __HERMES_COMMON_COMMON_H
 #define __HERMES_COMMON_COMMON_H
 

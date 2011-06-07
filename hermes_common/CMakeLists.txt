@@ -43,7 +43,6 @@ set(SRC
   src/common_time_period.cpp
   src/callstack.cpp
   src/error.cpp
-  src/utils.cpp
   src/matrix.cpp
   src/tables.cpp
   src/qsort.cpp

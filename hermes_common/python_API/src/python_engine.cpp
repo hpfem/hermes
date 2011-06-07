@@ -217,7 +217,6 @@ typedef struct
 #endif
 #include <math.h>
 #define __PYX_HAVE_API__python_engine
-#include "utilities.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "numpy/arrayobject.h"
@@ -1265,7 +1264,7 @@ __pyx_L3_error:;
                  * cdef api object c2py_double(double i):
                  */
                  __pyx_t_10 = PyBytes_AsString(__pyx_v_s); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-                 throw_exception(__pyx_t_10);
+                 throw std::runtime_error(__pyx_t_10);
                  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
                  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -1550,7 +1549,7 @@ __pyx_L3_error:;
                  * cdef api object c2py_str(const_char_p s):
                  */
                  __pyx_t_10 = PyBytes_AsString(__pyx_v_s); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-                 throw_exception(__pyx_t_10);
+                 throw std::runtime_error(__pyx_t_10);
                  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
                  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -1833,7 +1832,7 @@ __pyx_L3_error:;
                  * cdef api object c2numpy_int(int *A, int len):
                  */
                  __pyx_t_1 = PyBytes_AsString(__pyx_v_s); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-                 throw_exception(__pyx_t_1);
+                 throw std::runtime_error(__pyx_t_1);
                  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
                  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2990,7 +2989,7 @@ __pyx_L23_try_end:;
       *         throw_exception(s)             # <<<<<<<<<<<<<<
       */
       __pyx_t_11 = PyBytes_AsString(__pyx_v_s); if (unlikely((!__pyx_t_11) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-      throw_exception(__pyx_t_11);
+      throw std::runtime_error(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5305,68 +5304,26 @@ PyMODINIT_FUNC PyInit_python_engine(void)
   __pyx_ptype_5numpy_broadcast = __Pyx_ImportType("numpy", "broadcast", sizeof(PyArrayMultiIterObject), 0); if (unlikely(!__pyx_ptype_5numpy_broadcast)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_5numpy_ndarray = __Pyx_ImportType("numpy", "ndarray", sizeof(PyArrayObject), 0); if (unlikely(!__pyx_ptype_5numpy_ndarray)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 172; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_5numpy_ufunc = __Pyx_ImportType("numpy", "ufunc", sizeof(PyUFuncObject), 0); if (unlikely(!__pyx_ptype_5numpy_ufunc)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 849; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  /*--- Function import code ---*/
-  /*--- Execution code ---*/
 
-  /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":23
-  *     void throw_exception(char *msg)
-  * 
-  * import sys             # <<<<<<<<<<<<<<
-  * import traceback
-  * from numpy cimport (ndarray, npy_intp, import_array, PyArray_SimpleNewFromData,
-  */
   __pyx_t_1 = __Pyx_Import(((PyObject *)__pyx_n_s__sys), 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__sys, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 23; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":24
-  * 
-  * import sys
-  * import traceback             # <<<<<<<<<<<<<<
-  * from numpy cimport (ndarray, npy_intp, import_array, PyArray_SimpleNewFromData,
-  *         NPY_INT, NPY_DOUBLE, NPY_COMPLEX128)
-  */
   __pyx_t_1 = __Pyx_Import(((PyObject *)__pyx_n_s__traceback), 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s__traceback, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 24; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":30
-  * 
-  * # this is important to be called here, otherwise we can't use the NumPy C/API:
-  * import_array()             # <<<<<<<<<<<<<<
-  * 
-  * cdef api object namespace_create():
-  */
   import_array();
 
-  /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":123
-  * #    return PyArray_SimpleNewFromData(1, &dim, NPY_COMPLEX128, A)
-  * 
-  * _AA = None             # <<<<<<<<<<<<<<
-  * 
-  * cdef api void numpy2c_int_inplace(object A_n, int **A_c, int *n):
-  */
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s___AA, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":1
-  * # Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).             # <<<<<<<<<<<<<<
-  * # Distributed under the terms of the BSD license (see the LICENSE
-  * # file for the exact terms).
-  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_1));
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s____test__, ((PyObject *)__pyx_t_1)) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(((PyObject *)__pyx_t_1)); __pyx_t_1 = 0;
 
-  /* "/home/ondrej/usr/lib/python/Cython/Includes/numpy.pxd":963
-  *      arr.base = baseptr
-  * 
-  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
-  *     if arr.base is NULL:
-  *         return None
-  */
   goto __pyx_L0;
 __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
