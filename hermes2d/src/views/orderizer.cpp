@@ -417,7 +417,7 @@ void Orderizer::save_data_vtk(const char* file_name)
     fprintf(f, "5\n");    // The "5" means triangle in VTK.
   }
 
-  // This outputs double solution values. Look into hermes3d/src/output/vtk.cpp 
+  // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp 
   // for how it is done for vectors.
   fprintf(f, "\n");
   fprintf(f, "POINT_DATA %d\n", this->nv);
