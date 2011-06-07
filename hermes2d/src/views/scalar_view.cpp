@@ -20,8 +20,8 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
-#include "h2d_common.h"
-#include "Scalar_view.h"
+#include "hermes2d_common_defs.h"
+#include "scalar_view.h"
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 

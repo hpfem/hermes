@@ -14,6 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "linearizer.h"
+#include "refmap.h"
+#include "traverse.h"
 
 double3 lin_pts_0_tri[] =
 {

@@ -18,7 +18,6 @@
 
 #include "space.h"
 
-
 /// HdivSpace represents a space of vector functions with continuous normal
 /// components over a domain (mesh).
 ///

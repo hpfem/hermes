@@ -17,6 +17,8 @@
 #define __H2D_H1_WEAK_FORMS_H
 
 #include "../integrals/h1.h"
+#include "../weakform/weakform.h"
+#include "../spline.h"
 
 namespace WeakFormsH1 
 {

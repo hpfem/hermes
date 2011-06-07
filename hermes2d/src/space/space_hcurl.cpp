@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "space_hcurl.h"
 #include "matrix.h"
 #include "quad_all.h"
 #include "shapeset_hc_all.h"
-#include "essential_bcs.h"
+#include "essential_boundary_conditions.h"
 
 template<typename Scalar>
 double** HcurlSpace<Scalar>::hcurl_proj_mat = NULL;

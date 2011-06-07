@@ -16,7 +16,7 @@
 #ifndef __H2D_QUAD_H
 #define __H2D_QUAD_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "config.h"
 
 /// Indices of values in the value returned by Quad2D::get_points().

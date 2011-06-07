@@ -16,7 +16,7 @@
 #ifndef __H2D_SHAPESET_H
 #define __H2D_SHAPESET_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 
 
 #define H2D_CHECK_MODE      assert(mode == HERMES_MODE_TRIANGLE || mode == HERMES_MODE_QUAD)

@@ -16,72 +16,65 @@
 #ifndef __H2D_SOLUTION_H
 #define __H2D_SOLUTION_H
 
-#include "../function/function.h"
-#include "../space/space.h"
-#include "../mesh/refmap.h"
-#include "matrix.h"
+#include "mesh_function.h"
+#include "../quadrature/quad.h"
 
-class PrecalcShapeset;
-class Ord;
+static double3* cheb_tab_tri[11];
+static double3* cheb_tab_quad[11];
+static int      cheb_np_tri[11];
+static int      cheb_np_quad[11];
 
-/// \brief Represents a function defined on a mesh.
+extern double3** cheb_tab[2];
+extern int*      cheb_np[2];
+
+/// Quad2DCheb is a special "quadrature" consisting of product Chebyshev
+/// points on the reference triangle and quad. It is used for expressing
+/// the solution on an element as a linear combination of monomials.
 ///
-/// MeshFunction is a base class for all classes representing an arbitrary function
-/// superimposed on a mesh (ie., domain). These include the Solution, ExactSolution
-/// and Filter classes, which define the concrete behavior and the way the function
-/// is (pre)calculated. Any such function can later be visualized.
-///
-/// (This is an abstract class and cannot be instantiated.)
-///
-template<typename Scalar>
-class HERMES_API MeshFunction : public Function<Scalar>
+class Quad2DCheb : public Quad2D
 {
 public:
 
-  MeshFunction();
-  MeshFunction(Mesh *mesh);
-  virtual ~MeshFunction();
-
-  virtual void init() {};
-  virtual void reinit() { this->free(); init();};
-
-  virtual void set_quad_2d(Quad2D* quad_2d);
-  virtual void set_active_element(Element* e);
-
-  virtual int get_edge_fn_order(int edge) { return get_edge_fn_order(edge); }
-
-  Mesh*   get_mesh() const { return mesh; }
-  RefMap* get_refmap() { this->update_refmap(); return refmap; }
-
-  virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
-
-  /// Virtual function handling overflows. Has to be virtual, because
-  /// the necessary iterators in the templated class do not work with GCC.
-  virtual void handle_overflow_idx();
-
-  /// See Transformable::push_transform.
-  virtual void push_transform(int son);
-
-  virtual void pop_transform();
-  
-protected:
-
-  int mode;
-  Mesh* mesh;
-  RefMap* refmap;
-
-public:
-
-  /// For internal use only.
-  void force_transform(MeshFunction<Scalar>* mf)
-    { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
-  void update_refmap()
-    { refmap->force_transform(this->sub_idx, this->ctm); }
-  void force_transform(uint64_t sub_idx, Trf* ctm)
+  Quad2DCheb()
   {
-    this->sub_idx = sub_idx;
-    this->ctm = ctm;
+    mode = HERMES_MODE_TRIANGLE;
+    max_order[0]  = max_order[1]  = 10;
+    num_tables[0] = num_tables[1] = 11;
+    tables = cheb_tab;
+    np = cheb_np;
+
+    tables[0][0] = tables[1][0] = NULL;
+    np[0][0] = np[1][0] = 0;
+
+    int i, j, k, n, m;
+    double3* pt;
+    for (mode = 0; mode <= 1; mode++)
+    {
+      for (k = 0; k <= 10; k++)
+      {
+        np[mode][k] = n = mode ? sqr(k+1) : (k+1)*(k+2)/2;
+        tables[mode][k] = pt = new double3[n];
+
+        for (i = k, m = 0; i >= 0; i--)
+          for (j = k; j >= (mode ? 0 : k-i); j--, m++) 
+          {
+            pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
+            pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
+            pt[m][2] = 1.0;
+          }
+      }
+    }
+  };
+
+  ~Quad2DCheb()
+  {
+    for (int mode = 0; mode <= 1; mode++)
+      for (int k = 1; k <= 10; k++)
+        delete[] tables[mode][k];
   }
+
+  virtual void dummy_fn() {}
+
 };
 
 /// \brief Represents the solution of a PDE.
@@ -89,9 +82,35 @@ public:
 /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
 /// it calculates the appropriate linear combination of basis functions at the specified
 /// element and integration points.
-///
-/// TODO: write how to obtain solution values, maybe include inherited methods from Function as comments.
-///
+
+//  The higher-order solution on elements is best calculated not as a linear  combination
+//  of shape functions (the usual approach), but as a linear combination of monomials.
+//  This has the advantage that no shape function table calculation and look-ups are
+//  necessary (except for the conversion of the solution coefficients), which means that
+//  visualization and multi-mesh calculations are much faster (all the push_transforms
+//  and table searches take the most time when evaluating the solution).
+//
+//  The linear combination of monomials can be calculated using the Horner's scheme, which
+//  requires the same number of multiplications as the calculation of the linear combination
+//  of shape functions. However, sub-element transforms are trivial and cheap. Moreover,
+//  after the solution on all elements is expressed as a combination of monomials, the
+//  Space can be forgotten. This is comfortable for the user, since the Solution class acts
+//  as a self-contained unit, internally containing just a copy of the mesh and a table of
+//  monomial coefficients. It is also very straight-forward to obtain all derivatives of
+//  a solution defined in this way. Finally, it is possible to store the solution on the
+//  disk easily (no need to store the Space, which is difficult).
+//
+//  The following is an example of the set of monomials for a cubic quad and a cubic triangle.
+//  (Note that these are actually the definitions of the polynomial spaces on these elements.)
+//
+//    [ x^3*y^3  x^2*y^3  x*y^3  y^3 ]       [                    y^3 ]
+//    [ x^3*y^2  x^2*y^2  x*y^2  y^2 ]       [             x*y^2  y^2 ]
+//    [ x^3*y    x^2*y    x*y    y   ]       [      x^2*y  x*y    y   ]
+//    [ x^3      x^2      x      1   ]       [ x^3  x^2    x      1   ]
+//
+//  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
+//   'n' is the polynomial degree.)
+//
 template<typename Scalar>
 class HERMES_API Solution : public MeshFunction<Scalar>
 {
@@ -197,7 +216,9 @@ public:
 
   bool own_mesh;
 protected:
-
+  
+  Quad2DCheb g_quad_2d_cheb;
+  
   /// Converts a coefficient vector into a Solution.
   virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
   virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
@@ -245,79 +266,4 @@ protected:
 
 };
 
-
-/// \brief Represents an exact solution of a PDE.
-///
-/// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
-/// typically an exact solution to a PDE. This can be used to compare an approximate solution
-/// with an exact solution (see DiffFilter).
-template<typename Scalar>
-class ExactSolution : public Solution<Scalar>
-{
-public:
-  ExactSolution(Mesh* mesh);
-
-  ~ExactSolution();
-
-  // Dimension of result - either 1 or 2.
-  virtual unsigned int get_dimension() const = 0;
-};
-
-/// These classes are abstract (pure virtual destructor).
-/// The user is supposed to subclass them (see e.g. NIST benchmarks).
-template<typename Scalar>
-class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
-{
-public:
-  ExactSolutionScalar(Mesh* mesh);
-
-  ~ExactSolutionScalar() = 0;
-
-  // For Scalar-valued solutions this returns 1.
-  virtual unsigned int get_dimension() const;
-
-  // Function returning the value.
-  virtual Scalar value (double x, double y) const = 0;
-
-  // Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const = 0;
-
-  // Function returning the value and derivatives.
-  Scalar exact_function (double x, double y, Scalar& dx, Scalar& dy) const {
-    derivatives (x, y, dx, dy);
-    return value (x, y);
-  };
-
-  // Function returning the integration order that 
-  // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) const = 0;
-};
-
-template<typename Scalar>
-class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
-{
-public:
-  ExactSolutionVector(Mesh* mesh);
-
-  ~ExactSolutionVector() = 0;
-
-  // For vector-valued solutions this returns 2.
-  virtual unsigned int get_dimension() const;
-
-  // Function returning the value.
-  virtual Scalar2<Scalar> value (double x, double y) const = 0;
-
-  // Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
-
-  // Function returning the value and derivatives.
-  virtual Scalar2<Scalar> exact_function(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
-    derivatives (x, y, dx, dy);
-    return value (x, y);
-  };
-
-  // Function returning the integration order that 
-  // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) const = 0;
-};
 #endif

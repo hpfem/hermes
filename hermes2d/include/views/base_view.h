@@ -22,8 +22,10 @@
 #ifndef __H2D_BASE_VIEW_H
 #define __H2D_BASE_VIEW_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "scalar_view.h"
+#include "../space/space.h"
+#include "../shapeset/precalc.h"
 
 // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT

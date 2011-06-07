@@ -16,6 +16,8 @@
 #ifndef __H2D_LIMIT_ORDER_H
 #define __H2D_LIMIT_ORDER_H
 
+#include "../hermes2d_common_defs.h"
+
 // can be called to set a custom order limiting table
 extern HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n);
 

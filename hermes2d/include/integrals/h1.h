@@ -17,8 +17,8 @@
 #define __H2D_INTEGRALS_H1_H
 
 #include "../quadrature/limit_order.h"
-#include "../weakform/weakform.h"
-#include "../adapt/adapt.h"
+#include "../form/forms.h"
+#include "../function/function.h"
 
 //// the following integrals can be used in both volume and surface forms ////
 

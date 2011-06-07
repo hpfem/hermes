@@ -16,7 +16,7 @@
 #ifndef __H2D_CURVED_H
 #define __H2D_CURVED_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "../shapeset/shapeset_common.h"
 
 class Element;

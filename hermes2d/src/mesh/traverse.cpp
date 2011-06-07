@@ -13,19 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "mesh.h"
-#include "transform.h"
+#include "transformable.h"
 #include "traverse.h"
 
 const uint64_t ONE = (uint64_t) 1 << 63;
-
 
 struct Rect
 {
   uint64_t l, b, r, t;
 };
-
 
 struct State
 {

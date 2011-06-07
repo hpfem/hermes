@@ -1,6 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
-#include "hermes2d.h"
+
 
 //  This example solves a linear advection equation using Discontinuous Galerkin (DG) method.
 //  Its purpose is to show how to evaluate surface matrix forms that take basis functions defined

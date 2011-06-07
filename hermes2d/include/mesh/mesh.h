@@ -16,9 +16,8 @@
 #ifndef __H2D_MESH_H
 #define __H2D_MESH_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "curved.h"
-
 
 class Element;
 class HashTable;

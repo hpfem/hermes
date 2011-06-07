@@ -16,7 +16,7 @@
 #ifndef __H2D_LINEARIZER_H
 #define __H2D_LINEARIZER_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "../function/solution.h"
 
 const double HERMES_EPS_LOW      = 0.007;

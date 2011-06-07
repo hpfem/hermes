@@ -22,8 +22,10 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "vector_base_view.h"
+#include "space.h"
+#include "precalc.h"
 
 template<typename Scalar>
 void VectorBaseView<Scalar>::show(Space<Scalar>* space)

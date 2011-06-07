@@ -14,6 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "orderizer.h"
+#include "space.h"
+#include "refmap.h"
 
 #include "linear_data.cpp"
 

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
 #include "discrete_problem.h"
@@ -27,7 +27,7 @@
 #include "neighbor.h"
 #include "views/Scalar_view.h"
 #include "base_view.h"
-#include "boundary_conditions/essential_bcs.h"
+#include "boundary_conditions/essential_boundary_conditions.h"
 
 template<typename Scalar>
 DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)

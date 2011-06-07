@@ -16,6 +16,11 @@
 #ifndef __H2D_INTEGRALS_HCURL_H
 #define __H2D_INTEGRALS_HCURL_H
 
+#include "../quadrature/limit_order.h"
+#include "../form/forms.h"
+#include "../function/function.h"
+#include "../weakform/weakform.h"
+
 //// new volume integrals //////////////////////////////////////////////////////////////////////////////
 
 template<typename real, typename Scalar>

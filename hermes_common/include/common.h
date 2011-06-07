@@ -78,6 +78,7 @@ const int HERMES_DUMMY_EDGE_MARKER = -8888;
 #include "tables.h"
 #include "../python_API/include/python_api.h"
 #include "../python_API/include/python_engine_api.h"
+#include "array.h"
 
 #define HERMES  "Hermes"
 

@@ -23,7 +23,8 @@
 #include "vector.h"
 #include "map"
 
-//#include "../function/solution.h"
+#include "../hermes2d_common_defs.h"
+
 template<typename Scalar> class ExactSolutionScalar;
 template<typename Scalar> class ExactSolutionVector;
 template<typename Scalar> class EssentialBCs;

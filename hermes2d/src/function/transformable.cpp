@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
-#include "transform.h"
+#include "transformable.h"
+#include "mesh.h"
 
 #define H2D_IDENTIFY_TRF { 1.0,  1.0 }, { 0.0, 0.0 } ///< Identity transformation.
 
@@ -57,6 +57,24 @@ void Transformable::set_transform(uint64_t idx)
   reset_transform();
   for (int k = i-1; k >= 0; k--)
     push_transform(son[k]);
+}
+
+void Transformable::push_transform(int son)
+{
+  assert(element != NULL);
+  if (top >= H2D_MAX_TRN_LEVEL) 
+    error("Too deep transform.");
+
+  Trf* mat = stack + (++top);
+  Trf* tr = (element->is_triangle() ? tri_trf + son : quad_trf + son);
+
+  mat->m[0] = ctm->m[0] * tr->m[0];
+  mat->m[1] = ctm->m[1] * tr->m[1];
+  mat->t[0] = ctm->m[0] * tr->t[0] + ctm->t[0];
+  mat->t[1] = ctm->m[1] * tr->t[1] + ctm->t[1];
+
+  ctm = mat;
+  sub_idx = (sub_idx << 3) + son + 1; // see traverse.cpp if this changes
 }
 
 void Transformable::push_transforms(std::set<Transformable *>& transformables, int son)

@@ -18,7 +18,6 @@
 
 #include "space.h"
 
-
 /// HcurlSpace represents a space of vector functions with continuous tangent
 /// components over a domain (mesh).
 ///

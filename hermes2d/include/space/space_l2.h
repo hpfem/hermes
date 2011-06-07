@@ -18,7 +18,6 @@
 
 #include "space.h"
 
-
 /// L2Space represents a space of Scalar functions with discontinuities along
 /// mesh edges.
 ///

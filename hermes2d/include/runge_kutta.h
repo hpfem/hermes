@@ -16,6 +16,9 @@
 #ifndef __H2D_RUNGE_KUTTA_H
 #define __H2D_RUNGE_KUTTA_H
 
+#include "hermes2d_common_defs.h"
+#include "../../hermes_common/solvers/include/umfpack_solver.h"
+#include "weakform/weakform.h"
 
 // TODO LIST: 
 //

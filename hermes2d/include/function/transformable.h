@@ -16,7 +16,9 @@
 #ifndef __H2D_TRANSFORM_H
 #define __H2D_TRANSFORM_H
 
-#include "mesh.h"
+#include "../hermes2d_common_defs.h"
+
+class Element;
 
 /// 2D transformation.
 struct Trf
@@ -71,23 +73,7 @@ public:
   /// specified son element and pushes it on top of the matrix stack. All integration
   /// points will then be transformed to this sub-element. This process can be repeated.
   /// \param son [in] Son element number in the range [0-3] for triangles and [0-7] for quads.
-  virtual void push_transform(int son)
-  {
-    assert(element != NULL);
-    if (top >= H2D_MAX_TRN_LEVEL) 
-      error("Too deep transform.");
-
-    Trf* mat = stack + (++top);
-    Trf* tr = (element->is_triangle() ? tri_trf + son : quad_trf + son);
-
-    mat->m[0] = ctm->m[0] * tr->m[0];
-    mat->m[1] = ctm->m[1] * tr->m[1];
-    mat->t[0] = ctm->m[0] * tr->t[0] + ctm->t[0];
-    mat->t[1] = ctm->m[1] * tr->t[1] + ctm->t[1];
-
-    ctm = mat;
-    sub_idx = (sub_idx << 3) + son + 1; // see traverse.cpp if this changes
-  }
+  virtual void push_transform(int son);
 
   /// Removes the current transformation matrix from the top of the stack. The new top becomes
   /// the current transformation matrix. This returns the transform to the state before the

@@ -16,6 +16,8 @@
 #ifndef __H2D_GRAPH_H
 #define __H2D_GRAPH_H
 
+#include "../hermes2d_common_defs.h"
+
 ///  Graph is a utility class storing a simple XY graph (eg., a convergence graph).
 ///  One or more data rows can be defined by calling add_row(). The actual data
 ///  are added to the rows by calling add_values(). The resulting graph is saved

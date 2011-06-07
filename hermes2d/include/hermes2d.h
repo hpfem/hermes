@@ -18,12 +18,14 @@
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 
-#include "config.h"
+#include "../../hermes_common/include/config.h"
+
+#include "../../hermes_common/include/hermes_common.h"
 
 // boundary conditions
-#include "boundary_conditions/essential_bcs.h"
+#include "boundary_conditions/essential_boundary_conditions.h"
 
 #include "range.h"
 #include "quadrature/limit_order.h"
@@ -33,12 +35,17 @@
 #include "mesh/h2d_reader.h"
 #include "mesh/exodusii.h"
 
+#include "quadrature/quad.h"
+#include "quadrature/quad_all.h"
+
+#include "function/solution.h"
+#include "function/filter.h"
+
 #include "space/space_h1.h"
 #include "space/space_hcurl.h"
 #include "space/space_l2.h"
 #include "space/space_hdiv.h"
 
-#include "quadrature/quad_all.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "shapeset/shapeset_hc_all.h"
 #include "shapeset/shapeset_hd_all.h"

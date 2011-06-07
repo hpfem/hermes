@@ -26,10 +26,17 @@ include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform_library)
 
 set(SRC
    forms.cpp
+   range.cpp
    
    adapt/adapt.cpp
    adapt/kelly_type_adapt.cpp
-
+   
+   boundary_conditions/essential_boundary_conditions.cpp
+   
+   function/transformable.cpp
+   function/function.cpp
+   function/mesh_function.cpp
+   function/exact_solution.cpp
    function/solution.cpp 
    function/filter.cpp
 	   
@@ -41,8 +48,7 @@ set(SRC
    mesh/hash.cpp 
    mesh/h2d_reader.cpp
    mesh/mesh.cpp 
-   mesh/regul.cpp 
-   mesh/transform.cpp 
+   mesh/regul.cpp
    mesh/traverse.cpp
    mesh/trans.cpp
    mesh/python_reader.cpp
@@ -93,11 +99,10 @@ set(SRC
    neighbor.cpp
    graph.cpp
    ogprojection.cpp
-   h2d_common.cpp  
+   hermes2d_common_defs.cpp  
    discrete_problem.cpp
    runge_kutta.cpp
    spline.cpp
-   boundary_conditions/essential_bcs.cpp
    
    weakform_library/weakforms_elasticity.cpp
    weakform_library/weakforms_h1.cpp

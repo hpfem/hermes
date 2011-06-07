@@ -7,6 +7,8 @@
 #include "solution.h"
 #include "forms.h"
 #include "refmap.h"
+#include "asmlist.h"
+#include "space.h"
 
 /*** Class NeighborSearch. ***/
 

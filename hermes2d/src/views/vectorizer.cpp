@@ -14,6 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "vectorizer.h"
+#include "refmap.h"
+#include "traverse.h"
 
 extern int tri_indices[5][3];
 extern int quad_indices[9][5];

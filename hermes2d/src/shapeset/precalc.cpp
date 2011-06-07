@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
-#include "quad.h"
+#include "hermes2d_common_defs.h"
+#include "quad_all.h"
 #include "precalc.h"
-
-
+#include "mesh.h"
 
 PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>()
 {

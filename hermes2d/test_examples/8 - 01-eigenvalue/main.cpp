@@ -1,5 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
+
 #include <stdio.h>
 
 using Teuchos::RCP;

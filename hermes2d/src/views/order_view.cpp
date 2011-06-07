@@ -23,8 +23,9 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "order_view.h"
+#include "space.h"
 
 template<typename Scalar>
 OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)

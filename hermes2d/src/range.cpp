@@ -13,17 +13,5 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_TRANS_H
-#define __H2D_TRANS_H
 
-#include "../hermes2d_common_defs.h"
-#include "mesh.h"
-#include "../shapeset/shapeset.h"
-#include "../shapeset/shapeset_h1_all.h"
-#include "../quadrature/quad.h"
-#include "../quadrature/quad_all.h"
-
-extern HERMES_API double2 *transform(Element *e);
-extern HERMES_API void element_polygonal_boundary(Element *e, double2 **tp, int *n);
-
-#endif
+// TODO: implement stuff from range.h here.

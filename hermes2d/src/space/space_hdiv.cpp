@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 #include "space_hdiv.h"
 #include "matrix.h"
 #include "quad_all.h"
 #include "shapeset/shapeset_hd_all.h"
-#include "boundary_conditions/essential_bcs.h"
+#include "boundary_conditions/essential_boundary_conditions.h"
 
 template<typename Scalar>
 double** HdivSpace<Scalar>::hdiv_proj_mat = NULL;

@@ -13,182 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "h2d_common.h"
-#include "solution.h"
+#include "hermes2d_common_defs.h"
+#include "exact_solution.h"
 #include "matrix.h"
 #include "shapeset/precalc.h"
 #include "refmap.h"
+#include "space.h"
 
-//// MeshFunction //////////////////////////////////////////////////////////////////////////////////
-
-
-template<typename Scalar>
-MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
-{
-  refmap = new RefMap;
-  mesh = NULL;
-  this->element = NULL;
-}
-
-template<typename Scalar>
-MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>()
-{
-  this->mesh = mesh;
-  this->refmap = new RefMap;
-  // FIXME - this was in H3D: MEM_CHECK(this->refmap);
-  this->element = NULL;		// this comes with Transformable
-}
-
-template<typename Scalar>
-MeshFunction<Scalar>::~MeshFunction()
-{
-  delete refmap;
-  if(this->overflow_nodes != NULL) 
-  {
-    for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-      if(this->overflow_nodes->present(i))
-        ::free(this->overflow_nodes->get(i));
-    delete this->overflow_nodes;
-  }
-}
-
-
-template<typename Scalar>
-void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
-{
-  Function<Scalar>::set_quad_2d(quad_2d);
-  refmap->set_quad_2d(quad_2d);
-}
-
-
-template<typename Scalar>
-void MeshFunction<Scalar>::set_active_element(Element* e)
-{
-  this->element = e;
-  this->mode = e->get_mode();
-  refmap->set_active_element(e);
-  this->reset_transform();
-}
-
-template<typename Scalar>
-void MeshFunction<Scalar>::handle_overflow_idx()
-{
-  if(this->overflow_nodes != NULL) 
-  {
-    for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-      if(this->overflow_nodes->present(i))
-        ::free(this->overflow_nodes->get(i));
-    delete this->overflow_nodes;
-  }
-  this->nodes = new LightArray<struct Function<Scalar>::Node *>;
-  this->overflow_nodes = this->nodes;
-}
-
-template<typename Scalar>
-void MeshFunction<Scalar>::push_transform(int son)
-{
-  Transformable::push_transform(son);
-  this->update_nodes_ptr();
-}
-
-template<typename Scalar>
-void MeshFunction<Scalar>::pop_transform()
-{
-  Transformable::pop_transform();
-  this->update_nodes_ptr();
-}
-
-//// Quad2DCheb ////////////////////////////////////////////////////////////////////////////////////
-
-static double3* cheb_tab_tri[11];
-static double3* cheb_tab_quad[11];
-static int      cheb_np_tri[11];
-static int      cheb_np_quad[11];
-
-static double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
-static int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
-
-/// Quad2DCheb is a special "quadrature" consisting of product Chebyshev
-/// points on the reference triangle and quad. It is used for expressing
-/// the solution on an element as a linear combination of monomials.
-///
-static class Quad2DCheb : public Quad2D
-{
-public:
-
-  Quad2DCheb()
-  {
-    mode = HERMES_MODE_TRIANGLE;
-    max_order[0]  = max_order[1]  = 10;
-    num_tables[0] = num_tables[1] = 11;
-    tables = cheb_tab;
-    np = cheb_np;
-
-    tables[0][0] = tables[1][0] = NULL;
-    np[0][0] = np[1][0] = 0;
-
-    int i, j, k, n, m;
-    double3* pt;
-    for (mode = 0; mode <= 1; mode++)
-    {
-      for (k = 0; k <= 10; k++)
-      {
-        np[mode][k] = n = mode ? sqr(k+1) : (k+1)*(k+2)/2;
-        tables[mode][k] = pt = new double3[n];
-
-        for (i = k, m = 0; i >= 0; i--)
-          for (j = k; j >= (mode ? 0 : k-i); j--, m++) 
-          {
-            pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
-            pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
-            pt[m][2] = 1.0;
-          }
-      }
-    }
-  };
-
-  ~Quad2DCheb()
-  {
-    for (int mode = 0; mode <= 1; mode++)
-      for (int k = 1; k <= 10; k++)
-        delete[] tables[mode][k];
-  }
-
-  virtual void dummy_fn() {}
-
-} g_quad_2d_cheb;
-
-
-//// Solution //////////////////////////////////////////////////////////////////////////////////////
-
-//  The higher-order solution on elements is best calculated not as a linear  combination
-//  of shape functions (the usual approach), but as a linear combination of monomials.
-//  This has the advantage that no shape function table calculation and look-ups are
-//  necessary (except for the conversion of the solution coefficients), which means that
-//  visualization and multi-mesh calculations are much faster (all the push_transforms
-//  and table searches take the most time when evaluating the solution).
-//
-//  The linear combination of monomials can be calculated using the Horner's scheme, which
-//  requires the same number of multiplications as the calculation of the linear combination
-//  of shape functions. However, sub-element transforms are trivial and cheap. Moreover,
-//  after the solution on all elements is expressed as a combination of monomials, the
-//  Space can be forgotten. This is comfortable for the user, since the Solution class acts
-//  as a self-contained unit, internally containing just a copy of the mesh and a table of
-//  monomial coefficients. It is also very straight-forward to obtain all derivatives of
-//  a solution defined in this way. Finally, it is possible to store the solution on the
-//  disk easily (no need to store the Space, which is difficult).
-//
-//  The following is an example of the set of monomials for a cubic quad and a cubic triangle.
-//  (Note that these are actually the definitions of the polynomial spaces on these elements.)
-//
-//    [ x^3*y^3  x^2*y^3  x*y^3  y^3 ]       [                    y^3 ]
-//    [ x^3*y^2  x^2*y^2  x*y^2  y^2 ]       [             x*y^2  y^2 ]
-//    [ x^3*y    x^2*y    x*y    y   ]       [      x^2*y  x*y    y   ]
-//    [ x^3      x^2      x      1   ]       [ x^3  x^2    x      1   ]
-//
-//  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
-//   'n' is the polynomial degree.)
-//
+double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
+int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
 
 template<typename Scalar>
 void Solution<Scalar>::init()
@@ -399,9 +232,6 @@ Solution<Scalar>::~Solution()
   space_type = HERMES_INVALID_SPACE;
 }
 
-
-//// set_coeff_vector ///////////////////////////////////////////////////////////////////////////////
-
 static struct mono_lu_init
 {
 public:
@@ -427,7 +257,6 @@ public:
   }
 }
 mono_lu;
-
 
 template<typename Scalar>
 double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
@@ -458,7 +287,6 @@ double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
   return mat;
 }
 
-// using coefficient vector
 template<typename Scalar>
 void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift)
 {
@@ -476,7 +304,6 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* ve
   delete [] coeffs;
 }
 
-// using coefficient array (no pss)
 template<typename Scalar>
 void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift)
 {
@@ -494,7 +321,6 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bo
   delete pss;
 }
 
-// using pss and coefficient array
 template<typename Scalar>
 void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift)
 {
@@ -782,9 +608,6 @@ void Solution<Scalar>::multiply(Scalar coef)
 }
 
 
-//// set_active_element ////////////////////////////////////////////////////////////////////////////
-
-// differentiates the mono coefs by x
 template<typename Scalar>
 static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
@@ -799,7 +622,6 @@ static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
   }
 }
 
-// differentiates the mono coefs by y
 template<typename Scalar>
 static void make_dy_coefs(int mode, int o, Scalar* mono, Scalar* result)
 {
@@ -833,7 +655,6 @@ void Solution<Scalar>::init_dxdy_buffer()
   }
   dxdy_buffer = new Scalar[this->num_components * 5 * sqr(11)];
 }
-
 
 template<typename Scalar>
 void Solution<Scalar>::set_active_element(Element* e)
@@ -906,10 +727,6 @@ void Solution<Scalar>::set_active_element(Element* e)
   this->update_nodes_ptr();
 }
 
-
-//// precalculate //////////////////////////////////////////////////////////////////////////////////
-
-// sets all elements of y[] to num
 template<typename Scalar>
 static inline void set_vec_num(int n, Scalar* y, Scalar num)
 {
@@ -917,7 +734,6 @@ static inline void set_vec_num(int n, Scalar* y, Scalar num)
     y[i] = num;
 }
 
-// y = y .* x + num
 template<typename Scalar>
 static inline void vec_x_vec_p_num(int n, Scalar* y, Scalar* x, Scalar num)
 {
@@ -925,14 +741,12 @@ static inline void vec_x_vec_p_num(int n, Scalar* y, Scalar* x, Scalar num)
     y[i] = y[i]*x[i] + num;
 }
 
-// y = y .* x + z
 template<typename Scalar>
 static inline void vec_x_vec_p_vec(int n, Scalar* y, Scalar* x, Scalar* z)
 {
   for (int i = 0; i < n; i++)
     y[i] = y[i]*x[i] + z[i];
 }
-
 
 static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
 static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
@@ -1051,7 +865,6 @@ int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element*
     return Function<Scalar>::get_edge_fn_order(edge);
   }
 }
-
 
 template<typename Scalar>
 void Solution<Scalar>::precalculate(int order, int mask)
@@ -1226,9 +1039,6 @@ void Solution<Scalar>::precalculate(int order, int mask)
   this->cur_node = node;
 }
 
-
-//// save & load ///////////////////////////////////////////////////////////////////////////////////
-
 template<typename Scalar>
 void Solution<Scalar>::save(const char* filename, bool compress)
 {
@@ -1282,7 +1092,6 @@ void Solution<Scalar>::save(const char* filename, bool compress)
 
   if (compress) pclose(f); else fclose(f);
 }
-
 
 template<typename Scalar>
 void Solution<Scalar>::load(const char* filename)
@@ -1370,9 +1179,6 @@ void Solution<Scalar>::load(const char* filename)
   init_dxdy_buffer();
 }
 
-
-//// getting solution values in arbitrary points ///////////////////////////////////////////////////////////////
-
 template<typename Scalar>
 Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
 {
@@ -1392,7 +1198,6 @@ Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int c
   return result;
 }
 
-
 static inline bool is_in_ref_domain(Element* e, double xi1, double xi2)
 {
   const double TOL = 1e-11;
@@ -1401,7 +1206,6 @@ static inline bool is_in_ref_domain(Element* e, double xi1, double xi2)
   else
     return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
 }
-
 
 template<typename Scalar>
 Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
@@ -1524,57 +1328,5 @@ Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
   return NAN;
 }
 
-
-// Exact solution.
-template<typename Scalar>
-ExactSolution<Scalar>::ExactSolution(Mesh* mesh) : Solution<Scalar>(mesh)
-{
-  this->sln_type = HERMES_EXACT;
-  this->exact_mult = 1.0;
-  this->num_dofs = -1;
-}
-
-template<typename Scalar>
-ExactSolution<Scalar>::~ExactSolution()
-{}
-
-template<typename Scalar>
-ExactSolutionScalar<Scalar>::ExactSolutionScalar(Mesh* mesh) : ExactSolution<Scalar>(mesh)
-{
-  this->num_components = 1;
-}
-
-template<typename Scalar>
-ExactSolutionScalar<Scalar>::~ExactSolutionScalar()
-{}
-
-template<typename Scalar>
-unsigned int ExactSolutionScalar<Scalar>::get_dimension() const
-{
-  return 1;
-}
-
-template<typename Scalar>
-ExactSolutionVector<Scalar>::ExactSolutionVector(Mesh* mesh) : ExactSolution<Scalar>(mesh)
-{
-  this->num_components = 2;
-}
-
-template<typename Scalar>
-ExactSolutionVector<Scalar>::~ExactSolutionVector()
-{}
-
-template<typename Scalar>
-unsigned int ExactSolutionVector<Scalar>::get_dimension() const
-{
-  return 2;
-}
-
-template HERMES_API class MeshFunction<double>;
-template HERMES_API class MeshFunction<std::complex<double> >;
 template HERMES_API class Solution<double>;
 template HERMES_API class Solution<std::complex<double> >;
-template HERMES_API class ExactSolutionScalar<double>;
-template HERMES_API class ExactSolutionScalar<std::complex<double> >;
-template HERMES_API class ExactSolutionVector<double>;
-template HERMES_API class ExactSolutionVector<std::complex<double> >;

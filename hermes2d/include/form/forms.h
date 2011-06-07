@@ -17,11 +17,12 @@
 #ifndef __H2D_FORMS_H
 #define __H2D_FORMS_H
 
-#include "../h2d_common.h"
+#include "../hermes2d_common_defs.h"
 #include "../quadrature/quad.h"
 #include "../function/function.h"
 #include "../function/solution.h"
 #include "../mesh/refmap.h"
+#include "../mesh/traverse.h"
 #include <complex>
 
 #define callback(a)	a<double, Scalar>, a<Ord, Ord>

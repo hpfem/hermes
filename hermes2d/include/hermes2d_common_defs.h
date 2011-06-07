@@ -22,6 +22,8 @@
 // H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
 
+#define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
+
 // get_elem_marker(e) 
 #define get_elem_marker(e) wf->get_element_markers_conversion()->get_user_marker(e->elem_marker)
 
@@ -63,6 +65,7 @@ template<typename Scalar> class WeakForm;
 class Quad2D;
 class Quad1DStd;
 class Quad2DStd;
+
 // Class for all global functions.
 template<typename Scalar>
 class HERMES_API Hermes2D {

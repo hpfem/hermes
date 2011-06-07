@@ -16,12 +16,12 @@
 #ifndef __H2D_SPACE_H
 #define __H2D_SPACE_H
 
-#include "mesh.h"
-#include "shapeset.h"
+#include "../mesh/mesh.h"
+#include "../shapeset/shapeset.h"
 #include "asmlist.h"
-#include "traverse.h"
-#include "quad_all.h"
-#include "essential_bcs.h"
+#include "../mesh/traverse.h"
+#include "../quadrature/quad_all.h"
+#include "../boundary_conditions/essential_boundary_conditions.h"
 
 /// \brief Represents a finite element space over a domain.
 ///

@@ -16,7 +16,7 @@
 #ifndef __H2D_ASMLIST_H
 #define __H2D_ASMLIST_H
 
-#include "h2d_common.h"
+#include "hermes2d_common_defs.h"
 
 
 /// AsmList is a simple container for the element assembly arrays idx, dof and coef.
@@ -75,12 +75,7 @@ public:
   }
 
 protected:
-
-  // this is the only non-inline method; defined in space.cpp
   void enlarge();
-
 };
-
-
 
 #endif

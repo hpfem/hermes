@@ -16,7 +16,7 @@
 #ifndef __H2D_REFINEMENT_TYPE_H
 #define __H2D_REFINEMENT_TYPE_H
 
-#define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
+#include "../hermes2d_common_defs.h"
 
 /// Possible refinements of an element.
 enum RefinementType {
