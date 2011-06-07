@@ -13,6 +13,12 @@ config_real.cmake
 *.obj
 *.sln
 CMake.vars
+*.dll
+*.ilk
+*.pdb
+*.lib
+Debug/
+*.sdf
 
 # Documentation generated
 *.html
@@ -22,3 +28,8 @@ CMake.vars
 *.ps
 *.pdf
 *.png
+*.aux
+*.css
+*.tag
+*.sty
+*.dvi

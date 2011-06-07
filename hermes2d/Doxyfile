@@ -123,7 +123,7 @@ FULL_PATH_NAMES        = NO
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = /home/jakub/hermes2d
+STRIP_FROM_PATH        = .
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
@@ -527,8 +527,10 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories 
 # for example use the pattern */test/*
 
-#EXCLUDE_PATTERNS       = shapeset_h1_*.cpp \
-#                         shapeset_hc_*.cpp
+EXCLUDE_PATTERNS       = shapeset_h1_*.cpp \
+                         shapeset_hc_*.cpp \
+						 shapeset_hd_*.cpp \
+						 shapeset_l2_*.cpp
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the output. 
@@ -785,7 +787,7 @@ TREEVIEW_WIDTH         = 250
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will 
 # generate Latex output.
 
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
@@ -1053,7 +1055,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = H2D_COMPLEX
+#PREDEFINED             = 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
