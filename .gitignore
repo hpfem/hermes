@@ -13,3 +13,12 @@ config_real.cmake
 *.obj
 *.sln
 CMake.vars
+
+# Documentation generated
+*.html
+*.eps
+*.js
+*.tex
+*.ps
+*.pdf
+*.png
