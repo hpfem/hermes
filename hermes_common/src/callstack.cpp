@@ -22,10 +22,8 @@
 #include <signal.h>
 #include <stdlib.h>
 
-// global instance of the call stack object
-static CallStack callstack;
-
-// Call Stack Object ////
+/// Definition of the global CallStack instance.
+CallStack callstack;
 
 CallStackObj::CallStackObj(int ln, const char *func, const char *file) 
 {
@@ -51,10 +49,7 @@ CallStackObj::~CallStackObj()
   }
 }
 
-// Signals ////
-
-static
-  void sighandler(int signo) 
+static void sighandler(int signo) 
 {
   const char *sig_name[64];
 
@@ -65,13 +60,6 @@ static
   callstack.dump();
   exit(EXIT_FAILURE);
 }
-
-// Comment this out to stop using Teuchos stacktrace (in that case the stacktrace
-// code originally in h3d will be used). Teuchos stacktrace not used for WIN32 
-// (execinfo.h and cxxabi.h absent).
-#ifndef _WIN32
-#define HERMES_USE_TEUCHOS_STACKTRACE
-#endif
 
 void callstack_initialize() 
 {
@@ -87,10 +75,6 @@ void callstack_initialize()
 void callstack_finalize() 
 {
 }
-
-// Call Stack ////
-
-CallStack &get_callstack() { return callstack; }
 
 CallStack::CallStack(int max_size) 
 {

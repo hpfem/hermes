@@ -17,25 +17,27 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file c99_functions.h
-    \brief File containing definitions from the C99 standard that are missing in MSVC.
+\brief File containing definitions from the C99 standard that are missing in MSVC.
 */
 #ifndef __HERMES_COMMON_C99_FUNCTIONS_H
 #define __HERMES_COMMON_C99_FUNCTIONS_H
 
 #ifdef IMPLEMENT_C99
 
-/* Definitions of C99 specification. Used in a case of MSVC 2008 and
- * below because MSVC follows C++ rather than C
- */
-
 // Not-a-number constant.
 #define NAN 0x7fffffffffffffffL;
 
 // functions
-extern HERMES_API double exp2(double x); ///< exp 2
-extern HERMES_API double log2(double x); ///< log 2
-extern HERMES_API double cbrt(double x); ///< cubic root
+namespace Hermes 
+{
+  namespace C_99 
+  {
 
+    HERMES_API double exp2(double x); ///< exp 2
+    HERMES_API double log2(double x); ///< log 2
+    HERMES_API double cbrt(double x); ///< cubic root
+  }
+}
 #endif /* IMPLEMENT_C99 */
 
 #endif

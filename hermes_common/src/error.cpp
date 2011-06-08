@@ -40,20 +40,18 @@ static void report_w_loc(const char *prefix, const char *file, int line, const c
   fprintf(stderr, "%s%s:%d: %s: %s\n", prefix, file, line, func, msg);
 }
 
-// errors
-void h_exit(int line, const char *func, const char *file, char const *fmt, ...)
+void Hermes::Error::h_exit(int line, const char *func, const char *file, char const *fmt, ...)
 {
   va_list params;
 
   va_start(params, fmt);
   report_w_loc("FATAL: ", file, line, func, fmt, params);
   va_end(params);
-  get_callstack().dump();
+  callstack.dump();
   exit(128);
 }
 
-// FIXME: this function should be removed (use the one from hermes_logging.cpp):
-void error_function(const char *err, ...)
+void Hermes::Error::error_function(const char *err, ...)
 {
   va_list params;
 
@@ -63,7 +61,7 @@ void error_function(const char *err, ...)
   exit(128);
 }
 
-void warning(const char *warn, ...)
+void Hermes::Error::warning(const char *warn, ...)
 {
   va_list params;
 
@@ -72,7 +70,7 @@ void warning(const char *warn, ...)
   va_end(params);
 }
 
-void h_mem_check(int line, const char *func, const char *file, void *var)
+void Hermes::Error::h_mem_check(int line, const char *func, const char *file, void *var)
 {
   //va_list params;
 
@@ -80,7 +78,7 @@ void h_mem_check(int line, const char *func, const char *file, void *var)
   {
     //report_w_loc("FATAL: ", file, line, func, "Out of memory.", params);
     report_w_loc("FATAL: ", file, line, func, "Out of memory.", NULL);
-    get_callstack().dump();
+    callstack.dump();
     exit(EXIT_FAILURE);
   }
 }

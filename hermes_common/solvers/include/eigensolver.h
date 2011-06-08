@@ -22,6 +22,8 @@
 #ifndef __HERMES_EIGENSOLVER_H
 #define __HERMES_EIGENSOLVER_H
 
+#ifdef WITH_PYTHON
+
 #include "matrix.h"
 
 #include "python_api.h"
@@ -79,5 +81,7 @@ private:
 };
 
 }
+
+#endif
 
 #endif

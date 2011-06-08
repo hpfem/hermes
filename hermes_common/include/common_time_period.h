@@ -82,6 +82,6 @@ namespace Hermes
 
     friend std::ofstream& operator<<(std::ofstream& stream, const Hermes::TimePeriod& period);
   };
-  extern std::ostream& operator<<(std::ostream& stream, const TimePeriod& period);
+  extern std::ostream& operator<<(std::ostream& stream, const Hermes::TimePeriod& period);
 }
 #endif

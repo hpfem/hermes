@@ -37,5 +37,7 @@
 #cmakedefine WITH_HEX
 #cmakedefine WITH_PRISM
 
-#cmakedefine PRELOADING
 #cmakedefine HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
+
+// no logo
+#cmakedefine HERMES_NO_LOGO

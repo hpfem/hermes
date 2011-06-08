@@ -32,8 +32,7 @@
   #define _F_ CallStackObj __call_stack_obj(__LINE__, __PRETTY_FUNCTION__, __FILE__);
 #endif
 
-/// Holds data for one call stack object
-///
+/// Holds data for one call stack object.
 class HERMES_API CallStackObj 
 {
 public:
@@ -45,8 +44,7 @@ public:
 	const char *func;			// function name
 };
 
-/// Call stack object
-///
+/// Call stack class.
 class HERMES_API CallStack 
 {
 public:
@@ -64,7 +62,7 @@ protected:
 	friend class CallStackObj;
 };
 
-CallStack &get_callstack();
-
+/// Global call stack instance.
+extern CallStack callstack;
 
 #endif

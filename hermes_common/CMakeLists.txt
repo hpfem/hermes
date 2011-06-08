@@ -53,7 +53,7 @@ set(SRC
   solvers/src/dpinterface.cpp
   solvers/src/solver.cpp
   solvers/src/nox_solver.cpp
-  solvers/src/epetra_solver.cpp
+  solvers/src/epetra.cpp
   solvers/src/aztecoo_solver.cpp
   solvers/src/amesos_solver.cpp
   solvers/src/mumps_solver.cpp

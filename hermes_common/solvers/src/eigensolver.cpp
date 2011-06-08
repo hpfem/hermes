@@ -1,29 +1,45 @@
+// This file is part of HermesCommon
+//
+// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
+// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+//
+// Hermes2D is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation; either version 2 of the License,
+// or (at your option) any later version.
+//
+// Hermes2D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Hermes2D; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 #include "eigensolver.h"
 #include "umfpack_solver.h"
 
+#ifdef WITH_PYTHON
+
+using Teuchos::RCP;
+using Teuchos::Ptr;
+using Teuchos::rcp;
+using Teuchos::ptr;
+using Teuchos::null;
+using Teuchos::rcp_dynamic_cast;
+
 namespace Hermes 
 {
-
-  using Teuchos::RCP;
-  using Teuchos::Ptr;
-  using Teuchos::rcp;
-  using Teuchos::ptr;
-  using Teuchos::null;
-  using Teuchos::rcp_dynamic_cast;
-
-  PyMODINIT_FUNC initeigen(void); /*proto*/
-
   template<typename Scalar>
   EigenSolver<Scalar>::EigenSolver(const RCP<Matrix<Scalar> > &A, const RCP<Matrix<Scalar> > &B) 
   {
     this->A = A;
     this->B = B;
     this->n_eigs=0;
-
-    initeigen();
   }
 
-  void wrap_CSC(const Ptr<Python> p, const std::string name,
+  static void wrap_CSC(const Ptr<Python> p, const std::string name,
     const RCP<CSCMatrix<double> > A)
   {
     p->push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
@@ -35,7 +51,7 @@ namespace Hermes
   }
 
   template<typename Scalar>
-  void wrap_CSC(const Ptr<Python> p, const std::string name,
+  static void wrap_CSC(const Ptr<Python> p, const std::string name,
     const RCP<CSCMatrix<std::complex<double> > > A)
   {
     p->push_numpy_int_inplace("_IA", A->get_Ai(), A->get_nnz());
@@ -90,5 +106,6 @@ namespace Hermes
     } else
       throw std::runtime_error("'i' must obey 0 <= i < n_eigs");
   }
+}
 
-} // namespace Schroedinger
+#endif

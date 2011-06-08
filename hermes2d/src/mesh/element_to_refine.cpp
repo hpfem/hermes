@@ -3,6 +3,7 @@
 #include "element_to_refine.h"
 
 using namespace std;
+using namespace Hermes::C_99;
 
 ElementToRefine& ElementToRefine::operator=(const ElementToRefine& orig) 
 {

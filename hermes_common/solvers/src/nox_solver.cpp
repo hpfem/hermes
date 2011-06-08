@@ -15,7 +15,7 @@
 
 #include "nox_solver.h"
 
-#ifdef HAVE_NOX
+#if (defined HAVE_NOX && defined HAVE_EPETRA)
 
 static Epetra_SerialComm seq_comm;
 

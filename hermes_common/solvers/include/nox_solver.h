@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_NOX_SOLVER_H_
 
 #include "solver.h"
-#include "epetra_solver.h"
+#include "epetra.h"
 
 #ifdef HAVE_NOX
   #include <NOX.H>

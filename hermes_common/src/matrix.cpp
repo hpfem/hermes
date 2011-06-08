@@ -239,7 +239,7 @@ SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
   {
     case Hermes::SOLVER_AMESOS:
       {
-#ifdef HAVE_AMESOS
+#if defined HAVE_AMESOS && defined HAVE_EPETRA
         return new EpetraMatrix<Scalar>;
 #else
         error("Amesos not installed.");
@@ -248,7 +248,7 @@ SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_AZTECOO:
       {
-#ifdef HAVE_AZTECOO
+#if defined HAVE_AZTECOO && defined HAVE_EPETRA
         return new EpetraMatrix<Scalar>;
 #else
         error("AztecOO not installed.");
@@ -306,7 +306,7 @@ Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Mat
   {
   case Hermes::SOLVER_AZTECOO:
     {
-#ifdef HAVE_AZTECOO
+#if defined HAVE_AZTECOO && defined HAVE_EPETRA
       info("Using AztecOO."); 
       if (rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
       else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
@@ -317,7 +317,7 @@ Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Mat
     }
   case Hermes::SOLVER_AMESOS:
     {
-#ifdef HAVE_AMESOS
+#if defined HAVE_AMESOS && defined HAVE_EPETRA
       info("Using Amesos.");         
       if (rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
       else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
@@ -384,7 +384,7 @@ Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
   {
     case Hermes::SOLVER_AMESOS:
       {
-#ifdef HAVE_AMESOS
+#if defined HAVE_AMESOS && defined HAVE_EPETRA
         return new EpetraVector<Scalar>;
 #else
         error("Amesos not installed.");
@@ -393,7 +393,7 @@ Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
       }
     case Hermes::SOLVER_AZTECOO:
       {
-#ifdef HAVE_AZTECOO
+#if defined HAVE_AZTECOO && defined HAVE_EPETRA
         return new EpetraVector<Scalar>;
 #else
         error("AztecOO not installed.");

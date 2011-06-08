@@ -17,80 +17,80 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file hermes_common.h
-    \brief Functions and support for logging of events.
+\brief Functions and support for logging of events.
 */
 /** \addtogroup g_logging Event Logging
- *  \{
- *  \brief Functions and support for logging of events.
- *
- *  Hermes controls event logging through:
- *  - compiler directives (e.g. ::HERMES_REPORT_INFO). Directives has to be included prior including Hermes header files.
- *  - boolean variables (e.g. ::__hermes_report_info). These variables can be set anytime but their direct use is discouraged
- *    because they are integeded to be used by Python wreappers. Initial settings of these variables is given by the compiler
- *    directives.
- *
- *  By default, all logs are written into a file 'hermes.log' created in the current directory.
- *  A logs created by the application can be directed to a separate file. The file is specified through
- *  a compiler directive ::HERMES_REPORT_FILE, i.e.,\code
-    #define HERMES_REPORT_FILE "application.log"
- *  \endcode
- *  In a case, the application is a test (i.e., a directive ::HERMES_TEST is defined),
- *  the output is directed to a file 'test.log'.
- *  The output to a file can be suppressed specifying ::HERMES_REPORT_NO_FILE.
- *
- *  \section s_example Supported Directives
- *  The following list contains directives that controls even logging.
- *  - ::HERMES_REPORT_WARN: Define to allow warning.
- *  - ::HERMES_REPORT_WARN_INTRO: Define to allow warning about integration issues.
- *  - ::HERMES_REPORT_INFO: Define to allow info.
- *  - ::HERMES_REPORT_VERBOSE: Define to allow verbose.
- *  - ::HERMES_REPORT_TIME: Define to allow time measurement reports.
- *  - ::HERMES_REPORT_TRACE: Define to allow execution tracing.
- *  - ::HERMES_REPORT_FILE "my_file.log": Define to direct output of a file \c my_file_log.
- *  - ::HERMES_REPORT_NO_FILE: Define to avoid any output file. It always overrides ::HERMES_REPORT_FILE.
- *  - ::HERMES_REPORT_REPORT_ALL: Define to allow all events to be reported except integration warnings (::HERMES_REPORT_WARN_INTRO). It overrides all settings.
- *  - ::HERMES_REPORT_RUNTIME_CONTROL: Define to allow controling of event logging through boolean variables.
- *    Notice this will enforce evaluation of all parameters of logging macros even though a logging of a given event
- *    is not enabled.
- *  - ::HERMES_NO_LOGO: Define to disable logo message. This directive has to be defined at the compilation time of Hermes library.
- *
- *  \section s_usage Usage Guidelines
- *  - Do \b not put any computation (e.g., \c it++) into parameters if the result of the computation is
- *    used outside the macro. If a given event is not logged, no code may be generated and therefore
- *    your computation will never be executed.
- *  - Do \b not use new line characters (i.e. \c \\n or \c \\r) inside the message. Used a space or an exclamation
- *    mark instead, see below.
- *  - Use an exclamation mark at the beginning of the message to emphasize the message.
- *  - Use a space at the beginning of the message to generate a sub-info.
- *  - Use the event logging wisely since every line is flushed to a file if file output is enabled. This allows
- *    to obtain all logged vents in a case a SIGSEGV happens on a remote machine, e.g., if an application is
- *    executed using a batch system on a cluster.
- *  - The format of the message is similar to the function printf().
- *
- *  \section s_example Examples of Use
- *  The following code \code
-    #define HERMES_REPORT_WARN
-    #define HERMES_REPORT_INFO
-    #define HERMES_REPORT_VERBOSE
-    #define HERMES_REPORT_FILE "application.log"
-    #include <hermes.h>
-    #include <solver_umfpack.h>
- *  \endcode will enable logging of events warning, info and verbose in the application and it
- *  copies the output to a file \c application.log.
- *
- *  The following code \code
-    info("Result is %d", 32);
-    info(" Probability of error is %g", 0.1);
-    trace("Computation is done.");
-    info("!Done");
- *  \endcode will generate \verbatim
-    I Result is 32
-      Probability of error is 0.1
-    R Computation is done.
+*  \{
+*  \brief Functions and support for logging of events.
+*
+*  Hermes controls event logging through:
+*  - compiler directives (e.g. ::HERMES_REPORT_INFO). Directives has to be included prior including Hermes header files.
+*  - boolean variables (e.g. ::__hermes_report_info). These variables can be set anytime but their direct use is discouraged
+*    because they are integeded to be used by Python wreappers. Initial settings of these variables is given by the compiler
+*    directives.
+*
+*  By default, all logs are written into a file 'hermes.log' created in the current directory.
+*  A logs created by the application can be directed to a separate file. The file is specified through
+*  a compiler directive ::HERMES_REPORT_FILE, i.e.,\code
+#define HERMES_REPORT_FILE "application.log"
+*  \endcode
+*  In a case, the application is a test (i.e., a directive ::HERMES_TEST is defined),
+*  the output is directed to a file 'test.log'.
+*  The output to a file can be suppressed specifying ::HERMES_REPORT_NO_FILE.
+*
+*  \section s_example Supported Directives
+*  The following list contains directives that controls even logging.
+*  - ::HERMES_REPORT_WARN: Define to allow warning.
+*  - ::HERMES_REPORT_WARN_INTRO: Define to allow warning about integration issues.
+*  - ::HERMES_REPORT_INFO: Define to allow info.
+*  - ::HERMES_REPORT_VERBOSE: Define to allow verbose.
+*  - ::HERMES_REPORT_TIME: Define to allow time measurement reports.
+*  - ::HERMES_REPORT_TRACE: Define to allow execution tracing.
+*  - ::HERMES_REPORT_FILE "my_file.log": Define to direct output of a file \c my_file_log.
+*  - ::HERMES_REPORT_NO_FILE: Define to avoid any output file. It always overrides ::HERMES_REPORT_FILE.
+*  - ::HERMES_REPORT_REPORT_ALL: Define to allow all events to be reported except integration warnings (::HERMES_REPORT_WARN_INTRO). It overrides all settings.
+*  - ::HERMES_REPORT_RUNTIME_CONTROL: Define to allow controling of event logging through boolean variables.
+*    Notice this will enforce evaluation of all parameters of logging macros even though a logging of a given event
+*    is not enabled.
+*  - ::HERMES_NO_LOGO: Define to disable logo message. This directive has to be defined at the compilation time of Hermes library.
+*
+*  \section s_usage Usage Guidelines
+*  - Do \b not put any computation (e.g., \c it++) into parameters if the result of the computation is
+*    used outside the macro. If a given event is not logged, no code may be generated and therefore
+*    your computation will never be executed.
+*  - Do \b not use new line characters (i.e. \c \\n or \c \\r) inside the message. Used a space or an exclamation
+*    mark instead, see below.
+*  - Use an exclamation mark at the beginning of the message to emphasize the message.
+*  - Use a space at the beginning of the message to generate a sub-info.
+*  - Use the event logging wisely since every line is flushed to a file if file output is enabled. This allows
+*    to obtain all logged vents in a case a SIGSEGV happens on a remote machine, e.g., if an application is
+*    executed using a batch system on a cluster.
+*  - The format of the message is similar to the function printf().
+*
+*  \section s_example Examples of Use
+*  The following code \code
+#define HERMES_REPORT_WARN
+#define HERMES_REPORT_INFO
+#define HERMES_REPORT_VERBOSE
+#define HERMES_REPORT_FILE "application.log"
+#include <hermes.h>
+#include <solver_umfpack.h>
+*  \endcode will enable logging of events warning, info and verbose in the application and it
+*  copies the output to a file \c application.log.
+*
+*  The following code \code
+info("Result is %d", 32);
+info(" Probability of error is %g", 0.1);
+trace("Computation is done.");
+info("!Done");
+*  \endcode will generate \verbatim
+I Result is 32
+Probability of error is 0.1
+R Computation is done.
 
-    I Done. \endverbatim on screen if all events are enabled.
- */
- 
+I Done. \endverbatim on screen if all events are enabled.
+*/
+
 #ifndef __HERMES_COMMON_LOGGING_H_
 #define __HERMES_COMMON_LOGGING_H_
 
@@ -103,6 +103,86 @@
 #include <cstdio>
 #include <stdarg.h>
 #include <sstream>
+
+
+namespace Hermes
+{
+  namespace Logging
+  {
+    /// Writes a fancy formatted text to a console. \internal \ingroup g_logging
+    /** \param[in] code An event code, e.g., ::HERMES_EC_ERROR.
+    *  \param[in] emphasize True if the message should be emphasized.
+    *  \param[in] text A message. A C-style string.
+    *  \return True if the message was written. False if it failed due to some reasone. */
+    HERMES_API bool write_console(const char code, const bool emphasize, const char* text);
+
+    /// Info about a log record. Used for output log function. \internal
+    class HERMES_API HermesLogEventInfo 
+    {
+    public:
+      const char code;          ///< An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
+      const char* log_file;     ///< Log file name.
+      const char* src_function; ///< A name of a function/method at which the event was generated.
+      const char* src_file;     ///< A source file at which the event was generated.
+      const int src_line;       ///< A line in the source file at which the event was generated.
+      HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line);
+
+    };
+
+    /// Exits the application if the condition is true. \internal
+    /** Used by macros error() and error_if().
+    *  \param[in] cond True if the function should exit.
+    *  \param[in] code Exit code returned by the application throught exit(). */
+    HERMES_API void hermes_exit_if(bool cond, int code = -1);
+
+    /// Logs an event if the condition is true. \internal
+    /** Used by all even logging macros. Since this function returns a copy of the parameter cond,
+    *  it can be used to call a function hermes2d_exit_if() or a function(). Thanks to that, the macro
+    *  behaves as a function rather than a block of code. Also, this allows a debugger to a particular
+    *  code.
+    *  \param[in] cond True if the event should be logged.
+    *  \param[in] info Info about the event.
+    *  \param[in] msg A message or prinf-like formatting string.
+    *  \return A value of the parameter cond. */
+    HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...);
+
+    /* file operations */
+    void HERMES_API hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream);
+    void HERMES_API hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream);
+
+    /// Logging output monitor. \internal \ingroup g_logging
+    /** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
+    class LoggerMonitor 
+    {
+      pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
+      pthread_mutex_t mutex; ///< Mutex that protects monitor.
+
+    public:
+      /// Constructor. Creates a mutex.
+      LoggerMonitor() 
+      {
+        pthread_mutexattr_init(&mutex_attr);
+        pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&mutex, &mutex_attr);
+      };
+      /// Destructor. Deletes a mutex.
+      ~LoggerMonitor() 
+      {
+        pthread_mutex_destroy(&mutex);
+        pthread_mutexattr_destroy(&mutex_attr);
+      };
+
+      /// Enters protected section.
+      void enter() { pthread_mutex_lock(&mutex); };
+
+      /// Leaves protected section.
+      void leave() { pthread_mutex_unlock(&mutex); };
+    };
+  }
+}
+
+// Preprocessor directives follow.
+using namespace Hermes::Logging;
 
 /* event codes */
 #define HERMES_EC_ERROR 'E' ///< An event code: errors. \internal
@@ -117,39 +197,9 @@
 /// A size of a delimiter in a log file. \internal \ingroup g_logging
 #define HERMES_LOG_FILE_DELIM_SIZE 80
 
-/// Info about a log record. Used for output log function. \internal
-class HERMES_API HermesLogEventInfo 
-{
-public:
-  const char code;          ///< An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
-  const char* log_file;     ///< Log file name.
-  const char* src_function; ///< A name of a function/method at which the event was generated.
-  const char* src_file;     ///< A source file at which the event was generated.
-  const int src_line;       ///< A line in the source file at which the event was generated.
-  HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line);
-  
-};
-
-/// Exits the application if the condition is true. \internal
-/** Used by macros error() and error_if().
- *  \param[in] cond True if the function should exit.
- *  \param[in] code Exit code returned by the application throught exit(). */
-extern HERMES_API void hermes_exit_if(bool cond, int code = -1);
-
-/// Logs an event if the condition is true. \internal
-/** Used by all even logging macros. Since this function returns a copy of the parameter cond,
- *  it can be used to call a function hermes2d_exit_if() or a function(). Thanks to that, the macro
- *  behaves as a function rather than a block of code. Also, this allows a debugger to a particular
- *  code.
- *  \param[in] cond True if the event should be logged.
- *  \param[in] info Info about the event.
- *  \param[in] msg A message or prinf-like formatting string.
- *  \return A value of the parameter cond. */
-extern HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...);
-
 /* function name */
 /** \def __CURRENT_FUNCTION
- *  \brief A platform-dependent string defining a current function. \internal */
+*  \brief A platform-dependent string defining a current function. \internal */
 #ifdef _WIN32 //Win32
 # ifdef __MINGW32__ //MinGW
 #   define __CURRENT_FUNCTION __func__
@@ -160,9 +210,6 @@ extern HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo
 # define __CURRENT_FUNCTION __PRETTY_FUNCTION__
 #endif
 
-/* file operations */
-void HERMES_API __hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
-void HERMES_API __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info);
 /* log file */
 #undef HERMES_LOG_FILE
 #ifdef HERMES_REPORT_NO_FILE
@@ -179,7 +226,7 @@ void HERMES_API __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stre
 # endif
 #endif
 
-/// Builds info about an event. \internal
+// Builds info about an event. \internal
 #define HERMES_BUILD_LOG_INFO(__event) HermesLogEventInfo(__event, HERMES_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__)
 
 /* error and assert macros */
@@ -206,139 +253,106 @@ void HERMES_API __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stre
 # define HERMES_REPORT_TIME
 #endif
 /** \def HERMES_RCTR(__var)
- *  \brief Defines a condition that can control whether logging of a given event is enabled. \internal
- *  An argument \a __var spefies a variable which can control a logging of a given event during
- *  runtime if runtime control is enabled through a preprocessor directive ::HERMES_REPORT_RUNTIME_CONTROL. */
+*  \brief Defines a condition that can control whether logging of a given event is enabled. \internal
+*  An argument \a __var spefies a variable which can control a logging of a given event during
+*  runtime if runtime control is enabled through a preprocessor directive ::HERMES_REPORT_RUNTIME_CONTROL. */
 #ifdef HERMES_REPORT_RUNTIME_CONTROL
 # define HERMES_RCTR(__var) __var /* reports will be controled also by runtime report control variables */
-extern HERMES_API bool __hermes_report_warn;
-extern HERMES_API bool __hermes_report_warn_intr;
-extern HERMES_API bool __hermes_report_info;
-extern HERMES_API bool __hermes_report_verbose;
-extern HERMES_API bool __hermes_report_trace;
-extern HERMES_API bool __hermes_report_time;
-extern HERMES_API bool __hermes_report_debug;
+
+#if defined(HERMES_REPORT_WARNING)
+# define __HERMES_REP_WARN true
 #else
-# define HERMES_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
+# define __HERMES_REP_WARN false
+#endif
+#if defined(HERMES_REPORT_INTR_WARNING)
+# define __HERMES_REP_WARN_INTR true
+#else
+# define __HERMES_REP_WARN_INTR false
+#endif
+#if defined(HERMES_REPORT_INFO)
+# define __HERMES_REP_INFO true
+#else
+# define __HERMES_REP_INFO false
+#endif
+#if defined(HERMES_REPORT_VERBOSE)
+# define __HERMES_REP_VERB true
+#else
+# define __HERMES_REP_VERB false
+#endif
+#if defined(HERMES_REPORT_TRACE)
+# define __HERMES_REP_TRAC true
+#else
+# define __HERMES_REP_TRAC false
+#endif
+#if defined(HERMES_REPORT_TIME)
+# define __HERMES_REP_TIME true
+#else
+# define __HERMES_REP_TIME false
+#endif
+#if defined(_DEBUG) || !defined(NDEBUG)
+# define __HERMES_REP_DEBG true
+#else
+# define __HERMES_REP_DEBG false
 #endif
 
-#if defined(HERMES_REPORT_WARNING) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+bool __hermes_report_warn = __HERMES_REP_WARN;
+bool __hermes_report_warn_intr = __HERMES_REP_WARN_INTR;
+bool __hermes_report_info = __HERMES_REP_INFO;
+bool __hermes_report_verbose = __HERMES_REP_VERB;
+bool __hermes_report_trace = __HERMES_REP_TRAC;
+bool __hermes_report_time = __HERMES_REP_TIME;
+bool __hermes_report_debug = __HERMES_REP_DEBG;
+
+#if defined(HERMES_REPORT_WARNING))
 # define warn(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 # define warn_if(__cond, ...) hermes_log_message_if((__cond) && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 #else
 # define warn(...)
 # define warn_if(__cond, ...)
 #endif
-#if defined(HERMES_REPORT_INTR_WARNING) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(HERMES_REPORT_INTR_WARNING))
 # define warn_intr(...) hermes_log_message_if(HERMES_RCTR(__hermes_report_warn_intr), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 #else
 # define warn_intr(...)
 #endif
-#if defined(HERMES_REPORT_INFO) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(HERMES_REPORT_INFO))
 # define info(...) hermes_log_message_if(true  && HERMES_RCTR(__hermes_report_info), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 # define info_if(__cond, ...) hermes_log_message_if((__cond) && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 #else
 # define info(...)
 # define info_if(__cond, ...)
 #endif
-#if defined(HERMES_REPORT_VERBOSE) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(HERMES_REPORT_VERBOSE))
 # define verbose(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_verbose), HERMES_BUILD_LOG_INFO(HERMES_EC_VERBOSE), __VA_ARGS__)
 #else
 # define verbose(...)
 #endif
-#if defined(HERMES_REPORT_TRACE) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(HERMES_REPORT_TRACE))
 # define trace(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_trace), HERMES_BUILD_LOG_INFO(HERMES_EC_TRACE), __VA_ARGS__)
 #else
 # define trace(...)
 #endif
-#if defined(HERMES_REPORT_TIME) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(HERMES_REPORT_TIME))
 # define report_time(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_time), HERMES_BUILD_LOG_INFO(HERMES_EC_TIME), __VA_ARGS__)
 #else
 # define report_time(...)
 #endif
-#if defined(_DEBUG) || !defined(NDEBUG) || defined(HERMES_REPORT_RUNTIME_CONTROL)
+#if defined(_DEBUG) || !defined(NDEBUG) ||)
 # define debug_log(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_debug), HERMES_BUILD_LOG_INFO(HERMES_EC_DEBUG), __VA_ARGS__)
 #else
 # define debug_log(...)
 #endif
-
-/** \def error(...)
- *  \brief Logs an error and quits the application. For details see \ref s_usage. */
-/** \def error_if(__cond, ...)
- *  \brief If \a __cond is true, it logs an error and quits the application.
- *
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def assert_msg(__cond, ...)
- *  \brief If \a __cond is false, it logs a message and invokes assert().
- *
- *  Similar to the function assert() if ::NDEBUG is defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def warn(...)
- *  \brief Logs a warning.
- *
- *  If ::HERMES_REPORT_WARN is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def warn_if(__cond, ...)
- *  \brief If \a __cond is true, it logs a warning.
- *
- *  If ::HERMES_REPORT_WARN is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def warn_intr(...)
- *  \brief Logs an warning about integration. This is used to report integration issues which
- *  may occur frequently.
- *
- *  If ::HERMES_REPORT_INTR_WARNING is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def info(...)
- *  \brief Logs info about a result of an operation.
- *
- *  If ::HERMES_REPORT_INFO is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def info_if(__cond, ...)
- *  \brief If \a __cond is true, it logs info about a result of na operation.
- *
- *  If ::HERMES_REPORT_WARN is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def verbose(...)
- *  \brief Logs detailed info about a result of an operation. It should be used as a second level
- *  of the macro info().
- *
- *  If ::HERMES_REPORT_VERBOSE is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def report_time(...)
- *  \brief Logs information about measured time.
- *
- *  If ::HERMES_REPORT_TIME is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def trace(...)
- *  \brief Logs information about executed code portions.
- *
- *  If ::HERMES_REPORT_TRACE is not defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \def debug_log(...)
- *  \brief Logs a general debugging information.
- *
- *  This macro should be used for debugging outputs and it is suggested to remove
- *  almost all of them an debugged issue is solved.
- *  If ::NDEBUG is defined, no code may be generated for the macro.
- *  For usage guidelines, see \ref s_usage. */
-
-/** \} */
-
-#define hermes_fwrite(ptr, size, nitems, stream) \
-      __hermes_fwrite((ptr), (size), (nitems), (stream), HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR))
-
-#define hermes_fread(ptr, size, nitems, stream) \
-      __hermes_fread((ptr), (size), (nitems), (stream), HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR))
+#else
+# define HERMES_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
+# define warn(...)
+# define warn_if(__cond, ...)
+# define warn_intr(...)
+# define info(...)
+# define info_if(__cond, ...)
+# define verbose(...)
+# define trace(...)
+# define report_time(...)
+# define debug_log(...)
+#endif
 
 #endif

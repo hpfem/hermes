@@ -61,6 +61,14 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #define strcasecmp strcmp
 #endif
 
+
+// Comment this out to stop using Teuchos stacktrace.
+// Teuchos stacktrace not used for WIN32 
+// (execinfo.h and cxxabi.h absent).
+#ifndef _WIN32
+#define HERMES_USE_TEUCHOS_STACKTRACE
+#endif
+
 //C99 functions
 #include "c99_functions.h"
 

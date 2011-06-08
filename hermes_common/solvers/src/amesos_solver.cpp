@@ -17,17 +17,17 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-
 #include "amesos_solver.h"
 #include "callstack.h"
 
 #include <Amesos_ConfigDefs.h>
 
+using namespace Hermes::Error;
+
 #ifdef HAVE_AMESOS
 
 template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 
-// Amesos solver ///////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)

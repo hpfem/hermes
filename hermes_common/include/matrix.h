@@ -25,6 +25,8 @@
 #include "common.h"
 #include "error.h"
 
+using namespace Hermes::Error;
+
 /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
 /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
 /// do "delete matrix".

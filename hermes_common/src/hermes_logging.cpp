@@ -23,103 +23,22 @@ public:
     fflush(stdout);
   }
 };
-// FIXME: Currently, this can't be disabled from cmake (due to some bugs), so
-// cmake has to be fixed first, then this can be enabled again.
-//HermesLogoMessage hermes_logo_message;
+
+HermesLogoMessage hermes_logo_message;
 #endif
 
-//// runtime report control varibles //////////////////////////////////////////////////////////////////////////////////
-#if defined(HERMES_REPORT_WARNING)
-# define __HERMES_REP_WARN true
-#else
-# define __HERMES_REP_WARN false
-#endif
-#if defined(HERMES_REPORT_INTR_WARNING)
-# define __HERMES_REP_WARN_INTR true
-#else
-# define __HERMES_REP_WARN_INTR false
-#endif
-#if defined(HERMES_REPORT_INFO)
-# define __HERMES_REP_INFO true
-#else
-# define __HERMES_REP_INFO false
-#endif
-#if defined(HERMES_REPORT_VERBOSE)
-# define __HERMES_REP_VERB true
-#else
-# define __HERMES_REP_VERB false
-#endif
-#if defined(HERMES_REPORT_TRACE)
-# define __HERMES_REP_TRAC true
-#else
-# define __HERMES_REP_TRAC false
-#endif
-#if defined(HERMES_REPORT_TIME)
-# define __HERMES_REP_TIME true
-#else
-# define __HERMES_REP_TIME false
-#endif
-#if defined(_DEBUG) || !defined(NDEBUG)
-# define __HERMES_REP_DEBG true
-#else
-# define __HERMES_REP_DEBG false
-#endif
 
-HERMES_API bool __hermes_report_warn = __HERMES_REP_WARN;
-HERMES_API bool __hermes_report_warn_intr = __HERMES_REP_WARN_INTR;
-HERMES_API bool __hermes_report_info = __HERMES_REP_INFO;
-HERMES_API bool __hermes_report_verbose = __HERMES_REP_VERB;
-HERMES_API bool __hermes_report_trace = __HERMES_REP_TRAC;
-HERMES_API bool __hermes_report_time = __HERMES_REP_TIME;
-HERMES_API bool __hermes_report_debug = __HERMES_REP_DEBG;
+static Hermes::Logging::LoggerMonitor logger_monitor;
 
+static std::map<std::string, bool> logger_written;
 
-
-void hermes_exit_if(bool cond, int code) 
+void Hermes::Logging::hermes_exit_if(bool cond, int code) 
 {
   if (cond)
     exit(code);
 }
 
-/// Logging output monitor. \internal \ingroup g_logging
-/** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
-class LoggerMonitor 
-{
-  pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
-  pthread_mutex_t mutex; ///< Mutex that protects monitor.
-
-public:
-  /// Constructor. Creates a mutex.
-  LoggerMonitor() 
-  {
-    pthread_mutexattr_init(&mutex_attr);
-    pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&mutex, &mutex_attr);
-  };
-  /// Destructor. Deletes a mutex.
-  ~LoggerMonitor() 
-  {
-    pthread_mutex_destroy(&mutex);
-    pthread_mutexattr_destroy(&mutex_attr);
-  };
-
-  /// Enters protected section.
-  void enter() { pthread_mutex_lock(&mutex); };
-
-  /// Leaves protected section.
-  void leave() { pthread_mutex_unlock(&mutex); };
-};
-
-static LoggerMonitor logger_monitor; ///< A monitor that protects logging function. \internal \ingroup g_logging
-
-static std::map<std::string, bool> logger_written; ///< A list of all log files that were used to write a log. Used to write a log header to a log file. \internal \ingroup g_logging
-
-/// Writes a fancy formatted text to a console. \internal \ingroup g_logging
-/** \param[in] code An event code, e.g., ::HERMES_EC_ERROR.
-*  \param[in] emphasize True if the message should be emphasized.
-*  \param[in] text A message. A C-style string.
-*  \return True if the message was written. False if it failed due to some reasone. */
-static bool write_console(const char code, const bool emphasize, const char* text) 
+bool Hermes::Logging::write_console(const char code, const bool emphasize, const char* text) 
 {
 #ifdef WIN32 //Windows platform
   HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -203,7 +122,7 @@ static bool write_console(const char code, const bool emphasize, const char* tex
 #endif
 }
 
-bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...) 
+bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::HermesLogEventInfo& info, const char* msg, ...) 
 {
   if (cond) 
   {
@@ -298,21 +217,21 @@ bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char
   return cond;
 }
 
-void __hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info)
+void Hermes::Logging::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream)
 {
   if (fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
-    hermes_exit_if(hermes_log_message_if(true, err_info, "Error writing to file: %s", strerror(ferror(stream))));
+    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error writing to file: %s", strerror(ferror(stream))));
 }
 
-void __hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream, const HermesLogEventInfo& err_info)
+void Hermes::Logging::hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream)
 {
   size_t ret = fread(ptr, size, nitems, stream);
   if (ret < nitems)
-    hermes_exit_if(hermes_log_message_if(true, err_info, "Premature end of file."));
+    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Premature end of file."));
   else if (ferror(stream))
-    hermes_exit_if(hermes_log_message_if(true, err_info, "Error reading file: %s", strerror(ferror(stream))));
+    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error reading file: %s", strerror(ferror(stream))));
 }
 
-HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
+Hermes::Logging::HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
   : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line) 
 {}

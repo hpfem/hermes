@@ -24,7 +24,7 @@
 #define __HERMES_COMMON_PRECOND_ML_H_
 
 #include "precond.h"
-#include "epetra_solver.h"
+#include "epetra.h"
 #ifdef HAVE_ML
   #include <ml_MultiLevelPreconditioner.h>
 #endif

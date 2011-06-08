@@ -22,7 +22,7 @@
 #include "common.h"
 #include "../solvers/include/amesos_solver.h"
 #include "../solvers/include/aztecoo_solver.h"
-#include "../solvers/include/epetra_solver.h"
+#include "../solvers/include/epetra.h"
 #include "../solvers/include/mumps_solver.h"
 #include "../solvers/include/nox_solver.h"
 #include "../solvers/include/petsc_solver.h"

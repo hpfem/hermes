@@ -30,7 +30,6 @@
   #include <Epetra_Vector.h>
   #include <Epetra_CrsGraph.h>
   #include <Epetra_CrsMatrix.h>
-#endif
 
 template <typename Scalar> class AmesosSolver;
 template <typename Scalar> class AztecOOSolver;
@@ -42,9 +41,7 @@ template <typename Scalar>
 class HERMES_API EpetraMatrix : public SparseMatrix<Scalar> {
 public:
   EpetraMatrix();
-#ifdef HAVE_EPETRA
   EpetraMatrix(Epetra_RowMatrix &mat);
-#endif
   virtual ~EpetraMatrix();
 
   virtual void prealloc(unsigned int n);
@@ -66,13 +63,11 @@ public:
   virtual double get_fill_in() const;
 
 protected:
-#ifdef HAVE_EPETRA
   Epetra_BlockMap *std_map;
   Epetra_CrsGraph *grph;
   Epetra_CrsMatrix *mat;
   Epetra_CrsMatrix *mat_im;		// imaginary part of the matrix, mat holds the real part
   bool owner;
-#endif
 
   friend class AmesosSolver<Scalar>;
   friend class AztecOOSolver<Scalar>;
@@ -85,20 +80,13 @@ template <typename Scalar>
 class HERMES_API EpetraVector : public Vector<Scalar> {
 public:
   EpetraVector();
-#ifdef HAVE_EPETRA
   EpetraVector(const Epetra_Vector &v);
-#endif
   virtual ~EpetraVector();
 
   virtual void alloc(unsigned int ndofs);
   virtual void free();
-#ifdef HAVE_EPETRA
   virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
   virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); }
-#else
-  virtual Scalar get(unsigned int idx) { return 0.0; }
-  virtual void extract(Scalar *v) const { }
-#endif
   virtual void zero();
   virtual void change_sign();
   virtual void set(unsigned int idx, Scalar y);
@@ -114,16 +102,15 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifdef HAVE_EPETRA
   Epetra_BlockMap *std_map;
   Epetra_Vector *vec;
   Epetra_Vector *vec_im;		// imaginary part of the vector, vec holds the real part
   bool owner;
-#endif
 
   friend class AmesosSolver<Scalar>;
   friend class AztecOOSolver<Scalar>;
   friend class NoxSolver<Scalar>;
 };
 
+#endif
 #endif
