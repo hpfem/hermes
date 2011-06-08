@@ -139,7 +139,8 @@ set(WITH_MPI                NO)
 # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
 # Enable or disable Python.
-set(WITH_PYTHON             YES)
+# Python wrappers are disabled.
+set(WITH_PYTHON             NO)
 
 # Set overrides:
 if(WITH_PYTHON)
