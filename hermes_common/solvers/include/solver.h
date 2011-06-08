@@ -29,6 +29,8 @@
 #include <Teuchos_RefCountPtr.hpp>
 #endif
 
+using namespace Hermes::Algebra;
+
 /// @defgroup solvers Solvers
 ///
 /// TODO: description

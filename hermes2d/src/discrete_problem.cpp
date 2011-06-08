@@ -26,6 +26,8 @@
 #include "config.h"
 #include "neighbor.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 template<typename Scalar>
 DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)
 {

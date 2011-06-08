@@ -16,6 +16,8 @@
 #include "tables.h"
 #include "matrix.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 Table::Table() 
 {
   this->size = 0;

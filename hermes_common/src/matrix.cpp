@@ -31,14 +31,9 @@
 #include "mumps_solver.h"
 #include "nox_solver.h"
 #include "aztecoo_solver.h"
+#include "qsort.h"
 
-#define HERMES_TINY 1.0e-20
-
-
-// ludcmp, lubksb - LU decomposition and back-substitution routines from
-// the book Numerical Recipes in C, adjusted to zero-based indexing
-
-void ludcmp(double **a, int n, int *indx, double *d)
+void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx, double *d)
 {
   _F_
     int i, imax = 0, j, k;
@@ -96,10 +91,7 @@ void ludcmp(double **a, int n, int *indx, double *d)
   delete [] vv;
 }
 
-// choldc, cholsl - Cholesky decomposition and solution routines from
-// the book Numerical Recipes in C, adjusted to zero-based indexing
-
-void choldc(double **a, int n, double p[])
+void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[])
 {
   _F_
     int i, j, k;
@@ -120,29 +112,8 @@ void choldc(double **a, int n, double p[])
   }
 }
 
-// Simple dot product.
-double vec_dot(double *r, double *s, int n_dof)
-{
-  double result = 0;
-  for (int i=0; i < n_dof; i++) result += r[i]*s[i];
-  return result;
-}
-
 template<typename Scalar>
-Scalar vec_dot(Vector<Scalar> *r, Vector<Scalar> *s, int n_dof)
-{
-  Scalar result = 0;
-  for (int i=0; i < n_dof; i++) result += r->get(i)*s->get(i);
-  return result;
-}
-
-// SparseMatrix<Scalar> ////////////////////////////////////////////////////////////////////////////////////
-
-void qsort_int(int* pbase, size_t total_elems); // defined in qsort.cpp
-
-
-template<typename Scalar>
-SparseMatrix<Scalar>::SparseMatrix()
+Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix()
 {
   _F_
     this->size = 0;
@@ -153,7 +124,7 @@ SparseMatrix<Scalar>::SparseMatrix()
 }
 
 template<typename Scalar>
-SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
+Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 {
   _F_
     this->size = size;
@@ -164,14 +135,14 @@ SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 }
 
 template<typename Scalar>
-SparseMatrix<Scalar>::~SparseMatrix()
+Hermes::Algebra::SparseMatrix<Scalar>::~SparseMatrix()
 {
   _F_
     delete [] pages;
 }
 
 template<typename Scalar>
-void SparseMatrix<Scalar>::prealloc(unsigned int n)
+void Hermes::Algebra::SparseMatrix<Scalar>::prealloc(unsigned int n)
 {
   _F_
     this->size = n;
@@ -182,7 +153,7 @@ void SparseMatrix<Scalar>::prealloc(unsigned int n)
 }
 
 template<typename Scalar>
-void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
+void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_
     if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) 
@@ -197,7 +168,7 @@ void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 }
 
 template<typename Scalar>
-int SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
+int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
 {
   _F_
     // gather all pages in the buffer, deleting them along the way
@@ -220,7 +191,7 @@ int SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *m
 }
 
 template<typename Scalar>
-int SparseMatrix<Scalar>::get_num_indices()
+int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 {
   _F_
     int total = 0;
@@ -232,7 +203,7 @@ int SparseMatrix<Scalar>::get_num_indices()
 }
 
 template<typename Scalar>
-SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
+SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver)
 {
   _F_
     switch (matrix_solver) 
@@ -298,86 +269,7 @@ SparseMatrix<Scalar>* create_matrix(Hermes::MatrixSolverType matrix_solver)
 }
 
 template<typename Scalar>
-Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
-{
-  _F_
-    Vector<Scalar>* rhs_dummy = NULL;
-  switch (matrix_solver) 
-  {
-  case Hermes::SOLVER_AZTECOO:
-    {
-#if defined HAVE_AZTECOO && defined HAVE_EPETRA
-      info("Using AztecOO."); 
-      if (rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-      else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
-#else
-      error("AztecOO not installed.");
-#endif
-      break;
-    }
-  case Hermes::SOLVER_AMESOS:
-    {
-#if defined HAVE_AMESOS && defined HAVE_EPETRA
-      info("Using Amesos.");         
-      if (rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-      else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
-#else
-      error("Amesos not installed.");
-#endif
-      break;
-    }
-  case Hermes::SOLVER_MUMPS: 
-    {
-#ifdef HAVE_MUMPS
-      info("Using Mumps.");         
-      if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
-      else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
-#else
-      error("MUMPS was not installed.");
-#endif
-      break;
-    }
-  case Hermes::SOLVER_PETSC: 
-    {
-#ifdef HAVE_PETSC
-      info("Using PETSc.");        
-      if (rhs != NULL) return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs)); 
-      else return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy)); 
-#else
-      error("PETSc not installed.");
-#endif
-      break;
-    }
-  case Hermes::SOLVER_UMFPACK: 
-    {
-#ifdef HAVE_UMFPACK
-      info("Using UMFPack.");
-      if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
-      else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
-#else
-      error("UMFPACK was not installed.");
-#endif
-      break;
-    }
-  case Hermes::SOLVER_SUPERLU: 
-    {
-#ifdef HAVE_SUPERLU
-      info("Using SuperLU.");       
-      if (rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs)); 
-      else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy)); 
-#else
-      error("SuperLU was not installed.");
-#endif
-      break;
-    }
-  default: 
-    error("Unknown matrix solver requested.");
-  }
-  return NULL;
-}
-
-template<typename Scalar>
-Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
+Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver)
 {
   _F_
     switch (matrix_solver) 
@@ -442,15 +334,11 @@ Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver)
   return NULL;
 }
 
-template class SparseMatrix<double>;
-template class SparseMatrix<std::complex<double> >;
+template class Hermes::Algebra::SparseMatrix<double>;
+template class Hermes::Algebra::SparseMatrix<std::complex<double> >;
 
-template HERMES_API Vector<double>* create_vector(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<double>*  create_matrix(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API Solver<double>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
-  Matrix<double>* matrix, Vector<double>* rhs);
+template HERMES_API Vector<double>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver);
+template HERMES_API SparseMatrix<double>*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver);
 
-template HERMES_API Vector<std::complex<double> >* create_vector(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<std::complex<double> >*  create_matrix(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API Solver<std::complex<double> >*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
-  Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
+template HERMES_API Vector<std::complex<double> >* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver);
+template HERMES_API SparseMatrix<std::complex<double> >*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver);

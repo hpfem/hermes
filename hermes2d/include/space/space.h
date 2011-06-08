@@ -23,6 +23,8 @@
 #include "../quadrature/quad_all.h"
 #include "../boundary_conditions/essential_boundary_conditions.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 /// \brief Represents a finite element space over a domain.
 ///
 /// The Space class represents a finite element space over a domain defined by 'mesh', spanned

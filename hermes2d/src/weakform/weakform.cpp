@@ -19,6 +19,8 @@
 #include "forms.h"
 #include "space.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 //// interface /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param,

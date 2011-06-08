@@ -18,6 +18,7 @@
 
 #include <limits.h>
 #include <stdlib.h>
+#include "qsort.h"
 
 #define SWAP(a, b) { int c = *(a); *(a) = *(b); *(b) = c; }
 
@@ -28,6 +29,7 @@ typedef struct
   int *lo;
   int *hi;
 }
+
 stack_node;
 
 #define STACK_SIZE      (CHAR_BIT * sizeof(size_t))
@@ -36,7 +38,6 @@ stack_node;
 #define STACK_NOT_EMPTY (stack < top)
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
-
 
 void qsort_int(int* pbase, size_t total_elems)
 {
@@ -184,25 +185,3 @@ jump_over:
     }
   }
 }
-
-
-/* test code
-
-const int max = 10000;
-int array[max];
-int i, j, n;
-for (i = 0; i < 1000; i++)
-{
-n = rand() % max;
-for (j = 0; j < n; j++)
-array[j] = j;
-for (j = 0; j < n; j++)
-swap(array[j], array[rand() % n]);
-qsort_int(array, n);
-for (j = 0; j < n; j++)
-if (array[j] != j)
-error("failed.");
-}
-info("passed");
-
-*/

@@ -34,7 +34,8 @@
 /// @defgroup preconds Preconditioners
 ///
 
-template <typename Scalar> class Matrix;
+using namespace Hermes::Algebra;
+
 /// Abstract class to define interface for preconditioners
 ///
 /// @ingroup preconds

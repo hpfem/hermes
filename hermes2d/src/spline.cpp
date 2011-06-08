@@ -16,6 +16,8 @@
 #include <typeinfo>
 #include "spline.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values, 
   double bc_left, double bc_right, 
   bool first_der_left, bool first_der_right,

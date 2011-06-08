@@ -22,6 +22,8 @@
 #include "quad_all.h"
 #include "matrix.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 H1ShapesetJacobi CurvMap::ref_map_shapeset;
 PrecalcShapeset CurvMap::ref_map_pss(&ref_map_shapeset);
 

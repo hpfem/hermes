@@ -20,6 +20,8 @@
 #include "matrix.h"
 #include "optimum_selector.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 namespace RefinementSelectors {
   /// Error of an element of a candidate for various permutations of orders. \ingroup g_selectors
   /** If not noted otherwise, the first index is the horizontal order, the second index is the vertical order.

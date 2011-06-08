@@ -37,6 +37,8 @@ template <typename Scalar> class NoxSolver;
 template <typename Scalar> class IfpackPrecond;
 template <typename Scalar> class MlPrecond;
 
+using namespace Hermes::Algebra;
+
 template <typename Scalar>
 class HERMES_API EpetraMatrix : public SparseMatrix<Scalar> {
 public:

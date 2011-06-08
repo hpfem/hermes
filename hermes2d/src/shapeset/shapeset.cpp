@@ -17,6 +17,8 @@
 #include "shapeset.h"
 #include "matrix.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 
 /*    numbering of edge intervals: (the variable 'part')
 

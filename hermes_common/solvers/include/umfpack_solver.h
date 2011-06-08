@@ -27,6 +27,7 @@
 
 #ifdef WITH_UMFPACK
 using namespace Hermes::Solvers;
+using namespace Hermes::Algebra;
 
 // General CSC Matrix class (can be used in umfpack, in that case use the
 // UMFPackMatrix subclass, or with EigenSolver, or anything else)

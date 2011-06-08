@@ -27,9 +27,11 @@
 //#include "../vector.h"
 //#include "../tables.h"
 
-template<typename Scalar> class SparseMatrix;
-template<typename Scalar> class Vector;
+template<typename Scalar> class Hermes::Algebra::SparseMatrix;
+template<typename Scalar> class Hermes::Algebra::Vector;
 class Table;
+
+using namespace Hermes::Algebra;
 
 /// Minimalistic DiscreteProblem interface required by NoxProblemInterface.
 template<typename Scalar>

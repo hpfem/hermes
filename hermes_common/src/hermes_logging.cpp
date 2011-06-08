@@ -27,7 +27,6 @@ public:
 HermesLogoMessage hermes_logo_message;
 #endif
 
-
 static Hermes::Logging::LoggerMonitor logger_monitor;
 
 static std::map<std::string, bool> logger_written;

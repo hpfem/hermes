@@ -20,6 +20,8 @@
 #include "refmap.h"
 #include "space.h"
 
+using namespace Hermes::Algebra::DenseMatrixOperations;
+
 double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
 int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
 
