@@ -780,7 +780,6 @@ bool ButcherTable::is_fully_implicit()
   return result;
 } 
 
-
 bool ButcherTable::is_embedded()
 {
   // Test whether B2 row is not zero.

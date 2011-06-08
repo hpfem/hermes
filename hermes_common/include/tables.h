@@ -24,8 +24,9 @@
 
 #include "common.h"
 
-// Butcher's tables type. The last number in the name always means order,
-// the one before last (if provided) is the number of stages.
+/// \brief Butcher's tables type. 
+/// The last number in the name always means order,
+/// the one before last (if provided) is the number of stages.
 enum ButcherTableType 
 {
    /* EXPLICIT METHODS */
@@ -79,7 +80,7 @@ enum ButcherTableType
                                             // 7 stages but the first one is explicit.
 };
 
-// General square table of real numbers.
+/// \brief General square table of real numbers.
 class HERMES_API Table 
 {
 public:
@@ -95,7 +96,7 @@ protected:
   double** A;
 };
 
-/// Butcher's tables for Runge-Kutta methods.
+/// \brief Butcher's tables for Runge-Kutta methods.
 class HERMES_API ButcherTable: public Table
 {
 public:

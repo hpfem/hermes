@@ -30,7 +30,6 @@
   #include <petscmat.h>
   #include <petscvec.h>
   #include <petscksp.h>
-#endif
 
 using namespace Hermes::Solvers;
 
@@ -57,27 +56,21 @@ public:
   virtual unsigned int get_matrix_size() const;
   virtual unsigned int get_nnz() const;
   virtual double get_fill_in() const;
-#ifdef WITH_PETSC
   virtual void add_matrix(PetscMatrix* mat);
   virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
   virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
-#endif
 
   // Applies the matrix to vector_in and saves result to vector_out.
   void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
 
-#ifdef WITH_PETSC
   // Multiplies matrix with a Scalar.
   void multiply_with_Scalar(Scalar value);
   // Creates matrix in PETSC format using size, nnz, and the three arrays.
   void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
   // Duplicates a matrix (including allocation).
   PetscMatrix* duplicate();
-#endif
 protected:
-#ifdef WITH_PETSC
   Mat matrix;
-#endif
   unsigned int nnz;
   bool inited;
 
@@ -112,9 +105,7 @@ public:
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
 protected:
-#ifdef WITH_PETSC
   Vec vec;
-#endif
   bool inited;
 
   friend class PetscLinearSolver<Scalar>;
@@ -136,4 +127,5 @@ protected:
   PetscVector<Scalar> *rhs;
 };
 
+#endif
 #endif

@@ -23,7 +23,6 @@
 #include "utils.h"
 #include "callstack.h"
 
-#define USE_COMM_WORLD  -987654
 
 #ifdef WITH_MUMPS
 

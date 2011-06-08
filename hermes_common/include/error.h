@@ -38,6 +38,7 @@
 
 namespace Hermes
 {
+  /// \brief Namespace containing error handling functionality in Hermes.
   namespace Error
   {
     /// \brief Check that memory allocation was ok, it not, report an error (also dump call stack) and \

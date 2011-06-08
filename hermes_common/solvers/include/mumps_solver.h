@@ -25,6 +25,8 @@
 #include "solver.h"
 #include "matrix.h"
 
+#define USE_COMM_WORLD  -987654
+
 #ifdef WITH_MUMPS
   extern "C" {
     #include <mumps_c_types.h>

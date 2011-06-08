@@ -187,7 +187,6 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     }
 }
 
-// NOTE: Corresponding nonzero entries in the matrix "this" must be existing.
 template<typename Scalar>
 void CSCMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat_block)
 {
@@ -270,8 +269,6 @@ void CSCMatrix<Scalar>::add_matrix(CSCMatrix<Scalar>* mat)
   }
 }
 
-/// Add a number to each diagonal entry.
-
 template<typename Scalar>
 void CSCMatrix<Scalar>::add_to_diagonal(Scalar v) 
 {
@@ -291,8 +288,6 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *r
           add(rows[i], cols[j], mat[i][j]);
 }
 
-/// dumping matrix and right-hand side
-///
 double inline Real(double x)
 {
   return x;
@@ -302,7 +297,6 @@ double inline imag(double x)
 {
   return 0;
 }
-
 
 double inline Real(std::complex<double> x)
 {
@@ -565,9 +559,6 @@ CSCMatrix<Scalar>* CSCMatrix<Scalar>::duplicate()
   return new_matrix;
 }
 
-
-// UMFPackVector<Scalar> ///////
-
 template<typename Scalar>
 UMFPackVector<Scalar>::UMFPackVector() 
 {
@@ -692,7 +683,6 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
   }
 }
 
-
 template<>
 bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
 {
@@ -735,15 +725,12 @@ bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name
   }
 }
 
-// UMFPack solver //////
-
 template<typename Scalar>
 UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
   : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
 {
   _F_
 }
-
 
 template<typename Scalar>
 UMFPackLinearSolver<Scalar>::~UMFPackLinearSolver() 
@@ -771,8 +758,6 @@ static void check_status(const char *fn_name, int status)
     default:                                    warning("%s: unknown error (%d)", fn_name, status); break;
   }
 }
-
-/*** UMFPack matrix iterator ****/
 
 template<typename Scalar>
 bool UMFPackIterator<Scalar>::init()
@@ -822,14 +807,6 @@ void UMFPackIterator<Scalar>::add_to_current_position(Scalar val)
 {
   this->Ax[this->Ai_pos] += val;
 }
-template class HERMES_API CSCMatrix<double>;
-template class HERMES_API CSCMatrix<std::complex<double> >;
-template class HERMES_API UMFPackMatrix<double>;
-template class HERMES_API UMFPackMatrix<std::complex<double> >;
-template class HERMES_API UMFPackVector<double>;
-template class HERMES_API UMFPackVector<std::complex<double> >;
-template class HERMES_API UMFPackLinearSolver<double>;
-template class HERMES_API UMFPackLinearSolver<std::complex<double> >;
 
 template<>
 bool UMFPackLinearSolver<double>::setup_factorization()
@@ -1010,5 +987,14 @@ bool UMFPackLinearSolver<std::complex<double> >::solve()
 
   return true;
 }
+
+template class HERMES_API CSCMatrix<double>;
+template class HERMES_API CSCMatrix<std::complex<double> >;
+template class HERMES_API UMFPackMatrix<double>;
+template class HERMES_API UMFPackMatrix<std::complex<double> >;
+template class HERMES_API UMFPackVector<double>;
+template class HERMES_API UMFPackVector<std::complex<double> >;
+template class HERMES_API UMFPackLinearSolver<double>;
+template class HERMES_API UMFPackLinearSolver<std::complex<double> >;
 
 #endif

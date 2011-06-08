@@ -24,11 +24,12 @@
 
 #include "precond.h"
 #include "epetra.h"
-#ifdef HAVE_IFPACK
-  #include <Ifpack_Preconditioner.h>
-#endif
 
-/// Preconditioners built on IFPACK
+#ifdef HAVE_IFPACK
+
+#include <Ifpack_Preconditioner.h>
+
+/// \brief Preconditioners built on IFPACK.
 ///
 /// @ingroup preconds
 template <typename Scalar>
@@ -44,15 +45,11 @@ public:
   /// @param[in] name: [ ic | ict | ilu | ilut ]
   /// @param[in] overlap - number
   IfpackPrecond(const char *cls, const char *type, int overlap);
-#ifdef HAVE_IFPACK
   /// Wrap IFPACK object
   IfpackPrecond(Ifpack_Preconditioner *ipc);
-#endif
   virtual ~IfpackPrecond();
 
-#ifdef HAVE_IFPACK
   virtual Epetra_Operator *get_obj() { return prec; }
-#endif
 
   virtual void create(Matrix<Scalar> *mat);
   virtual void destroy() { }
@@ -62,13 +59,11 @@ public:
   void set_param(const char *name, int value);
   void set_param(const char *name, double value);
 
-#ifdef HAVE_IFPACK
   // Epetra_Operator interface
   virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
   virtual const Epetra_Comm &Comm() const;
   virtual const Epetra_Map &OperatorDomainMap() const;
   virtual const Epetra_Map &OperatorRangeMap() const;
-#endif
 
 protected:
   void create_point_relax(EpetraMatrix<Scalar> *a, const char *name);
@@ -76,11 +71,9 @@ protected:
   void create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap);
   int initialize();
   void apply_params();
-#ifdef HAVE_IFPACK
   Ifpack_Preconditioner *prec;
   Teuchos::ParameterList ilist;
   EpetraMatrix<Scalar> *mat;
-#endif
   unsigned owner:1;
   const char *cls;			// class of the preconditioner
   const char *type;
@@ -89,4 +82,5 @@ protected:
   friend class AztecOOSolver<Scalar>;
 };
 
-#endif /* _PRECOND_IFPACK_H_ */
+#endif
+#endif

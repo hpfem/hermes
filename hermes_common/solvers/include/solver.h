@@ -37,45 +37,47 @@ using namespace Hermes::Algebra;
 ///
 /*@{*/ // Beginning of documentation group Solvers.
 
-/// Options for matrix factorization reuse.
-///
-/// Reusing the information computed during previous solution of a similar problem 
-/// significantly improves efficiency of the solver. 
-///
-/// <b>Usage:</b> 
-/// Each solver which allows factorization reuse should perform complete factorization 
-/// from scratch for the first time it is invoked, keep the precomputed structures 
-/// according to the current factorization reuse stratregy and use them for next 
-/// factorization.
-/// 
-/// <b>Enabled solvers:</b>
-///   -\c SuperLU - performs reordering, scaling and factorization separately. When the 
-///                 multithreaded version is used, scaling is performed during the factorization
-///                 phase (if neccessary) and thus \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
-///                 and \c HERMES_REUSE_MATRIX_REORDERING have the same effect.
-///   -\c UMFPack - like the MT version of SuperLU, performs scaling and factorization in one step.
-///                 \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
-///                 \c HERMES_REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
-///   -\c MUMPS   - If \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING is set, scaling is performed
-///                 during analysis and only factorization is repeated during each solve.
-///                 If \c HERMES_REUSE_MATRIX_REORDERING is set, scaling is performed during 
-///                 the factorization phase. This may be less efficient, but more reliable,
-///                 especially for highly non-symmetric matrices.
-///   -\c AMESOS  - Behaves like UMFPack.
-///   -\c PETSc   - Factorization reuse applies to the construction of PETSc preconditioner.
-///                 Both \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and 
-///                 \c HERMES_REUSE_MATRIX_REORDERING allow to reuse the non-zero pattern of the
-///                 previously created preconditioner, \c HERMES_REUSE_FACTORIZATION_COMPLETELY
-///                 indicates that the preconditioner may be reused completely for future solves.
-///
-/// <b>Typical scenario:</b>
-/// When \c rhsonly was set to \c true for the assembly phase, 
-/// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following solution phase.
-///
+
+/// \brief General namespace for the Hermes library.
 namespace Hermes
 {
+  /// \brief Namespace for linear / nonlinear / iterative solvers.
   namespace Solvers
   {
+    /// \ brief Options for matrix factorization reuse.
+    ///
+    /// Reusing the information computed during previous solution of a similar problem 
+    /// significantly improves efficiency of the solver. 
+    ///
+    /// <b>Usage:</b> 
+    /// Each solver which allows factorization reuse should perform complete factorization 
+    /// from scratch for the first time it is invoked, keep the precomputed structures 
+    /// according to the current factorization reuse stratregy and use them for next 
+    /// factorization.
+    /// 
+    /// <b>Enabled solvers:</b>
+    ///   -\c SuperLU - performs reordering, scaling and factorization separately. When the 
+    ///                 multithreaded version is used, scaling is performed during the factorization
+    ///                 phase (if neccessary) and thus \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+    ///                 and \c HERMES_REUSE_MATRIX_REORDERING have the same effect.
+    ///   -\c UMFPack - like the MT version of SuperLU, performs scaling and factorization in one step.
+    ///                 \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING has thus the same effect as
+    ///                 \c HERMES_REUSE_MATRIX_REORDERING (saves the preceding symbolic analysis step).
+    ///   -\c MUMPS   - If \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING is set, scaling is performed
+    ///                 during analysis and only factorization is repeated during each solve.
+    ///                 If \c HERMES_REUSE_MATRIX_REORDERING is set, scaling is performed during 
+    ///                 the factorization phase. This may be less efficient, but more reliable,
+    ///                 especially for highly non-symmetric matrices.
+    ///   -\c AMESOS  - Behaves like UMFPack.
+    ///   -\c PETSc   - Factorization reuse applies to the construction of PETSc preconditioner.
+    ///                 Both \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and 
+    ///                 \c HERMES_REUSE_MATRIX_REORDERING allow to reuse the non-zero pattern of the
+    ///                 previously created preconditioner, \c HERMES_REUSE_FACTORIZATION_COMPLETELY
+    ///                 indicates that the preconditioner may be reused completely for future solves.
+    ///
+    /// <b>Typical scenario:</b>
+    /// When \c rhsonly was set to \c true for the assembly phase, 
+    /// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following solution phase.
     enum FactorizationScheme
     {
       HERMES_FACTORIZE_FROM_SCRATCH,              ///< Perform new factorization, don't reuse
@@ -89,7 +91,7 @@ namespace Hermes
       ///< factorization.
     };
 
-    /// Abstract class for defining solver interface.
+    /// \brief Abstract class for defining solver interface.
     ///
     /// TODO: Adjust interface to support faster update of matrix and rhs
     ///
@@ -117,10 +119,10 @@ namespace Hermes
     };
 
 
-    /// Abstract class for defining interface for linear solvers.
+    /// \brief Base class for defining interface for linear solvers.
     ///
     template <typename Scalar>
-    class LinearSolver : public Solver<Scalar>
+    class LinearSolver : virtual public Solver<Scalar>
     {
     public:
       LinearSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH) 
@@ -134,22 +136,24 @@ namespace Hermes
       unsigned int factorization_scheme;
     };
 
-    /// Abstract class for defining interface for nonlinear solvers.
+    /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearSolver : public Solver<Scalar> 
+    class NonlinearSolver : virtual public Solver<Scalar> 
     {
     public:
-      NonlinearSolver() : Solver<Scalar>() { dp = NULL; }
-      NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Solver<Scalar>() { this->dp = dp; }
+      NonlinearSolver() : Solver<Scalar>() { fep = NULL; }
+      NonlinearSolver(DiscreteProblemInterface<Scalar>* fep) : Solver<Scalar>() { this->fep = fep; }
 
     protected:
-      DiscreteProblemInterface<Scalar>* dp; // FE problem being solved (not NULL in case of using
+      DiscreteProblemInterface<Scalar>* fep; // FE problem being solved (not NULL in case of using
       // NonlinearProblem(DiscreteProblemInterface *) ctor
     };
 
+    /// \brief  Abstract class for defining interface for nonlinear solvers.
+    ///
     template <typename Scalar>
-    class IterSolver : public Solver<Scalar>
+    class IterSolver : public virtual Solver<Scalar>
     {
     public:
       IterSolver() : Solver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
@@ -191,7 +195,8 @@ namespace Hermes
     /*@}*/ // End of documentation group Solvers.
   }
 }
-
-template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
-  Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+/// \brief Function returning a solver according to the users's choice.
+/// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
+template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  
+  create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 #endif

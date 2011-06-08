@@ -185,8 +185,6 @@ use.
 
 Relevant files: shapeset.h, shapeset_h1_all.h, shapeset_hc_all.h
 
-
-
 <br>
 <h2>Space Classes</h2>
 
@@ -210,16 +208,12 @@ For details, see the documentation for the Space class.
 
 Relevant files: space.h, space_h1.h, space_hcurl.h, space_l2.h, asmlist.h
 
-
-
 <br>
 <h2>Quadrature Classes</h2>
 
 Quad1D, Quad2D, edge tables (24)
 
 Relevant files: quad.h, quad_all.h
-
-
 
 <br>
 <h2>PrecalcShapeset</h2>
@@ -229,8 +223,6 @@ TODO
 <img src="classPrecalcShapeset.png">
 
 Relevant files: transform.h, function.h, precalc.h
-
-
 
 <br>
 <h2>RefMap Class</h2>
@@ -242,17 +234,12 @@ TODO
 Relevant files: refmap.h
 
 
-
-
-
 <br>
 <h2>Multi-mesh Assembling</h2>
 
 TODO
 
 Relevant file: traverse.h
-
-
 
 <br>
 <h2>Solution and Filter Classes</h2>
@@ -263,8 +250,6 @@ TODO
 
 Relevant files: solution.h, filter.h
 
-
-
 <br>
 <h2>Linearizer Classes</h2>
 
@@ -274,8 +259,6 @@ TODO
 
 Relevant files: linear.h
 
-
-
 <br>
 <h2>View Classes</h2>
 
@@ -284,10 +267,6 @@ TODO
 <img src="classView.png">
 
 Relevant files: view.h
-
-
-
-
 */
 
 

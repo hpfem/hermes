@@ -24,20 +24,16 @@
 
 #ifdef IMPLEMENT_C99
 
-// Not-a-number constant.
+/// \brief Not-a-number constant.
 #define NAN 0x7fffffffffffffffL;
 
-// functions
-namespace Hermes 
-{
-  namespace C_99 
-  {
+/// \brief The exp2 function from C99 standard.
+HERMES_API double exp2(double x);
+/// \brief The log2 function from C99 standard.
+HERMES_API double log2(double x);
+/// \brief The cbrt function from C99 standard.
+HERMES_API double cbrt(double x);
 
-    HERMES_API double exp2(double x); ///< exp 2
-    HERMES_API double log2(double x); ///< log 2
-    HERMES_API double cbrt(double x); ///< cubic root
-  }
-}
 #endif /* IMPLEMENT_C99 */
 
 #endif

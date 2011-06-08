@@ -22,12 +22,12 @@
 
 #ifndef __HERMES_COMMON_PRECOND_ML_H_
 #define __HERMES_COMMON_PRECOND_ML_H_
-
 #include "precond.h"
 #include "epetra.h"
+
 #ifdef HAVE_ML
-  #include <ml_MultiLevelPreconditioner.h>
-#endif
+
+#include <ml_MultiLevelPreconditioner.h>
 
 /// Preconditioners built on ML
 ///
@@ -39,15 +39,11 @@ public:
   /// - sa = smooth aggregation
   /// - dd = domain decomposition
   MlPrecond(const char *type);
-#ifdef HAVE_ML
   /// Wrap ML object
   MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
-#endif
   virtual ~MlPrecond();
 
-#ifdef HAVE_ML
   virtual Epetra_Operator *get_obj() { return prec; }
-#endif
 
   /// @param[in] a
   virtual void create(Matrix<Scalar> *mat);
@@ -62,23 +58,20 @@ public:
 
   void print_unused();
 
-#ifdef HAVE_ML
   // Epetra_Operator interface
   virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
   virtual const Epetra_Comm &Comm() const;
   virtual const Epetra_Map &OperatorDomainMap() const;
   virtual const Epetra_Map &OperatorRangeMap() const;
-#endif
 
 protected:
-#ifdef HAVE_ML
   ML_Epetra::MultiLevelPreconditioner *prec;
   Teuchos::ParameterList mlist;
   EpetraMatrix<Scalar> *mat;
-#endif
   unsigned owner:1;
 
   friend class AztecOOSolver<Scalar>;
 };
 
-#endif /* _PRECOND_ML_H_ */
+#endif
+#endif

@@ -31,6 +31,7 @@ using namespace Hermes::Error;
 
 namespace Hermes
 {
+  /// \brief Namespace containing classes for vector / matrix operations.
   namespace Algebra
   {
     /// Contains operation on dense matrices.
@@ -243,7 +244,7 @@ namespace Hermes
       DF_MATRIX_MARKET // Matrix Market which can be read by pysparse library
     };
 
-    /// \brief General matrix representation in Hermes.
+    /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
     class HERMES_API Matrix {
     public:
@@ -300,7 +301,7 @@ namespace Hermes
       unsigned int size;  // matrix size
     };
 
-    /// \brief Sparse matrix representation in Hermes.
+    /// \brief General (abstract) sparse matrix representation in Hermes.
     template<typename Scalar>
     class HERMES_API SparseMatrix : public Matrix<Scalar> {
     public:
@@ -395,6 +396,7 @@ namespace Hermes
       int mem_size;
     };
 
+    /// \brief General (abstract) vector representation in Hermes.
     template<typename Scalar>
     class HERMES_API Vector {
     public:
@@ -458,9 +460,13 @@ namespace Hermes
       unsigned int size;
     };
 
+    /// \brief Function returning a vector according to the users's choice.
+    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
     template<typename Scalar> HERMES_API 
       Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver);
 
+    /// \brief Function returning a matrix according to the users's choice.
+    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
     template<typename Scalar> HERMES_API 
       SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver);
 

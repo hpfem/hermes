@@ -29,8 +29,9 @@
 using namespace Hermes::Solvers;
 using namespace Hermes::Algebra;
 
-// General CSC Matrix class (can be used in umfpack, in that case use the
-// UMFPackMatrix subclass, or with EigenSolver, or anything else)
+/// \brief General CSC Matrix class.
+/// (can be used in umfpack, in that case use the
+/// UMFPackMatrix subclass, or with EigenSolver, or anything else)
 
 template <typename Scalar>
 class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
@@ -85,11 +86,12 @@ protected:
 
 };
 
-// This class is to be used with UMFPack solver only:
+/// \brief This class is to be used with UMFPack solver only.
 template <typename Scalar>
 class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> {
 };
 
+/// \brief Class representing the vector for UMFPACK.
 template <typename Scalar>
 class HERMES_API UMFPackVector : public Vector<Scalar> {
 public:
@@ -124,10 +126,9 @@ protected:
   Scalar *v;
 };
 
-
-/// Encapsulation of UMFPACK linear solver
+/// \brief Encapsulation of UMFPACK linear solver.
 ///
-/// @ingroup solvers
+/// @ingroup Solvers
 template <typename Scalar>
 class HERMES_API UMFPackLinearSolver : public LinearSolver<Scalar> {
 public:
@@ -140,17 +141,15 @@ protected:
   UMFPackMatrix<Scalar> *m;
   UMFPackVector<Scalar> *rhs;
   
-  // Reusable factorization information (A denotes matrix represented by the pointer 'm').
-  void *symbolic; // Reordering of matrix A to reduce fill-in during factorization.
-  void *numeric;  // LU factorization of matrix A.
+  /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').
+  void *symbolic; /// Reordering of matrix A to reduce fill-in during factorization.
+  void *numeric;  /// LU factorization of matrix A.
   
   void free_factorization_data();
   bool setup_factorization();
 };
 
-
-
-/*** UMFPack matrix iterator ****/
+/// \brief UMFPack matrix iterator.
 template <typename Scalar>
 class UMFPackIterator {
 public:

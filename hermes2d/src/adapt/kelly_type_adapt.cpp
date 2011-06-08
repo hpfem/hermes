@@ -1,7 +1,5 @@
 #include "kelly_type_adapt.h"
 
-// #ifdef KELLY_TYPE_ADAPT_H_IS_REWORKED
-
 template<typename Scalar>
 KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
   Hermes::vector< ProjNormType > norms_,
@@ -112,12 +110,6 @@ double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>
     this->errors[i] = new double[max];
     memset(this->errors[i], 0.0, sizeof(double) * max);
   }
-  /*
-  for (unsigned int i = 0; i < error_estimators_vol.size(); i++)
-  trset.insert(error_estimators_vol[i].ext.begin(), error_estimators_vol[i].ext.end());
-  for (unsigned int i = 0; i < error_estimators_surf.size(); i++)
-  trset.insert(error_estimators_surf[i].ext.begin(), error_estimators_surf[i].ext.end());
-  */
 
   double total_norm = 0.0;
 
