@@ -42,11 +42,11 @@ namespace Hermes
   *  \todo Measure time that CPU spent on the task instead of a global time. */
   class HERMES_API TimePeriod {
   public:
-    Hermes::TimePeriod(const char *name = NULL); ///< Constructs internal structures and starts measuring.
+    TimePeriod(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 
-    const Hermes::TimePeriod& reset(); ///< Resets accumulated time.
-    const Hermes::TimePeriod& tick_reset(); ///< Starts a new period and resets accumulated time.
-    const Hermes::TimePeriod& tick(TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new period.
+    const TimePeriod& reset(); ///< Resets accumulated time.
+    const TimePeriod& tick_reset(); ///< Starts a new period and resets accumulated time.
+    const TimePeriod& tick(TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new period.
 
     /// Returns a name of the time period if any.
     const std::string& name() const { return period_name; }
