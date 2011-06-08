@@ -20,11 +20,12 @@
 #include "mumps_solver.h"
 #include "trace.h"
 #include "error.h"
-#include "utils.h"
 #include "callstack.h"
 
 
 #ifdef WITH_MUMPS
+
+using namespace Hermes::Error;
 
 extern "C" 
 {

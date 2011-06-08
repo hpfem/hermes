@@ -1,4 +1,4 @@
-// This file is part of HermesCommon
+// This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
@@ -90,7 +90,19 @@ enum GeomType
 
 template<typename Scalar> class MeshFunction;
 template<typename Scalar> class Solution;
-enum ProjNormType;
+
+// Projection norms.
+enum ProjNormType
+{
+  HERMES_L2_NORM, 
+  HERMES_H1_NORM, 
+  HERMES_H1_SEMINORM, 
+  HERMES_HCURL_NORM, 
+  HERMES_HDIV_NORM,
+  // Used for passing to projecting functions.
+  HERMES_UNSET_NORM
+};
+
 class RefMap;
 template<typename Scalar> class DiscreteProblem;
 template<typename Scalar> class Space;
@@ -98,6 +110,9 @@ template<typename Scalar> class WeakForm;
 class Quad2D;
 class Quad1DStd;
 class Quad2DStd;
+
+#define HERMES_DEFAULT_FUNCTION NULL
+#define HERMES_DEFAULT_SPLINE NULL
 
 // Class for all global functions.
 template<typename Scalar>

@@ -655,7 +655,7 @@ void Solution<Scalar>::init_dxdy_buffer()
     delete [] dxdy_buffer;
     dxdy_buffer = NULL;
   }
-  dxdy_buffer = new Scalar[this->num_components * 5 * sqr(11)];
+  dxdy_buffer = new Scalar[this->num_components * 5 * 121];
 }
 
 template<typename Scalar>

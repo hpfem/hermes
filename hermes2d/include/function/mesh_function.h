@@ -17,6 +17,7 @@
 #define __H2D_MESH_FN_H
 
 #include "function.h"
+#include "../mesh/refmap.h"
 #include "../mesh/mesh.h"
 
 class PrecalcShapeset;

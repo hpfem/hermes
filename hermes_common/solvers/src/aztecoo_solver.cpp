@@ -19,11 +19,12 @@
 
 #include "aztecoo_solver.h"
 #include "callstack.h"
-#include <Komplex_LinearProblem.h>
 
 using namespace Hermes::Error;
 
 #ifdef HAVE_AZTECOO
+
+#include <Komplex_LinearProblem.h>
 
 template<typename Scalar>
 AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)

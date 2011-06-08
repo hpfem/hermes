@@ -15,18 +15,20 @@
 
 #ifndef __H2D_VECTORIZER_H
 #define __H2D_VECTORIZER_H
+
 #include "linearizer.h"
+
 namespace Hermes
 {
   namespace Views
   {
-    /// "Vectorizer" is a Linearizer<Scalar> for vector solutions. The only difference is
-    /// that linearized vertices are vector-valued. Also, regularization of the
+    /// \brief "Vectorizer" is a Linearizer<Scalar> for vector solutions. 
+    /// The only difference is that linearized vertices are vector-valued. Also, regularization of the
     /// resulting mesh is not attempted. The class can handle different meshes in
     /// both X and Y components.
     ///
     template<typename Scalar>
-    class HERMES_API Vectorizer: public Linearizer<Scalar>
+    class HERMES_API Vectorizer: public Hermes::Views::Linearizer<Scalar>
     {
     public:
 
@@ -37,13 +39,9 @@ namespace Hermes
 
     public: //accessors
       double4* get_vertices() const { return verts; }
-      int get_num_vertices() const { return nv; }
-
+      
       int2* get_dashes() const { return dashes; }
       int get_num_dashes() const { return nd; }
-
-      double get_min_value() const { return min_val; }
-      double get_max_value() const { return max_val; }
 
       virtual void save_data(const char* filename);
       virtual void load_data(const char* filename);
@@ -66,14 +64,14 @@ namespace Hermes
 
       int add_vertex()
       {
-        if (nv >= cv)
+        if (this->nv >= this->cv)
         {
-          cv *= 2;
-          verts = (double4*) realloc(verts, sizeof(double4) * cv);
-          info = (int4*) realloc(info, sizeof(int4) * cv);
-          verbose("Vectorizer::add_vertex(): realloc to %d", cv);
+          this->cv *= 2;
+          verts = (double4*) realloc(verts, sizeof(double4) * this->cv);
+          this->info = (int4*) realloc(this->info, sizeof(int4) * this->cv);
+          verbose("Vectorizer::add_vertex(): realloc to %d", this->cv);
         }
-        return nv++;
+        return this->nv++;
       }
 
       void add_dash(int iv1, int iv2)

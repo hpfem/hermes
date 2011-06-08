@@ -20,10 +20,11 @@
 #include "superlu_solver.h"
 #include "trace.h"
 #include "error.h"
-#include "utils.h"
 #include "callstack.h"
 
 #ifdef WITH_SUPERLU  
+
+using namespace Hermes::Error;
 
 #ifdef SLU_MT
 template <>    

@@ -23,6 +23,10 @@
 #define __HERMES_COMMON_TUPLE_H
 
 #include <vector>
+#include <stdexcept>   // for exception, runtime_error, out_of_range
+#include <typeinfo>
+#include <sstream>
+#include <stdio.h>
 
 namespace Hermes
 {

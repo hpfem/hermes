@@ -43,23 +43,16 @@ public:
     MatrixFormVolHCurl(unsigned int i, unsigned int j, Hermes::vector<std::string> areas, 
                        SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) { }
 
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
-    {
-      return int_e_f<Real, Scalar>(n, wt, u, v);
-    }
-
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
                  Geom<double> *e, ExtData<Scalar> *ext) const
     {
-        return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+        return int_e_f<double, Scalar>(n, wt, u, v);
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const
     {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        return int_e_f<Ord, Ord>(n, wt, u, v);
     }
 };
 

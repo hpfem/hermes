@@ -23,13 +23,8 @@
 #ifndef DPINTERFACE_H
 #define DPINTERFACE_H
 
-//#include "../matrix.h"
-//#include "../vector.h"
-//#include "../tables.h"
-
-template<typename Scalar> class Hermes::Algebra::SparseMatrix;
-template<typename Scalar> class Hermes::Algebra::Vector;
-class Table;
+#include "../include/matrix.h"
+#include "../include/tables.h"
 
 using namespace Hermes::Algebra;
 

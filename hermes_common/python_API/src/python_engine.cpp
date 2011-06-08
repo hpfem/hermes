@@ -6,6 +6,8 @@
 #error Python headers needed to compile C extensions, please install development version of Python.
 #else
 
+#include <stdexcept>   // for exception, runtime_error, out_of_range
+
 #include <stddef.h> /* For offsetof */
 #ifndef offsetof
 #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )

@@ -41,19 +41,17 @@ namespace Hermes
   /// \brief Namespace containing error handling functionality in Hermes.
   namespace Error
   {
-    /// \brief Check that memory allocation was ok, it not, report an error (also dump call stack) and \
-    /// terminate.
+    /// \brief Check that memory allocation was ok, it not, report an error (also dump call stack) and terminate.
     void HERMES_API h_mem_check(int line, const char *func, const char *file, void *var);
 
-    /// \brief Report unrecoverable errors where you need to report the location of the error \
+    /// \brief Report unrecoverable errors where you need to report the location of the error.
     /// It also reports call stack.
     void HERMES_API h_exit(int line, const char *func, const char *file, char const *fmt, ...) NORETURN;
 
     /// \brief Report unrecoverable error (no call stack or location dumped)
     void HERMES_API error_function(char const *fmt, ...) NORETURN;
 
-    /// \brief Notify the user about warning (the execution continues), neither location or call stack \
-    /// is dumped
+    /// \brief Notify the user about warning (the execution continues), neither location or call stack is dumped.
     void HERMES_API warning(const char *warn, ...);
   }
 }

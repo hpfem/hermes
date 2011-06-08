@@ -30,28 +30,23 @@ public:
     // Multiple areas.
     MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas, 
                     SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) {}
-        
-
-    template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
-    {
-      Scalar result = 0;
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * conj(v->val[i]));
-      return result;
-    }
 
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
                  Geom<double> *e, ExtData<Scalar> *ext) const
     {
-        return matrix_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+        Scalar result = 0;
+        for (int i = 0; i < n; i++)
+          result += wt[i] * (u->val[i] * conj(v->val[i]));
+        return result;
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const
     {
-        return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
+        Ord result = 0;
+        for (int i = 0; i < n; i++)
+          result += wt[i] * (u->val[i] * conj(v->val[i]));
+        return result;
     }
 };
 #endif

@@ -17,8 +17,6 @@
 #include "refmap.h"
 #include "traverse.h"
 
-using namespace Hermes::Views;
-
 extern int tri_indices[5][3];
 extern int quad_indices[9][5];
 
@@ -27,7 +25,7 @@ extern int lin_np_quad[2];
 class Quad2DLin;
 
 template<typename Scalar>
-Vectorizer<Scalar>::Vectorizer() : Linearizer()
+Hermes::Views::Vectorizer<Scalar>::Vectorizer() : Linearizer<Scalar>()
 {
   verts = NULL;
   dashes = NULL;
@@ -35,7 +33,7 @@ Vectorizer<Scalar>::Vectorizer() : Linearizer()
 }
 
 template<typename Scalar>
-int Vectorizer<Scalar>::create_vertex(double x, double y, double xvalue, double yvalue)
+int Hermes::Views::Vectorizer<Scalar>::create_vertex(double x, double y, double xvalue, double yvalue)
 {
   int i = add_vertex();
   verts[i][0] = x;
@@ -46,20 +44,20 @@ int Vectorizer<Scalar>::create_vertex(double x, double y, double xvalue, double 
 }
 
 template<typename Scalar>
-int Vectorizer<Scalar>::get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue)
+int Hermes::Views::Vectorizer<Scalar>::get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue)
 {
   // search for an existing vertex
   if (p1 > p2) std::swap(p1, p2);
-  int index = hash(p1, p2);
-  int i = hash_table[index];
+  int index = this->hash(p1, p2);
+  int i = this->hash_table[index];
   while (i >= 0)
   {
-    if (info[i][0] == p1 && info[i][1] == p2 &&
+    if (this->info[i][0] == p1 && this->info[i][1] == p2 &&
       (fabs((xvalue - verts[i][2]) / xvalue) < 1e-4 && fabs((yvalue - verts[i][3]) / yvalue) < 1e-4)) return i;
     // note that we won't return a vertex with a different value than the required one;
     // this takes care for discontinuities in the solution, where more vertices
     // with different values will be created
-    i = info[i][2];
+    i = this->info[i][2];
   }
 
   // if not found, create a new one
@@ -68,14 +66,15 @@ int Vectorizer<Scalar>::get_vertex(int p1, int p2, double x, double y, double xv
   verts[i][1] = y;
   verts[i][2] = xvalue;
   verts[i][3] = yvalue;
-  info[i][0] = p1;
-  info[i][1] = p2;
-  info[i][2] = hash_table[index];
-  hash_table[index] = i;
+  this->info[i][0] = p1;
+  this->info[i][1] = p2;
+  this->info[i][2] = this->hash_table[index];
+  this->hash_table[index] = i;
   return i;
 }
 
-void Vectorizer<double>::process_triangle(int iv0, int iv1, int iv2, int level,
+template<>
+void Hermes::Views::Vectorizer<double>::process_triangle(int iv0, int iv1, int iv2, int level,
   double* xval, double* yval, double* phx, double* phy, int* idx)
 {
   if (level < LIN_MAX_LEVEL)
@@ -176,7 +175,7 @@ void Vectorizer<double>::process_triangle(int iv0, int iv1, int iv2, int level,
   add_triangle(iv0, iv1, iv2);
 }
 template<>
-void Vectorizer<std::complex<double> >::process_triangle(int iv0, int iv1, int iv2, int level,
+void Hermes::Views::Vectorizer<std::complex<double> >::process_triangle(int iv0, int iv1, int iv2, int level,
   std::complex<double>* xval, std::complex<double>* yval, double* phx, double* phy, int* idx)
 {
   if (level < LIN_MAX_LEVEL)
@@ -278,7 +277,7 @@ void Vectorizer<std::complex<double> >::process_triangle(int iv0, int iv1, int i
 }
 
 template<>
-void Vectorizer<double>::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
+void Hermes::Views::Vectorizer<double>::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
   double* xval, double* yval, double* phx, double* phy, int* idx)
 {
   // try not to split through the vertex with the largest value
@@ -408,7 +407,7 @@ void Vectorizer<double>::process_quad(int iv0, int iv1, int iv2, int iv3, int le
   }
 }
 template<>
-void Vectorizer<std::complex<double> >::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
+void Hermes::Views::Vectorizer<std::complex<double> >::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
   std::complex<double>* xval, std::complex<double>* yval, double* phx, double* phy, int* idx)
 {
   // try not to split through the vertex with the largest value
@@ -539,7 +538,7 @@ void Vectorizer<std::complex<double> >::process_quad(int iv0, int iv1, int iv2, 
 }
 
 template<typename Scalar>
-void Vectorizer<Scalar>::process_dash(int iv1, int iv2)
+void Hermes::Views::Vectorizer<Scalar>::process_dash(int iv1, int iv2)
 {
   int mid = peek_vertex(iv1, iv2);
   if (mid != -1)
@@ -552,24 +551,24 @@ void Vectorizer<Scalar>::process_dash(int iv1, int iv2)
 }
 
 template<typename Scalar>
-void Vectorizer<Scalar>::find_min_max()
+void Hermes::Views::Vectorizer<Scalar>::find_min_max()
 {
   // find min & max vertex values
-  min_val =  1e100;
-  max_val = -1e100;
-  for (int i = 0; i < nv; i++)
+  this->min_val =  1e100;
+  this->max_val = -1e100;
+  for (int i = 0; i < this->nv; i++)
   {
     double mag = (verts[i][2]*verts[i][2] + verts[i][3]*verts[i][3]);
-    if (finite(mag) && mag < min_val) min_val = mag;
-    if (finite(mag) && mag > max_val) max_val = mag;
+    if (finite(mag) && mag < this->min_val) this->min_val = mag;
+    if (finite(mag) && mag > this->max_val) this->max_val = mag;
   }
-  max_val = sqrt(max_val);
-  min_val = sqrt(min_val);
+  this->max_val = sqrt(this->max_val);
+  this->min_val = sqrt(this->min_val);
 
 }
 
 template<>
-void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps)
+void Hermes::Views::Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem, MeshFunction<double>* ysln, int yitem, double eps)
 {
   // sanity check
   if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -584,7 +583,7 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
   this->xitem = xitem;
   this->yitem = yitem;
   this->eps = eps;
-  nv = nt = ne = nd = 0;
+  this->nv = nt = ne = nd = 0;
   del_slot = -1;
 
   Mesh* meshes[2] = { xsln->get_mesh(), ysln->get_mesh() };
@@ -610,13 +609,13 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
   lin_init_array(edges, int3, ce, ee);
   lin_init_array(dashes, int2, cd, ed);
 
-  info = (int4*) malloc(sizeof(int4) * cv);
+  this->info = (int4*) malloc(sizeof(int4) * cv);
 
   // initialize the hash table
   int size = 0x1000;
   while (size*2 < cv) size *= 2;
-  hash_table = (int*) malloc(sizeof(int) * size);
-  memset(hash_table, 0xff, sizeof(int) * size);
+  this->hash_table = (int*) malloc(sizeof(int) * size);
+  memset(this->hash_table, 0xff, sizeof(int) * size);
   mask = size-1;
 
 
@@ -632,8 +631,8 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
   if (!yitem) error("Parameter 'yitem' cannot be zero.");
   get_gv_a_b(xitem, xia, xib);
   get_gv_a_b(yitem, yia, yib);
-  if (xib >= 6) error("Invalid value of paremeter 'xitem'.");
-  if (yib >= 6) error("Invalid value of paremeter 'yitem'.");
+  if (xib >= 6) error("Ithis->nvalid value of paremeter 'xitem'.");
+  if (yib >= 6) error("Ithis->nvalid value of paremeter 'yitem'.");
 
   max = 1e-10;
   trav.begin(2, meshes, fns);
@@ -722,7 +721,7 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
 
   find_min_max();
 
-  verbose("Vectorizer<Scalar>created %d verts and %d tris in %0.3g s", nv, nt, cpu_time.tick().last());
+  verbose("Vectorizer<Scalar>created %d verts and %d tris in %0.3g s", this->nv, nt, cpu_time.tick().last());
   //if (verbose_mode) print_hash_stats();
   unlock_data();
 
@@ -731,12 +730,12 @@ void Vectorizer<double>::process_solution(MeshFunction<double>* xsln, int xitem,
   ysln->set_quad_2d(old_quad_y);
 
   // clean up
-  ::free(hash_table);
-  ::free(info);
+  ::free(this->hash_table);
+  ::free(this->info);
 
 }
 template<>
-void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::complex<double> >* xsln, int xitem, MeshFunction<std::complex<double> >* ysln, int yitem, double eps)
+void Hermes::Views::Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::complex<double> >* xsln, int xitem, MeshFunction<std::complex<double> >* ysln, int yitem, double eps)
 {
   // sanity check
   if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -751,7 +750,7 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
   this->xitem = xitem;
   this->yitem = yitem;
   this->eps = eps;
-  nv = nt = ne = nd = 0;
+  this->nv = nt = ne = nd = 0;
   del_slot = -1;
 
   Mesh* meshes[2] = { xsln->get_mesh(), ysln->get_mesh() };
@@ -777,13 +776,13 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
   lin_init_array(edges, int3, ce, ee);
   lin_init_array(dashes, int2, cd, ed);
 
-  info = (int4*) malloc(sizeof(int4) * cv);
+  this->info = (int4*) malloc(sizeof(int4) * cv);
 
   // initialize the hash table
   int size = 0x1000;
   while (size*2 < cv) size *= 2;
-  hash_table = (int*) malloc(sizeof(int) * size);
-  memset(hash_table, 0xff, sizeof(int) * size);
+  this->hash_table = (int*) malloc(sizeof(int) * size);
+  memset(this->hash_table, 0xff, sizeof(int) * size);
   mask = size-1;
 
 
@@ -799,8 +798,8 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
   if (!yitem) error("Parameter 'yitem' cannot be zero.");
   get_gv_a_b(xitem, xia, xib);
   get_gv_a_b(yitem, yia, yib);
-  if (xib >= 6) error("Invalid value of paremeter 'xitem'.");
-  if (yib >= 6) error("Invalid value of paremeter 'yitem'.");
+  if (xib >= 6) error("Ithis->nvalid value of paremeter 'xitem'.");
+  if (yib >= 6) error("Ithis->nvalid value of paremeter 'yitem'.");
 
   max = 1e-10;
   trav.begin(2, meshes, fns);
@@ -889,7 +888,7 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
 
   find_min_max();
 
-  verbose("Vectorizer<Scalar>created %d verts and %d tris in %0.3g s", nv, nt, cpu_time.tick().last());
+  verbose("Vectorizer<Scalar>created %d verts and %d tris in %0.3g s", this->nv, nt, cpu_time.tick().last());
   //if (verbose_mode) print_hash_stats();
   unlock_data();
 
@@ -898,21 +897,21 @@ void Vectorizer<std::complex<double> >::process_solution(MeshFunction<std::compl
   ysln->set_quad_2d(old_quad_y);
 
   // clean up
-  ::free(hash_table);
-  ::free(info);
+  ::free(this->hash_table);
+  ::free(this->info);
 
 }
 
 template<typename Scalar>
-void Vectorizer<Scalar>::save_data(const char* filename)
+void Hermes::Views::Vectorizer<Scalar>::save_data(const char* filename)
 {
   FILE* f = fopen(filename, "wb");
   if (f == NULL) error("Could not open %s for writing.", filename);
   lock_data();
 
   if (fwrite("H2DV\001\000\000\000", 1, 8, f) != 8 ||
-    fwrite(&nv, sizeof(int), 1, f) != 1 ||
-    fwrite(verts, sizeof(double4), nv, f) != (unsigned) nv ||
+    fwrite(&this->nv, sizeof(int), 1, f) != 1 ||
+    fwrite(verts, sizeof(double4), this->nv, f) != (unsigned) this->nv ||
     fwrite(&nt, sizeof(int), 1, f) != 1 ||
     fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
     fwrite(&ne, sizeof(int), 1, f) != 1 ||
@@ -928,7 +927,7 @@ void Vectorizer<Scalar>::save_data(const char* filename)
 }
 
 template<typename Scalar>
-void Vectorizer<Scalar>::load_data(const char* filename)
+void Hermes::Views::Vectorizer<Scalar>::load_data(const char* filename)
 {
   FILE* f = fopen(filename, "rb");
   if (f == NULL) error("Could not open %s for reading.", filename);
@@ -950,7 +949,7 @@ void Vectorizer<Scalar>::load_data(const char* filename)
   if (fread(array, sizeof(type), n, f) != (unsigned) n) \
   error("Error reading " what " from %s", filename);
 
-  read_array(verts, double4, nv, cv, "vertices");
+  read_array(verts, double4, this->nv, cv, "vertices");
   read_array(tris,  int3,    nt, ct, "triangles");
   read_array(edges, int3,    ne, ce, "edges");
   read_array(dashes, int2,   nd, cd, "dashes");
@@ -961,18 +960,18 @@ void Vectorizer<Scalar>::load_data(const char* filename)
 }
 
 template<typename Scalar>
-Vectorizer<Scalar>::~Vectorizer()
+Hermes::Views::Vectorizer<Scalar>::~Vectorizer()
 {
-  lin_free_array(verts, nv, cv);
+  lin_free_array(verts, this->nv, cv);
   // fixme: free dashes?
 }
 
 template<typename Scalar>
-void Vectorizer<Scalar>::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+void Hermes::Views::Vectorizer<Scalar>::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
 {
   assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
-  calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), nv, min_x, max_x, min_y, max_y);
+  calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->nv, min_x, max_x, min_y, max_y);
 }
 
-template class HERMES_API Vectorizer<double>;
-template class HERMES_API Vectorizer<std::complex<double> >;
+template class HERMES_API Hermes::Views::Vectorizer<double>;
+template class HERMES_API Hermes::Views::Vectorizer<std::complex<double> >;

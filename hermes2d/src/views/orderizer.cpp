@@ -59,8 +59,7 @@ public:
 
 
 //// Orderizer<Scalar> /////////////////////////////////////////////////////////////////////////////////////
-Orderizer::Orderizer()
-  : Linearizer()
+Orderizer::Orderizer() : Linearizer<double>()
 {
   ltext = NULL;
   lvert = NULL;

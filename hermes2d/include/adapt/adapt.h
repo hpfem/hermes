@@ -131,55 +131,55 @@ public:
   private:
     ProjNormType projNormType;
 
-    template<typename Real, typename Scalar>
-    static Scalar l2_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                   Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar h1_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                   Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                   Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
                            + u->dy[i] * conj(v->dy[i]));
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar h1_error_semi_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                        Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                        Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hdiv_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
 
       error("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hcurl_error_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u, Func<Scalar> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
                            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));

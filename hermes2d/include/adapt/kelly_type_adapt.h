@@ -286,11 +286,11 @@ public:
     }
 
   private:
-    template<typename Real, typename Scalar>
-    static Scalar original_kelly_interface_estimator(int n, double *wt, Func<Scalar> *u_ext[], Func<Scalar> *u,
-                                                     Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                                                     Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      Scalar result = 0.;
+      SolFunctionDomain result = 0.;
       for (int i = 0; i < n; i++)
         result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
                                e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );

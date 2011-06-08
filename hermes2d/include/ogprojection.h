@@ -22,18 +22,6 @@
 #include "form/forms.h"
 #include "weakform/weakform.h"
 
-// Projection norms.
-enum ProjNormType
-{
-  HERMES_L2_NORM, 
-  HERMES_H1_NORM, 
-  HERMES_H1_SEMINORM, 
-  HERMES_HCURL_NORM, 
-  HERMES_HDIV_NORM,
-  // Used for passing to projecting functions.
-  HERMES_UNSET_NORM
-};
-
 const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
 template<typename Scalar>
@@ -132,45 +120,45 @@ protected:
   private:
     ProjNormType projNormType;
 
-    template<typename Real, typename Scalar>
-    static Scalar h1_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static Scalar h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+                                       Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar h1_semi_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                             Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static Scalar h1_semi_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+                                             Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar l2_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain l2_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+                                       Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * v->val[i]);
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hcurl_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                           Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain hcurl_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+                                           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++) {
         result += wt[i] * (u->curl[i] * conj(v->curl[i]));
         result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -178,12 +166,12 @@ protected:
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    static Scalar hdiv_projection_biform(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
-                                       Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext)
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain hdiv_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+                                       Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++) {
         result += wt[i] * (u->div[i] * conj(v->div[i]));
         result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -249,12 +237,12 @@ protected:
   private:
     ProjNormType projNormType;
 
-    template<typename Real, typename Scalar>
-    Scalar h1_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                       Geom<Real> *e, ExtData<Scalar> *ext) const
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
+                                       Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
          result += wt[i] * ((u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i] 
                             + (u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
@@ -262,35 +250,35 @@ protected:
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar h1_semi_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                            Geom<Real> *e, ExtData<Scalar> *ext) const
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    SolFunctionDomain h1_semi_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
+                                            Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * ((u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
                            + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar l2_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                       Geom<Real> *e, ExtData<Scalar> *ext) const
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    SolFunctionDomain l2_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
+                                       Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
     {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)
         result += wt[i] * (u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i];
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar hcurl_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                          Geom<Real> *e, ExtData<Scalar> *ext) const
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    SolFunctionDomain hcurl_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
+                                          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
      {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++) {
          result += wt[i] * (u_ext[this->i]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
          result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
@@ -300,12 +288,12 @@ protected:
       return result;
     }
 
-    template<typename Real, typename Scalar>
-    Scalar hdiv_projection_residual(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                         Geom<Real> *e, ExtData<Scalar> *ext) const
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    SolFunctionDomain hdiv_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
+                                         Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
      {
       _F_
-      Scalar result = 0;
+      SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++) {
          result += wt[i] * (u_ext[this->i]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
          result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])

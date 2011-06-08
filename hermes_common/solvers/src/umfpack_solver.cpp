@@ -20,6 +20,9 @@
 #define HERMES_REPORT_INFO
 
 #include "umfpack_solver.h"
+#include "trace.h"
+#include "error.h"
+#include "callstack.h"
 
 #ifdef WITH_UMFPACK
 extern "C" 
@@ -27,10 +30,7 @@ extern "C"
 #include <umfpack.h>
 }
 
-#include "trace.h"
-#include "error.h"
-#include "utils.h"
-#include "callstack.h"
+using namespace Hermes::Error;
 
 static int find_position(int *Ai, int Alen, int idx) 
 {
@@ -375,16 +375,16 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
         // If Real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
-        for (unsigned int j = 0; j < size; j)
+        for (unsigned int j = 0; j < size; j++)
         {
-          for (int i = Ap[j]; i < Ap[j + 1]; i)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];
               ascii_entry_j[k] = j;
-              k; 
+              k++;
             }
             else
               nnz -= 1;            
@@ -393,8 +393,8 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
         fprintf(file, "%d\n", size);
         fprintf(file, "%d\n", nnz);
-        for (unsigned int k = 0; k < nnz; k)
-          fprintf(file, "%d %d %d\n", ascii_entry_i[k], ascii_entry_j[k], (ascii_entry_buff[k]));
+        for (unsigned int k = 0; k < nnz; k++)
+          fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
 
         //Free memory
         delete [] ascii_entry_buff;
@@ -481,16 +481,16 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
 
         // If Real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
-        for (unsigned int j = 0; j < size; j)
+        for (unsigned int j = 0; j < size; j++)
         {
-          for (int i = Ap[j]; i < Ap[j + 1]; i)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];
               ascii_entry_j[k] = j;
-              k; 
+              k++;
             }
             else
               nnz -= 1;            
@@ -499,7 +499,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
 
         fprintf(file, "%d\n", size);
         fprintf(file, "%d\n", nnz);
-        for (unsigned int k = 0; k < nnz; k)
+        for (unsigned int k = 0; k < nnz; k++)
           fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k].real(), ascii_entry_buff[k].imag());     
 
         //Free memory
@@ -668,7 +668,7 @@ bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFo
     case DF_PLAIN_ASCII: 
       {
         fprintf(file, "\n");
-        for (unsigned int i = 0; i < size; i) 
+        for (unsigned int i = 0; i < size; i++) 
         {
 
           Hermes::Helpers::fprint_num(file, v[i]);
@@ -712,7 +712,7 @@ bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name
     case DF_PLAIN_ASCII: 
       {
         fprintf(file, "\n");
-        for (unsigned int i = 0; i < size; i) 
+        for (unsigned int i = 0; i < size; i++) 
         {
           fprintf(file, "%E %E\n", v[i].real(), v[i].imag());     
         }

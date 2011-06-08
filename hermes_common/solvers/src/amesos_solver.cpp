@@ -19,12 +19,13 @@
 
 #include "amesos_solver.h"
 #include "callstack.h"
-
-#include <Amesos_ConfigDefs.h>
+#include "error.h"
 
 using namespace Hermes::Error;
 
 #ifdef HAVE_AMESOS
+
+#include <Amesos_ConfigDefs.h>
 
 template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 
