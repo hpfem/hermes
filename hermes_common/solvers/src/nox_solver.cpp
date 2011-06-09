@@ -22,11 +22,11 @@ static Epetra_SerialComm seq_comm;
 template<typename Scalar>
 NoxProblemInterface<Scalar>::NoxProblemInterface(DiscreteProblemInterface<Scalar>* problem)
 {
-  fep = problem;
-  int ndof = fep->get_num_dofs();
+  this->fep = problem;
+  int ndof = this->fep->get_num_dofs();
   // allocate initial solution
   init_sln.alloc(ndof);
-  if(!fep->is_matrix_free()) prealloc_jacobian();
+  if(!this->fep->is_matrix_free()) prealloc_jacobian();
 
   this->precond = Teuchos::null;
 }
@@ -35,13 +35,13 @@ template<typename Scalar>
 NoxProblemInterface<Scalar>::~NoxProblemInterface()
 {
   init_sln.free();
-  if(!fep->is_matrix_free()) jacobian.free();
+  if(!this->fep->is_matrix_free()) jacobian.free();
 }
 
 template<typename Scalar>
 void NoxProblemInterface<Scalar>::prealloc_jacobian()
 {
-  fep->create_sparse_structure(&jacobian);
+  this->fep->create_sparse_structure(&jacobian);
 }
 
 template<typename Scalar>
@@ -54,7 +54,7 @@ void NoxProblemInterface<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc
 template<typename Scalar>
 void NoxProblemInterface<Scalar>::set_init_sln(double *ic)
 {
-  int size = fep->get_num_dofs();
+  int size = this->fep->get_num_dofs();
   int *idx = new int[size];
   for (int i = 0; i < size; i++) init_sln.set(i, ic[i]);
   delete [] idx;
@@ -70,7 +70,7 @@ bool NoxProblemInterface<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector
 
   Scalar* coeff_vec = new Scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
+  this->fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
   delete [] coeff_vec;
 
   return true;
@@ -89,7 +89,7 @@ bool NoxProblemInterface<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra
 
   Scalar* coeff_vec = new Scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
+  this->fep->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
   delete [] coeff_vec;
   //jacobian.finish();
 
@@ -107,7 +107,7 @@ bool NoxProblemInterface<Scalar>::computePreconditioner(const Epetra_Vector &x, 
 
   Scalar* coeff_vec = new Scalar[xx.length()];
   xx.extract(coeff_vec);
-  fep->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
+  this->fep->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
   delete [] coeff_vec;
   //jacobian.finish();
 
@@ -148,7 +148,7 @@ NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : IterSo
   // Create the interface_ between the test problem and the nonlinear solver
   // This is created by the user using inheritance of the abstract base class:
   // NOX_Epetra_Interface
-  interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
+  this->interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
 }
 template<typename Scalar>
 NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
@@ -197,7 +197,7 @@ NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned
   // Create the interface_ between the test problem and the nonlinear solver
   // This is created by the user using inheritance of the abstract base class:
   // NOX_Epetra_Interface
-  interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
+  this->interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
 }
 
 template<typename Scalar>
@@ -205,7 +205,7 @@ NoxSolver<Scalar>::~NoxSolver()
 {
   // FIXME: this does not destroy the "interface_", and Trilinos 
   // complains at closing main.cpp.
-  fep->invalidate_matrix();
+  this->fep->invalidate_matrix();
 }
 
 #ifdef HAVE_TEUCHOS
@@ -249,7 +249,7 @@ void NoxSolver<double>::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & 
   const Epetra_Vector &f_sln =
     (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
   // extract solution
-  int n = fep->get_num_dofs();
+  int n = this->fep->get_num_dofs();
   delete [] sln;
   sln = new double[n];
   memset(sln, 0, n * sizeof(double));
@@ -260,7 +260,7 @@ template<>
 void NoxSolver<std::complex<double> >::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver)
 {
   // extract solution
-  int n = fep->get_num_dofs();
+  int n = this->fep->get_num_dofs();
   delete [] sln;
   sln = new std::complex<double>[n];
   memset(sln, 0, n * sizeof(std::complex<double>));
@@ -303,11 +303,11 @@ bool NoxSolver<Scalar>::solve()
   ls_pars.set("Output Frequency", AZ_all);
 
   // precond stuff
-  Teuchos::RCP<Precond<Scalar> > precond = get_precond();
+  Teuchos::RCP<Precond<Scalar> > precond = this->get_precond();
   if(this->precond_yes == false)
     ls_pars.set("Preconditioner", "None");
   else 
-    if(fep->is_matrix_free()) 
+    if(this->fep->is_matrix_free()) 
       ls_pars.set("Preconditioner", "User Defined");
     else 
     {
@@ -332,9 +332,9 @@ bool NoxSolver<Scalar>::solve()
     Teuchos::RCP<Epetra_RowMatrix> jac_mat;
     Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
 
-    NOX::Epetra::Vector init_sln(*get_init_sln()->vec);
+    NOX::Epetra::Vector init_sln(*this->get_init_sln()->vec);
 
-    if(fep->is_matrix_free()) 
+    if(this->fep->is_matrix_free()) 
     {
       // Matrix<Scalar>-Free (Epetra_Operator)
       if(precond == Teuchos::null) 
@@ -354,7 +354,7 @@ bool NoxSolver<Scalar>::solve()
     }
     else {  // not Matrix<Scalar> Free
       // Create the Epetra_RowMatrix.
-      jac_mat = Teuchos::rcp(get_jacobian()->mat);
+      jac_mat = Teuchos::rcp(this->get_jacobian()->mat);
       i_jac = Teuchos::rcp(this);
       lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
         i_jac, jac_mat, init_sln));
@@ -419,7 +419,7 @@ bool NoxSolver<Scalar>::solve()
     NOX::StatusTest::StatusType status = solver->solve();
 
 
-    if(!fep->is_matrix_free())
+    if(!this->fep->is_matrix_free())
       jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
 
     bool success;

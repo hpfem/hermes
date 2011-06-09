@@ -217,7 +217,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
       for (unsigned int i = 0; i < nnz; i++)
       {
         fprintf(file, "%d %d ", irn[i], jcn[i]);
-        fprint_num(file,mumps_to_Scalar(Ax[i]));
+        Hermes::Helpers::fprint_num(file,mumps_to_Scalar(Ax[i]));
         fprintf(file, "\n");
       }
       return true;
@@ -228,7 +228,7 @@ bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpForm
         for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
         {
           fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-          fprint_num(file, mumps_to_Scalar(Ax[i]));
+          Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]));
           fprintf(file, "\n");
         }
         fprintf(file, "];\n%s = spconvert(temp);\n", var_name);

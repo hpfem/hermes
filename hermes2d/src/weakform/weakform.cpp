@@ -538,7 +538,7 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
 
   // Helper macro for iterating in a set,
 #define set_for_each(myset, type) \
-  for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
+  for (typename std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
 
   // Initialize the arrays meshes and fns needed by Traverse for each stage.
   for (i = 0; i < stages.size(); i++)
