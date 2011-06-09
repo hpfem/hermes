@@ -31,14 +31,14 @@ void  SuperLUSolver<double>::solver_driver (superlu_options_t *options, SuperMat
 }
 
 template <>
-void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, SuperLuType<double>::scalar *nzval, 
+void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, SuperLuType<double>::Scalar *nzval, 
   int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
 {
   dCreate_CompCol_Matrix (A, m, n, nnz, nzval, rowind, colptr, stype, dtype, mtype);
 }
 
 template<>
-void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<double>::scalar *x, 
+void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<double>::Scalar *x, 
   int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
 {
   dCreate_Dense_Matrix (X, m, n, (double*) x, ldx, stype, dtype, mtype);
