@@ -328,7 +328,7 @@ namespace RefinementSelectors
 
         total_error_squared += gip_pt[H2D_GIP2D_W] * error_squared;
       }
-      return total_error_squared;
     }
+    return total_error_squared;
   }
 }

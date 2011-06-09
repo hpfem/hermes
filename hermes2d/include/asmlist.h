@@ -43,7 +43,7 @@ public:
     this->idx = (int*) malloc(sizeof(int) * cap);
     this->dof = (int*) malloc(sizeof(int) * cap);
     this->coef = (Scalar*) malloc(sizeof(Scalar) * cap);
-    for(unsigned int i = 0; i < cnt; i) {
+    for(unsigned int i = 0; i < cnt; i++) {
       coef[i] = other.coef[i];
       dof[i] = other.dof[i];
       idx[i] = other.idx[i];

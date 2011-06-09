@@ -17,7 +17,7 @@
 #include "runge_kutta.h"
 #include "discrete_problem.h"
 #include "ogprojection.h"
-#include "weakform_library\weakforms_hcurl.h"
+#include "weakform_library/weakforms_hcurl.h"
 
 template<typename Scalar>
 RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)

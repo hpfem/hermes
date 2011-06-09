@@ -121,7 +121,7 @@ protected:
     ProjNormType projNormType;
 
     template<typename TestFunctionDomain, typename SolFunctionDomain>
-    static Scalar h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+    static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
                                        Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_
@@ -132,7 +132,7 @@ protected:
     }
 
     template<typename TestFunctionDomain, typename SolFunctionDomain>
-    static Scalar h1_semi_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
+    static SolFunctionDomain h1_semi_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
                                              Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       _F_

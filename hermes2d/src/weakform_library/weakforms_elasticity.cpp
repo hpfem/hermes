@@ -35,16 +35,16 @@ namespace WeakFormsElasticity
   Scalar DefaultJacobianElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const 
   {
-    return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-      mu * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+    return (lambda + 2*mu) * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
+      mu * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
   Ord DefaultJacobianElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
-    return (lambda + 2*mu) * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-      mu * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+    return (lambda + 2*mu) * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
+      mu * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
@@ -65,16 +65,16 @@ namespace WeakFormsElasticity
   Scalar DefaultJacobianElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-      mu * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
+    return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u, v) +
+      mu * int_dudx_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
   Ord DefaultJacobianElasticity_0_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
     Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u, v) +
-      mu * int_dudx_dvdy<Real, Scalar>(n, wt, u, v);
+    return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u, v) +
+      mu * int_dudx_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
@@ -95,16 +95,16 @@ namespace WeakFormsElasticity
   Scalar DefaultResidualElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return (2*mu + lambda) * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
-      mu * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
+    return (2*mu + lambda) * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[0], v) +
+      mu * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[0], v);
   }
 
   template<typename Scalar>
   Ord DefaultResidualElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return (2*mu + lambda) * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
-      mu * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
+    return (2*mu + lambda) * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[0], v) +
+      mu * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[0], v);
   }
 
   template<typename Scalar>
@@ -125,16 +125,16 @@ namespace WeakFormsElasticity
   Scalar DefaultResidualElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[1], v) +
-      mu * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[1], v);
+    return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[1], v) +
+      mu * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[1], v);
   }
 
   template<typename Scalar>
   Ord DefaultResidualElasticity_0_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return lambda * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[1], v) +
-      mu * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[1], v);
+    return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[1], v) +
+      mu * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[1], v);
   }
 
   template<typename Scalar>
@@ -155,16 +155,16 @@ namespace WeakFormsElasticity
   Scalar DefaultResidualElasticity_1_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return mu * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
-      lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
+    return mu * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[0], v) +
+      lambda * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[0], v);
   }
 
   template<typename Scalar>
   Ord DefaultResidualElasticity_1_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return mu * int_dudy_dvdx<Real, Scalar>(n, wt, u_ext[0], v) +
-      lambda * int_dudx_dvdy<Real, Scalar>(n, wt, u_ext[0], v);
+    return mu * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[0], v) +
+      lambda * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[0], v);
   }
 
 
@@ -186,16 +186,16 @@ namespace WeakFormsElasticity
   Scalar DefaultResidualElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
     Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return (2*mu + lambda) * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[1], v) +
-      mu * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[1], v);
+    return (2*mu + lambda) * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[1], v) +
+      mu * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[1], v);
   }
 
   template<typename Scalar>
   Ord DefaultResidualElasticity_1_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return (2*mu + lambda) * int_dudy_dvdy<Real, Scalar>(n, wt, u_ext[1], v) +
-      mu * int_dudx_dvdx<Real, Scalar>(n, wt, u_ext[1], v);
+    return (2*mu + lambda) * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[1], v) +
+      mu * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[1], v);
   }
 
   template<typename Scalar>
@@ -216,29 +216,29 @@ namespace WeakFormsElasticity
   Scalar DefaultJacobianElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
     Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
   {
-    return  mu * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-      (lambda + 2*mu) * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+    return  mu * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
+      (lambda + 2*mu) * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
   Ord DefaultJacobianElasticity_1_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const
   {
-    return  mu * int_dudx_dvdx<Real, Scalar>(n, wt, u, v) +
-      (lambda + 2*mu) * int_dudy_dvdy<Real, Scalar>(n, wt, u, v);
+    return  mu * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
+      (lambda + 2*mu) * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
   }
 
   template<typename Scalar>
   DefaultJacobianElasticity_00_11<Scalar>::DefaultJacobianElasticity_00_11
     (Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, double lambda, double mu)
-    : WeakForm<Scalar>::MultiComponentMatrixFormVol<Scalar>(coordinates, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) 
+    : MultiComponentMatrixFormVol<Scalar>(coordinates, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu) 
   {
   }
 
   template<typename Scalar>
   DefaultJacobianElasticity_00_11<Scalar>::DefaultJacobianElasticity_00_11
     (Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area, double lambda, double mu)
-    : WeakForm<Scalar>::MultiComponentMatrixFormVol<Scalar>(coordinates, area, HERMES_SYM), lambda(lambda), mu(mu) 
+    : MultiComponentMatrixFormVol<Scalar>(coordinates, area, HERMES_SYM), lambda(lambda), mu(mu) 
   {
   }
 
@@ -283,14 +283,14 @@ namespace WeakFormsElasticity
   template<typename Scalar>
   DefaultResidualElasticity_00_11<Scalar>::DefaultResidualElasticity_00_11
     (Hermes::vector<unsigned int> coordinates, double lambda, double mu)
-    : WeakForm<Scalar>::MultiComponentVectorFormVol<Scalar>(coordinates), lambda(lambda), mu(mu) 
+    : MultiComponentVectorFormVol<Scalar>(coordinates), lambda(lambda), mu(mu) 
   {
   }
 
   template<typename Scalar>
   DefaultResidualElasticity_00_11<Scalar>::DefaultResidualElasticity_00_11
     (Hermes::vector<unsigned int> coordinates, std::string area, double lambda, double mu)
-    : WeakForm<Scalar>::MultiComponentVectorFormVol<Scalar>(coordinates, area), lambda(lambda), mu(mu) 
+    : MultiComponentVectorFormVol<Scalar>(coordinates, area), lambda(lambda), mu(mu) 
   {
   }
 

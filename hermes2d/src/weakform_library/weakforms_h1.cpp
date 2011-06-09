@@ -938,7 +938,7 @@ namespace WeakFormsH1
     std::string area,
     Hermes::vector<Scalar> coeffs,
     GeomType gt)
-    : WeakForm::MultiComponentVectorFormSurf<Scalar>(coordinates, area), coeffs(coeffs), gt(gt) 
+    : MultiComponentVectorFormSurf<Scalar>(coordinates, area), coeffs(coeffs), gt(gt) 
   {
   }
 
@@ -946,7 +946,7 @@ namespace WeakFormsH1
   DefaultMultiComponentVectorFormSurf<Scalar>::DefaultMultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
     Hermes::vector<std::string> areas,
     Hermes::vector<Scalar> coeffs, GeomType gt)
-    : WeakForm::MultiComponentVectorFormSurf<Scalar>(coordinates, areas), coeffs(coeffs), gt(gt) 
+    : MultiComponentVectorFormSurf<Scalar>(coordinates, areas), coeffs(coeffs), gt(gt) 
   {
   }
 
@@ -1085,13 +1085,13 @@ namespace WeakFormsH1
   template<typename Scalar>
   DefaultWeakFormLaplace<Scalar>::DefaultWeakFormLaplace(std::string area, Scalar const_coeff,
     CubicSpline* spline_coeff,
-    GeomType gt) : WeakForm()
+    GeomType gt) : WeakForm<Scalar>()
   {
     // Jacobian.
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0, area, const_coeff,
+    add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, const_coeff,
       spline_coeff, HERMES_SYM, gt));
     // Residual.
-    add_vector_form(new DefaultResidualDiffusion(0, area, const_coeff,
+    add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, const_coeff,
       spline_coeff, gt));
   };
 
@@ -1100,13 +1100,13 @@ namespace WeakFormsH1
   DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson(DefaultFunction<Scalar>* rhs,
     std::string area, Scalar const_coeff,
     CubicSpline* spline_coeff,
-    GeomType gt) : WeakForm()
+    GeomType gt) : WeakForm<Scalar>()
   {
     // Jacobian.
-    add_matrix_form(new DefaultJacobianDiffusion(0, 0, area, const_coeff,
+    add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, const_coeff,
       spline_coeff, HERMES_NONSYM, gt));
     // Residual.
-    add_vector_form(new DefaultResidualDiffusion(0, area, const_coeff,
+    add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, const_coeff,
       spline_coeff, gt));
     add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, -1.0, rhs, gt));
   };

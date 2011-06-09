@@ -28,7 +28,7 @@ namespace WeakFormsNeutronics
       DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( Hermes::vector<std::string> regions, 
         Hermes::vector<double> D_map, 
         Hermes::vector<double> Sigma_a_map, 
-        Hermes::vector<double> Q_map ) : WeakForm(1) 
+        Hermes::vector<double> Q_map ) : WeakForm<Scalar>(1) 
       {
         using namespace WeakFormsH1;
 
@@ -552,7 +552,7 @@ namespace WeakFormsNeutronics
         {
           Scalar result;
 
-          std::string mat = get_material(e->elem_marker, wf);     
+          std::string mat = get_material(e->elem_marker, this->wf);     
           rank1 D_elem = matprop.get_D(mat);
           rank1 Sigma_r_elem = matprop.get_Sigma_r(mat);
 
@@ -584,7 +584,7 @@ namespace WeakFormsNeutronics
         {
           Scalar result;
 
-          std::string mat = get_material(e->elem_marker, wf);        
+          std::string mat = get_material(e->elem_marker, this->wf);        
           rank1 D_elem = matprop.get_D(mat);
           rank1 Sigma_r_elem = matprop.get_Sigma_r(mat);
 
@@ -625,7 +625,7 @@ namespace WeakFormsNeutronics
             else result = int_x_u_v<Real, Scalar>(n, wt, u, v, e);
           }
 
-          std::string mat = get_material(e->elem_marker, wf);
+          std::string mat = get_material(e->elem_marker, this->wf);
           rank1 nu_elem = matprop.get_nu(mat);
           rank1 Sigma_f_elem = matprop.get_Sigma_f(mat);
           rank1 chi_elem = matprop.get_chi(mat);
@@ -641,7 +641,7 @@ namespace WeakFormsNeutronics
           if (!matprop.get_fission_multigroup_structure()[g])
             return 0.0;
 
-          std::string mat = get_material(e->elem_marker, wf);
+          std::string mat = get_material(e->elem_marker, this->wf);
           rank1 nu_elem = matprop.get_nu(mat);
           rank1 Sigma_f_elem = matprop.get_Sigma_f(mat);
           rank1 chi_elem = matprop.get_chi(mat);
@@ -685,7 +685,7 @@ namespace WeakFormsNeutronics
             else result = int_x_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
           }
 
-          std::string mat = get_material(e->elem_marker, wf);
+          std::string mat = get_material(e->elem_marker, this->wf);
           rank1 nu_elem = matprop.get_nu(mat);
           rank1 Sigma_f_elem = matprop.get_Sigma_f(mat);
           rank1 chi_elem = matprop.get_chi(mat);
@@ -706,7 +706,7 @@ namespace WeakFormsNeutronics
             else result = int_x_u_v<Real, Scalar>(n, wt, u, v, e);
           }
 
-          return result * matprop.get_Sigma_s(get_material(e->elem_marker, wf))[gto][gfrom];
+          return result * matprop.get_Sigma_s(get_material(e->elem_marker, this->wf))[gto][gfrom];
         }
 
         template<typename ScalarClass>
@@ -722,7 +722,7 @@ namespace WeakFormsNeutronics
             else result = int_x_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
           }
 
-          return result * matprop.get_Sigma_s(get_material(e->elem_marker, wf))[gto][gfrom];
+          return result * matprop.get_Sigma_s(get_material(e->elem_marker, this->wf))[gto][gfrom];
         }
 
         template<typename ScalarClass>
@@ -730,7 +730,7 @@ namespace WeakFormsNeutronics
         Scalar ExternalSources::LinearForm<ScalarClass>::vector_form(int n, double *wt, Func<Scalar> *u_ext[],
           Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const 
         {
-          std::string mat = get_material(e->elem_marker, wf);
+          std::string mat = get_material(e->elem_marker, this->wf);
 
           if (geom_type == HERMES_PLANAR) 
             return matprop.get_src(mat)[g] * int_v<Real>(n, wt, v);
@@ -758,21 +758,21 @@ namespace WeakFormsNeutronics
 
           for (unsigned int gto = 0; gto < G; gto++)
           {
-            add_matrix_form(new DiffusionReaction::Jacobian(gto, matprop, geom_type));
-            add_vector_form(new DiffusionReaction::Residual(gto, matprop, geom_type));
+            add_matrix_form(new DiffusionReaction::Jacobian<Scalar>(gto, matprop, geom_type));
+            add_vector_form(new DiffusionReaction::Residual<Scalar>(gto, matprop, geom_type));
 
             for (unsigned int gfrom = 0; gfrom < G; gfrom++)
             {
               if (Ss_nnz[gto][gfrom])
               {
-                add_matrix_form(new Scattering::Jacobian(gto, gfrom, matprop, geom_type));
-                add_vector_form(new Scattering::Residual(gto, gfrom, matprop, geom_type));
+                add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, geom_type));
+                add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, geom_type));
               }
 
               if (chi_nnz[gto])
               {
-                add_matrix_form(new FissionYield::Jacobian(gto, gfrom, matprop, geom_type));
-                add_vector_form(new FissionYield::Residual(gto, gfrom, matprop, geom_type));
+                add_matrix_form(new FissionYield::Jacobian<Scalar>(gto, gfrom, matprop, geom_type));
+                add_vector_form(new FissionYield::Residual<Scalar>(gto, gfrom, matprop, geom_type));
               }
             }
           }
@@ -780,17 +780,17 @@ namespace WeakFormsNeutronics
 
         template<typename Scalar>
         DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-          GeomType geom_type) : WeakForm(matprop.get_G())
+          GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
         {
           lhs_init(matprop.get_G(), matprop, geom_type);
           for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-            add_vector_form(new ExternalSources::LinearForm(gto, matprop, geom_type));
+            add_vector_form(new ExternalSources::LinearForm<Scalar>(gto, matprop, geom_type));
         }
 
         template<typename Scalar>
         DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
           DefaultFunction<Scalar>*f_src, std::string src_area,
-          GeomType geom_type  ) : WeakForm(matprop.get_G())
+          GeomType geom_type  ) : WeakForm<Scalar>(matprop.get_G())
         {
           lhs_init(matprop.get_G(), matprop, geom_type);
           for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
@@ -801,7 +801,7 @@ namespace WeakFormsNeutronics
         DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
           DefaultFunction<Scalar>*f_src,
           Hermes::vector<std::string> src_areas,
-          GeomType geom_type  ) : WeakForm(matprop.get_G())
+          GeomType geom_type  ) : WeakForm<Scalar>(matprop.get_G())
         {
           lhs_init(matprop.get_G(), matprop, geom_type);
           for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
@@ -812,7 +812,7 @@ namespace WeakFormsNeutronics
         DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
           const std::vector<DefaultFunction<Scalar>*>& f_src,
           std::string src_area, 
-          GeomType geom_type ) : WeakForm(matprop.get_G())
+          GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
         {
           if (f_src.size() != matprop.get_G())
             error(E_INVALID_SIZE);
@@ -826,7 +826,7 @@ namespace WeakFormsNeutronics
         DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
           const std::vector<DefaultFunction<Scalar>*>& f_src,
           Hermes::vector<std::string> src_areas,
-          GeomType geom_type ) : WeakForm(matprop.get_G())
+          GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
         {
           if (f_src.size() != matprop.get_G())
             error(E_INVALID_SIZE);
@@ -840,26 +840,26 @@ namespace WeakFormsNeutronics
         DefaultWeakFormSourceIteration<Scalar>::DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop,
           Hermes::vector<MeshFunction<Scalar>*>& iterates,
           double initial_keff_guess, 
-          GeomType geom_type ) : WeakForm(matprop.get_G())
+          GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
         {
           bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
 
           for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
           {
-            add_matrix_form(new DiffusionReaction::Jacobian(gto, matprop, geom_type));
-            add_vector_form(new DiffusionReaction::Residual(gto, matprop, geom_type));
+            add_matrix_form(new DiffusionReaction::Jacobian<Scalar>(gto, matprop, geom_type));
+            add_vector_form(new DiffusionReaction::Residual<Scalar>(gto, matprop, geom_type));
 
             for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
             {
               if (Ss_nnz[gto][gfrom])
               {
-                add_matrix_form(new Scattering::Jacobian(gto, gfrom, matprop, geom_type));
-                add_vector_form(new Scattering::Residual(gto, gfrom, matprop, geom_type));
+                add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, geom_type));
+                add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, geom_type));
               }
             }
 
-            FissionYield::OuterIterationForm* keff_iteration_form = 
-              new FissionYield::OuterIterationForm( gto, matprop, iterates, initial_keff_guess, geom_type );
+            FissionYield::OuterIterationForm<Scalar>* keff_iteration_form = 
+              new FissionYield::OuterIterationForm<Scalar>( gto, matprop, iterates, initial_keff_guess, geom_type );
             keff_iteration_forms.push_back(keff_iteration_form);
             add_vector_form(keff_iteration_form);
           }
@@ -868,9 +868,13 @@ namespace WeakFormsNeutronics
         template<typename Scalar>
         void DefaultWeakFormSourceIteration<Scalar>::update_keff(double new_keff) 
         {
-          std::vector<FissionYield::OuterIterationForm*>::iterator it = keff_iteration_forms.begin();
+	  /* Somehow does not work with templates. A bug / typo from me?
+          std::vector<FissionYield::OuterIterationForm<Scalar> *>::iterator it = keff_iteration_forms.begin();
           for ( ; it != keff_iteration_forms.end(); ++it)
-            (*it)->update_keff(new_keff); 
+            (*it)->update_keff(new_keff);
+	  */
+	  for(int i = 0; i < keff_iteration_forms.size(); i++)
+	    keff_iteration_forms[i]->update_keff(new_keff);
         }
       }
     }
