@@ -59,7 +59,7 @@ Hermes::Solvers::Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType m
     }
   case Hermes::SOLVER_MUMPS: 
     {
-#ifdef HAVE_MUMPS
+#ifdef WITH_MUMPS
       info("Using Mumps.");         
       if (rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs)); 
       else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy)); 
@@ -70,7 +70,7 @@ Hermes::Solvers::Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType m
     }
   case Hermes::SOLVER_PETSC: 
     {
-#ifdef HAVE_PETSC
+#ifdef WITH_PETSC
       info("Using PETSc.");        
       if (rhs != NULL) return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs)); 
       else return new PetscLinearSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy)); 
@@ -81,7 +81,7 @@ Hermes::Solvers::Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType m
     }
   case Hermes::SOLVER_UMFPACK: 
     {
-#ifdef HAVE_UMFPACK
+#ifdef WITH_UMFPACK
       info("Using UMFPack.");
       if (rhs != NULL) return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs)); 
       else return new UMFPackLinearSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));  
@@ -92,7 +92,7 @@ Hermes::Solvers::Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType m
     }
   case Hermes::SOLVER_SUPERLU: 
     {
-#ifdef HAVE_SUPERLU
+#ifdef WITH_SUPERLU
       info("Using SuperLU.");       
       if (rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs)); 
       else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy)); 

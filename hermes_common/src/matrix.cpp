@@ -228,7 +228,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
       }
     case Hermes::SOLVER_MUMPS: 
       {
-#ifdef HAVE_MUMPS
+#ifdef WITH_MUMPS
         return new MumpsMatrix<Scalar>;
 #else
         error("MUMPS not installed.");
@@ -237,7 +237,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
       }
     case Hermes::SOLVER_PETSC: 
       {
-#ifdef HAVE_PETSC
+#ifdef WITH_PETSC
         return new PetscMatrix<Scalar>;
 #else
       error("PETSc not installed.");
@@ -246,7 +246,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
       }
     case Hermes::SOLVER_UMFPACK: 
       {
-#ifdef HAVE_UMFPACK
+#ifdef WITH_UMFPACK
         return new UMFPackMatrix<Scalar>;
 #else
         error("UMFPACK was not installed.");
@@ -255,7 +255,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
       }
     case Hermes::SOLVER_SUPERLU: 
       {
-#ifdef HAVE_SUPERLU
+#ifdef WITH_SUPERLU
         return new SuperLUMatrix<Scalar>;
 #else
         error("SuperLU was not installed.");
@@ -294,7 +294,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
       }
     case Hermes::SOLVER_MUMPS: 
       {
-#ifdef HAVE_MUMPS
+#ifdef WITH_MUMPS
         return new MumpsVector<Scalar>;
 #else
         error("MUMPS was not installed.");
@@ -303,7 +303,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
       }
     case Hermes::SOLVER_PETSC: 
       {
-#ifdef HAVE_PETSC
+#ifdef WITH_PETSC
         return new PetscVector<Scalar>;
 #else
         error("PETSc not installed.");
@@ -312,7 +312,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
       }
     case Hermes::SOLVER_UMFPACK: 
       {
-#ifdef HAVE_UMFPACK
+#ifdef WITH_UMFPACK
         return new UMFPackVector<Scalar>;
 #else
         error("UMFPACK was not installed.");
@@ -321,7 +321,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
       }
     case Hermes::SOLVER_SUPERLU: 
       {
-#ifdef HAVE_SUPERLU
+#ifdef WITH_SUPERLU
         return new SuperLUVector<Scalar>;
 #else
         error("SuperLU was not installed.");

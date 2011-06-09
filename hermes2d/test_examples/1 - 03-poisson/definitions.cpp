@@ -1,17 +1,17 @@
-#include "weakform/weakform.h"
-#include "integrals/integrals_h1.h"
-#include "boundaryconditions/essential_bcs.h"
-#include "weakform_library/laplace.h"
-
-using namespace Laplace::VolumetricMatrixForms;
-using namespace Laplace::VolumetricVectorForms;
-
 class CustomWeakFormPoisson : public WeakForm<double>
 {
 public:
-  CustomWeakFormPoisson(double const_f) : WeakForm<double>(1)
-  {
-    add_matrix_form(new DefaultMatrixFormStiffness(0, 0));
-    add_vector_form(new DefaultVectorFormConst(0, const_f));
-  };
+  CustomWeakFormPoisson(std::string mat_al);
+};
+
+CustomWeakFormPoisson::CustomWeakFormPoisson(std::string mat_al) : WeakForm<double>(1)
+{
+  // Jacobian forms.
+  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, mat_al));
+  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0));
+
+  // Residual forms.
+  add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0));
+  add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0));
+  add_vector_form(new WeakFormsH1::DefaultVectorFormVol<double>(0, HERMES_ANY));
 };

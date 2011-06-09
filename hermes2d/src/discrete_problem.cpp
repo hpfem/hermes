@@ -423,7 +423,7 @@ void DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>
 {
   _F_;
   Scalar* coeff_vec = NULL;
-  assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights);
+  assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights == NULL);
 }
 
 template<typename Scalar>
@@ -4238,7 +4238,7 @@ void DiscreteProblem<Scalar>::eval_dg_form(MultiComponentMatrixFormSurf<Scalar>*
     neighbor_supp_u, nbs_u->neighbor_edge.orientation);
   nbs_v->set_quad_order(order);
   DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
-    neighbor_supp_v, nbs_v->neighbor_edge.orientation);
+    neighbor_supp_v, nbs_v->neighbor_edge.orientation == 0);
 
   ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 

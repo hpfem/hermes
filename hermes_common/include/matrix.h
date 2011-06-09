@@ -41,7 +41,7 @@ namespace Hermes
       /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
       /// do "delete matrix".
       template<typename T>
-      HERMES_API T **new_matrix(unsigned int m, unsigned int n = 0)
+      T **new_matrix(unsigned int m, unsigned int n = 0)
       {
         if (!n) n = m;
         T **vec = (T **) new char[sizeof(T *) * m + sizeof(T) * m * n];
@@ -55,7 +55,7 @@ namespace Hermes
       /// Copies a matrix. Both matrices has to be equal to or larger than provided sizes.
       /// Size compatibility check is not done.
       template<typename T>
-      HERMES_API void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0) 
+      void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0) 
       {
         if (n == 0) n = m;
         for(unsigned int i = 0; i < m; i++) {
@@ -70,7 +70,7 @@ namespace Hermes
       /// \param[in] n A number of columns of the matrix. If zero, it is assumed to be equal to m.
       /// \param[in] filename An output filename. If not specified, matrix_name will be used by concatenating it with a suffix '.mat'.
       template<typename T>
-      HERMES_API void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string()) 
+      void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string()) 
       {
         if (n == 0) n = m;
 
@@ -105,7 +105,7 @@ namespace Hermes
 
       /// Saves MxM sparse matrix to a octave file format.
       template<typename T>
-      HERMES_API void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, const int* Ap, const int* Ai, 
+      void save_sparse_matrix_octave(const std::string& matrix_name, const T* Ax, const int* Ap, const int* Ai, 
         unsigned int m, const std::string& filename = std::string()) 
       {
         // create filename
@@ -139,7 +139,7 @@ namespace Hermes
       /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
       /// a square matrix of the size max(m, n) in order for the transpose to fit inside it.
       template<typename T>
-      HERMES_API void transpose(T **matrix, unsigned int m, unsigned int n) 
+      void transpose(T **matrix, unsigned int m, unsigned int n) 
       {
         unsigned int min = std::min(m, n);
         for (unsigned int i = 0; i < min; i++)
@@ -158,7 +158,7 @@ namespace Hermes
 
       /// Changes the sign of a matrix
       template<typename T>
-      HERMES_API void chsgn(T **matrix, unsigned int m, unsigned int n) 
+      void chsgn(T **matrix, unsigned int m, unsigned int n) 
       {
         for (unsigned int i = 0; i < m; i++)
           for (unsigned int j = 0; j < n; j++)
@@ -181,7 +181,7 @@ namespace Hermes
       /// into account the possibility that b will begin with many zero elements, so it is efficient for use
       /// in matrix inversion.
       template<typename T>
-      HERMES_API void lubksb(double **a, int n, int *indx, T *b) 
+      void lubksb(double **a, int n, int *indx, T *b) 
       {
         int i, ip, j;
         T sum;
@@ -214,7 +214,7 @@ namespace Hermes
       /// x in the calling sequence, which is allowed. The right-hand side b can be complex, in which case
       /// the solution x is also complex.
       template<typename T>
-      HERMES_API void cholsl(double **a, int n, double p[], T b[], T x[]) 
+      void cholsl(double **a, int n, double p[], T b[], T x[]) 
       {
         int i, k;
         T sum;

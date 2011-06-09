@@ -160,6 +160,7 @@ namespace Hermes
     double a, b, c, d;		// four coefficients of a cubic spline.
   };
 
+  inline double sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }
   inline double sqr(std::complex<double> x)   { return std::norm(x); }
   inline double magn(double x) { return fabs(x); }

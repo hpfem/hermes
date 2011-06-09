@@ -41,27 +41,22 @@ public:
   /// Calculates coefficients.
   bool calculate_coeffs();
 
-  /// Get the value at a given point.
+  /// \brief Get the value at a given point.
   double get_value(double x_in);
-#ifdef H2D_COMPLEX
-  // This is a hack for Hermes to build in complex mode.
-  double get_value(Scalar x_in_Scalar) {
-    double x_in = std::Real(x_in_Scalar); 
-    return get_value(x_in);
-  };
-#endif
 
-  /// For order calculation in Hermes.
-  Ord get_value(Ord x_in) {return Ord(3);};
-  /// Get first derivative at a given point.
-  double get_derivative(double x_in);
-#ifdef H2D_COMPLEX
-  // This is a hack for Hermes to build in complex mode.
-  double get_derivative(Scalar x_in_Scalar) {
-    double x_in = std::Real(x_in_Scalar); 
-    return get_derivative(x_in);
+  /// \brief Get the value at a given point.
+  double get_value(std::complex<double> x_in) {
+    return get_value(x_in.real());
   };
-#endif
+
+  /// \brief For order calculation in Hermes.
+  Ord get_value(Ord x_in) {return Ord(3);};
+  /// \brief Get first derivative at a given point.
+  double get_derivative(double x_in);
+  /// \brief Get first derivative at a given point.
+  double get_derivative(std::complex<double> x_in) {
+    return get_derivative(x_in.real());
+  };
 
   /// For order calculation in Hermes.
   Ord get_derivative(Ord x_in) {return Ord(2);};

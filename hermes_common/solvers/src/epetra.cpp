@@ -145,11 +145,14 @@ template<typename Scalar>
 Scalar EpetraMatrix<Scalar>::get(unsigned int m, unsigned int n)
 {
   _F_
-    int n_entries = mat->NumGlobalEntries(m);
+  int n_entries = mat->NumGlobalEntries(m);
   std::vector<double> vals(n_entries);
   std::vector<int> idxs(n_entries);
   mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
-  for (int i = 0; i < n_entries; i++) if (idxs[i] == (int)n) return vals[i];
+  for (int i = 0; i < n_entries; i++) 
+    if (idxs[i] == (int)n) 
+      return vals[i];
+  return 0.0;
 }
 
 template<typename Scalar>

@@ -1475,7 +1475,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
 
   // check if element e is a internal element.
   bool e_inter = true;
-  for (int n = 0; n < e->nvert; n++)
+  for (unsigned int n = 0; n < e->nvert; n++)
   {
     if (bnd[n] == 1)
       e_inter = false;
@@ -1505,8 +1505,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
     // for base element.
     if (e->cm->toplevel == true) 
     {	
-      int n = 0;
-      for (n = 0; n < e->nvert; n++)
+      for (unsigned int n = 0; n < e->nvert; n++)
       {
         if (e->cm->nurbs[n] != NULL)
         {
@@ -1519,8 +1518,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
       // one level refinement.
       if (e->parent->cm->toplevel == true) 
       {	
-        int n = 0;
-        for (n = 0; n < e->nvert; n++)
+        for (unsigned int n = 0; n < e->nvert; n++)
         {
           if (e->parent->cm->nurbs[n] != NULL)
           {
@@ -1533,8 +1531,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
         // two level refinements.
         if (e->parent->parent->cm->toplevel == true) 
         {	
-          int n = 0;
-          for (n = 0; n < e->nvert; n++)
+          for (unsigned int n = 0; n < e->nvert; n++)
           {
             if (e->parent->parent->cm->nurbs[n] != NULL)
             {
@@ -1547,8 +1544,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
           // three level refinements.
           if (e->parent->parent->parent->cm->toplevel == true) 
           {	
-            int n = 0;
-            for (n = 0; n < e->nvert; n++)
+            for (unsigned int n = 0; n < e->nvert; n++)
             {
               if (e->parent->parent->parent->cm->nurbs[n] != NULL)
               {
@@ -1561,8 +1557,7 @@ void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
             // four level refinements.
             if (e->parent->parent->parent->parent->cm->toplevel == true) 
             {	
-              int n = 0;
-              for (n = 0; n < e->nvert; n++)
+              for (unsigned int n = 0; n < e->nvert; n++)
               {
                 if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                 {
@@ -2378,7 +2373,7 @@ void Mesh::convert_triangles_to_base(Element *e)
 
   // check if element e is a internal element.
   bool e_inter = true;
-  for (int n = 0; n < e->nvert; n++)
+  for (unsigned int n = 0; n < e->nvert; n++)
   {
     if (bnd[n] == 1)
       e_inter = false;
@@ -2391,8 +2386,7 @@ void Mesh::convert_triangles_to_base(Element *e)
     // for base element.
     if (e->cm->toplevel == true) 
     {	
-      int n = 0;
-      for (n = 0; n < e->nvert; n++)
+      for (unsigned int n = 0; n < e->nvert; n++)
       {
         if (e->cm->nurbs[n] != NULL)
         {
@@ -2405,8 +2399,7 @@ void Mesh::convert_triangles_to_base(Element *e)
       // one level refinement.
       if (e->parent->cm->toplevel == true) 
       {	
-        int n = 0;
-        for (n = 0; n < e->nvert; n++)
+        for (unsigned int n = 0; n < e->nvert; n++)
         {
           if (e->parent->cm->nurbs[n] != NULL)
           {
@@ -2419,8 +2412,7 @@ void Mesh::convert_triangles_to_base(Element *e)
         // two level refinements.
         if (e->parent->parent->cm->toplevel == true) 
         {	
-          int n = 0;
-          for (n = 0; n < e->nvert; n++)
+          for (unsigned int n = 0; n < e->nvert; n++)
           {
             if (e->parent->parent->cm->nurbs[n] != NULL)
             {
@@ -2433,8 +2425,7 @@ void Mesh::convert_triangles_to_base(Element *e)
           // three level refinements.
           if (e->parent->parent->parent->cm->toplevel == true) 
           {	
-            int n = 0;
-            for (n = 0; n < e->nvert; n++)
+            for (unsigned int n = 0; n < e->nvert; n++)
             {
               if (e->parent->parent->parent->cm->nurbs[n] != NULL)
               {
@@ -2447,8 +2438,7 @@ void Mesh::convert_triangles_to_base(Element *e)
             // four level refinements.
             if (e->parent->parent->parent->parent->cm->toplevel == true) 
             {	
-              int n = 0;
-              for (n = 0; n < e->nvert; n++)
+              for (unsigned int n = 0; n < e->nvert; n++)
               {
                 if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                 {
@@ -2562,7 +2552,7 @@ void Mesh::convert_quads_to_base(Element *e)
 
   // check if element e is a internal element.
   bool e_inter = true;
-  for (int n = 0; n < e->nvert; n++)
+  for (unsigned int n = 0; n < e->nvert; n++)
   {
     if (bnd[n] == 1)
       e_inter = false;
@@ -2575,8 +2565,7 @@ void Mesh::convert_quads_to_base(Element *e)
     // for base element.
     if (e->cm->toplevel == true) 
     {	
-      int n = 0;
-      for (n = 0; n < e->nvert; n++)
+      for (unsigned int n = 0; n < e->nvert; n++)
       {
         if ((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
         {
@@ -2589,8 +2578,7 @@ void Mesh::convert_quads_to_base(Element *e)
       // one level refinement.
       if (e->parent->cm->toplevel == true) 
       {	
-        int n = 0;
-        for (n = 0; n < e->nvert; n++)
+        for (unsigned int n = 0; n < e->nvert; n++)
         {
           if ((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
           {
@@ -2603,8 +2591,7 @@ void Mesh::convert_quads_to_base(Element *e)
         // two level refinements.
         if (e->parent->parent->cm->toplevel == true) 
         {	
-          int n = 0;
-          for (n = 0; n < e->nvert; n++)
+          for (unsigned int n = 0; n < e->nvert; n++)
           {
             if ((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
@@ -2617,8 +2604,7 @@ void Mesh::convert_quads_to_base(Element *e)
           // three level refinements.
           if (e->parent->parent->parent->cm->toplevel == true) 
           {	
-            int n = 0;
-            for (n = 0; n < e->nvert; n++)
+            for (unsigned int n = 0; n < e->nvert; n++)
             {
               if ((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
@@ -2631,8 +2617,7 @@ void Mesh::convert_quads_to_base(Element *e)
             // four level refinements.
             if (e->parent->parent->parent->parent->cm->toplevel == true) 
             {	
-              int n = 0;
-              for (n = 0; n < e->nvert; n++)
+              for (unsigned int n = 0; n < e->nvert; n++)
               {
                 if ((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
@@ -2645,7 +2630,7 @@ void Mesh::convert_quads_to_base(Element *e)
 
   // FIXME:
   if (rtb_aniso) 
-    for (int i = 0; i < e->nvert; i++) 
+    for (unsigned int i = 0; i < e->nvert; i++) 
       refinement_angle[i] = refinement_angle[i]*2;
 
   // deactivate this element and unregister from its nodes
@@ -2661,7 +2646,7 @@ void Mesh::convert_quads_to_base(Element *e)
   if ((e->is_curved()) && (!e_inter))
   {
     bool create_new = false;
-    for (int i = 0; i < e->nvert; i++)
+    for (unsigned int i = 0; i < e->nvert; i++)
     {
       if (fabs(refinement_angle[i] - 0.0) > 1e-4)
       {
@@ -2765,7 +2750,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
 
   // check if element e is a internal element.
   bool e_inter = true;
-  for (int n = 0; n < e->nvert; n++)
+  for (unsigned int n = 0; n < e->nvert; n++)
   {
     if (bnd[n] == 1)
       e_inter = false;
@@ -2778,8 +2763,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
     // for base element.
     if (e->cm->toplevel == true) 
     {	
-      int n = 0;
-      for (n = 0; n < e->nvert; n++)
+      for (unsigned int n = 0; n < e->nvert; n++)
       {
         if ((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
         {
@@ -2792,8 +2776,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
       // one level refinement.
       if (e->parent->cm->toplevel == true) 
       {	
-        int n = 0;
-        for (n = 0; n < e->nvert; n++)
+        for (unsigned int n = 0; n < e->nvert; n++)
         {
           if ((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
           {
@@ -2806,8 +2789,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
         // two level refinements.
         if (e->parent->parent->cm->toplevel == true) 
         {	
-          int n = 0;
-          for (n = 0; n < e->nvert; n++)
+          for (unsigned int n = 0; n < e->nvert; n++)
           {
             if ((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
@@ -2820,8 +2802,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
           // three level refinements.
           if (e->parent->parent->parent->cm->toplevel == true) 
           {	
-            int n = 0;
-            for (n = 0; n < e->nvert; n++)
+            for (unsigned int n = 0; n < e->nvert; n++)
             {
               if ((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
@@ -2834,8 +2815,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
             // four level refinements.
             if (e->parent->parent->parent->parent->cm->toplevel == true) 
             {	
-              int n = 0;
-              for (n = 0; n < e->nvert; n++)
+              for (unsigned int n = 0; n < e->nvert; n++)
               {
                 if ((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
@@ -2884,7 +2864,7 @@ void Mesh::refine_quad_to_quads(Element* e, int refinement)
     if ((e->is_curved()) && (!e_inter))
     {
       //bool create_new = false;
-      for (int i = 0; i < e->nvert; i++)
+      for (unsigned int i = 0; i < e->nvert; i++)
       {
         if (fabs(refinement_angle[i] - 0.0) > 1e-4)
         {

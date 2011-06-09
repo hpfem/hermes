@@ -657,7 +657,7 @@ namespace WeakFormsH1
     Geom<Ord> *e, ExtData<Ord> *ext) const 
   {
     Ord result = 0;
-    Func<Scalar>* u_prev = u_ext[idx_i];
+    Func<Ord>* u_prev = u_ext[idx_i];
     for (int i = 0; i < n; i++) 
     {
       result += wt[i] * (const_coeff1*spline_coeff1->get_value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
@@ -1110,4 +1110,31 @@ namespace WeakFormsH1
       spline_coeff, gt));
     add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, -1.0, rhs, gt));
   };
+
+  template class HERMES_API DefaultMatrixFormVol<double>;
+  template class HERMES_API DefaultMatrixFormVol<std::complex<double> >;
+  template class HERMES_API DefaultJacobianDiffusion<double>;
+  template class HERMES_API DefaultJacobianDiffusion<std::complex<double> >;
+  template class HERMES_API DefaultResidualAdvection<double>;
+  template class HERMES_API DefaultResidualAdvection<std::complex<double> >;
+  template class HERMES_API DefaultJacobianAdvection<double>;
+  template class HERMES_API DefaultJacobianAdvection<std::complex<double> >;
+  template class HERMES_API DefaultResidualDiffusion<double>;
+  template class HERMES_API DefaultResidualDiffusion<std::complex<double> >;
+  template class HERMES_API DefaultMatrixFormSurf<double>;
+  template class HERMES_API DefaultMatrixFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultVectorFormSurf<double>;
+  template class HERMES_API DefaultVectorFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultJacobianFormSurf<double>;
+  template class HERMES_API DefaultJacobianFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultMultiComponentVectorFormSurf<double>;
+  template class HERMES_API DefaultMultiComponentVectorFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultWeakFormLaplace<double>;
+  template class HERMES_API DefaultWeakFormLaplace<std::complex<double> >;
+  template class HERMES_API DefaultWeakFormPoisson<double>;
+  template class HERMES_API DefaultWeakFormPoisson<std::complex<double> >;
+  template class HERMES_API DefaultResidualSurf<double>;
+  template class HERMES_API DefaultResidualSurf<std::complex<double> >;
+  template class HERMES_API DefaultResidualVol<double>;
+  template class HERMES_API DefaultResidualVol<std::complex<double> >;
 };

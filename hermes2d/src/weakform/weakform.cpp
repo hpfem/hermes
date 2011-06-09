@@ -21,7 +21,6 @@
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
-//// interface /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>
 Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param,
   double scaling_factor, int u_ext_offset) :
@@ -176,6 +175,13 @@ VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, std::string area,
   Hermes::vector<MeshFunction<Scalar>*> ext,
   Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
 Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i)
+{
+}
+template<typename Scalar>
+VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
+  Hermes::vector<MeshFunction<Scalar>*> ext,
+  Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
+Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), i(i)
 {
 }
 
@@ -414,7 +420,6 @@ void WeakForm<Scalar>::add_multicomponent_vector_form_surf(MultiComponentVectorF
   seq++;
 }
 
-
 template<typename Scalar>
 void WeakForm<Scalar>::set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext)
 {
@@ -530,12 +535,41 @@ void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes
       s->vfsurf_mc.push_back(vfsurf_mc[i]);
     }
   }
+
+  // Helper macro for iterating in a set,
+#define set_for_each(myset, type) \
+  for (std::set<type>::iterator it = (myset).begin(); it != (myset).end(); it++)
+
+  // Initialize the arrays meshes and fns needed by Traverse for each stage.
+  for (i = 0; i < stages.size(); i++)
+  {
+    Stage<Scalar>* s = &stages[i];
+
+    // First, initialize arrays for the test functions. A pointer to the PrecalcShapeset
+    // corresponding to each space will be assigned to s->fns later during assembling.
+    set_for_each(s->idx_set, int)
+    {
+      s->idx.push_back(*it);
+      s->meshes.push_back(spaces[*it]->get_mesh());
+      s->fns.push_back(NULL);
+    }
+
+    // Next, append to the existing arrays the external functions (including the solutions
+    // from previous Newton iteration) and their meshes. Also fill in a special array with
+    // these external functions only.
+    set_for_each(s->ext_set, MeshFunction<Scalar>*)
+    {
+      s->ext.push_back(*it);
+      s->meshes.push_back((*it)->get_mesh());
+      s->fns.push_back(*it);
+    }
+
+    s->idx_set.clear();
+    s->seq_set.clear();
+    s->ext_set.clear();
+  }
 }
 
-/// Finds an assembling stage with the same set of meshes as [m1, m2, ext, u_ext]. If no such
-/// stage can be found, a new one is created and returned.
-/// This function is the same in H2D and H3D.
-///
 template<typename Scalar>
 Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
   Mesh* m1, Mesh* m2,
@@ -787,3 +821,11 @@ template class HERMES_API VectorFormSurf<double>;
 template class HERMES_API VectorFormSurf<std::complex<double> >;
 template class HERMES_API Stage<double>;
 template class HERMES_API Stage<std::complex<double> >;
+template class HERMES_API MultiComponentVectorFormVol<double>;
+template class HERMES_API MultiComponentVectorFormVol<std::complex<double> >;
+template class HERMES_API MultiComponentVectorFormSurf<double>;
+template class HERMES_API MultiComponentVectorFormSurf<std::complex<double> >;
+template class HERMES_API MultiComponentMatrixFormVol<double>;
+template class HERMES_API MultiComponentMatrixFormVol<std::complex<double> >;
+template class HERMES_API MultiComponentMatrixFormSurf<double>;
+template class HERMES_API MultiComponentMatrixFormSurf<std::complex<double> >;

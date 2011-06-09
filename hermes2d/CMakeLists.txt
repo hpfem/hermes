@@ -85,6 +85,28 @@ if(WITH_PYTHON)
 endif(WITH_PYTHON)
 
 #
+# Header files location for the Hermes2d library.
+#
+
+include_directories(${HERMES_COMMON_DIR}/include)
+include_directories(${HERMES_COMMON_DIR}/solvers/include)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/form)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/space)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/mesh)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/boundary_conditions)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/shapeset)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/function)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/integrals)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/linearizer)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/adapt)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/quadrature)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/refinement_selectors)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/views)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform)
+include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform_library)
+
+#
 # Subdirectories.
 #
 

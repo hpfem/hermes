@@ -215,7 +215,9 @@ typedef struct
 #endif
 
 #if defined(WIN32) || defined(MS_WINDOWS)
-#define _USE_MATH_DEFINES
+  #ifndef _USE_MATH_DEFINES
+  #define _USE_MATH_DEFINES
+  #endif
 #endif
 #include <math.h>
 #define __PYX_HAVE_API__python_engine
