@@ -62,6 +62,8 @@ enum SpaceType {
 
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
 
+#define HERMES_ONE NULL
+
 // how many bits the order number takes
 const int H2D_ORDER_BITS = 5;
 const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;

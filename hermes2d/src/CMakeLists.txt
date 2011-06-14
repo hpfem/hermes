@@ -17,6 +17,7 @@ set(SRC
    function/exact_solution.cpp
    function/solution.cpp 
    function/filter.cpp
+   function/hermes_function.cpp
 	   
    mesh/refmap.cpp 
    mesh/curved.cpp
