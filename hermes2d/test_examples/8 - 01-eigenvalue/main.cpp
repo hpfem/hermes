@@ -1,16 +1,17 @@
 #define HERMES_REPORT_ALL
-
+#define HERMES_REPORT_FILE "application.log"
+#include "definitions.h"
 #include <stdio.h>
 
+using namespace RefinementSelectors;
 using Teuchos::RCP;
 using Teuchos::rcp;
 using Hermes::EigenSolver;
 
-//  This example solves the eigenproblem for the Laplace operator in 
-//  a square with zero boundary conditions. Python and Pysparse must
-//  be installed. 
+//  This example solves a simple eigenproblem in a square. 
+//  Python and Pysparse must be installed. 
 //
-//  PDE: -Laplace u = lambda_k u,
+//  PDE: -Laplace u + (x*x + y*y)u = lambda_k u,
 //  where lambda_0, lambda_1, ... are the eigenvalues.
 //
 //  Domain: Square (0, pi)^2.
@@ -23,15 +24,9 @@ const int NUMBER_OF_EIGENVALUES = 50;             // Desired number of eigenvalu
 const int P_INIT = 4;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial mesh refinements.
 const double TARGET_VALUE = 2.0;                  // PySparse parameter: Eigenvalues in the vicinity of 
-// this number will be computed. 
+                                                  // this number will be computed. 
 const double TOL = 1e-10;                         // Pysparse parameter: Error tolerance.
 const int MAX_ITER = 1000;                        // PySparse parameter: Maximum number of iterations.
-
-// Boundary markers.
-const std::string BDY_ALL = "1";
-
-// Weak forms.
-#include "forms.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -46,7 +41,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DefaultEssentialBCConst bc_essential(BDY_ALL, 0.0);
+  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -63,10 +58,9 @@ int main(int argc, char* argv[])
   RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
 
   // Assemble the matrices.
-  bool is_linear = true;
-  DiscreteProblem dp_left(&wf_left, &space, is_linear);
+  DiscreteProblem dp_left(&wf_left, &space);
   dp_left.assemble(matrix_left.get());
-  DiscreteProblem dp_right(&wf_right, &space, is_linear);
+  DiscreteProblem dp_right(&wf_right, &space);
   dp_right.assemble(matrix_right.get());
 
   EigenSolver es(matrix_left, matrix_right);
@@ -84,8 +78,7 @@ int main(int argc, char* argv[])
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
   int neig = es.get_n_eigs();
   if (neig != NUMBER_OF_EIGENVALUES) error("Mismatched number of eigenvectors in the eigensolver output file.");  
-  for (int ieig = 0; ieig < neig; ieig++) 
-  {
+  for (int ieig = 0; ieig < neig; ieig++) {
     eigenval[ieig] = es.get_eigenvalue(ieig);
     int n;
     es.get_eigenvector(ieig, &coeff_vec, &n);

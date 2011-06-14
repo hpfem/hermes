@@ -1,8 +1,5 @@
 #define HERMES_REPORT_ALL
-#include "hermes2d.h"
-
-using namespace Hermes;
-using namespace Hermes::Views;
+#include "definitions.h"
 
 // This example shows how to solve a simple PDE that describes stationary 
 // heat transfer in an object consisting of two materials (aluminum and 
@@ -41,8 +38,6 @@ const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatur
 const double VOLUME_HEAT_SRC = 5e3;        // Volume heat sources generated (for example) by electric current.        
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
-#include "definitions.cpp"
-
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
@@ -58,7 +53,8 @@ int main(int argc, char* argv[])
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf("Aluminum");
+  CustomWeakFormPoisson wf("Aluminum", new HermesFunction<double>(LAMBDA_AL), "Copper", 
+                           new HermesFunction<double>(LAMBDA_CU), new HermesFunction<double>(-VOLUME_HEAT_SRC));
   
   // Initialize essential boundary conditions.
   DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), 
@@ -83,7 +79,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof*sizeof(double));
 
   // Perform Newton's iteration.
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) 
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, true, 1E-8, 100, true)) 
     error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into a Solution.
@@ -94,13 +90,13 @@ int main(int argc, char* argv[])
   if (VTK_VISUALIZATION) 
   {
     // Output solution in VTK format.
-    Linearizer<double> lin;
+    Hermes::Views::Linearizer<double> lin;
     bool mode_3D = true;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.
-    Orderizer ord;
+    Hermes::Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
     info("Element orders in VTK format saved to file %s.", "ord.vtk");
   }
@@ -108,14 +104,14 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if (HERMES_VISUALIZATION) 
   {
-    ScalarView<double> view("Solution", new WinGeom(0, 0, 440, 350));
+    Hermes::Views::ScalarView<double> view("Solution", new Hermes::Views::WinGeom(0, 0, 440, 350));
     // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
     // triangles for OpenGL. The second parameter of View::show() sets the error 
     // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default), 
     // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows 
     // considerably with more accurate representation, so use it wisely.
-    view.show(&sln, HERMES_EPS_HIGH);
-    View::wait();
+    view.show(&sln, Hermes::Views::HERMES_EPS_HIGH);
+    Hermes::Views::View::wait();
   }
 
   // Clean up.

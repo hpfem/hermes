@@ -132,6 +132,13 @@ bool Hermes2D<Scalar>::solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* 
     // If Jacobian changed, assemble the matrix.
     if (jacobian_changed) dp->assemble(coeff_vec, matrix, NULL); // NULL = we do not want the rhs.
 
+    std::ofstream out("out");
+    for(int i = 0; i < matrix->get_size(); i++)
+      for(int j = 0; j < matrix->get_size(); j++)
+        if(std::abs(matrix->get(i,j)) > 1E-5)
+          out << i << ',' << j << ':' << matrix->get(i,j) << std::endl;
+    out.close();
+
     // Multiply the residual vector with -1 since the matrix
     // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
     rhs->change_sign();

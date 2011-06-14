@@ -1,40 +1,47 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
-
-#include "runge_kutta.h"
+#include "definitions.h"
 
 using namespace RefinementSelectors;
 
-//  This example is the same as 03-newton-heat-ie and 03-newton-heat-sdirk22
-//  except that time discretization is performed using arbitrary (explicit 
-//  or implicit, low-order or higher-order) Runge-Kutta methods entered via 
-//  their Butcher's tables. As opposed to examples 03 and 04, approximation 
-//  of the time derivative is not part of the weak formulation.
+//  This example is a continuation of the example "09-timedep-basic" and it shows how 
+//  to perform time integration with arbitrary Runge-Kutta methods, using Butcher's 
+//  tables as input parameters. Currently (as of January 2011) approx. 30 tables are 
+//  available by default, as can be seen below. They are taken from various sources 
+//  including J. Butcher's book, journal articles, and the Wikipedia page 
+//  http://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods. If you know 
+//  about some other interesting R-K method that we are missing here, please let us 
+//  know!
 //
-//  For a list of available R-K methods see the file hermes_common/tables.h.
+//  PDE: non-stationary heat transfer equation
+//       HEATCAP * RHO * dT/dt - LAMBDA * Laplace T = 0.
+//  This equation is, however, written in such a way that the time-derivative 
+//  is on the left and everything else on the right:
 //
-//  The function rk_time_step() needs more optimisation, see a todo list at 
-//  the beginning of file src/runge-kutta.H.
+//  dT/dt = LAMBDA * Laplace T / (HEATCAP * RHO).
 //
-//  PDE: time-dependent heat transfer equation with nonlinear thermal
-//  conductivity, du/dt - div[lambda(u)grad u] = f.
+//  As opposed to the previous example where the time-discretization was hardwired
+//  into the weak formulation, now we only need the weak formulation of the 
+//  right-hand side.
 //
-//  Domain: square (-10,10)^2.
+//  Domain: St. Vitus cathedral (file cathedral.mesh).
 //
-//  BC: Dirichlet, given by the function dir_lift() below.
-//  IC: Same function dir_lift().
+//  IC:  T = TEMP_INIT.
+//  BC:  T = TEMP_INIT on the bottom edge ... Dirichlet,
+//       LAMBDA * dT/dn = ALPHA*(t_exterior(time) - T) ... Newton, time-dependent.
+//
+//  Time-stepping: Arbitrary Runge-Kutta methods.
 //
 //  The following parameters can be changed:
 
-const int INIT_GLOB_REF_NUM = 3;                   // Number of initial uniform mesh refinements.
-const int INIT_BDY_REF_NUM = 4;                    // Number of initial refinements towards boundary.
-const int P_INIT = 2;                              // Initial polynomial degree.
-const double time_step = 0.2;                      // Time step.
-const double T_FINAL = 5.0;                        // Time interval length.
-const double NEWTON_TOL = 1e-5;                    // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                   // Maximum allowed number of Newton iterations.
-Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;   // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
-// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
+const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
+const double time_step = 3e+2;                    // Time step in seconds.
+const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
 // in the name of each method is its order. The one before last, if present, is the number of stages.
@@ -51,16 +58,17 @@ Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;   // Possibilit
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
 //   Implicit_DIRK_ISMAIL_7_45_embedded. 
-ButcherTableType butcher_table_type = Implicit_RK_1;
 
-const double ALPHA = 4.0;                         // For the nonlinear thermal conductivity.
+ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
-const std::string BDY_DIRICHLET = "1";
+// Problem parameters.
+const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
+const double ALPHA = 10;           // Heat flux coefficient for Newton's boundary condition.
+const double LAMBDA = 1e2;         // Thermal conductivity of the material.
+const double HEATCAP = 1e2;        // Heat capacity.
+const double RHO = 3000;           // Material density.
+const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
-// Weak forms.
-#include "definitions.cpp"
-
-// Main function.
 int main(int argc, char* argv[])
 {
   // Choose a Butcher's table or define your own.
@@ -72,79 +80,77 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("square.mesh", &mesh);
+  mloader.load("cathedral.mesh", &mesh);
 
-  // Initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_DIRICHLET, INIT_BDY_REF_NUM);
+  // Perform initial mesh refinements.
+  for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  mesh.refine_towards_boundary("Boundary air", INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary ground", INIT_REF_NUM_BDY);
 
+  // Previous and next time level solutions.
+  Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
+  Solution* sln_time_new = new Solution(&mesh);
+
+  // Initialize the weak formulation.
+  double current_time = 0;
+
+  CustomWeakFormHeatRK wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, 
+                          &current_time, TEMP_INIT, T_FINAL);
+  
   // Initialize boundary conditions.
-  EssentialBCNonConst bc_essential(BDY_DIRICHLET);
+  DefaultEssentialBCConst bc_essential("Boundary ground", TEMP_INIT);
   EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
-  info("ndof = %d.", ndof);
-
-  // Previous time level solution (initialized by the initial condition).
-  InitialSolutionHeatTransfer sln_time_prev(&mesh);
-
-  // Initialize the weak formulation
-  WeakFormHeatTransferRungeKuttaTimedep wf(ALPHA, &sln_time_prev);
-
-  // Previous and next time level solutions.
-  Solution sln_time_new(&mesh);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  bool is_linear = false;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem dp(&wf, &space);
+
+  // Initialize views.
+  ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
+  Tview.set_min_max_range(0,20);
+  Tview.fix_scale_width(30);
 
   // Initialize Runge-Kutta time stepping.
   RungeKutta runge_kutta(&dp, &bt, matrix_solver);
 
-  // Initialize views.
-  ScalarView sview("Solution", new WinGeom(0, 0, 500, 400));
-  OrderView oview("Mesh", new WinGeom(510, 0, 460, 400));
-  oview.show(&space);
-
   // Time stepping loop:
-  double current_time = 0; int ts = 1;
+  int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
-      current_time, time_step, bt.get_size());
+         current_time, time_step, bt.get_size());
+    bool jacobian_changed = false;
     bool verbose = true;
-    Hermes::vector<Solution*> slns_time_prev;
-    slns_time_prev.push_back(&sln_time_prev);
-    Hermes::vector<Solution*> slns_time_new;
-    slns_time_new.push_back(&sln_time_new);
-
-    if (!runge_kutta.rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, true, verbose, NEWTON_TOL, NEWTON_MAX_ITER)) 
-    {
+    if (!runge_kutta.rk_time_step(current_time, time_step, sln_time_prev, 
+                                  sln_time_new, jacobian_changed, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
-    // Update time.
-    current_time += time_step;
-
     // Show the new time level solution.
     char title[100];
-    sprintf(title, "Solution, t = %g", current_time);
-    sview.set_title(title);
-    sview.show(&sln_time_new, HERMES_EPS_VERYHIGH);
-    oview.show(&space);
+    sprintf(title, "Time %3.2f s", current_time);
+    Tview.set_title(title);
+    Tview.show(sln_time_new);
 
     // Copy solution for the new time step.
-    sln_time_prev.copy(&sln_time_new);
+    sln_time_prev->copy(sln_time_new);
 
-    // Increase counter of time steps.
+    // Increase current time and time step counter.
+    current_time += time_step;
     ts++;
   } 
   while (current_time < T_FINAL);
 
-  // Wait for all views to be closed.
+  // Cleanup.
+  delete sln_time_prev;
+  delete sln_time_new;
+
+  // Wait for the view to be closed.
   View::wait();
   return 0;
 }

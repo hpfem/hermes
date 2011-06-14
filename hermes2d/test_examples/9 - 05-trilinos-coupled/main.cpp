@@ -1,6 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
-
+#include "hermes2d.h"
 
 using Teuchos::RCP;
 using Teuchos::rcp;
@@ -18,11 +18,11 @@ using Teuchos::rcp;
 const int INIT_REF_NUM = 2;         // Number of initial uniform mesh refinements.
 const int P_INIT = 2;               // Initial polynomial degree of all mesh elements.
 const bool JFNK = true;             // true = jacobian-free method,
-// false = Newton
+                                    // false = Newton
 const int PRECOND = 2;              // Preconditioning by jacobian (1) (less GMRES iterations, more time to create precond)
-// or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
-// in case of jfnk,
-// default Ifpack proconditioner in case of Newton.
+                                    // or by approximation of jacobian (2) (less time for precond creation, more GMRES iters).
+                                    // in case of jfnk,
+                                    // default Ifpack proconditioner in case of Newton.
 const double TAU = 0.05;            // Time step.
 const double T_FINAL = 60.0;        // Time interval length.
 const bool TRILINOS_OUTPUT = true;  // Display more details about nonlinear and linear solvers.
@@ -34,23 +34,20 @@ const double beta  = 10.0;
 const double kappa = 0.1;
 const double x1    = 9.0;
 
-// Boundary markers.
-const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
-
 // Initial conditions.
-Scalar temp_ic(double x, double y, Scalar& dx, Scalar& dy)
-{ return (x <= x1) ? 1.0 : exp(x1 - x); }
+scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
+  { return (x <= x1) ? 1.0 : exp(x1 - x); }
 
-Scalar conc_ic(double x, double y, Scalar& dx, Scalar& dy)
-{ return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
+scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
+  { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
 // Weak forms. 
-# include "forms.cpp"
+# include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
   // Time measurement.
-  Hermes::TimePeriod cpu_time;
+  TimePeriod cpu_time;
   cpu_time.tick();
 
   // Load the mesh.
@@ -63,16 +60,16 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(BDY_NEUMANN);
-  bc_types.add_bc_newton(BDY_COOLED);
+  bc_types.add_bc_dirichlet("Left");
+  bc_types.add_bc_neumann("Neumann");
+  bc_types.add_bc_newton("Cooled");
 
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
-  bc_values_t.add_const(BDY_LEFT, 1.0);
+  bc_values_t.add_const("Left", 1.0);
 
   BCValues bc_values_c;
-  bc_values_c.add_zero(BDY_LEFT);
+  bc_values_c.add_zero("Left");
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);
@@ -82,7 +79,7 @@ int main(int argc, char* argv[])
 
   // Define initial conditions.
   Solution t_prev_time_1, c_prev_time_1, t_prev_time_2, 
-    c_prev_time_2, t_iter, c_iter, t_prev_newton, c_prev_newton;
+           c_prev_time_2, t_iter, c_iter, t_prev_newton, c_prev_newton;
   t_prev_time_1.set_exact(&mesh, temp_ic);  
   c_prev_time_1.set_exact(&mesh, conc_ic);
   t_prev_time_2.set_exact(&mesh, temp_ic);  
@@ -114,18 +111,18 @@ int main(int argc, char* argv[])
     wf.add_matrix_form(1, 1, callback(precond_1_1));
   }
   wf.add_vector_form(0, callback(newton_linear_form_0), HERMES_ANY, 
-    Hermes::vector<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
+                     Hermes::vector<MeshFunction*>(&t_prev_time_1, &t_prev_time_2, &omega));
   wf.add_vector_form_surf(0, callback(newton_linear_form_0_surf), 3);
   wf.add_vector_form(1, callback(newton_linear_form_1), HERMES_ANY, 
-    Hermes::vector<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
+                     Hermes::vector<MeshFunction*>(&c_prev_time_1, &c_prev_time_2, &omega));
 
   // Project the functions "t_prev_time_1" and "c_prev_time_1" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
-  Scalar* coeff_vec = new Scalar[ndof];
+  scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(Hermes::vector<Space *>(t_space, c_space), 
-    Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
-    coeff_vec);
+                                       Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
+                                       coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
@@ -143,8 +140,8 @@ int main(int argc, char* argv[])
   }
   if (TRILINOS_OUTPUT)
     solver.set_output_flags(NOX::Utils::Error | NOX::Utils::OuterIteration |
-    NOX::Utils::OuterIterationStatusTest |
-    NOX::Utils::LinearSolverDetails);
+                            NOX::Utils::OuterIterationStatusTest |
+                            NOX::Utils::LinearSolverDetails);
 
   // Time stepping loop:
   double total_time = 0.0;
@@ -158,13 +155,13 @@ int main(int argc, char* argv[])
     if (solver.solve())
     {
       Solution::vector_to_solutions(solver.get_solution(), Hermes::vector<Space *>(t_space, c_space), 
-        Hermes::vector<Solution *>(&t_prev_newton, &c_prev_newton));
+                Hermes::vector<Solution *>(&t_prev_newton, &c_prev_newton));
 
       cpu_time.tick();
       info("Number of nonlin iterations: %d (norm of residual: %g)",
-        solver.get_num_iters(), solver.get_residual());
+          solver.get_num_iters(), solver.get_residual());
       info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
-        solver.get_num_lin_iters(), solver.get_achieved_tol());
+          solver.get_num_lin_iters(), solver.get_achieved_tol());
 
       // Time measurement.
       cpu_time.tick(HERMES_SKIP);
@@ -174,7 +171,7 @@ int main(int argc, char* argv[])
       rview.set_min_max_range(0.0,2.0);
       rview.show(&omega_view);
       cpu_time.tick(HERMES_SKIP);
-
+			
       // Skip visualization time.
       cpu_time.tick(HERMES_SKIP);
 

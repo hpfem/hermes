@@ -1,6 +1,6 @@
 #define HERMES_REPORT_ALL
 #define HERMES_REPORT_FILE "application.log"
-#include "hermes2d.h"
+#include "definitions.h"
 
 using namespace RefinementSelectors;
 
@@ -8,7 +8,7 @@ using namespace RefinementSelectors;
 //  a 2D domain comprising a wire carrying electrical current, air, and
 //  an iron which is not under voltage.
 //
-//  PDE: -Laplace A + ii*omega*gamma*mu*A = mu *J_ext.
+//  PDE: -(1/mu)Laplace A + ii*omega*gamma*A - J_ext = 0.
 //
 //  Domain: Rectangle of height 0.003 and width 0.004. Different
 //  materials for the wire, air, and iron (see mesh file domain2.mesh).
@@ -47,7 +47,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+const char* iterative_method = "gmres";           // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
@@ -57,32 +57,19 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-
 // Problem parameters.
-double mu_0 = 4.0*3.141592654E-7;
-double J_wire = 5000000.0;
-double freq = 5E3;
-double omega = 2*3.141592654*freq;
-double gamma_iron = 6E6;
-double mu_iron = 1000*mu_0;
-
-// Boundary markers.
-const int BDY_BUTTOM = 1;
-const int BDY_RIGHT = 2;
-const int BDY_TOP = 3;
-const int BDY_LEFT = 4;
-
-// Essential (Dirichlet) boundary condition values.
-Scalar essential_bc_values(int ess_bdy_marker, double x, double y)
-{
-  return cplx(0.0,0.0);
-}
-
-// Weak forms.
-#include "forms.cpp"
+const double MU_0 = 4.0*M_PI*1e-7;
+const double MU_IRON = 1e3 * MU_0;
+const double GAMMA_IRON = 6e6;
+const double J_EXT = 1e6;
+const double FREQ = 5e3;
+const double OMEGA = 2 * M_PI * FREQ;
 
 int main(int argc, char* argv[])
 {
+  // Instantiate a class with global functions.
+  Hermes2D hermes2d;
+
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -90,25 +77,23 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
-  mloader.load("domain2.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  BCTypes bc_types;
-  bc_types.add_bc_dirichlet(Hermes::vector<int>(BDY_RIGHT, BDY_TOP, BDY_LEFT));
-  bc_types.add_bc_neumann(BDY_BUTTOM);
+  DefaultEssentialBCConst bc_essential("Dirichlet", scalar(0.0, 0.0));
+  EssentialBCs bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bc_types, essential_bc_values, P_INIT);
+  H1Space space(&mesh, &bcs, P_INIT);
+  int ndof = Space::get_num_dofs(&space);
+  info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form_iron), HERMES_SYM, 3);
-  wf.add_matrix_form(callback(bilinear_form_wire), HERMES_SYM, 2);
-  wf.add_matrix_form(callback(bilinear_form_air), HERMES_SYM, 1);
-  wf.add_vector_form(callback(linear_form_wire), 2);
+  CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON, 
+                    "Wire", MU_0, scalar(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
   Solution sln, ref_sln;
@@ -124,6 +109,7 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
+  // Initialize the matrix solver.
   SparseMatrix* matrix = create_matrix(matrix_solver);
   Vector* rhs = create_vector(matrix_solver);
   Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
@@ -135,32 +121,37 @@ int main(int argc, char* argv[])
   }
   
   // Adaptivity loop:
-  int as = 1; 
-  bool done = false;
+  int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space* ref_space = Space::construct_refined_space(&space);
+    int ndof_ref = Space::get_num_dofs(ref_space);
 
-    // Assemble the reference problem.
+    // Initialize matrix solver.
+    SparseMatrix* matrix = create_matrix(matrix_solver);
+    Vector* rhs = create_vector(matrix_solver);
+    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+
+    // Initialize reference problem.
     info("Solving on reference mesh.");
-    bool is_linear = true;
-    DiscreteProblem* dp = new DiscreteProblem(&wf, ref_space, is_linear);
-      
-    dp->assemble(matrix, rhs);
+    DiscreteProblem dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
-    
-    // Solve the linear system of the reference problem. If successful, obtain the solution.
-    if(solver->solve()) Solution::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
-    else error ("Matrix solver failed.\n");
+
+    // Initial coefficient vector for the Newton's method.  
+    scalar* coeff_vec = new scalar[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+
+    // Perform Newton's iteration.
+    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+
+    // Translate the resulting coefficient vector into the Solution sln.
+    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
   
-    // Time measurement.
-    cpu_time.tick();
-
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
@@ -196,11 +187,12 @@ int main(int argc, char* argv[])
     }
     if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
+    // Clean up.
+    delete [] coeff_vec;
     delete adaptivity;
     if (done == false)
       delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
     
     // Increase counter.
     as++;

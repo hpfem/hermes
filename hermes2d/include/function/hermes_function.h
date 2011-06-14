@@ -28,19 +28,19 @@ public:
 
   virtual Scalar value(Scalar x) const;
 
-  virtual Ord value(Ord x) const;
+  virtual Ord value_ord(Ord x) const;
 
   virtual Scalar value(Scalar x, Scalar y) const;
 
-  virtual Ord value(Ord x, Ord y) const;
+  virtual Ord value_ord(Ord x, Ord y) const;
 
   virtual Scalar derivative(Scalar x) const;
 
-  virtual Ord derivative(Ord x) const;
+  virtual Ord derivative_ord(Ord x) const;
 
   virtual Scalar derivative(Scalar x, Scalar y) const;
 
-  virtual Ord derivative(Ord x, Ord y) const;
+  virtual Ord derivative_ord(Ord x, Ord y) const;
 
   bool is_constant() const;
 

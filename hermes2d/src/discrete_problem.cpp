@@ -841,13 +841,13 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
       {
         for (unsigned int j = 0; j < al[n]->cnt; j++) 
         {
-          if (j < i && al[n]->dof[j] >= 0) continue;
+          if (j < i && al[n]->dof[j] >= 0) 
+            continue;
           pss[n]->set_active_shape(al[n]->idx[j]);
           if (al[n]->dof[j] >= 0) 
           {
             if (mat != NULL) 
             {
-
               Scalar val = 0;
               // Numerical integration performed only if all coefficients 
               // multiplying the form are nonzero.
@@ -859,24 +859,21 @@ void DiscreteProblem<Scalar>::assemble_volume_matrix_forms(Stage<Scalar>& stage,
           }
         }
       }
+    }
+    // Insert the local stiffness matrix into the global one.
+    if (mat != NULL) 
+      mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
 
-      // Insert the local stiffness matrix into the global one.
-      if (mat != NULL) 
-      {
-        mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
-      }
+    // Insert also the off-diagonal (anti-)symmetric block, if required.
+    if (tra) 
+    {
+      if (mfv->sym < 0)
+        chsgn(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
-      // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if (tra) 
-      {
-        if (mfv->sym < 0)
-          chsgn(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
+      transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
-        transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
-
-        if (mat != NULL)
-          mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
-      }
+      if (mat != NULL)
+        mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
     }
   }
 }

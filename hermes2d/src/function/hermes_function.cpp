@@ -38,7 +38,7 @@ Scalar HermesFunction<Scalar>::value(Scalar x) const
 };
 
 template<typename Scalar>
-Ord HermesFunction<Scalar>::value(Ord x) const
+Ord HermesFunction<Scalar>::value_ord(Ord x) const
 {
   return Ord(1);
 };
@@ -50,7 +50,7 @@ Scalar HermesFunction<Scalar>::value(Scalar x, Scalar y) const
 };
 
 template<typename Scalar>
-Ord HermesFunction<Scalar>::value(Ord x, Ord y) const
+Ord HermesFunction<Scalar>::value_ord(Ord x, Ord y) const
 {
   return Ord(1);
 };
@@ -67,7 +67,7 @@ std::complex<double> HermesFunction<std::complex<double> >::derivative(std::comp
 };
 
 template<typename Scalar>
-Ord HermesFunction<Scalar>::derivative(Ord x) const
+Ord HermesFunction<Scalar>::derivative_ord(Ord x) const
 {
   return Ord(1);
 };
@@ -84,7 +84,7 @@ std::complex<double> HermesFunction<std::complex<double> >::derivative(std::comp
 };
 
 template<typename Scalar>
-Ord HermesFunction<Scalar>::derivative(Ord x, Ord y) const
+Ord HermesFunction<Scalar>::derivative_ord(Ord x, Ord y) const
 {
   return Ord(1);
 };
@@ -93,4 +93,8 @@ template<typename Scalar>
 bool HermesFunction<Scalar>::is_constant() const
 {
   return is_const;
-}
+};
+
+template class HERMES_API HermesFunction<double>;
+template class HERMES_API HermesFunction<std::complex<double> >;
+

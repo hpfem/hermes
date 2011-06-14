@@ -495,27 +495,27 @@ namespace Hermes
               if (finite(v) && fabs(v) > max) max = fabs(v);
             }
 
-            // obtain physical element coordinates
-            if (curved || disp)
-            {
-              RefMap* refmap = sln->get_refmap();
-              phx = refmap->get_phys_x(1);
-              phy = refmap->get_phys_y(1);
+          // obtain physical element coordinates
+          if (curved || disp)
+          {
+            RefMap* refmap = sln->get_refmap();
+            phx = refmap->get_phys_x(1);
+            phy = refmap->get_phys_y(1);
 
-              if (disp)
+            if (disp)
+            {
+              xdisp->set_quad_order(1, H2D_FN_VAL);
+              ydisp->set_quad_order(1, H2D_FN_VAL);
+              double* dx = xdisp->get_fn_values();
+              double* dy = ydisp->get_fn_values();
+              for (i = 0; i < lin_np_quad[1]; i++) 
               {
-                xdisp->set_quad_order(1, H2D_FN_VAL);
-                ydisp->set_quad_order(1, H2D_FN_VAL);
-                double* dx = xdisp->get_fn_values();
-                double* dy = ydisp->get_fn_values();
-                for (i = 0; i < lin_np_quad[1]; i++) 
-                {
-                  phx[i] += dmult*dx[i];
-                  phy[i] += dmult*dy[i];
-                }
+                phx[i] += dmult*dx[i];
+                phy[i] += dmult*dy[i];
               }
             }
-            idx = quad_indices[0];
+          }
+          idx = quad_indices[0];
         }
 
         // obtain linearized values and coordinates at the midpoints

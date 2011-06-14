@@ -168,7 +168,7 @@ typedef struct
 #define VOLATILE
 
 /* For 12-byte long doubles on an i386, pad a 16-bit short 0
- * to the end of Real constants initialized by integer arrays.
+ * to the end of real constants initialized by integer arrays.
  *
  * #define XPD 0,
  *
@@ -1876,7 +1876,7 @@ extern double exp ( double );
 extern double sin ( double );
 // extern double polevl ( double, void *, int );
 // extern double p1evl ( double, void *, int );
-extern double floor ( double );
+// extern double floor ( double );
 extern double fabs ( double );
 extern int isnan ( double );
 // extern int isfinite ( double );
@@ -1998,7 +1998,7 @@ while( x >= 3.0 )
 while( x < 0.0 )
   {
   if( x > -1.E-9 )
-    goto small;
+    goto small_;
   z /= x;
   x += 1.0;
   }
@@ -2006,7 +2006,7 @@ while( x < 0.0 )
 while( x < 2.0 )
   {
   if( x < 1.e-9 )
-    goto small;
+    goto small_;
   z /= x;
   x += 1.0;
   }
@@ -2019,7 +2019,7 @@ p = polevl( x, P, 6 );
 q = polevl( x, Q, 7 );
 return( z * p / q );
 
-small:
+small_:
 if( x == 0.0 )
   {
 #ifdef INFINITIES
@@ -2303,7 +2303,7 @@ return( q );
  * DESCRIPTION:
  *
  * Returns Bessel function of order v of the argument,
- * where v is Real.  Negative x is allowed if v is an integer.
+ * where v is real.  Negative x is allowed if v is an integer.
  *
  * Several expansions are included: the ascending power
  * series, the Hankel expansion, and two transitional
@@ -2346,13 +2346,13 @@ Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
 #ifdef ANSIPROT
 // extern int airy ( double, double *, double *, double *, double * );
 extern double fabs ( double );
-extern double floor ( double );
-extern double frexp ( double, int * );
+// extern double floor ( double );
+// extern double frexp ( double, int * );
 // extern double polevl ( double, void *, int );
-extern double j0 ( double );
-extern double j1 ( double );
+// extern double j0 ( double );
+// extern double j1 ( double );
 extern double sqrt ( double );
-extern double cbrt ( double );
+// extern double cbrt ( double );
 extern double exp ( double );
 extern double log ( double );
 extern double sin ( double );

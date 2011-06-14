@@ -288,7 +288,7 @@ void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *r
           add(rows[i], cols[j], mat[i][j]);
 }
 
-double inline Real(double x)
+double inline real(double x)
 {
   return x;
 }
@@ -298,7 +298,7 @@ double inline imag(double x)
   return 0;
 }
 
-double inline Real(std::complex<double> x)
+double inline real(std::complex<double> x)
 {
   return x.real();
 }
@@ -330,7 +330,7 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
 
     case DF_MATRIX_MARKET:
       {
-        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate Real symmetric\n");
+        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
         int nnz_sym=0;
         for (unsigned int j = 0; j < this->size; j++)
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
@@ -373,13 +373,13 @@ bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat
         int *ascii_entry_j = new int[nnz];
         int k = 0;
 
-        // If Real or imaginary part of Scalar entry is below zero_cutoff
+        // If real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
         for (unsigned int j = 0; j < size; j++)
         {
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
-            if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+            if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];
@@ -436,7 +436,7 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
 
     case DF_MATRIX_MARKET:
       {
-        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate Real symmetric\n");
+        fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
         int nnz_sym=0;
         for (unsigned int j = 0; j < this->size; j++)
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
@@ -479,13 +479,13 @@ bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EM
         int *ascii_entry_j = new int[nnz];
         int k = 0;
 
-        // If Real or imaginary part of Scalar entry is below zero_cutoff
+        // If real or imaginary part of Scalar entry is below zero_cutoff
         // it's not included in ascii file, and number of non-zeros is reduced by one.
         for (unsigned int j = 0; j < size; j++)
         {
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
-            if (Real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+            if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
             {
               ascii_entry_buff[k] = Ax[i];
               ascii_entry_i[k] = Ai[i];

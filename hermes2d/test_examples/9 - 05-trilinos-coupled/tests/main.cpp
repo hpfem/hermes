@@ -28,18 +28,15 @@ const double beta  = 10.0;
 const double kappa = 0.1;
 const double x1    = 9.0;
 
-// Boundary markers.
-const int BDY_LEFT = 1, BDY_NEUMANN = 2, BDY_COOLED = 3;
-
 // Initial conditions.
-Scalar temp_ic(double x, double y, Scalar& dx, Scalar& dy)
+scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
   { return (x <= x1) ? 1.0 : exp(x1 - x); }
 
-Scalar conc_ic(double x, double y, Scalar& dx, Scalar& dy)
+scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
   { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
 // Weak forms. 
-# include "../forms.cpp"
+# include "../definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -57,16 +54,16 @@ int main(int argc, char* argv[])
 
   // Initialize boundary conditions.
   BCTypes bc_types;
-  bc_types.add_bc_dirichlet(BDY_LEFT);
-  bc_types.add_bc_neumann(BDY_NEUMANN);
-  bc_types.add_bc_newton(BDY_COOLED);
+  bc_types.add_bc_dirichlet("Left");
+  bc_types.add_bc_neumann("Neumann");
+  bc_types.add_bc_newton("Cooled");
 
   // Enter Dirichlet boundary values.
   BCValues bc_values_t;
-  bc_values_t.add_const(BDY_LEFT, 1.0);
+  bc_values_t.add_const("Left", 1.0);
 
   BCValues bc_values_c;
-  bc_values_c.add_zero(BDY_LEFT);
+  bc_values_c.add_zero("Left");
 
   // Create H1 spaces with default shapesets.
   H1Space* t_space = new H1Space(&mesh, &bc_types, &bc_values_t, P_INIT);
@@ -113,7 +110,7 @@ int main(int argc, char* argv[])
   // Project the functions "t_iter" and "c_iter" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
-  Scalar* coeff_vec = new Scalar[ndof];
+  scalar* coeff_vec = new scalar[ndof];
   OGProjection::project_global(Hermes::vector<Space *>(t_space, c_space), Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
     coeff_vec);
 
