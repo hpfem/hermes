@@ -292,7 +292,7 @@ namespace WeakFormsH1
   class HERMES_API DefaultJacobianFormSurf : public MatrixFormSurf<Scalar>
   {
   public:
-    DefaultJacobianFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY, HermesFunction<Scalar>* coeff = HERMES_ONEE,
+    DefaultJacobianFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY, HermesFunction<Scalar>* coeff = HERMES_ONE,
       GeomType gt = HERMES_PLANAR);
     DefaultJacobianFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas, HermesFunction<Scalar>* coeff = HERMES_ONE,
       GeomType gt = HERMES_PLANAR);

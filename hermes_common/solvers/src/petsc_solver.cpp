@@ -17,6 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include "config.h"
 #ifdef WITH_PETSC
 
 #include "petsc_solver.h"
