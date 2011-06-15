@@ -1030,6 +1030,8 @@ namespace WeakFormsH1
   template class HERMES_API DefaultMatrixFormSurf<std::complex<double> >;
   template class HERMES_API DefaultVectorFormSurf<double>;
   template class HERMES_API DefaultVectorFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultVectorFormVol<double>;
+  template class HERMES_API DefaultVectorFormVol<std::complex<double> >;
   template class HERMES_API DefaultJacobianFormSurf<double>;
   template class HERMES_API DefaultJacobianFormSurf<std::complex<double> >;
   template class HERMES_API DefaultMultiComponentVectorFormSurf<double>;
