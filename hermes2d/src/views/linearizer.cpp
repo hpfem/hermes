@@ -1085,7 +1085,7 @@ namespace Hermes
         int iv[4];
         for (unsigned int i = 0; i < e[0]->nvert; i++)
         {
-          double f = (i);
+          double f = val[i];
           if (auto_max && finite(f) && fabs(f) > max) 
             max = fabs(f);
 
