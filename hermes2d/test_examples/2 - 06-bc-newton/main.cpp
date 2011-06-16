@@ -36,7 +36,7 @@ const double BDY_C_PARAM = 20.0;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D hermes2d;
+  Hermes2D<double> hermes2d;
 
   // Load the mesh.
   Mesh mesh;
@@ -47,59 +47,59 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf("Aluminum", new HermesFunction(LAMBDA_AL), 
-                                 "Copper", new HermesFunction(LAMBDA_CU), 
-                                 new HermesFunction(-VOLUME_HEAT_SRC),
+  CustomWeakFormPoissonNewton wf("Aluminum", new HermesFunction<double>(LAMBDA_AL), 
+                                 "Copper", new HermesFunction<double>(LAMBDA_CU), 
+                                 new HermesFunction<double>(-VOLUME_HEAT_SRC),
                                   "Outer", ALPHA, T_EXTERIOR);
   
   // Initialize boundary conditions.
   CustomDirichletCondition bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Left"),
                                         BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
-  EssentialBCs bcs(&bc_essential);
+  EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(&wf, &space);
+  DiscreteProblem<double> dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
+  Vector<double>* rhs = create_vector<double>(matrix_solver);
+  Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
   // Initial coefficient vector for the Newton's method.  
-  scalar* coeff_vec = new scalar[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(scalar));
+  double* coeff_vec = new double[ndof];
+  memset(coeff_vec, 0, ndof*sizeof(double));
 
   // Perform Newton's iteration.
   if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into the Solution sln.
-  Solution sln;
-  Solution::vector_to_solution(coeff_vec, &space, &sln);
+  Solution<double> sln;
+  Solution<double>::vector_to_solution(coeff_vec, &space, &sln);
 
   // VTK output.
   if (VTK_VISUALIZATION) {
     // Output solution in VTK format.
-    Linearizer lin;
+    Views::Linearizer<double> lin;
     bool mode_3D = true;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.
-    Orderizer ord;
+    Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
     info("Element orders in VTK format saved to file %s.", "ord.vtk");
   }
 
   // Visualize the solution.
   if (HERMES_VISUALIZATION) {
-    ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
-    view.show(&sln, HERMES_EPS_VERYHIGH);
-    View::wait();
+    Views::ScalarView<double> view("Solution", new Views::WinGeom(0, 0, 440, 350));
+    view.show(&sln, Views::HERMES_EPS_VERYHIGH);
+    Views::View::wait();
   }
 
   // Clean up.
