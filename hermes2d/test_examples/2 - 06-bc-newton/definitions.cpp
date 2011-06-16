@@ -21,7 +21,7 @@ CustomWeakFormPoissonNewton::CustomWeakFormPoissonNewton(std::string mat_al, Her
 
   // Residual forms - surface.
   add_vector_form_surf(new WeakFormsH1::DefaultResidualSurf<double>(0, bdy_heat_flux, new HermesFunction<double>(alpha)));
-  add_vector_form_surf(new WeakFormsH1::DefaultVectorFormSurf<double>(0, bdy_heat_flux, new HermesFunction<double>(-alpha * t_exterior)));
+  //add_vector_form_surf(new WeakFormsH1::DefaultVectorFormSurf<double>(0, bdy_heat_flux, new HermesFunction<double>(-alpha * t_exterior)));
 };
 
 /* Custom non-constant Dirichlet condition */

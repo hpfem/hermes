@@ -47,6 +47,13 @@ MeshFunction<Scalar>::~MeshFunction()
 }
 
 template<typename Scalar>
+int MeshFunction<Scalar>::get_edge_fn_order(int edge)
+{
+  return Function<Scalar>::get_edge_fn_order(edge);
+}
+
+
+template<typename Scalar>
 void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
 {
   Function<Scalar>::set_quad_2d(quad_2d);

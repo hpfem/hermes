@@ -47,10 +47,10 @@ public:
   virtual void set_quad_2d(Quad2D* quad_2d);
   virtual void set_active_element(Element* e);
 
-  virtual int get_edge_fn_order(int edge) { return get_edge_fn_order(edge); }
-
   Mesh*   get_mesh() const { return mesh; }
   RefMap* get_refmap() { this->update_refmap(); return refmap; }
+
+  virtual int get_edge_fn_order(int edge);
 
   virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 

@@ -435,6 +435,12 @@ void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* p
 }
 
 template<typename Scalar>
+int Solution<Scalar>::get_edge_fn_order(int edge)
+{
+  return Function<Scalar>::get_edge_fn_order(edge);
+}
+
+template<typename Scalar>
 void Solution<Scalar>::set_const(Mesh* mesh, Scalar c)
 {
   free();

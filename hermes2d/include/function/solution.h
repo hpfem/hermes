@@ -145,7 +145,7 @@ public:
   void set_zero(Mesh* mesh);
   void set_zero_2(Mesh* mesh); // two-component (Hcurl) zero
 
-  virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
+  int get_edge_fn_order(int edge);
   int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
   /// Sets solution equal to Dirichlet lift only, solution vector = 0
