@@ -992,7 +992,7 @@ namespace WeakFormsH1
   template<typename Scalar>
   DefaultWeakFormLaplace<Scalar>::DefaultWeakFormLaplace(std::string area, 
                                                  HermesFunction<Scalar>* coeff,
-                                                 GeomType gt) : WeakForm()
+                                                 GeomType gt) : WeakForm<Scalar>()
   {
     // Jacobian.
     add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, coeff, HERMES_NONSYM, gt));
@@ -1005,7 +1005,7 @@ namespace WeakFormsH1
   DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson(std::string area,
                                                  HermesFunction<Scalar>* coeff,
                                                  HermesFunction<Scalar>* f,
-                                                 GeomType gt) : WeakForm()
+                                                 GeomType gt) : WeakForm<Scalar>()
   {
     // Jacobian.
     // NOTE: The flag HERMES_NONSYM is important here.
@@ -1030,6 +1030,8 @@ namespace WeakFormsH1
   template class HERMES_API DefaultMatrixFormSurf<std::complex<double> >;
   template class HERMES_API DefaultVectorFormSurf<double>;
   template class HERMES_API DefaultVectorFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultVectorFormVol<double>;
+  template class HERMES_API DefaultVectorFormVol<std::complex<double> >;
   template class HERMES_API DefaultJacobianFormSurf<double>;
   template class HERMES_API DefaultJacobianFormSurf<std::complex<double> >;
   template class HERMES_API DefaultMultiComponentVectorFormSurf<double>;

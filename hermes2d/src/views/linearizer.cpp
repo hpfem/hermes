@@ -1085,7 +1085,7 @@ namespace Hermes
         int iv[4];
         for (unsigned int i = 0; i < e[0]->nvert; i++)
         {
-          double f = (i);
+          double f = val[i];
           if (auto_max && finite(f) && fabs(f) > max) 
             max = fabs(f);
 
@@ -1399,7 +1399,7 @@ namespace Hermes
       // for how it is done for vectors.
       fprintf(f, "\n");
       fprintf(f, "POINT_DATA %d\n", this->nv);
-      fprintf(f, "doubleS %s %s %d\n", name, "float", 1);
+      fprintf(f, "SCALARS %s %s %d\n", name, "float", 1);
       fprintf(f, "LOOKUP_TABLE %s\n", "default");
       for (int i=0; i < this->nv; i++) 
       {
