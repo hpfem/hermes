@@ -875,6 +875,9 @@ int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element*
 }
 
 template<typename Scalar>
+Quad2DCheb Solution<Scalar>::g_quad_2d_cheb;
+
+template<typename Scalar>
 void Solution<Scalar>::precalculate(int order, int mask)
 {
   int i, j, k, l;
