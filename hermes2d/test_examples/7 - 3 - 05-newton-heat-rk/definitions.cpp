@@ -4,13 +4,13 @@ CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, do
                                            double* current_time_ptr, double temp_init, double t_final) : WeakForm(1)
 {
   // Jacobian volumetric part.
-  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0, HERMES_ANY, new HermesFunction(-lambda / (heatcap * rho))));
+  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, new HermesFunction<double>(-lambda / (heatcap * rho))));
 
   // Jacobian surface part.
-  add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf(0, 0, bdy_air, new HermesFunction(-alpha / (heatcap * rho))));
+  add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf<double>(0, 0, bdy_air, new HermesFunction<double>(-alpha / (heatcap * rho))));
 
   // Residual - volumetric.
-  add_vector_form(new WeakFormsH1::DefaultResidualDiffusion(0, HERMES_ANY, new HermesFunction(-lambda / (heatcap * rho))));
+  add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0, HERMES_ANY, new HermesFunction<double>(-lambda / (heatcap * rho))));
 
   // Residual - surface.
   add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap,
@@ -32,10 +32,10 @@ Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, dou
   return alpha / (rho * heatcap) * result;
 }
 
-scalar CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, Geom<double> *e,
-                                                           ExtData<scalar> *ext) const 
+double CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e,
+                                                           ExtData<double> *ext) const 
 {
-  return vector_form_surf<double, scalar>(n, wt, u_ext, v, e, ext);
+  return vector_form_surf<double, double>(n, wt, u_ext, v, e, ext);
 }
 
 Ord CustomWeakFormHeatRK::CustomFormResidualSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
@@ -43,7 +43,7 @@ Ord CustomWeakFormHeatRK::CustomFormResidualSurf::ord(int n, double *wt, Func<Or
   return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
 }
 
-WeakForm::VectorFormSurf* CustomWeakFormHeatRK::CustomFormResidualSurf::clone() 
+VectorFormSurf<double>* CustomWeakFormHeatRK::CustomFormResidualSurf::clone() 
 {
   return new CustomFormResidualSurf(*this);
 }

@@ -32,11 +32,12 @@ using namespace RefinementSelectors;
 //
 //  Time-stepping: Arbitrary Runge-Kutta methods.
 //
+
 //  The following parameters can be changed:
 
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM_BDY = 3;                   // Number of initial uniform mesh refinements towards the boundary.
+const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 const double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
@@ -88,8 +89,8 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary("Boundary ground", INIT_REF_NUM_BDY);
 
   // Previous and next time level solutions.
-  Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
-  Solution* sln_time_new = new Solution(&mesh);
+  Solution<double>* sln_time_prev = new Solution<double>(&mesh, TEMP_INIT);
+  Solution<double>* sln_time_new = new Solution<double>(&mesh);
 
   // Initialize the weak formulation.
   double current_time = 0;
@@ -98,24 +99,24 @@ int main(int argc, char* argv[])
                           &current_time, TEMP_INIT, T_FINAL);
   
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential("Boundary ground", TEMP_INIT);
-  EssentialBCs bcs(&bc_essential);
+  DefaultEssentialBCConst<double> bc_essential("Boundary ground", TEMP_INIT);
+  EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(&wf, &space);
+  DiscreteProblem<double> dp(&wf, &space);
 
   // Initialize views.
-  ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
+  Hermes::Views::ScalarView<double> Tview("Temperature", new Hermes::Views::WinGeom(0, 0, 450, 600));
   Tview.set_min_max_range(0,20);
   Tview.fix_scale_width(30);
-
+  
   // Initialize Runge-Kutta time stepping.
-  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
+  RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver);
 
   // Time stepping loop:
   int ts = 1;
@@ -151,6 +152,6 @@ int main(int argc, char* argv[])
   delete sln_time_new;
 
   // Wait for the view to be closed.
-  View::wait();
+  Hermes::Views::View::wait();
   return 0;
 }
