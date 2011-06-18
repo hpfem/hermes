@@ -181,8 +181,9 @@ int main(int argc, char* argv[])
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+      bool jacobian_changed = true;
+      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
+        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {error("Newton's iteration failed.");}
 
       // Update previous time level solutions.
       Solution<double>::vector_to_solutions(coeff_vec, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 

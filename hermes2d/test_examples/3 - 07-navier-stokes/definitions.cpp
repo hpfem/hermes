@@ -45,14 +45,14 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = int_grad_u_grad_v<double, double>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, double>(n, wt, u, v) / time_step;
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
@@ -75,7 +75,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* xvel_prev_time = ext->fn[0];
@@ -85,7 +85,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_time = ext->fn[0];
@@ -108,11 +108,11 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       return - int_u_dvdx<double, double>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -126,11 +126,11 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       return - int_u_dvdy<double, double>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const{
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -143,7 +143,7 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -152,7 +152,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* vel_prev_time = ext->fn[0]; // this form is used with both velocity components
@@ -219,14 +219,14 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = int_grad_u_grad_v<double, double>(n, wt, u, v) / Reynolds;
       if(!Stokes)
         result += int_u_v<double, double>(n, wt, u, v) / time_step;
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext)
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
     {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
       if(!Stokes)
@@ -249,7 +249,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* xvel_prev_newton = u_ext[0];
@@ -261,7 +261,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const{
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -286,7 +286,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* xvel_prev_newton = u_ext[0];
@@ -296,7 +296,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -319,7 +319,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* yvel_prev_newton = u_ext[0];
@@ -329,7 +329,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const{
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* yvel_prev_newton = u_ext[0];
@@ -352,7 +352,7 @@ public:
       sym = HERMES_NONSYM;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* xvel_prev_newton = u_ext[0];
@@ -364,7 +364,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       if(!Stokes) {
         Func<Ord>* xvel_prev_newton = u_ext[0];
@@ -389,11 +389,11 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       return - int_u_dvdx<double, double>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -407,11 +407,11 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       return - int_u_dvdy<double, double>(n, wt, u, v);
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
   };
@@ -424,7 +424,7 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       Func<double>* xvel_prev_time = ext->fn[0];  
       Func<double>* yvel_prev_time = ext->fn[1];
@@ -440,7 +440,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -469,7 +469,7 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       Func<double>* xvel_prev_time = ext->fn[0];  
       Func<double>* yvel_prev_time = ext->fn[1];
@@ -485,7 +485,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const{
       Ord result = 0;
       Func<Ord>* xvel_prev_time = ext->fn[0];  
       Func<Ord>* yvel_prev_time = ext->fn[1];
@@ -514,7 +514,7 @@ public:
       adapt_eval = false;
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) {
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       Func<double>* xvel_prev_newton = u_ext[0];  
       Func<double>* yvel_prev_newton = u_ext[1];  
@@ -524,7 +524,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
       Ord result = 0;
       Func<Ord>* xvel_prev_newton = u_ext[0];  
       Func<Ord>* yvel_prev_newton = u_ext[1];  
