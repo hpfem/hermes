@@ -69,7 +69,7 @@ const double LAMBDA = 1.0;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D hermes2d;
+  Hermes2D<std::complex<double> > hermes2d;
 
   // Time measurement
   TimePeriod cpu_time;
@@ -85,12 +85,12 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Corner horizontal",
+  DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner horizontal",
                                                                    "Corner vertical"), 0);
-  EssentialBCs bcs(&bc_essential);
+  EssentialBCs<std::complex<double> > bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
-  HcurlSpace space(&mesh, &bcs, P_INIT);
+  HcurlSpace<std::complex<double> > space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   CustomWeakForm wf(MU_R, KAPPA);
 
   // Initialize coarse and reference mesh solutions.
-  Solution sln, ref_sln;
+  Solution<std::complex<double> > sln, ref_sln;
 
   // Initialize exact solution.
   CustomExactSolution sln_exact(&mesh);
@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
   HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  VectorView v_view("Solution (magnitude)", new WinGeom(0, 0, 460, 350));
+  Views::VectorView<std::complex<double> > v_view("Solution (magnitude)", new Views::WinGeom(0, 0, 460, 350));
   v_view.set_min_max_range(0, 1.5);
-  OrderView  o_view("Polynomial orders", new WinGeom(470, 0, 400, 350));
+  Views::OrderView<std::complex<double> >  o_view("Polynomial orders", new Views::WinGeom(470, 0, 400, 350));
   
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
@@ -122,37 +122,37 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space* ref_space = Space::construct_refined_space(&space);
-    int ndof_ref = Space::get_num_dofs(ref_space);
+    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    int ndof_ref = Space<std::complex<double> >::get_num_dofs(ref_space);
 
     // Initialize matrix solver.
-    SparseMatrix* matrix = create_matrix(matrix_solver);
-    Vector* rhs = create_vector(matrix_solver);
-    Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+    SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
+    Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
+    Solver<std::complex<double> >* solver = create_linear_solver<std::complex<double> >(matrix_solver, matrix, rhs);
 
     // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem dp(&wf, ref_space);
+    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
 
     // Initial coefficient vector for the Newton's method.  
-    scalar* coeff_vec = new scalar[ndof_ref];
-    memset(coeff_vec, 0, ndof_ref * sizeof(scalar));
+    std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
     // Perform Newton's iteration.
     if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
 
     // Translate the resulting coefficient vector into the Solution sln.
-    Solution::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+    Solution<std::complex<double> >::vector_to_solution(coeff_vec, ref_space, &ref_sln);
 
     // Time measurement.
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver); 
    
     // View the coarse mesh solution and polynomial orders.
     v_view.show(&sln);
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error."); 
-    Adapt* adaptivity = new Adapt(&space);
+    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Calculate exact error.
@@ -176,11 +176,11 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space::get_num_dofs(&space), err_est_rel);
+    graph_dof_est.add_values(Space<std::complex<double> >::get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space::get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.add_values(Space<std::complex<double> >::get_num_dofs(&space), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu_exact.save("conv_cpu_exact.dat");
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
-    if (Space::get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (Space<std::complex<double> >::get_num_dofs(&space) >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
   v_view.show(&ref_sln);
   
   // Wait for all views to be closed.
-  View::wait();
+  Views::View::wait();
   return 0;
 }
 

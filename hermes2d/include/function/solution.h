@@ -69,8 +69,13 @@ public:
   ~Quad2DCheb()
   {
     for (int mode = 0; mode <= 1; mode++)
-      for (int k = 1; k <= 10; k++)
-        delete[] tables[mode][k];
+      for (int k = 0; k <= 10; k++){
+        if (tables[mode][k])
+        {
+          delete[] tables[mode][k];
+          tables[mode][k]=NULL;
+        }
+      }
   }
 
   virtual void dummy_fn() {}
@@ -224,7 +229,7 @@ public:
   bool own_mesh;
 protected:
   
-  Quad2DCheb g_quad_2d_cheb;
+  static Quad2DCheb g_quad_2d_cheb;
   
   /// Converts a coefficient vector into a Solution.
   virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
