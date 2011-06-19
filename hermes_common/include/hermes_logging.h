@@ -252,93 +252,49 @@ using namespace Hermes::Logging;
 # undef HERMES_REPORT_TIME
 # define HERMES_REPORT_TIME
 #endif
-/** \def HERMES_RCTR(__var)
-*  \brief Defines a condition that can control whether logging of a given event is enabled. \internal
-*  An argument \a __var spefies a variable which can control a logging of a given event during
-*  runtime if runtime control is enabled through a preprocessor directive ::HERMES_REPORT_RUNTIME_CONTROL. */
-#ifdef HERMES_REPORT_RUNTIME_CONTROL
-# define HERMES_RCTR(__var) __var /* reports will be controled also by runtime report control variables */
 
-#if defined(HERMES_REPORT_WARNING)
-# define __HERMES_REP_WARN true
-#else
-# define __HERMES_REP_WARN false
-#endif
-#if defined(HERMES_REPORT_INTR_WARNING)
-# define __HERMES_REP_WARN_INTR true
-#else
-# define __HERMES_REP_WARN_INTR false
-#endif
-#if defined(HERMES_REPORT_INFO)
-# define __HERMES_REP_INFO true
-#else
-# define __HERMES_REP_INFO false
-#endif
-#if defined(HERMES_REPORT_VERBOSE)
-# define __HERMES_REP_VERB true
-#else
-# define __HERMES_REP_VERB false
-#endif
-#if defined(HERMES_REPORT_TRACE)
-# define __HERMES_REP_TRAC true
-#else
-# define __HERMES_REP_TRAC false
-#endif
-#if defined(HERMES_REPORT_TIME)
-# define __HERMES_REP_TIME true
-#else
-# define __HERMES_REP_TIME false
-#endif
 #if defined(_DEBUG) || !defined(NDEBUG)
 # define __HERMES_REP_DEBG true
 #else
 # define __HERMES_REP_DEBG false
 #endif
 
-bool __hermes_report_warn = __HERMES_REP_WARN;
-bool __hermes_report_warn_intr = __HERMES_REP_WARN_INTR;
-bool __hermes_report_info = __HERMES_REP_INFO;
-bool __hermes_report_verbose = __HERMES_REP_VERB;
-bool __hermes_report_trace = __HERMES_REP_TRAC;
-bool __hermes_report_time = __HERMES_REP_TIME;
-bool __hermes_report_debug = __HERMES_REP_DEBG;
-
-#if defined(HERMES_REPORT_WARNING))
-# define warn(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
-# define warn_if(__cond, ...) hermes_log_message_if((__cond) && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
+#if defined(HERMES_REPORT_WARNING)
+# define warn(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
+# define warn_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 #else
 # define warn(...)
 # define warn_if(__cond, ...)
 #endif
-#if defined(HERMES_REPORT_INTR_WARNING))
-# define warn_intr(...) hermes_log_message_if(HERMES_RCTR(__hermes_report_warn_intr), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
+#if defined(HERMES_REPORT_INTR_WARNING)
+# define warn_intr(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 #else
 # define warn_intr(...)
 #endif
-#if defined(HERMES_REPORT_INFO))
-# define info(...) hermes_log_message_if(true  && HERMES_RCTR(__hermes_report_info), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
-# define info_if(__cond, ...) hermes_log_message_if((__cond) && HERMES_RCTR(__hermes_report_warn), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
+#if defined(HERMES_REPORT_INFO)
+# define info(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
+# define info_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 #else
 # define info(...)
 # define info_if(__cond, ...)
 #endif
-#if defined(HERMES_REPORT_VERBOSE))
-# define verbose(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_verbose), HERMES_BUILD_LOG_INFO(HERMES_EC_VERBOSE), __VA_ARGS__)
+#if defined(HERMES_REPORT_VERBOSE)
+# define verbose(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_VERBOSE), __VA_ARGS__)
 #else
 # define verbose(...)
 #endif
-#if defined(HERMES_REPORT_TRACE))
-# define trace(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_trace), HERMES_BUILD_LOG_INFO(HERMES_EC_TRACE), __VA_ARGS__)
+#if defined(HERMES_REPORT_TRACE)
+# define trace(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_TRACE), __VA_ARGS__)
 #else
 # define trace(...)
 #endif
-#if defined(HERMES_REPORT_TIME))
-# define report_time(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_time), HERMES_BUILD_LOG_INFO(HERMES_EC_TIME), __VA_ARGS__)
+#if defined(HERMES_REPORT_TIME)
+# define report_time(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_TIME), __VA_ARGS__)
 #else
 # define report_time(...)
 #endif
-#if defined(_DEBUG) || !defined(NDEBUG) ||)
-# define debug_log(...) hermes_log_message_if(true && HERMES_RCTR(__hermes_report_debug), HERMES_BUILD_LOG_INFO(HERMES_EC_DEBUG), __VA_ARGS__)
+#if defined(_DEBUG) || !defined(NDEBUG)
+# define debug_log(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_DEBUG), __VA_ARGS__)
 #else
 # define debug_log(...)
 #endif
@@ -353,6 +309,4 @@ bool __hermes_report_debug = __HERMES_REP_DEBG;
 # define trace(...)
 # define report_time(...)
 # define debug_log(...)
-#endif
-
 #endif

@@ -48,7 +48,6 @@ HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
   g_order_table_quad = quad_table;
 }
 
-
 HERMES_API void update_limit_table(int mode)
 {
   g_quad_2d_std.set_mode(mode);
