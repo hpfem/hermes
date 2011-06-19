@@ -561,5 +561,20 @@ namespace WeakFormsHcurl
     return new DefaultVectorFormSurf<Scalar>(*this);
   }
 
-
+  template class HERMES_API DefaultJacobianCurlCurl<double>;
+  template class HERMES_API DefaultJacobianCurlCurl<std::complex<double> >;
+  template class HERMES_API DefaultMatrixFormVol<double>;
+  template class HERMES_API DefaultMatrixFormVol<std::complex<double> >;
+  template class HERMES_API DefaultVectorFormVol<double>;
+  template class HERMES_API DefaultVectorFormVol<std::complex<double> >;
+  template class HERMES_API DefaultResidualVol<double>;
+  template class HERMES_API DefaultResidualVol<std::complex<double> >;
+  template class HERMES_API DefaultResidualCurlCurl<double>;
+  template class HERMES_API DefaultResidualCurlCurl<std::complex<double> >;
+  template class HERMES_API DefaultMatrixFormSurf<double>;
+  template class HERMES_API DefaultMatrixFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultVectorFormSurf<double>;
+  template class HERMES_API DefaultVectorFormSurf<std::complex<double> >;
+  template class HERMES_API DefaultResidualSurf<double>;
+  template class HERMES_API DefaultResidualSurf<std::complex<double> >;
 };
