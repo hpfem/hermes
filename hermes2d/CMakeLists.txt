@@ -116,6 +116,10 @@ if(H2D_WITH_TEST_EXAMPLES)
   add_subdirectory(test_examples)
 endif(H2D_WITH_TEST_EXAMPLES)
 
+if(H2D_WITH_TESTS)
+  enable_testing()
+endif(H2D_WITH_TESTS)
+
 #
 # Documentation
 #
