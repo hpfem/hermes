@@ -34,30 +34,30 @@ using namespace RefinementSelectors;
 // The following parameters can be changed:
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
-// discontinuous L2 elements (making the velocity discreetely
-// divergence-free, more accurate than using a continuous
-// pressure approximation). Otherwise the standard continuous
-// elements are used. The results are striking - check the
-// tutorial for comparisons.
+                                                  // discontinuous L2 elements (making the velocity discreetely
+                                                  // divergence-free, more accurate than using a continuous
+                                                  // pressure approximation). Otherwise the standard continuous
+                                                  // elements are used. The results are striking - check the
+                                                  // tutorial for comparisons.
 const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
-// in every time step. Otherwise the convective term is linearized
-// using the velocities from the previous time step.
+                                                  // in every time step. Otherwise the convective term is linearized
+                                                  // using the velocities from the previous time step.
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
-// Note: P_INIT_VEL should always be greater than
-// P_INIT_PRESSURE because of the inf-sup condition.
+                                                  // Note: P_INIT_VEL should always be greater than
+                                                  // P_INIT_PRESSURE because of the inf-sup condition.
 const double RE = 200.0;                          // Reynolds number.
 const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
 const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
-// from 0 to VEL_INLET, then it stays constant.
+                                                  // from 0 to VEL_INLET, then it stays constant.
 const double TAU = 0.1;                           // Time step.
 const double T_FINAL = 30000.0;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
-// velocity profile at inlet).
+                                                  // velocity profile at inlet).
 Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
-// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
+                                                                  // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -131,9 +131,6 @@ int main(int argc, char* argv[])
     wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
-  bool is_linear;
-  if (NEWTON) is_linear = false;
-  else is_linear = true;
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
@@ -157,9 +154,9 @@ int main(int argc, char* argv[])
   {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
     OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-      Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-      coeff_vec, matrix_solver, 
-      Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+                                         Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+                                         coeff_vec, matrix_solver, 
+                                         Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
   }
 
   // Time-stepping loop:
@@ -176,6 +173,7 @@ int main(int argc, char* argv[])
       info("Updating time-dependent essential BC.");
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
+    
     if (NEWTON) 
     {
       // Perform Newton's iteration.
