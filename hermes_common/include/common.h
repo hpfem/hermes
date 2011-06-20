@@ -261,7 +261,10 @@ namespace Hermes
   /// Throws an exception std::runtime_error. Used by Python wrappers.
   /** \param[in] text A text (a cause) of the exception. */
   extern HERMES_API void throw_exception(char *text);
-
+  
+  // Common return values for tests.
+  #define TEST_SUCCESS    0
+  #define TEST_FAILURE    -1
 }
 #endif
 

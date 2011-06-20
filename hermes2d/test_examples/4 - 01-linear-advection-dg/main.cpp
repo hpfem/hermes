@@ -14,7 +14,9 @@
 //
 //  The following parameters can be changed:
 
-const int P_H = 0, P_V = 0;                       // Polynomial degrees of mesh elements in horizontal and vertical directions.
+const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
+const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const int P_INIT = 0;                             // Polynomial degree of mesh elements.
 const int INIT_REF = 1;                           // Number of initial uniform mesh refinements.
 const char* iterative_method = "cg";              // Name of the iterative method employed by AztecOO (ignored
                                                   // by the other solvers). 
@@ -26,24 +28,11 @@ const char* preconditioner = "jacobi";            // Name of the preconditioner 
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Flux definition.
-#include "fluxes.cpp"
-
-// Boundary conditions.
-BCType bc_types(int marker)
-{
-  return BC_NATURAL;
-}
-
-// Essential (Dirichlet) boundary condition values.
-template<typename Real, typename Scalar>
-Scalar g(int ess_bdy_marker, Real x, Real y)
-{
-  if (ess_bdy_marker == 1) return 1; else return 0;
-}
+// Boundary markers.
+const std::string BDY_BOTTOM_LEFT = "1";
 
 // Weak forms.
-#include "forms.cpp"
+#include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
@@ -58,40 +47,36 @@ int main(int argc, char* argv[])
   //mloader.load("square-tri.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF; i++) 
+    mesh.refine_all_elements();
   
   // Create an L2 space with default shapeset.
-  L2Space space(&mesh, bc_types, NULL, Ord2(P_H, P_V));
-  int ndof = Space::get_num_dofs(&space);
+  L2Space<double> space(&mesh, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakForm wf;
-  wf.add_matrix_form(callback(bilinear_form));
-  wf.add_vector_form(callback(linear_form));
-  wf.add_matrix_form_surf(callback(bilinear_form_boundary), H2D_DG_BOUNDARY_EDGE);
-  wf.add_vector_form_surf(callback(linear_form_boundary), H2D_DG_BOUNDARY_EDGE);
-  wf.add_matrix_form_surf(callback(bilinear_form_interface), H2D_DG_INNER_EDGE);
+  // Initialize the weak formulation.
+  CustomWeakForm wf(BDY_BOTTOM_LEFT);
 
   // Initialize the FE problem.
-  bool is_linear = true;
-  DiscreteProblem dp(&wf, &space, is_linear);
+  DiscreteProblem<double> dp(&wf, &space);
   
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
+  Vector<double>* rhs = create_vector<double>(matrix_solver);
+  Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
   
   // Initialize the preconditioner in the case of SOLVER_AZTECOO.
   if (matrix_solver == SOLVER_AZTECOO) 
   {
-    ((AztecOOSolver*) solver)->set_solver(iterative_method);
-    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    dynamic_cast<AztecOOSolver<double>*>(solver)->set_solver(iterative_method);
+    dynamic_cast<AztecOOSolver<double>*>(solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
   }
     
   // Initialize the solution.
-  Solution sln;
+  Solution<double> sln;
   
   // Assemble the stiffness matrix and right-hand side vector.
   info("Assembling the stiffness matrix and right-hand side vector.");
@@ -100,7 +85,7 @@ int main(int argc, char* argv[])
   // Solve the linear system and if successful, obtain the solution.
   info("Solving the matrix problem.");
   if(solver->solve())
-    Solution::vector_to_solution(solver->get_solution(), &space, &sln);
+    Solution<double>::vector_to_solution(solver->get_solution(), &space, &sln);
   else
     error ("Matrix solver failed.\n");
   
@@ -112,12 +97,28 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
   
+  // VTK output.
+  if (VTK_VISUALIZATION) 
+  {
+    // Output solution in VTK format.
+    Views::Linearizer<double> lin;
+    bool mode_3D = true;
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
+    info("Solution in VTK format saved to file %s.", "sln.vtk");
+    
+    // Output mesh and element orders in VTK format.
+    Views::Orderizer ord;
+    ord.save_orders_vtk(&space, "ord.vtk");
+    info("Element orders in VTK format saved to file %s.", "ord.vtk");
+  }
+  
   // Visualize the solution.
-  ScalarView view1("Solution", new WinGeom(860, 0, 400, 350));
-  view1.show(&sln);
-
-  // Wait for all views to be closed.
-  View::wait();
+  if (HERMES_VISUALIZATION) 
+  {
+    Views::ScalarView<double> view("Solution", new Views::WinGeom(0, 0, 440, 350));
+    view.show(&sln, Views::HERMES_EPS_VERYHIGH);
+    Views::View::wait();
+  }
   
   return 0;
 }
