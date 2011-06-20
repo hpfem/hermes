@@ -4,7 +4,7 @@
 
 CustomWeakFormPoisson::CustomWeakFormPoisson(std::string mat_al, HermesFunction<double>* lambda_al,
                                              std::string mat_cu, HermesFunction<double>* lambda_cu,
-                                             HermesFunction<double>* src_term) : WeakForm(1)
+                                             HermesFunction<double>* src_term) : WeakForm<double>(1)
 {
   // Jacobian forms.
   add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, mat_al, lambda_al));

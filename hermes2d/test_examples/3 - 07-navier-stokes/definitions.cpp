@@ -1,7 +1,9 @@
+#include "hermes2d.h"
+
 class WeakFormNSSimpleLinearization : public WeakForm<double>
 {
 public:
-  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
+  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm<double>(3), Stokes(Stokes), 
                                       Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) {
     BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_0);
@@ -178,7 +180,7 @@ protected:
 class WeakFormNSNewton : public WeakForm<double>
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm(3), Stokes(Stokes), 
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm<double>(3), Stokes(Stokes), 
                                       Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) {
     BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
     add_matrix_form(sym_form_0);
@@ -570,7 +572,7 @@ public:
 
 protected:
   // Members.
-  double startup_time;
   double vel_inlet;
   double H;
+  double startup_time;
 };
