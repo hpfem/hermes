@@ -31,3 +31,4 @@
 #include "../solvers/include/precond.h"
 #include "../solvers/include/precond_ifpack.h"
 #include "../solvers/include/precond_ml.h"
+#include "../solvers/include/eigensolver.h"

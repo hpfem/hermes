@@ -2,7 +2,7 @@
 
 WeakFormEigenLeft::WeakFormEigenLeft() : WeakForm(1) 
 {
-  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion(0, 0));
+  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0));
   add_matrix_form(new MatrixFormPotential(0, 0));
 }
 
@@ -20,10 +20,10 @@ Scalar WeakFormEigenLeft::MatrixFormPotential::matrix_form(int n, double *wt, Fu
   return result;
 }
 
-scalar WeakFormEigenLeft::MatrixFormPotential::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                                                     Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+double WeakFormEigenLeft::MatrixFormPotential::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                                                     Func<double> *v, Geom<double> *e, ExtData<double> *ext) const 
 {
-  return matrix_form<double, scalar>(n, wt, u_ext, u, v, e, ext);
+  return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 }
 
 Ord WeakFormEigenLeft::MatrixFormPotential::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, 
@@ -35,6 +35,6 @@ Ord WeakFormEigenLeft::MatrixFormPotential::ord(int n, double *wt, Func<Ord> *u_
 
 WeakFormEigenRight::WeakFormEigenRight() : WeakForm(1) 
 {
-  add_matrix_form(new WeakFormsH1::DefaultMatrixFormVol(0, 0));
+  add_matrix_form(new WeakFormsH1::DefaultMatrixFormVol<double>(0, 0));
 }
 

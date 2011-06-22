@@ -39,6 +39,7 @@ namespace Hermes
     this->n_eigs=0;
   }
 
+  template<typename Scalar>
   static void wrap_CSC(const Ptr<Python> p, const std::string name,
     const RCP<CSCMatrix<double> > A)
   {
@@ -69,8 +70,8 @@ namespace Hermes
     // Support CSCMatrix<Scalar> only for now:
     RCP<CSCMatrix<Scalar> > A = rcp_dynamic_cast<CSCMatrix<Scalar> >(this->A, true);
     RCP<CSCMatrix<Scalar> > B = rcp_dynamic_cast<CSCMatrix<Scalar> >(this->B, true);
-    wrap_CSC(ptr(&p), "A", A);
-    wrap_CSC(ptr(&p), "B", B);
+    wrap_CSC<Scalar>(ptr(&p), "A", A);
+    wrap_CSC<Scalar>(ptr(&p), "B", B);
     this->p.exec("from eigen import solve_eig_pysparse");
     this->p.push_double("target_value", target_value);
     this->p.push_int("n_eigs", n_eigs);
@@ -106,6 +107,9 @@ namespace Hermes
     } else
       throw std::runtime_error("'i' must obey 0 <= i < n_eigs");
   }
+
+  template class HERMES_API EigenSolver<double>;
+  template class HERMES_API EigenSolver<std::complex<double> >;
 }
 
 #endif

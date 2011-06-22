@@ -22,13 +22,13 @@
 #ifndef __HERMES_EIGENSOLVER_H
 #define __HERMES_EIGENSOLVER_H
 
+#include "config.h"
 #ifdef WITH_PYTHON
 
 #include "matrix.h"
 
 #include "python_api.h"
 
-#include "config.h"
 // RCP
 #ifndef WITH_TRILINOS
 #include "Teuchos_RCP.hpp"
@@ -43,10 +43,11 @@ using Teuchos::Ptr;
 using Teuchos::rcp;
 using Teuchos::null;
 
+
 template <typename Scalar>
 class HERMES_API EigenSolver {
 public:
-    EigenSolver(const RCP<Matrix<Scalar> > &A, const RCP<Matrix<Scalar> > &B);
+    EigenSolver(const RCP<Algebra::Matrix<Scalar> > &A, const RCP<Algebra::Matrix<Scalar> > &B);
 
 
     // Solves for 'n_eigs' eigenvectors, around the 'target_value'. Use
@@ -75,7 +76,7 @@ public:
     }
 
 private:
-    RCP<Matrix<Scalar> > A, B;
+    RCP<Algebra::Matrix<Scalar> > A, B;
     int n_eigs;
     Python p;
 };
