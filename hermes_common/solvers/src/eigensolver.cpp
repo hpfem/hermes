@@ -31,12 +31,16 @@ using Teuchos::rcp_dynamic_cast;
 
 namespace Hermes 
 {
+  PyMODINIT_FUNC initeigen(void); /* proto*/
+
   template<typename Scalar>
   EigenSolver<Scalar>::EigenSolver(const RCP<Matrix<Scalar> > &A, const RCP<Matrix<Scalar> > &B) 
   {
     this->A = A;
     this->B = B;
     this->n_eigs=0;
+
+    initeigen();
   }
 
   template<typename Scalar>
