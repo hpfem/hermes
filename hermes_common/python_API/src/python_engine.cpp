@@ -872,7 +872,8 @@ __pyx_L0:;
 *     return {"verbose": False}
 * 
 * cdef api void namespace_push(object namespace, const_char_p name, object o):             # <<<<<<<<<<<<<<
-*     namespace.update({name: o})
+*     namespace.update(
+{name: o})
 * 
 */
 
@@ -886,11 +887,13 @@ static  void namespace_push(PyObject *__pyx_v_namespace, const char* __pyx_v_nam
   /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":36
   * 
   * cdef api void namespace_push(object namespace, const_char_p name, object o):
-  *     namespace.update({name: o})             # <<<<<<<<<<<<<<
+  *     namespace.update(
+{name: o})             # <<<<<<<<<<<<<<
   * 
   * cdef api void namespace_print(object namespace):
   */
-  __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__update); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__update); if (unlikely(!__pyx_t_1)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
@@ -920,7 +923,8 @@ __pyx_L0:;
 }
 
 /* "/home/ondrej/repos/hermes/hermes_common/python/python_engine.pyx":38
-*     namespace.update({name: o})
+*     namespace.update(
+{name: o})
 * 
 * cdef api void namespace_print(object namespace):             # <<<<<<<<<<<<<<
 *     print "-"*80
@@ -960,7 +964,8 @@ static  void namespace_print(PyObject *__pyx_v_namespace)
   * 
   * cdef api object namespace_pull(object namespace, const_char_p name):
   */
-  if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   goto __pyx_L0;
 __pyx_L1_error:;
@@ -994,7 +999,8 @@ static  PyObject *namespace_pull(PyObject *__pyx_v_namespace, const char* __pyx_
   * cdef api object c2py_int(int i):
   */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__get); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__get); if (unlikely(!__pyx_t_1)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(((PyObject *)__pyx_t_2));
@@ -2568,7 +2574,8 @@ static  void run_cmd(const char* __pyx_v_text, PyObject *__pyx_v_namespace)
       *         if verbose:
       *             print "got a text:", text
       */
-      __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__get); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_1 = PyObject_GetAttr(__pyx_v_namespace, __pyx_n_s__get); if (unlikely(!__pyx_t_1)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_1);
       __pyx_t_2 = PyObject_Call(__pyx_t_1, ((PyObject *)__pyx_k_tuple_5), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_2);
@@ -2638,7 +2645,8 @@ __pyx_L11:;
         *         code = compile(text, "", "exec")
         *         eval(code, {}, namespace)
         */
-        if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         goto __pyx_L12;
       }
 __pyx_L12:;
@@ -2722,7 +2730,8 @@ __pyx_L12:;
         *     except SystemExit, e:
         *         try:
         */
-        if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PrintOne(0, __pyx_v_namespace) < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         goto __pyx_L13;
       }
 __pyx_L13:;
@@ -5284,10 +5293,14 @@ PyMODINIT_FUNC PyInit_python_engine(void)
   if (unlikely(__Pyx_InitCachedConstants() < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   /*--- Global init code ---*/
   /*--- Function export code ---*/
-  if (__Pyx_ExportFunction("namespace_create", (void (*)(void))namespace_create, "PyObject *(void)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__Pyx_ExportFunction("namespace_push", (void (*)(void))namespace_push, "void (PyObject *, const char*, PyObject *)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__Pyx_ExportFunction("namespace_print", (void (*)(void))namespace_print, "void (PyObject *)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (__Pyx_ExportFunction("namespace_pull", (void (*)(void))namespace_pull, "PyObject *(PyObject *, const char*)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_ExportFunction("namespace_create", (void (*)(void))namespace_create, "PyObject *(void)") < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_ExportFunction("namespace_push", (void (*)(void))namespace_push, "void (PyObject *, const char*, PyObject *)") < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_ExportFunction("namespace_print", (void (*)(void))namespace_print, "void (PyObject *)") < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_ExportFunction("namespace_pull", (void (*)(void))namespace_pull, "PyObject *(PyObject *, const char*)") < 0) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportFunction("c2py_int", (void (*)(void))c2py_int, "PyObject *(int)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportFunction("py2c_int", (void (*)(void))py2c_int, "int (PyObject *)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   if (__Pyx_ExportFunction("c2py_double", (void (*)(void))c2py_double, "PyObject *(double)") < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}

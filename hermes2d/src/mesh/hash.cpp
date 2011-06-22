@@ -17,235 +17,228 @@
 #include "mesh.h"
 #include "hash.h"
 
-
-HashTable::HashTable()
+namespace Hermes
 {
-  v_table = NULL; e_table = NULL;
-  nqueries = ncollisions = 0;
-}
-
-
-void HashTable::init(int size)
-{
-  v_table = e_table = NULL;
-  nqueries = ncollisions = 0;
-
-  mask = size-1;
-  if (size & mask) error("Parameter 'size' must be a power of two.");
-
-  // allocate and initialize the hash tables
-  v_table = new Node*[size];
-  e_table = new Node*[size];
-
-  memset(v_table, 0, size * sizeof(Node*));
-  memset(e_table, 0, size * sizeof(Node*));
-
-  nqueries = ncollisions = 0;
-}
-
-
-void HashTable::copy_list(Node** ptr, Node* node)
-{
-  while (node != NULL)
+  namespace Hermes2D
   {
-    *ptr = &nodes[node->id];
-    ptr = &((*ptr)->next_hash);
-    node = node->next_hash;
-  }
-  *ptr = NULL;
-}
-
-
-void HashTable::copy(const HashTable* ht)
-{
-  free();
-  nodes.copy(ht->nodes);
-  mask = ht->mask;
-
-  v_table = new Node*[mask+1];
-  e_table = new Node*[mask+1];
-  for (int i = 0; i <= mask; i++)
-  {
-    copy_list(v_table + i, ht->v_table[i]);
-    copy_list(e_table + i, ht->e_table[i]);
-  }
-}
-
-
-void HashTable::rebuild()
-{
-  memset(v_table, 0, (mask+1) * sizeof(Node*));
-  memset(e_table, 0, (mask+1) * sizeof(Node*));
-
-  Node* node;
-  for_all_nodes(node, this)
-  {
-    int p1 = node->p1, p2 = node->p2;
-    if (p1 > p2) std::swap(p1, p2);
-    int idx = hash(p1, p2);
-
-    if (node->type == HERMES_TYPE_VERTEX)
+    HashTable::HashTable()
     {
-      node->next_hash = v_table[idx];
-      v_table[idx] = node;
+      v_table = NULL; e_table = NULL;
+      nqueries = ncollisions = 0;
     }
-    else
+
+    void HashTable::init(int size)
     {
-      node->next_hash = e_table[idx];
-      e_table[idx] = node;
+      v_table = e_table = NULL;
+      nqueries = ncollisions = 0;
+
+      mask = size-1;
+      if (size & mask) error("Parameter 'size' must be a power of two.");
+
+      // allocate and initialize the hash tables
+      v_table = new Node*[size];
+      e_table = new Node*[size];
+
+      memset(v_table, 0, size * sizeof(Node*));
+      memset(e_table, 0, size * sizeof(Node*));
+
+      nqueries = ncollisions = 0;
     }
-  }
-}
 
-
-void HashTable::free()
-{
-  nodes.free();
-  if (v_table != NULL)
-  {
-    delete [] v_table;
-    v_table = NULL;
-  }
-  if (e_table != NULL)
-  {
-    delete [] e_table;
-    e_table = NULL;
-  }
-  dump_hash_stat();
-}
-
-
-void HashTable::dump_hash_stat()
-{
-  if (ncollisions > 2*nqueries) 
-  {
-    warn("Hashtable: nqueries=%d ncollisions=%d", nqueries, ncollisions);
-  }
-}
-
-
-inline Node* HashTable::search_list(Node* node, int p1, int p2)
-{
-  nqueries++;
-  while (node != NULL)
-  {
-    if (node->p1 == p1 && node->p2 == p2) return node;
-    node = node->next_hash;
-    ncollisions++;
-  }
-  return NULL;
-}
-
-
-Node* HashTable::get_vertex_node(int p1, int p2)
-{
-  // search for the node in the vertex hashtable
-  if (p1 > p2) std::swap(p1, p2);
-  int i = hash(p1, p2);
-  Node* node = search_list(v_table[i], p1, p2);
-  if (node != NULL) return node;
-
-  // not found - create a new one
-  Node* newnode = nodes.add();
-
-  // initialize the new Node
-  newnode->type = HERMES_TYPE_VERTEX;
-  newnode->ref = 0;
-  newnode->bnd = 0;
-  newnode->p1 = p1;
-  newnode->p2 = p2;
-  assert(nodes[p1].type == HERMES_TYPE_VERTEX && nodes[p2].type == HERMES_TYPE_VERTEX);
-  newnode->x = (nodes[p1].x + nodes[p2].x) * 0.5;
-  newnode->y = (nodes[p1].y + nodes[p2].y) * 0.5;
-
-  // insert into hashtable
-  newnode->next_hash = v_table[i];
-  v_table[i] = newnode;
-
-  return newnode;
-}
-
-Node* HashTable::get_edge_node(int p1, int p2)
-{
-  // search for the node in the edge hashtable
-  if (p1 > p2) std::swap(p1, p2);
-  int i = hash(p1, p2);
-  Node* node = search_list(e_table[i], p1, p2);
-  if (node != NULL) return node;
-
-  // not found - create a new one
-  Node* newnode = nodes.add();
-
-  // initialize the new node
-  newnode->type = HERMES_TYPE_EDGE;
-  newnode->ref = 0;
-  newnode->bnd = 0;
-  newnode->p1 = p1;
-  newnode->p2 = p2;
-  newnode->marker = 0;
-  newnode->elem[0] = newnode->elem[1] = NULL;
-
-  // insert into hashtable
-  newnode->next_hash = e_table[i];
-  e_table[i] = newnode;
-
-  return newnode;
-}
-
-
-Node* HashTable::peek_vertex_node(int p1, int p2)
-{
-  if (p1 > p2) std::swap(p1, p2);
-  return search_list(v_table[hash(p1, p2)], p1, p2);
-}
-
-
-Node* HashTable::peek_edge_node(int p1, int p2)
-{
-  if (p1 > p2) std::swap(p1, p2);
-  return search_list(e_table[hash(p1, p2)], p1, p2);
-}
-
-
-void HashTable::remove_vertex_node(int id)
-{
-  // remove the node from the hash table
-  int i = hash(nodes[id].p1, nodes[id].p2);
-  Node** ptr = v_table + i;
-  Node* node = *ptr;
-  while (node != NULL)
-  {
-    if (node->id == id)
+    void HashTable::copy_list(Node** ptr, Node* node)
     {
-      *ptr = node->next_hash;
-      break;
+      while (node != NULL)
+      {
+        *ptr = &nodes[node->id];
+        ptr = &((*ptr)->next_hash);
+        node = node->next_hash;
+      }
+      *ptr = NULL;
     }
-    ptr = &node->next_hash;
-    node = *ptr;
-  }
 
-  // remove node from the array
-  nodes.remove(id);
-}
-
-
-void HashTable::remove_edge_node(int id)
-{
-  // remove the node from the hash table
-  int i = hash(nodes[id].p1, nodes[id].p2);
-  Node** ptr = e_table + i;
-  Node* node = *ptr;
-  while (node != NULL)
-  {
-    if (node->id == id)
+    void HashTable::copy(const HashTable* ht)
     {
-      *ptr = node->next_hash;
-      break;
-    }
-    ptr = &node->next_hash;
-    node = *ptr;
-  }
+      free();
+      nodes.copy(ht->nodes);
+      mask = ht->mask;
 
-  // remove node from the array
-  nodes.remove(id);
+      v_table = new Node*[mask+1];
+      e_table = new Node*[mask+1];
+      for (int i = 0; i <= mask; i++)
+      {
+        copy_list(v_table + i, ht->v_table[i]);
+        copy_list(e_table + i, ht->e_table[i]);
+      }
+    }
+
+    void HashTable::rebuild()
+    {
+      memset(v_table, 0, (mask+1) * sizeof(Node*));
+      memset(e_table, 0, (mask+1) * sizeof(Node*));
+
+      Node* node;
+      for_all_nodes(node, this)
+      {
+        int p1 = node->p1, p2 = node->p2;
+        if (p1 > p2) std::swap(p1, p2);
+        int idx = hash(p1, p2);
+
+        if (node->type == HERMES_TYPE_VERTEX)
+        {
+          node->next_hash = v_table[idx];
+          v_table[idx] = node;
+        }
+        else
+        {
+          node->next_hash = e_table[idx];
+          e_table[idx] = node;
+        }
+      }
+    }
+
+    void HashTable::free()
+    {
+      nodes.free();
+      if (v_table != NULL)
+      {
+        delete [] v_table;
+        v_table = NULL;
+      }
+      if (e_table != NULL)
+      {
+        delete [] e_table;
+        e_table = NULL;
+      }
+      dump_hash_stat();
+    }
+
+    void HashTable::dump_hash_stat()
+    {
+      if (ncollisions > 2*nqueries) 
+      {
+        warn("Hashtable: nqueries=%d ncollisions=%d", nqueries, ncollisions);
+      }
+    }
+
+    inline Node* HashTable::search_list(Node* node, int p1, int p2)
+    {
+      nqueries++;
+      while (node != NULL)
+      {
+        if (node->p1 == p1 && node->p2 == p2) return node;
+        node = node->next_hash;
+        ncollisions++;
+      }
+      return NULL;
+    }
+
+    Node* HashTable::get_vertex_node(int p1, int p2)
+    {
+      // search for the node in the vertex hashtable
+      if (p1 > p2) std::swap(p1, p2);
+      int i = hash(p1, p2);
+      Node* node = search_list(v_table[i], p1, p2);
+      if (node != NULL) return node;
+
+      // not found - create a new one
+      Node* newnode = nodes.add();
+
+      // initialize the new Node
+      newnode->type = HERMES_TYPE_VERTEX;
+      newnode->ref = 0;
+      newnode->bnd = 0;
+      newnode->p1 = p1;
+      newnode->p2 = p2;
+      assert(nodes[p1].type == HERMES_TYPE_VERTEX && nodes[p2].type == HERMES_TYPE_VERTEX);
+      newnode->x = (nodes[p1].x + nodes[p2].x) * 0.5;
+      newnode->y = (nodes[p1].y + nodes[p2].y) * 0.5;
+
+      // insert into hashtable
+      newnode->next_hash = v_table[i];
+      v_table[i] = newnode;
+
+      return newnode;
+    }
+
+    Node* HashTable::get_edge_node(int p1, int p2)
+    {
+      // search for the node in the edge hashtable
+      if (p1 > p2) std::swap(p1, p2);
+      int i = hash(p1, p2);
+      Node* node = search_list(e_table[i], p1, p2);
+      if (node != NULL) return node;
+
+      // not found - create a new one
+      Node* newnode = nodes.add();
+
+      // initialize the new node
+      newnode->type = HERMES_TYPE_EDGE;
+      newnode->ref = 0;
+      newnode->bnd = 0;
+      newnode->p1 = p1;
+      newnode->p2 = p2;
+      newnode->marker = 0;
+      newnode->elem[0] = newnode->elem[1] = NULL;
+
+      // insert into hashtable
+      newnode->next_hash = e_table[i];
+      e_table[i] = newnode;
+
+      return newnode;
+    }
+
+    Node* HashTable::peek_vertex_node(int p1, int p2)
+    {
+      if (p1 > p2) std::swap(p1, p2);
+      return search_list(v_table[hash(p1, p2)], p1, p2);
+    }
+
+    Node* HashTable::peek_edge_node(int p1, int p2)
+    {
+      if (p1 > p2) std::swap(p1, p2);
+      return search_list(e_table[hash(p1, p2)], p1, p2);
+    }
+
+    void HashTable::remove_vertex_node(int id)
+    {
+      // remove the node from the hash table
+      int i = hash(nodes[id].p1, nodes[id].p2);
+      Node** ptr = v_table + i;
+      Node* node = *ptr;
+      while (node != NULL)
+      {
+        if (node->id == id)
+        {
+          *ptr = node->next_hash;
+          break;
+        }
+        ptr = &node->next_hash;
+        node = *ptr;
+      }
+
+      // remove node from the array
+      nodes.remove(id);
+    }
+
+    void HashTable::remove_edge_node(int id)
+    {
+      // remove the node from the hash table
+      int i = hash(nodes[id].p1, nodes[id].p2);
+      Node** ptr = e_table + i;
+      Node* node = *ptr;
+      while (node != NULL)
+      {
+        if (node->id == id)
+        {
+          *ptr = node->next_hash;
+          break;
+        }
+        ptr = &node->next_hash;
+        node = *ptr;
+      }
+
+      // remove node from the array
+      nodes.remove(id);
+    }
+  }
 }

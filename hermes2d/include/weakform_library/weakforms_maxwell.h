@@ -19,69 +19,73 @@
 #include "../integrals/h1.h"
 #include "../weakform/weakform.h"
 #include "../spline.h"
-
-namespace WeakFormsMaxwell {
-
-  /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx
-  spline_coeff... nonconstant parameter given by cubic spline
-  */
-
-  template<typename Scalar>
-  class HERMES_API DefaultJacobianMagnetostatics : public MatrixFormVol<Scalar>
+namespace Hermes
+{
+  namespace Hermes2D
   {
-  public:
-    DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
-      int order_increase = 3);
-    DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
-      Scalar const_coeff,CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
+    namespace WeakFormsMaxwell {
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-      Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+      /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx
+      spline_coeff... nonconstant parameter given by cubic spline
+      */
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+      template<typename Scalar>
+      class HERMES_API DefaultJacobianMagnetostatics : public MatrixFormVol<Scalar>
+      {
+      public:
+        DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
+          int order_increase = 3);
+        DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
+          Scalar const_coeff,CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
-    // This is to make the form usable in rk_time_step().
-    virtual MatrixFormVol<Scalar>* clone();
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
 
-  private:
-    int idx_j;
-    Scalar const_coeff;
-    CubicSpline* spline_coeff;
-    GeomType gt;
-    int order_increase;
-  };
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  template<typename Scalar>
-  class HERMES_API DefaultResidualMagnetostatics : public VectorFormVol<Scalar>
-  {
-  public:
-    DefaultResidualMagnetostatics(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      GeomType gt = HERMES_PLANAR,
-      int order_increase = 3);
-    DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0, 
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      GeomType gt = HERMES_PLANAR, int order_increase = 3);
+        // This is to make the form usable in rk_time_step().
+        virtual MatrixFormVol<Scalar>* clone();
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+      private:
+        int idx_j;
+        Scalar const_coeff;
+        CubicSpline* spline_coeff;
+        GeomType gt;
+        int order_increase;
+      };
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+      template<typename Scalar>
+      class HERMES_API DefaultResidualMagnetostatics : public VectorFormVol<Scalar>
+      {
+      public:
+        DefaultResidualMagnetostatics(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          GeomType gt = HERMES_PLANAR,
+          int order_increase = 3);
+        DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0, 
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
-    // This is to make the form usable in rk_time_step().
-    virtual VectorFormVol<Scalar>* clone();
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-  private:
-    int idx_i;
-    Scalar const_coeff;
-    CubicSpline* spline_coeff;
-    GeomType gt;
-    int order_increase;
-  };
-};
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        // This is to make the form usable in rk_time_step().
+        virtual VectorFormVol<Scalar>* clone();
+
+      private:
+        int idx_i;
+        Scalar const_coeff;
+        CubicSpline* spline_coeff;
+        GeomType gt;
+        int order_increase;
+      };
+    };
+  }
+}
 #endif

@@ -17,7 +17,6 @@
 #define __H2D_SHAPESET_COMMON_H
 
 // Common definitions used by the shapesets...
-using namespace Hermes;
 
 #define lambda1(x,y) (((y) + 1) / 2)
 #define lambda2(x,y) (-((x) + (y)) / 2)

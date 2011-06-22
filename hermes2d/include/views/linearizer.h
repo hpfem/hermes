@@ -21,6 +21,8 @@
 
 namespace Hermes
 {
+  using namespace Hermes2D;
+
   namespace Views
   {
     const double HERMES_EPS_LOW      = 0.007;

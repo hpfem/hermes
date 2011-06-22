@@ -17,103 +17,108 @@
 
 #ifdef HAVE_ML
 
-template<typename Scalar>
-MlPrecond<Scalar>::MlPrecond(const char *type)
+namespace Hermes 
 {
-  this->prec = NULL;
-  this->owner = true;
-  this->mat = NULL;
-
-  if (strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
-  else if (strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
-}
-
-template<typename Scalar>
-MlPrecond<Scalar>::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
+  namespace Preconditioners 
 {
-  this->prec = mpc;
-  this->owner = false;
-  this->mat = NULL;			// FIXME: get the matrix from mpc
-}
+    template<typename Scalar>
+    MlPrecond<Scalar>::MlPrecond(const char *type)
+    {
+      this->prec = NULL;
+      this->owner = true;
+      this->mat = NULL;
 
-template<typename Scalar>
-MlPrecond<Scalar>::~MlPrecond()
-{
-  if (owner) delete prec;
-}
+      if (strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
+      else if (strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, const char *value)
-{
-  mlist.set(name, value);
-}
+    template<typename Scalar>
+    MlPrecond<Scalar>::MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc)
+    {
+      this->prec = mpc;
+      this->owner = false;
+      this->mat = NULL;			// FIXME: get the matrix from mpc
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, int value)
-{
-  mlist.set(name, value);
-}
+    template<typename Scalar>
+    MlPrecond<Scalar>::~MlPrecond()
+    {
+      if (owner) delete prec;
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::set_param(const char *name, double value)
-{
-  mlist.set(name, value);
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::set_param(const char *name, const char *value)
+    {
+      mlist.set(name, value);
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
-{
-  EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
-  assert(mt != NULL);
-  mat = mt;
-  delete prec;
-  prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::set_param(const char *name, int value)
+    {
+      mlist.set(name, value);
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::destroy()
-{
-  assert(prec != NULL);
-  prec->DestroyPreconditioner();
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::set_param(const char *name, double value)
+    {
+      mlist.set(name, value);
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::compute()
-{
-  assert(prec != NULL);
-  prec->ComputePreconditioner();
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
+    {
+      EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
+      assert(mt != NULL);
+      mat = mt;
+      delete prec;
+      prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
+    }
 
-template<typename Scalar>
-void MlPrecond<Scalar>::print_unused()
-{
-  assert(prec != NULL);
-  prec->PrintUnused();
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::destroy()
+    {
+      assert(prec != NULL);
+      prec->DestroyPreconditioner();
+    }
 
-template<typename Scalar>
-int MlPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
-{
-  assert(prec != NULL);
-  return prec->ApplyInverse(r, z);
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::compute()
+    {
+      assert(prec != NULL);
+      prec->ComputePreconditioner();
+    }
 
-template<typename Scalar>
-const Epetra_Comm &MlPrecond<Scalar>::Comm() const
-{
-  return mat->mat->Comm();
-}
+    template<typename Scalar>
+    void MlPrecond<Scalar>::print_unused()
+    {
+      assert(prec != NULL);
+      prec->PrintUnused();
+    }
 
-template<typename Scalar>
-const Epetra_Map &MlPrecond<Scalar>::OperatorDomainMap() const
-{
-  return mat->mat->OperatorDomainMap();
-}
+    template<typename Scalar>
+    int MlPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
+    {
+      assert(prec != NULL);
+      return prec->ApplyInverse(r, z);
+    }
 
-template<typename Scalar>
-const Epetra_Map &MlPrecond<Scalar>::OperatorRangeMap() const
-{
-  return mat->mat->OperatorRangeMap();
-}
+    template<typename Scalar>
+    const Epetra_Comm &MlPrecond<Scalar>::Comm() const
+    {
+      return mat->mat->Comm();
+    }
 
+    template<typename Scalar>
+    const Epetra_Map &MlPrecond<Scalar>::OperatorDomainMap() const
+    {
+      return mat->mat->OperatorDomainMap();
+    }
+
+    template<typename Scalar>
+    const Epetra_Map &MlPrecond<Scalar>::OperatorRangeMap() const
+    {
+      return mat->mat->OperatorRangeMap();
+    }
+  }
+}
 #endif

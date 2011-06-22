@@ -2,8 +2,6 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
-using namespace RefinementSelectors;
-
 //  This example is a continuation of the example "09-timedep-basic" and it shows how 
 //  to perform time integration with arbitrary Runge-Kutta methods, using Butcher's 
 //  tables as input parameters. Currently (as of January 2011) approx. 30 tables are 

@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file amesos_solver.h
-    \brief AmesosSolver class as an interface to Amesos.
+\brief AmesosSolver class as an interface to Amesos.
 */
 #ifndef __HERMES_COMMON_AMESOS_SOLVER_H_
 #define __HERMES_COMMON_AMESOS_SOLVER_H_
@@ -33,34 +33,35 @@
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 
-using namespace Hermes::Solvers;
+namespace Hermes {
+  namespace Solvers {
+    /// \brief Encapsulation of Amesos linear solver.
+    ///
+    /// @ingroup solvers
+    template<typename Scalar>
+    class HERMES_API AmesosSolver : public LinearSolver<Scalar> {
+    public:
+      AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+      virtual ~AmesosSolver();
 
-/// Encapsulation of Amesos linear solver
-///
-/// @ingroup solvers
-template<typename Scalar>
-class HERMES_API AmesosSolver : public LinearSolver<Scalar> {
-public:
-  AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
-  virtual ~AmesosSolver();
+      static bool is_available(const char *name);
 
-  static bool is_available(const char *name);
+      /// Returns the current UseTranspose setting.
+      bool use_transpose();
+      /// If set true, X will be set to the solution of A^T X = B (not A X = B).
+      void set_use_transpose(bool use_transpose);
+      virtual bool solve();
 
-  /// Returns the current UseTranspose setting.
-  bool use_transpose();
-  /// If set true, X will be set to the solution of A^T X = B (not A X = B).
-  void set_use_transpose(bool use_transpose);
-  virtual bool solve();
+    protected:
+      static Amesos factory;
+      Amesos_BaseSolver *solver;
+      Epetra_LinearProblem problem;
+      EpetraMatrix<Scalar> *m;
+      EpetraVector<Scalar> *rhs;
 
-protected:
-  static Amesos factory;
-  Amesos_BaseSolver *solver;
-  Epetra_LinearProblem problem;
-  EpetraMatrix<Scalar> *m;
-  EpetraVector<Scalar> *rhs;
-  
-  bool setup_factorization();
-};
+      bool setup_factorization();
+    };
+  }
+}
 #endif
-
 #endif

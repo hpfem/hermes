@@ -29,7 +29,9 @@
 # include <AntTweakBar.h>
 #endif
 
+using namespace Hermes;
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 using namespace std;
 
 /* constants */

@@ -19,6 +19,7 @@
 #include "stream_view.h"
 
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 
 //// StreamView /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>

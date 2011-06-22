@@ -21,7 +21,10 @@
 #include "space.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
-
+namespace Hermes
+{
+  namespace Hermes2D
+  {
 double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
 int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
 
@@ -1341,3 +1344,5 @@ Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
 
 template HERMES_API class Solution<double>;
 template HERMES_API class Solution<std::complex<double> >;
+}
+}

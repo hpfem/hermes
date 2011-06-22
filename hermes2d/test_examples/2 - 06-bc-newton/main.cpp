@@ -36,7 +36,7 @@ const double BDY_C_PARAM = 20.0;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D<double> hermes2d;
+  Global<double> hermes2d;
 
   // Load the mesh.
   Mesh mesh;

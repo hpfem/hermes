@@ -18,76 +18,82 @@
 
 #include "solution.h"
 
-/// \brief Represents an exact solution of a PDE.
-///
-/// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
-/// typically an exact solution to a PDE. This can be used to compare an approximate solution
-/// with an exact solution (see DiffFilter).
-template<typename Scalar>
-class HERMES_API ExactSolution : public Solution<Scalar>
+namespace Hermes
 {
-public:
-  ExactSolution(Mesh* mesh);
+  namespace Hermes2D
+  {
+    /// \brief Represents an exact solution of a PDE.
+    ///
+    /// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
+    /// typically an exact solution to a PDE. This can be used to compare an approximate solution
+    /// with an exact solution (see DiffFilter).
+    template<typename Scalar>
+    class HERMES_API ExactSolution : public Solution<Scalar>
+    {
+    public:
+      ExactSolution(Mesh* mesh);
 
-  // Dimension of result - either 1 or 2.
-  virtual unsigned int get_dimension() const = 0;
-};
+      /// Dimension of result - either 1 or 2.
+      virtual unsigned int get_dimension() const = 0;
+    };
 
-/// These classes are abstract (pure virtual destructor).
-/// The user is supposed to subclass them (see e.g. NIST benchmarks).
-template<typename Scalar>
-class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
-{
-public:
-  ExactSolutionScalar(Mesh* mesh);
+    /// These classes are abstract (pure virtual destructor).
+    /// The user is supposed to subclass them (see e.g. NIST benchmarks).
+    template<typename Scalar>
+    class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
+    {
+    public:
+      ExactSolutionScalar(Mesh* mesh);
 
-  ~ExactSolutionScalar() = 0;
+      ~ExactSolutionScalar() = 0;
 
-  // For Scalar-valued solutions this returns 1.
-  virtual unsigned int get_dimension() const;
+      /// For Scalar-valued solutions this returns 1.
+      virtual unsigned int get_dimension() const;
 
-  // Function returning the value.
-  virtual Scalar value (double x, double y) const = 0;
+      /// Function returning the value.
+      virtual Scalar value (double x, double y) const = 0;
 
-  // Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const = 0;
+      /// Function returning the derivatives.
+      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const = 0;
 
-  // Function returning the value and derivatives.
-  Scalar exact_function (double x, double y, Scalar& dx, Scalar& dy) const {
-    derivatives (x, y, dx, dy);
-    return value (x, y);
-  };
+      /// Function returning the value and derivatives.
+      Scalar exact_function (double x, double y, Scalar& dx, Scalar& dy) const {
+        derivatives (x, y, dx, dy);
+        return value (x, y);
+      };
 
-  // Function returning the integration order that 
-  // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) const = 0;
-};
+      /// Function returning the integration order that 
+      /// should be used when integrating the function.
+      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
+    };
 
-template<typename Scalar>
-class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
-{
-public:
-  ExactSolutionVector(Mesh* mesh);
+    template<typename Scalar>
+    class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
+    {
+    public:
+      ExactSolutionVector(Mesh* mesh);
 
-  ~ExactSolutionVector() = 0;
+      ~ExactSolutionVector() = 0;
 
-  // For vector-valued solutions this returns 2.
-  virtual unsigned int get_dimension() const;
+      /// For vector-valued solutions this returns 2.
+      virtual unsigned int get_dimension() const;
 
-  // Function returning the value.
-  virtual Scalar2<Scalar> value (double x, double y) const = 0;
+      /// Function returning the value.
+      virtual Scalar2<Scalar> value (double x, double y) const = 0;
 
-  // Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
+      /// Function returning the derivatives.
+      virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
 
-  // Function returning the value and derivatives.
-  virtual Scalar2<Scalar> exact_function(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
-    derivatives (x, y, dx, dy);
-    return value (x, y);
-  };
+      /// Function returning the value and derivatives.
+      virtual Scalar2<Scalar> exact_function(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
+        derivatives (x, y, dx, dy);
+        return value (x, y);
+      };
 
-  // Function returning the integration order that 
-  // should be used when integrating the function.
-  virtual Ord ord(Ord x, Ord y) const = 0;
-};
+      /// Function returning the integration order that 
+      /// should be used when integrating the function.
+      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
+    };
+  }
+}
 #endif

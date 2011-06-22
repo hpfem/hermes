@@ -20,18 +20,20 @@
 
 #include "shapeset.h"
 
-
-/// L2 shapeset - products of legendre polynomials
-class HERMES_API L2ShapesetLegendre : public Shapeset
+namespace Hermes
 {
-  public: L2ShapesetLegendre();
-  virtual int get_id() const { return 30; }
-  virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
-};
+  namespace Hermes2D
+  {
+    /// L2 shapeset - products of legendre polynomials
+    class HERMES_API L2ShapesetLegendre : public Shapeset
+    {
+    public: L2ShapesetLegendre();
+            virtual int get_id() const { return 30; }
+            virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
+    };
 
-
-/// This is the default shapeset typedef
-typedef L2ShapesetLegendre L2Shapeset;
-
-
+    /// This is the default shapeset typedef
+    typedef L2ShapesetLegendre L2Shapeset;
+  }
+}
 #endif

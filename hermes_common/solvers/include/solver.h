@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file solver.h
-    \brief General linear/nonlinear/iterative solver functionality.
+\brief General linear/nonlinear/iterative solver functionality.
 */
 #ifndef __HERMES_COMMON_SOLVER_H_
 #define __HERMES_COMMON_SOLVER_H_
@@ -37,13 +37,13 @@ using namespace Hermes::Algebra;
 ///
 /*@{*/ // Beginning of documentation group Solvers.
 
-
 /// \brief General namespace for the Hermes library.
 namespace Hermes
 {
   /// \brief Namespace for linear / nonlinear / iterative solvers.
   namespace Solvers
   {
+    using namespace Hermes::Preconditioners;
     /// \ brief Options for matrix factorization reuse.
     ///
     /// Reusing the information computed during previous solution of a similar problem 
@@ -182,6 +182,13 @@ namespace Hermes
       bool precond_yes;
     };
 
+    /// \brief Function returning a solver according to the users's choice.
+    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
+    template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  
+      create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+
+    /*@}*/ // End of documentation group Solvers.
+
     template class HERMES_API Solver<double>;
     template class HERMES_API Solver<std::complex<double> >;
     template class HERMES_API LinearSolver<double>;
@@ -190,13 +197,6 @@ namespace Hermes
     template class HERMES_API NonlinearSolver<std::complex<double> >;
     template class HERMES_API IterSolver<double>;
     template class HERMES_API IterSolver<std::complex<double> >;
-
-
-    /*@}*/ // End of documentation group Solvers.
   }
 }
-/// \brief Function returning a solver according to the users's choice.
-/// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
-template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  
-  create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 #endif

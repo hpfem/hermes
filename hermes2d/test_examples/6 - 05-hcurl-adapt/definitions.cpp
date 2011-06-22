@@ -89,9 +89,9 @@ public:
     return;
   };
   
-  virtual Ord ord(Ord x, Ord y) const 
+  virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const 
   {
-    return Ord(10);
+    return Hermes::Ord(10);
   } 
 };
 
@@ -144,10 +144,10 @@ public:
       return -result;
     }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                    Geom<Ord> *e, ExtData<Ord> *ext) const 
+    virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+                    Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const 
     {
-      return Ord(10);
+      return Hermes::Ord(10);
     }
   };
 };

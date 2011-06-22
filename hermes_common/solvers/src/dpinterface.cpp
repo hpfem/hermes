@@ -22,4 +22,10 @@
 
 #include "dpinterface.h"
 
+namespace Hermes 
+{
+  namespace Solvers 
+{
+  }
+}
 #endif

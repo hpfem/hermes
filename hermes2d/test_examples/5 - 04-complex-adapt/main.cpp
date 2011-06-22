@@ -2,8 +2,6 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
-using namespace RefinementSelectors;
-
 //  This problem describes the distribution of the vector potential in
 //  a 2D domain comprising a wire carrying electrical current, air, and
 //  an iron which is not under voltage.
@@ -68,7 +66,7 @@ const double OMEGA = 2 * M_PI * FREQ;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D<std::complex<double> > hermes2d;
+  Global<std::complex<double> > hermes2d;
 
   // Time measurement.
   TimePeriod cpu_time;

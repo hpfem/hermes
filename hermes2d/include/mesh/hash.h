@@ -20,8 +20,6 @@
 
 struct Node;
 
-
-
 /// \brief Stores and searches node tables.
 ///
 /// HashTable is a base class for Mesh. It serves as a container for all nodes
@@ -109,7 +107,4 @@ private:
   friend struct Node;
   friend class H2DReader;
 };
-
-
-
 #endif

@@ -19,37 +19,39 @@
 // This file is a common header for all H1 shapesets.
 
 #include "shapeset.h"
-
-
-/// H1 shapeset with orthogonalized bubble functions for improved conditioning.
-class HERMES_API H1ShapesetOrtho : public Shapeset
+namespace Hermes
 {
-  public: H1ShapesetOrtho();
-  virtual int get_id() const { return 0; }
-  virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-};
+  namespace Hermes2D
+  {
+    /// H1 shapeset with orthogonalized bubble functions for improved conditioning.
+    class HERMES_API H1ShapesetOrtho : public Shapeset
+    {
+    public: H1ShapesetOrtho();
+            virtual int get_id() const { return 0; }
+            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    };
 
 
-/// Shape functions based on integrated Jacobi polynomials.
-class HERMES_API H1ShapesetJacobi : public Shapeset
-{
-  public: H1ShapesetJacobi();
-  virtual int get_id() const { return 1; }
-  virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-};
+    /// Shape functions based on integrated Jacobi polynomials.
+    class HERMES_API H1ShapesetJacobi : public Shapeset
+    {
+    public: H1ShapesetJacobi();
+            virtual int get_id() const { return 1; }
+            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    };
 
 
-// Experimental.
-class HERMES_API H1ShapesetEigen : public Shapeset
-{
-  public: H1ShapesetEigen();
-  virtual int get_id() const { return 2; }
-  virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-};
+    // Experimental.
+    class HERMES_API H1ShapesetEigen : public Shapeset
+    {
+    public: H1ShapesetEigen();
+            virtual int get_id() const { return 2; }
+            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    };
 
 
-/// This is the default shapeset typedef
-typedef H1ShapesetJacobi H1Shapeset;
-
-
+    /// This is the default shapeset typedef
+    typedef H1ShapesetJacobi H1Shapeset;
+  }
+}
 #endif

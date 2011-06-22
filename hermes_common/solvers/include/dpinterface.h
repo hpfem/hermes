@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file dpinterface.h
-    \brief Interface for DiscreteProblem required by NoxProblemInterface.
+\brief Interface for DiscreteProblem required by NoxProblemInterface.
 */
 
 #ifndef DPINTERFACE_H
@@ -28,41 +28,44 @@
 
 using namespace Hermes::Algebra;
 
-/// Minimalistic DiscreteProblem interface required by NoxProblemInterface.
-template<typename Scalar>
-class DiscreteProblemInterface
-{
-public:
-  /// Get the number of unknowns.
-  virtual int get_num_dofs() = 0;
-  
-  /// Get info about presence of a matrix.
-  virtual bool is_matrix_free() = 0;
-  
-  /// Preassembling.
-  /// Precalculate matrix sparse structure.
-  /// If force_diagonal_block == true, then (zero) matrix
-  /// antries are created in diagonal blocks even if corresponding matrix weak
-  /// forms do not exist. This is useful if the matrix is later to be merged with
-  /// a matrix that has nonzeros in these blocks. The Table serves for optional
-  /// weighting of matrix blocks in systems.
-  virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-                                       bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
+namespace Hermes {
+  namespace Solvers {
+    /// \brief Minimalistic DiscreteProblem interface required by NoxProblemInterface.
+    template<typename Scalar>
+    class DiscreteProblemInterface
+    {
+    public:
+      /// Get the number of unknowns.
+      virtual int get_num_dofs() = 0;
 
-  /// Assembling.
-  /// General assembling procedure for nonlinear problems. coeff_vec is the
-  /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
-  /// antries are created in diagonal blocks even if corresponding matrix weak
-  /// forms do not exist. This is useful if the matrix is later to be merged with
-  /// a matrix that has nonzeros in these blocks. The Table serves for optional
-  /// weighting of matrix blocks in systems. The parameter add_dir_lift decides 
-  /// whether Dirichlet lift will be added while coeff_vec is converted into 
-  /// Solutions.
-  virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-             bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL) = 0; 
+      /// Get info about presence of a matrix.
+      virtual bool is_matrix_free() = 0;
 
-  virtual void invalidate_matrix() = 0;
-  
-};
+      /// Preassembling.
+      /// Precalculate matrix sparse structure.
+      /// If force_diagonal_block == true, then (zero) matrix
+      /// antries are created in diagonal blocks even if corresponding matrix weak
+      /// forms do not exist. This is useful if the matrix is later to be merged with
+      /// a matrix that has nonzeros in these blocks. The Table serves for optional
+      /// weighting of matrix blocks in systems.
+      virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
 
-#endif // DPINTERFACE_H
+      /// Assembling.
+      /// General assembling procedure for nonlinear problems. coeff_vec is the
+      /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
+      /// antries are created in diagonal blocks even if corresponding matrix weak
+      /// forms do not exist. This is useful if the matrix is later to be merged with
+      /// a matrix that has nonzeros in these blocks. The Table serves for optional
+      /// weighting of matrix blocks in systems. The parameter add_dir_lift decides 
+      /// whether Dirichlet lift will be added while coeff_vec is converted into 
+      /// Solutions.
+      virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL) = 0; 
+
+      virtual void invalidate_matrix() = 0;
+
+    };
+  }
+}
+#endif

@@ -28,6 +28,7 @@
 #include "space.h"
 
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 
 template<typename Scalar>
 OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)

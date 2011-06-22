@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file precond_ml.h
-    \brief ML (Trilinos package) preconditioners interface.
+\brief ML (Trilinos package) preconditioners interface.
 */
 
 #ifndef __HERMES_COMMON_PRECOND_ML_H_
@@ -29,49 +29,53 @@
 
 #include <ml_MultiLevelPreconditioner.h>
 
-/// Preconditioners built on ML
-///
-/// @ingroup preconds
-template <typename Scalar>
-class HERMES_API MlPrecond : public Precond<Scalar> {
-public:
-  /// @param[in] type - type of the preconditioner [ sa | dd ]
-  /// - sa = smooth aggregation
-  /// - dd = domain decomposition
-  MlPrecond(const char *type);
-  /// Wrap ML object
-  MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
-  virtual ~MlPrecond();
+namespace Hermes {
+  namespace Preconditioners {
+    using namespace Hermes::Solvers;
+    /// \brief Preconditioners built on ML.
+    ///
+    /// @ingroup preconds
+    template <typename Scalar>
+    class HERMES_API MlPrecond : public Precond<Scalar> {
+    public:
+      /// @param[in] type - type of the preconditioner [ sa | dd ]
+      /// - sa = smooth aggregation
+      /// - dd = domain decomposition
+      MlPrecond(const char *type);
+      /// Wrap ML object
+      MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
+      virtual ~MlPrecond();
 
-  virtual Epetra_Operator *get_obj() { return prec; }
+      virtual Epetra_Operator *get_obj() { return prec; }
 
-  /// @param[in] a
-  virtual void create(Matrix<Scalar> *mat);
-  /// Destroy the preconditioner object
-  virtual void destroy();
-  /// Compute the preconditioner
-  virtual void compute();
+      /// @param[in] a
+      virtual void create(Matrix<Scalar> *mat);
+      /// Destroy the preconditioner object
+      virtual void destroy();
+      /// Compute the preconditioner
+      virtual void compute();
 
-  void set_param(const char *name, const char *value);
-  void set_param(const char *name, int value);
-  void set_param(const char *name, double value);
+      void set_param(const char *name, const char *value);
+      void set_param(const char *name, int value);
+      void set_param(const char *name, double value);
 
-  void print_unused();
+      void print_unused();
 
-  // Epetra_Operator interface
-  virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
-  virtual const Epetra_Comm &Comm() const;
-  virtual const Epetra_Map &OperatorDomainMap() const;
-  virtual const Epetra_Map &OperatorRangeMap() const;
+      // Epetra_Operator interface
+      virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
+      virtual const Epetra_Comm &Comm() const;
+      virtual const Epetra_Map &OperatorDomainMap() const;
+      virtual const Epetra_Map &OperatorRangeMap() const;
 
-protected:
-  ML_Epetra::MultiLevelPreconditioner *prec;
-  Teuchos::ParameterList mlist;
-  EpetraMatrix<Scalar> *mat;
-  unsigned owner:1;
+    protected:
+      ML_Epetra::MultiLevelPreconditioner *prec;
+      Teuchos::ParameterList mlist;
+      EpetraMatrix<Scalar> *mat;
+      unsigned owner:1;
 
-  friend class AztecOOSolver<Scalar>;
-};
-
+      friend class AztecOOSolver<Scalar>;
+    };
+  }
+}
 #endif
 #endif
