@@ -329,6 +329,13 @@ namespace Hermes
         error("add_sparse_matrix() undefined.");
       };
 
+      /// Add matrix to diagonal
+      /// Matrices must be the same type of solver
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+      { 
+        error("add_sparse_to_diagonal_blocks() undefined.");
+      };
+
       /// Return the number of entries in a specified row
       ///
       /// @param[in] row - index of the row
