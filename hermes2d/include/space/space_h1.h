@@ -34,7 +34,7 @@ namespace Hermes
       H1Space(Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      // Common code for the constructors.
+      /// Common code for the constructors.
       void init(Shapeset* shapeset, Ord2 p_init);
 
       virtual ~H1Space();
@@ -95,9 +95,6 @@ namespace Hermes
 
       inline bool is_fixed_vertex(int id) const;
       virtual void post_assign();
-
-      //void dump_baselist(NodeData& nd);
-
     };
   }
 }

@@ -65,7 +65,7 @@ namespace Hermes
     ///
     ///    <li> Finally, and most importantly, the Space is able to deliver a list of shape functions
     ///         existing on each element. Such a list is called an "assembly list" and is represented
-    ///         by the class AsmList. The assembly list contains the triplets (idx, dof, coef).
+    ///         by the class AsmList<Scalar>. The assembly list contains the triplets (idx, dof, coef).
     ///         'idx' is the shape function index, as understood by the Shapeset. 'dof' is the number
     ///         of the basis function, whose part the shape function forms. 'coef' is a Real constant,
     ///         with which the shape function must be multiplied in order to fit into the basis
@@ -215,10 +215,10 @@ namespace Hermes
       Shapeset* shapeset;
       bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
-      // boundary conditions
+      /// Boundary conditions.
       EssentialBCs<Scalar>* essential_bcs;
 
-      /// FE mesh
+      /// FE mesh.
       Mesh* mesh;
 
       int default_tri_order, default_quad_order;
@@ -270,7 +270,7 @@ namespace Hermes
       ElementData* edata; ///< element data table
       int esize;
 
-    protected: //debugging support
+    protected:
       virtual int get_edge_order_internal(Node* en);
 
       /// \brief Updates internal node and element tables.
@@ -355,7 +355,8 @@ namespace Hermes
         return ref_space;
       }
 
-      // updating time-dependent essential (Dirichlet) boundary conditions
+      /// Updating time-dependent essential (Dirichlet) boundary conditions.
+      /// Multiple spaces.
       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
         int n = spaces.size();
         for (int i = 0; i < n; i++) {
@@ -364,6 +365,8 @@ namespace Hermes
         }
       }
 
+      /// Updating time-dependent essential (Dirichlet) boundary conditions.
+      /// one space.
       static void update_essential_bc_values(Space<Scalar>*s, double time) {
         s->get_essential_bcs()->set_current_time(time);
         s->update_essential_bc_values();

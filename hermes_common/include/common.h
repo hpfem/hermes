@@ -277,3 +277,11 @@ namespace Hermes
 }
 #endif
 
+/**
+
+\mainpage
+
+This manual documents the source code of hermes_common. It is intended for the developers of
+the library. If you are only interested in using hermes_common together with hermesNd, please refer to the User's Manual.
+
+*/

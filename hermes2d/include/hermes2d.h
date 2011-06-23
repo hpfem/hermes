@@ -24,7 +24,6 @@
 
 #include "../../hermes_common/include/hermes_common.h"
 
-// boundary conditions
 #include "boundary_conditions/essential_boundary_conditions.h"
 
 #include "range.h"
@@ -195,7 +194,7 @@ mathematical counterparts.
 <img src="classSpace.png">
 
 The main purpose of these classes is (1) to hold polynomial degrees of mesh elements, (2) to construct
-and enumerate the basis functions of the space and (3) to return assembly lists (see AsmList),
+and enumerate the basis functions of the space and (3) to return assembly lists (see AsmList<Scalar>),
 which are used in the stiffness matrix assembly.
 
 Multiple spaces can share the same mesh. This is used when solving systems of PDEs. In multi-mesh

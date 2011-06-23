@@ -22,17 +22,17 @@
 #define lambda2(x,y) (-((x) + (y)) / 2)
 #define lambda3(x,y) (((x) + 1) / 2)
 
-// x derivatives of affine coordinates
+/// x derivatives of affine coordinates
 #define lambda1x(x,y) (0.0)
 #define lambda2x(x,y) (-1.0 / 2.0)
 #define lambda3x(x,y) (1.0 / 2.0)
 
-// y derivatives of affine coordinates
+/// y derivatives of affine coordinates
 #define lambda1y(x,y) (1.0 / 2.0)
 #define lambda2y(x,y) (-1.0 / 2.0)
 #define lambda3y(x,y) (0.0)
 
-// kernel functions
+/// kernel functions
 #define phi0(x) (-2.0 * 1.22474487139158904909864203735)
 #define phi1(x) (-2.0 * 1.58113883008418966599944677222 * (x))
 #define phi2(x) (-1.0 / 2.0 * 1.87082869338697069279187436616 * (5 * (x) * (x) - 1))
@@ -44,7 +44,7 @@
 #define phi8(x) (-1.0 / 64.0 * 3.08220700148448822512509619073 * ((((2431 * (x) * (x) - 4004) * (x) * (x) + 2002) * (x) * (x) - 308) * (x) * (x) + 7))
 #define phi9(x) (-1.0 / 128.0 * 6.4807406984078603784382721642 * ((((4199 * (x) * (x) - 7956) * (x) * (x) + 4914) * (x) * (x) - 1092) * (x) * (x) + 63) * (x))
 
-// derivatives of kernel functions
+/// derivatives of kernel functions
 #define phi0x(x) (0)
 #define phi1x(x) (-2.0 * 1.58113883008418966599944677222)
 #define phi2x(x) (-1.0 / 2.0 * 1.87082869338697069279187436616 * (10 * (x)))
@@ -56,7 +56,7 @@
 #define phi8x(x) (-1.0 / 64.0 * 3.08220700148448822512509619073 * ((((19448.0*(x)*(x)-24024.0)*(x)*(x)+8008.0)*(x)*(x)-616.0)*(x)))
 #define phi9x(x) (-1.0 / 128.0 * 6.4807406984078603784382721642 * ((((37791.0*(x)*(x)-55692.0)*(x)*(x)+24570.0)*(x)*(x)-3276.0)*(x)*(x)-63.0))
 
-// second derivatives of kernel functions
+/// second derivatives of kernel functions
 #define phi0xx(x) (0)
 #define phi1xx(x) (0)
 #define phi2xx(x) (-1.0 / 2.0 * 1.87082869338697069279187436616 * 10)
@@ -68,7 +68,7 @@
 #define phi8xx(x) (-1.0 / 64.0 * 3.08220700148448822512509619073 * ((((136136.0*(x)*(x)-120120.0)*(x)*(x)+24024.0)*(x)*(x)-616.0)))
 #define phi9xx(x) (-1.0 / 128.0 * 6.4807406984078603784382721642 * ((((302328.0*(x)*(x)-334152.0)*(x)*(x)+98280.0)*(x)*(x)-6552.0)*(x)*(x)))
 
-// Legendre polynomials
+/// Legendre polynomials
 #define Legendre0(x) (1.0)
 #define Legendre1(x) (x)
 #define Legendre2(x) (1.0 / 2.0 * (3 * (x) * (x) - 1))
@@ -81,7 +81,7 @@
 #define Legendre9(x) (1.0 / 128.0 * ((((12155 * (x) * (x) - 25740) * (x) * (x) + 18018) * (x) * (x) - 4620) * (x) * (x) + 315) * (x))
 #define Legendre10(x) (1.0 / 256.0 * (((((46189 * (x) * (x) - 109395) * (x) * (x) + 90090) * (x) * (x) - 30030) * (x) * (x) + 3465) * (x) * (x) - 63))
 
-// derivatives of Legendre polynomials
+/// derivatives of Legendre polynomials
 #define Legendre0x(x) (0.0)
 #define Legendre1x(x) (1.0)
 #define Legendre2x(x) (3.0 * (x))
@@ -94,7 +94,7 @@
 #define Legendre9x(x) ((((109395.0 / 128.0 * (x) * (x) - 45045.0 / 32.0) * (x) * (x) + 45045.0 / 64.0) * (x) * (x) - 3465.0 / 32.0) * (x) * (x) + 315.0 / 128.0)
 #define Legendre10x(x) (2.0 / 256.0 * (x) * ((((230945.0 * (x) * (x) - 437580.0) * (x) * (x) + 270270.0) * (x) * (x) - 60060.0) * (x) * (x) + 3465.0))
 
-// second derivatives of Legendre polynomials
+/// second derivatives of Legendre polynomials
 #define Legendre0xx(x) (0.0)
 #define Legendre1xx(x) (0.0)
 #define Legendre2xx(x) (3.0)
@@ -107,13 +107,13 @@
 #define Legendre9xx(x) (45.0 / 16.0 * (x) * (((2431.0 * (x) * (x) - 3003.0) * (x) * (x) + 1001.0) * (x) * (x) - 77.0))
 #define Legendre10xx(x) ((((2078505.0 / 128.0 * (x) * (x) - 765765.0 / 32.0) * (x) * (x) + 675675.0 / 64.0) * (x) * (x) - 45045.0 / 32.0) * (x) * (x) + 3465.0 / 128.0)
 
-// first two Lobatto shape functions
+/// first two Lobatto shape functions
 #define l0(x) ((1.0 - (x)) * 0.5)
 #define l1(x) ((1.0 + (x)) * 0.5)
 
 #define l0l1(x) ((1.0 - (x)*(x)) * 0.25)
 
-// other Lobatto shape functions
+/// other Lobatto shape functions
 #define l2(x)  (phi0(x) * l0l1(x))
 #define l3(x)  (phi1(x) * l0l1(x))
 #define l4(x)  (phi2(x) * l0l1(x))
@@ -125,7 +125,7 @@
 #define l10(x) (phi8(x) * l0l1(x))
 #define l11(x) (phi9(x) * l0l1(x))
 
-// derivatives of Lobatto functions
+/// derivatives of Lobatto functions
 #define dl0(x)  (-0.5)
 #define dl1(x)  (0.5)
 #define dl2(x)  (sqrt(3.0/2.0) * Legendre1(x))
@@ -139,7 +139,7 @@
 #define dl10(x) (sqrt(19.0/2.0) * Legendre9(x))
 #define dl11(x) (sqrt(21.0/2.0) * Legendre10(x))
 
-// second derivatives of Lobatto functions
+/// second derivatives of Lobatto functions
 #define d2l0(x)  (0.0)
 #define d2l1(x)  (0.0)
 #define d2l2(x)  (sqrt(3.0/2.0) * Legendre1x(x))
@@ -156,7 +156,7 @@
 
 //// Hcurl /////////////////////////////////////////////////////////////////////////////////////////
 
-// outward unit normal vectors to the reference triangle
+/// outward unit normal vectors to the reference triangle
 #define n11  0.0
 #define n12 -1.0
 #define n21  0.707106781186547524400844362105
@@ -164,7 +164,7 @@
 #define n31 -1.0
 #define n32  0.0
 
-// inner products of normals and tangents
+/// inner products of normals and tangents
 #define n2t1  0.707106781186547524400844362105
 #define n3t1 -1.0
 #define n3t2  0.707106781186547524400844362105
@@ -239,7 +239,7 @@
 #define psi1e3y_2(x,y) ((lambda2y(x,y) * n12 / n1t3 - lambda1y(x,y) * n22 / n2t3)/2.0)
 */
 
-// Whitney functions
+/// Whitney functions
 #define psi0e1_1(x,y) ((lambda3(x,y) * n21 / n2t1 + lambda2(x,y) * n31 / n3t1))
 #define psi0e1_2(x,y) ((lambda3(x,y) * n22 / n2t1 + lambda2(x,y) * n32 / n3t1))
 #define psi0e2_1(x,y) ((lambda1(x,y) * n31 / n3t2 + lambda3(x,y) * n11 / n1t2))
@@ -247,7 +247,7 @@
 #define psi0e3_1(x,y) ((lambda2(x,y) * n11 / n1t3 + lambda1(x,y) * n21 / n2t3))
 #define psi0e3_2(x,y) ((lambda2(x,y) * n12 / n1t3 + lambda1(x,y) * n22 / n2t3))
 
-// x derivatives of Whitney functions
+/// x derivatives of Whitney functions
 #define psi0e1x_1(x,y) ((lambda3x(x,y) * n21 / n2t1 + lambda2x(x,y) * n31 / n3t1))
 #define psi0e1x_2(x,y) ((lambda3x(x,y) * n22 / n2t1 + lambda2x(x,y) * n32 / n3t1))
 #define psi0e2x_1(x,y) ((lambda1x(x,y) * n31 / n3t2 + lambda3x(x,y) * n11 / n1t2))
@@ -255,7 +255,7 @@
 #define psi0e3x_1(x,y) ((lambda2x(x,y) * n11 / n1t3 + lambda1x(x,y) * n21 / n2t3))
 #define psi0e3x_2(x,y) ((lambda2x(x,y) * n12 / n1t3 + lambda1x(x,y) * n22 / n2t3))
 
-// y derivatives of Whitney functions
+/// y derivatives of Whitney functions
 #define psi0e1y_1(x,y) ((lambda3y(x,y) * n21 / n2t1 + lambda2y(x,y) * n31 / n3t1))
 #define psi0e1y_2(x,y) ((lambda3y(x,y) * n22 / n2t1 + lambda2y(x,y) * n32 / n3t1))
 #define psi0e2y_1(x,y) ((lambda1y(x,y) * n31 / n3t2 + lambda3y(x,y) * n11 / n1t2))
@@ -263,7 +263,7 @@
 #define psi0e3y_1(x,y) ((lambda2y(x,y) * n11 / n1t3 + lambda1y(x,y) * n21 / n2t3))
 #define psi0e3y_2(x,y) ((lambda2y(x,y) * n12 / n1t3 + lambda1y(x,y) * n22 / n2t3))
 
-// linear edge functions
+/// linear edge functions
 #define psi1e1_1(x,y) ((lambda3(x,y) * n21 / n2t1 - lambda2(x,y) * n31 / n3t1))
 #define psi1e1_2(x,y) ((lambda3(x,y) * n22 / n2t1 - lambda2(x,y) * n32 / n3t1))
 #define psi1e2_1(x,y) ((lambda1(x,y) * n31 / n3t2 - lambda3(x,y) * n11 / n1t2))
@@ -271,7 +271,7 @@
 #define psi1e3_1(x,y) ((lambda2(x,y) * n11 / n1t3 - lambda1(x,y) * n21 / n2t3))
 #define psi1e3_2(x,y) ((lambda2(x,y) * n12 / n1t3 - lambda1(x,y) * n22 / n2t3))
 
-// x derivatives of linear edge functions
+/// x derivatives of linear edge functions
 #define psi1e1x_1(x,y) ((lambda3x(x,y) * n21 / n2t1 - lambda2x(x,y) * n31 / n3t1))
 #define psi1e1x_2(x,y) ((lambda3x(x,y) * n22 / n2t1 - lambda2x(x,y) * n32 / n3t1))
 #define psi1e2x_1(x,y) ((lambda1x(x,y) * n31 / n3t2 - lambda3x(x,y) * n11 / n1t2))
@@ -279,7 +279,7 @@
 #define psi1e3x_1(x,y) ((lambda2x(x,y) * n11 / n1t3 - lambda1x(x,y) * n21 / n2t3))
 #define psi1e3x_2(x,y) ((lambda2x(x,y) * n12 / n1t3 - lambda1x(x,y) * n22 / n2t3))
 
-// y derivatives of linear edge functions
+/// y derivatives of linear edge functions
 #define psi1e1y_1(x,y) ((lambda3y(x,y) * n21 / n2t1 - lambda2y(x,y) * n31 / n3t1))
 #define psi1e1y_2(x,y) ((lambda3y(x,y) * n22 / n2t1 - lambda2y(x,y) * n32 / n3t1))
 #define psi1e2y_1(x,y) ((lambda1y(x,y) * n31 / n3t2 - lambda3y(x,y) * n11 / n1t2))

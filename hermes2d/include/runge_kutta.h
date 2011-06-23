@@ -149,7 +149,6 @@ namespace Hermes
 
       /// DiscreteProblem.
       DiscreteProblem<Scalar>* dp;
-      bool is_linear;
 
       /// ButcherTable.
       ButcherTable* bt;
@@ -158,25 +157,28 @@ namespace Hermes
       unsigned int num_stages;
 
       /// Multistage weak formulation.
-      WeakForm<Scalar> stage_wf_right;    // For the main part equation (written on the right),
-      // size num_stages*ndof times num_stages*ndof.
-      WeakForm<Scalar> stage_wf_left;     // For the matrix M (size ndof times ndof).
+      // For the main part equation (written on the right),
+      /// size num_stages*ndof times num_stages*ndof.
+      WeakForm<Scalar> stage_wf_right;    
+      
+      /// For the matrix M (size ndof times ndof).
+      WeakForm<Scalar> stage_wf_left;
 
       bool start_from_zero_K_vector;
 
       bool residual_as_vector;
 
-      // Vector K_vector of length num_stages * ndof. will represent
-      // the 'K_i' vectors in the usual R-K notation.
+      /// Vector K_vector of length num_stages * ndof. will represent
+      /// the 'K_i' vectors in the usual R-K notation.
       Scalar* K_vector;
 
-      // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
+      /// Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
       Scalar* u_ext_vec;
 
-      // Vector for the left part of the residual.
+      /// Vector for the left part of the residual.
       Scalar* vector_left;
 
-      // Number of previous calls to rk_time_step().
+      /// Number of previous calls to rk_time_step().
       unsigned int iteration;
     };
   }

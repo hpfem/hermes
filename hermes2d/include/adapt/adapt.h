@@ -46,7 +46,7 @@ namespace Hermes
 
 #define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
 
-    // Constant used by Adapt::calc_eror().
+    /// Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
     ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
     ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
@@ -77,10 +77,11 @@ namespace Hermes
       Adapt(Space<Scalar>* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
-      // Matrix forms for error calculation.
+      /// Matrix forms for error calculation.
       class HERMES_API MatrixFormVolError
       {
       public:
+        /// Constructor that takes the norm identification.
         MatrixFormVolError(ProjNormType type)
         {
           this->projNormType = type;
@@ -133,8 +134,10 @@ namespace Hermes
         }
 
       private:
+        /// Norm used.
         ProjNormType projNormType;
 
+        /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
           Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
@@ -145,6 +148,7 @@ namespace Hermes
           return result;
         }
 
+        /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
           Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
@@ -156,6 +160,7 @@ namespace Hermes
           return result;
         }
 
+        /// H1 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
           Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
@@ -166,6 +171,7 @@ namespace Hermes
           return result;
         }
 
+        /// H-div error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
@@ -180,6 +186,7 @@ namespace Hermes
           return result;
         }
 
+        /// H-curl error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
@@ -242,7 +249,7 @@ namespace Hermes
       /// Refines elements based on results from calc_err_est().
       /** The behavior of adaptivity can be controlled through methods should_ignore_element()
       *  and can_refine_element() which are inteteded to be overridden if neccessary.
-      *  \param[in] refinement_selector A point to a selector which will select a refinement.
+      *  \param[in] refinement_selectors Vector of selectors.
       *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
       *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
       *  \param[in] regularize Regularizing of a mesh.
@@ -252,6 +259,16 @@ namespace Hermes
       bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors, double thr, int strat = 0,
         int regularize = -1, double to_be_processed = 0.0);
 
+      /// Refines elements based on results from calc_err_est().
+      /** The behavior of adaptivity can be controlled through methods should_ignore_element()
+      *  and can_refine_element() which are inteteded to be overridden if neccessary.
+      *  \param[in] refinement_selector A pointer to a selector which will select a refinement.
+      *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
+      *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
+      *  \param[in] regularize Regularizing of a mesh.
+      *  \param[in] same_order True if all element have to have same orders after all refinements are applied.
+      *  \param[in] to_be_processed Error which has to be processed. Used in strategy number 3.
+      *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
       bool adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat = 0,
         int regularize = -1, double to_be_processed = 0.0);
 
@@ -294,7 +311,7 @@ namespace Hermes
       /** \return A vector of refinements generated during the last execution of the method adapt(). The returned vector might change or become invalid after the next execution of the method adadpt(). */
       const std::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
 
-    protected: //adaptivity
+    protected:
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
       std::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
@@ -331,7 +348,7 @@ namespace Hermes
       /** \param[in] meshes An arrat of meshes of components. */
       void homogenize_shared_mesh_orders(Mesh** meshes);
 
-    protected: // spaces & solutions
+    protected:
       int num;                              ///< Number of solution components (as in wf->neq).
       Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
@@ -347,7 +364,7 @@ namespace Hermes
 
       double error_time;                    ///< Time needed to calculate the error.
 
-    protected: //forms and error evaluation
+    protected:
       static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
       static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
 

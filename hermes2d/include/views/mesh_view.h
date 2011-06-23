@@ -71,7 +71,7 @@ namespace Hermes
       Mesh* mesh;
 
     };
-#endif // NOGLUT
+#endif
   }
 }
 #endif

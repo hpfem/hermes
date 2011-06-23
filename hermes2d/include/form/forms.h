@@ -33,7 +33,7 @@ namespace Hermes
       "Neighboring elements are not defined and so are not function traces on their interface. "
       "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
 
-    // Function
+    /// Calculated function values (from the class Function) on an element for assembling.
     template<typename T>
     class Func
     {
@@ -96,6 +96,7 @@ namespace Hermes
       };
 #undef H2D_SUBTRACT_IF_NOT_NULL
 
+      /// Dellocates an instance of Func<Ord>
       virtual void free_ord() {
         delete val;
         val = val0 = val1 = NULL;
@@ -107,6 +108,8 @@ namespace Hermes
         laplace = NULL;
 #endif
       }
+
+      /// Dellocates an instance of Func<double> / Func<std::complex<double> >
       virtual void free_fn()
       {
         delete [] val; val = NULL;
@@ -123,12 +126,13 @@ namespace Hermes
         delete [] div; div = NULL;
       }
 
-      virtual ~Func() { }; // All deallocation done via free_fn / free_ord.
-      // This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
-
-      // NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
-      // Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
-      // expected from a continuous function.
+      /// All deallocation done via free_fn / free_ord.
+      /// This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
+      /// NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
+      /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
+      /// expected from a continuous function.
+      virtual ~Func() { }; 
+      
       virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       virtual T& get_val_neighbor(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       virtual T& get_dx_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
@@ -237,6 +241,7 @@ namespace Hermes
           fn_neighbor = NULL;
         }
       }
+
       virtual void free_ord() {
         if (fn_central != NULL) {
           fn_central->free_ord();
@@ -387,7 +392,8 @@ namespace Hermes
       }
     };
 
-    // Generic class for functions of x, y in weak forms.
+    /// Generic class for functions of x, y in weak forms.
+    /// DEPRECATED.
     template<typename Scalar>
     class DefaultFunction
     {

@@ -75,8 +75,10 @@ namespace Hermes
       /// For internal use only.
       void force_transform(MeshFunction<Scalar>* mf)
       { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
+
       void update_refmap()
       { refmap->force_transform(this->sub_idx, this->ctm); }
+
       void force_transform(uint64_t sub_idx, Trf* ctm)
       {
         this->sub_idx = sub_idx;

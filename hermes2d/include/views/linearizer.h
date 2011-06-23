@@ -32,12 +32,11 @@ namespace Hermes
 
     //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
 
-    // The tables with index zero are for obtaining solution values at the element
-    // vertices. Index one tables serve for the retrieval of interior values. Index one tables
-    // are used for adaptive approximation of the solution by transforming their points to sub-elements.
-    // Actually, the tables contain two levels of refinement -- this is an optimization to reduce
-    // the number of calls to sln->get_values().
-
+    /// The tables with index zero are for obtaining solution values at the element
+    /// vertices. Index one tables serve for the retrieval of interior values. Index one tables
+    /// are used for adaptive approximation of the solution by transforming their points to sub-elements.
+    /// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
+    /// the number of calls to sln->get_values().
     extern double3 lin_pts_0_tri[];
 
     extern double3 lin_pts_0_quad[];
@@ -115,18 +114,18 @@ namespace Hermes
       virtual void calc_vertices_aabb(double* min_x, double* max_x, 
         double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
-      // Saves data in a binary format.
+      /// Saves data in a binary format.
       virtual void save_data(const char* filename);
-      // Loads data in a binary format.
+      /// Loads data in a binary format.
       virtual void load_data(const char* filename);
-      // Saves a MeshFunction (Solution, Filter) in VTK format.
+      /// Saves a MeshFunction (Solution, Filter) in VTK format.
       virtual void save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char* quantity_name,
         bool mode_3D = true, int item = H2D_FN_VAL_0, 
         double eps = HERMES_EPS_NORMAL, double max_abs = -1.0,
         MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL,
         double dmult = 1.0);
 
-      // This function is used by save_solution_vtk().
+      /// This function is used by save_solution_vtk().
       virtual void save_data_vtk(const char* file_name, const char* quantity_name, bool mode_3D);
 
       void free();
@@ -213,7 +212,7 @@ namespace Hermes
       static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y); ///< Calculates AABB from an array of X-axis and Y-axis coordinates. The distance between values in the array is stride bytes.
     };
 
-    // maximum subdivision level (2^N)
+    /// maximum subdivision level (2^N)
     const int LIN_MAX_LEVEL = 6;
 
 #define lin_init_array(array, type, c, e) \

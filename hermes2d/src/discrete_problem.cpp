@@ -55,9 +55,10 @@ namespace Hermes
       if(wf == NULL)
         error("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
 
-      if (spaces.size() != (unsigned) wf->get_neq()) error("Bad number of spaces in DiscreteProblem.");
-      if (spaces.size() > 0) have_spaces = true;
-      else error("Zero number of spaces in DiscreteProblem.");
+      if (spaces.size() != (unsigned) wf->get_neq()) 
+        error("Bad number of spaces in DiscreteProblem.");
+      if (spaces.size() == 0) 
+        error("Zero number of spaces in DiscreteProblem.");
 
       // Internal variables settings.
       sp_seq = new int[wf->get_neq()];
@@ -67,21 +68,18 @@ namespace Hermes
       matrix_buffer = NULL;
       matrix_buffer_dim = 0;
       have_matrix = false;
-      values_changed = true;
-      struct_changed = true;
 
       // Initialize precalc shapesets according to spaces provided.
       pss = new PrecalcShapeset*[wf->get_neq()];
-      for (unsigned int i = 0; i < wf->get_neq(); i++) pss[i] = NULL;
-      num_user_pss = 0;
+
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
+        pss[i] = NULL;
         Shapeset *shapeset = spaces[i]->get_shapeset();
         if (shapeset == NULL) error("Internal in DiscreteProblem<Scalar>::init_spaces().");
         PrecalcShapeset *p = new PrecalcShapeset(shapeset);
         if (p == NULL) error("New PrecalcShapeset could not be allocated in DiscreteProblem<Scalar>::init_spaces().");
         pss[i] = p;
-        num_user_pss++;
       }
 
       // Create global enumeration of dof and fill the ndof variable.
@@ -113,7 +111,7 @@ namespace Hermes
       if (sp_seq != NULL) delete [] sp_seq;
       if (pss != NULL) 
       {
-        for(int i = 0; i < num_user_pss; i++)
+        for(int i = 0; i < wf->get_neq(); i++)
           delete pss[i];
         delete [] pss;
       }
@@ -123,7 +121,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::free()
     {
       _F_;
-      struct_changed = values_changed = true;
       if (wf != NULL)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
       wf_seq = -1;
@@ -416,8 +413,6 @@ namespace Hermes
         sp_seq[i] = spaces[i]->get_seq();
 
       wf_seq = wf->get_seq();
-
-      struct_changed = true;
     }
 
     template<typename Scalar>
@@ -433,9 +428,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble_sanity_checks(Table* block_weights) 
     {
       _F_;
-      // Check that spaces have been set either when constructing or by a call to set_spaces().
-      if (!have_spaces) 
-        error("You have to call DiscreteProblem<Scalar>::set_spaces() before calling assemble().");
+
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
 
@@ -726,7 +719,7 @@ namespace Hermes
 
       init_cache();
 
-      /// Assemble volume matrix forms.
+      // Assemble volume matrix forms.
       assemble_volume_matrix_forms(stage, mat, rhs, force_diagonal_blocks, 
         block_weights, spss, refmap, u_ext, isempty, 
         rep_element->marker, al);
@@ -735,7 +728,7 @@ namespace Hermes
         block_weights, spss, refmap, u_ext, isempty,
         rep_element->marker, al);
 
-      /// Assemble volume vector forms.
+      // Assemble volume vector forms.
       if (rhs != NULL) 
       {
         assemble_volume_vector_forms(stage, mat, rhs, force_diagonal_blocks,

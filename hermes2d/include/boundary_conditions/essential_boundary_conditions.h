@@ -68,10 +68,9 @@ namespace Hermes
       /// Current time.
       double current_time;
 
-      // Markers.
+      /// Markers.
       Hermes::vector<std::string> markers;
 
-      // Friend class.
       friend class EssentialBCs<Scalar>;
       friend class Space<Scalar>;
     };

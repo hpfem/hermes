@@ -55,10 +55,10 @@ namespace Hermes
       Vectorizer<Scalar> vec;
 
       double gx, gy, gs;
-      bool hexa; // false - quad grid, true - hexa grid
-      int mode;  // 0 - magnitude is on the background, 1 - arrows are colored, 2 - no arrows, just magnitude on the background
+      bool hexa; ///< false - quad grid, true - hexa grid
+      int mode;  ///< 0 - magnitude is on the background, 1 - arrows are colored, 2 - no arrows, just magnitude on the background
       bool lines, pmode;
-      double length_coef; // for extending or shortening arrows
+      double length_coef; ///< for extending or shortening arrows
 
       void plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs);
 

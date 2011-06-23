@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// AsmList is a simple container for the element assembly arrays idx, dof and coef.
+    /// AsmList<Scalar> is a simple container for the element assembly arrays idx, dof and coef.
     /// These arrays are filled by Space::get_element_assembly_list() and used by the
     /// assembling procedure and the Solution class. The arrays are allocated and deallocated
     /// automatically by the class. The class provides a list of triples (idx, dof, coef).
@@ -39,43 +39,18 @@ namespace Hermes
       unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
       unsigned int cap;       ///< internal
 
-      AsmList(const AsmList & other)
-      {
-        this->cnt = other.cnt;
-        this->cap = other.cap;
-        this->idx = (int*) malloc(sizeof(int) * cap);
-        this->dof = (int*) malloc(sizeof(int) * cap);
-        this->coef = (Scalar*) malloc(sizeof(Scalar) * cap);
-        for(unsigned int i = 0; i < cnt; i++) {
-          coef[i] = other.coef[i];
-          dof[i] = other.dof[i];
-          idx[i] = other.idx[i];
-        }
-      }
+      /// Copy constructor.
+      AsmList<Scalar>(const AsmList<Scalar> & other);
 
-      AsmList()
-      {
-        idx = dof = NULL;
-        coef = NULL;
-        cnt = cap = 0;
-      }
+      /// Constructor.
+      AsmList<Scalar>();
 
-      ~AsmList()
-      {
-        free(idx);
-        free(dof);
-        free(coef);
-      }
+      /// Destructor.
+      ~AsmList<Scalar>();
+     
+      void clear();
 
-      void clear() { cnt = 0; }
-
-      inline void add_triplet(int i, int d, Scalar c)
-      {
-        if (cnt >= cap) enlarge();
-        idx[cnt] = i;
-        dof[cnt] = d;
-        coef[cnt++] = c;
-      }
+      void add_triplet(int i, int d, Scalar c);
 
     protected:
       void enlarge();

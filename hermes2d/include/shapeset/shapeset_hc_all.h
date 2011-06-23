@@ -38,7 +38,7 @@ namespace Hermes
             virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
     };
 
-    // Experimental.
+    /// Experimental.
     class HERMES_API HcurlShapesetGradEigen : public Shapeset
     {
     public: HcurlShapesetGradEigen();

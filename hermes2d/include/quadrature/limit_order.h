@@ -21,10 +21,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    // can be called to set a custom order limiting table
+    /// can be called to set a custom order limiting table
     extern HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n);
 
-    // limit_order is used in integrals
+    /// limit_order is used in integrals
     extern HERMES_API int  g_safe_max_order;
     extern HERMES_API int  g_max_order;
     extern HERMES_API int* g_order_table;
