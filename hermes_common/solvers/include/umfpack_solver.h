@@ -51,6 +51,9 @@ public:
   // TODO: implement this for other matrix types.
   virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
   // TODO: implement this for other matrix types.
+  virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+    add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
+  }
   virtual void add_as_block(unsigned int i, unsigned int j, CSCMatrix<Scalar>* mat);
   virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
   virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);

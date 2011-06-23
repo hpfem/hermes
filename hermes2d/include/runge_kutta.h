@@ -89,7 +89,7 @@ public:
   /// which has length num_stages*ndof. The result is saved in vector_left which also
   /// has length num_stages*ndof.
   /// TODO: enable this for other types of matrices.
-  void multiply_as_diagonal_block_matrix(UMFPackMatrix<Scalar>* matrix_left, int num_stages,
+  void multiply_as_diagonal_block_matrix(SparseMatrix<Scalar>* matrix_left, int num_stages,
                                          Scalar* stage_coeff_vec, Scalar* vector_left);
 
   // Perform one explicit or implicit time step using the Runge-Kutta method
@@ -135,11 +135,11 @@ protected:
   Hermes2D<Scalar> hermes2d;
 
   /// Matrix for the time derivative part of the equation (left-hand side).
-  UMFPackMatrix<Scalar> matrix_left;
+  SparseMatrix<Scalar> *matrix_left;
 
   /// Matrix and vector for the rest (right-hand side).
-  UMFPackMatrix<Scalar> matrix_right;
-  UMFPackVector<Scalar> vector_right;
+  SparseMatrix<Scalar> *matrix_right;
+  Vector<Scalar> *vector_right;
 
   /// Matrix solver.
   Solver<Scalar>* solver;
