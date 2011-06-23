@@ -31,7 +31,6 @@ namespace Hermes
     template<typename Scalar> class MeshFunction;
     struct SurfPos;
     class Hermes::Ord;
-    template<typename Scalar> class Precond;
 
     class Element;
     class Shapeset;

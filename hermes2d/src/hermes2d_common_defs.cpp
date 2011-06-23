@@ -23,8 +23,6 @@
 #include "integrals/h1.h"
 #include "discrete_problem.h"
 
-using namespace Hermes;
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -61,7 +59,7 @@ namespace Hermes
         Scalar inc = vec->get(i);
         val = val + inc*conj(inc);
       }
-      return std::sqrt(std::abs(val));
+      return sqrt(std::abs(val));
     }
 
     template<typename Scalar>
@@ -274,7 +272,7 @@ namespace Hermes
         }
       }
       trav.finish();
-      return std::sqrt(error);
+      return sqrt(error);
     }
 
     template<typename Scalar>
@@ -312,7 +310,7 @@ namespace Hermes
         default: error("Unknown norm in calc_norm().");
         }
       }
-      return std::sqrt(norm);
+      return sqrt(norm);
     }
 
     // Calculate norm of a (possibly vector-valued) solution.
@@ -337,7 +335,7 @@ namespace Hermes
       // Calculate the resulting norm.
       double result = 0;
       for (int i=0; i<n; i++) result += norms[i]*norms[i];
-      return std::sqrt(result);
+      return sqrt(result);
     }
 
 
@@ -375,8 +373,8 @@ namespace Hermes
         norm_total += norm_vals[i] * norm_vals[i];
       }
 
-      err_abs_total = std::sqrt(err_abs_total);
-      norm_total = std::sqrt(norm_total);
+      err_abs_total = sqrt(err_abs_total);
+      norm_total = sqrt(norm_total);
       err_rel_total = err_abs_total / norm_total * 100.;
 
       // Everything went well, return appropriate flag.
@@ -415,7 +413,7 @@ namespace Hermes
         error += fn(sln1, sln2, ru, rv);
       }
       trav.finish();
-      return std::sqrt(error);
+      return sqrt(error);
     }
 
 
@@ -440,7 +438,7 @@ namespace Hermes
 
         norm += fn(sln, ru);
       }
-      return std::sqrt(norm);
+      return sqrt(norm);
     }
 
     template<typename Scalar>

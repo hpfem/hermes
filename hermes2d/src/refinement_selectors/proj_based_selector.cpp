@@ -144,7 +144,7 @@ namespace Hermes
           }
 
           //calculate error from squared error
-          c.error = std::sqrt(error_squared);
+          c.error = sqrt(error_squared);
 
           //apply weights
           switch(c.split) 
@@ -166,7 +166,7 @@ namespace Hermes
         }
 
         *avg_error = sum_err / num_processed;  // mean
-        *dev_error = std::sqrt(sum_sqr_err/num_processed - Hermes::sqr(*avg_error)); // deviation is square root of variance
+        *dev_error = sqrt(sum_sqr_err/num_processed - Hermes::sqr(*avg_error)); // deviation is square root of variance
       }
 
       template<typename Scalar>

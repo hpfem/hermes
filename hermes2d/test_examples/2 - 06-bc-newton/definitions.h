@@ -2,18 +2,18 @@
 
 /* Weak forms */
 
-class CustomWeakFormPoissonNewton : public WeakForm<double>
+class CustomWeakFormPoissonNewton : public Hermes::Hermes2D::WeakForm<double>
 {
 public:
-  CustomWeakFormPoissonNewton(std::string mat_al, HermesFunction<double>* lambda_al,
-                              std::string mat_cu, HermesFunction<double>* lambda_cu,
-                              HermesFunction<double>* vol_src_term, std::string bdy_heat_flux,
+  CustomWeakFormPoissonNewton(std::string mat_al, Hermes::Hermes2D::HermesFunction<double>* lambda_al,
+                              std::string mat_cu, Hermes::Hermes2D::HermesFunction<double>* lambda_cu,
+                              Hermes::Hermes2D::HermesFunction<double>* vol_src_term, std::string bdy_heat_flux,
                               double alpha, double t_exterior);
 };
 
 /* Custom non-constant Dirichlet condition */
 
-class CustomDirichletCondition : public EssentialBoundaryCondition<double> 
+class CustomDirichletCondition : public Hermes::Hermes2D::EssentialBoundaryCondition<double> 
 {
 public:
   CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C);

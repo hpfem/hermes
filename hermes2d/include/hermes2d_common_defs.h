@@ -23,14 +23,16 @@
 #define __H2D_COMMON_H_
 
 #include "../../hermes_common/include/hermes_common.h"
+
 namespace Hermes
 {
+  /// Namespace containing definitions specific for Hermes2D.
   namespace Hermes2D
   {
-    // H2D-specific error codes.
+    /// H2D-specific error codes.
 #define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
 
-    enum // node types
+    enum ///< node types
     {
       HERMES_TYPE_VERTEX = 0,
       HERMES_TYPE_EDGE = 1
@@ -60,23 +62,20 @@ namespace Hermes
 
 #define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
 
-    // get_elem_marker(e) 
-#define get_elem_marker(e) wf->get_element_markers_conversion()->get_user_marker(e->elem_marker)
-
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
 
 #define HERMES_ONE NULL
 
-    // how many bits the order number takes
+    /// How many bits the order number takes.
     const int H2D_ORDER_BITS = 5;
     const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
 
-    // macros for combining quad horizontal and vertical orders
+    /// Macros for combining quad horizontal and vertical orders.
 #define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
 #define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
 #define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
 
-    // Geometrical type of weak forms.
+    /// Geometrical type of weak forms.
     enum GeomType
     {
       HERMES_PLANAR = 0,         // Planar problem.
@@ -84,19 +83,15 @@ namespace Hermes
       HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
     };
 
-    // Enabling second derivatives in weak forms. Turned off by default. Second
-    // derivatives are employed, among others, by stabilization methods for
-    // transport equations. For usage see the example linear-convection-diffusion.
+    /// Enabling second derivatives in weak forms. Turned off by default. Second
+    /// derivatives are employed, among others, by stabilization methods for
+    /// transport equations. For usage see the example linear-convection-diffusion.
 #define H2D_SECOND_DERIVATIVES_ENABLED
-
-    /* Uncomment this line to disable internal mesh compatibility
-    tests in Traverse:begin(). */
-    //#define H2D_DISABLE_MULTIMESH_TESTS
 
     template<typename Scalar> class MeshFunction;
     template<typename Scalar> class Solution;
 
-    // Projection norms.
+    /// Projection norms.
     enum ProjNormType
     {
       HERMES_L2_NORM, 
@@ -104,7 +99,7 @@ namespace Hermes
       HERMES_H1_SEMINORM, 
       HERMES_HCURL_NORM, 
       HERMES_HDIV_NORM,
-      // Used for passing to projecting functions.
+      /// Used for passing to projecting functions.
       HERMES_UNSET_NORM
     };
 

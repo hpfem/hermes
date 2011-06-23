@@ -2,6 +2,10 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+using namespace Hermes::Hermes2D::RefinementSelectors;
+
 //  This example comes with an exact solution, and it describes the diffraction
 //  of an electromagnetic wave from a re-entrant corner. Convergence graphs saved
 //  (both exact error and error estimate, and both wrt. dof number and cpu time).

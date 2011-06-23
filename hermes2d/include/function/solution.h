@@ -19,7 +19,6 @@
 #include "mesh_function.h"
 #include "../quadrature/quad.h"
 
-
 namespace Hermes
 {
   class Ord;

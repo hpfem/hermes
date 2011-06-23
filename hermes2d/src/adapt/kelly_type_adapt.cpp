@@ -394,9 +394,9 @@ namespace Hermes
         for (int i = 0; i < this->num; i++)
         {
           if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-            component_errors->push_back(std::sqrt(errors_components[i]));
+            component_errors->push_back(sqrt(errors_components[i]));
           else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-            component_errors->push_back(std::sqrt(errors_components[i]/norms[i]));
+            component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
             error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
@@ -437,9 +437,9 @@ namespace Hermes
 
       // Return error value.
       if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-        return std::sqrt(total_error);
+        return sqrt(total_error);
       else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-        return std::sqrt(total_error / total_norm);
+        return sqrt(total_error / total_norm);
       else
       {
         error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);

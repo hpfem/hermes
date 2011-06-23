@@ -2,7 +2,6 @@
 #include "range.h"
 #include "element_to_refine.h"
 
-using namespace std;
 namespace Hermes
 {
   namespace Hermes2D

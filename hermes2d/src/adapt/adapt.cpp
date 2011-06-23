@@ -27,7 +27,6 @@
 #include "matrix.h"
 #include "common_time_period.h"
 
-using namespace std;
 namespace Hermes
 {
   namespace Hermes2D
@@ -219,7 +218,7 @@ namespace Hermes
             // first refinement strategy:
             // refine elements until prescribed amount of error is processed
             // if more elements have similar error refine all to keep the mesh symmetric
-            if ((strat == 0) && (processed_error_squared > std::sqrt(thr) * errors_squared_sum)
+            if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
               && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) break;
 
             // second refinement strategy:
@@ -810,9 +809,9 @@ namespace Hermes
         for (int i = 0; i < num; i++) 
         {
           if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-            component_errors->push_back(std::sqrt(errors_components[i]));
+            component_errors->push_back(sqrt(errors_components[i]));
           else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-            component_errors->push_back(std::sqrt(errors_components[i]/norms[i]));
+            component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else 
           {
             error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
@@ -869,9 +868,9 @@ namespace Hermes
 
       // Return error value.
       if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-        return std::sqrt(total_error);
+        return sqrt(total_error);
       else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-        return std::sqrt(total_error / total_norm);
+        return sqrt(total_error / total_norm);
       else 
       {
         error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);

@@ -2,6 +2,8 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
+using namespace Hermes::Hermes2D::RefinementSelectors;
+
 //  This problem describes the distribution of the vector potential in
 //  a 2D domain comprising a wire carrying electrical current, air, and
 //  an iron which is not under voltage.

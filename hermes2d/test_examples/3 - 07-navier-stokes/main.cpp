@@ -3,6 +3,9 @@
 
 #include "hermes2d.h"
 
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+
 // The time-dependent laminar incompressible Navier-Stokes equations are
 // discretized in time via the implicit Euler method. If NEWTON == true,
 // the Newton's method is used to solve the nonlinear problem at each time
