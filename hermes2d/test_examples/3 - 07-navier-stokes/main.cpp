@@ -3,7 +3,8 @@
 
 #include "hermes2d.h"
 
-using namespace RefinementSelectors;
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
 
 // The time-dependent laminar incompressible Navier-Stokes equations are
 // discretized in time via the implicit Euler method. If NEWTON == true,
@@ -74,7 +75,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes2D<double> hermes_2D;
+  Global<double> hermes_2D;
 
   // Load the mesh.
   Mesh mesh;

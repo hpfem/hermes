@@ -15,64 +15,68 @@
 
 #ifndef __H2D_REFINEMENT_ORDER_PERMUTATOR_H
 #define __H2D_REFINEMENT_ORDER_PERMUTATOR_H
-
-namespace RefinementSelectors {
-  /// Order permutator. Generates all permutations of orders from a set defined by a range of orders. \ingroup g_selectors
-  /** Used to generate all possible generation of horizontal and vertical orders bettween
-   *  the starting order and the ending order. Both the starting order and the ending order are included.
-   *  \par Suggested Use
-   *  \code
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace RefinementSelectors {
+      /// Hermes::Order permutator. Generates all permutations of orders from a set defined by a range of orders. \ingroup g_selectors
+      /** Used to generate all possible generation of horizontal and vertical orders bettween
+      *  the starting order and the ending order. Both the starting order and the ending order are included.
+      *  \par Suggested Use
+      *  \code
       OrderPermutator order_perm(start_order, end_order, false);
       do {
-        int order_h = order_perm.get_order_h();
+      int order_h = order_perm.get_order_h();
       } while (order_perm.next());
-   *  \endcode */
-  class HERMES_API OrderPermutator {
-  protected:
-    int order_h; ///< The current horizontal order.
-    int order_v; ///< The current verical order.
-    int start_order_h; ///< The starting horizontal order.
-    int start_order_v; ///< The starting vertical order.
-    int end_order_h; ///< The ending horizontal order.
-    int end_order_v; ///< The ending vertical order.
-    bool iso_p; ///< True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
-    int* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if NULL.
+      *  \endcode */
+      class HERMES_API OrderPermutator {
+      protected:
+        int order_h; ///< The current horizontal order.
+        int order_v; ///< The current verical order.
+        int start_order_h; ///< The starting horizontal order.
+        int start_order_v; ///< The starting vertical order.
+        int end_order_h; ///< The ending horizontal order.
+        int end_order_v; ///< The ending vertical order.
+        bool iso_p; ///< True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
+        int* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if NULL.
 
-  public:
-    /// Constructor.
-    /** \param[in] start_quad_order The starting order in an encoded form.
-     *  \param[in] end_quad_order The ending order in an encoded form.
-     *  \param[in] iso_p True if both orders (i.e. horizontal and vertical) should be increased simultaneously.
-     *  \param[in] tgt_quad_order A point to a location to which a current orders (i.e. horizontal and vertical) are stored in an encoded form. Ignored if NULL. */
-    OrderPermutator (int start_quad_order = 0, int end_quad_order = 0, bool iso_p = false, int* tgt_quad_order = NULL);
+      public:
+        /// Constructor.
+        /** \param[in] start_quad_order The starting order in an encoded form.
+        *  \param[in] end_quad_order The ending order in an encoded form.
+        *  \param[in] iso_p True if both orders (i.e. horizontal and vertical) should be increased simultaneously.
+        *  \param[in] tgt_quad_order A point to a location to which a current orders (i.e. horizontal and vertical) are stored in an encoded form. Ignored if NULL. */
+        OrderPermutator (int start_quad_order = 0, int end_quad_order = 0, bool iso_p = false, int* tgt_quad_order = NULL);
 
-    /// Moves to the next permutation of orders.
-    /** \return True if there is a next permutation of orders. */
-    bool next();
+        /// Moves to the next permutation of orders.
+        /** \return True if there is a next permutation of orders. */
+        bool next();
 
-    /// Resets permutator to the starting order.
-    void reset();
+        /// Resets permutator to the starting order.
+        void reset();
 
-    /// Returns the current horizontal order.
-    /** \return The current horizontal order. */
-    int get_order_h() const { return order_h; };
+        /// Returns the current horizontal order.
+        /** \return The current horizontal order. */
+        int get_order_h() const { return order_h; };
 
-    /// Returns the current vertical order.
-    /** \return The current vertical order. */
-    int get_order_v() const { return order_v; };
+        /// Returns the current vertical order.
+        /** \return The current vertical order. */
+        int get_order_v() const { return order_v; };
 
-    /// Returns the current order in an encoded form.
-    /** \return The current order in an encoded form. */
-    int get_quad_order() const { return H2D_MAKE_QUAD_ORDER(order_h, order_v); };
+        /// Returns the current order in an encoded form.
+        /** \return The current order in an encoded form. */
+        int get_quad_order() const { return H2D_MAKE_QUAD_ORDER(order_h, order_v); };
 
-    /// Returns the starting order in an encoded form.
-    /** \return The starting order in an encoded form. */
-    int get_start_quad_order() const { return H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v); };
+        /// Returns the starting order in an encoded form.
+        /** \return The starting order in an encoded form. */
+        int get_start_quad_order() const { return H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v); };
 
-    /// Returns the ending order in an encoded form.
-    /** \return The ending order in an encoded form. */
-    int get_end_quad_order() const { return H2D_MAKE_QUAD_ORDER(end_order_h, end_order_v); };
-  };
+        /// Returns the ending order in an encoded form.
+        /** \return The ending order in an encoded form. */
+        int get_end_quad_order() const { return H2D_MAKE_QUAD_ORDER(end_order_h, end_order_v); };
+      };
+    }
+  }
 }
-
 #endif

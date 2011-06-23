@@ -16,34 +16,36 @@
 #ifndef __H2D_INTEGRALS_HDIV_H
 #define __H2D_INTEGRALS_HDIV_H
 
-// a
-//// volume integrals //////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-inline T int_g_h(Function<T>* fg, Function<T>* fh, RefMap* rg, RefMap* rh)
+namespace Hermes
 {
-  Quad2D* quad = rg->get_quad_2d();
-  int o = fg->get_fn_order() + fh->get_fn_order() + 2 + rg->get_inv_ref_order();
-  limit_order(o);
-  fg->set_quad_order(o, H2D_FN_VAL);
-  fh->set_quad_order(o, H2D_FN_VAL);
+  namespace Hermes2D
+  {
+    template<typename T>
+    inline T int_g_h(Function<T>* fg, Function<T>* fh, RefMap* rg, RefMap* rh)
+    {
+      Quad2D* quad = rg->get_quad_2d();
+      int o = fg->get_fn_order() + fh->get_fn_order() + 2 + rg->get_inv_ref_order();
+      limit_order(o);
+      fg->set_quad_order(o, H2D_FN_VAL);
+      fh->set_quad_order(o, H2D_FN_VAL);
 
-  T *g0 = fg->get_fn_values(0), *g1 = fg->get_fn_values(1);
-  T *h0 = fh->get_fn_values(0), *h1 = fh->get_fn_values(1);
+      T *g0 = fg->get_fn_values(0), *g1 = fg->get_fn_values(1);
+      T *h0 = fh->get_fn_values(0), *h1 = fh->get_fn_values(1);
 
-  T result = 0.0;
+      T result = 0.0;
 
-  double3* pt = quad->get_points(o);
-  int np = quad->get_num_points(o);
-  double2x2* mg, *mh;
-  mg = rg->get_inv_ref_map(o);
-  mh = rh->get_inv_ref_map(o);
-  double* jac = rg->get_jacobian(o);
-  for (int i = 0; i < np; i++, mg++, mh++)
-      result += pt[i][2] * jac[i] * (( (*mg)[1][1]*g0[i] - (*mg)[1][0]*g1[i]) * ( (*mh)[1][1]*h0[i] - (*mh)[1][0]*h1[i]) +
-                                     (-(*mg)[0][1]*g0[i] + (*mg)[0][0]*g1[i]) * (-(*mh)[0][1]*h0[i] + (*mh)[0][0]*h1[i]));
+      double3* pt = quad->get_points(o);
+      int np = quad->get_num_points(o);
+      double2x2* mg, *mh;
+      mg = rg->get_inv_ref_map(o);
+      mh = rh->get_inv_ref_map(o);
+      double* jac = rg->get_jacobian(o);
+      for (int i = 0; i < np; i++, mg++, mh++)
+        result += pt[i][2] * jac[i] * (( (*mg)[1][1]*g0[i] - (*mg)[1][0]*g1[i]) * ( (*mh)[1][1]*h0[i] - (*mh)[1][0]*h1[i]) +
+        (-(*mg)[0][1]*g0[i] + (*mg)[0][0]*g1[i]) * (-(*mh)[0][1]*h0[i] + (*mh)[0][0]*h1[i]));
 
-  return result;
+      return result;
+    }
+  }
 }
-
 #endif

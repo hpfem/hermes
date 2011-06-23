@@ -22,7 +22,6 @@
 #include "error.h"
 #include "callstack.h"
 
-//  Solvers
 #include "solver.h"
 #include "umfpack_solver.h"
 #include "superlu_solver.h"

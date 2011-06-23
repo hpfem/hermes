@@ -1,5 +1,8 @@
 #include "hermes2d.h"
 
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+
 /* Weak forms */
 
 class CustomWeakForm : public WeakForm<std::complex<double> >

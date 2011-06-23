@@ -16,85 +16,89 @@
 #include "mesh_function.h"
 #include "refmap.h"
 #include "hermes_function.h"
-
-template<typename Scalar>
-HermesFunction<Scalar>::HermesFunction()
+namespace Hermes
 {
-  this->is_const = true;
-  this->const_value = -9999.0;
-};
+  namespace Hermes2D
+  {
+    template<typename Scalar>
+    HermesFunction<Scalar>::HermesFunction()
+    {
+      this->is_const = true;
+      this->const_value = -9999.0;
+    };
 
-template<typename Scalar>
-HermesFunction<Scalar>::HermesFunction(Scalar value)
-{
-  this->is_const = true;
-  this->const_value = value;
-};
+    template<typename Scalar>
+    HermesFunction<Scalar>::HermesFunction(Scalar value)
+    {
+      this->is_const = true;
+      this->const_value = value;
+    };
 
-template<typename Scalar>
-Scalar HermesFunction<Scalar>::value(Scalar x) const
-{
-  return const_value;
-};
+    template<typename Scalar>
+    Scalar HermesFunction<Scalar>::value(Scalar x) const
+    {
+      return const_value;
+    };
 
-template<typename Scalar>
-Ord HermesFunction<Scalar>::value_ord(Ord x) const
-{
-  return Ord(1);
-};
+    template<typename Scalar>
+    Ord HermesFunction<Scalar>::value_ord(Ord x) const
+    {
+      return Ord(1);
+    };
 
-template<typename Scalar>
-Scalar HermesFunction<Scalar>::value(Scalar x, Scalar y) const
-{
-  return const_value;
-};
+    template<typename Scalar>
+    Scalar HermesFunction<Scalar>::value(Scalar x, Scalar y) const
+    {
+      return const_value;
+    };
 
-template<typename Scalar>
-Ord HermesFunction<Scalar>::value_ord(Ord x, Ord y) const
-{
-  return Ord(1);
-};
+    template<typename Scalar>
+    Ord HermesFunction<Scalar>::value_ord(Ord x, Ord y) const
+    {
+      return Ord(1);
+    };
 
-template<>
-double HermesFunction<double>::derivative(double x) const
-{
-  return 0.0;
-};
-template<>
-std::complex<double> HermesFunction<std::complex<double> >::derivative(std::complex<double> x) const
-{
-  return std::complex<double>(0.0, 0.0);
-};
+    template<>
+    double HermesFunction<double>::derivative(double x) const
+    {
+      return 0.0;
+    };
+    template<>
+    std::complex<double> HermesFunction<std::complex<double> >::derivative(std::complex<double> x) const
+    {
+      return std::complex<double>(0.0, 0.0);
+    };
 
-template<typename Scalar>
-Ord HermesFunction<Scalar>::derivative_ord(Ord x) const
-{
-  return Ord(1);
-};
+    template<typename Scalar>
+    Ord HermesFunction<Scalar>::derivative_ord(Ord x) const
+    {
+      return Ord(1);
+    };
 
-template<>
-double HermesFunction<double>::derivative(double x, double y) const
-{
-  return 0.0;
-};
-template<>
-std::complex<double> HermesFunction<std::complex<double> >::derivative(std::complex<double> x, std::complex<double> y) const
-{
-  return 0.0;
-};
+    template<>
+    double HermesFunction<double>::derivative(double x, double y) const
+    {
+      return 0.0;
+    };
+    template<>
+    std::complex<double> HermesFunction<std::complex<double> >::derivative(std::complex<double> x, std::complex<double> y) const
+    {
+      return 0.0;
+    };
 
-template<typename Scalar>
-Ord HermesFunction<Scalar>::derivative_ord(Ord x, Ord y) const
-{
-  return Ord(1);
-};
+    template<typename Scalar>
+    Ord HermesFunction<Scalar>::derivative_ord(Ord x, Ord y) const
+    {
+      return Ord(1);
+    };
 
-template<typename Scalar>
-bool HermesFunction<Scalar>::is_constant() const
-{
-  return is_const;
-};
+    template<typename Scalar>
+    bool HermesFunction<Scalar>::is_constant() const
+    {
+      return is_const;
+    };
 
-template class HERMES_API HermesFunction<double>;
-template class HERMES_API HermesFunction<std::complex<double> >;
-
+    template class HERMES_API HermesFunction<double>;
+    template class HERMES_API HermesFunction<std::complex<double> >;
+  }
+}

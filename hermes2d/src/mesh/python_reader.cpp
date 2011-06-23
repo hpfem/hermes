@@ -884,7 +884,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     m = m.replace("^", "**")
  *     # Make sure 1/2 produces 0.5:
  *     m = "from __future__ import division\n\n" + m             # <<<<<<<<<<<<<<
- *     namespace = {}
+ *     namespace = 
+{}
  *     try:
  */
   __pyx_t_1 = PyNumber_Add(((PyObject *)__pyx_kp_s_17), __pyx_v_m); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -896,7 +897,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
   /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":52
  *     # Make sure 1/2 produces 0.5:
  *     m = "from __future__ import division\n\n" + m
- *     namespace = {}             # <<<<<<<<<<<<<<
+ *     namespace = 
+{}             # <<<<<<<<<<<<<<
  *     try:
  *         exec m in math.__dict__, namespace
  */
@@ -908,7 +910,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
 
   /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":53
  *     m = "from __future__ import division\n\n" + m
- *     namespace = {}
+ *     namespace = 
+{}
  *     try:             # <<<<<<<<<<<<<<
  *         exec m in math.__dict__, namespace
  *     except (SyntaxError, NameError), e:
@@ -923,7 +926,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
 {
 
       /* "/home/ondrej/repos/hermes/hermes2d/src/python_reader.pyx":54
- *     namespace = {}
+ *     namespace = 
+{}
  *     try:
  *         exec m in math.__dict__, namespace             # <<<<<<<<<<<<<<
  *     except (SyntaxError, NameError), e:
@@ -1031,7 +1035,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     elements = namespace.pop("elements", None)
  *     boundary = namespace.pop("boundaries", None)
  */
-  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_2 = PyObject_Call(__pyx_t_4, ((PyObject *)__pyx_k_tuple_19), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -1047,7 +1052,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     boundary = namespace.pop("boundaries", None)
  *     nurbs = namespace.pop("curves", None)
  */
-  __pyx_t_2 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_2)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_k_tuple_20), NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
@@ -1063,7 +1069,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     nurbs = namespace.pop("curves", None)
  *     refinements = namespace.pop("refinements", None)
  */
-  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_2 = PyObject_Call(__pyx_t_4, ((PyObject *)__pyx_k_tuple_21), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
@@ -1079,7 +1086,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     refinements = namespace.pop("refinements", None)
  *     if nodes is None or elements is None or boundary is None:
  */
-  __pyx_t_2 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_2)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = PyObject_Call(__pyx_t_2, ((PyObject *)__pyx_k_tuple_22), NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
@@ -1095,7 +1103,8 @@ static PyObject *__pyx_pf_13python_reader_2read_hermes_format_str(PyObject *__py
  *     if nodes is None or elements is None or boundary is None:
  *         raise ParseError("Either nodes, elements or boundary is missing")
  */
-  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyObject_GetAttr(((PyObject *)__pyx_v_namespace), __pyx_n_s__pop); if (unlikely(!__pyx_t_4)) 
+{__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_2 = PyObject_Call(__pyx_t_4, ((PyObject *)__pyx_k_tuple_23), NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);

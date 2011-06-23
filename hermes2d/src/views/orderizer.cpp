@@ -18,6 +18,7 @@
 #include "refmap.h"
 
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 
 #include "linear_data.cpp"
 

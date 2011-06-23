@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file petsc_solver.h
-    \brief PETSc solver interface.
+\brief PETSc solver interface.
 */
 #ifndef __HERMES_COMMON_PETSC_SOLVER_H_
 #define __HERMES_COMMON_PETSC_SOLVER_H_
@@ -26,106 +26,111 @@
 #include "solver.h"
 
 #ifdef WITH_PETSC
-  #include <petsc.h>
-  #include <petscmat.h>
-  #include <petscvec.h>
-  #include <petscksp.h>
+#include <petsc.h>
+#include <petscmat.h>
+#include <petscvec.h>
+#include <petscksp.h>
 
-using namespace Hermes::Solvers;
+namespace Hermes {
+  namespace Solvers {
+    template <typename Scalar> class PetscLinearSolver;
+  }
+}
 
-/// Wrapper of PETSc matrix, to store matrices used with PETSc in its native format
-///
+namespace Hermes {
+  namespace Algebra {
+    /// \brief Wrapper of PETSc matrix, to store matrices used with PETSc in its native format.
+    template <typename Scalar>
+    class PetscMatrix : public SparseMatrix<Scalar> {
+    public:
+      PetscMatrix();
+      virtual ~PetscMatrix();
 
-template <typename Scalar> class PetscLinearSolver;
+      virtual void alloc();
+      virtual void free();
+      virtual void finish();
+      virtual Scalar get(unsigned int m, unsigned int n);
+      virtual void zero();
+      virtual void add(unsigned int m, unsigned int n, Scalar v);
+      virtual void add_to_diagonal(Scalar v);
+      virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
+      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+      virtual unsigned int get_matrix_size() const;
+      virtual unsigned int get_nnz() const;
+      virtual double get_fill_in() const;
+      virtual void add_matrix(PetscMatrix* mat);
+      virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
+      virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
 
-template <typename Scalar>
-class PetscMatrix : public SparseMatrix<Scalar> {
-public:
-  PetscMatrix();
-  virtual ~PetscMatrix();
+      // Applies the matrix to vector_in and saves result to vector_out.
+      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
 
-  virtual void alloc();
-  virtual void free();
-  virtual void finish();
-  virtual Scalar get(unsigned int m, unsigned int n);
-  virtual void zero();
-  virtual void add(unsigned int m, unsigned int n, Scalar v);
-  virtual void add_to_diagonal(Scalar v);
-  virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
-  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
-  virtual unsigned int get_matrix_size() const;
-  virtual unsigned int get_nnz() const;
-  virtual double get_fill_in() const;
-  virtual void add_matrix(PetscMatrix* mat);
-  virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
-  virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
+      // Multiplies matrix with a Scalar.
+      void multiply_with_Scalar(Scalar value);
+      // Creates matrix in PETSC format using size, nnz, and the three arrays.
+      void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
+      // Duplicates a matrix (including allocation).
+      PetscMatrix* duplicate();
+    protected:
+      Mat matrix;
+      unsigned int nnz;
+      bool inited;
 
-  // Applies the matrix to vector_in and saves result to vector_out.
-  void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+      friend class PetscLinearSolver<Scalar>;
+    };
 
-  // Multiplies matrix with a Scalar.
-  void multiply_with_Scalar(Scalar value);
-  // Creates matrix in PETSC format using size, nnz, and the three arrays.
-  void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
-  // Duplicates a matrix (including allocation).
-  PetscMatrix* duplicate();
-protected:
-  Mat matrix;
-  unsigned int nnz;
-  bool inited;
+    /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
+    ///
+    template <typename Scalar>
+    class PetscVector : public Vector<Scalar> {
+    public:
+      PetscVector();
+      virtual ~PetscVector();
 
-  friend class PetscLinearSolver<Scalar>;
-};
+      virtual void alloc(unsigned int ndofs);
+      virtual void free();
+      virtual void finish();
+      virtual Scalar get(unsigned int idx);
+      virtual void extract(Scalar *v) const;
+      virtual void zero();
+      virtual void change_sign();
+      virtual void set(unsigned int idx, Scalar y);
+      virtual void add(unsigned int idx, Scalar y);
+      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+      virtual void add_vector(Vector<Scalar>* vec) {
+        assert(this->length() == vec->length());
+        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+      };
+      virtual void add_vector(Scalar* vec) {
+        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+      };
+      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
-/// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
-///
-template <typename Scalar>
-class PetscVector : public Vector<Scalar> {
-public:
-  PetscVector();
-  virtual ~PetscVector();
+    protected:
+      Vec vec;
+      bool inited;
 
-  virtual void alloc(unsigned int ndofs);
-  virtual void free();
-  virtual void finish();
-  virtual Scalar get(unsigned int idx);
-  virtual void extract(Scalar *v) const;
-  virtual void zero();
-  virtual void change_sign();
-  virtual void set(unsigned int idx, Scalar y);
-  virtual void add(unsigned int idx, Scalar y);
-  virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-  virtual void add_vector(Vector<Scalar>* vec) {
-    assert(this->length() == vec->length());
-    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-  };
-  virtual void add_vector(Scalar* vec) {
-    for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-  };
-  virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
+      friend class PetscLinearSolver<Scalar>;
+    };
+  }
+  namespace Solvers
+  {
+    /// Encapsulation of PETSc linear solver
+    ///
+    /// @ingroup solvers
+    template <typename Scalar>
+    class HERMES_API PetscLinearSolver : public LinearSolver<Scalar> {
+    public:
+      PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
+      virtual ~PetscLinearSolver();
 
-protected:
-  Vec vec;
-  bool inited;
+      virtual bool solve();
 
-  friend class PetscLinearSolver<Scalar>;
-};
-
-/// Encapsulation of PETSc linear solver
-///
-/// @ingroup solvers
-template <typename Scalar>
-class HERMES_API PetscLinearSolver : public LinearSolver<Scalar> {
-public:
-  PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
-  virtual ~PetscLinearSolver();
-
-  virtual bool solve();
-
-protected:
-  PetscMatrix<Scalar> *m;
-  PetscVector<Scalar> *rhs;
-};
-
+    protected:
+      PetscMatrix<Scalar> *m;
+      PetscVector<Scalar> *rhs;
+    };
+  }
+}
 #endif
 #endif

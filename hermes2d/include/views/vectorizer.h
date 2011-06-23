@@ -20,6 +20,8 @@
 
 namespace Hermes
 {
+  using namespace Hermes2D;
+
   namespace Views
   {
     /// \brief "Vectorizer" is a Linearizer<Scalar> for vector solutions. 

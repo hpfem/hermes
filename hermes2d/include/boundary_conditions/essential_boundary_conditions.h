@@ -24,149 +24,153 @@
 #include "map"
 
 #include "../hermes2d_common_defs.h"
-
-template<typename Scalar> class ExactSolutionScalar;
-template<typename Scalar> class ExactSolutionVector;
-template<typename Scalar> class EssentialBCs;
-
-/// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
-template<typename Scalar>
-class HERMES_API EssentialBoundaryCondition
+namespace Hermes
 {
-public:
-  /// Default constructor.
-  EssentialBoundaryCondition(Hermes::vector<std::string> markers);
-  EssentialBoundaryCondition(std::string marker);
+  namespace Hermes2D
+  {
+    template<typename Scalar> class ExactSolutionScalar;
+    template<typename Scalar> class ExactSolutionVector;
+    template<typename Scalar> class EssentialBCs;
 
-  /// Virtual destructor.
-  virtual ~EssentialBoundaryCondition();
+    /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
+    template<typename Scalar>
+    class HERMES_API EssentialBoundaryCondition
+    {
+    public:
+      /// Default constructor.
+      EssentialBoundaryCondition(Hermes::vector<std::string> markers);
+      EssentialBoundaryCondition(std::string marker);
 
-  /// Types of description of boundary values, either a function (callback), or a constant.
-  enum EssentialBCValueType {
-    BC_FUNCTION,
-    BC_CONST
-  };
+      /// Virtual destructor.
+      virtual ~EssentialBoundaryCondition();
 
-  /// Pure virtual function reporting the type of the essential boundary condition.
-  virtual EssentialBCValueType get_value_type() const = 0;
+      /// Types of description of boundary values, either a function (callback), or a constant.
+      enum EssentialBCValueType {
+        BC_FUNCTION,
+        BC_CONST
+      };
 
-  /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
-  /// normal and tangential vectors.
-  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
- 
-  /// Special case of a constant function.
-  Scalar value_const;
+      /// Pure virtual function reporting the type of the essential boundary condition.
+      virtual EssentialBCValueType get_value_type() const = 0;
 
-  /// Sets the current time for time-dependent boundary conditions.
-  void set_current_time(double time);
-  double get_current_time() const;
+      /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
+      /// normal and tangential vectors.
+      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
 
-protected:
-  /// Current time.
-  double current_time;
-  
-  // Markers.
-  Hermes::vector<std::string> markers;
+      /// Special case of a constant function.
+      Scalar value_const;
 
-  // Friend class.
-  friend class EssentialBCs<Scalar>;
-  friend class Space<Scalar>;
-};
+      /// Sets the current time for time-dependent boundary conditions.
+      void set_current_time(double time);
+      double get_current_time() const;
 
-/// Class representing constant essential boundary condition.
-template<typename Scalar>
-class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition<Scalar> {
-public:
-  /// Constructors.
-  DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
-  DefaultEssentialBCConst(std::string marker, Scalar value_const);
+    protected:
+      /// Current time.
+      double current_time;
 
-  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      // Markers.
+      Hermes::vector<std::string> markers;
 
-  /// Function giving info that u_Essential is a constant.
-  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
-};
+      // Friend class.
+      friend class EssentialBCs<Scalar>;
+      friend class Space<Scalar>;
+    };
 
-/// Class representing non-constant essential boundary condition for Scalar approximation.
-template<typename Scalar>
-class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
-{
-public:
-  DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
-                             ExactSolutionScalar<Scalar>* exact_solution); 
+    /// Class representing constant essential boundary condition.
+    template<typename Scalar>
+    class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition<Scalar> {
+    public:
+      /// Constructors.
+      DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
+      DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
-  DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution); 
- 
-  ~DefaultEssentialBCNonConst() {};
+      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
-  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      /// Function giving info that u_Essential is a constant.
+      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
+    };
 
-  /// Function giving info that u_Essential is a non-constant function.
-  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
+    /// Class representing non-constant essential boundary condition for Scalar approximation.
+    template<typename Scalar>
+    class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
+    {
+    public:
+      DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
+        ExactSolutionScalar<Scalar>* exact_solution); 
 
-  ExactSolutionScalar<Scalar>* exact_solution;
-};
+      DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution); 
 
-/// Class representing non-constant essential boundary condition 
-/// (tangential component for Hcurl approximations).
-template<typename Scalar>
-class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
-{
-public:
-  // Tangential values given by a vector-valued solution.
-  DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
-                                  ExactSolutionVector<Scalar>* exact_solution2); 
-  DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2); 
- 
-  ~DefaultEssentialBCNonConstHcurl() {};
+      ~DefaultEssentialBCNonConst() {};
 
-  virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
-  /// Function giving info that u_Essential is a non-constant function.
-  typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
+      /// Function giving info that u_Essential is a non-constant function.
+      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
-  ExactSolutionVector<Scalar>* exact_solution2;
-};
+      ExactSolutionScalar<Scalar>* exact_solution;
+    };
 
-/// Class encapsulating all boundary conditions of one problem.
-/// Using the class EssentialBCs and its descendants.
-template<typename Scalar>
-class HERMES_API EssentialBCs {
-public:
-  /// Default constructor.
-  EssentialBCs();
+    /// Class representing non-constant essential boundary condition 
+    /// (tangential component for Hcurl approximations).
+    template<typename Scalar>
+    class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
+    {
+    public:
+      // Tangential values given by a vector-valued solution.
+      DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
+        ExactSolutionVector<Scalar>* exact_solution2); 
+      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2); 
 
-  /// Constructor with all boundary conditions of a problem.
-  EssentialBCs(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
-  EssentialBCs(EssentialBoundaryCondition<Scalar>* boundary_condition);
+      ~DefaultEssentialBCNonConstHcurl() {};
 
-  /// Default destructor.
-  ~EssentialBCs();
+      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
-  /// Initializes the class, fills the structures.
-  void add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
-  void add_boundary_condition(EssentialBoundaryCondition<Scalar>* essential_bc);
+      /// Function giving info that u_Essential is a non-constant function.
+      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
-  /// Public iterators for the private data structures.
-  typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator iterator;
-  typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
-  typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
-  
-  EssentialBoundaryCondition<Scalar>* get_boundary_condition(std::string marker);
+      ExactSolutionVector<Scalar>* exact_solution2;
+    };
 
-  /// Sets the current time for time-dependent boundary conditions.
-  void set_current_time(double time);
+    /// Class encapsulating all boundary conditions of one problem.
+    /// Using the class EssentialBCs and its descendants.
+    template<typename Scalar>
+    class HERMES_API EssentialBCs {
+    public:
+      /// Default constructor.
+      EssentialBCs();
 
-private:
-  /// All boundary conditions together.
-  Hermes::vector<EssentialBoundaryCondition<Scalar> *> all;
+      /// Constructor with all boundary conditions of a problem.
+      EssentialBCs(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
+      EssentialBCs(EssentialBoundaryCondition<Scalar>* boundary_condition);
 
-  /// Boundary markers cache
-  std::map<std::string, EssentialBoundaryCondition<Scalar> *> markers;
+      /// Default destructor.
+      ~EssentialBCs();
 
-  /// Create boundary markers cache for assembling
-  void create_marker_cache();
-};
+      /// Initializes the class, fills the structures.
+      void add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
+      void add_boundary_condition(EssentialBoundaryCondition<Scalar>* essential_bc);
 
+      /// Public iterators for the private data structures.
+      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator iterator;
+      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
+      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
+
+      EssentialBoundaryCondition<Scalar>* get_boundary_condition(std::string marker);
+
+      /// Sets the current time for time-dependent boundary conditions.
+      void set_current_time(double time);
+
+    private:
+      /// All boundary conditions together.
+      Hermes::vector<EssentialBoundaryCondition<Scalar> *> all;
+
+      /// Boundary markers cache
+      std::map<std::string, EssentialBoundaryCondition<Scalar> *> markers;
+
+      /// Create boundary markers cache for assembling
+      void create_marker_cache();
+    };
+  }
+}
 #endif
 

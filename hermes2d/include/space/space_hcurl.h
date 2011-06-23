@@ -17,66 +17,70 @@
 #define __H2D_SPACE_HCURL_H
 
 #include "space.h"
-
-/// HcurlSpace represents a space of vector functions with continuous tangent
-/// components over a domain (mesh).
-///
-///
-///
-template<typename Scalar>
-class HERMES_API HcurlSpace : public Space<Scalar>
+namespace Hermes
 {
-public:
-  HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-          Shapeset* shapeset = NULL);
-
-  HcurlSpace(Mesh* mesh, int p_init = 1,
-          Shapeset* shapeset = NULL);
-
-  // Common code for the constructors.
-  void init(Shapeset* shapeset, Ord2 p_init);
-
-  virtual ~HcurlSpace();
-
-  virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
-
-  virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
-
-  virtual void set_shapeset(Shapeset* shapeset);
-
-  /// Sets element polynomial order and calls assign_dofs(). Intended for the user.
-  virtual void set_element_order(int id, int order);
-
-  /// Sets element polynomial order without calling assign_dofs(). For internal use.
-  virtual void set_element_order_internal(int id, int order);
-
-
-protected:
-
-  virtual void assign_vertex_dofs() {}
-  virtual void assign_edge_dofs();
-  virtual void assign_bubble_dofs();
-
-  virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
-  virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
-
-  static double** hcurl_proj_mat;
-  static double*  hcurl_chol_p;
-  static int      hcurl_proj_ref;
-
-  virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
-
-  struct EdgeInfo
+  namespace Hermes2D
   {
-    Node* node;
-    int part;
-    int ori;
-    double lo, hi;
-  };
+    /// HcurlSpace represents a space of vector functions with continuous tangent
+    /// components over a domain (mesh).
+    ///
+    ///
+    ///
+    template<typename Scalar>
+    class HERMES_API HcurlSpace : public Space<Scalar>
+    {
+    public:
+      HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+        Shapeset* shapeset = NULL);
 
-  void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
-  virtual void update_constraints();
+      HcurlSpace(Mesh* mesh, int p_init = 1,
+        Shapeset* shapeset = NULL);
 
-};
+      // Common code for the constructors.
+      void init(Shapeset* shapeset, Ord2 p_init);
 
+      virtual ~HcurlSpace();
+
+      virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
+
+      virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
+
+      virtual void set_shapeset(Shapeset* shapeset);
+
+      /// Sets element polynomial order and calls assign_dofs(). Intended for the user.
+      virtual void set_element_order(int id, int order);
+
+      /// Sets element polynomial order without calling assign_dofs(). For internal use.
+      virtual void set_element_order_internal(int id, int order);
+
+
+    protected:
+
+      virtual void assign_vertex_dofs() {}
+      virtual void assign_edge_dofs();
+      virtual void assign_bubble_dofs();
+
+      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
+      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
+
+      static double** hcurl_proj_mat;
+      static double*  hcurl_chol_p;
+      static int      hcurl_proj_ref;
+
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+
+      struct EdgeInfo
+      {
+        Node* node;
+        int part;
+        int ori;
+        double lo, hi;
+      };
+
+      void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
+      virtual void update_constraints();
+
+    };
+  }
+}
 #endif

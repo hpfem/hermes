@@ -16,51 +16,46 @@
 #ifndef __H2D_SHAPESET_HC_ALL_H
 #define __H2D_SHAPESET_HC_ALL_H
 
-//#ifdef H2D_COMPLEX
-
 #include "shapeset.h"
 
-
-/// H(curl) shapeset based on Legendre polynomials.
-class HERMES_API HcurlShapesetLegendre : public Shapeset
+namespace Hermes
 {
-  public: HcurlShapesetLegendre();
-  virtual int get_id() const { return 10; }
-  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
-};
+  namespace Hermes2D
+  {
+    /// H(curl) shapeset based on Legendre polynomials.
+    class HERMES_API HcurlShapesetLegendre : public Shapeset
+    {
+    public: HcurlShapesetLegendre();
+            virtual int get_id() const { return 10; }
+            virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+    };
 
+    // Experimental.
+    class HERMES_API HcurlShapesetEigen2 : public Shapeset
+    {
+    public: HcurlShapesetEigen2();
+            virtual int get_id() const { return 11; }
+            virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+    };
 
-// Experimental.
-class HERMES_API HcurlShapesetEigen2 : public Shapeset
-{
-  public: HcurlShapesetEigen2();
-  virtual int get_id() const { return 11; }
-  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
-};
+    // Experimental.
+    class HERMES_API HcurlShapesetGradEigen : public Shapeset
+    {
+    public: HcurlShapesetGradEigen();
+            virtual int get_id() const { return 12; }
+            virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+    };
 
+    /// H(curl) shapeset with Legendre bubbles and gradients of H1 functions as edges
+    class HERMES_API HcurlShapesetGradLeg : public Shapeset
+    {
+    public: HcurlShapesetGradLeg();
+            virtual int get_id() const { return 13; }
+            virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+    };
 
-// Experimental.
-class HERMES_API HcurlShapesetGradEigen : public Shapeset
-{
-  public: HcurlShapesetGradEigen();
-  virtual int get_id() const { return 12; }
-  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
-};
-
-
-/// H(curl) shapeset with Legendre bubbles and gradients of H1 functions as edges
-class HERMES_API HcurlShapesetGradLeg : public Shapeset
-{
-  public: HcurlShapesetGradLeg();
-  virtual int get_id() const { return 13; }
-  virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
-};
-
-
-/// This is the default Hcurl shapeset typedef.
-typedef HcurlShapesetGradLeg HcurlShapeset;
-
-
-//#endif // H2D_COMPLEX
-
+    /// This is the default Hcurl shapeset typedef.
+    typedef HcurlShapesetGradLeg HcurlShapeset;
+  }
+}
 #endif

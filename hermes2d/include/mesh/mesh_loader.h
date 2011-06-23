@@ -17,21 +17,25 @@
 #define _MESHLOADER_H_
 
 #include "mesh.h"
-
-/// @defgroup meshloaders Mesh loaders
-
-/// Abstract class for mesh loaders
-///
-/// @ingroup meshloaders
-class HERMES_API MeshLoader
+namespace Hermes
 {
-public:
-  virtual ~MeshLoader() { }
+  namespace Hermes2D
+  {
+    /// @defgroup meshloaders Mesh loaders
 
-  /// Loads the mesh from a file. Aborts the program on error.
-  /// @param filename [in] The name of the file.
-  /// @param mesh [out] The mesh.
-  virtual bool load(const char *file_name, Mesh *mesg) = 0;
-};
+    /// Abstract class for mesh loaders
+    ///
+    /// @ingroup meshloaders
+    class HERMES_API MeshLoader
+    {
+    public:
+      virtual ~MeshLoader() { }
 
+      /// Loads the mesh from a file. Aborts the program on error.
+      /// @param filename [in] The name of the file.
+      /// @param mesh [out] The mesh.
+      virtual bool load(const char *file_name, Mesh *mesg) = 0;
+    };
+  }
+}
 #endif

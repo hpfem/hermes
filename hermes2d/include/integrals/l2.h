@@ -18,35 +18,39 @@
 
 #include "../quadrature/limit_order.h"
 #include "../weakform/weakform.h"
-
-//// some l2 integrals ////
-template<typename Scalar>
-class MatrixFormVolL2 : public MatrixFormVol<Scalar>
+namespace Hermes
 {
-public:
-    // One area.
-    MatrixFormVolL2(int i, int j, std::string area = HERMES_ANY, 
-                    SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, area, sym) {}
-    // Multiple areas.
-    MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas, 
-                    SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) {}
-
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, ExtData<Scalar> *ext) const
+  namespace Hermes2D
+  {
+    template<typename Scalar>
+    class MatrixFormVolL2 : public MatrixFormVol<Scalar>
     {
+    public:
+      // One area.
+      MatrixFormVolL2(int i, int j, std::string area = HERMES_ANY, 
+        SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, area, sym) {}
+      // Multiple areas.
+      MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas, 
+        SymFlag sym = HERMES_SYM) : MatrixFormVol<Scalar>(i, j, areas, sym) {}
+
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const
+      {
         Scalar result = 0;
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * conj(v->val[i]));
         return result;
-    }
+      }
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, ExtData<Ord> *ext) const
-    {
-        Ord result = 0;
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
+      {
+        Hermes::Ord result = 0;
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * conj(v->val[i]));
         return result;
-    }
-};
+      }
+    };
+  }
+}
 #endif

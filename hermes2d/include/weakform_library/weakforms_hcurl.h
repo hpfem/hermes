@@ -19,282 +19,286 @@
 #include "../integrals/hcurl.h"
 #include "../weakform/weakform.h"
 #include "../spline.h"
-
-namespace WeakFormsHcurl 
+namespace Hermes
 {
-  /* Default volumetric matrix form \int_{area} const_coeff * function_coeff(x, y) * E \cdot F d\bfx
-  const_coeff... constant number
-  function_coeff... (generally nonconstant) function of x, y
-  */
-
-  template<typename Scalar>
-  class HERMES_API DefaultMatrixFormVol : public MatrixFormVol<Scalar>
+  namespace Hermes2D
   {
-  public:
-    DefaultMatrixFormVol<Scalar>(int i, int j, std::string area = HERMES_ANY,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+    namespace WeakFormsHcurl 
+    {
+      /* Default volumetric matrix form \int_{area} const_coeff * function_coeff(x, y) * E \cdot F d\bfx
+      const_coeff... constant number
+      function_coeff... (generally nonconstant) function of x, y
+      */
 
-    DefaultMatrixFormVol<Scalar>(int i, int j, Hermes::vector<std::string> areas,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultMatrixFormVol : public MatrixFormVol<Scalar>
+      {
+      public:
+        DefaultMatrixFormVol<Scalar>(int i, int j, std::string area = HERMES_ANY,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-    ~DefaultMatrixFormVol<Scalar>();
+        DefaultMatrixFormVol<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-      Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultMatrixFormVol<Scalar>();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual MatrixFormVol<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    Scalar const_coeff;
-    DefaultFunction<Scalar>* function_coeff;
-    GeomType gt;
-  };
+        virtual MatrixFormVol<Scalar>* clone();
 
-  /* FIXME
-  Default volumetric matrix form \int_{area} const_coeff \curl E \curl F d\bfx
-  coeff... constant number
-  */
+      private:
+        Scalar const_coeff;
+        DefaultFunction<Scalar>* function_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultJacobianCurlCurl : public MatrixFormVol<Scalar>
-  {
-  public:
-    DefaultJacobianCurlCurl(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default volumetric matrix form \int_{area} const_coeff \curl E \curl F d\bfx
+      coeff... constant number
+      */
 
-    DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultJacobianCurlCurl : public MatrixFormVol<Scalar>
+      {
+      public:
+        DefaultJacobianCurlCurl(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-    ~DefaultJacobianCurlCurl();
+        DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-      Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultJacobianCurlCurl();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual MatrixFormVol<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    int idx_j;
-    Scalar const_coeff;
-    CubicSpline* spline_coeff;
-    GeomType gt;
-  };
+        virtual MatrixFormVol<Scalar>* clone();
 
-  /* FIXME
-  Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx
-  coeff0, coeff1... constant numbers
-  */
+      private:
+        int idx_j;
+        Scalar const_coeff;
+        CubicSpline* spline_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
-  {
-  public:
-    DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY, 
-      Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
-      DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
-      DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default volumetric vector form \int_{area} (coeff0, coeff1) \cdot E d\bfx
+      coeff0, coeff1... constant numbers
+      */
 
-    DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, 
-      Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
-      DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
-      DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
+      {
+      public:
+        DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY, 
+          Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
+          DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
+          DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultVectorFormVol<Scalar>();
+        DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, 
+          Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
+          DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
+          DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultVectorFormVol<Scalar>();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual VectorFormVol<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    Scalar const_coeff0, const_coeff1;
-    DefaultFunction<Scalar>* function_coeff0, *function_coeff1;
-    GeomType gt;
-  };
+        virtual VectorFormVol<Scalar>* clone();
 
-  /* Default volumetric vector form \int_{area} const_coeff * function_coeff(x, y) * u_ext[0] * v d\bfx
-  const_coeff... constant number
-  function_coeff... (generally nonconstant) function of x, y
-  */
+      private:
+        Scalar const_coeff0, const_coeff1;
+        DefaultFunction<Scalar>* function_coeff0, *function_coeff1;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultResidualVol : public VectorFormVol<Scalar>
-  {
-  public:
-    DefaultResidualVol(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      /* Default volumetric vector form \int_{area} const_coeff * function_coeff(x, y) * u_ext[0] * v d\bfx
+      const_coeff... constant number
+      function_coeff... (generally nonconstant) function of x, y
+      */
 
-    DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-      DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultResidualVol : public VectorFormVol<Scalar>
+      {
+      public:
+        DefaultResidualVol(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultResidualVol();
+        DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultResidualVol();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual VectorFormVol<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    int idx_i;
-    Scalar const_coeff;
-    DefaultFunction<Scalar>* function_coeff;
-    GeomType gt;
-  };
+        virtual VectorFormVol<Scalar>* clone();
 
-  /* FIXME
-  Default volumetric vector form \int_{area} const_coeff * spline_coeff(u_ext[0]) *
-  \nabla u_ext[0] \cdot \nabla v d\bfx
-  const_coeff... constant number
-  spline_coeff... non-constant parameter given by a cubic spline
-  */
+      private:
+        int idx_i;
+        Scalar const_coeff;
+        DefaultFunction<Scalar>* function_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultResidualCurlCurl : public VectorFormVol<Scalar>
-  {
-  public:
-    DefaultResidualCurlCurl(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
-      GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default volumetric vector form \int_{area} const_coeff * spline_coeff(u_ext[0]) *
+      \nabla u_ext[0] \cdot \nabla v d\bfx
+      const_coeff... constant number
+      spline_coeff... non-constant parameter given by a cubic spline
+      */
 
-    DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-      CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, 
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultResidualCurlCurl : public VectorFormVol<Scalar>
+      {
+      public:
+        DefaultResidualCurlCurl(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultResidualCurlCurl();
+        DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, 
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultResidualCurlCurl();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual VectorFormVol<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    int idx_i;
-    Scalar const_coeff;
-    CubicSpline* spline_coeff;
-    GeomType gt;
-  };
+        virtual VectorFormVol<Scalar>* clone();
 
-  /* FIXME
-  Default surface matrix form \int_{area} coeff e tau f tau dS
-  coeff... constant number
-  */
+      private:
+        int idx_i;
+        Scalar const_coeff;
+        CubicSpline* spline_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf<Scalar>
-  {
-  public:
-    DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default surface matrix form \int_{area} coeff e tau f tau dS
+      coeff... constant number
+      */
 
-    DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf<Scalar>
+      {
+      public:
+        DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultMatrixFormSurf<Scalar>();
+        DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultMatrixFormSurf<Scalar>();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual MatrixFormSurf<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u,
+          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    Scalar const_coeff;
-    DefaultFunction<Scalar>* function_coeff;
-    GeomType gt;
-  };
+        virtual MatrixFormSurf<Scalar>* clone();
 
-  /* FIXME
-  Default surface vector form \int_{area} const_coeff * function_coeff(x, y) * v dS
-  const_coeff... constant number
-  function_coeff... (generally nonconstant) function of x, y
-  */
+      private:
+        Scalar const_coeff;
+        DefaultFunction<Scalar>* function_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultVectorFormSurf : public VectorFormSurf<Scalar>
-  {
-  public:
-    DefaultVectorFormSurf<Scalar>(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-      DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default surface vector form \int_{area} const_coeff * function_coeff(x, y) * v dS
+      const_coeff... constant number
+      function_coeff... (generally nonconstant) function of x, y
+      */
 
-    DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-      DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormSurf : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultVectorFormSurf<Scalar>(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultVectorFormSurf<Scalar>();
+        DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultVectorFormSurf<Scalar>();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual VectorFormSurf<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    Scalar const_coeff;
-    DefaultFunction<Scalar>* function_coeff;
-    GeomType gt;
-  };
+        virtual VectorFormSurf<Scalar>* clone();
 
-  /* FIXME
-  Default surface residual form \int_{area} coeff u_ext[0] tau f tau dS
-  coeff... constant number
-  */
+      private:
+        Scalar const_coeff;
+        DefaultFunction<Scalar>* function_coeff;
+        GeomType gt;
+      };
 
-  template<typename Scalar>
-  class HERMES_API DefaultResidualSurf : public VectorFormSurf<Scalar>
-  {
-  public:
-    DefaultResidualSurf(int i, std::string area = HERMES_ANY,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      /* FIXME
+      Default surface residual form \int_{area} coeff u_ext[0] tau f tau dS
+      coeff... constant number
+      */
 
-    DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
-      Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
-      GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultResidualSurf : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultResidualSurf(int i, std::string area = HERMES_ANY,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    ~DefaultResidualSurf();
+        DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
+          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          GeomType gt = HERMES_PLANAR);
 
-    virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const;
+        ~DefaultResidualSurf();
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[],
-      Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
 
-    virtual VectorFormSurf<Scalar>* clone();
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
+          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-  private:
-    Scalar const_coeff;
-    DefaultFunction<Scalar>* function_coeff;
-    GeomType gt;
-  };
+        virtual VectorFormSurf<Scalar>* clone();
+
+      private:
+        Scalar const_coeff;
+        DefaultFunction<Scalar>* function_coeff;
+        GeomType gt;
+      };
+    }
+  }
 }
-
 #endif

@@ -16,24 +16,23 @@
 #ifndef __H2D_SHAPESET_HD_ALL_H
 #define __H2D_SHAPESET_HD_ALL_H
 
-//#ifdef H2D_COMPLEX
-
 #include "shapeset.h"
 
-
-/// H(div) shapeset based on Legendre polynomials.
-class HERMES_API HdivShapesetLegendre : public Shapeset
+namespace Hermes
 {
-  public: HdivShapesetLegendre();
-  virtual int get_id() const { return 20; }
-  virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
-};
+  namespace Hermes2D
+  {
+    /// H(div) shapeset based on Legendre polynomials.
+    class HERMES_API HdivShapesetLegendre : public Shapeset
+    {
+    public: HdivShapesetLegendre();
+            virtual int get_id() const { return 20; }
+            virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
+    };
 
 
-/// This is the default Hdiv shapeset typedef.
-typedef HdivShapesetLegendre HdivShapeset;
-
-
-//#endif // H2D_COMPLEX
-
+    /// This is the default Hdiv shapeset typedef.
+    typedef HdivShapesetLegendre HdivShapeset;
+  }
+}
 #endif

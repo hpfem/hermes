@@ -47,6 +47,7 @@ set(SRC
   src/tables.cpp
   src/qsort.cpp
   src/c99_functions.cpp
+  src/ord.cpp
   
   third_party_codes/trilinos-teuchos/src/Teuchos_stacktrace.cpp
   

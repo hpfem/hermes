@@ -26,10 +26,8 @@ set(SRC
    mesh/exodusii.cpp 
    mesh/hash.cpp 
    mesh/h2d_reader.cpp
-   mesh/mesh.cpp 
-   mesh/regul.cpp
+   mesh/mesh.cpp
    mesh/traverse.cpp
-   mesh/trans.cpp
    mesh/python_reader.cpp
 
    quadrature/limit_order.cpp

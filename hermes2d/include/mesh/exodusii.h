@@ -17,17 +17,21 @@
 #define _EXODUSII_LOADER_H_
 
 #include "mesh_loader.h"
-
-/// Mesh loader from EXODUSII format
-///
-/// @ingroup meshloaders
-class HERMES_API ExodusIIReader : public MeshLoader
+namespace Hermes
 {
-public:
-  ExodusIIReader();
-  virtual ~ExodusIIReader();
+  namespace Hermes2D
+  {
+    /// Mesh loader from EXODUSII format
+    ///
+    /// @ingroup meshloaders
+    class HERMES_API ExodusIIReader : public MeshLoader
+    {
+    public:
+      ExodusIIReader();
+      virtual ~ExodusIIReader();
 
-  virtual bool load(const char *file_name, Mesh *mesh);
-};
-
+      virtual bool load(const char *file_name, Mesh *mesh);
+    };
+  }
+}
 #endif

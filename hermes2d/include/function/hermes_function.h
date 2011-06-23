@@ -16,35 +16,40 @@
 #include "mesh_function.h"
 #include "../mesh/refmap.h"
 #include "../form/forms.h"
-
-// Generic class for functions of one and two variables.
-template<typename Scalar>
-class HERMES_API HermesFunction
+namespace Hermes
 {
-public:
-  HermesFunction();
+  namespace Hermes2D
+  {
+    // Generic class for functions of one and two variables.
+    template<typename Scalar>
+    class HERMES_API HermesFunction
+    {
+    public:
+      HermesFunction();
 
-  HermesFunction(Scalar value);
+      HermesFunction(Scalar value);
 
-  virtual Scalar value(Scalar x) const;
+      virtual Scalar value(Scalar x) const;
 
-  virtual Ord value_ord(Ord x) const;
+      virtual Hermes::Ord value_ord(Hermes::Ord x) const;
 
-  virtual Scalar value(Scalar x, Scalar y) const;
+      virtual Scalar value(Scalar x, Scalar y) const;
 
-  virtual Ord value_ord(Ord x, Ord y) const;
+      virtual Hermes::Ord value_ord(Hermes::Ord x, Hermes::Ord y) const;
 
-  virtual Scalar derivative(Scalar x) const;
+      virtual Scalar derivative(Scalar x) const;
 
-  virtual Ord derivative_ord(Ord x) const;
+      virtual Hermes::Ord derivative_ord(Hermes::Ord x) const;
 
-  virtual Scalar derivative(Scalar x, Scalar y) const;
+      virtual Scalar derivative(Scalar x, Scalar y) const;
 
-  virtual Ord derivative_ord(Ord x, Ord y) const;
+      virtual Hermes::Ord derivative_ord(Hermes::Ord x, Hermes::Ord y) const;
 
-  bool is_constant() const;
+      bool is_constant() const;
 
-protected:
-  bool is_const;
-  Scalar const_value;
-};
+    protected:
+      bool is_const;
+      Scalar const_value;
+    };
+  }
+}

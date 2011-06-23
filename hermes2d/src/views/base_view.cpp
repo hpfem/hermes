@@ -27,6 +27,7 @@
 #include "base_view.h"
 
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 
 template<typename Scalar>
 BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)

@@ -20,6 +20,7 @@
 #include "vector_view.h"
 
 using namespace Hermes::Views;
+using namespace Hermes::Hermes2D;
 
 //// VectorView /////////////////////////////////////////////////////////////////////////////////////
 template<typename Scalar>

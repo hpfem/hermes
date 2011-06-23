@@ -2,7 +2,9 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-using namespace RefinementSelectors;
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+using namespace Hermes::Hermes2D::RefinementSelectors;
 
 //  This example comes with an exact solution, and it describes the diffraction
 //  of an electromagnetic wave from a re-entrant corner. Convergence graphs saved
@@ -69,10 +71,10 @@ const double LAMBDA = 1.0;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D<std::complex<double> > hermes2d;
+  Global<std::complex<double> > hermes2d;
 
   // Time measurement
-  TimePeriod cpu_time;
+  Hermes::TimePeriod cpu_time;
   cpu_time.tick();
 
   // Load the mesh.

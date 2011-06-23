@@ -20,28 +20,31 @@
 
 #include "quad.h"
 
-
-/// 1D quadrature points on the standard reference domain (-1,1)
-class HERMES_API Quad1DStd : public Quad1D
+namespace Hermes
 {
-  public: Quad1DStd();
+  namespace Hermes2D
+  {
+    /// 1D quadrature points on the standard reference domain (-1,1)
+    class HERMES_API Quad1DStd : public Quad1D
+    {
+    public: Quad1DStd();
 
-  virtual void dummy_fn() {}
-};
-
-
-/// 2D quadrature points on the standard reference domains (-1,1)^2
-class HERMES_API Quad2DStd : public Quad2D
-{
-  public:  Quad2DStd();
-          ~Quad2DStd();
-
-  virtual void dummy_fn() {}
-};
+            virtual void dummy_fn() {}
+    };
 
 
-extern HERMES_API Quad1DStd g_quad_1d_std;
-extern HERMES_API Quad2DStd g_quad_2d_std;
+    /// 2D quadrature points on the standard reference domains (-1,1)^2
+    class HERMES_API Quad2DStd : public Quad2D
+    {
+    public:  Quad2DStd();
+             ~Quad2DStd();
+
+             virtual void dummy_fn() {}
+    };
 
 
+    extern HERMES_API Quad1DStd g_quad_1d_std;
+    extern HERMES_API Quad2DStd g_quad_2d_std;
+  }
+}
 #endif
