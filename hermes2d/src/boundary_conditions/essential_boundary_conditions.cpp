@@ -25,7 +25,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// Essential boundary condition.
     template<typename Scalar>
     EssentialBoundaryCondition<Scalar>::EssentialBoundaryCondition(Hermes::vector<std::string> markers) : markers(markers) 
     {
@@ -56,7 +55,7 @@ namespace Hermes
       return current_time;
     }
 
-    /// Essential BoundaryCondition Constant.
+
     template<typename Scalar>
     DefaultEssentialBCConst<Scalar>::DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const) : EssentialBoundaryCondition<Scalar>(markers) 
     {
@@ -77,7 +76,7 @@ namespace Hermes
       return 0.0;
     }
 
-    /// Essential boundary condition non-constant (Scalar case).
+
     template<typename Scalar>
     DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
       ExactSolutionScalar<Scalar>* exact_solution)  
@@ -99,7 +98,7 @@ namespace Hermes
       return exact_solution->value(x, y);
     };
 
-    /// Essential boundary condition non-constant (Hcurl case... tangential component).
+
     template<typename Scalar>
     DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
       ExactSolutionVector<Scalar>* exact_solution2)  
@@ -122,7 +121,7 @@ namespace Hermes
       return val.val[0] * t_x + val.val[1] * t_y;
     };
 
-    /// EssentialBCs.
+
     template<typename Scalar>
     EssentialBCs<Scalar>::EssentialBCs() 
     {

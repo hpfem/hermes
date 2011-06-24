@@ -20,35 +20,49 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    // Generic class for functions of one and two variables.
+    /// Generic class for functions of one and two variables.
     template<typename Scalar>
     class HERMES_API HermesFunction
     {
     public:
+      /// Constructor.
       HermesFunction();
 
+      /// Constructor for the constant case.
       HermesFunction(Scalar value);
 
+      /// One-dimensional function value.
       virtual Scalar value(Scalar x) const;
 
+      /// One-dimensional function integration order.
       virtual Hermes::Ord value_ord(Hermes::Ord x) const;
 
+      /// Two-dimensional function value.
       virtual Scalar value(Scalar x, Scalar y) const;
 
+      /// Two-dimensional function integration order.
       virtual Hermes::Ord value_ord(Hermes::Ord x, Hermes::Ord y) const;
 
+      /// One-dimensional function derivative value.
       virtual Scalar derivative(Scalar x) const;
 
+      /// One-dimensional function derivative integration order.
       virtual Hermes::Ord derivative_ord(Hermes::Ord x) const;
 
+      /// Two-dimensional function derivative value.
       virtual Scalar derivative(Scalar x, Scalar y) const;
 
+      /// Two-dimensional function derivative integration order.
       virtual Hermes::Ord derivative_ord(Hermes::Ord x, Hermes::Ord y) const;
 
+      /// The function is constant.
+      /// Returns the value of is_const.
       bool is_constant() const;
 
     protected:
+      /// The function is constant.
       bool is_const;
+      /// If the function is constant, this is the value.
       Scalar const_value;
     };
   }

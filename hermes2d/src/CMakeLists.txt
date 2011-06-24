@@ -5,6 +5,7 @@
 set(SRC
    forms.cpp
    range.cpp
+   asmlist.cpp
    
    adapt/adapt.cpp
    adapt/kelly_type_adapt.cpp

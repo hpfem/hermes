@@ -40,9 +40,9 @@ namespace Hermes
 
       virtual void save_data(const char* filename);
       virtual void load_data(const char* filename);
-      // Saves a MeshFunction (Solution, Filter) in VTK format.
+      /// Saves a MeshFunction (Solution, Filter) in VTK format.
       virtual void save_orders_vtk(Space<double>* space, const char* file_name);
-      // This function is used by save_solution_vtk().
+      /// This function is used by save_solution_vtk().
       virtual void save_data_vtk(const char* file_name);
 
     protected:

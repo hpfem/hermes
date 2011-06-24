@@ -61,8 +61,8 @@ namespace Hermes
     /* exported functions */
     class View;
 
-    HERMES_API bool init_glut(); ///Initialize GLUT.
-    HERMES_API bool shutdown_glut(); ///Shutdown GLUT.
+    HERMES_API bool init_glut(); ///< Initialize GLUT.
+    HERMES_API bool shutdown_glut(); ///< Shutdown GLUT.
     extern "C"
     {
       int add_view(View* view, int x, int y, int width, int height, const char* title); ///< Adds a view.

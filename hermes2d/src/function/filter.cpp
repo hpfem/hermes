@@ -207,7 +207,6 @@ namespace Hermes
       }
     }
 
-    //// SimpleFilter //////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
     SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
@@ -332,8 +331,6 @@ namespace Hermes
       return result;
     }
 
-    //// DXDYFilter ////////////////////////////////////////////////////////////////////////////////////
-
 
     template<typename Scalar>
     DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions) : Filter<Scalar>(solutions)
@@ -404,8 +401,6 @@ namespace Hermes
       this->cur_node = node;
     }
 
-
-    //// predefined simple filters /////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
     void MagFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
@@ -538,7 +533,7 @@ namespace Hermes
         error("RealFilter only supports one MeshFunction.");
     };
 
-    //// VonMisesFilter ////////////////////////////////////////////////////////////////////////////////
+
     void VonMisesFilter::precalculate(int order, int mask)
     {
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
@@ -591,8 +586,6 @@ namespace Hermes
       this->item1 = item1;
       this->item2 = item2;
     }
-
-    //// LinearFilter //////////////////////////////////////////////////////////////////////////////////
 
 
     template<typename Scalar>

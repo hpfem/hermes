@@ -16,7 +16,7 @@
 #ifndef __H2D_SHAPESET_H1_ALL
 #define __H2D_SHAPESET_H1_ALL
 
-// This file is a common header for all H1 shapesets.
+/// \file This file is a common header for all H1 shapesets.
 
 #include "shapeset.h"
 namespace Hermes
@@ -41,7 +41,7 @@ namespace Hermes
     };
 
 
-    // Experimental.
+    /// Experimental.
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
     public: H1ShapesetEigen();

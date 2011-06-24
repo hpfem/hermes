@@ -222,22 +222,46 @@ namespace Hermes
 
       double** comb_table;
       int table_size;
+      /**    numbering of edge intervals: (the variable 'part')
+      -+-        -+-         -+-
+      |          |        13 |
+      |        5 |          -+-
+      |          |        12 |
+      1 |         -+-         -+-                  finer interval:
+      |          |        11 |
+      |        4 |          -+-                  p = (p + 1) * 2   (+1)
+      |          |        10 |
+      -+-        -+-         -+-   ... etc.
+      |          |         9 |
+      |        3 |          -+-
+      |          |         8 |
+      0 |         -+-         -+-
+      |          |         7 |
+      |        2 |          -+-
+      |          |         6 |
+      -+-        -+-         -+-            **/
 
+      /// Constrained edge functions are constructed by subtracting the linear part (ie., two
+      /// vertex functions) from the constraining edge function and expressing the rest as a
+      /// linear combination of standard edge functions. This function determines the coefficients
+      /// of such linear combination by forming and solving a simple linear system.
+      ///
       double* calculate_constrained_edge_combination(int order, int part, int ori);
+
+      /// Returns the coefficients for the linear combination forming a constrained edge function.
+      /// This function performs the storage (caching) of these coefficients, so that they can be
+      /// calculated only once.
+      ///
       double* get_constrained_edge_combination(int order, int part, int ori, int& nitems);
 
+      /// Releases all cached coefficients.
       void    free_constrained_edge_combinations();
 
+      /// Constructs the linear combination of edge functions, forming a constrained edge function.
+      ///
       double get_constrained_value(int n, int index, double x, double y, int component);
 
     };
-
-    // TODO : promyslet moznost ulozeni shapesetu jako tabulky monomialnich koeficientu
-    // - mozna efektivnejsi nez stavajici kod
-    // - monolitictejsi, elegantnejsi
-    // - pri ulozeni koeficientu jako long double mozna i presnejsi
-    // - moznost ulozeni jen zakladnich polynomu, derivace lze dopocitat automaticky
-
 
 #undef H2D_CHECK_MODE
 #undef H2D_CHECK_VERTEX

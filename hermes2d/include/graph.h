@@ -54,8 +54,6 @@ namespace Hermes
       virtual void save(const char* filename) = 0;
       void save_numbered(const char* filename, int number);
 
-      // todo: clear
-
     protected:
 
       std::string title, xname, yname;

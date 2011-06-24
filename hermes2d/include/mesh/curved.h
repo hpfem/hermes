@@ -67,8 +67,8 @@ namespace Hermes
       CurvMap(CurvMap* cm);
       ~CurvMap();
 
-      // this structure defines a curved mapping of an element; it has two
-      // modes, depending on the value of 'toplevel'
+      /// this structure defines a curved mapping of an element; it has two
+      /// modes, depending on the value of 'toplevel'
       bool toplevel;
       union
       {
@@ -84,19 +84,19 @@ namespace Hermes
         };
       };
 
-      // current polynomial degree of the refmap approximation
+      /// current polynomial degree of the refmap approximation
       int order;
 
-      // finally here are the coefficients of the higher-order basis functions
-      // that constitute the projected reference mapping:
+      /// finally here are the coefficients of the higher-order basis functions
+      /// that constitute the projected reference mapping:
       int nc; // number of coefficients (todo: mozna spis polyn. rad zobrazeni)
       double2* coeffs; // array of the coefficients
 
-      // this is called for every curvilinear element when it is created
-      // or when it is necessary to re-calculate coefficients for another
-      // order: 'e' is a pointer to the element to which this CurvMap
-      // belongs to. First, old "coeffs" are removed if they are not NULL,
-      // then new coefficients are projected.
+      /// this is called for every curvilinear element when it is created
+      /// or when it is necessary to re-calculate coefficients for another
+      /// order: 'e' is a pointer to the element to which this CurvMap
+      /// belongs to. First, old "coeffs" are removed if they are not NULL,
+      /// then new coefficients are projected.
       void update_refmap_coeffs(Element* e);
 
       void get_mid_edge_points(Element* e, double2* pt, int n);
@@ -104,16 +104,16 @@ namespace Hermes
       static H1ShapesetJacobi ref_map_shapeset;
       static PrecalcShapeset ref_map_pss;
 
-      static double** edge_proj_matrix;  //projection matrix for each edge is the same
-      static double** bubble_proj_matrix_tri; //projection matrix for triangle bubbles
-      static double** bubble_proj_matrix_quad; //projection matrix for quad bubbles
+      static double** edge_proj_matrix;  ///< projection matrix for each edge is the same
+      static double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
+      static double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
 
-      static double* edge_p;  // diagonal vector in cholesky factorization
-      static double* bubble_tri_p; // diagonal vector in cholesky factorization
-      static double* bubble_quad_p; // diagonal vector in cholesky factorization
+      static double* edge_p;  ///<  diagonal vector in cholesky factorization
+      static double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
+      static double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
 
       static Quad1DStd quad1d;
-      static Quad2DStd quad2d; // fixme: g_quad_2d_std
+      static Quad2DStd quad2d; ///<  fixme: g_quad_2d_std
 
       static Trf ctm;
 
@@ -121,28 +121,39 @@ namespace Hermes
       static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
         double& y, double& n_x, double& n_y, double& t_x, double& t_y);
 
-      // definition of vertex basis functions for triangle
+      ///<  definition of vertex basis functions for triangle
       static double lambda_0(double x, double y) { return -0.5 * (x + y); }
       static double lambda_1(double x, double y) { return  0.5 * (x + 1); }
       static double lambda_2(double x, double y) { return  0.5 * (y + 1); }
 
-      // 1D Lobatto functions
+      ///<  1D Lobatto functions.
       static double lob0(double x)  { return l0(x); }
+      ///<  1D Lobatto functions.
       static double lob1(double x)  { return l1(x); }
+      ///<  1D Lobatto functions.
       static double lob2(double x)  { return l2(x); }
+      ///<  1D Lobatto functions.
       static double lob3(double x)  { return l3(x); }
+      ///<  1D Lobatto functions.
       static double lob4(double x)  { return l4(x); }
+      ///<  1D Lobatto functions.
       static double lob5(double x)  { return l5(x); }
+      ///<  1D Lobatto functions.
       static double lob6(double x)  { return l6(x); }
+      ///<  1D Lobatto functions.
       static double lob7(double x)  { return l7(x); }
+      ///<  1D Lobatto functions.
       static double lob8(double x)  { return l8(x); }
+      ///<  1D Lobatto functions.
       static double lob9(double x)  { return l9(x); }
+      ///<  1D Lobatto functions.
       static double lob10(double x) { return l10(x); }
+      ///<  1D Lobatto functions.
       static double lob11(double x) { return l11(x); }
 
       static const double2 ref_vert[2][4];
 
-      // subtraction of straight edge and nurbs curve
+      /// subtraction of straight edge and nurbs curve
       static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
       static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y);
       static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,

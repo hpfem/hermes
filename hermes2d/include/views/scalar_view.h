@@ -32,8 +32,8 @@ namespace Hermes
     // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-    // GUI inside views (the current GUI uses AntTweakBar and it is still experimental)
-    // to enable view define: ENABLE_VIEWER_GUI
+    /// GUI inside views (the current GUI uses AntTweakBar and it is still experimental)
+    /// to enable view define: ENABLE_VIEWER_GUI
 # ifdef ENABLE_VIEWER_GUI
 #   include <AntTweakBar.h>
 #   define VIEWER_GUI(__def) __def
@@ -75,7 +75,7 @@ namespace Hermes
       void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 
 
-    public: // input/output routines
+    public:
       void load_data(const char* filename);
       void save_data(const char* filename);
       void save_numbered(const char* format, int number);
@@ -89,8 +89,9 @@ namespace Hermes
 
       Linearizer<Scalar> lin;
 
-    protected: // node selection
-      struct VertexNodeInfo ///< Information about a vertex node.
+    protected:
+      /// Information about a vertex node.
+      struct VertexNodeInfo
       {
         float x, y; ///< location of the node in coordinates of the mesh
         int id; ///< id of the node
@@ -116,7 +117,7 @@ namespace Hermes
       void draw_single_vertex_node(const VertexNodeInfo& node); ///< Draws a single vertex node.
       void create_nodes_widgets(); ///< Creates vertex nodes widgets if not created already.
 
-    protected: //element nfo
+    protected:
       struct ElementInfo ///< element info structure
       {
         float x, y; ///< location of center [in physical coordinates]
@@ -127,7 +128,7 @@ namespace Hermes
       };
       std::vector<ElementInfo> element_infos; ///< Element info.
 
-      unsigned int element_id_widget; ///> A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.
+      unsigned int element_id_widget; ///< A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.
 
       bool show_element_info; ///< true, to draw element info (currently ID) in 2D mode
 
@@ -241,7 +242,7 @@ namespace Hermes
       virtual void on_reshape(int width, int height);
 
     };
-#endif // NOGLUT
+#endif
   }
 }
 #endif

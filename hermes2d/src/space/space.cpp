@@ -60,8 +60,6 @@ namespace Hermes
       if (esize) { ::free(edata); edata=NULL; }
     }
 
-    //// element orders ///////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void Space<Scalar>::resize_tables()
     {
@@ -94,7 +92,6 @@ namespace Hermes
         }
     }
 
-
     template<typename Scalar>
     void Space<Scalar>::H2D_CHECK_ORDER(int order)
     {
@@ -105,8 +102,6 @@ namespace Hermes
         error("Hermes::Order = %d, maximum is 10.", order);
     }
 
-    // if the user calls this, then the enumeration of dof
-    // is updated
     template<typename Scalar>
     void Space<Scalar>::set_element_order(int id, int order)
     {
@@ -117,7 +112,6 @@ namespace Hermes
       this->assign_dofs();
     }
 
-    // just sets the element order without enumerating dof
     template<typename Scalar>
     void Space<Scalar>::set_element_order_internal(int id, int order)
     {
@@ -399,17 +393,17 @@ namespace Hermes
       resize_tables();
       for_all_active_elements(e, space->get_mesh())
       {
-        int oo = space->get_element_order(e->id);
-        if (oo < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
+        int o = space->get_element_order(e->id);
+        if (o < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
 
         int mo = shapeset->get_max_order();
         int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
-        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(oo) + inc, mo));
-        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(oo) + inc, mo));
-        oo = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
+        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(o) + inc, mo));
+        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + inc, mo));
+        o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
 
-        H2D_CHECK_ORDER(oo);
-        copy_orders_recurrent(mesh->get_element/*sic!*/(e->id), oo);
+        H2D_CHECK_ORDER(o);
+        copy_orders_recurrent(mesh->get_element/*sic!*/(e->id), o);
       }
       seq++;
 
@@ -594,18 +588,6 @@ namespace Hermes
       }
     }
 
-    //// assembly lists ///////////////////////////////////////////////////////////////////////////////
-
-    template<typename Scalar>
-    void AsmList<Scalar>::enlarge()
-    {
-      cap = !cap ? 256 : cap * 2;
-      idx = (int*) realloc(idx, sizeof(int) * cap);
-      dof = (int*) realloc(dof, sizeof(int) * cap);
-      coef = (Scalar*) realloc(coef, sizeof(Scalar) * cap);
-    }
-
-
     template<typename Scalar>
     void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
     {
@@ -768,8 +750,6 @@ namespace Hermes
       extra_data.clear();
     }
 
-    template HERMES_API class AsmList<double>;
-    template HERMES_API class AsmList<std::complex<double> >;
     template HERMES_API class Space<double>;
     template HERMES_API class Space<std::complex<double> >;
   }

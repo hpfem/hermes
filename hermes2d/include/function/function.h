@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    // Precalculation masks
+    /// Precalculation masks
     enum
     {
       H2D_FN_VAL_0 = 0x0001, H2D_FN_VAL_1 = 0x0040, // Function values
@@ -33,7 +33,7 @@ namespace Hermes
       H2D_FN_DXY_0 = 0x0020, H2D_FN_DXY_1 = 0x0800  // Second mixed derivative
     };
 
-    // Both components are usually requested together...
+    /// Both components are usually requested together...
     const int H2D_FN_VAL = H2D_FN_VAL_0 | H2D_FN_VAL_1;
     const int H2D_FN_DX  = H2D_FN_DX_0  | H2D_FN_DX_1;
     const int H2D_FN_DY  = H2D_FN_DY_0  | H2D_FN_DY_1;
@@ -41,14 +41,14 @@ namespace Hermes
     const int H2D_FN_DYY = H2D_FN_DYY_0 | H2D_FN_DYY_1;
     const int H2D_FN_DXY = H2D_FN_DXY_0 | H2D_FN_DXY_1;
 
-    // The most common case is H2D_FN_DEFAULT, ie. values and the gradient.
+    /// The most common case is H2D_FN_DEFAULT, ie. values and the gradient.
     const int H2D_FN_DEFAULT = H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY;            // default precalculation mask
     const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY; // precalculate everything
 
     const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
     const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
 
-    // Plenty of checking stuff for the debug version
+    /// Plenty of checking stuff for the debug version
 #ifndef NDEBUG
 #define check_params \
   if (component < 0 || component > num_components) \
@@ -243,10 +243,10 @@ namespace Hermes
       /// Table of nodes.
       LightArray<Node*>* nodes;
 
-      // Current Node.
+      /// Current Node.
       Node* cur_node;
 
-      // Nodes for the overflow sub-element transformation.
+      /// Nodes for the overflow sub-element transformation.
       LightArray<Node*>* overflow_nodes;
 
       /// With changed sub-element mapping, there comes the need for a change of the current

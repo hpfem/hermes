@@ -350,21 +350,21 @@ namespace Hermes
         MarkersConversion();
         ~MarkersConversion();
 
-        // Info about the maximum marker used so far, used in determining
-        // of the internal marker for a user-supplied std::string identification for
-        // the purpose of disambiguity.
+        /// Info about the maximum marker used so far, used in determining
+        /// of the internal marker for a user-supplied std::string identification for
+        /// the purpose of disambiguity.
         int min_marker_unused;
 
-        // Function inserting a marker into conversion_table_for_element_markers.
-        // This function controls if this user_marker x internal_marker is already
-        // present, and if not, it inserts the std::pair.
+        /// Function inserting a marker into conversion_table_for_element_markers.
+        /// This function controls if this user_marker x internal_marker is already
+        /// present, and if not, it inserts the std::pair.
         void insert_marker(int internal_marker, std::string user_marker);
 
-        // Lookup functions.
-        // Find a user marker for this internal marker.
+        /// Lookup functions.
+        /// Find a user marker for this internal marker.
         std::string get_user_marker(int internal_marker);
 
-        // Find an internal marker for this user_marker.
+        /// Find an internal marker for this user_marker.
         int get_internal_marker(std::string user_marker);
 
         enum MarkersConversionType {
@@ -375,12 +375,12 @@ namespace Hermes
         virtual MarkersConversionType get_type() = 0;
 
       protected:
-        // Conversion tables between the std::string markers the user sets and
-        // the markers used internally as members of Elements, Nodes.
+        /// Conversion tables between the std::string markers the user sets and
+        /// the markers used internally as members of Elements, Nodes.
         std::map<int, std::string>* conversion_table;
 
-        // Inverse tables, so that it is possible to search using either
-        // the internal representation, or the user std::string value.
+        /// Inverse tables, so that it is possible to search using either
+        /// the internal representation, or the user std::string value.
         std::map<std::string, int>* conversion_table_inverse;
         friend class Space<double>;
         friend class Space<std::complex<double> >;
@@ -528,11 +528,11 @@ namespace Hermes
       void refine_quad(Element* e, int refinement, Element** sons_out = NULL);
       void refine_triangle_to_triangles(Element* e, Element** sons = NULL);
 
-      // computing vector length
+      /// computing vector length
       static double vector_length(double a_1, double a_2);
-      // checking whether the points p, q, r lie on the same line
+      /// checking whether the points p, q, r lie on the same line
       static bool same_line(double p_1, double p_2, double q_1, double q_2, double r_1, double r_2);
-      // checking whether the angle of vectors 'a' and 'b' is between zero and Pi
+      /// checking whether the angle of vectors 'a' and 'b' is between zero and Pi
       static bool is_convex(double a_1, double a_2, double b_1, double b_2);
       static void check_triangle(int i, Node *&v0, Node *&v1, Node *&v2);
       static void check_quad(int i, Node *&v0, Node *&v1, Node *&v2, Node *&v3);

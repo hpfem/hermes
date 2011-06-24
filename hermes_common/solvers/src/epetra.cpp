@@ -267,8 +267,6 @@ namespace Hermes
         return mat->NumGlobalNonzeros();
     }
 
-    // EpetraVector<Scalar> ////////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     EpetraVector<Scalar>::EpetraVector()
     {

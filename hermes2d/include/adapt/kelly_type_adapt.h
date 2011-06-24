@@ -66,16 +66,16 @@ namespace Hermes
       class HERMES_API ErrorEstimatorForm
       {
       public:
-        int i;
-        std::string area;
-        Hermes::vector<MeshFunction<Scalar>*> ext;
-        Hermes::vector<Scalar> param;
-
+        int i; ///< Component.
+        std::string area; ///< Area.
+        Hermes::vector<MeshFunction<Scalar>*> ext; ///< External functions.
+        
+        /// Constructor.
         ErrorEstimatorForm(int i, std::string area = HERMES_ANY, 
-          Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(), 
-          Hermes::vector<Scalar> param = Hermes::vector<Scalar>()) :
-        i(i), area(area), ext(ext), param(param) {}
+          Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>()) :
+        i(i), area(area), ext(ext) {}
 
+        /// Value calculation.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
           Func<Scalar> *u, Geom<double> *e,
           ExtData<Scalar> *ext) const
@@ -83,6 +83,8 @@ namespace Hermes
           error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
           return 0.0;
         }
+
+        /// Integration order.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
           Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
           ExtData<Hermes::Ord> *ext) const
@@ -91,7 +93,7 @@ namespace Hermes
           return Hermes::Ord();
         }
 
-        // FIXME - temporary
+        /// FIXME - temporary
         KellyTypeAdapt *adapt;
       };
 
@@ -272,6 +274,7 @@ namespace Hermes
       class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
       {
       public:
+        /// Constructor.
         ErrorEstimatorFormKelly(int i) : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],

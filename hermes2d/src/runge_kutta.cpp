@@ -24,7 +24,7 @@ namespace Hermes
   {
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
-      : dp(dp), is_linear(dp->get_is_linear()), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
+      : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
       stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
     {
       // Check for not implemented features.
