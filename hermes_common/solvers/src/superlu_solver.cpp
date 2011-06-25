@@ -520,6 +520,11 @@ namespace Hermes
           return false;
       }
     }
+
+    template class HERMES_API SuperLUMatrix<double>;
+    template class HERMES_API SuperLUMatrix<std::complex<double> >;
+    template class HERMES_API SuperLUVector<double>;
+    template class HERMES_API SuperLUVector<std::complex<double> >;
   }
   namespace Solvers
   {
@@ -1181,10 +1186,6 @@ namespace Hermes
     }
 #endif
 
-    template class HERMES_API SuperLUMatrix<double>;
-    template class HERMES_API SuperLUMatrix<std::complex<double> >;
-    template class HERMES_API SuperLUVector<double>;
-    template class HERMES_API SuperLUVector<std::complex<double> >;
     template class HERMES_API SuperLUSolver<double>;
     template class HERMES_API SuperLUSolver<std::complex<double> >;
   }

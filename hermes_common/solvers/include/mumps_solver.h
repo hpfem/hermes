@@ -101,7 +101,7 @@ namespace Hermes {
       int *Ai;          ///< Row indices of values in Ax.
       unsigned int *Ap;          ///< Index to Ax/Ai, where each column starts.
 
-      friend class MumpsSolver<Scalar>;
+      friend class Solvers::MumpsSolver<Scalar>;
     };
 
     template <typename Scalar>
@@ -132,7 +132,7 @@ namespace Hermes {
       // MUMPS specific data structures for storing the rhs.
       Scalar *v;
 
-      friend class MumpsSolver<Scalar>;
+      friend class Solvers::MumpsSolver<Scalar>;
     };
   }
   namespace Solvers

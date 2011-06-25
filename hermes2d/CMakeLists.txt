@@ -90,6 +90,7 @@ endif(WITH_PYTHON)
 
 include_directories(${HERMES_COMMON_DIR}/include)
 include_directories(${HERMES_COMMON_DIR}/solvers/include)
+include_directories(${HERMES_COMMON_DIR}/python_API/include)
 include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include)
 include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/form)
 include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/space)

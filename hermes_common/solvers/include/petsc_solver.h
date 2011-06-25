@@ -76,7 +76,7 @@ namespace Hermes {
       unsigned int nnz;
       bool inited;
 
-      friend class PetscLinearSolver<Scalar>;
+      friend class Solvers::PetscLinearSolver<Scalar>;
     };
 
     /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
@@ -110,7 +110,7 @@ namespace Hermes {
       Vec vec;
       bool inited;
 
-      friend class PetscLinearSolver<Scalar>;
+      friend class Solvers::PetscLinearSolver<Scalar>;
     };
   }
   namespace Solvers

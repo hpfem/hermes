@@ -6,7 +6,6 @@
 using namespace RefinementSelectors;
 using Teuchos::RCP;
 using Teuchos::rcp;
-using Hermes::EigenSolver;
 
 //  This example solves a simple eigenproblem in a square. 
 //  Python and Pysparse must be installed. 
@@ -41,11 +40,11 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Initialize boundary conditions. 
-  DefaultEssentialBCConst bc_essential("Bdy", 0.0);
-  EssentialBCs bcs(&bc_essential);
+  DefaultEssentialBCConst<double> bc_essential("Bdy", 0.0);
+  EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof: %d.", ndof);
 
@@ -54,16 +53,16 @@ int main(int argc, char* argv[])
   WeakFormEigenRight wf_right;
 
   // Initialize matrices.
-  RCP<SparseMatrix> matrix_left = rcp(new CSCMatrix());
-  RCP<SparseMatrix> matrix_right = rcp(new CSCMatrix());
+  RCP<SparseMatrix<double> > matrix_left = rcp(new CSCMatrix<double>());
+  RCP<SparseMatrix<double> > matrix_right = rcp(new CSCMatrix<double>());
 
   // Assemble the matrices.
-  DiscreteProblem dp_left(&wf_left, &space);
+  DiscreteProblem<double> dp_left(&wf_left, &space);
   dp_left.assemble(matrix_left.get());
-  DiscreteProblem dp_right(&wf_right, &space);
+  DiscreteProblem<double> dp_right(&wf_right, &space);
   dp_right.assemble(matrix_right.get());
 
-  EigenSolver es(matrix_left, matrix_right);
+  EigenSolver<double> es(matrix_left, matrix_right);
   info("Calling Pysparse...");
   es.solve(NUMBER_OF_EIGENVALUES, TARGET_VALUE, TOL, MAX_ITER);
   info("Pysparse finished.");
@@ -71,8 +70,8 @@ int main(int argc, char* argv[])
 
   // Initializing solution vector, solution and ScalarView.
   double* coeff_vec;
-  Solution sln;
-  ScalarView view("Solution", new WinGeom(0, 0, 440, 350));
+  Solution<double> sln;
+  Views::ScalarView<double> view("Solution", new Views::WinGeom(0, 0, 440, 350));
 
   // Reading solution vectors and visualizing.
   double* eigenval = new double[NUMBER_OF_EIGENVALUES];
@@ -83,7 +82,7 @@ int main(int argc, char* argv[])
     int n;
     es.get_eigenvector(ieig, &coeff_vec, &n);
     // Convert coefficient vector into a Solution.
-    Solution::vector_to_solution(coeff_vec, &space, &sln);
+    Solution<double>::vector_to_solution(coeff_vec, &space, &sln);
 
     // Visualize the solution.
     char title[100];
@@ -92,7 +91,7 @@ int main(int argc, char* argv[])
     view.show(&sln);
 
     // Wait for keypress.
-    View::wait(HERMES_WAIT_KEYPRESS);
+    Views::View::wait(Views::HERMES_WAIT_KEYPRESS);
   }
 
   return 0; 
