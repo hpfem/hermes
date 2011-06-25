@@ -403,7 +403,7 @@ namespace Hermes
       {
         if (abs(found_iter->y - y) <= radius)
         {
-          float dist = min(found_iter->x - x, found_iter->y - y);
+          float dist = std::min(found_iter->x - x, found_iter->y - y);
           if (found_nearest_dist < 0 || dist < found_nearest_dist)
           {
             found_nearest_dist = dist;
