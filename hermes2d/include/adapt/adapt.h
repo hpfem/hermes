@@ -310,12 +310,12 @@ namespace Hermes
 
       /// Returns a vector of refinements generated during the last execution of the method adapt().
       /** \return A vector of refinements generated during the last execution of the method adapt(). The returned vector might change or become invalid after the next execution of the method adadpt(). */
-      const Hermes::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
+      const std::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
 
     protected:
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
       Hermes::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
-      Hermes::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
+      std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
 
       /// Returns true if a given element should be ignored and not processed through refinement selection.
       /** Overload this method to omit some elements from processing.

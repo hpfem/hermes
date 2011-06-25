@@ -163,7 +163,7 @@ namespace Hermes
       double err0_squared = 1000.0;
       double processed_error_squared = 0.0;
 
-      Hermes::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
+      std::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
       elem_inx_to_proc.reserve(num_act_elems);
 
       //adaptivity loop
