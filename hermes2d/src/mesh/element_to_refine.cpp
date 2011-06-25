@@ -46,7 +46,7 @@ namespace Hermes
           str << "Unexpected EOF found while reading tag '" << checker.get_tag() << "'";
         else
           str << "Expected '" << checker.get_tag() << "' but '" << tag.str() << "' found at offset " << (int)stream.tellg();
-        throw runtime_error(str.str());
+        throw std::runtime_error(str.str());
       }
       return stream;
     };
@@ -68,19 +68,19 @@ namespace Hermes
 
     void ElementToRefineStream::open(const char* filename, std::ios_base::openmode mode) 
     {
-      error_if((mode & ios_base::binary) == 0, "Only binary mode is supported.");
-      error_if((mode & ios_base::in) == 0 && (mode & ios_base::out) == 0 && (mode & ios_base::app) == 0, "Only in, out, and append mode is supported.");
+      error_if((mode & std::ios_base::binary) == 0, "Only binary mode is supported.");
+      error_if((mode & std::ios_base::in) == 0 && (mode & std::ios_base::out) == 0 && (mode & std::ios_base::app) == 0, "Only in, out, and append mode is supported.");
 
       //if append: check header and append
-      if ((mode & ios_base::app) != 0) 
+      if ((mode & std::ios_base::app) != 0) 
       {
         //open for reading
-        stream.open(filename, (mode & ~ios_base::app) | ios_base::in);
+        stream.open(filename, (mode & ~std::ios_base::app) | std::ios_base::in);
 
         //if fails: write new file
         if (!stream.is_open()) 
         {
-          stream.open(filename, (mode & ~ios_base::app) | ios_base::out);
+          stream.open(filename, (mode & ~std::ios_base::app) | std::ios_base::out);
           error_if(!stream.is_open(), "Unable to open the stream \"%s\" for writing.", filename);
           write_header(mode);
         }
@@ -103,9 +103,9 @@ namespace Hermes
         //check header (read)
         if (stream.good()) 
         {
-          if ((mode & ios_base::in) != 0)
+          if ((mode & std::ios_base::in) != 0)
             read_header(mode);
-          else if ((mode & ios_base::out) != 0)
+          else if ((mode & std::ios_base::out) != 0)
             write_header(mode);
         }
       }
