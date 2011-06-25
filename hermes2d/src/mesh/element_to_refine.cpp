@@ -32,7 +32,7 @@ namespace Hermes
 
     HERMES_API std::istream& operator>>(std::istream& stream, const TagChecker& checker) 
     {
-      stringstream tag;
+      std::stringstream tag;
       for(unsigned i = 0; i < checker.get_tag().size(); i++) 
       {
         char tag_char;
@@ -41,7 +41,7 @@ namespace Hermes
       }
       if (checker.get_tag().compare(tag.str()) != 0) 
       {
-        stringstream str;
+        std::stringstream str;
         if (stream.eof())
           str << "Unexpected EOF found while reading tag '" << checker.get_tag() << "'";
         else
@@ -113,7 +113,7 @@ namespace Hermes
 
     void ElementToRefineStream::write_header(std::ios_base::openmode mode) 
     {
-      assert_msg((mode & ios_base::binary) != 0, "Binary mode supported only.");
+      assert_msg((mode & std::ios_base::binary) != 0, "Binary mode supported only.");
 
       //write header tag
       stream << H2DER_START_TAG << " " << H2DER_BIN_TAG << "\n";
@@ -121,13 +121,13 @@ namespace Hermes
 
     bool ElementToRefineStream::read_header(std::ios_base::openmode mode) 
     {
-      assert_msg((mode & ios_base::binary) != 0, "Binary mode supported only.");
+      assert_msg((mode & std::ios_base::binary) != 0, "Binary mode supported only.");
 
       //decode
       try 
       {
         //read header tag
-        stream >> TagChecker(H2DER_START_TAG) >> skipws >> TagChecker(H2DER_BIN_TAG) >> skipws;
+        stream >> TagChecker(H2DER_START_TAG) >> std::skipws >> TagChecker(H2DER_BIN_TAG) >> std::skipws;
         return true;
       }
       catch(std::runtime_error& err) 
@@ -268,7 +268,7 @@ namespace Hermes
       int pos = (int)stream.stream.tellg();
       //read tag
       try { stream.stream >> TagChecker(ElementToRefineStream::H2DER_VECTOR_TAG); }
-      catch (runtime_error &err) { error("Unable to read record start tag (%s)", err.what()); };
+      catch (std::runtime_error &err) { error("Unable to read record start tag (%s)", err.what()); };
 
       //read sizes
       int num_size = stream.read_bytes(ElementToRefineStream::H2DER_SIZE_BYTESIZE); // byte length of number of elements
