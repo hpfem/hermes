@@ -424,13 +424,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const 
+    const Hermes::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const 
     {
       return last_refinements;
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
+    void Adapt<Scalar>::apply_refinements(Hermes::vector<ElementToRefine>& elems_to_refine)
     {
       for (Hermes::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
         elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
@@ -906,7 +906,7 @@ namespace Hermes
 
       //prepare initial fill
       Element* e;
-      typename std::vector<ElementReference>::iterator elem_info = regular_queue.begin();
+      typename Hermes::vector<ElementReference>::iterator elem_info = regular_queue.begin();
       for (int i = 0; i < this->num; i++)
         for_all_active_elements(e, meshes[i])
         regular_queue.push_back(ElementReference(e->id, i));

@@ -37,8 +37,8 @@ template<class TYPE>
 class Array
 {
 protected:
-  std::vector<TYPE*> pages; // todo: standard array for maximum access speed
-  std::vector<int> unused;
+  Hermes::vector<TYPE*> pages; // todo: standard array for maximum access speed
+  Hermes::vector<int> unused;
   int  size, nitems;
   bool append_only;
 
@@ -96,7 +96,7 @@ public:
     this->append_only = append_only;
   }
   
-  /// Wrapper function for std::vector::add() for compatibility purposes.
+  /// Wrapper function for Hermes::vector::add() for compatibility purposes.
   int add(TYPE item) {
     TYPE* ptr = this->add();
     *ptr = item;
@@ -272,8 +272,8 @@ template<class TYPE>
 class LightArray
 {
 protected:
-  std::vector<TYPE*> pages; // todo: standard array for maximum access speed
-  std::vector<bool*> presence; // todo: standard array for maximum access speed
+  Hermes::vector<TYPE*> pages; // todo: standard array for maximum access speed
+  Hermes::vector<bool*> presence; // todo: standard array for maximum access speed
   unsigned int size;
 
   const unsigned int page_bits;

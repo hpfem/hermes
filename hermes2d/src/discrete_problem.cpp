@@ -280,7 +280,7 @@ namespace Hermes
               for(int ed = 0; ed < num_edges; ed++) 
               {
                 ns.set_active_edge(ed);
-                std::vector<Element *> *neighbors = ns.get_neighbors();
+                Hermes::vector<Element *> *neighbors = ns.get_neighbors();
 
                 neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
                 neighbor_elems_arrays[el][ed] = new Element * [neighbor_elems_counts[el][ed]];
@@ -514,7 +514,7 @@ namespace Hermes
         get_matrix_buffer(9);
 
       // Create assembling stages.
-      std::vector<Stage<Scalar> > stages = std::vector<Stage<Scalar> >();
+      Hermes::vector<Stage<Scalar> > stages = Hermes::vector<Stage<Scalar> >();
       bool want_matrix = (mat != NULL);
       bool want_vector = (rhs != NULL);
       wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector);
@@ -542,13 +542,13 @@ namespace Hermes
       matrix_buffer_dim = 0;
 
       // Deinitialize slave pss's, refmaps.
-      for(std::vector<PrecalcShapeset *>::iterator it = spss.begin(); it != spss.end(); it++)
+      for(Hermes::vector<PrecalcShapeset *>::iterator it = spss.begin(); it != spss.end(); it++)
         delete *it;
-      for(std::vector<RefMap *>::iterator it = refmap.begin(); it != refmap.end(); it++)
+      for(Hermes::vector<RefMap *>::iterator it = refmap.begin(); it != refmap.end(); it++)
         delete *it;
 
       // Delete the vector u_ext.
-      for(typename std::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
+      for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
         delete *it;
     }
 

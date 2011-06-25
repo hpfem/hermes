@@ -293,7 +293,7 @@ namespace Hermes
 
       /// Returns regular queue of elements
       /** \return A regular queue. */
-      const std::vector<ElementReference>& get_regular_queue() const { return regular_queue; };
+      const Hermes::vector<ElementReference>& get_regular_queue() const { return regular_queue; };
 
       /// Returns a total number of active elements.
       /** \return A total number of active elements. If below 0, errors were not calculated yet, see set_solutions() */
@@ -305,16 +305,16 @@ namespace Hermes
 
       /// Apply a vector of refinements.
       /** \param[in] A vector of refinements to apply. */
-      virtual void apply_refinements(std::vector<ElementToRefine>& elems_to_refine);
+      virtual void apply_refinements(Hermes::vector<ElementToRefine>& elems_to_refine);
 
       /// Returns a vector of refinements generated during the last execution of the method adapt().
       /** \return A vector of refinements generated during the last execution of the method adapt(). The returned vector might change or become invalid after the next execution of the method adadpt(). */
-      const std::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
+      const Hermes::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
 
     protected:
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
-      std::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
-      std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
+      Hermes::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
+      Hermes::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
 
       /// Returns true if a given element should be ignored and not processed through refinement selection.
       /** Overload this method to omit some elements from processing.

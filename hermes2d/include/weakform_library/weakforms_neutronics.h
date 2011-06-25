@@ -53,17 +53,17 @@ namespace Hermes
           namespace Definitions
           {
             typedef double rank0;
-            typedef std::vector<double> rank1;
-            typedef std::vector<std::vector<double > > rank2;
-            typedef std::vector<std::vector<std::vector<double > > > rank3;
+            typedef Hermes::vector<double> rank1;
+            typedef Hermes::vector<Hermes::vector<double > > rank2;
+            typedef Hermes::vector<Hermes::vector<Hermes::vector<double > > > rank3;
 
             typedef std::map<std::string, rank0> MaterialPropertyMap0;
             typedef std::map<std::string, rank1> MaterialPropertyMap1;
             typedef std::map<std::string, rank2> MaterialPropertyMap2;
             typedef std::map<std::string, rank3> MaterialPropertyMap3;
 
-            typedef std::vector<bool > bool1;
-            typedef std::vector<std::vector<bool > > bool2;
+            typedef Hermes::vector<bool > bool1;
+            typedef Hermes::vector<Hermes::vector<bool > > bool2;
           }
 
           namespace Messages
@@ -512,7 +512,7 @@ namespace Hermes
           class MultiArray
           {
           private:
-            std::vector<NDArrayType> m_data;
+            Hermes::vector<NDArrayType> m_data;
           public:
             MultiArray(const NDArrayType& val) {
               m_data.push_back(val);
@@ -523,7 +523,7 @@ namespace Hermes
               return *this;
             }
 
-            operator std::vector<NDArrayType>() {
+            operator Hermes::vector<NDArrayType>() {
               return m_data;
             }
           };
@@ -533,7 +533,7 @@ namespace Hermes
             typedef MultiArray<rank0> grow;
             typedef MultiArray<rank1> gmat;
             typedef MultiArray<bool> bool_row;
-            typedef MultiArray< std::vector<bool> > bool_mat;
+            typedef MultiArray< Hermes::vector<bool> > bool_mat;
           }
         }
 
@@ -1046,12 +1046,12 @@ namespace Hermes
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                const std::vector<DefaultFunction<Scalar>*>& f_src,
+                const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
                 std::string src_area = HERMES_ANY,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                const std::vector<DefaultFunction<Scalar>*>& f_src,
+                const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
                 Hermes::vector<std::string> src_areas,
                 GeomType geom_type = HERMES_PLANAR);
             };
@@ -1060,7 +1060,7 @@ namespace Hermes
             class DefaultWeakFormSourceIteration : public WeakForm<Scalar>
             {
             protected:
-              std::vector<FissionYield::OuterIterationForm<Scalar>*> keff_iteration_forms;
+              Hermes::vector<FissionYield::OuterIterationForm<Scalar>*> keff_iteration_forms;
 
             public:
               DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop,

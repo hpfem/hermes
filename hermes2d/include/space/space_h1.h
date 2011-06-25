@@ -91,7 +91,7 @@ namespace Hermes
         Scalar value;
       };
 
-      std::vector<FixedVertex> fixed_vertices;
+      Hermes::vector<FixedVertex> fixed_vertices;
 
       inline bool is_fixed_vertex(int id) const;
       virtual void post_assign();

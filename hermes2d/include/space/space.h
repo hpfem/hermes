@@ -310,7 +310,7 @@ namespace Hermes
       /// the DOFs have been assigned.
       virtual void post_assign() {}
 
-      std::vector<void*> extra_data;
+      Hermes::vector<void*> extra_data;
       void free_extra_data();
 
       void propagate_zero_orders(Element* e);
