@@ -327,7 +327,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine,
+    void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
       int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors) 
     {
       int num_elem_to_proc = elems_to_refine.size();
@@ -423,15 +423,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Hermes::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const 
+    const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const 
     {
       return last_refinements;
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::apply_refinements(Hermes::vector<ElementToRefine>& elems_to_refine)
+    void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
     {
-      for (Hermes::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
+      for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
         elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
           apply_refinement(*elem_ref);
       }

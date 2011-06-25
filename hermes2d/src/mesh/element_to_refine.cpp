@@ -193,7 +193,7 @@ namespace Hermes
     }
 
     HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, 
-      const Hermes::vector<ElementToRefine>& elem_refs) 
+      const std::vector<ElementToRefine>& elem_refs) 
     {
       //calculate range of values
       Range<int> range_id(0, 0), range_comp(0, 0), range_order(0, 0);
@@ -263,7 +263,7 @@ namespace Hermes
       return stream;
     }
 
-    HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, Hermes::vector<ElementToRefine>& elem_refs) 
+    HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs) 
     {
       int pos = (int)stream.stream.tellg();
       //read tag

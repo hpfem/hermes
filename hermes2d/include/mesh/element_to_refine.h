@@ -113,7 +113,7 @@ namespace Hermes
     ElementToRefineStream erstream("data.ers", std::ios_base::in | std::ios_base::binary);
     if (erstream.is_open()) {
     while (erstream.good()) {
-    Hermes::vector<ElementToRefine> refinements;
+    std::vector<ElementToRefine> refinements;
     errstream >> refinements;
     hp.apply_refinements(refinements);
     }
@@ -244,15 +244,15 @@ namespace Hermes
       /// Closes the stream.
       void close() { stream.close(); };
 
-      friend HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const Hermes::vector<ElementToRefine>& elem_refs);
-      friend HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, Hermes::vector<ElementToRefine>& elem_refs);
+      friend HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
+      friend HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
     };
 
     /// Operator. Stores a vector of refinements to a stream. \ingroup g_adapt
-    extern HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const Hermes::vector<ElementToRefine>& elem_refs);
+    extern HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, const std::vector<ElementToRefine>& elem_refs);
 
     /// Operator. Reads a vector of refinemens. It erases the contents of the vector that it is reading to. \ingroup g_adapt
-    extern HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, Hermes::vector<ElementToRefine>& elem_refs);
+    extern HERMES_API ElementToRefineStream& operator>>(ElementToRefineStream& stream, std::vector<ElementToRefine>& elem_refs);
   }
 }
 #endif
