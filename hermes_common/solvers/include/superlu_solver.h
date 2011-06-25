@@ -26,15 +26,15 @@
 #include "matrix.h"
 
 typedef int int_t; /* default */
+#ifdef WITH_SUPERLU  
+#ifdef SLU_MT
+
 #include <supermatrix.h>
 #include <slu_util.h>
 
 namespace Hermes {
   namespace Solvers {
     template <typename Scalar> class SuperLUSolver;
-
-#ifdef WITH_SUPERLU  
-#ifdef SLU_MT
     template <typename Scalar>    
     class SuperLu{
     public:
@@ -215,8 +215,7 @@ namespace Hermes {
       SuperMatrix AC;             // Matrix A permuted by perm_c.
 #endif  
     };
-
-#endif
   }
 }
+#endif
 #endif
