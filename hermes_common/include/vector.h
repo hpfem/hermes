@@ -158,7 +158,7 @@ public:
     printf("]\n");
   }
 
-  void swap(Hermes::vector<T> & other) { std::vector<T>::swap((std::vector<T>)other); }
+  void swap(Hermes::vector<T> & other) { this->swap((std::vector<T>)other); }
 
   private:
     std::vector<int> _permut;
