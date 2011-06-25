@@ -233,7 +233,6 @@ namespace Hermes
       friend void on_close_stub();
       friend int add_view_in_thread(void*);
       friend int remove_view_in_thread(void*);
-      friend int remove_view_in_thread(void*);
       friend void on_create(int);
     };
 #endif // NOGLUT
