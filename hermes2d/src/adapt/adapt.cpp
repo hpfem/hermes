@@ -22,7 +22,6 @@
 #include "refmap.h"
 #include "quad_all.h"
 #include "traverse.h"
-#include "element_to_refine.h"
 #include "refinement_selectors/selector.h"
 #include "matrix.h"
 #include "common_time_period.h"

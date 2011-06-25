@@ -24,6 +24,7 @@
 #include "../integrals/hdiv.h"
 #include "../integrals/l2.h"
 #include "../ogprojection.h"
+#include "element_to_refine.h"
 #include "../refinement_selectors/selector.h"
 
 namespace Hermes
