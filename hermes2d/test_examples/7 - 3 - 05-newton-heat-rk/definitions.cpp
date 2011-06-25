@@ -51,5 +51,5 @@ VectorFormSurf<double>* CustomWeakFormHeatRK::CustomFormResidualSurf::clone()
 template<typename Real>
 Real CustomWeakFormHeatRK::CustomFormResidualSurf::temp_ext(Real t) const 
 {
-  return temp_init + 10. * sin(2*M_PI*t/t_final);
+  return temp_init + 10. * Hermes::sin(2*M_PI*t/t_final);
 }

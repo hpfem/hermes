@@ -28,11 +28,12 @@ namespace Hermes
       stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
     {
       // Check for not implemented features.
-      if (matrix_solver != Hermes::SOLVER_UMFPACK)
-        error("Sorry, rk_time_step() still only works with UMFpack.");
 
+      matrix_right=create_matrix<Scalar>(matrix_solver);
+      matrix_left=create_matrix<Scalar>(matrix_solver);
+      vector_right=create_vector<Scalar>(matrix_solver);
       // Create matrix solver.
-      solver = create_linear_solver(matrix_solver, &matrix_right, &vector_right);
+      solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
 
       // Vector K_vector of length num_stages * ndof. will represent
       // the 'K_i' vectors in the usual R-K notation.
@@ -49,13 +50,16 @@ namespace Hermes
     RungeKutta<Scalar>::~RungeKutta()
     {
       delete solver;
+      delete matrix_right;
+      delete matrix_left;
+      delete vector_right;
       delete [] K_vector;
       delete [] u_ext_vec;
       delete [] vector_left;
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::multiply_as_diagonal_block_matrix(UMFPackMatrix<Scalar>* matrix, int num_blocks,
+    void RungeKutta<Scalar>::multiply_as_diagonal_block_matrix(SparseMatrix<Scalar>* matrix, int num_blocks,
       Scalar* source_vec, Scalar* target_vec)
     {
       int size = matrix->get_size();
@@ -140,7 +144,7 @@ namespace Hermes
         // The corresponding part of the global residual vector is obtained 
         // just by multiplication with the stage vector K.
         // FIXME: This should not be repeated if spaces have not changed.
-        stage_dp_left.assemble(&matrix_left, NULL);
+        stage_dp_left.assemble(matrix_left, NULL);
 
         // The Newton's loop.
         double residual_norm;
@@ -151,33 +155,33 @@ namespace Hermes
           prepare_u_ext_vec(time_step, slns_prev_time_projection);
 
           // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
-          multiply_as_diagonal_block_matrix(&matrix_left, num_stages, K_vector, vector_left);
+          multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
 
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
           bool force_diagonal_blocks = true;
           bool add_dir_lift = true;
-          stage_dp_right.assemble(u_ext_vec, NULL, &vector_right, force_diagonal_blocks, add_dir_lift);
+          stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks, add_dir_lift);
 
           // Finalizing the residual vector.
-          vector_right.add_vector(vector_left);
+          vector_right->add_vector(vector_left);
 
           // Multiply the residual vector with -1 since the matrix
           // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-          vector_right.change_sign();
+          vector_right->change_sign();
 
           // Measure the residual norm.
           if (residual_as_vector)
             // Calculate the l2-norm of residual vector.
-            residual_norm = hermes2d.get_l2_norm(&vector_right);
+            residual_norm = hermes2d.get_l2_norm(vector_right);
           else 
           {
             // Translate residual vector into residual functions.
             Hermes::vector<bool> add_dir_lift_vector;
             add_dir_lift_vector.reserve(1);
             add_dir_lift_vector.push_back(add_dir_lift);
-            Solution<Scalar>::vector_to_solutions(&vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift_vector);
+            Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift_vector);
             residual_norm = hermes2d.calc_norms(residuals_vector);
           }
 
@@ -214,11 +218,11 @@ namespace Hermes
             // Assemble the block Jacobian matrix of the stationary residual F
             // Diagonal blocks are created even if empty, so that matrix_left
             // can be added later.
-            stage_dp_right.assemble(u_ext_vec, &matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
+            stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
 
             // Adding the block mass matrix M to matrix_right. This completes the 
             // resulting tensor Jacobian.
-            matrix_right.add_to_diagonal_blocks(num_stages, &matrix_left);
+            matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
           }
 
           // Solve the linear system.

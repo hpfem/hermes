@@ -25,6 +25,10 @@
 #include "solver.h"
 #include "matrix.h"
 
+typedef int int_t; /* default */
+#include <supermatrix.h>
+#include <slu_util.h>
+
 namespace Hermes {
   namespace Solvers {
     template <typename Scalar> class SuperLUSolver;
@@ -45,9 +49,6 @@ namespace Hermes {
       int querySpace (SuperMatrix *, SuperMatrix *, slu_memusage_t *);
     }
 #else
-    typedef int int_t; /* default */
-#include <supermatrix.h>
-#include <slu_util.h>
 
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
@@ -119,7 +120,7 @@ namespace Hermes {
       unsigned int *Ap;        // Index to Ax/Ai, where each column starts.
       unsigned int nnz;        // Number of non-zero entries (= Ap[size]).
 
-      friend class SuperLUSolver<Scalar>;
+      friend class Solvers::SuperLUSolver<Scalar>;
     };
 
     template <typename Scalar>
@@ -150,9 +151,11 @@ namespace Hermes {
       // SUPERLU specific data structures for storing the rhs.
       Scalar *v;     // Vector entries.
 
-      friend class SuperLUSolver<Scalar>;
+      friend class Solvers::SuperLUSolver<Scalar>;
     };
 
+  }
+  namespace Solvers{
 
     /// Encapsulation of SUPERLU linear solver
     ///
