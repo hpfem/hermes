@@ -102,6 +102,9 @@ namespace Hermes {
       virtual double get_fill_in() const;
       virtual void add_matrix(SuperLUMatrix* mat);
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+        add_to_diagonal_blocks(num_stages,dynamic_cast<SuperLUMatrix*>(mat));
+      }
       virtual void add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat);
 
       // Applies the matrix to vector_in and saves result to vector_out.
