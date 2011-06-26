@@ -81,6 +81,9 @@ namespace Hermes {
       virtual double get_fill_in() const;
       virtual void add_matrix(MumpsMatrix* mat);
       virtual void add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat);
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+        add_to_diagonal_blocks(num_stages,dynamic_cast<MumpsMatrix*>(mat));
+      }
       virtual void add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat);
 
       /// Applies the matrix to vector_in and saves result to vector_out.

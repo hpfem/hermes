@@ -230,6 +230,35 @@ namespace Hermes
     };
 
     template<typename Scalar>
+    void EpetraMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat_block)
+    {
+      _F_
+        int ndof = mat_block->get_size();
+      if (this->get_size() != (unsigned int) num_stages * ndof) 
+        error("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
+
+      for (int i = 0; i < num_stages; i++) 
+      {
+        this->add_as_block(ndof*i, ndof*i, mat_block);
+      }
+    }
+
+    template<typename Scalar>
+    void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
+    {
+      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() )) 
+        error("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
+      unsigned int block_size=mat->get_size();
+      for (unsigned int r=0;r<block_size;r++)
+      {
+        for (unsigned int c=0;c<block_size;c++)
+        {
+          this->add(i+r,j+c,mat->get(r,c));
+        }
+      }
+    }
+
+    template<typename Scalar>
     void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
     {
       _F_
