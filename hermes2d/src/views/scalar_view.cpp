@@ -396,14 +396,14 @@ namespace Hermes
     typename ScalarView<Scalar>::VertexNodeInfo* ScalarView<Scalar>::find_nearest_node_in_range(float x, float y, float radius)
     {
       VertexNodeInfo node_info(-1, x - radius, y); //right side of the widget
-      typename std::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
-      typename std::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
+      typename Hermes::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
+      typename Hermes::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
       float found_nearest_dist = -1;
       while (found_iter != vertex_nodes.end() && abs(found_iter->x - x) <= radius)
       {
         if (abs(found_iter->y - y) <= radius)
         {
-          float dist = min(found_iter->x - x, found_iter->y - y);
+          float dist = std::min(found_iter->x - x, found_iter->y - y);
           if (found_nearest_dist < 0 || dist < found_nearest_dist)
           {
             found_nearest_dist = dist;
@@ -469,7 +469,7 @@ namespace Hermes
 
       //draw selected nodes
       glDisable(GL_BLEND);
-      typename std::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
+      typename Hermes::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
       while (iter != vertex_nodes.end())
       {
         if (iter->selected)

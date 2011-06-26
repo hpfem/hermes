@@ -33,7 +33,7 @@ namespace Hermes
         current_min_order = 0;
       }
 
-      void HcurlProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
+      void HcurlProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
       {
         //for all transformations
         bool done = false;
@@ -42,7 +42,7 @@ namespace Hermes
         {
           //prepare data for processing
           const Trf& trf = trfs[inx_trf];
-          std::vector<TrfShapeExp>& trf_svals = svals[inx_trf];
+          Hermes::vector<TrfShapeExp>& trf_svals = svals[inx_trf];
 
           //allocate
           trf_svals.resize(max_shape_inx + 1);
@@ -84,7 +84,7 @@ namespace Hermes
         error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
 
-      void HcurlProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
+      void HcurlProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
       {
         //calculate values
         precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals);

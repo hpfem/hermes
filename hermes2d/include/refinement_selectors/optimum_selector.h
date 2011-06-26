@@ -142,7 +142,7 @@ namespace Hermes
 
         /// Returns a vector of the last generated candidates.
         /** \return A vector of last generated candidates. The vector will change if a new list is generated. */
-        const std::vector<Cand>& get_candidates() const { return candidates; };
+        const Hermes::vector<Cand>& get_candidates() const { return candidates; };
 
       protected: //candidates
         /// Information about candidates.
@@ -161,7 +161,7 @@ namespace Hermes
 
         CandList cand_list; ///< Allowed candidate types.
         double conv_exp; ///< Convergence power. Modifies difference between DOFs before they are used to calculate the score.
-        std::vector<Cand> candidates; ///< A vector of candidates. The first candidate has to be equal to the original element with a refinement ::H2D_REFINEMENT_P.
+        Hermes::vector<Cand> candidates; ///< A vector of candidates. The first candidate has to be equal to the original element with a refinement ::H2D_REFINEMENT_P.
 
         /// Updates information about candidates. Initial information is provided.
         /** \param[in,out] info_h Information about all H-candidates.
@@ -282,7 +282,7 @@ namespace Hermes
 
         Shapeset *shapeset; ///< A shapeset used to calculate error.
 
-        std::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
+        Hermes::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
         int max_shape_inx[H2D_NUM_MODES]; ///< A maximum index of a shape function. The first index is a mode (ElementMode2D).
         int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER+1]; ///< An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode2D), the second index is an order.
         bool has_vertex_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode2D).
@@ -299,7 +299,7 @@ namespace Hermes
         *  \param[in] order_v A vertical order of an element.
         *  \param[in,out] used_shape_index A vector of used shape indices. If a shape index is present in the map, a shape was already added and it will not be added again.
         *  \param[in,out] indices A vector of shape indices. The vector is updated by the function. */
-        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices);
+        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices);
 
         /// Builds shape index table OptimumSelector::shape_indices.
         /** The method fills the array OptimumSelector::shape_indices for a given mode.

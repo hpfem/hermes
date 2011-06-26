@@ -752,7 +752,7 @@ namespace Hermes
     void Mesh::unrefine_all_elements(bool keep_initial_refinements)
     {
       // find inactive elements with active sons
-      std::vector<int> list;
+      Hermes::vector<int> list;
       Element* e;
       for_all_inactive_elements(e, this)
       {

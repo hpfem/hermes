@@ -30,7 +30,6 @@ namespace Hermes
     template<typename Scalar> class Space;
     template<typename Scalar> class MeshFunction;
     struct SurfPos;
-    class Hermes::Ord;
 
     class Element;
     class Shapeset;
@@ -165,7 +164,7 @@ namespace Hermes
 
 
       void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
-        std::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector);
+        Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector);
 
       bool** get_blocks(bool force_diagonal_blocks);
 
@@ -199,13 +198,13 @@ namespace Hermes
 
     protected:
 
-      Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
+      Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 
-      Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
+      Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
         Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
-      Stage<Scalar>* find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
+      Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
         Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext);
 

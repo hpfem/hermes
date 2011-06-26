@@ -24,6 +24,7 @@
 #include "../integrals/hdiv.h"
 #include "../integrals/l2.h"
 #include "../ogprojection.h"
+#include "element_to_refine.h"
 #include "../refinement_selectors/selector.h"
 
 namespace Hermes
@@ -293,7 +294,7 @@ namespace Hermes
 
       /// Returns regular queue of elements
       /** \return A regular queue. */
-      const std::vector<ElementReference>& get_regular_queue() const { return regular_queue; };
+      const Hermes::vector<ElementReference>& get_regular_queue() const { return regular_queue; };
 
       /// Returns a total number of active elements.
       /** \return A total number of active elements. If below 0, errors were not calculated yet, see set_solutions() */
@@ -313,7 +314,7 @@ namespace Hermes
 
     protected:
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
-      std::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
+      Hermes::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
 
       /// Returns true if a given element should be ignored and not processed through refinement selection.
@@ -341,7 +342,7 @@ namespace Hermes
       *  \param[in] elems_to_refine A vector of refinements.
       *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
       *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
-      void fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine, int** idx,
+      void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, int** idx,
         Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
 
       /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.

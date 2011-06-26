@@ -183,7 +183,7 @@ namespace Hermes
       ///
       /// \return pointer to the vector of neighboring elements.
       ///
-      std::vector<Element*>* get_neighbors() { return &neighbors; }
+      Hermes::vector<Element*>* get_neighbors() { return &neighbors; }
 
       /// Retrieve the central element in the neighborhood defined by current active segment.
       ///
@@ -274,8 +274,8 @@ namespace Hermes
       int active_segment;            ///< Part of the active edge shared by central and neighbor elements.
 
 
-      std::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
-      std::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
+      Hermes::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
+      Hermes::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
       unsigned int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
 
       /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the

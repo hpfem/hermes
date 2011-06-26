@@ -373,7 +373,7 @@ namespace Hermes
               // Now, we surely have Sigma_r ...
 
               if (scattering_multigroup_structure.empty())
-                scattering_multigroup_structure = bool2(G, std::vector<bool>(G, true));
+                scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, true));
 
               if (!Sigma_s_given)
               {
@@ -385,7 +385,7 @@ namespace Hermes
                 {
                   Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_r));
 
-                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
                   for (unsigned int gto = 0; gto < G; gto++)
                     for (unsigned int gfrom = 0; gfrom < G; gfrom++)
                       if (gto == gfrom) 
@@ -395,7 +395,7 @@ namespace Hermes
                 {
                   warning(W_NO_SCATTERING);
                   fill_with(0.0, &Sigma_s);
-                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
                 }
 
                 Sigma_s_given = true;
@@ -813,7 +813,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              const std::vector<DefaultFunction<Scalar>*>& f_src,
+              const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
               std::string src_area, 
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
@@ -827,7 +827,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              const std::vector<DefaultFunction<Scalar>*>& f_src,
+              const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
               Hermes::vector<std::string> src_areas,
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
@@ -872,7 +872,7 @@ namespace Hermes
             void DefaultWeakFormSourceIteration<Scalar>::update_keff(double new_keff) 
             {
               /* Somehow does not work with templates. A bug / typo from me?
-              std::vector<FissionYield::OuterIterationForm<Scalar> *>::iterator it = keff_iteration_forms.begin();
+              Hermes::vector<FissionYield::OuterIterationForm<Scalar> *>::iterator it = keff_iteration_forms.begin();
               for ( ; it != keff_iteration_forms.end(); ++it)
               (*it)->update_keff(new_keff);
               */

@@ -36,7 +36,7 @@ namespace Hermes
       this->ndof = 0;
 
       if(essential_bcs != NULL)
-        for(typename std::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+        for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
             if(mesh->get_boundary_markers_conversion().conversion_table_inverse->find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse->end())
               error("A boundary condition defined on a non-existent marker.");
@@ -271,7 +271,7 @@ namespace Hermes
     void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
     {
       // find inactive elements with active sons
-      std::vector<int> list;
+      Hermes::vector<int> list;
       Element* e;
       for_all_inactive_elements(e, this->mesh)
       {

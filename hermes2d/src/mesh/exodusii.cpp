@@ -86,7 +86,7 @@ namespace Hermes
       // remove duplicate vertices and build renumbering map
       std::map<Vertex, int, VCompare> vtx_list;				// map for eliminating duplicities
       std::map<int, int> vmap;								// reindexing map
-      std::vector<Vertex> vtx_arr;							// vertex array
+      Hermes::vector<Vertex> vtx_arr;							// vertex array
       int vid = 0;
       for (int i = 0; i < n_nodes; i++)
       {

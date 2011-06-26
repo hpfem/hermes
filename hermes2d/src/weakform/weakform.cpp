@@ -432,7 +432,7 @@ namespace Hermes
 
     template<typename Scalar>
     void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
-      std::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector)
+      Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector)
     {
       _F_
 
@@ -574,7 +574,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, int ii, int jj,
+    Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj,
       Mesh* m1, Mesh* m2,
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {
@@ -633,7 +633,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
+    Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
       Mesh* m1, Mesh* m2,
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {
@@ -695,7 +695,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Stage<Scalar>* WeakForm<Scalar>::find_stage(std::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
+    Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
       Mesh* m1, Mesh* m2,
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {

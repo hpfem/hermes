@@ -20,7 +20,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    AsmList<Scalar>::AsmList<Scalar>(const AsmList<Scalar> & other)
+    AsmList<Scalar>::AsmList(const AsmList<Scalar> & other)
     {
       this->cnt = other.cnt;
       this->cap = other.cap;
@@ -35,7 +35,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    AsmList<Scalar>::AsmList<Scalar>()
+    AsmList<Scalar>::AsmList()
     {
       idx = dof = NULL;
       coef = NULL;
@@ -43,7 +43,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    AsmList<Scalar>::~AsmList<Scalar>()
+    AsmList<Scalar>::~AsmList()
     {
       free(idx);
       free(dof);

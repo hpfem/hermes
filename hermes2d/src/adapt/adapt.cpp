@@ -22,7 +22,6 @@
 #include "refmap.h"
 #include "quad_all.h"
 #include "traverse.h"
-#include "element_to_refine.h"
 #include "refinement_selectors/selector.h"
 #include "matrix.h"
 #include "common_time_period.h"
@@ -164,7 +163,7 @@ namespace Hermes
       double err0_squared = 1000.0;
       double processed_error_squared = 0.0;
 
-      Hermes::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
+      std::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
       elem_inx_to_proc.reserve(num_act_elems);
 
       //adaptivity loop
@@ -328,7 +327,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, Hermes::vector<ElementToRefine>& elems_to_refine,
+    void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
       int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors) 
     {
       int num_elem_to_proc = elems_to_refine.size();
@@ -432,7 +431,7 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
     {
-      for (Hermes::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
+      for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
         elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
           apply_refinement(*elem_ref);
       }
@@ -906,7 +905,7 @@ namespace Hermes
 
       //prepare initial fill
       Element* e;
-      typename std::vector<ElementReference>::iterator elem_info = regular_queue.begin();
+      typename Hermes::vector<ElementReference>::iterator elem_info = regular_queue.begin();
       for (int i = 0; i < this->num; i++)
         for_all_active_elements(e, meshes[i])
         regular_queue.push_back(ElementReference(e->id, i));

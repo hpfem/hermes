@@ -32,7 +32,7 @@ namespace Hermes
 
     HERMES_API std::istream& operator>>(std::istream& stream, const TagChecker& checker) 
     {
-      stringstream tag;
+      std::stringstream tag;
       for(unsigned i = 0; i < checker.get_tag().size(); i++) 
       {
         char tag_char;
@@ -41,12 +41,12 @@ namespace Hermes
       }
       if (checker.get_tag().compare(tag.str()) != 0) 
       {
-        stringstream str;
+        std::stringstream str;
         if (stream.eof())
           str << "Unexpected EOF found while reading tag '" << checker.get_tag() << "'";
         else
           str << "Expected '" << checker.get_tag() << "' but '" << tag.str() << "' found at offset " << (int)stream.tellg();
-        throw runtime_error(str.str());
+        throw std::runtime_error(str.str());
       }
       return stream;
     };
@@ -68,19 +68,19 @@ namespace Hermes
 
     void ElementToRefineStream::open(const char* filename, std::ios_base::openmode mode) 
     {
-      error_if((mode & ios_base::binary) == 0, "Only binary mode is supported.");
-      error_if((mode & ios_base::in) == 0 && (mode & ios_base::out) == 0 && (mode & ios_base::app) == 0, "Only in, out, and append mode is supported.");
+      error_if((mode & std::ios_base::binary) == 0, "Only binary mode is supported.");
+      error_if((mode & std::ios_base::in) == 0 && (mode & std::ios_base::out) == 0 && (mode & std::ios_base::app) == 0, "Only in, out, and append mode is supported.");
 
       //if append: check header and append
-      if ((mode & ios_base::app) != 0) 
+      if ((mode & std::ios_base::app) != 0) 
       {
         //open for reading
-        stream.open(filename, (mode & ~ios_base::app) | ios_base::in);
+        stream.open(filename, (mode & ~std::ios_base::app) | std::ios_base::in);
 
         //if fails: write new file
         if (!stream.is_open()) 
         {
-          stream.open(filename, (mode & ~ios_base::app) | ios_base::out);
+          stream.open(filename, (mode & ~std::ios_base::app) | std::ios_base::out);
           error_if(!stream.is_open(), "Unable to open the stream \"%s\" for writing.", filename);
           write_header(mode);
         }
@@ -103,9 +103,9 @@ namespace Hermes
         //check header (read)
         if (stream.good()) 
         {
-          if ((mode & ios_base::in) != 0)
+          if ((mode & std::ios_base::in) != 0)
             read_header(mode);
-          else if ((mode & ios_base::out) != 0)
+          else if ((mode & std::ios_base::out) != 0)
             write_header(mode);
         }
       }
@@ -113,7 +113,7 @@ namespace Hermes
 
     void ElementToRefineStream::write_header(std::ios_base::openmode mode) 
     {
-      assert_msg((mode & ios_base::binary) != 0, "Binary mode supported only.");
+      assert_msg((mode & std::ios_base::binary) != 0, "Binary mode supported only.");
 
       //write header tag
       stream << H2DER_START_TAG << " " << H2DER_BIN_TAG << "\n";
@@ -121,13 +121,13 @@ namespace Hermes
 
     bool ElementToRefineStream::read_header(std::ios_base::openmode mode) 
     {
-      assert_msg((mode & ios_base::binary) != 0, "Binary mode supported only.");
+      assert_msg((mode & std::ios_base::binary) != 0, "Binary mode supported only.");
 
       //decode
       try 
       {
         //read header tag
-        stream >> TagChecker(H2DER_START_TAG) >> skipws >> TagChecker(H2DER_BIN_TAG) >> skipws;
+        stream >> TagChecker(H2DER_START_TAG) >> std::skipws >> TagChecker(H2DER_BIN_TAG) >> std::skipws;
         return true;
       }
       catch(std::runtime_error& err) 
@@ -268,7 +268,7 @@ namespace Hermes
       int pos = (int)stream.stream.tellg();
       //read tag
       try { stream.stream >> TagChecker(ElementToRefineStream::H2DER_VECTOR_TAG); }
-      catch (runtime_error &err) { error("Unable to read record start tag (%s)", err.what()); };
+      catch (std::runtime_error &err) { error("Unable to read record start tag (%s)", err.what()); };
 
       //read sizes
       int num_size = stream.read_bytes(ElementToRefineStream::H2DER_SIZE_BYTESIZE); // byte length of number of elements

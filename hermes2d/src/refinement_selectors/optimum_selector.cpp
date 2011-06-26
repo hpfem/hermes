@@ -80,7 +80,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices) 
+      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices) 
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order);
@@ -99,7 +99,7 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order) 
       {
-        std::vector<ShapeInx> &indices = shape_indices[mode];
+        Hermes::vector<ShapeInx> &indices = shape_indices[mode];
         int* next_order = this->next_order_shape[mode];
         int& max_shape_inx = this->max_shape_inx[mode];
         int num_edges = (mode == HERMES_MODE_QUAD) ? 4 : 3;
@@ -237,9 +237,9 @@ namespace Hermes
         //evaluate
         if (full_eval) 
         {
-          std::vector<ShapeInx>& shapes = shape_indices[mode];
+          Hermes::vector<ShapeInx>& shapes = shape_indices[mode];
           int num = 0;
-          typename std::vector<ShapeInx>::const_iterator shape = shapes.begin();
+          typename Hermes::vector<ShapeInx>::const_iterator shape = shapes.begin();
           while (shape != shapes.end()) 
           {
             if (((int)shape->type & allowed_type_mask) != 0) 
@@ -382,7 +382,7 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const 
       {
-        typename std::vector<Cand>::const_iterator cand = candidates.begin();
+        typename Hermes::vector<Cand>::const_iterator cand = candidates.begin();
         while (cand != candidates.end()) 
         {
           CandsInfo* info = NULL;
