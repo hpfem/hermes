@@ -299,12 +299,14 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
       _F_
-        unsigned int block_size=mat->get_size();
+      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() )) 
+        error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
+      unsigned int block_size=mat->get_size();
       for (unsigned int r=0;r<block_size;r++)
       {
         for (unsigned int c=0;c<block_size;c++)
         {
-          this->add(i+r,j+c,mat->get(i,j));
+          this->add(i+r,j+c,mat->get(r,c));
         }
       }
     }
@@ -393,6 +395,7 @@ namespace Hermes
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*) &idx, &py);
       y=py.real();
+      return y;
     }
 
     template<>
@@ -401,6 +404,7 @@ namespace Hermes
       _F_
         std::complex<double> y = 0;
       VecGetValues(vec, 1, (PetscInt*) &idx, &y);
+      return y;
     }
 
     template<typename Scalar>
