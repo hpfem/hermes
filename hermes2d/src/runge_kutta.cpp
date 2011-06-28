@@ -25,7 +25,7 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
       : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
-      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) 
+      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) ,matrix_solver(matrix_solver)
     {
       // Check for not implemented features.
 
@@ -108,7 +108,7 @@ namespace Hermes
       // Project the previous time level solutions onto the actual spaces to be able to add the resulting vector to
       // the K_vector when passing the u_ext.
       Scalar* slns_prev_time_projection = new Scalar[ndof];
-      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, Hermes::SOLVER_UMFPACK);
+      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, matrix_solver);
 
       // Creates the stage weak formulation.
       create_stage_wf(dp->get_spaces().size(), current_time, time_step);
@@ -223,6 +223,7 @@ namespace Hermes
             // Adding the block mass matrix M to matrix_right. This completes the 
             // resulting tensor Jacobian.
             matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
+            matrix_right->finish();
           }
 
           // Solve the linear system.
