@@ -44,7 +44,7 @@ namespace Hermes
     {
       PetscScalar *py=new PetscScalar[ni];
       VecGetValues(x, ni, ix, py);
-      for (int i=0;i<ni;i++) y[i]=py[i].real();
+      for (int i=0;i<ni;i++)y[i]=py[i].real();
       delete [] py;
     }
 
@@ -176,6 +176,7 @@ namespace Hermes
       PetscScalar pv;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
       v=pv.real();
+      return v;
     }
 
     template<>
@@ -184,6 +185,7 @@ namespace Hermes
       _F_
         std::complex<double> v = 0.0;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
+      return v;
     }
 
     template<typename Scalar>
@@ -193,11 +195,11 @@ namespace Hermes
         MatZeroEntries(matrix);
     }
 
-    inline PetscScalar to_petsc(double x){  //unused
+    inline PetscScalar to_petsc(double x){
       return std::complex<double>(x,0);
     }
 
-    inline PetscScalar to_petsc(std::complex<double> x){  //unused
+    inline PetscScalar to_petsc(std::complex<double> x){
       return x;
     }
 
@@ -234,9 +236,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) 
+    bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
       _F_
+        switch (fmt) 
+      {
+        case DF_MATLAB_SPARSE: //only to stdout
+          PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
+          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
+          MatView(matrix,viewer);
+          return true;
+      }
         return false;
     }
 
@@ -285,7 +295,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat)
     {
       _F_
-        int ndof = mat->get_size();
+      int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof) 
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
@@ -299,12 +309,14 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
       _F_
-        unsigned int block_size=mat->get_size();
+      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() )) 
+        error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
+      unsigned int block_size=mat->get_size();
       for (unsigned int r=0;r<block_size;r++)
       {
         for (unsigned int c=0;c<block_size;c++)
         {
-          this->add(i+r,j+c,mat->get(i,j));
+          this->add(i+r,j+c,mat->get(r,c));
         }
       }
     }
@@ -393,6 +405,7 @@ namespace Hermes
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*) &idx, &py);
       y=py.real();
+      return y;
     }
 
     template<>
@@ -401,6 +414,7 @@ namespace Hermes
       _F_
         std::complex<double> y = 0;
       VecGetValues(vec, 1, (PetscInt*) &idx, &y);
+      return y;
     }
 
     template<typename Scalar>
@@ -460,9 +474,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat) 
+    bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
       _F_
+      switch (fmt) 
+      {
+        case DF_MATLAB_SPARSE: //only to stdout
+          PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
+          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
+          VecView(vec,viewer);
+          return true;
+      }
         return false;
     }
 
@@ -492,7 +514,7 @@ namespace Hermes
     bool PetscLinearSolver<Scalar>::solve() 
     {
       _F_
-        assert(m != NULL);
+      assert(m != NULL);
       assert(rhs != NULL);
 
       PetscErrorCode ec;

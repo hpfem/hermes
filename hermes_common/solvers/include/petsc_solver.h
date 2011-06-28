@@ -60,6 +60,9 @@ namespace Hermes {
       virtual double get_fill_in() const;
       virtual void add_matrix(PetscMatrix* mat);
       virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+        add_to_diagonal_blocks(num_stages,dynamic_cast<PetscMatrix<Scalar>*>(mat));
+      }
       virtual void add_as_block(unsigned int i, unsigned int j, PetscMatrix* mat);
 
       // Applies the matrix to vector_in and saves result to vector_out.

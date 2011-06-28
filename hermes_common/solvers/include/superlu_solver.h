@@ -27,14 +27,12 @@
 
 typedef int int_t; /* default */
 #ifdef WITH_SUPERLU  
-#ifdef SLU_MT
-
 #include <supermatrix.h>
 #include <slu_util.h>
-
 namespace Hermes {
   namespace Solvers {
     template <typename Scalar> class SuperLUSolver;
+#ifdef SLU_MT
     template <typename Scalar>    
     class SuperLu{
     public:
@@ -48,7 +46,7 @@ namespace Hermes {
       double lamch_ (char *cmach);
       int querySpace (SuperMatrix *, SuperMatrix *, slu_memusage_t *);
     }
-#else
+#else //SLU_MT
 
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
@@ -77,9 +75,9 @@ namespace Hermes {
     struct SuperLuType<std::complex<double> >{
       typedef struct { double r, i; } Scalar;
     };
+#endif //SLU_MT
   }
 }
-#endif
 
 namespace Hermes {
   namespace Algebra {
@@ -102,6 +100,9 @@ namespace Hermes {
       virtual double get_fill_in() const;
       virtual void add_matrix(SuperLUMatrix* mat);
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+        add_to_diagonal_blocks(num_stages,dynamic_cast<SuperLUMatrix*>(mat));
+      }
       virtual void add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat);
 
       // Applies the matrix to vector_in and saves result to vector_out.
@@ -170,7 +171,7 @@ namespace Hermes {
         double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth, 
         double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
       void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
-#endif  
+#endif  //SLU_MT
     public:
       SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
       virtual ~SuperLUSolver();
@@ -213,9 +214,9 @@ namespace Hermes {
 #else  
       equed_t equed;              // Form of equilibration that was done on A.
       SuperMatrix AC;             // Matrix A permuted by perm_c.
-#endif  
+#endif //SLU_MT 
     };
   }
 }
-#endif
+#endif //SUPER_LU
 #endif

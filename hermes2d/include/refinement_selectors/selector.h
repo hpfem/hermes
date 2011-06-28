@@ -19,9 +19,15 @@
 #ifndef _MSC_VER
 #include "../mesh/refinement_type.h"
 
-class ElementToRefine;
-struct Element;
-template<typename Scalar> class Solution;
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    class ElementToRefine;
+    struct Element;
+    template<typename Scalar> class Solution;
+  }
+}
 #else
 #include "../mesh/element_to_refine.h"
 #endif

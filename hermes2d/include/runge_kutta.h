@@ -180,6 +180,8 @@ namespace Hermes
 
       /// Number of previous calls to rk_time_step().
       unsigned int iteration;
+    private:
+      MatrixSolverType matrix_solver;
     };
   }
 }
