@@ -21,6 +21,8 @@
 */
 #ifndef __PYX_HAVE_API__python_engine
 #define __PYX_HAVE_API__python_engine
+#ifdef WITH_PYTHON
+
 #include "Python.h"
 
 static PyObject *(*namespace_create)(void);
@@ -150,5 +152,5 @@ static int import_python_engine(void) {
   Py_XDECREF(module);
   return -1;
 }
-
+#endif
 #endif

@@ -35,6 +35,13 @@ if (NOT WITH_TRILINOS)
   )
 endif (NOT WITH_TRILINOS)
 
+if (WITH_PYTHON)
+  set ( PYTHON_SOURCES
+      python_API/src/python_api.cpp
+      python_API/src/python_engine.cpp
+	  )
+endif (WITH_PYTHON)
+
 #
 # Source files for the Hermes_common library.
 #
@@ -65,13 +72,11 @@ set(SRC
   solvers/src/umfpack_solver.cpp
   solvers/src/precond_ml.cpp
   solvers/src/precond_ifpack.cpp
-  solvers/src/eigensolver.cpp
-  solvers/src/eigen.cpp
+ # solvers/src/eigensolver.cpp
+ # solvers/src/eigen.cpp
   
   ${TEUCHOS_SOURCES}
-
-  python_API/src/python_api.cpp
-  python_API/src/python_engine.cpp
+  ${PYTHON_SOURCES}
 )
 
 #
@@ -105,11 +110,12 @@ include(PickRealOrCplxLibs)
 # FIXME: Find which projects need it and enclose their CMake scripts in
 # if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed,
 # as it has been already done in ../CMakeLists.txt
-if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
-    find_package(Python REQUIRED)
-    find_package(NumPy REQUIRED)
-    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+############ WORKING ON REPLACING THIS BY A C++ EIGENPROBLEM SOLVER.
+#if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+#    find_package(Python REQUIRED)
+#    find_package(NumPy REQUIRED)
+#    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+#endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
 
 # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 # and set its build properties (compile and link flags, installation directories).
