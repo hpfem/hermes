@@ -30,7 +30,7 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -54,11 +54,11 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_AL), "Copper", 
-                           new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_CU), new Hermes::Hermes2D::HermesFunction<double>(-VOLUME_HEAT_SRC));
-  
+    new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_CU), new Hermes::Hermes2D::HermesFunction<double>(-VOLUME_HEAT_SRC));
+
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"), 
-                                       FIXED_BDY_TEMP);
+    FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

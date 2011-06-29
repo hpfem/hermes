@@ -12,6 +12,7 @@ add_subdirectory("6-05-hcurl-adapt")
 
 add_subdirectory("7-3-05-newton-heat-rk")
 
-add_subdirectory("8-01-eigenvalue")
+# Commented out due to eigenproblems solver being reworked.
+#add_subdirectory("8-01-eigenvalue")
 
 add_subdirectory("9-05-trilinos-coupled")

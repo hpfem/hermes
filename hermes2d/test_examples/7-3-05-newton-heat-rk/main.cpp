@@ -97,8 +97,8 @@ int main(int argc, char* argv[])
                           &current_time, TEMP_INIT, T_FINAL);
   
   // Initialize boundary conditions.
-  DefaultEssentialBCConst<double> bc_essential("Boundary ground", TEMP_INIT);
-  EssentialBCs<double> bcs(&bc_essential);
+ Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary ground", TEMP_INIT);
+ Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);

@@ -1,6 +1,3 @@
-if(NOT H2D_REAL)
-    return()
-endif(NOT H2D_REAL)
 project(test-tutorial-P03-02-runge-kutta)
 
 add_executable(${PROJECT_NAME} main.cpp ../definitions.cpp)

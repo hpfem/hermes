@@ -358,7 +358,6 @@ endif(WITH_H2D)
 if(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
   enable_testing()
   add_custom_target(test COMMAND ctest)
-  add_custom_target(test-quick COMMAND ctest -LE slow -j9)
 endif(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
 
 

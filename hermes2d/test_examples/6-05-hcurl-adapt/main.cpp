@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner horizontal",
+ Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner horizontal",
                                                                    "Corner vertical"), 0);
   EssentialBCs<std::complex<double> > bcs(&bc_essential);
 

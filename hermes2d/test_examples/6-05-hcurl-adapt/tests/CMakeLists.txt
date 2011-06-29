@@ -1,6 +1,3 @@
-if(NOT H2D_COMPLEX)
-    return()
-endif(NOT H2D_COMPLEX)
 project(test-tutorial-P04-04-hcurl)
 
 add_executable(${PROJECT_NAME} main.cpp)

@@ -635,7 +635,7 @@ namespace Hermes
         al->add_triplet(*indices, dof, 1.0);
     }
 
-    //// BC stuff /////////////////////////////////////////////////////////////////////////////////////
+
     template<typename Scalar>
     void Space<Scalar>::set_essential_bcs(EssentialBCs<Scalar>* essential_bcs)
     {

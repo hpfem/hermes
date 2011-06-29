@@ -55,7 +55,7 @@ const double LAMBDA = 1.0;
 int main(int argc, char* argv[])
 {
   // Instantiate a class with global functions.
-  Hermes2D hermes2d;
+  Hermes::Hermes2D::Global hermes2d;
 
   // Time measurement
   TimePeriod cpu_time;
@@ -71,9 +71,9 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Corner horizontal",
+ Hermes::Hermes2D::DefaultEssentialBCConst bc_essential(Hermes::vector<std::string>("Corner horizontal",
                                                                    "Corner vertical"), 0);
-  EssentialBCs bcs(&bc_essential);
+ Hermes::Hermes2D::EssentialBCs<double>bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
   HcurlSpace space(&mesh, &bcs, P_INIT);
