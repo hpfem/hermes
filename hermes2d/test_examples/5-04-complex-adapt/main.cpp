@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-      Space::get_num_dofs(&space), Space::get_num_dofs(ref_space), err_est_rel);
+      Space<std::complex<double> >::get_num_dofs(&space), Space<std::complex<double> >::get_num_dofs(ref_space), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();

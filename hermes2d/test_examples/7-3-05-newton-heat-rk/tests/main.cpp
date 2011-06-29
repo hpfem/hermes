@@ -28,7 +28,9 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
 //   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
 // Embedded implicit methods:
 //   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-//   Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, Implicit_DIRK_7_45_embedded. 
+//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
+//   Implicit_DIRK_ISMAIL_7_45_embedded. 
+
 ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
 // Problem parameters.
@@ -58,33 +60,29 @@ int main(int argc, char* argv[])
   mesh.refine_towards_boundary("Boundary ground", INIT_REF_NUM_BDY);
 
   // Previous and next time level solutions.
-  Solution* sln_time_prev = new Solution(&mesh, TEMP_INIT);
-  Solution* sln_time_new = new Solution(&mesh);
+  Solution<double>* sln_time_prev = new Solution<double>(&mesh, TEMP_INIT);
+  Solution<double>* sln_time_new = new Solution<double>(&mesh);
 
   // Initialize the weak formulation.
   double current_time = 0;
+
   CustomWeakFormHeatRK wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO,
                           &current_time, TEMP_INIT, T_FINAL);
   
   // Initialize boundary conditions.
- Hermes::Hermes2D::DefaultEssentialBCConst bc_essential("Boundary ground", TEMP_INIT);
+ Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary ground", TEMP_INIT);
  Hermes::Hermes2D::EssentialBCs<double>bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space);
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  DiscreteProblem dp(&wf, &space);
-
-  // Initialize views.
-  //ScalarView Tview("Temperature", new WinGeom(0, 0, 450, 600));
-  //Tview.set_min_max_range(0,20);
-  //Tview.fix_scale_width(30);
+  DiscreteProblem<double> dp(&wf, &space);
 
   // Initialize Runge-Kutta time stepping.
-  RungeKutta runge_kutta(&dp, &bt, matrix_solver);
+  RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver);
 
   // Time stepping loop:
   int ts = 1;
@@ -99,12 +97,6 @@ int main(int argc, char* argv[])
                                   sln_time_new, jacobian_changed, verbose)) {
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
-
-    // Show the new time level solution.
-    //char title[100];
-    //sprintf(title, "Time %3.2f s", current_time);
-    //Tview.set_title(title);
-    //Tview.show(sln_time_new);
 
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);
@@ -133,11 +125,11 @@ int main(int argc, char* argv[])
 
   if (success) {
     printf("Success!\n");
-    return ERR_SUCCESS;
+    return TEST_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERR_FAILURE;
+    return TEST_FAILURE;
   }
 }
 

@@ -25,4 +25,3 @@ boundaries = [
   [ 6, 7, "Bottom" ],
   [ 7, 0, "Corner_vertical" ]
 ]
-

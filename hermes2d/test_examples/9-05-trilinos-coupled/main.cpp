@@ -35,10 +35,10 @@ const double kappa = 0.1;
 const double x1    = 9.0;
 
 // Initial conditions.
-scalar temp_ic(double x, double y, scalar& dx, scalar& dy)
+double temp_ic(double x, double y, double& dx, double& dy)
   { return (x <= x1) ? 1.0 : exp(x1 - x); }
 
-scalar conc_ic(double x, double y, scalar& dx, scalar& dy)
+double conc_ic(double x, double y, double& dx, double& dy)
   { return (x <= x1) ? 0.0 : 1.0 - exp(Le*(x1 - x)); }
 
 // Weak forms. 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   DXDYFilter omega_dc(omega_dc_fn, Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1));
 
   // Initialize visualization.
-  ScalarView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
+  doubleView rview("Reaction rate", new WinGeom(0, 0, 800, 230));
 
   // Initialize weak formulation.
   WeakForm wf(2, JFNK ? true : false);
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
   // Project the functions "t_prev_time_1" and "c_prev_time_1" on the FE space 
   // in order to obtain initial vector for NOX. 
   info("Projecting initial solutions on the FE meshes.");
-  scalar* coeff_vec = new scalar[ndof];
+  double* coeff_vec = new double[ndof];
   OGProjection::project_global(Hermes::vector<Space *>(t_space, c_space), 
                                        Hermes::vector<MeshFunction*>(&t_prev_time_1, &c_prev_time_1),
                                        coeff_vec);

@@ -4,9 +4,8 @@
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
-using namespace RefinementSelectors;
-
-// This test makes sure that example 21-newton-timedep-ns works correctly.
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
 
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
 #define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
@@ -32,8 +31,8 @@ const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the 
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
 // velocity profile at inlet).
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
+                                                                  // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -50,7 +49,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Global<double> hermes2d;
+  Global<double> hermes_2D;
 
   // Load the mesh.
   Mesh mesh;
@@ -112,7 +111,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
   Vector<double>* rhs = create_vector<double>(matrix_solver);
-  Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
+  Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -127,7 +126,6 @@ int main(int argc, char* argv[])
   }
 
   // Time-stepping loop:
-  char title[100];
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {

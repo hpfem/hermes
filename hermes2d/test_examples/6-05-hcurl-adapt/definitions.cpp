@@ -11,16 +11,16 @@ static void exact_sol_val(double x, double y, std::complex<double>& e0, std::com
 {
   double t1 = x*x;
   double t2 = y*y;
-  double t4 = sqrt(t1+t2);
+  double t4 = std::sqrt(t1+t2);
   double t5 = jv(-1.0/3.0,t4);
   double t6 = 1/t4;
   double t7 = jv(2.0/3.0,t4);
   double t11 = (t5-2.0/3.0*t6*t7)*t6;
-  double t12 = atan2(y,x);
+  double t12 = std::atan2(y,x);
   if (t12 < 0) t12 += 2.0*M_PI;
   double t13 = 2.0/3.0*t12;
-  double t14 = cos(t13);
-  double t17 = sin(t13);
+  double t14 = std::cos(t13);
+  double t17 = std::sin(t13);
   double t18 = t7*t17;
   double t20 = 1/t1;
   double t23 = 1/(1.0+t2*t20);
@@ -33,7 +33,7 @@ static void exact_sol_der(double x, double y, std::complex<double>& e1dx, std::c
   double t1 = x*x;
   double t2 = y*y;
   double t3 = t1+t2;
-  double t4 = sqrt(t3);
+  double t4 = std::sqrt(t3);
   double t5 = jv(2.0/3.0,t4);
   double t6 = 1/t4;
   double t7 = jv(-1.0/3.0,t4);
@@ -42,14 +42,14 @@ static void exact_sol_der(double x, double y, std::complex<double>& e1dx, std::c
   double t15 = t14*t5;
   double t21 = t7-2.0/3.0*t6*t5;
   double t22 = 1/t3*t21;
-  double t27 = atan2(y,x);
+  double t27 = std::atan2(y,x);
   if (t27 < 0) t27 += 2.0*M_PI;
   double t28 = 2.0/3.0*t27;
-  double t29 = cos(t28);
+  double t29 = std::cos(t28);
   double t32 = t21*t14;
   double t35 = t21*t6;
   double t36 = t35*t29;
-  double t39 = sin(t28);
+  double t39 = std::sin(t28);
   double t41 = 1/t1;
   double t43 = 1.0+t2*t41;
   double t44 = 1/t43;
@@ -129,12 +129,12 @@ public:
     {
       std::complex<double> result = 0;
       for (int i = 0; i < n; i++) {
-        double r = sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
-        double theta = atan2(e->y[i], e->x[i]);
+        double r = std::sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
+        double theta = std::atan2(e->y[i], e->x[i]);
         if (theta < 0) theta += 2.0*M_PI;
         double j13    = jv(-1.0/3.0, r),    j23    = jv(+2.0/3.0, r);
-        double cost   = cos(theta),         sint   = sin(theta);
-        double cos23t = cos(2.0/3.0*theta), sin23t = sin(2.0/3.0*theta);
+        double cost   = std::cos(theta),         sint   = std::sin(theta);
+        double cos23t = std::cos(2.0/3.0*theta), sin23t = std::sin(2.0/3.0*theta);
 
         double Etau = e->tx[i] * (cos23t*sint*j13 - 2.0/(3.0*r)*j23*(cos23t*sint + sin23t*cost)) +
                       e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
