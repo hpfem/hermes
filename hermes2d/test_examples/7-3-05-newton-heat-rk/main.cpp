@@ -83,8 +83,8 @@ int main(int argc, char* argv[])
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
-  mesh.refine_towards_boundary("Boundary air", INIT_REF_NUM_BDY);
-  mesh.refine_towards_boundary("Boundary ground", INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
+  mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
 
   // Previous and next time level solutions.
   Solution<double>* sln_time_prev = new Solution<double>(&mesh, TEMP_INIT);
@@ -93,11 +93,11 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   double current_time = 0;
 
-  CustomWeakFormHeatRK wf("Boundary air", ALPHA, LAMBDA, HEATCAP, RHO, 
+  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO, 
                           &current_time, TEMP_INIT, T_FINAL);
   
   // Initialize boundary conditions.
- Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary ground", TEMP_INIT);
+ Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
  Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
