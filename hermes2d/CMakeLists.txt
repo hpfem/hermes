@@ -120,6 +120,7 @@ endif(H2D_WITH_TEST_EXAMPLES)
 
 if(H2D_WITH_TESTS)
   enable_testing()
+  add_subdirectory(tests)
 endif(H2D_WITH_TESTS)
 
 #

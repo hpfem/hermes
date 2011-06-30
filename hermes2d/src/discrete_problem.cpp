@@ -27,6 +27,7 @@
 #include "neighbor.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -2412,7 +2413,8 @@ namespace Hermes
       for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_triangles.begin();
         it != assembling_caches.cache_fn_triangles.end(); it++)
       {
-        (it->second)->free_fn(); delete (it->second);
+        (it->second)->free_fn();
+        delete (it->second);
       }
       assembling_caches.cache_fn_triangles.clear();
     }

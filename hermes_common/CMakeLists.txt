@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(hermes_common)
 
-IF(HERMES_COMMON_WITH_TESTS)
-        set(WITH_TESTS YES)
-ELSE(HERMES_COMMON_WITH_TESTS)
-        set(WITH_TESTS NO)
-ENDIF(HERMES_COMMON_WITH_TESTS)
-
 # Check for stacktrace and math library.
 include(CMakeCommon.txt)
 
@@ -82,10 +76,10 @@ set(SRC
 #
 # Subdirectories with CMakeLists.txt
 #
-if(WITH_TESTS)
+if(HERMES_COMMON_WITH_TESTS)
     enable_testing()
     add_subdirectory(solvers)
-endif(WITH_TESTS)
+endif(HERMES_COMMON_WITH_TESTS)
 
 if(WITH_PYTHON)
     set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
@@ -122,9 +116,6 @@ include(PickRealOrCplxLibs)
 macro(BUILD_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   add_library(${HERMES_COMMON_LIB} SHARED ${SRC})
   set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
-
-  PICK_REAL_OR_CPLX_LIBS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
-  PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
 
   # Link with all third party libraries corresponding to selected configuration
   # options. Linking of optional libraries for the different Hermeses ({1,2,3}D)
