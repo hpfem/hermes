@@ -108,7 +108,7 @@ namespace Hermes
       else 
       {
         // Circular arc.
-        if (nurbs->arc == true) 
+        if(nurbs->arc) 
         {
           double3* cp = nurbs->pt;
           x = y = 0.0;

@@ -49,6 +49,9 @@ namespace Hermes
       virtual SpaceType get_type() const { return HERMES_L2_SPACE; }
 
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
+      
+      // FIXME: This function should probably not be used at all.
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
     protected:
 
@@ -70,9 +73,6 @@ namespace Hermes
       virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al);
       virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
       virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
-
-      // FIXME: This function should probably not be used at all.
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
     };
   }
 }

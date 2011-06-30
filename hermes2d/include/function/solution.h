@@ -17,7 +17,6 @@
 #define __H2D_SOLUTION_H
 
 #include "mesh_function.h"
-#include "../quadrature/quad.h"
 
 namespace Hermes
 {

@@ -18,6 +18,7 @@
 
 #include "transformable.h"
 #include "quad.h"
+
 namespace Hermes
 {
   namespace Hermes2D

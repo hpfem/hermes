@@ -37,9 +37,6 @@
 #include "quadrature/quad.h"
 #include "quadrature/quad_all.h"
 
-#include "function/solution.h"
-#include "function/filter.h"
-
 #include "space/space_h1.h"
 #include "space/space_hcurl.h"
 #include "space/space_l2.h"
@@ -62,7 +59,9 @@
 #include "integrals/hdiv.h"
 #include "integrals/l2.h"
 
-#include "function/solution.h"
+#include "function/exact_solution.h"
+#include "solution.h"
+#include "mesh_function.h"
 #include "function/filter.h"
 
 #include "graph.h"

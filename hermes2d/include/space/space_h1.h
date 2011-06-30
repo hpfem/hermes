@@ -53,6 +53,8 @@ namespace Hermes
 
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+
     protected:
 
       virtual void assign_vertex_dofs();
@@ -65,8 +67,6 @@ namespace Hermes
       static double** h1_proj_mat;
       static double*  h1_chol_p;
       static int      h1_proj_ref;
-
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       struct EdgeInfo
       {
