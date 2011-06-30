@@ -44,14 +44,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2Space<Scalar>::L2Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
-    {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
-    }
-
-    template<typename Scalar>
     L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
     {
@@ -67,12 +59,10 @@ namespace Hermes
         delete this->shapeset;
     }
 
-
     template<typename Scalar>
     Space<Scalar>* L2Space<Scalar>::dup(Mesh* mesh, int order_increase) const
     {
-      // FIXME - not tested
-      L2Space<Scalar>* space = new L2Space(mesh, this->essential_bcs, 0, this->shapeset);
+      L2Space<Scalar>* space = new L2Space(mesh, 0, this->shapeset);
       space->copy_orders(this, order_increase);
       return space;
     }
@@ -89,8 +79,6 @@ namespace Hermes
         error("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
     }
 
-    //// dof assignment ////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void L2Space<Scalar>::resize_tables()
     {
@@ -102,7 +90,6 @@ namespace Hermes
       }
       Space<Scalar>::resize_tables();
     }
-
 
     template<typename Scalar>
     void L2Space<Scalar>::assign_bubble_dofs()
@@ -118,8 +105,9 @@ namespace Hermes
       }
     }
 
-
-    //// assembly lists ////////////////////////////////////////////////////////////////////////////////
+    template<typename Scalar>
+    void L2Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al)
+    {}
 
     template<typename Scalar>
     void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
@@ -151,91 +139,17 @@ namespace Hermes
       }
     }
 
-    // FIXME: this should only return bubble functions which are nonzero on the
-    // given element surface
     template<typename Scalar>
     void L2Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
     {
       this->get_bubble_assembly_list(e, al);
     }
-
+    
     template<typename Scalar>
     Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      _F_
-        assert(order >= 1);
-      Scalar* proj = new Scalar[order + 1];
-
-      // Obtain linear part of the projection.
-      // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition<Scalar> *bc = static_cast<EssentialBoundaryCondition<Scalar> *>
-        (this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker)));
-
-      if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
-        proj[0] = proj[1] = bc->value_const;
-      // If the BC is not constant.
-      else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
-      {
-        surf_pos->t = surf_pos->lo;
-        // Find out the (x,y) coordinates for the first endpoint.
-        double x, y, n_x, n_y, t_x, t_y;
-        Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-        CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
-        // Calculate.
-        proj[0] = bc->value(x, y, n_x, n_y, t_x, t_y);
-        surf_pos->t = surf_pos->hi;
-        // Find out the (x,y) coordinates for the second endpoint.
-        CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
-        // Calculate.
-        proj[1] = bc->value(x, y, n_x, n_y, t_x, t_y);
-      }
-
-      if (order-- > 1)
-      {
-        Quad1DStd quad1d;
-        Scalar* rhs = proj + 2;
-        int mo = quad1d.get_max_order();
-        double2* pt = quad1d.get_points(mo);
-
-        // get boundary values at integration points, construct rhs
-        for (int i = 0; i < order; i++)
-        {
-          rhs[i] = 0.0;
-          int ii = this->shapeset->get_edge_index(0, 0, i+2);
-          for (int j = 0; j < quad1d.get_num_points(mo); j++)
-          {
-            double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
-            Scalar l = proj[0] * s + proj[1] * t;
-            surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
-
-            // If the BC on this part of the boundary is constant.
-            EssentialBoundaryCondition<Scalar> *bc = static_cast<EssentialBoundaryCondition<Scalar> *>
-              (this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker)));
-
-            if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
-            {
-              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-                * (bc->value_const - l);
-            }
-            // If the BC is not constant.
-            else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
-            {
-              // Find out the (x,y) coordinate.
-              double x, y, n_x, n_y, t_x, t_y;
-              Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
-              CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
-              // Calculate.
-              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
-                * (bc->value(x, y, n_x, n_y, t_x, t_y) - l);
-            }
-          }
-        }
-
-        // solve the system using a precalculated Cholesky decomposed projection matrix
-        cholsl(this->proj_mat, order, this->chol_p, rhs, rhs);
-      }
-
-      return proj;
+      error("Method get_bc_projection() called from an L2Space.");
+      return NULL;
     }
 
     template HERMES_API class L2Space<double>;
