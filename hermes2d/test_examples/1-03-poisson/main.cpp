@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i = 0; i < INIT_REF_NUM; i++) 
+  for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof*sizeof(double));
 
   // Perform Newton's iteration.
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, true, 1E-8, 100, true)) 
+  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs, true, 1E-8, 100, true))
     error("Newton's iteration failed.");
 
   // Translate the resulting coefficient vector into a Solution.
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::Solution<double>::vector_to_solution(coeff_vec, &space, &sln);
 
   // VTK output.
-  if (VTK_VISUALIZATION) 
+  if (VTK_VISUALIZATION)
   {
     // Output solution in VTK format.
     Hermes::Views::Linearizer<double> lin;
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   }
 
   // Visualize the solution.
-  if (HERMES_VISUALIZATION) 
+  if (HERMES_VISUALIZATION)
   {
     Hermes::Views::ScalarView<double> view("Solution", new Hermes::Views::WinGeom(0, 0, 440, 350));
     // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear

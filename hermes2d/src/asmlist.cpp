@@ -51,9 +51,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void AsmList<Scalar>::clear() { cnt = 0; }
-
-    template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
       if (cnt >= cap) enlarge();
