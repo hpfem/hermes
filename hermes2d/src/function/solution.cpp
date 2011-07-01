@@ -866,7 +866,7 @@ namespace Hermes
       struct Function<Scalar>::Node* node = NULL;
       Quad2D* quad = this->quads[this->cur_quad];
       quad->set_mode(this->mode);
-      this->H2D_CHECK_ORDER(quad, order);
+      this->check_order(quad, order);
       int np = quad->get_num_points(order);
 
       if (sln_type == HERMES_SLN)

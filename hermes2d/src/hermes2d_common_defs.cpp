@@ -176,7 +176,7 @@ namespace Hermes
       DiscreteProblem<Scalar> dp(wf, space);
 
       // Initial coefficient vector for the Newton's method.  
-      int ndof = Space<Scalar>::get_num_dofs(space);
+      int ndof = space->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
       memset(coeff_vec, 0, ndof * sizeof(Scalar));
 

@@ -207,10 +207,6 @@ namespace Hermes
       /** \return A regular queue. */
       const Hermes::vector<ElementReference>& get_regular_queue() const;
 
-      /// Returns a total number of active elements.
-      /** \return A total number of active elements. If below 0, errors were not calculated yet, see set_solutions() */
-      int get_total_active_elements() const;
-
       /// Apply a single refienement.
       /** \param[in] A refinement to apply. */
       void apply_refinement(const ElementToRefine& elem_ref);
@@ -260,7 +256,6 @@ namespace Hermes
       /** \param[in] meshes An arrat of meshes of components. */
       void homogenize_shared_mesh_orders(Mesh** meshes);
 
-    protected:
       int num;                              ///< Number of solution components (as in wf->neq).
       Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
@@ -276,7 +271,6 @@ namespace Hermes
 
       double error_time;                    ///< Time needed to calculate the error.
 
-    protected:
       static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
       static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
 
@@ -334,7 +328,8 @@ namespace Hermes
 
     private:
       /// A functor that compares elements accoring to their error. Used by std::sort().
-      class CompareElements {
+      class CompareElements 
+      {
       private:
         double** errors; ///< A 2D array of squared errors: the first index is an index of component, the second index is an element ID.
       public:

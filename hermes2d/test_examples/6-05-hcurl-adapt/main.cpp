@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-    int ndof_ref = Space<std::complex<double> >::get_num_dofs(ref_space);
+    int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize matrix solver.
     SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
@@ -171,18 +171,18 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d", 
-      Space<std::complex<double> >::get_num_dofs(&space), Space<std::complex<double> >::get_num_dofs(ref_space));
+      space.get_num_dofs(), ref_space->get_num_dofs());
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space<std::complex<double> >::get_num_dofs(&space), err_est_rel);
+    graph_dof_est.add_values(space.get_num_dofs(), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
-    graph_dof_exact.add_values(Space<std::complex<double> >::get_num_dofs(&space), err_exact_rel);
+    graph_dof_exact.add_values(space.get_num_dofs(), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel);
     graph_cpu_exact.save("conv_cpu_exact.dat");
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
-    if (Space<std::complex<double> >::get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (space.get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;

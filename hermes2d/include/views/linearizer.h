@@ -56,12 +56,10 @@ namespace Hermes
     extern double3*  lin_tables_tri[2];
     extern double3*  lin_tables_quad[2];
     extern double3** lin_tables[2];
-
-
+    
     class Quad2DLin : public Quad2D
     {
     public:
-
       Quad2DLin()
       {
         mode = HERMES_MODE_TRIANGLE;
@@ -70,11 +68,7 @@ namespace Hermes
         tables = lin_tables;
         np = lin_np;
       };
-
-      virtual void dummy_fn() {}
-
     };
-
 
     /// Linearizer<Scalar> is a utility class which converts a higher-order FEM solution defined on
     /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
@@ -116,8 +110,10 @@ namespace Hermes
 
       /// Saves data in a binary format.
       virtual void save_data(const char* filename);
+
       /// Loads data in a binary format.
       virtual void load_data(const char* filename);
+
       /// Saves a MeshFunction (Solution, Filter) in VTK format.
       virtual void save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char* quantity_name,
         bool mode_3D = true, int item = H2D_FN_VAL_0, 

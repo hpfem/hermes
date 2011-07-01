@@ -83,6 +83,7 @@ namespace Hermes
         Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents);
 
       void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
+
       virtual void update_constraints();
 
       struct FixedVertex
@@ -94,6 +95,7 @@ namespace Hermes
       Hermes::vector<FixedVertex> fixed_vertices;
 
       inline bool is_fixed_vertex(int id) const;
+
       virtual void post_assign();
     };
   }

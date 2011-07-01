@@ -129,16 +129,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::H2D_CHECK_ORDER(int order) const
-    {
-      _F_
-        if (H2D_GET_H_ORDER(order) < 0 || H2D_GET_V_ORDER(order) < 0)
-          error("Hermes::Order cannot be negative.");
-      if (H2D_GET_H_ORDER(order) > 10 || H2D_GET_V_ORDER(order) > 10)
-        error("Hermes::Order = %d, maximum is 10.", order);
-    }
-
-    template<typename Scalar>
     void Space<Scalar>::set_element_order(int id, int order)
     {
       _F_
@@ -157,11 +147,13 @@ namespace Hermes
       assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical is not zero", id);
       if (id < 0 || id >= mesh->get_max_element_id())
         error("Invalid element id.");
-      H2D_CHECK_ORDER(order);
+      assert(order >= 0 && order <= shapeset->get_max_order());
 
       resize_tables();
+
       if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
         order = H2D_MAKE_QUAD_ORDER(order, order);
+      
       edata[id].order = order;
       seq++;
     }
@@ -281,7 +273,7 @@ namespace Hermes
       int counter = 0;
       for_all_elements(e, mesh)
       {
-        H2D_CHECK_ORDER(elem_orders_[counter]);
+        assert(elem_orders_[counter] >= 0 && elem_orders_[counter] <= shapeset->get_max_order());
         ElementData* ed = &edata[e->id];
         if (e->is_triangle())
           ed->order = elem_orders_[counter];
@@ -483,8 +475,8 @@ namespace Hermes
         int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + inc, mo));
         o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
 
-        H2D_CHECK_ORDER(o);
-        copy_orders_recurrent(mesh->get_element/*sic!*/(e->id), o);
+        assert(o >= 0 && o <= shapeset->get_max_order());
+        copy_orders_recurrent(mesh->get_element(e->id), o);
       }
       seq++;
 

@@ -95,28 +95,37 @@ namespace Hermes
 
       /// Sets the boundary condition.
       void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
+
       /// Sets element polynomial order. Can be called by the user. Should not be called
       /// for many elements at once, since assign_dofs() is called at the end of this function.
       virtual void set_element_order(int id, int order);
+
       /// Sets polynomial order to all elements.
       virtual void set_element_orders(int* elem_orders);
+
       /// Sets element polynomial order. This version does not call assign_dofs() and is
       /// intended primarily for internal use.
       virtual void set_element_order_internal(int id, int order);
+
       /// Returns element polynomial order.
       int get_element_order(int id) const;
+
       /// Sets the same polynomial order for all elements in the mesh. Intended for
       /// the user and thus assign_dofs() is called at the end of this function.
       void set_uniform_order(int order, std::string marker = HERMES_ANY);
+
       /// Sets the same polynomial order for all elements in the mesh. Does not
       /// call assign_dofs(). For internal use.
       void set_uniform_order_internal(Ord2 order, int marker);
+
       /// Sets the order automatically assigned to all newly created elements.
       /// (The order of these is normally undefined and has to be set explicitly.)
       void set_default_order(int tri_order, int quad_order = -1);
+
       /// Set the element order relative to the current order.
       /// The parameter min_order prevents decreasing polynomial order below this threshold.
       void adjust_element_order(int order_change, int min_order);
+
       /// Version for quads.
       void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
 
@@ -126,10 +135,12 @@ namespace Hermes
 
       /// Sets the shapeset.
       virtual void set_shapeset(Shapeset* shapeset) = 0;
+
       /// Copies element orders from another space. 'inc' is an optional order
       /// increase. If the source space has a coarser mesh, the orders are distributed
       /// recursively. This is useful for reference solution spaces.
       void copy_orders(const Space<Scalar>* space, int inc = 0);
+
       /// Internal. Obtains the order of an edge, according to the minimum rule.
       virtual int get_edge_order(Element* e, int edge);
 
@@ -148,7 +159,9 @@ namespace Hermes
       int get_max_dof() const;
 
       Shapeset* get_shapeset() const;
+
       Mesh* get_mesh() const;
+
       void set_mesh(Mesh* mesh);
 
       /// Creates a copy of the space, increases order of all elements by
@@ -160,12 +173,7 @@ namespace Hermes
 
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(Mesh* mesh, int* parents);
-
-    public:
-
-      /// Number of degrees of freedom (dimension of the space).
-      int ndof;
-
+      
       /// Obtains an boundary conditions
       EssentialBCs<Scalar>* get_essential_bcs() const;
 
@@ -189,11 +197,6 @@ namespace Hermes
         return ndof;
       }
 
-      static int get_num_dofs(Space<Scalar>* space) {
-        _F_
-          return space->get_num_dofs();
-      }
-
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces) {
         _F_
@@ -208,10 +211,14 @@ namespace Hermes
       }
 
     protected:
+      /// Number of degrees of freedom (dimension of the space).
+      int ndof;
+
       static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
       static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
       Shapeset* shapeset;
+
       bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
       /// Boundary conditions.
@@ -263,13 +270,11 @@ namespace Hermes
         int bdof, n;
       };
 
-    public:
       NodeData* ndata;    ///< node data table
       int nsize, ndata_allocated; ///< number of items in ndata, allocated space
       ElementData* edata; ///< element data table
       int esize;
 
-    protected:
       virtual int get_edge_order_internal(Node* en);
 
       /// \brief Updates internal node and element tables.
@@ -281,7 +286,6 @@ namespace Hermes
       /// enough to contain all node and element id's, and to reallocate them if not.
       virtual void resize_tables();
 
-      void H2D_CHECK_ORDER(int order) const;
       void copy_orders_recurrent(Element* e, int order);
 
       virtual void reset_dof_assignment(); ///< Resets assignment of DOF to an unassigned state.

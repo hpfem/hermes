@@ -138,7 +138,7 @@ int main(int argc, char* args[])
     }    
 #endif
     // Assemble the linear problem.
-    info("Assembling (ndof: %d).", Space<double>::get_num_dofs(ref_space));
+    info("Assembling (ndof: %d).", ref_space->get_num_dofs());
     dp->assemble(matrix, rhs);
 
     // Solve the linear system. If successful, obtain the solution.
@@ -167,13 +167,13 @@ int main(int argc, char* args[])
  
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-         Space<double>::get_num_dofs(&space), Space<double>::get_num_dofs(ref_space), err_est_rel);
+      space.get_num_dofs(), ref_space->get_num_dofs(), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space<double>::get_num_dofs(&space), err_est_rel);
+    graph_dof_est.add_values(space.get_num_dofs(), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
     graph_cpu_est.save("conv_cpu_est.dat");
@@ -185,7 +185,7 @@ int main(int argc, char* args[])
       info("Adapting the coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (Space<double>::get_num_dofs(&space) >= NDOF_STOP) 
+      if (space.get_num_dofs() >= NDOF_STOP) 
       {
         done = true;
         break;

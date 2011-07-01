@@ -558,12 +558,6 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    int Adapt<Scalar>::get_total_active_elements() const 
-    {
-      return num_act_elems; 
-    };
-
-    template<typename Scalar>
     bool Adapt<Scalar>::should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const
     {
       return false;

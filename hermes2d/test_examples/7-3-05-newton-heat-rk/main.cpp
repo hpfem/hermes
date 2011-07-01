@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = Space<double>::get_num_dofs(&space);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.

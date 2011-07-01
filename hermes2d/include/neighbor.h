@@ -362,6 +362,17 @@ namespace Hermes
         /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
         void combine_assembly_lists();
 
+        /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
+        ///
+        /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
+        /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
+        ///
+        void update(NeighborSearch* neighborhood, Space<Scalar>* space) {
+          delete [] this->dof;
+          space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
+          combine_assembly_lists();
+        }
+
       public:
         int cnt;  ///< Number of shape functions in the extended shapeset.
         int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.

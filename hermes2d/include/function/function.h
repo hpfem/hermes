@@ -295,7 +295,7 @@ namespace Hermes
         cur_node = node;
       }
 
-      void H2D_CHECK_ORDER(Quad2D* quad, int order)
+      void check_order(Quad2D* quad, int order)
       {
         if (order < 0 || order >= quad->get_num_tables())
           error("Hermes::Order out of range (%d, %d).", order, quad->get_num_tables());

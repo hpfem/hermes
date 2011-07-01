@@ -23,7 +23,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    
     double* Shapeset::calculate_constrained_edge_combination(int order, int part, int ori)
     {
       /*

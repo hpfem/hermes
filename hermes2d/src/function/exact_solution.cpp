@@ -22,7 +22,6 @@ namespace Hermes
     ExactSolution<Scalar>::ExactSolution(Mesh* mesh) : Solution<Scalar>(mesh)
     {
       this->sln_type = HERMES_EXACT;
-      this->exact_mult = 1.0;
       this->num_dofs = -1;
     }
 

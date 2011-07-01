@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   H1Space<std::complex<double> > space(&mesh, &bcs, P_INIT);
-  int ndof = Space<std::complex<double> >::get_num_dofs(&space);
+  int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-    int ndof_ref = Space<std::complex<double> >::get_num_dofs(ref_space);
+    int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize matrix solver.
     SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
     // Report results.
     info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-      Space<std::complex<double> >::get_num_dofs(&space), Space<std::complex<double> >::get_num_dofs(ref_space), err_est_rel);
+      space.get_num_dofs(), ref_space->get_num_dofs(), err_est_rel);
 
     // Time measurement.
     cpu_time.tick();
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (Space<std::complex<double> >::get_num_dofs(&space) >= NDOF_STOP) done = true;
+    if (space.get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
 
-  ndof = Space<std::complex<double> >::get_num_dofs(&space);
+  ndof = space.get_num_dofs();
 
   printf("ndof allowed = %d\n", 360);
   printf("ndof actual = %d\n", ndof);
