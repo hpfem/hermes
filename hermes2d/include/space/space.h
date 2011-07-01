@@ -142,12 +142,13 @@ namespace Hermes
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
 
       /// \brief Returns the number of basis functions contained in the space.
-      int get_num_dofs() { return ndof; }
-      /// \brief Returns the DOF number of the last basis function.
-      int get_max_dof() const { return next_dof - stride; }
+      int get_num_dofs();
 
-      Shapeset* get_shapeset() const { return shapeset; }
-      Mesh* get_mesh() const { return mesh; }
+      /// \brief Returns the DOF number of the last basis function.
+      int get_max_dof() const;
+
+      Shapeset* get_shapeset() const;
+      Mesh* get_mesh() const;
       void set_mesh(Mesh* mesh);
 
       /// Creates a copy of the space, increases order of all elements by
@@ -155,9 +156,7 @@ namespace Hermes
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const = 0;
 
       /// Returns true if the space is ready for computation, false otherwise.
-      bool is_up_to_date() const {
-        return was_assigned && mesh_seq == (int) mesh->get_seq();
-      }
+      bool is_up_to_date() const;
 
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(Mesh* mesh, int* parents);
@@ -168,7 +167,7 @@ namespace Hermes
       int ndof;
 
       /// Obtains an boundary conditions
-      inline EssentialBCs<Scalar>* get_essential_bcs() { return essential_bcs; }
+      EssentialBCs<Scalar>* get_essential_bcs() const;
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
@@ -282,7 +281,7 @@ namespace Hermes
       /// enough to contain all node and element id's, and to reallocate them if not.
       virtual void resize_tables();
 
-      void H2D_CHECK_ORDER(int order);
+      void H2D_CHECK_ORDER(int order) const;
       void copy_orders_recurrent(Element* e, int order);
 
       virtual void reset_dof_assignment(); ///< Resets assignment of DOF to an unassigned state.
@@ -297,6 +296,9 @@ namespace Hermes
       double** proj_mat;
       double*  chol_p;
 
+      /// Used for bc projection.
+      Hermes::vector<void*> extra_data;
+
       void precalculate_projection_matrix(int nv, double**& mat, double*& p);
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
       void update_edge_bc(Element* e, SurfPos* surf_pos);
@@ -304,73 +306,33 @@ namespace Hermes
       /// Called by Space to update constraining relationships between shape functions due
       /// to hanging nodes in the mesh. As this is space-specific, this function is reimplemented
       /// in H1Space and HcurlSpace.
-      virtual void update_constraints() {}
+      virtual void update_constraints();
 
       /// Auxiliary function the descendants may implement to perform additional tasks after
       /// the DOFs have been assigned.
-      virtual void post_assign() {}
+      virtual void post_assign();
 
-      Hermes::vector<void*> extra_data;
       void free_extra_data();
 
       void propagate_zero_orders(Element* e);
 
     public:
       /// Internal. Used by DiscreteProblem to detect changes in the space.
-      int get_seq() const { return seq; }
-      int set_seq(int seq_) { seq = seq_; return seq;}
+      int get_seq() const;
+      int set_seq(int seq_);
 
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
       virtual SpaceType get_type() const = 0;
 
       /// Create globally refined space.
-      static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1) {
-        _F_
-          Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
-        bool same_meshes = true;
-        unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
-        for (unsigned int i = 0; i < coarse.size(); i++) {
-          if(coarse[i]->get_mesh()->get_seq() != same_seq)
-            same_meshes = false;
-          Mesh* ref_mesh = new Mesh;
-          ref_mesh->copy(coarse[i]->get_mesh());
-          ref_mesh->refine_all_elements();
-          ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
-        }
+      static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1);
 
-        if(same_meshes)
-          for (unsigned int i = 0; i < coarse.size(); i++)
-            ref_spaces->at(i)->get_mesh()->set_seq(same_seq);
-        return ref_spaces;
-      }
+      static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1);
 
-      static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1) {
-        _F_
-          Mesh* ref_mesh = new Mesh;
-        ref_mesh->copy(coarse->get_mesh());
-        ref_mesh->refine_all_elements();
-        Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
+      static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
 
-        return ref_space;
-      }
-
-      /// Updating time-dependent essential (Dirichlet) boundary conditions.
-      /// Multiple spaces.
-      static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
-        int n = spaces.size();
-        for (int i = 0; i < n; i++) {
-          spaces[i]->get_essential_bcs()->set_current_time(time);
-          spaces[i]->update_essential_bc_values();
-        }
-      }
-
-      /// Updating time-dependent essential (Dirichlet) boundary conditions.
-      /// one space.
-      static void update_essential_bc_values(Space<Scalar>*s, double time) {
-        s->get_essential_bcs()->set_current_time(time);
-        s->update_essential_bc_values();
-      }
+      static void update_essential_bc_values(Space<Scalar>*s, double time);
     };
   }
 }

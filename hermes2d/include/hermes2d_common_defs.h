@@ -88,9 +88,6 @@ namespace Hermes
     /// transport equations. For usage see the example linear-convection-diffusion.
 #define H2D_SECOND_DERIVATIVES_ENABLED
 
-    template<typename Scalar> class MeshFunction;
-    template<typename Scalar> class Solution;
-
     /// Projection norms.
     enum ProjNormType
     {
@@ -107,6 +104,8 @@ namespace Hermes
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class Space;
     template<typename Scalar> class WeakForm;
+    template<typename Scalar> class MeshFunction;
+    template<typename Scalar> class Solution;
     class Quad2D;
     class Quad1DStd;
     class Quad2DStd;

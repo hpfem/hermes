@@ -42,19 +42,15 @@ namespace Hermes
       MeshFunction(Mesh *mesh);
       virtual ~MeshFunction() = 0;
 
-      virtual void init() {};
-      virtual void reinit() { this->free(); init();};
+      virtual void init();
+      virtual void reinit();
 
-      void set_quad_2d(Quad2D* quad_2d)
-      {
-        Function<Scalar>::set_quad_2d(quad_2d);
-        refmap->set_quad_2d(quad_2d);
-      }
+      void set_quad_2d(Quad2D* quad_2d);
 
       virtual void set_active_element(Element* e);
 
-      Mesh*   get_mesh() const { return mesh; }
-      RefMap* get_refmap() { this->update_refmap(); return refmap; }
+      Mesh*   get_mesh() const;
+      RefMap* get_refmap();
 
       virtual int get_edge_fn_order(int edge);
 
@@ -62,31 +58,12 @@ namespace Hermes
 
       /// Handling overflows. Has to be virtual, because
       /// the necessary iterators in the templated class do not work with GCC.
-      virtual void handle_overflow_idx()
-      {
-        if(this->overflow_nodes != NULL) 
-        {
-          for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-            if(this->overflow_nodes->present(i))
-              ::free(this->overflow_nodes->get(i));
-          delete this->overflow_nodes;
-        }
-        this->nodes = new LightArray<Function<Scalar>::Node *>;
-        this->overflow_nodes = this->nodes;
-      }
+      virtual void handle_overflow_idx();
 
       /// See Transformable::push_transform.
-      void push_transform(int son)
-      {
-        Transformable::push_transform(son);
-        this->update_nodes_ptr();
-      }
+      void push_transform(int son);
 
-      void pop_transform()
-      {
-        Transformable::pop_transform();
-        this->update_nodes_ptr();
-      }
+      void pop_transform();
 
     protected:
 
@@ -97,19 +74,11 @@ namespace Hermes
     public:
 
       /// For internal use only.
-      void force_transform(MeshFunction<Scalar>* mf)
-      { 
-        Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); 
-      }
+      void force_transform(MeshFunction<Scalar>* mf);
 
-      void update_refmap()
-      { refmap->force_transform(this->sub_idx, this->ctm); }
+      void update_refmap();
 
-      void force_transform(uint64_t sub_idx, Trf* ctm)
-      {
-        this->sub_idx = sub_idx;
-        this->ctm = ctm;
-      }
+      void force_transform(uint64_t sub_idx, Trf* ctm);
     };
   }
 }

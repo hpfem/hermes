@@ -792,7 +792,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              DefaultFunction<Scalar>*f_src, std::string src_area,
+              HermesFunction<Scalar>*f_src, std::string src_area,
               GeomType geom_type  ) : WeakForm<Scalar>(matprop.get_G())
             {
               lhs_init(matprop.get_G(), matprop, geom_type);
@@ -802,7 +802,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              DefaultFunction<Scalar>*f_src,
+              HermesFunction<Scalar>*f_src,
               Hermes::vector<std::string> src_areas,
               GeomType geom_type  ) : WeakForm<Scalar>(matprop.get_G())
             {
@@ -813,7 +813,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
+              const Hermes::vector<HermesFunction<Scalar>*>& f_src,
               std::string src_area, 
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
@@ -827,7 +827,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource( const MaterialPropertyMaps& matprop, 
-              const Hermes::vector<DefaultFunction<Scalar>*>& f_src,
+              const Hermes::vector<HermesFunction<Scalar>*>& f_src,
               Hermes::vector<std::string> src_areas,
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {

@@ -31,7 +31,7 @@ namespace Hermes
     class Transformable;
 
     template<typename Scalar>
-    const std::string Global<Scalar>::get_quad_order_str(const int quad_order) 
+    const std::string Global<Scalar>::get_quad_order_str(const int quad_order)
     {
       std::stringstream str;
       str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
@@ -54,7 +54,7 @@ namespace Hermes
     {
       _F_
         Scalar val = 0;
-      for (unsigned int i = 0; i < vec->length(); i++) 
+      for (unsigned int i = 0; i < vec->length(); i++)
       {
         Scalar inc = vec->get(i);
         val = val + inc*conj(inc);
@@ -72,7 +72,7 @@ namespace Hermes
       int num_spaces = dp->get_spaces().size();
       Hermes::vector<Solution<Scalar>*> solutions;
       Hermes::vector<bool> dir_lift_false;
-      for (int i=0; i < num_spaces; i++) 
+      for (int i=0; i < num_spaces; i++)
       {
         if (residual_as_function) solutions.push_back(new Solution<Scalar>());
         dir_lift_false.push_back(false);      // No Dirichlet lifts will be considered.
@@ -90,7 +90,7 @@ namespace Hermes
         dp->assemble(coeff_vec, NULL, rhs); // NULL = we do not want the Jacobian.
 
         // Measure the residual norm.
-        if (residual_as_function) 
+        if (residual_as_function)
         {
           // Translate the residual vector into a residual function (or multiple functions)
           // in the corresponding finite element space(s) and measure their norm(s) there.
@@ -109,16 +109,16 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          if(verbose) 
+          if(verbose)
             info("---- Newton initial residual norm: %g", residual_norm);
           else 
             if(verbose)
               info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if (residual_norm > max_allowed_residual_norm) 
+        if (residual_norm > max_allowed_residual_norm)
         {
-          if (verbose) 
+          if (verbose)
           {
             info("Current residual norm: %g", residual_norm);
             info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
@@ -152,7 +152,7 @@ namespace Hermes
       for (unsigned int i = 0; i < solutions.size(); i++)
         delete solutions[i];
 
-      if (it >= newton_max_iter) 
+      if (it >= newton_max_iter)
       {
         if (verbose) info("Maximum allowed number of Newton iterations exceeded, returning false.");
         return false;
@@ -181,14 +181,14 @@ namespace Hermes
       memset(coeff_vec, 0, ndof * sizeof(Scalar));
 
       int iter_count = 0;
-      while (true) 
+      while (true)
       {
         // Assemble the stiffness matrix and right-hand side.
         dp.assemble(matrix, rhs);
         // Perform Newton's iteration to solve the linear problem.
         bool jacobian_changed = true;
         if (!this->solve_newton(coeff_vec, &dp, solver, matrix, rhs, 
-          jacobian_changed, tol, max_iter)) 
+          jacobian_changed, tol, max_iter))
           error("Newton's iteration failed.");
 
         // Solve the linear system and if successful, obtain the solution.
@@ -202,7 +202,7 @@ namespace Hermes
           iter_count+1, space->get_num_dofs(), rel_error);
 
         // Stopping criterion.
-        if (rel_error < tol) 
+        if (rel_error < tol)
         {
           sln_prev_iter->copy(&sln_new);
           delete [] coeff_vec;
@@ -212,7 +212,7 @@ namespace Hermes
           return true;
         }
 
-        if (iter_count >= max_iter) 
+        if (iter_count >= max_iter)
         {
           delete [] coeff_vec;
           delete matrix;
@@ -254,7 +254,7 @@ namespace Hermes
 
         RefMap* ru = sln1->get_refmap();
         RefMap* rv = sln2->get_refmap();
-        switch (norm_type) 
+        switch (norm_type)
         {
         case HERMES_L2_NORM:
           error += error_fn_l2(sln1, sln2, ru, rv);
@@ -293,7 +293,7 @@ namespace Hermes
         sln->set_active_element(e);
         RefMap* ru = sln->get_refmap();
 
-        switch (norm_type) 
+        switch (norm_type)
         {
         case HERMES_L2_NORM:
           norm += norm_fn_l2(sln, ru);
@@ -321,9 +321,9 @@ namespace Hermes
       // Calculate norms for all solutions.
       Hermes::vector<double> norms;
       int n = slns.size();
-      for (int i=0; i<n; i++) 
+      for (int i=0; i<n; i++)
       {
-        switch (slns[i]->get_space_type()) 
+        switch (slns[i]->get_space_type())
         {
         case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
         case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;

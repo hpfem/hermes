@@ -19,6 +19,8 @@
 #include "../integrals/hcurl.h"
 #include "../weakform/weakform.h"
 #include "../spline.h"
+#include "../function/hermes_function.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -35,11 +37,11 @@ namespace Hermes
       {
       public:
         DefaultMatrixFormVol<Scalar>(int i, int j, std::string area = HERMES_ANY,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         DefaultMatrixFormVol<Scalar>(int i, int j, Hermes::vector<std::string> areas,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         ~DefaultMatrixFormVol<Scalar>();
@@ -54,7 +56,7 @@ namespace Hermes
 
       private:
         Scalar const_coeff;
-        DefaultFunction<Scalar>* function_coeff;
+        HermesFunction<Scalar>* function_coeff;
         GeomType gt;
       };
 
@@ -103,14 +105,14 @@ namespace Hermes
       public:
         DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY, 
           Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
-          DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
-          DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, 
           Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
-          DefaultFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
-          DefaultFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultVectorFormVol<Scalar>();
@@ -125,7 +127,7 @@ namespace Hermes
 
       private:
         Scalar const_coeff0, const_coeff1;
-        DefaultFunction<Scalar>* function_coeff0, *function_coeff1;
+        HermesFunction<Scalar>* function_coeff0, *function_coeff1;
         GeomType gt;
       };
 
@@ -139,11 +141,11 @@ namespace Hermes
       {
       public:
         DefaultResidualVol(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualVol();
@@ -159,7 +161,7 @@ namespace Hermes
       private:
         int idx_i;
         Scalar const_coeff;
-        DefaultFunction<Scalar>* function_coeff;
+        HermesFunction<Scalar>* function_coeff;
         GeomType gt;
       };
 
@@ -209,11 +211,11 @@ namespace Hermes
       {
       public:
         DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultMatrixFormSurf<Scalar>();
@@ -228,7 +230,7 @@ namespace Hermes
 
       private:
         Scalar const_coeff;
-        DefaultFunction<Scalar>* function_coeff;
+        HermesFunction<Scalar>* function_coeff;
         GeomType gt;
       };
 
@@ -243,11 +245,11 @@ namespace Hermes
       {
       public:
         DefaultVectorFormSurf<Scalar>(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-          DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultVectorFormSurf<Scalar>();
@@ -262,7 +264,7 @@ namespace Hermes
 
       private:
         Scalar const_coeff;
-        DefaultFunction<Scalar>* function_coeff;
+        HermesFunction<Scalar>* function_coeff;
         GeomType gt;
       };
 
@@ -276,11 +278,11 @@ namespace Hermes
       {
       public:
         DefaultResidualSurf(int i, std::string area = HERMES_ANY,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
-          Scalar const_coeff = 1.0, DefaultFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
+          Scalar const_coeff = 1.0, HermesFunction<Scalar>* f_coeff = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualSurf();
@@ -295,7 +297,7 @@ namespace Hermes
 
       private:
         Scalar const_coeff;
-        DefaultFunction<Scalar>* function_coeff;
+        HermesFunction<Scalar>* function_coeff;
         GeomType gt;
       };
     }

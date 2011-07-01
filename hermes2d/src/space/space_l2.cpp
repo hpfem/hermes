@@ -120,7 +120,6 @@ namespace Hermes
         " any time the mesh changes.");
 
       // add bubble functions to the assembly list
-      al->clear();
       this->shapeset->set_mode(e->get_mode());
       get_bubble_assembly_list(e, al);
     }
@@ -132,7 +131,7 @@ namespace Hermes
       if (!ed->n) return;
 
       int* indices = this->shapeset->get_bubble_indices(ed->order);
-      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride) 
+      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride)
       {
         //printf("triplet: %d, %d, %f\n", *indices, dof, 1.0);
         al->add_triplet(*indices++, dof, 1.0);

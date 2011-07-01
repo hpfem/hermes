@@ -228,8 +228,8 @@ namespace Hermes
         int* idx = new int[nv-1];
         std::string el_marker;
         if (!nv) { 
-          mesh->elements.skip_slot(); 
-          continue; 
+          mesh->elements.skip_slot();
+          continue;
         }
 
         if (nv < 4 || nv > 5)
@@ -514,7 +514,7 @@ namespace Hermes
                 fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
                 save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
               }
-        if (!first) 
+        if (!first)
           fprintf(f, "\n}\n\n");
 
         // save refinements

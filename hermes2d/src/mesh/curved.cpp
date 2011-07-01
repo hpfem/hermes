@@ -44,7 +44,7 @@ namespace Hermes
     Trf CurvMap::ctm;
 
     //// NURBS //////////////////////////////////////////////////////////////////////////////////////////
-    // recursive calculation of the basis function N_i,k
+    
     bool CurvMap::warning_issued = false;
 
     double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
@@ -108,7 +108,7 @@ namespace Hermes
       else 
       {
         // Circular arc.
-        if(nurbs->arc) 
+        if(nurbs->arc)
         {
           double3* cp = nurbs->pt;
           x = y = 0.0;
@@ -167,7 +167,7 @@ namespace Hermes
           SB[1] = B[1] - S[1];
           double R = sqrt(sqr(SA[0]) + sqr(SA[1]));
           double R2 = sqrt(sqr(SB[0]) + sqr(SB[1]));
-          if (std::abs(R - R2) > 1e-6) 
+          if (std::abs(R - R2) > 1e-6)
             error("Internal error in nurbs_edge() - bad radius R.");
 
           // Normal vectors to circular arc at edge end points A, B.
@@ -230,7 +230,7 @@ namespace Hermes
 
           // Correcting sign so that the normal points outside 
           // if the angle is negative.
-          if (nurbs->angle < 0) 
+          if (nurbs->angle < 0)
           {
             n_x *= -1;
             n_y *= -1;
@@ -260,7 +260,7 @@ namespace Hermes
           x /= sum;
           y /= sum;
 
-          if(!warning_issued) 
+          if(!warning_issued)
           {
             printf("FIXME: IMPLEMENT CALCULATION OF n_x, n_y, t_x, t_y in nurbs_edge() !!!\n");
             warning_issued = true;
@@ -308,7 +308,7 @@ namespace Hermes
         int vb = e->next_vert(j);
         double l_a = 0;
         double l_b = 0;
-        switch(va) 
+        switch(va)
         {
         case 0:
           l_a = lambda_0(xi_1, xi_2);
@@ -321,7 +321,7 @@ namespace Hermes
           break;
         }
 
-        switch(vb) 
+        switch(vb)
         {
         case 0:
           l_b = lambda_0(xi_1, xi_2);
@@ -409,7 +409,7 @@ namespace Hermes
             double fi = 0;
             double fj = 0;
             double x = pt[k][0];
-            switch(i+2) 
+            switch(i+2)
             {
             case 0:
               fi = lob0(x);
@@ -448,7 +448,7 @@ namespace Hermes
               fi = lob11(x);
               break;
             }
-            switch(j+2) 
+            switch(j+2)
             {
             case 0:
               fj = lob0(x);
@@ -637,7 +637,7 @@ namespace Hermes
           {
             double t = pt[j][0];
             double fi = 0;
-            switch(i+2) 
+            switch(i+2)
             {
             case 0:
               fi = lob0(t);
@@ -739,7 +739,7 @@ namespace Hermes
 
       double* rhside[2];
       double* old[2];
-      for (i = 0; i < 2; i++) 
+      for (i = 0; i < 2; i++)
       {
         rhside[i] = new double[nb];
         old[i] = new double[np];
@@ -786,7 +786,7 @@ namespace Hermes
           result[i][k] = rhside[k][i];
       }
 
-      for (i = 0; i < 2; i++) 
+      for (i = 0; i < 2; i++)
       {
         delete [] rhside[i];
         delete [] old[i];
@@ -838,7 +838,7 @@ namespace Hermes
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       int nb = ref_map_shapeset.get_num_bubbles(qo);
       nc = nv + nv*ne + nb;
-      if (coeffs != NULL) 
+      if (coeffs != NULL)
       {
         delete [] coeffs;
         coeffs = NULL;
@@ -919,7 +919,7 @@ namespace Hermes
     CurvMap::~CurvMap()
     {
       _F_
-        if (coeffs != NULL) 
+        if (coeffs != NULL)
         {
           delete [] coeffs;
           coeffs = NULL;
