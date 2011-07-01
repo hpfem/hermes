@@ -53,7 +53,7 @@ namespace Hermes
           double x, y; ///< vertex node coordinates
         };
         struct // edge node variant:
-        {// TODO: review pointer sizes for 64-bits !!!
+        {// \todo review pointer sizes for 64-bits !!!
           int marker;       ///< edge marker
           Element* elem[2]; ///< elements sharing the edge node
           Nurbs* nurbs;     ///< temporary curved edge ptr (only for loading the mesh)

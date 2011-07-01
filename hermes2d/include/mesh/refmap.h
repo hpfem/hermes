@@ -39,6 +39,7 @@ namespace Hermes
     public:
 
       RefMap();
+
       ~RefMap() { free(); }
 
       /// Sets the quadrature points in which the reference map will be evaluated.
@@ -162,16 +163,18 @@ namespace Hermes
         if (is_const) calc_const_inv_ref_map();
       }
 
-
     protected:
 
       Quad2D* quad_2d;
+
       int num_tables;
 
       bool is_const;
+
       int inv_ref_order;
 
       double const_jacobian;
+
       double2x2 const_inv_ref_map;
 
       static const int H2D_MAX_TABLES = g_max_quad+1 + 4 * g_max_quad + 4;
@@ -192,6 +195,7 @@ namespace Hermes
       std::map<uint64_t, Node*> nodes;
 
       Node* cur_node;
+
       Node* overflow;
 
       void update_cur_node()
@@ -214,34 +218,40 @@ namespace Hermes
       }
 
       void calc_inv_ref_map(int order);
+
       /// Quickly calculates the (hard-coded) reference mapping for elements with constant jacobians
-      /// (ie., linear triangles and linear parallelogram quads). How it works for parallelograms
-      /// can be found <a href="data/parallelogram.pdf">here</a>.
-      ///
+      /// (ie., linear triangles and linear parallelogram quads).
       void calc_const_inv_ref_map();
+
       void calc_second_ref_map(int order);
+
       bool is_parallelogram();
 
       void calc_phys_x(int order);
+
       void calc_phys_y(int order);
+
       void calc_tangent(int edge, int eo);
 
       /// Finds the necessary quadrature degree needed to integrate the inverse reference mapping
       /// matrix alone. This is added to the total integration order in weak form itegrals.
       int calc_inv_ref_order();
 
-
       void init_node(Node* pp);
+
       void free_node(Node* node);
+
       Node* handle_overflow();
 
       Quad1DStd quad_1d;
 
       int indices[70];
-      int nc;
-      double2* coeffs;
-      double2  lin_coeffs[4];
 
+      int nc;
+
+      double2* coeffs;
+
+      double2  lin_coeffs[4];
     };
   }
 }

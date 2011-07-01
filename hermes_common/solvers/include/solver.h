@@ -33,7 +33,7 @@ using namespace Hermes::Algebra;
 
 /// @defgroup solvers Solvers
 ///
-/// TODO: description
+///\todo description
 ///
 /*@{*/ // Beginning of documentation group Solvers.
 
@@ -93,7 +93,7 @@ namespace Hermes
 
     /// \brief Abstract class for defining solver interface.
     ///
-    /// TODO: Adjust interface to support faster update of matrix and rhs
+    ///\todo Adjust interface to support faster update of matrix and rhs
     ///
     template <typename Scalar>
     class Solver {

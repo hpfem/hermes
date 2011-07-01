@@ -275,8 +275,8 @@ namespace Hermes
     class LightArray
     {
     protected:
-      Hermes::vector<TYPE*> pages; // todo: standard array for maximum access speed
-      Hermes::vector<bool*> presence; // todo: standard array for maximum access speed
+      Hermes::vector<TYPE*> pages; //\todo standard array for maximum access speed
+      Hermes::vector<bool*> presence; //\todo standard array for maximum access speed
       unsigned int size;
 
       const unsigned int page_bits;

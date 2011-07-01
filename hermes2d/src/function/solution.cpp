@@ -91,7 +91,6 @@ namespace Hermes
       own_mesh = false;
       this->num_components = 0;
       e_last = NULL;
-      exact_mult = 1.0;
 
       for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
@@ -423,7 +422,7 @@ namespace Hermes
       sln_type = HERMES_SLN;
       num_dofs = space->get_num_dofs();
 
-      // copy the mesh   TODO: share meshes between solutions // WHAT???
+      // copy the mesh
       this->mesh = space->get_mesh();
 
       // allocate the coefficient arrays
@@ -654,42 +653,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss)
-    {
-      space_type = space->get_type();
-      int ndof = space->get_num_dofs();
-      Scalar *temp = new Scalar[ndof];
-      memset(temp, 0, sizeof(Scalar)*ndof);
-      this->set_coeff_vector(space, pss, temp, true);
-      delete [] temp;
-    }
-
-    template<typename Scalar>
     void Solution<Scalar>::enable_transform(bool enable)
     {
-      if (transform != enable) free_tables();
+      if (transform != enable) 
+        free_tables();
       transform = enable;
-    }
-
-    template<typename Scalar>
-    void Solution<Scalar>::multiply(Scalar coef)
-    {
-      if (sln_type == HERMES_SLN)
-      {
-        for (int i = 0; i < num_coefs; i++)
-          mono_coefs[i] *= coef;
-      }
-      else if (sln_type == HERMES_CONST)
-      {
-        cnst[0] *= coef;
-        cnst[1] *= coef;
-      }
-      else if (sln_type == HERMES_EXACT)
-      {
-        exact_mult *= coef;
-      }
-      else
-        error("Uninitialized solution.");
     }
 
     template<typename Scalar>
@@ -1002,9 +970,9 @@ namespace Hermes
               double jac = (*m)[0][0] *  (*m)[1][1] - (*m)[1][0] *  (*m)[0][1];
               Scalar val, dx = 0.0, dy = 0.0;
               val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-              node->values[0][0][i] = val * exact_mult;
-              node->values[0][1][i] = (  (*m)[1][1]*dx - (*m)[0][1]*dy) / jac * exact_mult;
-              node->values[0][2][i] = (- (*m)[1][0]*dx + (*m)[0][0]*dy) / jac * exact_mult;
+              node->values[0][0][i] = val;
+              node->values[0][1][i] = (  (*m)[1][1]*dx - (*m)[0][1]*dy) / jac;
+              node->values[0][2][i] = (- (*m)[1][0]*dx + (*m)[0][0]*dy) / jac;
             }
           }
           else
@@ -1013,9 +981,9 @@ namespace Hermes
             {
               Scalar val, dx = 0.0, dy = 0.0;
               val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-              node->values[0][0][i] = val * exact_mult;
-              node->values[0][1][i] = dx * exact_mult;
-              node->values[0][2][i] = dy * exact_mult;
+              node->values[0][0][i] = val;
+              node->values[0][1][i] = dx;
+              node->values[0][2][i] = dy;
             }
           }
         }
@@ -1027,9 +995,9 @@ namespace Hermes
             Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
             for (j = 0; j < 2; j++) 
             {
-              node->values[j][0][i] = val[j] * exact_mult;
-              node->values[j][1][i] = dx[j] * exact_mult;
-              node->values[j][2][i] = dy[j] * exact_mult;
+              node->values[j][0][i] = val[j];
+              node->values[j][1][i] = dx[j];
+              node->values[j][2][i] = dy[j];
             }
           }
         }

@@ -189,7 +189,6 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::subtract(const DiscontinuousFunc<T>& func)
     {
-      // TODO: Add sanity checks, revise for adaptivity.
       if (fn_central != NULL && func.fn_central != NULL)
         fn_central->subtract(*func.fn_central);
       if (fn_neighbor != NULL && func.fn_neighbor != NULL)

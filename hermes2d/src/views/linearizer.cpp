@@ -994,7 +994,7 @@ namespace Hermes
       nn = ydisp->get_mesh()->get_num_elements();
       }
       */
-      int ev = std::max(32 * nn, 10000);  // todo: check this
+      int ev = std::max(32 * nn, 10000);  //\todo check this
       int et = std::max(64 * nn, 20000);
       int ee = std::max(24 * nn, 7500);
 
@@ -1167,7 +1167,7 @@ namespace Hermes
       }
       int nn = mesh->get_num_elements();
 
-      int ev = std::max(32 * nn, 10000);  // todo: check this
+      int ev = std::max(32 * nn, 10000);  //\todo check this
       int et = std::max(64 * nn, 20000);
       int ee = std::max(24 * nn, 7500);
 

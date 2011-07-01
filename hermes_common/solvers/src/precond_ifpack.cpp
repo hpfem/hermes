@@ -128,7 +128,7 @@ namespace Hermes
       Ifpack_Partitioner *partitioner = new Ifpack_GreedyPartitioner(graph);
 
       Teuchos::ParameterList list;
-      list.set("partitioner: local parts", 1000);	// TODO: parametrize me
+      list.set("partitioner: local parts", 1000);	//\todo parametrize me
       partitioner->SetParameters(list);
       partitioner->Compute();
 

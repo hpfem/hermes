@@ -136,7 +136,6 @@ namespace Hermes
       project_global(spaces, source_meshfns, target_vec, matrix_solver, proj_norms);
     }
 
-
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
       Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver,
@@ -214,6 +213,7 @@ namespace Hermes
 
       project_internal(spaces, proj_wf, target_vec, matrix_solver);
     }
+
     template class HERMES_API OGProjection<double>;
     template class HERMES_API OGProjection<std::complex<double> >;
   }

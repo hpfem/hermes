@@ -228,7 +228,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) 
     {
       _F_
-        // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+        //\todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
         // row and cols for -1)
         for (unsigned int i = 0; i < m; i++)				// rows
           for (unsigned int j = 0; j < n; j++)			// cols

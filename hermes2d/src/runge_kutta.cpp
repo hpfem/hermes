@@ -363,10 +363,10 @@ namespace Hermes
 
       // Extracting volume and surface matrix and vector forms from the
       // original weak formulation.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol_base = wf->get_mfvol();
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf_base = wf->get_mfsurf();
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol_base = wf->get_vfvol();
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf_base = wf->get_vfsurf();
+      Hermes::vector<MatrixFormVol<Scalar> *> mfvol_base = wf->mfvol;
+      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf_base = wf->mfsurf;
+      Hermes::vector<VectorFormVol<Scalar> *> vfvol_base = wf->vfvol;
+      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf_base = wf->vfsurf;
 
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional

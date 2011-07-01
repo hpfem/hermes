@@ -299,7 +299,7 @@ namespace Hermes
           // Obtain assembly lists for the element at all spaces.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
           {
-            // TODO: do not get the assembly list again if the element was not changed.
+            // \todo do not get the assembly list again if the element was not changed.
             if (e[i] != NULL) spaces[i]->get_element_assembly_list(e[i], &(al[i]));
           }
 
@@ -719,7 +719,7 @@ namespace Hermes
           continue;
         }
 
-        // TODO: do not obtain again if the element was not changed.
+        // \todo do not obtain again if the element was not changed.
         spaces[j]->get_element_assembly_list(e[i], al[j]);
 
         // Set active element to all test functions.
@@ -2527,7 +2527,7 @@ namespace Hermes
       else 
       {
         // Perform adaptive numerical quadrature starting with order = 2.
-        // TODO: The choice of initial order matters a lot for efficiency,
+        // \todo The choice of initial order matters a lot for efficiency,
         //       this needs more research.
         Shapeset* fu_shapeset = fu->get_shapeset();
         Shapeset* fv_shapeset = fv->get_shapeset();
@@ -2922,7 +2922,7 @@ namespace Hermes
       else 
       {
         // Perform adaptive numerical quadrature starting with order = 2.
-        // TODO: The choice of initial order matters a lot for efficiency,
+        // \todo The choice of initial order matters a lot for efficiency,
         //       this needs more research.
         Shapeset* fv_shapeset = fv->get_shapeset();
         int fv_index = fv->get_active_shape();
@@ -3304,7 +3304,7 @@ namespace Hermes
       else 
       {
         // Perform adaptive numerical quadrature starting with order = 2.
-        // TODO: The choice of initial order matters a lot for efficiency,
+        // \todo The choice of initial order matters a lot for efficiency,
         //       this needs more research.
         int fu_order = fu->get_edge_fn_order(surf_pos->surf_num);
         int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
@@ -3674,7 +3674,7 @@ namespace Hermes
       else 
       {
         // Perform adaptive numerical quadrature starting with order = 2.
-        // TODO: The choice of initial order matters a lot for efficiency,
+        // \todo The choice of initial order matters a lot for efficiency,
         //       this needs more research.
         int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
 

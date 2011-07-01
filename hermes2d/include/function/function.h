@@ -42,9 +42,8 @@ namespace Hermes
     const int H2D_FN_DYY = H2D_FN_DYY_0 | H2D_FN_DYY_1;
     const int H2D_FN_DXY = H2D_FN_DXY_0 | H2D_FN_DXY_1;
 
-    /// The most common case is H2D_FN_DEFAULT, ie. values and the gradient.
-    const int H2D_FN_DEFAULT = H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY;            // default precalculation mask
-    const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY; // precalculate everything
+    const int H2D_FN_DEFAULT = H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY;            ///< default precalculation mask
+    const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY; ///< precalculate everything
 
     const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
     const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
@@ -203,7 +202,6 @@ namespace Hermes
         return cur_node->values[a][b];
       }
 
-
       /// \brief Selects the quadrature points in which the function will be evaluated.
       /// \details It is possible to switch back and forth between different quadrature
       /// points: no precalculated values are freed. The standard quadrature is
@@ -223,18 +221,23 @@ namespace Hermes
       virtual void precalculate(int order, int mask) = 0;
 
       int order;          ///< current function polynomial order
+
       int num_components; ///< number of vector components
 
 # define H2D_Node_HDR_SIZE (sizeof(Node) - sizeof(Scalar)) ///< Size of the header part of the structure Node
       struct Node
       {
         int mask;           ///< a combination of H2D_FN_XXX: specifies which tables are present
+
         int size;           ///< size in bytes of this struct (for maintaining total_mem)
+
         Scalar* values[2][6]; ///< pointers to 'data'
 
         Scalar data[1];       ///< value tables. The length may vary.
-      private: //operation that are not allowed due to the variable length of the Node structure
+
+      private:
         Node(const Node& org) {}; ///< Copy constructor is disabled.
+
         Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
       };
 
@@ -272,11 +275,15 @@ namespace Hermes
       }
 
       Quad2D* quads[4]; ///< list of available quadratures
+
       int cur_quad;     ///< active quadrature (index into 'quads')
+
       int total_mem;    ///< total memory in bytes used by the tables
+
       int max_mem;      ///< peak memory usage
 
       Node* new_node(int mask, int num_points); ///< allocates a new Node structure
+
       virtual void  handle_overflow_idx() = 0;
 
       void replace_cur_node(Node* node)
@@ -295,7 +302,6 @@ namespace Hermes
       }
 
       static int idx2mask[6][2];  ///< index to mask table
-
     };
   }
 }

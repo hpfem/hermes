@@ -49,11 +49,11 @@ namespace Hermes
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_matrix(CSCMatrix<Scalar>* mat);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }
