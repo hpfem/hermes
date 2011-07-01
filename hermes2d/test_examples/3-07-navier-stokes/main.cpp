@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   H1Space<double> xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
   H1Space<double> yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space<double> p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
+  L2Space<double> p_space(&mesh, P_INIT_PRESSURE);
 #else
   H1Space<double> p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif

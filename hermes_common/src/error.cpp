@@ -16,7 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file error.cpp
+    \brief File containing macros directing error handling in Hermes.
+*/
 #include "error.h"
 #include <stdio.h>
 #include <stdarg.h>

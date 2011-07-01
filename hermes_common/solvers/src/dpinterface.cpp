@@ -16,16 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-#ifndef DPINTERFACE_H
-#define DPINTERFACE_H
-
+/*! \file dpinterface.cpp
+\brief Interface for DiscreteProblem required by NoxProblemInterface.
+*/
 #include "dpinterface.h"
 
+/// \todo Put methods' definitions here.
 namespace Hermes 
 {
   namespace Solvers 
-{
+  {
   }
 }
-#endif

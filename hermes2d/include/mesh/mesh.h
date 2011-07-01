@@ -18,6 +18,7 @@
 
 #include "../hermes2d_common_defs.h"
 #include "curved.h"
+#include "hash.h"
 
 namespace Hermes
 {
@@ -68,7 +69,6 @@ namespace Hermes
       void unref_element(HashTable* ht, Element* e = NULL);
     };
 
-
     /// \brief Stores one element of a mesh.
     ///
     /// The element can be a triangle or a quad (nvert == 3 or nvert = 4), active or inactive.
@@ -104,7 +104,6 @@ namespace Hermes
       int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
       Element* parent;   ///< pointer to the parent element for the current son
       bool visited;      ///< true if the element has been visited during assembling
-
 
       Node* vn[4];   ///< vertex node pointers
       union
@@ -150,9 +149,6 @@ namespace Hermes
       void unref_all_nodes(HashTable* ht);
     };
 
-
-    #include "hash.h"
-
     /// \brief Represents a finite element mesh.
     ///
     class HERMES_API Mesh : public HashTable
@@ -166,36 +162,15 @@ namespace Hermes
       }
       /// Creates a copy of another mesh.
       void copy(const Mesh* mesh);
+
       /// Copies the coarsest elements of another mesh.
       void copy_base(Mesh* mesh);
+
       /// Copies the active elements of a converted mesh.
       void copy_converted(Mesh* mesh);
+
       /// Frees all data associated with the mesh.
       void free();
-
-      /// Loads the mesh from a file. Aborts the program on error.
-      /// \param filename [in] The name of the file. DEPRECATED
-      void load_old(const char* filename);
-      void load_stream(FILE *f);
-      void load_str(char* mesh);
-
-      /// DEPRECATED
-      void load(const char* filename, bool debug = false);
-
-      /// Saves the mesh, including all refinements, to a file.
-      /// Caution: never overwrite hand-created meshes with this function --
-      /// all comments in the original file will be lost. DEPRECATED.
-      /// \param filename [in] The name of the file.
-      void save(const char* filename);
-
-      /// Creates a mesh from given vertex, triangle, quad, and marker arrays
-      void create(int nv, double2* verts, int nt, int4* tris,
-                  int nq, int5* quads, int nm, int3* mark);
-
-      /// Rescales the mesh in the x- and y- directions. Mesh must not 
-      /// be curvilinear. All x-coordinates are divided by x_ref and 
-      /// all y-coordinates by y_ref.
-      bool rescale(double x_ref, double y_ref);
 
       /// Retrieves an element by its id number.
       Element* get_element(int id) const;
@@ -205,16 +180,19 @@ namespace Hermes
         if (this == NULL) error("this == NULL in Mesh::get_num_elements().");
         return elements.get_num_items();
       }
+
       /// Returns the number of coarse mesh elements.
       int get_num_base_elements() const {
         if (this == NULL) error("this == NULL in Mesh::get_num_base_elements().");
         return nbase;
       }
+
       /// Returns the current number of active elements in the mesh.
       int get_num_active_elements() const {
         if (this == NULL) error("this == NULL in Mesh::get_num_active_elements().");
         return nactive;
       }
+
       /// Returns the maximum node id number plus one.
       int get_max_element_id() const {
         if (this == NULL) error("this == NULL in Mesh::get_max_element_id().");
@@ -274,39 +252,39 @@ namespace Hermes
       /// refine_all_elements().
       void unrefine_all_elements(bool keep_initial_refinements = true);
 
-      /// FIXME: Where are these functions implemented?
-      void transform(double2x2 m, double2 t);
-      void transform(void (*fn)(double* x, double* y));
-
-      /// Loads the entire internal state from a (binary) file. DEPRECATED
-      void load_raw(FILE* f);
-      /// Saves the entire internal state to a (binary) file. DEPRECATED
-      void save_raw(FILE* f);
-
       /// For internal use.
       int get_edge_sons(Element* e, int edge, int& son1, int& son2);
+
       /// For internal use.
       unsigned get_seq() const { return seq; }
+
       /// For internal use.
       void set_seq(unsigned seq) { this->seq = seq; }
+
       /// For internal use.
       Element* get_element_fast(int id) const { return &(elements[id]);}
+
       /// Refines all triangle elements to quads.
       /// It can refine a triangle element into three quadrilaterals.
       /// Note: this function creates a base mesh.
       void convert_triangles_to_quads();
+
       /// Refines all quad elements to triangles.
       /// It refines a quadrilateral element into two triangles.
       /// Note: this function creates a base mesh.
       void convert_quads_to_triangles();
+
       /// Convert all active elements to a base mesh.
       void convert_to_base();
 
       void refine_element_to_quads_id(int id);
+
       void refine_triangle_to_quads(Mesh* mesh, Element* e, Element** elems_out = NULL);
 
       void refine_element_to_triangles_id(int id);
+
       void refine_quad_to_triangles(Element* e);
+
       /// Refines one quad element into four quad elements.
       /// The difference between refine_quad_to_quads() and refine_quad() 
       /// is that all the internal edges of the former's son elements are  
@@ -528,11 +506,13 @@ namespace Hermes
       void refine_quad(Element* e, int refinement, Element** sons_out = NULL);
       void refine_triangle_to_triangles(Element* e, Element** sons = NULL);
 
-      /// computing vector length
+      /// Computing vector length.
       static double vector_length(double a_1, double a_2);
-      /// checking whether the points p, q, r lie on the same line
+
+      /// Checking whether the points p, q, r lie on the same line.
       static bool same_line(double p_1, double p_2, double q_1, double q_2, double r_1, double r_2);
-      /// checking whether the angle of vectors 'a' and 'b' is between zero and Pi
+
+      /// Checking whether the angle of vectors 'a' and 'b' is between zero and Pi.
       static bool is_convex(double a_1, double a_2, double b_1, double b_2);
       static void check_triangle(int i, Node *&v0, Node *&v1, Node *&v2);
       static void check_quad(int i, Node *&v0, Node *&v1, Node *&v2, Node *&v3);

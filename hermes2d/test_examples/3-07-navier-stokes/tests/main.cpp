@@ -32,7 +32,7 @@ const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of N
 const double H = 5;                               // Domain height (necessary to define the parabolic
 // velocity profile at inlet).
 Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
-                                                                  // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
+// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -65,16 +65,16 @@ int main(int argc, char* argv[])
   // Initialize boundary conditions.
   EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_other_vel_x(Hermes::vector<std::string>(BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
- Hermes::Hermes2D::EssentialBCs<double> bcs_vel_x(Hermes::vector<EssentialBoundaryCondition<double> *>(&bc_left_vel_x, &bc_other_vel_x));
+  Hermes::Hermes2D::EssentialBCs<double> bcs_vel_x(Hermes::vector<EssentialBoundaryCondition<double> *>(&bc_left_vel_x, &bc_other_vel_x));
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_vel_y(Hermes::vector<std::string>(BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE), 0.0);
- Hermes::Hermes2D::EssentialBCs<double> bcs_vel_y(&bc_vel_y);
- Hermes::Hermes2D::EssentialBCs<double> bcs_pressure;
+  Hermes::Hermes2D::EssentialBCs<double> bcs_vel_y(&bc_vel_y);
+  Hermes::Hermes2D::EssentialBCs<double> bcs_pressure;
 
   // Spaces for velocity components and pressure.
   H1Space<double> xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
   H1Space<double> yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
 #ifdef PRESSURE_IN_L2
-  L2Space<double> p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
+  L2Space<double> p_space(&mesh, P_INIT_PRESSURE);
 #else
   H1Space<double> p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
 #endif

@@ -94,11 +94,13 @@ int main(int argc, char* argv[])
   Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
   Solver<std::complex<double> >* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
+#ifdef HAVE_AZTECOO
   if (matrix_solver == SOLVER_AZTECOO) {
     dynamic_cast<AztecOOSolver<std::complex<double> >*>(solver)->set_solver(iterative_method);
     dynamic_cast<AztecOOSolver<std::complex<double> >*>(solver)->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
   }
+#endif
   
   // Adaptivity loop:
   int as = 1; bool done = false;

@@ -22,11 +22,11 @@
 #ifndef __HERMES_COMMON_SUPERLU_SOLVER_H_
 #define __HERMES_COMMON_SUPERLU_SOLVER_H_
 
+#include "config.h"
+#ifdef WITH_SUPERLU  
 #include "solver.h"
 #include "matrix.h"
 
-typedef int int_t; /* default */
-#ifdef WITH_SUPERLU  
 #include <supermatrix.h>
 #include <slu_util.h>
 namespace Hermes {
@@ -38,7 +38,7 @@ namespace Hermes {
     public:
       void gsequ (SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info);
       void laqgs (SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed);
-      int_t gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info);
+      int gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info);
       float pivotGrowth (int ncols, SuperMatrix *A, int *perm_c, SuperMatrix *L, SuperMatrix *U);
       float langs (char *norm, SuperMatrix *A);
       void  gscon (char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info);

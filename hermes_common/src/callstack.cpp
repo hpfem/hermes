@@ -16,7 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file callstack.cpp
+    \brief File containing functionality for investigating call stack.
+*/
 #include "callstack.h"
 #include "../third_party_codes/trilinos-teuchos/include/Teuchos_stacktrace.hpp"
 #include <signal.h>

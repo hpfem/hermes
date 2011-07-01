@@ -16,18 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file hermes_common.h
+/*! \file hermes_logging.h
 \brief Functions and support for logging of events.
 */
 /** \addtogroup g_logging Event Logging
 *  \{
 *  \brief Functions and support for logging of events.
 *
-*  Hermes controls event logging through:
-*  - compiler directives (e.g. ::HERMES_REPORT_INFO). Directives has to be included prior including Hermes header files.
-*  - boolean variables (e.g. ::__hermes_report_info). These variables can be set anytime but their direct use is discouraged
-*    because they are integeded to be used by Python wreappers. Initial settings of these variables is given by the compiler
-*    directives.
 *
 *  By default, all logs are written into a file 'hermes.log' created in the current directory.
 *  A logs created by the application can be directed to a separate file. The file is specified through
@@ -103,7 +98,6 @@ I Done. \endverbatim on screen if all events are enabled.
 #include <cstdio>
 #include <stdarg.h>
 #include <sstream>
-
 
 namespace Hermes
 {
@@ -298,15 +292,4 @@ using namespace Hermes::Logging;
 #else
 # define debug_log(...)
 #endif
-#else
-# define HERMES_RCTR(__var) true /* reports will be controled strictly by preprocessor directives */
-# define warn(...)
-# define warn_if(__cond, ...)
-# define warn_intr(...)
-# define info(...)
-# define info_if(__cond, ...)
-# define verbose(...)
-# define trace(...)
-# define report_time(...)
-# define debug_log(...)
 #endif

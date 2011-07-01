@@ -21,11 +21,10 @@
 */
 #ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
-
+#include "config.h"
+#ifdef WITH_UMFPACK
 #include "solver.h"
 #include "matrix.h"
-
-#ifdef WITH_UMFPACK
 
 using namespace Hermes::Algebra;
 

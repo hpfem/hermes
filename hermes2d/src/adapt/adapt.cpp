@@ -334,7 +334,6 @@ namespace Hermes
       return result;
     }
 
-    /// L2 error form.
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
@@ -347,7 +346,6 @@ namespace Hermes
       return result;
     }
 
-    /// H1 error form.
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
@@ -359,10 +357,10 @@ namespace Hermes
       return result;
     }
 
-    /// H-div error form.
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
-    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
 
       error("hdiv error form not implemented yet in hdiv.h.");
@@ -375,10 +373,10 @@ namespace Hermes
       return result;
     }
 
-    /// H-curl error form.
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
-    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
       SolFunctionDomain result = 0;
       for (int i = 0; i < n; i++)

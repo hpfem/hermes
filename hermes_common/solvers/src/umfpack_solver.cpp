@@ -16,15 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-#define HERMES_REPORT_INFO
-
+/*! \file umfpack_solver.cpp
+\brief UMFPACK solver interface.
+*/
+#include "config.h"
+#ifdef WITH_UMFPACK
 #include "umfpack_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
 
-#ifdef WITH_UMFPACK
 extern "C" 
 {
 #include <umfpack.h>

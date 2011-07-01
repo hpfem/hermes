@@ -1,10 +1,30 @@
+// This file is part of HermesCommon
+//
+// Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
+// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+//
+// Hermes2D is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation; either version 2 of the License,
+// or (at your option) any later version.
+//
+// Hermes2D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Hermes2D; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+/*! \file hermes_logging.cpp
+\brief Functions and support for logging of events.
+*/
 #include "hermes_logging.h"
 #include "Teuchos_stacktrace.hpp"
 #ifdef WIN32 //Windows platform
 #include <Windows.h>
 #endif
 
-//// logo //////////////////////////////////////////////////////////////////////////////////
 #ifndef HERMES_NO_LOGO
 /// Generates a logo when the library is loaded and the logo is enabled (a preprocessor directive ::HERMES_NO_LOGO). \internal \ingroup g_logging
 class HermesLogoMessage 

@@ -1111,10 +1111,7 @@ namespace Hermes
       // write element coef table
       for (i = 0; i < this->num_components; i++)
         hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
-
-      // write the mesh
-      this->mesh->save_raw(f);
-
+      
       if (compress) pclose(f); else fclose(f);
     }
 
@@ -1193,13 +1190,18 @@ namespace Hermes
         hermes_fread(elem_coefs[i], sizeof(int), num_elems, f);
       }
 
+      /*
       // load the mesh
       this->mesh = new Mesh;
       this->mesh->load_raw(f);
       //printf("Loading mesh from file and setting own_mesh = true.\n");
       own_mesh = true;
+      */
 
-      if (compressed) pclose(f); else fclose(f);
+      if (compressed) 
+        pclose(f); 
+      else 
+        fclose(f);
 
       init_dxdy_buffer();
     }
@@ -1344,7 +1346,7 @@ namespace Hermes
       return NAN;
     }
 
-    template HERMES_API class Solution<double>;
-    template HERMES_API class Solution<std::complex<double> >;
+    template class HERMES_API Solution<double>;
+    template class HERMES_API Solution<std::complex<double> >;
   }
 }

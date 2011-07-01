@@ -16,13 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file superlu_solver.cpp
+\brief SuperLU solver interface.
+*/
+#include "config.h"
+#ifdef WITH_SUPERLU  
 #include "superlu_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
-
-#ifdef WITH_SUPERLU  
 
 using namespace Hermes::Error;
 
@@ -44,7 +46,7 @@ namespace Hermes
     }
 
     template <>    
-    int_t SuperLu<double>::gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info)
+    int SuperLu<double>::gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info)
     {
       return dgstrf (options, m, n, anorm, LUstruct, grid, stat, info);
     }

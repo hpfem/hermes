@@ -16,14 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file mumps_solver.cpp
+\brief MUMPS solver interface.
+*/
+#include "config.h"
+#ifdef WITH_MUMPS
 #include "mumps_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
-
-
-#ifdef WITH_MUMPS
 
 using namespace Hermes::Error;
 

@@ -129,13 +129,14 @@ int main(int argc, char* args[])
     Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
     // Initialize the preconditioner in the case of SOLVER_AZTECOO.
+#ifdef HAVE_AZTECOO
     if (matrix_solver == SOLVER_AZTECOO) 
     {
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
       // Using default iteration parameters (see solver/aztecoo.h).
     }    
-
+#endif
     // Assemble the linear problem.
     info("Assembling (ndof: %d).", Space<double>::get_num_dofs(ref_space));
     dp->assemble(matrix, rhs);

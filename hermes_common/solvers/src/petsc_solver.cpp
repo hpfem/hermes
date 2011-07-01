@@ -16,16 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file petsc_solver.cpp
+\brief PETSc solver interface.
+*/
 #include "config.h"
 #ifdef WITH_PETSC
-
 #include "petsc_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
 
-/// TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
+/// \todo Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 namespace Hermes 
 {

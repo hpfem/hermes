@@ -16,15 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file aztecOO_solver.cpp
+\brief AztecOOSolver class as an interface to AztecOO.
+*/
+#include "config.h"
+#ifdef HAVE_AZTECOO
 #include "aztecoo_solver.h"
 #include "callstack.h"
+#include <Komplex_LinearProblem.h>
 
 using namespace Hermes::Error;
-
-#ifdef HAVE_AZTECOO
-
-#include <Komplex_LinearProblem.h>
 
 namespace Hermes 
 {

@@ -1,7 +1,9 @@
 #include <cmath>
 #include "common.h"
 #include "c99_functions.h"
-
+/*! \file c99_functions.cpp
+\brief File containing definitions from the C99 standard that are missing in MSVC.
+*/
 #ifdef IMPLEMENT_C99
 
 double exp2(double x)

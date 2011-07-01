@@ -16,16 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file amesos_solver.cpp
+\brief AmesosSolver class as an interface to Amesos.
+*/
+#include "config.h"
+#ifdef HAVE_AMESOS
 #include "amesos_solver.h"
 #include "callstack.h"
 #include "error.h"
+#include <Amesos_ConfigDefs.h>
 
 using namespace Hermes::Error;
-
-#ifdef HAVE_AMESOS
-
-#include <Amesos_ConfigDefs.h>
 
 namespace Hermes 
 {

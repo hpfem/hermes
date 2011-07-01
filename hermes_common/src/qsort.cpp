@@ -12,9 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
-
-// The QuickSort routine from glibc-2.5 modified for sorting int arrays.
+/*! \file qsort.cpp
+    \brief The QuickSort routine from glibc-2.5 modified for sorting int arrays.
+*/
 
 #include <limits.h>
 #include <stdlib.h>
@@ -28,9 +28,7 @@ typedef struct
 {
   int *lo;
   int *hi;
-}
-
-stack_node;
+} stack_node;
 
 #define STACK_SIZE      (CHAR_BIT * sizeof(size_t))
 #define PUSH(low, high) ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
@@ -39,6 +37,7 @@ stack_node;
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
+/// \brief The QuickSort routine from glibc-2.5 modified for sorting int arrays.
 void qsort_int(int* pbase, size_t total_elems)
 {
   register int *base_ptr = pbase;

@@ -16,9 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-#include"superlu_solver.h"
+/*! \file superlu_real.cpp
+\brief SuperLU algebraic interface for real numbers.
+*/
+#include "config.h"
 #ifdef WITH_SUPERLU
+#include"superlu_solver.h"
 #include <slu_ddefs.h>
 
 namespace Hermes 
