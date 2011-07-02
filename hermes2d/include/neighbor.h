@@ -128,8 +128,6 @@ namespace Hermes
       /// In case we determine a neighbor is not correct due to a subelement mapping, we delete it.
       void delete_neighbor(unsigned int position);
 
-      /*** Methods for computing values of external functions. ***/
-
       /// Fill arrays with function values / derivatives at both sides of the active segment of active edge.
       /// Assumes that integration order has been set by \c set_quad_order.
       ///
@@ -137,8 +135,6 @@ namespace Hermes
       /// \return Pointer to a discontinuous function allowing to access the values from each side of the active edge.
       ///
       DiscontinuousFunc<Scalar>* init_ext_fn(MeshFunction<Scalar>* fu);
-
-      /*** Methods for working with shape functions. ***/
 
       class ExtendedShapeset;
       ExtendedShapeset *supported_shapes; ///< Object allowing to set/get a particular shape function from the extended
@@ -156,6 +152,7 @@ namespace Hermes
       ///
       ExtendedShapeset* create_extended_asmlist(Space<Scalar>* space, AsmList<Scalar>* al);
       ExtendedShapeset* create_extended_asmlist_multicomponent(Space<Scalar>* space, AsmList<Scalar>* al); 
+
       /*** Methods for working with quadrature on the active edge. ***/
 
       /// Sets the quadrature order to be used for obtaining integration points and weights in both neighbors.
@@ -184,40 +181,7 @@ namespace Hermes
       /// \return pointer to the vector of neighboring elements.
       ///
       Hermes::vector<Element*>* get_neighbors() { return &neighbors; }
-
-      /// Retrieve the central element in the neighborhood defined by current active segment.
-      ///
-      /// \return pointer to the central element.
-      ///
-      Element* get_current_central_element()
-      {
-        return central_el;
-      }
-
-      /// Retrieve the neighbor element in the neighborhood defined by current active segment.
-      ///
-      /// \return pointer to the neighbor of the central element.
-      ///
-      Element* get_current_neighbor_element()
-      {
-        return neighb_el;
-      }
-
-      /// Return local number of the selected active edge segment relatively to the neighboring element.
-      ///
-      /// \param[in] segment Part of active edge shared by the central element and selected neighbor.
-      /// \return Local number of the active edge in the neighboring element.
-      ///
-      int get_neighb_edge_number(int segment);
-
-      /// Return orientation of the selected active edge segment with respect to both adjacent elements.
-      ///
-      /// \param[in] active_segment  Part of active edge shared by the central element and selected neighbor.
-      /// \return 0 if orientation of the common edge is the same on both adjacent elements,
-      /// \return 1 otherwise.
-      ///
-      int get_neighb_edge_orientation(int segment);
-
+      
       /// Frees the memory occupied by the extended shapeset.
       void clear_supported_shapes() {
         if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
@@ -352,7 +316,6 @@ namespace Hermes
       /// Cleaning of internal structures before a new edge is set as active.
       void reset_neighb_info();
 
-
       /*** Quadrature on the active edge. ***/
 
       Quad2D* quad;
@@ -432,4 +395,4 @@ namespace Hermes
     };
   }
 }
-#endif /* NEIGHBOR_H_ */
+#endif

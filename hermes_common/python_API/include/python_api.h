@@ -21,6 +21,7 @@
 */
 #ifndef __HERMES_COMMON_PYTHON_API_H
 #define __HERMES_COMMON_PYTHON_API_H
+#ifdef WITH_PYTHON
 
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
@@ -100,5 +101,5 @@ private:
     PyObject *_namespace;
     void _init(int argc, char* argv[]);
 };
-
+#endif
 #endif

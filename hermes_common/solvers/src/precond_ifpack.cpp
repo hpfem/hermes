@@ -12,10 +12,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
-#include "precond_ifpack.h"
-
+/*! \file precond_ifpack.cpp
+\brief IFPACK (Trilinos package) preconditioners interface.
+*/
+#include "config.h"
 #ifdef HAVE_IFPACK
+#include "precond_ifpack.h"
 #include <Ifpack_PointRelaxation.h>
 #include <Ifpack_BlockRelaxation.h>
 #include <Ifpack_DenseContainer.h>
@@ -126,7 +128,7 @@ namespace Hermes
       Ifpack_Partitioner *partitioner = new Ifpack_GreedyPartitioner(graph);
 
       Teuchos::ParameterList list;
-      list.set("partitioner: local parts", 1000);	// TODO: parametrize me
+      list.set("partitioner: local parts", 1000);	//\todo parametrize me
       partitioner->SetParameters(list);
       partitioner->Compute();
 

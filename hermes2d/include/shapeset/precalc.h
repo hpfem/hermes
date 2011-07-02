@@ -113,7 +113,9 @@ namespace Hermes
       LightArray<std::map<uint64_t, LightArray<Node*>*>*> tables;
 
       int mode;
+
       int index;
+
       int max_index[2];
 
       PrecalcShapeset* master_pss;

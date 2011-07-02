@@ -35,8 +35,6 @@ namespace Hermes
 #ifdef EXTREME_QUAD
     const int g_max_quad = 99;
 #else
-    // debug
-    //const int g_max_quad = 30;
     const int g_max_quad = 24;
     const int g_max_tri = 20;
 #endif
@@ -71,7 +69,6 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-
       void set_mode(int mode) { this->mode = mode; }
       int  get_mode() const { return mode; }
 
@@ -98,9 +95,6 @@ namespace Hermes
       int max_edge_order;
 
       double2 ref_vert[2][4];
-
-      virtual void dummy_fn() = 0; // to prevent this class from being instantiated
-
     };
   }
 }

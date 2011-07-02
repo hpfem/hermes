@@ -16,7 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file matrix.cpp
+\brief Basic matrix classes and operations.
+*/
 #include "common.h"
 #include "matrix.h"
 #include "error.h"

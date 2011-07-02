@@ -21,15 +21,11 @@
 */
 #ifndef __HERMES_COMMON_AMESOS_SOLVER_H_
 #define __HERMES_COMMON_AMESOS_SOLVER_H_
-
-#include "../include/config.h"
-
+#include "config.h"
 #ifdef HAVE_AMESOS
-
 #include "solver.h"
 #include "epetra.h"
 #include "compat.h"
-
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 

@@ -25,9 +25,9 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param,
+    Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+    ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
     {
       adapt_eval = false;
       areas.push_back(area);
@@ -35,9 +35,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Form<Scalar>::Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext, Hermes::vector<Scalar> param,
+    Form<Scalar>::Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    ext(ext), param(param), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
+    ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
     {
       adapt_eval = false;
       this->areas = areas;
@@ -58,17 +58,16 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
-      std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+      std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
     {
     }
 
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
       Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
     {
     }
 
@@ -97,17 +96,15 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
     {
     }
 
     template<typename Scalar>
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), i(i), j(j)
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j)
     {
     }
 
@@ -136,17 +133,15 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormVol<Scalar>::VectorFormVol(unsigned int i, std::string area,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i)
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
 
     template<typename Scalar>
     VectorFormVol<Scalar>::VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), i(i)
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
 
@@ -176,15 +171,15 @@ namespace Hermes
     template<typename Scalar>
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), i(i)
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
     template<typename Scalar>
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), i(i)
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
 
@@ -214,14 +209,14 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentMatrixFormVol<Scalar>::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
       std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
 
     template<typename Scalar>
     MultiComponentMatrixFormVol<Scalar>::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
       Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
 
     template<typename Scalar>
     MultiComponentMatrixFormVol<Scalar>* MultiComponentMatrixFormVol<Scalar>::clone()
@@ -233,15 +228,15 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentMatrixFormSurf<Scalar>::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentMatrixFormSurf<Scalar>::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
       Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentMatrixFormSurf<Scalar>* MultiComponentMatrixFormSurf<Scalar>::clone()
@@ -253,15 +248,15 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentVectorFormVol<Scalar>::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentVectorFormVol<Scalar>::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates,
       Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentVectorFormVol<Scalar>* MultiComponentVectorFormVol<Scalar>::clone()
@@ -273,15 +268,15 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentVectorFormSurf<Scalar>::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentVectorFormSurf<Scalar>::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
       Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext,
-      Hermes::vector<Scalar> param, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, param, scaling_factor, u_ext_offset), coordinates(coordinates) { }
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
 
     template<typename Scalar>
     MultiComponentVectorFormSurf<Scalar>* MultiComponentVectorFormSurf<Scalar>::clone()

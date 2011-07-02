@@ -318,6 +318,152 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(ProjNormType type)
+    {
+      this->projNormType = type;
+    }
+
+    template<typename Scalar>
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    {
+      SolFunctionDomain result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->val[i] * conj(v->val[i]));
+      return result;
+    }
+
+    template<typename Scalar>
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    {
+      SolFunctionDomain result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
+        + u->dy[i] * conj(v->dy[i]));
+      return result;
+    }
+
+    template<typename Scalar>
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    {
+      SolFunctionDomain result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
+      return result;
+    }
+
+    template<typename Scalar>
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    {
+
+      error("hdiv error form not implemented yet in hdiv.h.");
+
+      // this is Hcurl code:
+      SolFunctionDomain result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
+        u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+      return result;
+    }
+
+    template<typename Scalar>
+    template<typename TestFunctionDomain, typename SolFunctionDomain>
+    static SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+    {
+      SolFunctionDomain result = 0;
+      for (int i = 0; i < n; i++)
+        result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
+        u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+      return result;
+    }
+
+    template<typename Scalar>
+    Scalar Adapt<Scalar>::MatrixFormVolError::value(int n, double *wt, Func<Scalar> *u_ext[],
+      Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
+      ExtData<Scalar> *ext) const
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_SEMINORM:
+        return h1_error_semi_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HCURL_NORM:
+        return hcurl_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HDIV_NORM:
+        return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
+      default:
+        error("Unknown projection type");
+        return 0.0;
+      }
+    }
+
+    template<typename Scalar>
+    Hermes::Ord Adapt<Scalar>::MatrixFormVolError::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
+      Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
+      ExtData<Hermes::Ord> *ext) const
+    {
+      switch (projNormType)
+      {
+      case HERMES_L2_NORM:
+        return l2_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_NORM:
+        return h1_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_H1_SEMINORM:
+        return h1_error_semi_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HCURL_NORM:
+        return hcurl_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
+      case HERMES_HDIV_NORM:
+        return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
+      default:
+        error("Unknown projection type");
+        return Hermes::Ord();
+      }
+    }
+
+    template<typename Scalar>
+    double Adapt<Scalar>::calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
+      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+    {
+      if (num != 1) EXIT("Wrong number of solutions.");
+      return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
+    }
+
+    template<typename Scalar>
+    double Adapt<Scalar>::calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
+      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+    {
+      return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+    }
+
+    template<typename Scalar>
+    double Adapt<Scalar>::calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
+      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+    {
+      if (num != 1) EXIT("Wrong number of solutions.");
+      return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
+    }
+
+    template<typename Scalar>
+    double Adapt<Scalar>::calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
+      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+    {
+      return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+    }
+
+    template<typename Scalar>
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
       int regularize, double to_be_processed)
     {
@@ -399,6 +545,31 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    double Adapt<Scalar>::get_element_error_squared(int component, int id) const
+    { 
+      error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); 
+      return errors[component][id]; 
+    };
+
+    template<typename Scalar>
+    const Hermes::vector<typename Adapt<Scalar>::ElementReference>& Adapt<Scalar>::get_regular_queue() const 
+    { 
+      return regular_queue;
+    };
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const
+    {
+      return false;
+    };
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const
+    {
+      return refined; 
+    };
+
+    template<typename Scalar>
     void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes) 
     {
       Element* e;
@@ -432,9 +603,8 @@ namespace Hermes
     void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
     {
       for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
-        elem_ref != elems_to_refine.end(); elem_ref++) { // go over elements to be refined
+        elem_ref != elems_to_refine.end(); elem_ref++) 
           apply_refinement(*elem_ref);
-      }
     }
 
     template<typename Scalar>
@@ -887,6 +1057,17 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> rslns;
       rslns.push_back(rsln);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+    }
+
+    template<typename Scalar>
+    Adapt<Scalar>::CompareElements::CompareElements(double** errors): errors(errors) 
+    {
+    }
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1,const ElementReference& e2) const 
+    {
+      return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
     }
 
     template<typename Scalar>

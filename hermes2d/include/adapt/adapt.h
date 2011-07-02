@@ -83,56 +83,17 @@ namespace Hermes
       {
       public:
         /// Constructor that takes the norm identification.
-        MatrixFormVolError(ProjNormType type)
-        {
-          this->projNormType = type;
-        }
+        MatrixFormVolError(ProjNormType type);
 
         /// Error bilinear form callback function.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
           Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
-          ExtData<Scalar> *ext) const
-        {
-          switch (projNormType)
-          {
-          case HERMES_L2_NORM:
-            return l2_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_H1_NORM:
-            return h1_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_H1_SEMINORM:
-            return h1_error_semi_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_HCURL_NORM:
-            return hcurl_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_HDIV_NORM:
-            return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-          default:
-            error("Unknown projection type");
-            return 0.0;
-          }
-        }
+          ExtData<Scalar> *ext) const;
 
         /// Error bilinear form to estimate order of a function.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-          ExtData<Hermes::Ord> *ext) const
-        {
-          switch (projNormType)
-          {
-          case HERMES_L2_NORM:
-            return l2_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_H1_NORM:
-            return h1_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_H1_SEMINORM:
-            return h1_error_semi_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_HCURL_NORM:
-            return hcurl_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-          case HERMES_HDIV_NORM:
-            return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-          default:
-            error("Unknown projection type");
-            return Hermes::Ord();
-          }
-        }
+          ExtData<Hermes::Ord> *ext) const;
 
       private:
         /// Norm used.
@@ -141,62 +102,27 @@ namespace Hermes
         /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
-        {
-          SolFunctionDomain result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (u->val[i] * conj(v->val[i]));
-          return result;
-        }
-
-        /// L2 error form.
-        template<typename TestFunctionDomain, typename SolFunctionDomain>
-        static SolFunctionDomain h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
-        {
-          SolFunctionDomain result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
-            + u->dy[i] * conj(v->dy[i]));
-          return result;
-        }
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
 
         /// H1 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
+        static SolFunctionDomain h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+
+        /// H1-seminorm error form.
+        template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
-        {
-          SolFunctionDomain result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
-          return result;
-        }
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
 
         /// H-div error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
-        static SolFunctionDomain hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
-        {
-
-          error("hdiv error form not implemented yet in hdiv.h.");
-
-          // this is Hcurl code:
-          SolFunctionDomain result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-          return result;
-        }
+        static SolFunctionDomain hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
 
         /// H-curl error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
-        static SolFunctionDomain hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u, Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
-        {
-          SolFunctionDomain result = 0;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-            u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-          return result;
-        }
+        static SolFunctionDomain hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
       };
 
       /// Sets user defined bilinear form which is used to calculate error.
@@ -207,16 +133,12 @@ namespace Hermes
       *  \param[in] bi_form A bilinear form which calculates value.
       *  \param[in] bi_ord A bilinear form which calculates order. */
       void set_error_form(int i, int j, MatrixFormVolError* form);
-      void set_error_form(MatrixFormVolError* form);   // i = j = 0
+      void set_error_form(MatrixFormVolError* form);   ///< i = j = 0
 
       /// Type-safe version of calc_err_est() for one solution.
       /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
       double calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
-      {
-        if (num != 1) EXIT("Wrong number of solutions.");
-        return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
-      }
+        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Calculates the error of the solution. 'n' must be the same
       /// as 'num' in the constructor. After that, n coarse solution
@@ -224,28 +146,18 @@ namespace Hermes
       /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
       double calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
-      {
-        return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
-      }
+        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Type-safe version of calc_err_exact() for one solution.
       /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
       double calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
-      {
-        if (num != 1) EXIT("Wrong number of solutions.");
-        return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
-      }
+        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Calculates the error of the solution.
       /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
       double calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
-      {
-        return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
-      }
+        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Refines elements based on results from calc_err_est().
       /** The behavior of adaptivity can be controlled through methods should_ignore_element()
@@ -289,16 +201,11 @@ namespace Hermes
       /** \param[in] A component index.
       *  \param[in] An element index.
       *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
-      double get_element_error_squared(int component, int id) const { error_if(!have_errors,
-        "Element errors have to be calculated first, call calc_err_est()."); return errors[component][id]; };
+      double get_element_error_squared(int component, int id) const;
 
       /// Returns regular queue of elements
       /** \return A regular queue. */
-      const Hermes::vector<ElementReference>& get_regular_queue() const { return regular_queue; };
-
-      /// Returns a total number of active elements.
-      /** \return A total number of active elements. If below 0, errors were not calculated yet, see set_solutions() */
-      int get_total_active_elements() const { return num_act_elems; };
+      const Hermes::vector<ElementReference>& get_regular_queue() const;
 
       /// Apply a single refienement.
       /** \param[in] A refinement to apply. */
@@ -323,7 +230,7 @@ namespace Hermes
       *  \param[in] mesh A mesh that contains the element.
       *  \parar[in] element A pointer to the element.
       *  \return True if the element should be skipped. */
-      virtual bool should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) { return false; };
+      virtual bool should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const;
 
       /// Returns true if a given element can be refined using proposed refinement.
       /** Overload this method to
@@ -334,7 +241,7 @@ namespace Hermes
       *  \param[in] refined True if a refinement of the element was found.
       *  \param[in,out] elem_ref The proposed refinement. Change a value of this parameter to select a different refinement.
       *  \return True if the element should not be refined using the refinement. */
-      virtual bool can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) { return refined; };
+      virtual bool can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const;
 
       /// Fixes refinements of a mesh which is shared among multiple components of a multimesh.
       /** If a mesh is shared among components, it has to be refined similarly in order to avoid incosistency.
@@ -349,7 +256,6 @@ namespace Hermes
       /** \param[in] meshes An arrat of meshes of components. */
       void homogenize_shared_mesh_orders(Mesh** meshes);
 
-    protected:
       int num;                              ///< Number of solution components (as in wf->neq).
       Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
@@ -365,7 +271,6 @@ namespace Hermes
 
       double error_time;                    ///< Time needed to calculate the error.
 
-    protected:
       static const unsigned char HERMES_TOTAL_ERROR_MASK = 0x0F;    ///< A mask which masks-out total error type. Used by Adapt::calc_err_internal(). \internal
       static const unsigned char HERMES_ELEMENT_ERROR_MASK = 0xF0;  ///< A mask which masks-out element error type. Used by Adapt::calc_err_internal(). \internal
 
@@ -423,18 +328,17 @@ namespace Hermes
 
     private:
       /// A functor that compares elements accoring to their error. Used by std::sort().
-      class CompareElements {
+      class CompareElements 
+      {
       private:
         double** errors; ///< A 2D array of squared errors: the first index is an index of component, the second index is an element ID.
       public:
-        CompareElements(double** errors): errors(errors) {}; ///< Constructor.
+        CompareElements(double** errors); ///< Constructor.
         /// Compares two elements.
         /** \param[in] e1 A reference to the first element.
         *  \param[in] e1 A reference to the second element.
         *  \return True if a squared error of the first element is greater than a squared error of the second element. */
-        bool operator ()(const ElementReference& e1,const ElementReference& e2) const {
-          return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
-        };
+        bool operator ()(const ElementReference& e1,const ElementReference& e2) const;
       };
     };
   }

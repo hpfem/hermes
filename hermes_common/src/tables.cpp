@@ -12,7 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
-
+/*! \file tables.cpp
+    \brief Butcher tables. Including the class Table and enum ButcherTableType.
+*/
 #include "tables.h"
 #include "matrix.h"
 

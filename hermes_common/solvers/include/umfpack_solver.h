@@ -21,11 +21,10 @@
 */
 #ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
-
+#include "config.h"
+#ifdef WITH_UMFPACK
 #include "solver.h"
 #include "matrix.h"
-
-#ifdef WITH_UMFPACK
 
 using namespace Hermes::Algebra;
 
@@ -50,11 +49,11 @@ namespace Hermes
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_matrix(CSCMatrix<Scalar>* mat);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
-      // TODO: implement this for other matrix types.
+      //\todo implement this for other matrix types.
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }

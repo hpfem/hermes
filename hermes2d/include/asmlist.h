@@ -47,12 +47,12 @@ namespace Hermes
 
       /// Destructor.
       ~AsmList<Scalar>();
-     
-      void clear();
 
+      /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).
       void add_triplet(int i, int d, Scalar c);
 
     protected:
+      /// Internal. Enlarges the storage capacity.
       void enlarge();
     };
   }

@@ -14,18 +14,14 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   # If the real version is being used:
   if("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
 	set(FLAGS "${DEBUG_FLAGS}")
-	set(HERMES_COMMON ${HERMES_COMMON_LIB_DEBUG})
   elseif("${HERMES}" STREQUAL "${HERMES2D_RELEASE}")
 	set(FLAGS "${RELEASE_FLAGS}")
-	set(HERMES_COMMON ${HERMES_COMMON_LIB_RELEASE})
   endif("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
   
   set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
   include_directories(${hermes2d_SOURCE_DIR}/src)
-
-  PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON} ${TRGT})
 
   #target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
   #add_dependencies(${TRGT} ${HERMES})

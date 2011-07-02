@@ -21,13 +21,13 @@
 */
 #ifndef __HERMES_COMMON_MUMPS_SOLVER_H_
 #define __HERMES_COMMON_MUMPS_SOLVER_H_
-
+#include "config.h"
+#ifdef WITH_MUMPS
 #include "solver.h"
 #include "matrix.h"
 
 #define USE_COMM_WORLD  -987654
 
-#ifdef WITH_MUMPS
 extern "C" {
 #include <mumps_c_types.h>
 #include <dmumps_c.h>

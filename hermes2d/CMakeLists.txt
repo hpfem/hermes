@@ -71,11 +71,12 @@ endif(H2D_WITH_VIEWER_GUI)
 #
 
 # We require Python for the mesh parser (it also needs NumPy)
-if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
-  find_package(Python REQUIRED)
-  find_package(NumPy REQUIRED)
-  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)    
+# Working on removing this
+# if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+#   find_package(Python REQUIRED)
+#   find_package(NumPy REQUIRED)
+#   include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+# endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)    
 
 if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) # Required by python wrappers.
@@ -119,6 +120,7 @@ endif(H2D_WITH_TEST_EXAMPLES)
 
 if(H2D_WITH_TESTS)
   enable_testing()
+  add_subdirectory(tests)
 endif(H2D_WITH_TESTS)
 
 #

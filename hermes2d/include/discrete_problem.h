@@ -6,7 +6,7 @@
 /// (at your option) any later version.
 ///
 /// Hermes2D is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// but WITHOUT ANY WARRANTY;without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU General Public License for more details.
 ///
@@ -64,12 +64,12 @@ namespace Hermes
     public:
       /// Constructor for multiple components / equations.
       DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces);
-      
+
       /// Constructor for one equation.
       DiscreteProblem(WeakForm<Scalar>* wf, Space<Scalar>* space);
 
       /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
-      DiscreteProblem() : wf(NULL), pss(NULL) {sp_seq = NULL;}
+      DiscreteProblem();
 
       /// Init function. Common code for the constructors.
       void init();
@@ -78,25 +78,24 @@ namespace Hermes
       virtual ~DiscreteProblem();
       void free();
 
-      /// GET functions.
+      // GET functions.
       /// Get pointer to n-th space.
-      Space<Scalar>* get_space(int n) { return this->spaces[n]; }
+      Space<Scalar>* get_space(int n);
 
       /// Get the weak forms.
-      WeakForm<Scalar>* get_weak_formulation() { return this->wf;};
+      WeakForm<Scalar>* get_weak_formulation();
 
       /// Get all spaces as a Hermes::vector.
-      Hermes::vector<Space<Scalar>*> get_spaces() {return this->spaces;}
+      Hermes::vector<Space<Scalar>*> get_spaces();
 
       /// This is different from H3D.
-      PrecalcShapeset* get_pss(int n) {  return this->pss[n];  }
+      PrecalcShapeset* get_pss(int n);
 
       /// Get the number of unknowns.
       int get_num_dofs();
 
       /// Get info about presence of a matrix.
-      bool is_matrix_free() { return wf->is_matrix_free(); }
-
+      bool is_matrix_free() ;
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.
@@ -254,9 +253,9 @@ namespace Hermes
         Hermes::vector<bool>& isempty, int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-      void invalidate_matrix() { have_matrix = false; }
+      void invalidate_matrix();
 
-      void set_fvm() {this->is_fvm = true;}
+      void set_fvm();
 
     protected:
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
@@ -440,7 +439,7 @@ namespace Hermes
       void insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count);
 
       /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
-      Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree); 
+      Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree);
 
       /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
       void traverse_multimesh_tree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
@@ -494,8 +493,8 @@ namespace Hermes
       /// Space instances for all equations in the system.
       Hermes::vector<Space<Scalar>*> spaces;
 
-      Scalar** matrix_buffer;                ///< buffer for holding square matrix (during assembling)
-      int matrix_buffer_dim;                 ///< dimension of the matrix held by 'matrix_buffer'
+      Scalar** matrix_buffer;///< buffer for holding square matrix (during assembling)
+      int matrix_buffer_dim;///< dimension of the matrix held by 'matrix_buffer'
 
       /// Returns the matrix_buffer of the size n.
       Scalar** get_matrix_buffer(int n);
@@ -526,7 +525,8 @@ namespace Hermes
       void delete_single_geom_cache(int order);
 
       /// Class handling various caches used in assembling.
-      class AssemblingCaches {
+      class AssemblingCaches 
+      {
       public:
         /// Basic constructor.
         AssemblingCaches();
@@ -548,57 +548,16 @@ namespace Hermes
           int shapeset_type;
           double inv_ref_map[2][2];
 #ifdef _MSC_VER
-          KeyConst(int index, int order, UINT64 sub_idx, int shapeset_type, double2x2* inv_ref_map) {
-            this->index = index;
-            this->order = order;
-            this->sub_idx = sub_idx;
-            this->shapeset_type = shapeset_type;
-            this->inv_ref_map[0][0] = (* inv_ref_map)[0][0];
-            this->inv_ref_map[0][1] = (* inv_ref_map)[0][1];
-            this->inv_ref_map[1][0] = (* inv_ref_map)[1][0];
-            this->inv_ref_map[1][1] = (* inv_ref_map)[1][1];
-          }
+          KeyConst(int index, int order, UINT64 sub_idx, int shapeset_type, double2x2* inv_ref_map);
 #else
-          KeyConst(int index, int order, unsigned int sub_idx, int shapeset_type, double2x2* inv_ref_map) {
-            this->index = index;
-            this->order = order;
-            this->sub_idx = sub_idx;
-            this->shapeset_type = shapeset_type;
-            this->inv_ref_map[0][0] = (* inv_ref_map)[0][0];
-            this->inv_ref_map[0][1] = (* inv_ref_map)[0][1];
-            this->inv_ref_map[1][0] = (* inv_ref_map)[1][0];
-            this->inv_ref_map[1][1] = (* inv_ref_map)[1][1];
-          }
+          KeyConst(int index, int order, unsigned int sub_idx, int shapeset_type, double2x2* inv_ref_map);
 #endif
         };
 
         /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareConst {
-          bool operator()(KeyConst a, KeyConst b) const {
-            if(a.inv_ref_map[0][0] < b.inv_ref_map[0][0]) return true;
-            else if(a.inv_ref_map[0][0] > b.inv_ref_map[0][0]) return false;
-            else
-              if(a.inv_ref_map[0][1] < b.inv_ref_map[0][1]) return true;
-              else if(a.inv_ref_map[0][1] > b.inv_ref_map[0][1]) return false;
-              else
-                if(a.inv_ref_map[1][0] < b.inv_ref_map[1][0]) return true;
-                else if(a.inv_ref_map[1][0] > b.inv_ref_map[1][0]) return false;
-                else
-                  if(a.inv_ref_map[1][1] < b.inv_ref_map[1][1]) return true;
-                  else if(a.inv_ref_map[1][1] > b.inv_ref_map[1][1]) return false;
-                  else
-                    if (a.index < b.index) return true;
-                    else if (a.index > b.index) return false;
-                    else
-                      if (a.order < b.order) return true;
-                      else if (a.order > b.order) return false;
-                      else
-                        if (a.sub_idx < b.sub_idx) return true;
-                        else if (a.sub_idx > b.sub_idx) return false;
-                        else
-                          if (a.shapeset_type < b.shapeset_type) return true;
-                          else return false;
-          };
+        struct CompareConst 
+        {
+          bool operator()(KeyConst a, KeyConst b) const;
         };
 
         /// PrecalcShapeset stored values for Elements with constant jacobian of the reference mapping for triangles.
@@ -609,7 +568,8 @@ namespace Hermes
 
         /// The same setup for elements with non-constant jacobians.
         /// This cache is deleted with every change of the state in assembling.
-        struct KeyNonConst {
+        struct KeyNonConst 
+        {
           int index;
           int order;
 #ifdef _MSC_VER
@@ -619,40 +579,16 @@ namespace Hermes
 #endif
           int shapeset_type;
 #ifdef _MSC_VER
-          KeyNonConst(int index, int order, UINT64 sub_idx, int shapeset_type) {
-            this->index = index;
-            this->order = order;
-            this->sub_idx = sub_idx;
-            this->shapeset_type = shapeset_type;
-          }
+          KeyNonConst(int index, int order, UINT64 sub_idx, int shapeset_type);
 #else
-          KeyNonConst(int index, int order, unsigned int sub_idx, int shapeset_type) {
-            this->index = index;
-            this->order = order;
-            this->sub_idx = sub_idx;
-            this->shapeset_type = shapeset_type;
-          }
+          KeyNonConst(int index, int order, unsigned int sub_idx, int shapeset_type);
 #endif
         };
 
         /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareNonConst {
-          bool operator()(KeyNonConst a, KeyNonConst b) const {
-            if (a.index < b.index) return true;
-            else if (a.index > b.index) return false;
-            else {
-              if (a.order < b.order) return true;
-              else if (a.order > b.order) return false;
-              else {
-                if (a.sub_idx < b.sub_idx) return true;
-                else if (a.sub_idx > b.sub_idx) return false;
-                else {
-                  if (a.shapeset_type < b.shapeset_type) return true;
-                  else return false;
-                }
-              }
-            }
-          }
+        struct CompareNonConst 
+        {
+          bool operator()(KeyNonConst a, KeyNonConst b) const;
         };
 
         /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for triangles.

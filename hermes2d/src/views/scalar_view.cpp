@@ -1347,7 +1347,7 @@ namespace Hermes
         // If this is not true, the model is either too tall or too flat and will be subject to different scaling
         // along the y-axis, such that it would fit to the viewing frustum at one third of its depth (i.e. at one third of
         // the total available zooming range).
-        // TODO: allow the user to decide whether he always wants equal axes scaling or prefers actually seeing something sensible...
+        //\todo allow the user to decide whether he always wants equal axes scaling or prefers actually seeing something sensible...
         double tan_fovy_half = tan((double) fovy / 2.0 / 180.0 * M_PI);
         double max_allowed_height = (zfar-3)*tan_fovy_half;
         if (max_axial * xzscale > max_allowed_height || (max_axial * xzscale < 0.1 && !is_constant) )
@@ -1456,7 +1456,7 @@ namespace Hermes
     template<typename Scalar>
     void ScalarView<Scalar>::set_min_max_range(double min, double max)
     {
-      // TODO: allow settin min = max, in which case draw the corresponding contour.
+      //\todo allow settin min = max, in which case draw the corresponding contour.
       if (fabs(max-min) < 1e-8) 
       {
         warn("Range (%f,%f) is too narrow: adjusted to (%f,%f)", min, max, min-0.5, max);

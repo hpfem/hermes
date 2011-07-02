@@ -16,14 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file mumps_solver.cpp
+\brief MUMPS solver interface.
+*/
+#include "config.h"
+#ifdef WITH_MUMPS
 #include "mumps_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
-
-
-#ifdef WITH_MUMPS
 
 using namespace Hermes::Error;
 
@@ -588,7 +589,7 @@ namespace Hermes
       {
         case 0: return true; // no error
         case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
-          // TODO: add the rest according to the MUMPS docs
+          //\todo add the rest according to the MUMPS docs
         default: warning("INFOG(1) = %d", param.INFOG(1)); break;
       }
       return false;

@@ -19,14 +19,12 @@
 /*! \file precond_ml.h
 \brief ML (Trilinos package) preconditioners interface.
 */
-
 #ifndef __HERMES_COMMON_PRECOND_ML_H_
 #define __HERMES_COMMON_PRECOND_ML_H_
+#include "config.h"
+#ifdef HAVE_ML
 #include "precond.h"
 #include "epetra.h"
-
-#ifdef HAVE_ML
-
 #include <ml_MultiLevelPreconditioner.h>
 
 namespace Hermes {

@@ -16,16 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
+/*! \file petsc_solver.cpp
+\brief PETSc solver interface.
+*/
 #include "config.h"
 #ifdef WITH_PETSC
-
 #include "petsc_solver.h"
 #include "trace.h"
 #include "error.h"
 #include "callstack.h"
 
-/// TODO: Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
+/// \todo Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
 namespace Hermes 
 {
@@ -227,7 +228,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) 
     {
       _F_
-        // TODO: pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+        //\todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
         // row and cols for -1)
         for (unsigned int i = 0; i < m; i++)				// rows
           for (unsigned int j = 0; j < n; j++)			// cols

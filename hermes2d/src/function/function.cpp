@@ -90,7 +90,7 @@ namespace Hermes
       return node;
     }
 
-    template HERMES_API class Function<double>;
-    template HERMES_API class Function<std::complex<double> >;
+    template class HERMES_API Function<double>;
+    template class HERMES_API Function<std::complex<double> >;
   }
 }

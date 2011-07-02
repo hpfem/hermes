@@ -13,9 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef __H2D_HERMES_FUNCTION_H
+#define __H2D_HERMES_FUNCTION_H
+
 #include "mesh_function.h"
 #include "../mesh/refmap.h"
 #include "../form/forms.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -67,3 +71,5 @@ namespace Hermes
     };
   }
 }
+
+#endif

@@ -507,7 +507,6 @@ namespace Hermes
       n_neighbors--;
     }
 
-
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
     {
@@ -622,7 +621,6 @@ namespace Hermes
         }
       }
     }
-
 
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
@@ -808,31 +806,6 @@ namespace Hermes
       // deep memory copying, performed only after setting the active edge part (before the nested loops over basis and
       // test functions), would be actually more efficient than this. This would require implementing copy for Filters.
     }
-
-    template<typename Scalar>
-    int NeighborSearch<Scalar>::get_neighb_edge_number(int segment)
-    {
-      if( (unsigned) segment >= neighbor_edges.size())
-        error("given number is bigger than actual number of neighbors ");
-      else
-        return neighbor_edges[segment].local_num_of_edge;
-      return 0;
-    }
-
-    template<typename Scalar>
-    int NeighborSearch<Scalar>::get_neighb_edge_orientation(int segment)
-    {
-      if( (unsigned) segment >= neighbor_edges.size())
-        error("given number is bigger than actual number of neighbors ");
-      else
-        return neighbor_edges[segment].orientation;
-      return 0;
-    }
-
-
-
-    /*** _____________________________________________ EXTENDED SHAPESET _____________________________________________ ***/
-
 
     template<typename Scalar>
     NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>* space) :

@@ -122,7 +122,7 @@ namespace Hermes
       // initialization
       Quad2D* quad = get_quad_2d();
       quad->set_mode(mode);
-      H2D_CHECK_ORDER(quad, order);
+      check_order(quad, order);
       int np = quad->get_num_points(order);
       double3* pt = quad->get_points(order);
 

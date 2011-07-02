@@ -12,15 +12,17 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
-#include "precond_ml.h"
-
+/*! \file precond_ml.cpp
+\brief ML (Trilinos package) preconditioners interface.
+*/
 #ifdef HAVE_ML
+#include "config.h"
+#include "precond_ml.h"
 
 namespace Hermes 
 {
   namespace Preconditioners 
-{
+  {
     template<typename Scalar>
     MlPrecond<Scalar>::MlPrecond(const char *type)
     {

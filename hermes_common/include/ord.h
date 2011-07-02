@@ -12,7 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
-
+/*! \file ord.h
+\brief Contains class Ord for calculation of integration order.
+*/
 #include <complex>
 #include "compat.h"
 

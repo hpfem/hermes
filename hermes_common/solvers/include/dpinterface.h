@@ -19,7 +19,6 @@
 /*! \file dpinterface.h
 \brief Interface for DiscreteProblem required by NoxProblemInterface.
 */
-
 #ifndef DPINTERFACE_H
 #define DPINTERFACE_H
 

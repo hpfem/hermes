@@ -17,6 +17,7 @@
 #define __H2D_SPACE_HDIV_H
 
 #include "space.h"
+
 namespace Hermes
 {
   namespace Hermes2D

@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(hermes_common)
 
-IF(HERMES_COMMON_WITH_TESTS)
-        set(WITH_TESTS YES)
-ELSE(HERMES_COMMON_WITH_TESTS)
-        set(WITH_TESTS NO)
-ENDIF(HERMES_COMMON_WITH_TESTS)
-
 # Check for stacktrace and math library.
 include(CMakeCommon.txt)
 
@@ -34,6 +28,13 @@ if (NOT WITH_TRILINOS)
     third_party_codes/trilinos-teuchos/src/Teuchos_TypeNameTraits.cpp
   )
 endif (NOT WITH_TRILINOS)
+
+if (WITH_PYTHON)
+  set ( PYTHON_SOURCES
+      python_API/src/python_api.cpp
+      python_API/src/python_engine.cpp
+	  )
+endif (WITH_PYTHON)
 
 #
 # Source files for the Hermes_common library.
@@ -65,22 +66,20 @@ set(SRC
   solvers/src/umfpack_solver.cpp
   solvers/src/precond_ml.cpp
   solvers/src/precond_ifpack.cpp
-  solvers/src/eigensolver.cpp
-  solvers/src/eigen.cpp
+ # solvers/src/eigensolver.cpp
+ # solvers/src/eigen.cpp
   
   ${TEUCHOS_SOURCES}
-
-  python_API/src/python_api.cpp
-  python_API/src/python_engine.cpp
+  ${PYTHON_SOURCES}
 )
 
 #
 # Subdirectories with CMakeLists.txt
 #
-if(WITH_TESTS)
+if(HERMES_COMMON_WITH_TESTS)
     enable_testing()
     add_subdirectory(solvers)
-endif(WITH_TESTS)
+endif(HERMES_COMMON_WITH_TESTS)
 
 if(WITH_PYTHON)
     set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
@@ -105,20 +104,18 @@ include(PickRealOrCplxLibs)
 # FIXME: Find which projects need it and enclose their CMake scripts in
 # if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed,
 # as it has been already done in ../CMakeLists.txt
-if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
-    find_package(Python REQUIRED)
-    find_package(NumPy REQUIRED)
-    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+############ WORKING ON REPLACING THIS BY A C++ EIGENPROBLEM SOLVER.
+#if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
+#    find_package(Python REQUIRED)
+#    find_package(NumPy REQUIRED)
+#    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+#endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
 
 # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 # and set its build properties (compile and link flags, installation directories).
 macro(BUILD_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   add_library(${HERMES_COMMON_LIB} SHARED ${SRC})
   set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
-
-  PICK_REAL_OR_CPLX_LIBS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
-  PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${HERMES_COMMON_LIB})
 
   # Link with all third party libraries corresponding to selected configuration
   # options. Linking of optional libraries for the different Hermeses ({1,2,3}D)

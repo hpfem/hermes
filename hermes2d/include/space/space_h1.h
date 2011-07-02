@@ -53,6 +53,8 @@ namespace Hermes
 
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+
     protected:
 
       virtual void assign_vertex_dofs();
@@ -65,8 +67,6 @@ namespace Hermes
       static double** h1_proj_mat;
       static double*  h1_chol_p;
       static int      h1_proj_ref;
-
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       struct EdgeInfo
       {
@@ -83,6 +83,7 @@ namespace Hermes
         Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents);
 
       void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
+
       virtual void update_constraints();
 
       struct FixedVertex
@@ -94,6 +95,7 @@ namespace Hermes
       Hermes::vector<FixedVertex> fixed_vertices;
 
       inline bool is_fixed_vertex(int id) const;
+
       virtual void post_assign();
     };
   }

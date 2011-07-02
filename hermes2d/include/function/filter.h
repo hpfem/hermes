@@ -39,16 +39,21 @@ namespace Hermes
       Filter() {};
 
       Filter(Hermes::vector<MeshFunction<Scalar>*> solutions);
+
       virtual ~Filter();
 
       void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
 
       virtual void set_quad_2d(Quad2D* quad_2d);
+
       virtual void set_active_element(Element* e);
+
       virtual void free();
+
       virtual void reinit();
 
       virtual void push_transform(int son);
+
       virtual void pop_transform();
 
       virtual void init();
@@ -56,7 +61,9 @@ namespace Hermes
     protected:
 
       int num;
+
       MeshFunction<Scalar>* sln[10];
+
       uint64_t sln_sub[10];
 
       /// There is a 2-layer structure of the precalculated tables.
@@ -73,12 +80,12 @@ namespace Hermes
 #endif
 
       bool unimesh;
+
       UniData** unidata;
 
       void copy_base(Filter* flt);
 
     };
-
 
     /// SimpleFilter is a base class for predefined simple filters (MagFilter, DiffFilter...).
     /// The 'simplicity' lies in the fact that only one value per input function can be
@@ -103,6 +110,7 @@ namespace Hermes
       SimpleFilter() {};
 
       SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
       SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
@@ -129,6 +137,7 @@ namespace Hermes
     public:
       // one result (rslt), all inputs and result including derivatives
       DXDYFilter() {};
+
       DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions);
 
       void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
@@ -143,6 +152,7 @@ namespace Hermes
       virtual void filter_fn (int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
       void init_components();
+
       virtual void precalculate(int order, int mask);
     };
 
@@ -155,8 +165,11 @@ namespace Hermes
     {
     public:
       MagFilter() {};
+
       MagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
-      MagFilter(MeshFunction<Scalar>* sln1, int item1 = H2D_FN_VAL); // for vector-valued sln1
+
+      MagFilter(MeshFunction<Scalar>* sln1, int item1 = H2D_FN_VAL); ///< for vector-valued sln1
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
@@ -168,6 +181,7 @@ namespace Hermes
     {
     public: 
       DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
@@ -179,6 +193,7 @@ namespace Hermes
     {
     public: 
       SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
@@ -190,6 +205,7 @@ namespace Hermes
     {
     public: 
       SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
@@ -199,6 +215,7 @@ namespace Hermes
     {
     public:
       RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
     };
@@ -210,6 +227,7 @@ namespace Hermes
     {
     public:
       ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
     };
@@ -220,6 +238,7 @@ namespace Hermes
     {
     public: 
       AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
     };
@@ -229,6 +248,7 @@ namespace Hermes
     {
     public:
       AngleFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
     protected:
       virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
     };
@@ -240,16 +260,19 @@ namespace Hermes
     /// \brief Calculates the Von Mises stress.
     class HERMES_API VonMisesFilter : public Filter<double>
     {
-    public: // TODO: cylindrical coordinates
+    public: /// \todo cylindrical coordinates
 
       VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
+
       virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
       { error("Not implemented yet"); return 0; }
 
     protected:
       double lambda, mu;
+
       int cyl, item1, item2;
+
       virtual void precalculate(int order, int mask);
     };
 
@@ -262,14 +285,19 @@ namespace Hermes
     {
     public: 
       LinearFilter(MeshFunction<Scalar>* old);
+
       LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac = 1);
+
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
       { error("Not implemented yet"); return 0; }
 
     protected:
       double tau_frac;
+
       virtual void precalculate(int order, int mask);
+
       void init_components();
+
       virtual void set_active_element(Element* e);
     };
   }

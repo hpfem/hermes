@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "mesh_function.h"
-#include "refmap.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -40,7 +40,7 @@ namespace Hermes
     MeshFunction<Scalar>::~MeshFunction()
     {
       delete refmap;
-      if(this->overflow_nodes != NULL) 
+      if(this->overflow_nodes != NULL)
       {
         for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
           if(this->overflow_nodes->present(i))
@@ -50,11 +50,36 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void MeshFunction<Scalar>::init()
+    {
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::reinit()
+    { 
+      this->free();
+      init();
+    }
+
+    template<typename Scalar>
     int MeshFunction<Scalar>::get_edge_fn_order(int edge)
     {
       return Function<Scalar>::get_edge_fn_order(edge);
     }
 
+    template<typename Scalar>
+    void MeshFunction<Scalar>::handle_overflow_idx()
+    {
+      if(this->overflow_nodes != NULL)
+      {
+        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
+          if(this->overflow_nodes->present(i))
+            ::free(this->overflow_nodes->get(i));
+        delete this->overflow_nodes;
+      }
+      this->nodes = new LightArray<Function<Scalar>::Node *>;
+      this->overflow_nodes = this->nodes;
+    }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
@@ -64,26 +89,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MeshFunction<Scalar>::set_active_element(Element* e)
+    Mesh* MeshFunction<Scalar>::get_mesh() const
     {
-      this->element = e;
-      this->mode = e->get_mode();
-      refmap->set_active_element(e);
-      this->reset_transform();
+      return mesh;
     }
 
     template<typename Scalar>
-    void MeshFunction<Scalar>::handle_overflow_idx()
+    RefMap* MeshFunction<Scalar>::get_refmap()
     {
-      if(this->overflow_nodes != NULL) 
-      {
-        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-          if(this->overflow_nodes->present(i))
-            ::free(this->overflow_nodes->get(i));
-        delete this->overflow_nodes;
-      }
-      this->nodes = new LightArray<struct Function<Scalar>::Node *>;
-      this->overflow_nodes = this->nodes;
+      this->update_refmap();
+      return refmap;
     }
 
     template<typename Scalar>
@@ -100,7 +115,35 @@ namespace Hermes
       this->update_nodes_ptr();
     }
 
-    template HERMES_API class MeshFunction<double>;
-    template HERMES_API class MeshFunction<std::complex<double> >;
+    template<typename Scalar>
+    void MeshFunction<Scalar>::set_active_element(Element* e)
+    {
+      this->element = e;
+      this->mode = e->get_mode();
+      refmap->set_active_element(e);
+      this->reset_transform();
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::force_transform(MeshFunction<Scalar>* mf)
+    { 
+      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::update_refmap()
+    { 
+      refmap->force_transform(this->sub_idx, this->ctm);
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
+    }
+
+    template class HERMES_API MeshFunction<double>;
+    template class HERMES_API MeshFunction<std::complex<double> >;
   }
 }

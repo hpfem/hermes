@@ -29,7 +29,7 @@ set(SRC
    mesh/h2d_reader.cpp
    mesh/mesh.cpp
    mesh/traverse.cpp
-   mesh/python_reader.cpp
+   mesh/mesh2d_parser.cpp
 
    quadrature/limit_order.cpp
    quadrature/quad_std.cpp
