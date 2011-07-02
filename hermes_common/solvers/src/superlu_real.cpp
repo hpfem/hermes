@@ -26,7 +26,7 @@
 
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
 {
     template <>
     void  SuperLUSolver<double>::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 

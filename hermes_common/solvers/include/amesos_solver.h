@@ -30,7 +30,7 @@
 #include <Amesos_BaseSolver.h>
 
 namespace Hermes {
-  namespace Solvers {
+  namespace MatrixSolvers {
     /// \brief Encapsulation of Amesos linear solver.
     ///
     /// @ingroup solvers

@@ -20,42 +20,45 @@
 
 namespace Hermes
 {
-  namespace Views
+  namespace Hermes2D
   {
-    /// Like the Linearizer, but generates a triangular mesh showing polynomial
-    /// orders in a space, hence the funky name.
-    ///
-    class HERMES_API Orderizer : public Linearizer<double>
+    namespace Views
     {
-    public:
+      /// Like the Linearizer, but generates a triangular mesh showing polynomial
+      /// orders in a space, hence the funky name.
+      ///
+      class HERMES_API Orderizer : public Linearizer<double>
+      {
+      public:
 
-      Orderizer();
-      ~Orderizer();
+        Orderizer();
+        ~Orderizer();
 
-      void process_space(Space<double>* space);
-      void process_space(Space<std::complex<double> >* space);
+        void process_space(Space<double>* space);
+        void process_space(Space<std::complex<double> >* space);
 
-      int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
-      { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
+        int get_labels(int*& lvert, char**& ltext, double2*& lbox) const
+        { lvert = this->lvert; ltext = this->ltext; lbox = this->lbox; return nl; };
 
-      virtual void save_data(const char* filename);
-      virtual void load_data(const char* filename);
-      /// Saves a MeshFunction (Solution, Filter) in VTK format.
-      virtual void save_orders_vtk(Space<double>* space, const char* file_name);
-      /// This function is used by save_solution_vtk().
-      virtual void save_data_vtk(const char* file_name);
+        virtual void save_data(const char* filename);
+        virtual void load_data(const char* filename);
+        /// Saves a MeshFunction (Solution, Filter) in VTK format.
+        virtual void save_orders_vtk(Space<double>* space, const char* file_name);
+        /// This function is used by save_solution_vtk().
+        virtual void save_data_vtk(const char* file_name);
 
-    protected:
+      protected:
 
-      char  buffer[1000];
-      char* labels[11][11];
+        char  buffer[1000];
+        char* labels[11][11];
 
-      int  nl, cl1, cl2, cl3;
-      int* lvert;
-      char** ltext;
-      double2* lbox;
+        int  nl, cl1, cl2, cl3;
+        int* lvert;
+        char** ltext;
+        double2* lbox;
 
-    };
+      };
+    }
   }
 }
 #endif

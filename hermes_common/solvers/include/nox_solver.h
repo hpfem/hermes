@@ -35,7 +35,7 @@
 #include <NOX_Epetra.H>
 
 namespace Hermes {
-  namespace Solvers {
+  namespace MatrixSolvers {
     /// \brief A helper for NOX solver.
     ///
     /// @ingroup solvers

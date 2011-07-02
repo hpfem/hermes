@@ -18,6 +18,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file hermes2d_common_defs.h
 \brief Common definitions for Hermes2D.
+\todo Put more common H2D stuff here.
 */
 #ifndef __H2D_COMMON_H_
 #define __H2D_COMMON_H_
@@ -158,12 +159,13 @@ namespace Hermes
 
       ///< Returns string representation of the quad order: used for debugging purposses.
       static const std::string get_quad_order_str(const int quad_order);
+
       ///< Returns the correct axial order for given edge.
       static int make_edge_order(int edge, int encoded_order, int mode);
 
       double get_l2_norm(Vector<Scalar>* vec) const;
 
-      bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Hermes::Solvers::Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
+      bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Hermes::MatrixSolvers::Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
         Vector<Scalar>* rhs, bool jacobian_changed = true, double newton_tol = 1e-8, 
         int newton_max_iter = 100, bool verbose = false,
         bool residual_as_function = false,

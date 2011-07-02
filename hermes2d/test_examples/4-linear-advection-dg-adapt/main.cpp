@@ -19,7 +19,7 @@
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::RefinementSelectors;
-using namespace Hermes::Views;
+using namespace Hermes::Hermes2D::Views;
 
 const int INIT_REF = 2;                           // Number of initial uniform mesh refinements.
 const int P_INIT = 0;                             // Initial polynomial degrees of mesh elements in vertical and horizontal

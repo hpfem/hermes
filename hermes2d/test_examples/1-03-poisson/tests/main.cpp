@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   Hermes::Algebra::SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
   Hermes::Algebra::Vector<double>* rhs = create_vector<double>(matrix_solver);
-  Hermes::Solvers::Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  Hermes::MatrixSolvers::Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initial coefficient vector for the Newton's method.  
   double* coeff_vec = new double[ndof];

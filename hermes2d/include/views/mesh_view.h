@@ -25,53 +25,56 @@
 
 namespace Hermes
 {
-  namespace Views
+  namespace Hermes2D
   {
-    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+    namespace Views
+    {
+      // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-    /// \brief Displays a mesh.
-    ///
-    /// MeshView is a debugging tool for displaying meshes together with its element
-    /// id numbers, boundary markers etc.
-    ///
-    class HERMES_API MeshView : public View
-    {
-    public:
-
-      MeshView(const char* title = "MeshView", WinGeom* wg = NULL);
-      MeshView(char* title, WinGeom* wg = NULL);
-      virtual ~MeshView();
-
-      void show(Mesh* mesh);
-
-    protected:
-
-      Linearizer<double> lin;
-
-      bool b_ids, b_markers, b_elem_mrk;
-
-      struct ObjInfo
+      /// \brief Displays a mesh.
+      ///
+      /// MeshView is a debugging tool for displaying meshes together with its element
+      /// id numbers, boundary markers etc.
+      ///
+      class HERMES_API MeshView : public View
       {
-        double x, y;
-        int id, type;
+      public:
+
+        MeshView(const char* title = "MeshView", WinGeom* wg = NULL);
+        MeshView(char* title, WinGeom* wg = NULL);
+        virtual ~MeshView();
+
+        void show(Mesh* mesh);
+
+      protected:
+
+        Linearizer<double> lin;
+
+        bool b_ids, b_markers, b_elem_mrk;
+
+        struct ObjInfo
+        {
+          double x, y;
+          int id, type;
+        };
+
+        ObjInfo* nodes;
+        ObjInfo* elems;
+        int nn, ne;
+
+        float* get_marker_color(int marker);
+
+        virtual void on_display();
+        virtual void on_key_down(unsigned char key, int x, int y);
+        virtual void scale_dispatch() {}
+        virtual const char* get_help_text() const;
+
+        Mesh* mesh;
+
       };
-
-      ObjInfo* nodes;
-      ObjInfo* elems;
-      int nn, ne;
-
-      float* get_marker_color(int marker);
-
-      virtual void on_display();
-      virtual void on_key_down(unsigned char key, int x, int y);
-      virtual void scale_dispatch() {}
-      virtual const char* get_help_text() const;
-
-      Mesh* mesh;
-
-    };
 #endif
+    }
   }
 }
 #endif

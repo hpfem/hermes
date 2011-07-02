@@ -32,7 +32,7 @@ namespace Hermes
 {
   namespace Algebra 
   {
-    using namespace Hermes::Solvers;
+    using namespace Hermes::MatrixSolvers;
     /// \brief General CSC Matrix class.
     /// (can be used in umfpack, in that case use the
     /// UMFPackMatrix subclass, or with EigenSolver, or anything else)
@@ -132,7 +132,7 @@ namespace Hermes
       Scalar *v;
     };
   }
-  namespace Solvers
+  namespace MatrixSolvers
   {
     /// \brief Encapsulation of UMFPACK linear solver.
     ///

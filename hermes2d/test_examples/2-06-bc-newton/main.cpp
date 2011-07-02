@@ -85,22 +85,22 @@ int main(int argc, char* argv[])
   // VTK output.
   if (VTK_VISUALIZATION) {
     // Output solution in VTK format.
-    Hermes::Views::Linearizer<double> lin;
+    Hermes::Hermes2D::Views::Linearizer<double> lin;
     bool mode_3D = true;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.
-    Hermes::Views::Orderizer ord;
+    Hermes::Hermes2D::Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
     info("Element orders in VTK format saved to file %s.", "ord.vtk");
   }
 
   // Visualize the solution.
   if (HERMES_VISUALIZATION) {
-    Hermes::Views::ScalarView<double> view("Solution", new Hermes::Views::WinGeom(0, 0, 440, 350));
-    view.show(&sln, Hermes::Views::HERMES_EPS_VERYHIGH);
-   Hermes:: Views::View::wait();
+    Hermes::Hermes2D::Views::ScalarView<double> view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
+    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
+   Hermes::Hermes2D::Views::View::wait();
   }
 
   // Clean up.

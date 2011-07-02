@@ -32,7 +32,7 @@
 
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
   {
     template <typename Scalar> class AmesosSolver;
     template <typename Scalar> class AztecOOSolver;
@@ -82,11 +82,11 @@ namespace Hermes {
       Epetra_CrsMatrix *mat_im;		
       bool owner;
 
-      friend class Hermes::Solvers::AmesosSolver<Scalar>;
-      friend class Hermes::Solvers::AztecOOSolver<Scalar>;
-      friend class Hermes::Solvers::NoxSolver<Scalar>;
-      friend class Hermes::Solvers::IfpackPrecond<Scalar>;
-      friend class Hermes::Solvers::MlPrecond<Scalar>;
+      friend class Hermes::MatrixSolvers::AmesosSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::AztecOOSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::NoxSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::IfpackPrecond<Scalar>;
+      friend class Hermes::MatrixSolvers::MlPrecond<Scalar>;
     };
 
     template <typename Scalar>
@@ -121,9 +121,9 @@ namespace Hermes {
       Epetra_Vector *vec_im;
       bool owner;
 
-      friend class Hermes::Solvers::AmesosSolver<Scalar>;
-      friend class Hermes::Solvers::AztecOOSolver<Scalar>;
-      friend class Hermes::Solvers::NoxSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::AmesosSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::AztecOOSolver<Scalar>;
+      friend class Hermes::MatrixSolvers::NoxSolver<Scalar>;
     };
   }
 }

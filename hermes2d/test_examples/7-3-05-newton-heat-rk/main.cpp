@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(&wf, &space);
 
   // Initialize views.
-  Hermes::Views::ScalarView<double> Tview("Temperature", new Hermes::Views::WinGeom(0, 0, 450, 600));
+  Hermes::Hermes2D::Views::ScalarView<double> Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
   Tview.set_min_max_range(0,20);
   Tview.fix_scale_width(30);
   
@@ -150,6 +150,6 @@ int main(int argc, char* argv[])
   delete sln_time_new;
 
   // Wait for the view to be closed.
-  Hermes::Views::View::wait();
+  Hermes::Hermes2D::Views::View::wait();
   return 0;
 }

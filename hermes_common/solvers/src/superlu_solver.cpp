@@ -30,7 +30,7 @@ using namespace Hermes::Error;
 
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
   {
 #ifdef SLU_MT
     template <>    
@@ -528,7 +528,7 @@ namespace Hermes
     template class HERMES_API SuperLUVector<double>;
     template class HERMES_API SuperLUVector<std::complex<double> >;
   }
-  namespace Solvers
+  namespace MatrixSolvers
   {
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::check_status(unsigned int info)

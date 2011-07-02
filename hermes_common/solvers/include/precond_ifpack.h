@@ -30,7 +30,7 @@
 
 namespace Hermes {
   namespace Preconditioners {
-    using namespace Hermes::Solvers;
+    using namespace Hermes::MatrixSolvers;
     /// \brief Preconditioners built on IFPACK.
     ///
     /// @ingroup preconds

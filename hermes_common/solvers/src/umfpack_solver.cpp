@@ -738,7 +738,7 @@ namespace Hermes
     template class HERMES_API UMFPackVector<std::complex<double> >;
   }
 
-  namespace Solvers
+  namespace MatrixSolvers
   {
     static void check_status(const char *fn_name, int status) 
     {

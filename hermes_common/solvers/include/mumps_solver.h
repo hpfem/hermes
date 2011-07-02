@@ -40,7 +40,7 @@ extern "C" {
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace MatrixSolvers
   {
     template <typename Scalar> class MumpsSolver;
   }
@@ -138,7 +138,7 @@ namespace Hermes {
       friend class Solvers::MumpsSolver<Scalar>;
     };
   }
-  namespace Solvers
+  namespace MatrixSolvers
   {
     /// Encapsulation of MUMPS linear solver.
     ///

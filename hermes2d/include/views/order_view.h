@@ -25,54 +25,57 @@
 
 namespace Hermes
 {
-  namespace Views
+  namespace Hermes2D
   {
-    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+    namespace Views
+    {
+      // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
 #define H2DV_MAX_VIEWABLE_ORDER 10 ///< Maximum viewable order.
 
-    /// \brief Displays the polynomial degrees of elements.
-    ///
-    /// OrderView is a tool for displaying the polynomial degrees of the elements in a space.
-    ///
-    template<typename Scalar>
-    class HERMES_API OrderView : public View
-    {
-    public:
+      /// \brief Displays the polynomial degrees of elements.
+      ///
+      /// OrderView is a tool for displaying the polynomial degrees of the elements in a space.
+      ///
+      template<typename Scalar>
+      class HERMES_API OrderView : public View
+      {
+      public:
 
-      OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
-      //#ifndef _MSC_VER
-      //	OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
-      //#endif
-      OrderView(char* title, WinGeom* wg = NULL);
+        OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
+        //#ifndef _MSC_VER
+        //	OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
+        //#endif
+        OrderView(char* title, WinGeom* wg = NULL);
 
-      void show(Space<Scalar>* space);
+        void show(Space<Scalar>* space);
 
-      void load_data(const char* filename);
-      void save_data(const char* filename);
-      void save_numbered(const char* format, int number);
+        void load_data(const char* filename);
+        void save_data(const char* filename);
+        void save_numbered(const char* format, int number);
 
-    protected:
+      protected:
 
-      Orderizer ord;
-      bool b_orders;
+        Orderizer ord;
+        bool b_orders;
 
-      int num_boxes, order_min;
-      const char* box_names[H2DV_MAX_VIEWABLE_ORDER+1]; ///< Pointers to order names. Pointers points inside OrderView::text_buffer.
-      char text_buffer[H2DV_MAX_VIEWABLE_ORDER*4]; ///< Text buffer which contains all order names.
-      float order_colors[H2DV_MAX_VIEWABLE_ORDER+1][3]; ///< Hermes::Order colors. Maximum order has to be accessible.
+        int num_boxes, order_min;
+        const char* box_names[H2DV_MAX_VIEWABLE_ORDER+1]; ///< Pointers to order names. Pointers points inside OrderView::text_buffer.
+        char text_buffer[H2DV_MAX_VIEWABLE_ORDER*4]; ///< Text buffer which contains all order names.
+        float order_colors[H2DV_MAX_VIEWABLE_ORDER+1][3]; ///< Hermes::Order colors. Maximum order has to be accessible.
 
-      void init_order_palette(double3* vert); ///< Initializes opalette from supplied vertices.
+        void init_order_palette(double3* vert); ///< Initializes opalette from supplied vertices.
 
-      virtual void on_display();
-      virtual void on_key_down(unsigned char key, int x, int y);
-      virtual void scale_dispatch();
-      virtual int measure_scale_labels();
-      virtual const char* get_help_text() const;
+        virtual void on_display();
+        virtual void on_key_down(unsigned char key, int x, int y);
+        virtual void scale_dispatch();
+        virtual int measure_scale_labels();
+        virtual const char* get_help_text() const;
 
-    };
-#endif // NOGLUT
+      };
+#endif
+    }
   }
 }
 #endif

@@ -30,8 +30,8 @@ using namespace Hermes::Error;
 
 namespace Hermes 
 {
-  namespace Solvers 
-{
+  namespace MatrixSolvers 
+  {
     template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 
     template<typename Scalar>

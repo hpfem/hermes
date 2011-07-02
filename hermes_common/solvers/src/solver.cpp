@@ -30,9 +30,9 @@
 
 using namespace Hermes::Algebra;
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
 {
     template<typename Scalar>
     Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)

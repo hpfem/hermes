@@ -32,7 +32,7 @@
 #include <petscksp.h>
 
 namespace Hermes {
-  namespace Solvers {
+  namespace MatrixSolvers {
     template <typename Scalar> class PetscLinearSolver;
   }
 }
@@ -116,7 +116,7 @@ namespace Hermes {
       friend class Solvers::PetscLinearSolver<Scalar>;
     };
   }
-  namespace Solvers
+  namespace MatrixSolvers
   {
     /// Encapsulation of PETSc linear solver
     ///

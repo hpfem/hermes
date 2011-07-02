@@ -30,7 +30,7 @@
 #include <supermatrix.h>
 #include <slu_util.h>
 namespace Hermes {
-  namespace Solvers {
+  namespace MatrixSolvers {
     template <typename Scalar> class SuperLUSolver;
 #ifdef SLU_MT
     template <typename Scalar>    
@@ -156,7 +156,7 @@ namespace Hermes {
     };
 
   }
-  namespace Solvers{
+  namespace MatrixSolvers{
 
     /// Encapsulation of SUPERLU linear solver
     ///

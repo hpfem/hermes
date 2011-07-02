@@ -41,7 +41,7 @@ using namespace Hermes::Algebra;
 namespace Hermes
 {
   /// \brief Namespace for linear / nonlinear / iterative solvers.
-  namespace Solvers
+  namespace MatrixSolvers
   {
     using namespace Hermes::Preconditioners;
     /// \ brief Options for matrix factorization reuse.
@@ -184,7 +184,7 @@ namespace Hermes
 
     /// \brief Function returning a solver according to the users's choice.
     /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
-    template<typename Scalar> HERMES_API Hermes::Solvers::Solver<Scalar>*  
+    template<typename Scalar> HERMES_API Hermes::MatrixSolvers::Solver<Scalar>*  
       create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 
     /*@}*/ // End of documentation group Solvers.

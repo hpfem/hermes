@@ -494,7 +494,7 @@ namespace Hermes
     template class HERMES_API PetscVector<double>;
     template class HERMES_API PetscVector<std::complex<double> >;
   }
-  namespace Solvers
+  namespace MatrixSolvers
   {
     template<typename Scalar>
     PetscLinearSolver<Scalar>::PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)

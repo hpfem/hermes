@@ -29,9 +29,8 @@ using namespace Hermes::Error;
 
 namespace Hermes 
 {
-  namespace Solvers 
-{
-
+  namespace MatrixSolvers 
+  {
     template<typename Scalar>
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : IterSolver<Scalar>(), m(m), rhs(rhs)

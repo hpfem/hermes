@@ -25,51 +25,54 @@
 
 namespace Hermes
 {
-  namespace Views
+  namespace Hermes2D
   {
-    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
-#ifndef NOGLUT
-    template<typename Scalar>
-    class HERMES_API VectorBaseView : public VectorView<Scalar>
+    namespace Views
     {
-    public:
+      // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+#ifndef NOGLUT
+      template<typename Scalar>
+      class HERMES_API VectorBaseView : public VectorView<Scalar>
+      {
+      public:
 
-      VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-        : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
+          : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
-      VectorBaseView(char* title, WinGeom* wg = NULL)
-        : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+        VectorBaseView(char* title, WinGeom* wg = NULL)
+          : VectorView<Scalar>(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
-      void show(Space<Scalar>* space);
+        void show(Space<Scalar>* space);
 
-      virtual void set_title(const char* t) {
-        if (basic_title.length() == 0)
-          basic_title.assign(t);
-        View::set_title(t);
-      }
+        virtual void set_title(const char* t) {
+          if (basic_title.length() == 0)
+            basic_title.assign(t);
+          View::set_title(t);
+        }
 
-      virtual ~VectorBaseView() { free(); }
+        virtual ~VectorBaseView() { free(); }
 
-    protected:
+      protected:
 
-      Space<Scalar>* space;
-      PrecalcShapeset* pss;
-      Solution<Scalar>* sln;
+        Space<Scalar>* space;
+        PrecalcShapeset* pss;
+        Solution<Scalar>* sln;
 
-      int ndof, component;
-      int base_index;
+        int ndof, component;
+        int base_index;
 
-      std::string basic_title;
+        std::string basic_title;
 
-      void free();
-      void update_solution();
-      void update_title();
+        void free();
+        void update_solution();
+        void update_title();
 
-      virtual void on_special_key(int key, int x, int y);
-      virtual const char* get_help_text() const;
+        virtual void on_special_key(int key, int x, int y);
+        virtual const char* get_help_text() const;
 
-    };
-#endif // NOGLUT
+      };
+#endif
+    }
   }
 }
 #endif

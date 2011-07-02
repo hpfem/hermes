@@ -29,7 +29,7 @@
 #include <AztecOO.h>
 
 namespace Hermes {
-  namespace Solvers {
+  namespace MatrixSolvers {
     /// \brief Encapsulation of AztecOO linear solver.
     ///
     /// @ingroup solvers

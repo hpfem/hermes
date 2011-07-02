@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs according to the solver selection.
   Hermes::Algebra::SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
   Hermes::Algebra::Vector<double>* rhs = create_vector<double>(matrix_solver);
-  Hermes::Solvers::Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  Hermes::MatrixSolvers::Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initial coefficient vector for the Newton's method.  
   double* coeff_vec = new double[ndof];
@@ -90,13 +90,13 @@ int main(int argc, char* argv[])
   if (VTK_VISUALIZATION)
   {
     // Output solution in VTK format.
-    Hermes::Views::Linearizer<double> lin;
+    Hermes::Hermes2D::Views::Linearizer<double> lin;
     bool mode_3D = true;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.
-    Hermes::Views::Orderizer ord;
+    Hermes::Hermes2D::Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
     info("Element orders in VTK format saved to file %s.", "ord.vtk");
   }
@@ -104,14 +104,14 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if (HERMES_VISUALIZATION)
   {
-    Hermes::Views::ScalarView<double> view("Solution", new Hermes::Views::WinGeom(0, 0, 440, 350));
+    Hermes::Hermes2D::Views::ScalarView<double> view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
     // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
     // triangles for OpenGL. The second parameter of View::show() sets the error 
     // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default), 
     // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows 
     // considerably with more accurate representation, so use it wisely.
-    view.show(&sln, Hermes::Views::HERMES_EPS_HIGH);
-    Hermes::Views::View::wait();
+    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_HIGH);
+    Hermes::Hermes2D::Views::View::wait();
   }
 
   // Clean up.

@@ -21,7 +21,7 @@
 
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
 {
     static Epetra_SerialComm seq_comm;
 

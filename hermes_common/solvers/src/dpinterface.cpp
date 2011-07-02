@@ -24,7 +24,7 @@
 /// \todo Put methods' definitions here.
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
   {
   }
 }

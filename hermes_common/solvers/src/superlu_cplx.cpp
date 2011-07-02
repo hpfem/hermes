@@ -26,7 +26,7 @@
 
 namespace Hermes 
 {
-  namespace Solvers 
+  namespace MatrixSolvers 
 {
     template <>
     void SuperLUSolver<std::complex<double> >::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, 

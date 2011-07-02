@@ -6,7 +6,7 @@
 #include <iostream>
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
-using namespace Hermes::Solvers;
+using namespace Hermes::MatrixSolvers;
 
 // Test of linear solvers.
 // Read matrix and RHS from a file.
