@@ -94,7 +94,6 @@ set(SRC
 #
 
 include(BuildAndInstallScripts)
-include(PickRealOrCplxLibs)
 
 # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 # and set its build properties (compile and link flags, installation directories). Due to
@@ -141,7 +140,6 @@ macro(BUILD_LIB HERMES_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   endif(WITH_VIEWER_GUI)
 
   set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
-  PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} ${HERMES_LIB})
 
   target_link_libraries(  ${HERMES_LIB} 
     ${HERMES_COMMON_LIB}

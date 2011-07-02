@@ -5,10 +5,6 @@ project(hermes_common)
 # Check for stacktrace and math library.
 include(CMakeCommon.txt)
 
-# For selecting real or complex libraries and include directories for MUMPS and
-# PETSC.
-include(PickRealOrCplxLibs)
-
 # Additional building steps required by MSVC.
 include(BuildAndInstallScripts)
 
@@ -98,7 +94,6 @@ configure_file(
 #
 
 include(BuildAndInstallScripts)
-include(PickRealOrCplxLibs)
 
 # This is needed e.g. for eigenvalue problems.
 # FIXME: Find which projects need it and enclose their CMake scripts in
@@ -121,6 +116,7 @@ macro(BUILD_LIB HERMES_COMMON_LIB BUILD_FLAGS)
   # options. Linking of optional libraries for the different Hermeses ({1,2,3}D)
   # is controled in their respective CMakeLists.txt. Note that for unselected
   # TPL's, the respective variables will be empty.
+
   target_link_libraries(  ${HERMES_COMMON_LIB}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
