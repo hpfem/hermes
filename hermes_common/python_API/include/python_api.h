@@ -21,11 +21,13 @@
 */
 #ifndef __HERMES_COMMON_PYTHON_API_H
 #define __HERMES_COMMON_PYTHON_API_H
+#include "config.h"
 #ifdef WITH_PYTHON
 
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 #undef HAVE_SYS_TIME_H
+
 #include "Python.h"
 #include "compat.h"
 

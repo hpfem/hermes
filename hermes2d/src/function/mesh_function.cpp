@@ -77,7 +77,7 @@ namespace Hermes
             ::free(this->overflow_nodes->get(i));
         delete this->overflow_nodes;
       }
-      this->nodes = new LightArray<Function<Scalar>::Node *>;
+      this->nodes = new LightArray<typename Function<Scalar>::Node *>;
       this->overflow_nodes = this->nodes;
     }
 
