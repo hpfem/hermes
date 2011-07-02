@@ -3,14 +3,12 @@ include_directories(${PROJECT_BINARY_DIR}/../hermes_common/)  # TODO: probably n
 
 # TODO: Decide whether to link to DEBUG or RELEASE version of Hermes ?
 
-cython_add_module(hermes2d)
+cython_add_module(pyhermes2d)
 
-include(PickRealOrCplxLibs)
-PICK_REAL_OR_CPLX_INCS(${HERMES_COMMON_LIB} hermes2d)
-target_link_libraries(hermes2d ${HERMES2D_REAL})
+target_link_libraries(pyhermes2d ${HERMES2D_REAL})
 
 set(PY_PATH ${PYTHON_INSTALL_PATH}/hermes2d)
-install(TARGETS hermes2d
+install(TARGETS pyhermes2d
             RUNTIME DESTINATION ${PY_PATH}
             ARCHIVE DESTINATION ${PY_PATH}
             LIBRARY DESTINATION ${PY_PATH}

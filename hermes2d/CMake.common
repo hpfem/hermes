@@ -1,5 +1,3 @@
-include(PickRealOrCplxLibs)
-
 macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   # Each project can define the particular Hermes library to link with, or not
   # define anything, in which case the "real" version will be used if Hermes was

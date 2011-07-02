@@ -240,6 +240,8 @@ if(WITH_PETSC)
 	# set the architecture-specific include directory here, but rather on a 
 	# per-target basis.
 	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
+	include_directories(${PETSC_CPLX_INCLUDE_DIRS})
+	set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
 endif(WITH_PETSC)
 
 if(WITH_UMFPACK)
@@ -253,6 +255,8 @@ if(WITH_MUMPS)
 		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
   endif(WITH_MPI)
   include_directories(${MUMPS_INCLUDE_DIR})
+	set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
+	LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
 endif(WITH_MUMPS)
 
 if(WITH_TRILINOS)
