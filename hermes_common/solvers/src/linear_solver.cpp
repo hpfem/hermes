@@ -19,7 +19,7 @@
 /*! \file solver.cpp
 \brief General linear/nonlinear/iterative solver functionality.
 */
-#include "solver.h"
+#include "linear_solver.h"
 #include "umfpack_solver.h"
 #include "superlu_solver.h"
 #include "amesos_solver.h"
@@ -32,14 +32,14 @@ using namespace Hermes::Algebra;
 
 namespace Hermes
 {
-  namespace MatrixSolvers 
+  namespace Solvers 
 {
     template<typename Scalar>
-    Solver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
+    LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
     {
       _F_
         Vector<Scalar>* rhs_dummy = NULL;
-      switch (matrix_solver) 
+      switch (matrix_solver_type) 
       {
       case Hermes::SOLVER_AZTECOO:
         {
@@ -113,10 +113,10 @@ namespace Hermes
       return NULL;
     }
 
-    template HERMES_API Solver<double>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
+    template HERMES_API LinearSolver<double>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
       Matrix<double>* matrix, Vector<double>* rhs);
 
-    template HERMES_API Solver<std::complex<double> >*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
+    template HERMES_API LinearSolver<std::complex<double> >*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
       Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
   }
 }

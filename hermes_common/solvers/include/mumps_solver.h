@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_MUMPS_SOLVER_H_
 #include "config.h"
 #ifdef WITH_MUMPS
-#include "solver.h"
+#include "linear_solver.h"
 #include "matrix.h"
 
 #define USE_COMM_WORLD  -987654
@@ -40,7 +40,7 @@ extern "C" {
 
 namespace Hermes
 {
-  namespace MatrixSolvers
+  namespace Solvers
   {
     template <typename Scalar> class MumpsSolver;
   }
@@ -138,13 +138,13 @@ namespace Hermes {
       friend class Solvers::MumpsSolver<Scalar>;
     };
   }
-  namespace MatrixSolvers
+  namespace Solvers
   {
     /// Encapsulation of MUMPS linear solver.
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API MumpsSolver : public LinearSolver<Scalar> {
+    class HERMES_API MumpsSolver : public DirectSolver<Scalar> {
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
     public:

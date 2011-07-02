@@ -554,7 +554,7 @@ namespace Hermes
     template class HERMES_API MumpsVector<double>;
     template class HERMES_API MumpsVector<std::complex<double> >;
   }
-  namespace MatrixSolvers
+  namespace Solvers
   {
     /// Macros allowing to use indices according to the Fortran documentation to index C arrays.
 #define ICNTL(I)            icntl[(I)-1]
@@ -640,7 +640,7 @@ namespace Hermes
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
-    LinearSolver<Scalar>(), m(m), rhs(rhs)
+    DirectSolver<Scalar>(), m(m), rhs(rhs)
     {
       _F_
         inited = false;

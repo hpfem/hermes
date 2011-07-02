@@ -6,6 +6,8 @@ set(SRC
    forms.cpp
    range.cpp
    asmlist.cpp
+   newton_solver.cpp
+   picard_solver.cpp
    
    adapt/adapt.cpp
    adapt/kelly_type_adapt.cpp

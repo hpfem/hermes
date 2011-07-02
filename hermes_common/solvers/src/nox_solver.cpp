@@ -21,53 +21,18 @@
 
 namespace Hermes 
 {
-  namespace MatrixSolvers 
+  namespace Solvers 
 {
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
-    NoxProblemInterface<Scalar>::NoxProblemInterface(DiscreteProblemInterface<Scalar>* problem)
+    void NoxSolver<Scalar>::prealloc_jacobian()
     {
-      this->fep = problem;
-      int ndof = this->fep->get_num_dofs();
-      // allocate initial solution
-      init_sln.alloc(ndof);
-      if(!this->fep->is_matrix_free()) prealloc_jacobian();
-
-      this->precond = Teuchos::null;
+      this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
-    NoxProblemInterface<Scalar>::~NoxProblemInterface()
-    {
-      init_sln.free();
-      if(!this->fep->is_matrix_free()) jacobian.free();
-    }
-
-    template<typename Scalar>
-    void NoxProblemInterface<Scalar>::prealloc_jacobian()
-    {
-      this->fep->create_sparse_structure(&jacobian);
-    }
-
-    template<typename Scalar>
-    void NoxProblemInterface<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
-    {
-      precond = pc;
-      prealloc_jacobian();
-    }
-
-    template<typename Scalar>
-    void NoxProblemInterface<Scalar>::set_init_sln(double *ic)
-    {
-      int size = this->fep->get_num_dofs();
-      int *idx = new int[size];
-      for (int i = 0; i < size; i++) init_sln.set(i, ic[i]);
-      delete [] idx;
-    }
-
-    template<typename Scalar>
-    bool NoxProblemInterface<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
+    bool NoxSolver<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
       EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
       EpetraVector<Scalar> rhs(f);
@@ -76,14 +41,14 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->fep->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
+      this->dp->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
       delete [] coeff_vec;
 
       return true;
     }
 
     template<typename Scalar>
-    bool NoxProblemInterface<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
+    bool NoxSolver<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
     {
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
       assert(jac != NULL);
@@ -95,7 +60,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->fep->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
+      this->dp->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
 
@@ -103,7 +68,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxProblemInterface<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
+    bool NoxSolver<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
       Teuchos::ParameterList *precParams)
     {
       assert(precond != Teuchos::null);
@@ -113,7 +78,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->fep->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
+      this->dp->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
 
@@ -125,8 +90,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : IterSolver<Scalar>()
+    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem)
     {
+      this->fep = problem;
+      int ndof = this->dp->get_num_dofs();
+      // allocate initial solution
+      init_sln.alloc(ndof);
+      if(!this->dp->is_matrix_free()) prealloc_jacobian();
+
+      this->precond = Teuchos::null;
+
       // default values
       nl_dir = "Newton";
       output_flags = NOX::Utils::Error;
@@ -150,12 +123,8 @@ namespace Hermes
       conv_flag.relresid = 0;
       conv_flag.update = 0;
       conv_flag.wrms = 0;
-
-      // Create the interface_ between the test problem and the nonlinear solver
-      // This is created by the user using inheritance of the abstract base class:
-      // NOX_Epetra_Interface
-      this->interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
     }
+
     template<typename Scalar>
     NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
       double ls_tolerance,
@@ -176,6 +145,14 @@ namespace Hermes
       unsigned flag_wrms
       ) 
     {
+      this->fep = problem;
+      int ndof = this->dp->get_num_dofs();
+      // allocate initial solution
+      init_sln.alloc(ndof);
+      if(!this->dp->is_matrix_free()) prealloc_jacobian();
+
+      this->precond = Teuchos::null;
+
       // default values
       this->nl_dir = nl_dir;
       output_flags = message_type;
@@ -199,11 +176,6 @@ namespace Hermes
       this->conv_flag.relresid = flag_relresid;
       this->conv_flag.update = flag_update;
       this->conv_flag.wrms = flag_wrms;
-
-      // Create the interface_ between the test problem and the nonlinear solver
-      // This is created by the user using inheritance of the abstract base class:
-      // NOX_Epetra_Interface
-      this->interface_ = Teuchos::rcp(new NoxProblemInterface<Scalar>(problem));
     }
 
     template<typename Scalar>
@@ -211,7 +183,7 @@ namespace Hermes
     {
       // FIXME: this does not destroy the "interface_", and Trilinos 
       // complains at closing main.cpp.
-      this->fep->invalidate_matrix();
+      this->dp->invalidate_matrix();
     }
 
 #ifdef HAVE_TEUCHOS
@@ -220,7 +192,8 @@ namespace Hermes
     void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       this->precond_yes = true;
-      set_precond(pc);
+      precond = pc;
+      prealloc_jacobian();
     }
 #endif
 
@@ -234,7 +207,10 @@ namespace Hermes
     template<typename Scalar>
     bool NoxSolver<Scalar>::set_init_sln(double *ic)
     {
-      set_init_sln(ic);
+      int size = this->dp->get_num_dofs();
+      int *idx = new int[size];
+      for (int i = 0; i < size; i++) init_sln.set(i, ic[i]);
+      delete [] idx;
       return true;
     }
 
@@ -255,21 +231,21 @@ namespace Hermes
       const Epetra_Vector &f_sln =
         (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
       // extract solution
-      int n = this->fep->get_num_dofs();
-      delete [] sln;
-      sln = new double[n];
-      memset(sln, 0, n * sizeof(double));
-      f_sln.ExtractCopy(sln);
+      int n = this->dp->get_num_dofs();
+      delete [] sln_vector;
+      sln_vector = new double[n];
+      memset(sln_vector, 0, n * sizeof(double));
+      f_sln.ExtractCopy(sln_vector);
     }
 
     template<>
     void NoxSolver<std::complex<double> >::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver)
     {
       // extract solution
-      int n = this->fep->get_num_dofs();
-      delete [] sln;
-      sln = new std::complex<double>[n];
-      memset(sln, 0, n * sizeof(std::complex<double>));
+      int n = this->dp->get_num_dofs();
+      delete [] sln_vector;
+      sln_vector = new std::complex<double>[n];
+      memset(sln_vector, 0, n * sizeof(std::complex<double>));
     }
 
     template<typename Scalar>
@@ -313,7 +289,7 @@ namespace Hermes
       if(this->precond_yes == false)
         ls_pars.set("Preconditioner", "None");
       else 
-        if(this->fep->is_matrix_free()) 
+        if(this->dp->is_matrix_free()) 
           ls_pars.set("Preconditioner", "User Defined");
         else 
         {
@@ -340,7 +316,7 @@ namespace Hermes
 
         NOX::Epetra::Vector init_sln(*this->get_init_sln()->vec);
 
-        if(this->fep->is_matrix_free()) 
+        if(this->dp->is_matrix_free()) 
         {
           // Matrix<Scalar>-Free (Epetra_Operator)
           if(precond == Teuchos::null) 
@@ -425,7 +401,7 @@ namespace Hermes
         NOX::StatusTest::StatusType status = solver->solve();
 
 
-        if(!this->fep->is_matrix_free())
+        if(!this->dp->is_matrix_free())
           jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
 
         bool success;

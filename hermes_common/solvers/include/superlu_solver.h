@@ -24,13 +24,13 @@
 
 #include "config.h"
 #ifdef WITH_SUPERLU  
-#include "solver.h"
+#include "linear_solver.h"
 #include "matrix.h"
 
 #include <supermatrix.h>
 #include <slu_util.h>
 namespace Hermes {
-  namespace MatrixSolvers {
+  namespace Solvers {
     template <typename Scalar> class SuperLUSolver;
 #ifdef SLU_MT
     template <typename Scalar>    
@@ -156,13 +156,13 @@ namespace Hermes {
     };
 
   }
-  namespace MatrixSolvers{
+  namespace Solvers{
 
     /// Encapsulation of SUPERLU linear solver
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API SuperLUSolver : public LinearSolver<Scalar> {
+    class HERMES_API SuperLUSolver : public DirectSolver<Scalar> {
     private:
 #ifndef SLU_MT
       void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr, 

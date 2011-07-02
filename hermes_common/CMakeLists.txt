@@ -53,7 +53,8 @@ set(SRC
   third_party_codes/trilinos-teuchos/src/Teuchos_stacktrace.cpp
   
   solvers/src/dpinterface.cpp
-  solvers/src/solver.cpp
+  solvers/src/linear_solver.cpp
+  solvers/src/nonlinear_solver.cpp
   solvers/src/nox_solver.cpp
   solvers/src/epetra.cpp
   solvers/src/aztecoo_solver.cpp

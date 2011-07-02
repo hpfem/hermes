@@ -57,7 +57,7 @@ const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the 
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
                                                   // velocity profile at inlet).
-Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
                                                                   // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
 
 // Boundary markers.
@@ -135,8 +135,8 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
-  Vector<double>* rhs = create_vector<double>(matrix_solver);
+  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
+  Vector<double>* rhs = create_vector<double>(matrix_solver_type);
   Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
 
   // Initialize views.

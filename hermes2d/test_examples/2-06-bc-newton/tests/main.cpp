@@ -6,7 +6,7 @@
 
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
 
     // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
-    Vector<double>* rhs = create_vector<double>(matrix_solver);
+    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
+    Vector<double>* rhs = create_vector<double>(matrix_solver_type);
     Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
     // Initial coefficient vector for the Newton's method.  

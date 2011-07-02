@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 #include "config.h"
 #ifdef WITH_UMFPACK
-#include "solver.h"
+#include "linear_solver.h"
 #include "matrix.h"
 
 using namespace Hermes::Algebra;
@@ -32,7 +32,7 @@ namespace Hermes
 {
   namespace Algebra 
   {
-    using namespace Hermes::MatrixSolvers;
+    using namespace Hermes::Solvers;
     /// \brief General CSC Matrix class.
     /// (can be used in umfpack, in that case use the
     /// UMFPackMatrix subclass, or with EigenSolver, or anything else)
@@ -132,13 +132,13 @@ namespace Hermes
       Scalar *v;
     };
   }
-  namespace MatrixSolvers
+  namespace Solvers
   {
     /// \brief Encapsulation of UMFPACK linear solver.
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API UMFPackLinearSolver : public LinearSolver<Scalar> {
+    class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> {
     public:
       UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
       virtual ~UMFPackLinearSolver();

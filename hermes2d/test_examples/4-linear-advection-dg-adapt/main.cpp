@@ -51,7 +51,7 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
@@ -124,8 +124,8 @@ int main(int argc, char* args[])
     DiscreteProblem<double>* dp = new DiscreteProblem<double>(&wf, ref_space);
     
     // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
-    Vector<double>* rhs = create_vector<double>(matrix_solver);
+    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
+    Vector<double>* rhs = create_vector<double>(matrix_solver_type);
     Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
     // Initialize the preconditioner in the case of SOLVER_AZTECOO.

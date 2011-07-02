@@ -738,7 +738,7 @@ namespace Hermes
     template class HERMES_API UMFPackVector<std::complex<double> >;
   }
 
-  namespace MatrixSolvers
+  namespace Solvers
   {
     static void check_status(const char *fn_name, int status) 
     {
@@ -854,7 +854,7 @@ namespace Hermes
 
     template<typename Scalar>
     UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
-      : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
+      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
       _F_
     }

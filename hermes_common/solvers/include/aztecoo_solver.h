@@ -24,12 +24,12 @@
 #include "config.h"
 #ifdef HAVE_AZTECOO
 #include "epetra.h"
-#include "solver.h"
+#include "linear_solver.h"
 #include "precond_ifpack.h"
 #include <AztecOO.h>
 
 namespace Hermes {
-  namespace MatrixSolvers {
+  namespace Solvers {
     /// \brief Encapsulation of AztecOO linear solver.
     ///
     /// @ingroup solvers

@@ -29,7 +29,7 @@
 
 namespace Hermes {
   namespace Preconditioners {
-    using namespace Hermes::MatrixSolvers;
+    using namespace Hermes::Solvers;
     /// \brief Preconditioners built on ML.
     ///
     /// @ingroup preconds

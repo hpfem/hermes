@@ -470,7 +470,15 @@ namespace Hermes
     {
       _F_;
       Scalar* coeff_vec = NULL;
-      assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights == NULL);
+      assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights);
+    }
+    
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs,
+      bool force_diagonal_blocks, Table* block_weights)
+    {
+      _F_;
+      assemble(NULL, rhs, force_diagonal_blocks, block_weights);
     }
 
     template<typename Scalar>
@@ -599,6 +607,15 @@ namespace Hermes
       // Delete the vector u_ext.
       for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
         delete *it;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs,
+      bool force_diagonal_blocks, bool add_dir_lift, 
+      Table* block_weights)
+    {
+      _F_;
+      assemble(coeff_vec, NULL, rhs, force_diagonal_blocks, add_dir_lift, block_weights);
     }
 
     template<typename Scalar>

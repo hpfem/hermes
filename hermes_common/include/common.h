@@ -39,8 +39,7 @@
 #include <float.h>
 #include <errno.h>
 #include <cmath>
-//
-// STL stuff
+
 #include <algorithm>
 #include <vector>
 #include <map>
@@ -50,18 +49,18 @@
 #include <fstream>
 #include <cstring>
 
-#include "hermes_logging.h"       // logging
-#include "common_time_period.h"   // timing utilities
-#include "compat.h"               // platform compatibility stuff
-#include "callstack.h"            // error tracing
+#include "hermes_logging.h"
+#include "common_time_period.h"
+#include "compat.h"
+#include "callstack.h"
 #include "error.h"
 #include "vector.h"
 #include "tables.h"
-#include "../python_API/include/python_api.h"
-#include "../python_API/include/python_engine_api.h"
 #include "array.h"
 #include "qsort.h"
 #include "ord.h"
+#include "../python_API/include/python_api.h"
+#include "../python_API/include/python_engine_api.h"
 
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED

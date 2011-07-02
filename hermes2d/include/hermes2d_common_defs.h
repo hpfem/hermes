@@ -119,61 +119,43 @@ namespace Hermes
     class HERMES_API Global {
     public:
       /// Error calculation in Hermes, useful for non-adaptive computations.
-      double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const; // Note: coarse mesh sln has to be first, then
+      // Note: coarse mesh sln has to be first, then
       // ref_sln (because the abs. error is divided
       // by the norm of the latter).
-      double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type) const;
-      double calc_norm(MeshFunction<Scalar>* sln, int norm_type) const;
-      double calc_norms(Hermes::vector<Solution<Scalar>*> slns) const;         // Norms are determined from space_type in each Solution.
+      static double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
+      
+      static double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
 
-      /// Function calculating errors between solutions in right and left vectors, returning all necessary parameters.
-      /// returns correct parameters only if the return value is true.
-      /// coarse mesh sln has to be first, then ref_sln.
-      bool calc_errors(Hermes::vector<Solution<Scalar>* > left, Hermes::vector<Solution<Scalar>*> right,
-        Hermes::vector<double> & err_abs, Hermes::vector<double> & norm_vals,
-        double & err_abs_total, double & norm_total, double & err_rel_total,
-        Hermes::vector<ProjNormType> norms = Hermes::vector<ProjNormType>()) const;
+      static double calc_norm(MeshFunction<Scalar>* sln, int norm_type);
+      
+      /// Calculate norm of a (possibly vector-valued) solution.
+      /// Take norm from spaces where these solutions belong.
+      static double calc_norms(Hermes::vector<Solution<Scalar>*> slns);
+      static double calc_abs_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2);
+      static double calc_rel_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2);
 
-      /// Helper function.
-      /// DEPRECATED.
-      double calc_abs_error(double (*fn)(MeshFunction<Scalar>*, MeshFunction<Scalar>*, RefMap*, RefMap*),
-        MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2) const;
-      /// Helper function.
-      /// DEPRECATED.
-      double calc_norm(double (*fn)(MeshFunction<Scalar>*, RefMap*), MeshFunction<Scalar>* sln) const;
+      static double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
-      double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru) const;
+      static double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
-      double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru) const;
+      static double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
-      double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru) const;
+      static double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
-      double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru) const;
-
-      double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv) const;
-      double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru) const;
+      static double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
 
       ///< Returns string representation of the quad order: used for debugging purposses.
-      static const std::string get_quad_order_str(const int quad_order);
+      static std::string get_quad_order_str(const int quad_order);
 
       ///< Returns the correct axial order for given edge.
       static int make_edge_order(int edge, int encoded_order, int mode);
 
-      double get_l2_norm(Vector<Scalar>* vec) const;
-
-      bool solve_newton(Scalar* coeff_vec, DiscreteProblem<Scalar>* dp, Hermes::MatrixSolvers::Solver<Scalar>* solver, SparseMatrix<Scalar>* matrix,
-        Vector<Scalar>* rhs, bool jacobian_changed = true, double newton_tol = 1e-8, 
-        int newton_max_iter = 100, bool verbose = false,
-        bool residual_as_function = false,
-        double damping_coeff = 1.0, double max_allowed_residual_norm = 1e6) const;
-
-      bool solve_picard(WeakForm<Scalar>* wf, Space<Scalar>* space, Solution<Scalar>* sln_prev_iter, 
-        Hermes::MatrixSolverType matrix_solver, double tol = 1e-8, 
-        int max_iter = 100, bool verbose = false) const;
+      static double get_l2_norm(Vector<Scalar>* vec);
     };
   }
 }

@@ -54,7 +54,7 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -110,8 +110,8 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof, graph_cpu;
 
   // Initialize the matrix solver.
-  SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
-  Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
+  SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver_type);
+  Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver_type);
   Solver<std::complex<double> >* solver = create_linear_solver(matrix_solver, matrix, rhs);
   
 #ifdef HAVE_AZTECOO
@@ -133,8 +133,8 @@ int main(int argc, char* argv[])
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize matrix solver.
-    SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
-    Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
+    SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver_type);
+    Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver_type);
     Solver<std::complex<double> >* solver = create_linear_solver<std::complex<double> >(matrix_solver, matrix, rhs);
 
     // Initialize reference problem.

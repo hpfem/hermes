@@ -30,13 +30,13 @@ using namespace Hermes::Error;
 
 namespace Hermes 
 {
-  namespace MatrixSolvers 
+  namespace Solvers 
   {
     template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 
     template<typename Scalar>
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
+      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
     {
       _F_
         solver = factory.Create(solver_type, problem);

@@ -23,17 +23,17 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
+    RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver_type, bool start_from_zero_K_vector, bool residual_as_vector)
       : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
-      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) ,matrix_solver(matrix_solver)
+      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) , matrix_solver_type(matrix_solver_type)
     {
       // Check for not implemented features.
 
-      matrix_right=create_matrix<Scalar>(matrix_solver);
-      matrix_left=create_matrix<Scalar>(matrix_solver);
-      vector_right=create_vector<Scalar>(matrix_solver);
+      matrix_right=create_matrix<Scalar>(matrix_solver_type);
+      matrix_left=create_matrix<Scalar>(matrix_solver_type);
+      vector_right=create_vector<Scalar>(matrix_solver_type);
       // Create matrix solver.
-      solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
+      solver = create_linear_solver(matrix_solver_type, matrix_right, vector_right);
 
       // Vector K_vector of length num_stages * ndof. will represent
       // the 'K_i' vectors in the usual R-K notation.
@@ -108,7 +108,7 @@ namespace Hermes
       // Project the previous time level solutions onto the actual spaces to be able to add the resulting vector to
       // the K_vector when passing the u_ext.
       Scalar* slns_prev_time_projection = new Scalar[ndof];
-      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, matrix_solver);
+      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, slns_prev_time_projection, matrix_solver_type);
 
       // Creates the stage weak formulation.
       create_stage_wf(dp->get_spaces().size(), current_time, time_step);
