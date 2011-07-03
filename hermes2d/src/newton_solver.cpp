@@ -17,6 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "newton_solver.h"
+#include "hermes_common.h"
 
 namespace Hermes
 {
@@ -58,25 +59,25 @@ namespace Hermes
     bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
       // Delete the old solution vector, if there is any.
-      if(sln_vector != NULL)
+      if(this->sln_vector != NULL)
       {
-        delete [] sln_vector;
-        sln_vector = NULL;
+        delete [] this->sln_vector;
+        this->sln_vector = NULL;
       }
 
       // Set up the solver, jacobian, and residual according to the solver selection.
-      SparseMatrix<Scalar>* jacobian = create_matrix<Scalar>(matrix_solver_type);
-      Vector<Scalar>* residual = create_vector<Scalar>(matrix_solver_type);
-      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(matrix_solver_type, jacobian, residual);
+      SparseMatrix<Scalar>* jacobian = create_matrix<Scalar>(this->matrix_solver_type);
+      Vector<Scalar>* residual = create_vector<Scalar>(this->matrix_solver_type);
+      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
 
       // Set iterative method and preconditioner in case of iterative solver AztecOO.
-      if (matrix_solver_type == SOLVER_AZTECOO) {
-        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_solver(iterative_method);
-        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_precond(preconditioner);
+      if (this->matrix_solver_type == SOLVER_AZTECOO) {
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(this->preconditioner);
       }
 
       // Obtain the number of degrees of freedom.
-      int ndof = dp->get_num_dofs();
+      int ndof = this->dp->get_num_dofs();
 
       // The Newton's loop.
       double residual_norm;
@@ -84,7 +85,7 @@ namespace Hermes
       while (1)
       {
         // Assemble the residual vector.
-        dp->assemble(coeff_vec, residual);
+        this->dp->assemble(coeff_vec, residual);
 
         // Measure the residual norm.
         if (residual_as_function)
@@ -92,17 +93,17 @@ namespace Hermes
           // Prepare solutions for measuring residual norm.
           Hermes::vector<Solution<Scalar>*> solutions;
           Hermes::vector<bool> dir_lift_false;
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces().size(); i++) {
+          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++) {
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
-          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces(), solutions, dir_lift_false);
+          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
 
           // Clean up.
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces().size(); i++)
+          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
             delete solutions[i];
         }
         else 
@@ -113,17 +114,17 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1) {
-          if(verbose_output)
+          if(this->verbose_output)
             info("---- Newton initial residual norm: %g", residual_norm);
         }
         else 
-          if(verbose_output)
+          if(this->verbose_output)
             info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          if (verbose_output)
+          if (this->verbose_output)
           {
             info("Current residual norm: %g", residual_norm);
             info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
@@ -136,9 +137,9 @@ namespace Hermes
         // This is the only correct way of ending.
         if (residual_norm < newton_tol && it > 1) {
           // We want to return the solution in a different structure.
-          sln_vector = new Scalar[ndof];
+          this->sln_vector = new Scalar[ndof];
           for (unsigned int i = 0; i < ndof; i++)
-            sln_vector[i] = coeff_vec[i];
+            this->sln_vector[i] = coeff_vec[i];
 
           // Clean up.
           delete jacobian;
@@ -149,7 +150,7 @@ namespace Hermes
         }
 
         // Assemble the jacobian.
-        dp->assemble(coeff_vec, jacobian);
+        this->dp->assemble(coeff_vec, jacobian);
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
@@ -157,7 +158,7 @@ namespace Hermes
 
         // Solve the linear system.
         if(!linear_solver->solve()) {
-          if (verbose_output) 
+          if (this->verbose_output) 
             info ("Matrix<Scalar> solver failed. Returning false.\n");
           break;
         }
@@ -169,7 +170,7 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          if (verbose_output) 
+          if (this->verbose_output) 
             info("Maximum allowed number of Newton iterations exceeded, returning false.");
           break;
         }
@@ -192,17 +193,17 @@ namespace Hermes
     bool NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
       // Set up the solver, and residual according to the solver selection.
-      Vector<Scalar>* residual = create_vector<Scalar>(matrix_solver_type);
-      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(matrix_solver_type, kept_jacobian, residual);
+      Vector<Scalar>* residual = create_vector<Scalar>(this->matrix_solver_type);
+      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
 
       // Set iterative method and preconditioner in case of iterative solver AztecOO.
-      if (matrix_solver_type == SOLVER_AZTECOO) {
-        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_solver(iterative_method);
-        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_precond(preconditioner);
+      if (this->matrix_solver_type == SOLVER_AZTECOO) {
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_precond(this->preconditioner);
       }
 
       // Obtain the number of degrees of freedom.
-      int ndof = dp->get_num_dofs();
+      int ndof = this->dp->get_num_dofs();
 
       // The Newton's loop.
       double residual_norm;
@@ -210,7 +211,7 @@ namespace Hermes
       while (1)
       {
         // Assemble the residual vector.
-        dp->assemble(coeff_vec, residual);
+        this->dp->assemble(coeff_vec, residual);
 
         // Measure the residual norm.
         if (residual_as_function)
@@ -218,17 +219,17 @@ namespace Hermes
           // Prepare solutions for measuring residual norm.
           Hermes::vector<Solution<Scalar>*> solutions;
           Hermes::vector<bool> dir_lift_false;
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces().size(); i++) {
+          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++) {
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
-          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces(), solutions, dir_lift_false);
+          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
 
           // Clean up.
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(dp)->get_spaces().size(); i++)
+          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
             delete solutions[i];
         }
         else 
@@ -238,17 +239,19 @@ namespace Hermes
         }
 
         // Info for the user.
-        if(it == 1)
-          if(verbose_output)
+        if(it == 1) 
+        {
+          if(this->verbose_output)
             info("---- Newton initial residual norm: %g", residual_norm);
-          else 
-            if(verbose_output)
-              info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+        }
+	else 
+	  if(this->verbose_output)
+	    info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          if (verbose_output)
+          if (this->verbose_output)
           {
             info("Current residual norm: %g", residual_norm);
             info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
@@ -261,9 +264,9 @@ namespace Hermes
         // This is the only correct way of ending.
         if (residual_norm < newton_tol && it > 1) {
           // We want to return the solution in a different structure.
-          sln_vector = new Scalar[ndof];
+          this->sln_vector = new Scalar[ndof];
           for (unsigned int i = 0; i < ndof; i++)
-            sln_vector[i] = coeff_vec[i];
+            this->sln_vector[i] = coeff_vec[i];
 
           // Clean up.
           delete residual;
@@ -275,7 +278,7 @@ namespace Hermes
         // Assemble and keep the jacobian if this has not been done before.
         if(kept_jacobian == NULL) {
           kept_jacobian = create_matrix<Scalar>(matrix_solver_type);
-          dp->assemble(coeff_vec, kept_jacobian);
+          this->dp->assemble(coeff_vec, kept_jacobian);
         }
 
         // Multiply the residual vector with -1 since the matrix
@@ -284,7 +287,7 @@ namespace Hermes
 
         // Solve the linear system.
         if(!linear_solver->solve()) {
-          if (verbose_output) 
+          if (this->verbose_output) 
             info ("Matrix<Scalar> solver failed. Returning false.\n");
           break;
         }
@@ -296,7 +299,7 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          if (verbose_output) 
+          if (this->verbose_output) 
             info("Maximum allowed number of Newton iterations exceeded, returning false.");
           break;
         }

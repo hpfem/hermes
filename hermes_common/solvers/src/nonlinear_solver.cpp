@@ -28,12 +28,12 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : sln_vector(NULL), time(-1.0), dp(dp), verbose_output(true), matrix_solver_type(SOLVER_UMFPACK)
+    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : dp(dp), sln_vector(NULL), time(-1.0), matrix_solver_type(SOLVER_UMFPACK),  verbose_output(true)
     {
     }
 
     template<typename Scalar>
-    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : sln_vector(NULL), time(-1.0), dp(dp), verbose_output(true), matrix_solver_type(matrix_solver_type)
+    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : dp(dp), sln_vector(NULL), time(-1.0), matrix_solver_type(matrix_solver_type), verbose_output(true)
     {
     }
 
