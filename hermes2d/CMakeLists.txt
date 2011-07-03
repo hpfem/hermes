@@ -115,6 +115,7 @@ include_directories(${CMAKE_SOURCE_DIR}/hermes2d/include/weakform_library)
 add_subdirectory(src)
 
 if(H2D_WITH_TEST_EXAMPLES)
+  enable_testing()
   add_subdirectory(test_examples)
 endif(H2D_WITH_TEST_EXAMPLES)
 
