@@ -159,7 +159,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase = 1) {
+    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase) {
       _F_
         Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
       bool same_meshes = true;
@@ -180,7 +180,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase = 1) {
+    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase) {
       _F_
         Mesh* ref_mesh = new Mesh;
       ref_mesh->copy(coarse->get_mesh());
