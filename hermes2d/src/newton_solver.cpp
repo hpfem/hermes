@@ -68,6 +68,12 @@ namespace Hermes
       SparseMatrix<Scalar>* jacobian = create_matrix<Scalar>(matrix_solver_type);
       Vector<Scalar>* residual = create_vector<Scalar>(matrix_solver_type);
       LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(matrix_solver_type, jacobian, residual);
+      
+      // Set iterative method and preconditioner in case of iterative solver AztecOO.
+      if (matrix_solver_type == SOLVER_AZTECOO) {
+        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_solver(iterative_method);
+        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_precond(preconditioner);
+      }
 
       // Obtain the number of degrees of freedom.
       int ndof = dp->get_num_dofs();
@@ -187,6 +193,12 @@ namespace Hermes
       // Set up the solver, and residual according to the solver selection.
       Vector<Scalar>* residual = create_vector<Scalar>(matrix_solver_type);
       LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(matrix_solver_type, kept_jacobian, residual);
+      
+      // Set iterative method and preconditioner in case of iterative solver AztecOO.
+      if (matrix_solver_type == SOLVER_AZTECOO) {
+        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_solver(iterative_method);
+        dynamic_cast<AztecOOSolver<std::complex<double> >*>(linear_solver)->set_precond(preconditioner);
+      }
 
       // Obtain the number of degrees of freedom.
       int ndof = dp->get_num_dofs();

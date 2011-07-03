@@ -60,6 +60,7 @@ set(WITH_H2D                  YES)
 	set(H2D_RELEASE           YES)
 	# Optional parts of the library.
 	set(H2D_WITH_TEST_EXAMPLES     YES)
+	
   set(H2D_WITH_GLUT         YES)
   set(H2D_WITH_TESTS        YES)
 	

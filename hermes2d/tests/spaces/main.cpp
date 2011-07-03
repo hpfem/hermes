@@ -43,9 +43,6 @@ int main(int argc, char* argv[])
     Hermes::vector<int>(17, 72, 293),
     Hermes::vector<int>(19, 71, 291));
 
-  // Instantiate a class with global functions.
-  Global<double> hermes2d;
-
   // Load the mesh_lshape.
   Mesh mesh_lshape, mesh_square;
   H2DReader mloader;

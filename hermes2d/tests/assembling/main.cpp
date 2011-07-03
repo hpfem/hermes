@@ -5,9 +5,6 @@
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Hermes::Hermes2D::Global<double> hermes2d;
-  
   return 0;
 }
 

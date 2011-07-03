@@ -40,9 +40,6 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Hermes::Hermes2D::Global<double> hermes2d;
-
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::H2DReader mloader;

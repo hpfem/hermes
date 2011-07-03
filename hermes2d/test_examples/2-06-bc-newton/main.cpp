@@ -35,9 +35,6 @@ const double BDY_C_PARAM = 20.0;
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Hermes::Hermes2D::Global<double> hermes2d;
-
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::H2DReader mloader;
@@ -66,21 +63,17 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
 
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
-  Vector<double>* rhs = create_vector<double>(matrix_solver_type);
-  Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
-
   // Initial coefficient vector for the Newton's method.  
   double* coeff_vec = new double[ndof];
   memset(coeff_vec, 0, ndof*sizeof(double));
 
-  // Perform Newton's iteration.
-  if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
-
-  // Translate the resulting coefficient vector into the Solution sln.
+  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(coeff_vec, &space, &sln);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+  if (!newton.solve(coeff_vec)) 
+    error("Newton's iteration failed.");
+  else
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   // VTK output.
   if (VTK_VISUALIZATION) {
@@ -104,9 +97,6 @@ int main(int argc, char* argv[])
   }
 
   // Clean up.
-  delete solver;
-  delete matrix;
-  delete rhs;
   delete [] coeff_vec;
 
   return 0;

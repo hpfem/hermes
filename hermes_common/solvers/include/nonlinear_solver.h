@@ -50,6 +50,16 @@ namespace Hermes
 
       /// Sets the attribute verbose_output to the paramater passed.
       void set_verbose_output(bool verbose_output_to_set);
+      
+      /// Set the name of the iterative method employed by AztecOO (ignored
+      /// by the other solvers). 
+      /// \param[in] preconditioner_name See the attribute preconditioner.
+      void set_iterative_method(const char* iterative_method_name);
+
+      /// Set the name of the preconditioner employed by AztecOO (ignored by
+      /// the other solvers).
+      /// \param[in] preconditioner_name See the attribute preconditioner.
+      void set_preconditioner(const char* preconditioner_name);
 
     protected:
       DiscreteProblemInterface<Scalar>* dp; ///< FE problem being solved (not NULL in case of using
@@ -73,6 +83,17 @@ namespace Hermes
 
       /// Preconditioned solver.
       bool precond_yes;
+
+      /// Name of the iterative method employed by AztecOO (ignored
+      /// by the other solvers). 
+      /// Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+      char* iterative_method;
+      
+      /// Name of the preconditioner employed by AztecOO (ignored by
+      /// the other solvers).
+      /// Possibilities: none, jacobi, neumann, least-squares, or a
+      ///  preconditioner from IFPACK (see solver/aztecoo.h).
+      char* preconditioner;
     };
   }
 }

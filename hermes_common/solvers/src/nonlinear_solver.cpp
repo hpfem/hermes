@@ -62,6 +62,34 @@ namespace Hermes
       this->verbose_output = to_set;
     }
 
+    template<typename Scalar>
+    void NonlinearSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
+    {
+      if(this->matrix_solver_type != SOLVER_AZTECOO)
+      {
+        warning("Trying to set iterative method for a different solver than AztecOO.");
+        return;
+      }
+      else
+      {
+        this->iterative_method = (char*)iterative_method_name;
+      }
+    }
+
+    template<typename Scalar>
+    void NonlinearSolver<Scalar>::set_preconditioner(const char* preconditioner_name)
+    {
+      if(this->matrix_solver_type != SOLVER_AZTECOO)
+      {
+        warning("Trying to set iterative method for a different solver than AztecOO.");
+        return;
+      }
+      else
+      {
+        this->preconditioner = (char*)preconditioner_name;
+      }
+    }
+
     template class HERMES_API NonlinearSolver<double>;
     template class HERMES_API NonlinearSolver<std::complex<double> >;
   }

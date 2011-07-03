@@ -14,9 +14,6 @@ const bool STOKES = false;                        // For application of Stokes f
 // pressure approximation). Otherwise the standard continuous
 // elements are used. The results are striking - check the
 // tutorial for comparisons.
-const bool NEWTON = true;                         // If NEWTON == true then the Newton's iteration is performed.
-// in every time step. Otherwise the convective term is linearized
-// using the velocities from the previous time step.
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
 const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
 // Note: P_INIT_VEL should always be greater than
@@ -49,8 +46,6 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Global<double> hermes_2D;
-
   // Load the mesh.
   Mesh mesh;
   H2DReader mloader;
@@ -100,30 +95,19 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakForm<double>* wf;
-  if (NEWTON)
     wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
-  else
-    wf = new WeakFormNSSimpleLinearization(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
-  // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
-  Vector<double>* rhs = create_vector<double>(matrix_solver_type);
-  Solver<double>* solver = create_linear_solver(matrix_solver, matrix, rhs);
-
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
-  if (NEWTON) 
-  {
     info("Projecting initial condition to obtain initial vector for the Newton's method.");
     OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
       Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-      coeff_vec, matrix_solver, 
+    coeff_vec, matrix_solver_type, 
       Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
-  }
 
   // Time-stepping loop:
   int num_time_steps = T_FINAL / TAU;
@@ -139,37 +123,20 @@ int main(int argc, char* argv[])
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
-    if (NEWTON) 
-    {
       // Perform Newton's iteration.
       info("Solving nonlinear problem:");
       bool verbose = true;
-      bool jacobian_changed = true;
-      if (!hermes_2D.solve_newton(coeff_vec, &dp, solver, matrix, rhs, jacobian_changed,
-        NEWTON_TOL, NEWTON_MAX_ITER, verbose)) {error("Newton's iteration failed.");}
-
-      // Update previous time level solutions.
-      Solution<double>::vector_to_solutions(coeff_vec, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-        Hermes::vector<Solution<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-    }
+    // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
+    Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+    newton.set_verbose_output(verbose);
+    if (!newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER)) 
+      error("Newton's iteration failed.");
     else 
-    {
-      // Linear solve.
-      info("Assembling and solving linear problem.");
-      dp.assemble(matrix, rhs, false);
-      if(solver->solve()) 
-        Solution<double>::vector_to_solutions(solver->get_solution(), 
-        Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
+      Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
         Hermes::vector<Solution<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
-      else 
-        error ("Matrix solver failed.\n");
-    }
   }
 
   delete [] coeff_vec;
-  delete matrix;
-  delete rhs;
-  delete solver;
 
   info("Coordinate (   0, 2.5) xvel value = %lf", xvel_prev_time.get_pt_value(0.0, 2.5));
   info("Coordinate (   5, 2.5) xvel value = %lf", xvel_prev_time.get_pt_value(5.0, 2.5));

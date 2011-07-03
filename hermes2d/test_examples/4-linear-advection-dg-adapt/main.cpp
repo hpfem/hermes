@@ -126,11 +126,11 @@ int main(int argc, char* args[])
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
     Vector<double>* rhs = create_vector<double>(matrix_solver_type);
-    Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
+    LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
 
     // Initialize the preconditioner in the case of SOLVER_AZTECOO.
 #ifdef HAVE_AZTECOO
-    if (matrix_solver == SOLVER_AZTECOO) 
+    if (matrix_solver_type == SOLVER_AZTECOO) 
     {
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
@@ -148,7 +148,7 @@ int main(int argc, char* args[])
     
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<double>::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_L2_NORM);  
+    OGProjection<double>::project_global(&space, &ref_sln, &sln, matrix_solver_type, HERMES_L2_NORM);  
 
     // Time measurement.
     cpu_time.tick();
