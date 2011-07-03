@@ -433,7 +433,7 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
-      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+      unsigned int error_flags)
     {
       if (num != 1) EXIT("Wrong number of solutions.");
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
@@ -441,15 +441,15 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
-      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt,
-      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+      Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+      unsigned int error_flags)
     {
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }
 
     template<typename Scalar>
     double Adapt<Scalar>::calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
-      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+      unsigned int error_flags)
     {
       if (num != 1) EXIT("Wrong number of solutions.");
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
@@ -457,8 +457,8 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
-      Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt,
-      unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+      Hermes::vector<double>* component_errors, bool solutions_for_adapt,
+      unsigned int error_flags)
     {
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }

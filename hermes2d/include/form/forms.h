@@ -96,7 +96,7 @@ namespace Hermes
       virtual T& get_laplace_neighbor(int k) { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
     };
 
-    /** \class DiscontinuousFunc forms.h "src/forms.h"
+    /** \class DiscontinuousFunc forms.h "src/form/forms.h"
     *  \brief This class represents a function with jump discontinuity on an interface of two elements.
     *
     *  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,
