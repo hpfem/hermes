@@ -563,7 +563,7 @@ namespace Hermes
 
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs) 
-      : LinearSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
+      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       ,local_Ax(NULL),local_rhs(NULL)
     {
       _F_

@@ -1,4 +1,4 @@
-// This file is part of HermesCommon
+// This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
@@ -16,15 +16,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file dpinterface.cpp
-\brief Interface for DiscreteProblem required by NoxProblemInterface.
+/*! \file solver_picard.h
+\brief Picard's method.
 */
-#include "dpinterface.h"
+#ifndef __H2D_SOLVER_PICARD_H_
+#define __H2D_SOLVER_PICARD_H_
 
-/// \todo If there are really no bodies, delete this file.
-namespace Hermes 
+#include "hermes2d_common_defs.h"
+#include "discrete_problem.h"
+
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Hermes2D
   {
+    /// Class for Newton's method functions.
+    /// \todo Enable more norms than just L2 norm.
+    /// \todo Enable more equations.
+    template<typename Scalar>
+    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>
+    {
+    public:
+      PicardSolver(DiscreteProblem<Scalar>* dp);
+      PicardSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
+
+      /// Solve with default tolerances.
+      virtual bool solve(Scalar* coeff_vec);
+
+      /// Solve with user-defined tolerances.
+      bool solve(Scalar* coeff_vec, double tol, int max_iter);
+    };
   }
 }
+#endif
+

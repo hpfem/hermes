@@ -43,7 +43,7 @@ const double ERR_STOP = 1.0;                      // Stopping criterion for adap
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -56,9 +56,6 @@ const double LAMBDA = 1.0;
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Global<std::complex<double> > hermes2d;
-
   // Time measurement
   Hermes::TimePeriod cpu_time;
   cpu_time.tick();
@@ -104,11 +101,6 @@ int main(int argc, char* argv[])
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
-    // Initialize matrix solver.
-    SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
-    Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
-    Solver<std::complex<double> >* solver = create_linear_solver<std::complex<double> >(matrix_solver, matrix, rhs);
-
     // Initialize reference problem.
     info("Solving on reference mesh.");
     DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
@@ -120,18 +112,20 @@ int main(int argc, char* argv[])
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
-    // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
+    // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
 
-    // Translate the resulting coefficient vector into the Solution sln.
-    Solution<std::complex<double> >::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+    if (!newton.solve(coeff_vec)) 
+      error("Newton's iteration failed.");
+    else
+      Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
     // Time measurement.
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
    
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error."); 
@@ -164,11 +158,9 @@ int main(int argc, char* argv[])
 
     // Clean up.
     delete [] coeff_vec;
-    delete solver;
-    delete matrix;
-    delete rhs;
     delete adaptivity;
-    if(done == false) delete ref_space->get_mesh();
+    if(done == false)
+      delete ref_space->get_mesh();
     delete ref_space;
   }
   while (done == false);

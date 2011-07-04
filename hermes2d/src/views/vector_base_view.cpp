@@ -27,100 +27,105 @@
 #include "space.h"
 #include "precalc.h"
 
-using namespace Hermes::Views;
-using namespace Hermes::Hermes2D;
-
-template<typename Scalar>
-void VectorBaseView<Scalar>::show(Space<Scalar>* space)
+namespace Hermes
 {
-  free();
-  pss = new PrecalcShapeset(space->get_shapeset());
-  sln = new Solution<Scalar>();
-  this->space = space;
-  ndof = space->get_num_dofs();
-  base_index = 0;
-  update_solution();
-}
-
-
-template<typename Scalar>
-void VectorBaseView<Scalar>::free()
-{
-  if (pss != NULL) { delete pss; pss = NULL; }
-  if (sln != NULL) { delete sln; sln = NULL; }
-}
-
-
-template<typename Scalar>
-void VectorBaseView<Scalar>::update_solution()
-{
-  Scalar* coeffs = new Scalar[ndof + 1];
-  memset(coeffs, 0, sizeof(Scalar) * (ndof + 1));
-  if (base_index >= -1 && base_index < ndof)
-    coeffs[base_index + 1] = 1.0;
-  Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss);
-
-  VectorView<Scalar>::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
-  update_title();
-
-  delete [] coeffs;
-}
-
-
-template<typename Scalar>
-void VectorBaseView<Scalar>::update_title()
-{
-  std::stringstream str;
-  str << basic_title << " - dof = " << base_index;
-  if (base_index < 0)
-    str << " (Dirichlet lift)";
-  View::set_title(str.str().c_str());
-}
-
-
-template<typename Scalar>
-void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
-{
-  switch (key)
+  namespace Hermes2D
   {
-  case GLUT_KEY_LEFT:
-    if (base_index > -1) base_index--;
-    update_solution();
-    break;
+    namespace Views
+    {
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::show(Space<Scalar>* space)
+      {
+        free();
+        pss = new PrecalcShapeset(space->get_shapeset());
+        sln = new Solution<Scalar>();
+        this->space = space;
+        ndof = space->get_num_dofs();
+        base_index = 0;
+        update_solution();
+      }
 
-  case GLUT_KEY_RIGHT:
-    if (base_index < ndof-1) base_index++;
-    update_solution();
-    break;
 
-  default:
-    VectorView<Scalar>::on_special_key(key, x, y);
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::free()
+      {
+        if (pss != NULL) { delete pss; pss = NULL; }
+        if (sln != NULL) { delete sln; sln = NULL; }
+      }
+
+
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::update_solution()
+      {
+        Scalar* coeffs = new Scalar[ndof + 1];
+        memset(coeffs, 0, sizeof(Scalar) * (ndof + 1));
+        if (base_index >= -1 && base_index < ndof)
+          coeffs[base_index + 1] = 1.0;
+        Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss);
+
+        VectorView<Scalar>::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
+        update_title();
+
+        delete [] coeffs;
+      }
+
+
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::update_title()
+      {
+        std::stringstream str;
+        str << basic_title << " - dof = " << base_index;
+        if (base_index < 0)
+          str << " (Dirichlet lift)";
+        View::set_title(str.str().c_str());
+      }
+
+
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
+      {
+        switch (key)
+        {
+        case GLUT_KEY_LEFT:
+          if (base_index > -1) base_index--;
+          update_solution();
+          break;
+
+        case GLUT_KEY_RIGHT:
+          if (base_index < ndof-1) base_index++;
+          update_solution();
+          break;
+
+        default:
+          VectorView<Scalar>::on_special_key(key, x, y);
+        }
+      }
+
+
+      template<typename Scalar>
+      const char* VectorBaseView<Scalar>::get_help_text() const
+      {
+        return
+          "VectorBaseView\n\n"
+          "Controls:\n"
+          "  Left mouse - pan\n"
+          "  Right mouse - zoom\n"
+          "  Left arrow - previous basis function\n"
+          "  Right arrow - next basis function\n"
+          "  C - center image\n"
+          "  F - toggle smooth palette\n"
+          "  X - toggle hexagonal grid\n"
+          "  H - render high-quality frame\n"
+          "  M - toggle mesh\n"
+          "  P - cycle palettes\n"
+          "  S - save screenshot\n"
+          "  F1 - this help\n"
+          "  Esc, Q - quit";
+      }
+
+      template class HERMES_API VectorBaseView<double>;
+      template class HERMES_API VectorBaseView<std::complex<double> >;
+    }
   }
 }
-
-
-template<typename Scalar>
-const char* VectorBaseView<Scalar>::get_help_text() const
-{
-  return
-    "VectorBaseView\n\n"
-    "Controls:\n"
-    "  Left mouse - pan\n"
-    "  Right mouse - zoom\n"
-    "  Left arrow - previous basis function\n"
-    "  Right arrow - next basis function\n"
-    "  C - center image\n"
-    "  F - toggle smooth palette\n"
-    "  X - toggle hexagonal grid\n"
-    "  H - render high-quality frame\n"
-    "  M - toggle mesh\n"
-    "  P - cycle palettes\n"
-    "  S - save screenshot\n"
-    "  F1 - this help\n"
-    "  Esc, Q - quit";
-}
-
-template class HERMES_API VectorBaseView<double>;
-template class HERMES_API VectorBaseView<std::complex<double> >;
-
-#endif // NOGLUT
+#endif

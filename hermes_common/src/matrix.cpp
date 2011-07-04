@@ -24,7 +24,7 @@
 #include "error.h"
 #include "callstack.h"
 
-#include "solver.h"
+#include "linear_solver.h"
 #include "umfpack_solver.h"
 #include "superlu_solver.h"
 #include "amesos_solver.h"
@@ -204,10 +204,10 @@ int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 }
 
 template<typename Scalar>
-SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver)
+SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type)
 {
   _F_
-    switch (matrix_solver) 
+    switch (matrix_solver_type) 
   {
     case Hermes::SOLVER_AMESOS:
       {
@@ -270,10 +270,10 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 }
 
 template<typename Scalar>
-Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver)
+Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type)
 {
   _F_
-    switch (matrix_solver) 
+    switch (matrix_solver_type) 
   {
     case Hermes::SOLVER_AMESOS:
       {
@@ -338,8 +338,8 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 template class Hermes::Algebra::SparseMatrix<double>;
 template class Hermes::Algebra::SparseMatrix<std::complex<double> >;
 
-template HERMES_API Vector<double>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<double>*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver);
+template HERMES_API Vector<double>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
+template HERMES_API SparseMatrix<double>*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type);
 
-template HERMES_API Vector<std::complex<double> >* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver);
-template HERMES_API SparseMatrix<std::complex<double> >*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver);
+template HERMES_API Vector<std::complex<double> >* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
+template HERMES_API SparseMatrix<std::complex<double> >*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type);

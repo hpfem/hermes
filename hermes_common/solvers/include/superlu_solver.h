@@ -25,7 +25,7 @@
 #include "config.h"
 #ifdef WITH_SUPERLU  
 typedef int int_t; /*  default */
-#include "solver.h"
+#include "linear_solver.h"
 #include "matrix.h"
 
 #include <supermatrix.h>
@@ -163,7 +163,7 @@ namespace Hermes {
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API SuperLUSolver : public LinearSolver<Scalar> {
+    class HERMES_API SuperLUSolver : public DirectSolver<Scalar> {
     private:
 #ifndef SLU_MT
       void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr, 

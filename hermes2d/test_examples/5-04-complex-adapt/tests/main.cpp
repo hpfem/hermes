@@ -42,7 +42,7 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // the other solvers).
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
@@ -55,9 +55,6 @@ const double OMEGA = 2 * M_PI * FREQ;
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Global<std::complex<double> > hermes2d;
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
@@ -88,19 +85,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize the matrix solver.
-  SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
-  Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
-  Solver<std::complex<double> >* solver = create_linear_solver(matrix_solver, matrix, rhs);
-  
-#ifdef HAVE_AZTECOO
-  if (matrix_solver == SOLVER_AZTECOO) {
-    dynamic_cast<AztecOOSolver<std::complex<double> >*>(solver)->set_solver(iterative_method);
-    dynamic_cast<AztecOOSolver<std::complex<double> >*>(solver)->set_precond(preconditioner);
-    // Using default iteration parameters (see solver/aztecoo.h).
-  }
-#endif
   
   // Adaptivity loop:
   int as = 1; bool done = false;
@@ -111,11 +95,6 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
-
-    // Initialize matrix solver.
-    SparseMatrix<std::complex<double> >* matrix = create_matrix<std::complex<double> >(matrix_solver);
-    Vector<std::complex<double> >* rhs = create_vector<std::complex<double> >(matrix_solver);
-    Solver<std::complex<double> >* solver = create_linear_solver<std::complex<double> >(matrix_solver, matrix, rhs);
 
     // Initialize reference problem.
     info("Solving on reference mesh.");
@@ -128,15 +107,23 @@ int main(int argc, char* argv[])
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
-    // Perform Newton's iteration.
-    if (!hermes2d.solve_newton(coeff_vec, &dp, solver, matrix, rhs)) error("Newton's iteration failed.");
-
-    // Translate the resulting coefficient vector into the Solution sln.
-    Solution<std::complex<double> >::vector_to_solution(coeff_vec, ref_space, &ref_sln);
+    // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+    Hermes::Hermes2D::Solution<std::complex<double> > sln;
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+    // For iterative solver.
+    if (matrix_solver_type == SOLVER_AZTECOO)
+    {
+      newton.set_iterative_method(iterative_method);
+      newton.set_preconditioner(preconditioner);
+    }
+    if (!newton.solve(coeff_vec)) 
+      error("Newton's iteration failed.");
+    else
+      Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
   
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver); 
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
    
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
@@ -172,11 +159,6 @@ int main(int argc, char* argv[])
   while (done == false);
   
   verbose("Total running time: %g s", cpu_time.accumulated());
-  
-  // Clean up.
-  delete solver;
-  delete matrix;
-  delete rhs;
 
   ndof = space.get_num_dofs();
 

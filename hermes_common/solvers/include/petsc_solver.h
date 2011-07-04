@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_PETSC_SOLVER_H_
 
 #include "matrix.h"
-#include "solver.h"
+#include "linear_solver.h"
 
 #ifdef WITH_PETSC
 #include <petsc.h>
@@ -122,7 +122,7 @@ namespace Hermes {
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API PetscLinearSolver : public LinearSolver<Scalar> {
+    class HERMES_API PetscLinearSolver : public DirectSolver<Scalar> {
     public:
       PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
       virtual ~PetscLinearSolver();

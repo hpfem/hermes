@@ -640,7 +640,7 @@ namespace Hermes
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
-    LinearSolver<Scalar>(), m(m), rhs(rhs)
+    DirectSolver<Scalar>(), m(m), rhs(rhs)
     {
       _F_
         inited = false;

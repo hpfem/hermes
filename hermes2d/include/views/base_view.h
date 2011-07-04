@@ -29,49 +29,52 @@
 
 namespace Hermes
 {
-  namespace Views
+  namespace Hermes2D
   {
-    // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
+    namespace Views
+    {
+      // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-    /// \brief Visualizes the basis functions of a space.
-    ///
-    /// BaseView is a debugging tool for the visualization of the basis functions
-    /// of a given space.
-    ///
-    template<typename Scalar>
-    class HERMES_API BaseView : public ScalarView<Scalar>
-    {
-    public:
+      /// \brief Visualizes the basis functions of a space.
+      ///
+      /// BaseView is a debugging tool for the visualization of the basis functions
+      /// of a given space.
+      ///
+      template<typename Scalar>
+      class HERMES_API BaseView : public ScalarView<Scalar>
+      {
+      public:
 
-      BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
-      BaseView(char* title, WinGeom* wg = NULL);
+        BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
+        BaseView(char* title, WinGeom* wg = NULL);
 
-      void show(const Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
+        void show(const Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
-      virtual ~BaseView() { free(); }
+        virtual ~BaseView() { free(); }
 
-    protected:
+      protected:
 
-      Space<Scalar>* space;
-      PrecalcShapeset* pss;
-      Solution<Scalar>* sln;
+        Space<Scalar>* space;
+        PrecalcShapeset* pss;
+        Solution<Scalar>* sln;
 
-      double eps;
-      int ndof, item;
-      int base_index;
+        double eps;
+        int ndof, item;
+        int base_index;
 
-      std::string basic_title;
+        std::string basic_title;
 
-      void free();
-      void update_solution();
-      void update_title();
+        void free();
+        void update_solution();
+        void update_title();
 
-      virtual void on_special_key(int key, int x, int y);
-      virtual const char* get_help_text() const;
+        virtual void on_special_key(int key, int x, int y);
+        virtual const char* get_help_text() const;
 
-    };
+      };
 #endif
+    }
   }
 }
 #endif

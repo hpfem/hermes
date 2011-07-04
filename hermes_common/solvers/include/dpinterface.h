@@ -60,6 +60,11 @@ namespace Hermes {
       /// whether Dirichlet lift will be added while coeff_vec is converted into 
       /// Solutions.
       virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL) = 0;
+
+      /// Assembling.
+      /// Without the matrix.
+      virtual void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL) = 0; 
 
       virtual void invalidate_matrix() = 0;

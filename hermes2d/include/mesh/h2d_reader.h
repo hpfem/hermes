@@ -26,6 +26,7 @@ namespace Hermes
     /// Mesh loader from Hermes2D format
     ///
     /// @ingroup meshloaders
+    /// \todo Change the name to H2DMeshLoader
     class HERMES_API H2DReader : public MeshLoader
     {
     public:
@@ -40,6 +41,7 @@ namespace Hermes
 
     protected:
       Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);
+      /// Load NURBS.
       Nurbs* load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
 
       void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);

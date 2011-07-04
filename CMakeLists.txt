@@ -60,6 +60,7 @@ set(WITH_H2D                  YES)
 	set(H2D_RELEASE           YES)
 	# Optional parts of the library.
 	set(H2D_WITH_TEST_EXAMPLES     YES)
+	
   set(H2D_WITH_GLUT         YES)
   set(H2D_WITH_TESTS        YES)
 	
@@ -421,6 +422,5 @@ message("---------------------")
 message("---------------------")
 	message("\tBuild Hermes2D with GLUT: ${H2D_WITH_GLUT}")
 	message("\tBuild Hermes2D with VIEWER_GUI: ${H2D_WITH_VIEWER_GUI}")
-	message("\tBuild Hermes2D with util: ${H2D_WITH_UTIL}")
 endif(WITH_H2D)
 message("\n")

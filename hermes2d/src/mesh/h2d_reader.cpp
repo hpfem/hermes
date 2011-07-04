@@ -40,8 +40,6 @@ namespace Hermes
       this->load_stream(s, mesh, "");
     }
 
-    //// load_nurbs ////////////////////////////////////////////////////////////////////////////////////
-
     Nurbs* H2DReader::load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
     {
       double dummy_dbl;

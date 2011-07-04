@@ -145,9 +145,9 @@ namespace Hermes
         //NOTE: We need to take into account that L2 and Hcurl may use zero orders. The latter has its own version of this method, however.
         assert_msg(mesh->get_element(id)->is_triangle() || get_type() == HERMES_L2_SPACE || H2D_GET_V_ORDER(order) != 0, "Element #%d is quad but given vertical order is zero", id);
       assert_msg(mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical is not zero", id);
+      
       if (id < 0 || id >= mesh->get_max_element_id())
         error("Invalid element id.");
-      assert(order >= 0 && order <= shapeset->get_max_order());
 
       resize_tables();
 
@@ -475,7 +475,6 @@ namespace Hermes
         int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + inc, mo));
         o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
 
-        assert(o >= 0 && o <= shapeset->get_max_order());
         copy_orders_recurrent(mesh->get_element(e->id), o);
       }
       seq++;

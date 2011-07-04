@@ -24,6 +24,9 @@
 
 #include "../../hermes_common/include/hermes_common.h"
 
+#include "newton_solver.h"
+#include "picard_solver.h"
+
 #include "boundary_conditions/essential_boundary_conditions.h"
 
 #include "range.h"

@@ -253,7 +253,7 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
 }
 
 // Test code.
-void solve(Solver<double> &solver, int n) {
+void solve(LinearSolver<double> &solver, int n) {
   if (solver.solve()) {
     double *sln = solver.get_solution();
     for (int i = 0; i < n; i++)

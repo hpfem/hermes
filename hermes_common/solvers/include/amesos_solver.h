@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_AMESOS_SOLVER_H_
 #include "config.h"
 #ifdef HAVE_AMESOS
-#include "solver.h"
+#include "linear_solver.h"
 #include "epetra.h"
 #include "compat.h"
 #include <Amesos.h>
@@ -35,7 +35,7 @@ namespace Hermes {
     ///
     /// @ingroup solvers
     template<typename Scalar>
-    class HERMES_API AmesosSolver : public LinearSolver<Scalar> {
+    class HERMES_API AmesosSolver : public DirectSolver<Scalar> {
     public:
       AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AmesosSolver();

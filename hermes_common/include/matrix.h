@@ -470,12 +470,12 @@ namespace Hermes
     /// \brief Function returning a vector according to the users's choice.
     /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
     template<typename Scalar> HERMES_API 
-      Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver);
+      Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver_type);
 
     /// \brief Function returning a matrix according to the users's choice.
     /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
     template<typename Scalar> HERMES_API 
-      SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver);
+      SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
 
   }
 }

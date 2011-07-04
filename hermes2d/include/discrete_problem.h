@@ -126,7 +126,6 @@ namespace Hermes
       Element* init_state(Stage<Scalar>& stage, Hermes::vector<PrecalcShapeset*>& spss, 
         Hermes::vector<RefMap*>& refmap, Element** e, Hermes::vector<bool>& isempty, Hermes::vector<AsmList<Scalar>*>& al);
 
-
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the
       /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
@@ -139,9 +138,20 @@ namespace Hermes
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
 
+      /// Assembling.
+      /// Without the matrix.
+      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
+
       /// Light version passing NULL for the coefficient vector. External solutions 
       /// are initialized with zeros.
       void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false, 
+        Table* block_weights = NULL);
+
+      /// Light version passing NULL for the coefficient vector. External solutions 
+      /// are initialized with zeros.
+      /// Without the matrix.
+      void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false, 
         Table* block_weights = NULL);
 
       /// Assemble one stage.

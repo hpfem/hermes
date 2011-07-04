@@ -19,7 +19,7 @@
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::RefinementSelectors;
-using namespace Hermes::Views;
+using namespace Hermes::Hermes2D::Views;
 
 const int INIT_REF = 2;                           // Number of initial uniform mesh refinements.
 const int P_INIT = 0;                             // Initial polynomial degrees of mesh elements in vertical and horizontal
@@ -51,7 +51,7 @@ const double CONV_EXP = 1.0;                      // Default value is 1.0. This 
                                                   // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
@@ -124,13 +124,13 @@ int main(int argc, char* args[])
     DiscreteProblem<double>* dp = new DiscreteProblem<double>(&wf, ref_space);
     
     // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
-    Vector<double>* rhs = create_vector<double>(matrix_solver);
-    Solver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
+    SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
+    Vector<double>* rhs = create_vector<double>(matrix_solver_type);
+    LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
 
     // Initialize the preconditioner in the case of SOLVER_AZTECOO.
 #ifdef HAVE_AZTECOO
-    if (matrix_solver == SOLVER_AZTECOO) 
+    if (matrix_solver_type == SOLVER_AZTECOO) 
     {
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
       (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
@@ -148,7 +148,7 @@ int main(int argc, char* args[])
     
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<double>::project_global(&space, &ref_sln, &sln, matrix_solver, HERMES_L2_NORM);  
+    OGProjection<double>::project_global(&space, &ref_sln, &sln, matrix_solver_type, HERMES_L2_NORM);  
 
     // Time measurement.
     cpu_time.tick();
