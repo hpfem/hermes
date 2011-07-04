@@ -371,7 +371,9 @@ namespace Hermes
         unsigned int *idxs) { }
 
       /// Multiply with a vector.
-      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) { };
+      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) { 
+        error("multiply_with_vector() undefined.");
+      };
 
       /// Multiply with a Scalar.
       virtual void multiply_with_Scalar(Scalar value) { };
