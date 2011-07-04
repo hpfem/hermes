@@ -288,9 +288,9 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
     {
-      _F_
+      _F_;
 
-        this->neq = neq;
+      this->neq = neq;
       this->seq = 0;
       this->is_matfree = mat_free;
     }
@@ -303,10 +303,10 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
     {
-      _F_
+      _F_;
 
-        if (form->i >= neq || form->j >= neq)
-          error("Invalid equation number.");
+      if (form->i >= neq || form->j >= neq)
+        error("Invalid equation number.");
       if (form->sym < -1 || form->sym > 1)
         error("\"sym\" must be -1, 0 or 1.");
       if (form->sym < 0 && form->i == form->j)
@@ -324,9 +324,9 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_matrix_form_surf(MatrixFormSurf<Scalar>* form)
     {
-      _F_
-        if (form->i >= neq || form->j >= neq)
-          error("Invalid equation number.");
+      _F_;
+      if (form->i >= neq || form->j >= neq)
+        error("Invalid equation number.");
 
       form->set_weakform(this);
       mfsurf.push_back(form);
@@ -336,9 +336,9 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_vector_form(VectorFormVol<Scalar>* form)
     {
-      _F_
-        if (form->i >= neq)
-          error("Invalid equation number.");
+      _F_;
+      if (form->i >= neq)
+        error("Invalid equation number.");
       form->set_weakform(this);
       vfvol.push_back(form);
       seq++;
@@ -347,9 +347,9 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_vector_form_surf(VectorFormSurf<Scalar>* form)
     {
-      _F_
-        if (form->i >= neq)
-          error("Invalid equation number.");
+      _F_;
+      if (form->i >= neq)
+        error("Invalid equation number.");
 
       form->set_weakform(this);
       vfsurf.push_back(form);
@@ -359,34 +359,34 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_multicomponent_matrix_form(MultiComponentMatrixFormVol<Scalar>* form)
     {
-      _F_
+      _F_;
 
-        for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++) 
-        {
-          if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-            error("Invalid equation number.");
-          if (form->sym < 0 && form->coordinates.at(form_i).first == form->coordinates.at(form_i).second)
-            error("Only off-diagonal forms can be antisymmetric.");
-        }
-        if (form->sym < -1 || form->sym > 1)
-          error("\"sym\" must be -1, 0 or 1.");
+      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++) 
+      {
+        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
+          error("Invalid equation number.");
+        if (form->sym < 0 && form->coordinates.at(form_i).first == form->coordinates.at(form_i).second)
+          error("Only off-diagonal forms can be antisymmetric.");
+      }
+      if (form->sym < -1 || form->sym > 1)
+        error("\"sym\" must be -1, 0 or 1.");
 
-        if (mfvol_mc.size() > 100)
-          warn("Large number of forms (> 100). Is this the intent?");
+      if (mfvol_mc.size() > 100)
+        warn("Large number of forms (> 100). Is this the intent?");
 
-        form->set_weakform(this);
+      form->set_weakform(this);
 
-        mfvol_mc.push_back(form);
-        seq++;
+      mfvol_mc.push_back(form);
+      seq++;
     }
 
     template<typename Scalar>
     void WeakForm<Scalar>::add_multicomponent_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* form)
     {
-      _F_
-        for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-          if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-            error("Invalid equation number.");
+      _F_;
+      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
+        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
+          error("Invalid equation number.");
 
       form->set_weakform(this);
       mfsurf_mc.push_back(form);
@@ -396,10 +396,10 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_multicomponent_vector_form(MultiComponentVectorFormVol<Scalar>* form)
     {
-      _F_
-        for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-          if(form->coordinates.at(form_i) >= neq)
-            error("Invalid equation number.");
+      _F_;
+      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
+        if(form->coordinates.at(form_i) >= neq)
+          error("Invalid equation number.");
       form->set_weakform(this);
       vfvol_mc.push_back(form);
       seq++;
@@ -408,10 +408,10 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* form)
     {
-      _F_
-        for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-          if(form->coordinates.at(form_i) >= neq)
-            error("Invalid equation number.");
+      _F_;
+      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
+        if(form->coordinates.at(form_i) >= neq)
+          error("Invalid equation number.");
 
       form->set_weakform(this);
       vfsurf_mc.push_back(form);
@@ -421,17 +421,17 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext)
     {
-      _F_
-        error("Not implemented yet.");
+      _F_;
+      error("Not implemented yet.");
     }
 
     template<typename Scalar>
     void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
       Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector)
     {
-      _F_
+      _F_;
 
-        if (!want_matrix && !want_vector) return;
+      if (!want_matrix && !want_vector) return;
 
       unsigned int i;
       stages.clear();
@@ -574,9 +574,9 @@ namespace Hermes
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {
 
-      _F_
-        // first create a list of meshes the form uses
-        std::set<unsigned> seq;
+      _F_;
+      // first create a list of meshes the form uses
+      std::set<unsigned> seq;
       seq.insert(m1->get_seq());
       seq.insert(m2->get_seq());
       Mesh *mmm;
@@ -633,9 +633,9 @@ namespace Hermes
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {
 
-      _F_
-        // first create a list of meshes the form uses
-        std::set<unsigned> seq;
+      _F_;
+      // first create a list of meshes the form uses
+      std::set<unsigned> seq;
       seq.insert(m1->get_seq());
       seq.insert(m2->get_seq());
       Mesh *mmm;
@@ -695,9 +695,9 @@ namespace Hermes
       Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
     {
 
-      _F_
-        // first create a list of meshes the form uses
-        std::set<unsigned> seq;
+      _F_;
+      // first create a list of meshes the form uses
+      std::set<unsigned> seq;
       seq.insert(m1->get_seq());
       seq.insert(m2->get_seq());
       Mesh *mmm;
@@ -752,8 +752,8 @@ namespace Hermes
     template<typename Scalar>
     bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks) 
     {
-      _F_
-        bool** blocks = new_matrix<bool>(neq, neq);
+      _F_;
+      bool** blocks = new_matrix<bool>(neq, neq);
       for (unsigned int i = 0; i < neq; i++) 
       {
         for (unsigned int j = 0; j < neq; j++)

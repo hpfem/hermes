@@ -49,29 +49,29 @@ namespace Hermes
     H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
     H1Space<Scalar>::~H1Space()
     {
-      _F_
-        if (!--h1_proj_ref)
-        {
-          delete [] h1_proj_mat;
-          delete [] h1_chol_p;
-        }
-        if (this->own_shapeset)
-          delete this->shapeset;
+      _F_;
+      if (!--h1_proj_ref)
+      {
+        delete [] h1_proj_mat;
+        delete [] h1_chol_p;
+      }
+      if (this->own_shapeset)
+        delete this->shapeset;
     }
 
     template<typename Scalar>
@@ -89,29 +89,26 @@ namespace Hermes
     template<typename Scalar>
     Space<Scalar>* H1Space<Scalar>::dup(Mesh* mesh, int order_increase) const
     {
-      _F_
-        H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
+      _F_;
+      H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
       space->copy_orders(this, order_increase);
       return space;
     }
 
-
-    //// dof assignment ////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::assign_vertex_dofs()
     {
-      _F_
-        // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of
-        // a natural BC and which are part of an essential BC. The critical are those which
-        // lie at an interface of both types of BCs and which must be treated as belonging
-        // to the essential part. Unfortunately this has to be done on a per-space basis, as
-        // the markers may have different meanings in different spaces. There is no way to
-        // look at the adjacent edge nodes given a vertex node, thus we have to walk through
-        // all elements in the mesh.
+      _F_;
+      // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of
+      // a natural BC and which are part of an essential BC. The critical are those which
+      // lie at an interface of both types of BCs and which must be treated as belonging
+      // to the essential part. Unfortunately this has to be done on a per-space basis, as
+      // the markers may have different meanings in different spaces. There is no way to
+      // look at the adjacent edge nodes given a vertex node, thus we have to walk through
+      // all elements in the mesh.
 
-        // loop through all elements and assign vertex, edge and bubble dofs
-        Element* e;
+      // loop through all elements and assign vertex, edge and bubble dofs
+      Element* e;
       for_all_active_elements(e, this->mesh)
       {
         int order = this->get_element_order(e->id);
@@ -182,13 +179,11 @@ namespace Hermes
       }
     }
 
-    //// assembly lists ////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al)
     {
-      _F_
-        Node* vn = e->vn[iv];
+      _F_;
+      Node* vn = e->vn[iv];
       typename Space<Scalar>::NodeData* nd = &this->ndata[vn->id];
       int index = this->shapeset->get_vertex_index(iv);
       if (this->get_element_order(e->id) == 0) return;
@@ -208,12 +203,11 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
     {
-      _F_
-        Node* en = e->en[surf_num];
+      _F_;
+      Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
       if (this->get_element_order(e->id) == 0) return;
 
@@ -245,14 +239,11 @@ namespace Hermes
       }
     }
 
-
-    //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      _F_
-        assert(order >= 1);
+      _F_;
+      assert(order >= 1);
       Scalar* proj = new Scalar[order + 1];
 
       // Obtain linear part of the projection.
@@ -324,51 +315,44 @@ namespace Hermes
       return proj;
     }
 
-
-    //// hanging nodes /////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     inline void H1Space<Scalar>::output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
       Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
     {
-      _F_
-        // if the dof is already in the list, just add half of the other coef
-        if (last != NULL && last->dof == min->dof)
+      _F_;
+      // if the dof is already in the list, just add half of the other coef
+      if (last != NULL && last->dof == min->dof)
+      {
+        last->coef += min->coef * 0.5;
+        return;
+      }
+
+      // leave space for edge node dofs if they belong in front of the current minimum dof
+      if (edge != NULL && this->ndata[edge->id].dof <= min->dof)
+      {
+        edge_dofs = current;
+
+        // (reserve space only if the edge dofs are not in the list yet)
+        if (this->ndata[edge->id].dof != min->dof) 
         {
-          last->coef += min->coef * 0.5;
-          return;
+          current += this->ndata[edge->id].n;
         }
+        edge = NULL;
+      }
 
-        // leave space for edge node dofs if they belong in front of the current minimum dof
-        if (edge != NULL && this->ndata[edge->id].dof <= min->dof)
-        {
-          edge_dofs = current;
-
-          // (reserve space only if the edge dofs are not in the list yet)
-          if (this->ndata[edge->id].dof != min->dof) 
-          {
-            current += this->ndata[edge->id].n;
-          }
-          edge = NULL;
-        }
-
-        // output new dof
-        current->dof = min->dof;
-        current->coef = min->coef * 0.5;
-        last = current++;
+      // output new dof
+      current->dof = min->dof;
+      current->coef = min->coef * 0.5;
+      last = current++;
     }
 
-
-    /// This is a documentation for sadfs
-    ///
-    ///
     template<typename Scalar>
     typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
       Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents)
     {
-      _F_
-        // estimate the upper bound of the result size
-        int max_result = n1 + n2;
+      _F_;
+      // estimate the upper bound of the result size
+      int max_result = n1 + n2;
       if (edge != NULL) max_result += this->ndata[edge->id].n;
 
       typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
@@ -412,22 +396,20 @@ namespace Hermes
         return result;
     }
 
-
     static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
     {
-      _F_
-        if (e->is_triangle()) return e->sons[3]->vn[e->prev_vert(i)];
-        else if (e->sons[2] == NULL) return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
-        else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
-        else return e->sons[i]->vn[j];
+      _F_;
+      if (e->is_triangle()) return e->sons[3]->vn[e->prev_vert(i)];
+      else if (e->sons[2] == NULL) return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
+      else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
+      else return e->sons[i]->vn[j];
     }
-
 
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
     {
-      _F_
-        int j, k;
+      _F_;
+      int j, k;
       EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
 
@@ -576,62 +558,47 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void H1Space<Scalar>::update_constraints()
     {
-      _F_
-        Element* e;
+      _F_;
+      Element* e;
       for_all_base_elements(e, this->mesh)
         update_constrained_nodes(e, NULL, NULL, NULL, NULL);
     }
 
-
-    /*void H1Space<Scalar>::dump_baselist(NodeData& nd)
-    {
-    printf("  { ");
-    for (int i = 0; i < nd.ncomponents; i++)
-    printf("{ %d, %lg } ", nd.baselist[i].dof, nd.baselist[i].coef);
-    printf(" }\n");
-    }*/
-
-
-    //// vertex fixing /////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::fix_vertex(int id, Scalar value)
     {
-      _F_
-        FixedVertex fv = { id, value };
+      _F_;
+      FixedVertex fv = { id, value };
       fixed_vertices.push_back(fv);
     }
-
 
     template<typename Scalar>
     bool H1Space<Scalar>::is_fixed_vertex(int id) const
     {
-      _F_
-        for (unsigned int i = 0; i < fixed_vertices.size(); i++)
-          if (fixed_vertices[i].id == id)
-            return true;
+      _F_;
+      for (unsigned int i = 0; i < fixed_vertices.size(); i++)
+        if (fixed_vertices[i].id == id)
+          return true;
 
       return false;
     }
 
-
     template<typename Scalar>
     void H1Space<Scalar>::post_assign()
     {
-      _F_
-        // process fixed vertices -- put their values into nd->vertex_bc_coef
-        for (unsigned int i = 0; i < fixed_vertices.size(); i++)
-        {
-          Scalar* fixv = new Scalar[1];
-          *fixv = fixed_vertices[i].value;
-          typename Space<Scalar>::NodeData* nd = &this->ndata[fixed_vertices[i].id];
-          nd->vertex_bc_coef = fixv;
-          this->extra_data.push_back(fixv);
-        }
+      _F_;
+      // process fixed vertices -- put their values into nd->vertex_bc_coef
+      for (unsigned int i = 0; i < fixed_vertices.size(); i++)
+      {
+        Scalar* fixv = new Scalar[1];
+        *fixv = fixed_vertices[i].value;
+        typename Space<Scalar>::NodeData* nd = &this->ndata[fixed_vertices[i].id];
+        nd->vertex_bc_coef = fixv;
+        this->extra_data.push_back(fixv);
+      }
     }
 
     template HERMES_API class H1Space<double>;

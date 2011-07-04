@@ -61,7 +61,7 @@ static void exact_sol_der(double x, double y, std::complex<double>& e1dx, std::c
   double t57 = t5*t39;
   double t59 = 1/t1/x;
   e1dx =-(t11*x+2.0/3.0*t15*x-2.0/3.0*t22*x)
-              *t6*x*t29+t32*t1*t29-t36-t47+4.0/9.0*t48*t2/t49*t53+4.0/3.0*t57*y*t59*t44-4.0/3.0*t57*t2*y/t49/x*t53;
+    *t6*x*t29+t32*t1*t29-t36-t47+4.0/9.0*t48*t2/t49*t53+4.0/3.0*t57*y*t59*t44-4.0/3.0*t57*t2*y/t49/x*t53;
   e0dy = (t11*y+2.0/3.0*t15*y-2.0/3.0*t22*y)*t6*y*t29-t32*t2*t29+t36-t47-4.0/9.0*t48*t41*t53+4.0/3.0*t57*t59*t53*y;
 }
 
@@ -88,7 +88,7 @@ public:
     dy[1] = 0;
     return;
   };
-  
+
   virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const 
   {
     return Hermes::Ord(10);
@@ -120,12 +120,12 @@ public:
   {
   public:
     CustomVectorFormSurf()
-              : VectorFormSurf<std::complex<double> >(0) 
+      : VectorFormSurf<std::complex<double> >(0) 
     {
     }
 
     virtual std::complex<double> value(int n, double *wt, Func<std::complex<double> > *u_ext[], 
-                         Func<double> *v, Geom<double> *e, ExtData<std::complex<double> > *ext) const 
+      Func<double> *v, Geom<double> *e, ExtData<std::complex<double> > *ext) const 
     {
       std::complex<double> result = 0;
       for (int i = 0; i < n; i++) {
@@ -137,7 +137,7 @@ public:
         double cos23t = std::cos(2.0/3.0*theta), sin23t = std::sin(2.0/3.0*theta);
 
         double Etau = e->tx[i] * (cos23t*sint*j13 - 2.0/(3.0*r)*j23*(cos23t*sint + sin23t*cost)) +
-                      e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
+          e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
 
         result += wt[i] * std::complex<double>(cos23t*j23, -Etau) * ((v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
       }
@@ -145,7 +145,7 @@ public:
     }
 
     virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-                    Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const 
+      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const 
     {
       return Hermes::Ord(10);
     }

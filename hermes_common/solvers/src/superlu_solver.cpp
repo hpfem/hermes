@@ -97,8 +97,8 @@ namespace Hermes
     ///
     static int find_position(int *Ai, int Alen, int idx)
     {
-      _F_
-        assert (idx >= 0);
+      _F_;
+      assert (idx >= 0);
 
       register int lo = 0, hi = Alen - 1, mid;
 
@@ -120,8 +120,8 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>::SuperLUMatrix()
     {
-      _F_
-        this->size = 0; nnz = 0;
+      _F_;
+      this->size = 0; nnz = 0;
       Ax = NULL;
       Ap = NULL;
       Ai = NULL;
@@ -130,15 +130,15 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>::~SuperLUMatrix()
     {
-      _F_
-        this->free();
+      _F_;
+      this->free();
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::alloc()
     {
-      _F_
-        assert(this->pages != NULL);
+      _F_;
+      assert(this->pages != NULL);
 
       // Initialize the arrays Ap and Ai.
       Ap = new unsigned int [this->size + 1];
@@ -168,8 +168,8 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::free()
     {
-      _F_
-        nnz = 0;
+      _F_;
+      nnz = 0;
       delete [] Ap; Ap = NULL;
       delete [] Ai; Ai = NULL;
       delete [] Ax; Ax = NULL;
@@ -178,9 +178,9 @@ namespace Hermes
     template<typename Scalar>
     Scalar SuperLUMatrix<Scalar>::get(unsigned int m, unsigned int n)
     {
-      _F_
-        // Find m-th row in the n-th column.
-        int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      _F_;
+      // Find m-th row in the n-th column.
+      int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Return 0 if the entry has not been found.
       if (mid < 0) return 0.0;
       // Otherwise, add offset to the n-th column and return the value.
@@ -191,25 +191,25 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::zero()
     {
-      _F_
-        memset(Ax, 0, sizeof(Scalar) * nnz);
+      _F_;
+      memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      _F_
-        if (v != 0.0) // ignore zero values.
-        {
-          // Find m-th row in the n-th column.
-          int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
-          // Make sure we are adding to an existing non-zero entry.
-          if (pos < 0) 
-            error("Sparse matrix entry not found");
-          // Add offset to the n-th column.
-          pos += Ap[n];
-          Ax[pos] += v;
-        }
+      _F_;
+      if (v != 0.0) // ignore zero values.
+      {
+        // Find m-th row in the n-th column.
+        int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+        // Make sure we are adding to an existing non-zero entry.
+        if (pos < 0) 
+          error("Sparse matrix entry not found");
+        // Add offset to the n-th column.
+        pos += Ap[n];
+        Ax[pos] += v;
+      }
     }
 
     /// Add a number to each diagonal entry.
@@ -226,11 +226,11 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
     {
-      _F_
-        for (unsigned int i = 0; i < m; i++)       // rows
-          for (unsigned int j = 0; j < n; j++)     // cols
-            if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-              add(rows[i], cols[j], mat[i][j]);
+      _F_;
+      for (unsigned int i = 0; i < m; i++)       // rows
+        for (unsigned int j = 0; j < n; j++)     // cols
+          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+            add(rows[i], cols[j], mat[i][j]);
     }
 
     /// Save matrix and right-hand side to a file.
@@ -238,38 +238,38 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
-      _F_
-        // TODO
-        switch (fmt) 
+      _F_;
+      // TODO
+      switch (fmt) 
       {
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
-          for (unsigned int j = 0; j < this->size; j++)
-            for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
-            {
-              fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
-              Hermes::Helpers::fprint_num(file, Ax[i]);
-              fprintf(file,"\n");
-            }
-            fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-            return true;
-
-        case DF_HERMES_BIN: 
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
+        for (unsigned int j = 0; j < this->size; j++)
+          for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           {
-            hermes_fwrite("HERMESX\001", 1, 8, file);
-            int ssize = sizeof(Scalar);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(&nnz, sizeof(int), 1, file);
-            hermes_fwrite(Ap, sizeof(int),this->size + 1, file);
-            hermes_fwrite(Ai, sizeof(int), nnz, file);
-            hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
-            return true;
+            fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
+            Hermes::Helpers::fprint_num(file, Ax[i]);
+            fprintf(file,"\n");
           }
+          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
-        default:
-          return false;
+          return true;
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESX\001", 1, 8, file);
+          int ssize = sizeof(Scalar);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(Ap, sizeof(int),this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
+          return true;
+        }
+
+      default:
+        return false;
       }
     }
 
@@ -288,22 +288,22 @@ namespace Hermes
     template<typename Scalar>
     double SuperLUMatrix<Scalar>::get_fill_in() const
     {
-      _F_
-        return nnz / (double) (this->size * this->size);
+      _F_;
+      return nnz / (double) (this->size * this->size);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_matrix(SuperLUMatrix<Scalar>* mat)
     {
-      _F_
-        add_as_block(0,0,mat);
+      _F_;
+      add_as_block(0,0,mat);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, SuperLUMatrix<Scalar>* mat)
     {
-      _F_
-        int ndof = mat->get_size();
+      _F_;
+      int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof) 
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
@@ -316,8 +316,8 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix<Scalar>* mat)
     {
-      _F_
-        int idx;
+      _F_;
+      int idx;
       for (unsigned int col=0;col<mat->get_size();col++)
       {
         for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++)
@@ -336,26 +336,26 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
-      _F_
-        for(unsigned int i=0;i<this->size;i++)
+      _F_;
+      for(unsigned int i=0;i<this->size;i++)
+      {
+        vector_out[i]=0;
+      }
+      for (unsigned int c=0;c<this->size;c++)
+      {
+        for (unsigned int i=Ap[c];i<Ap[c+1];i++)
         {
-          vector_out[i]=0;
+          vector_out[c]+=vector_in[Ai[i]]*Ax[i];
         }
-        for (unsigned int c=0;c<this->size;c++)
-        {
-          for (unsigned int i=Ap[c];i<Ap[c+1];i++)
-          {
-            vector_out[c]+=vector_in[Ai[i]]*Ax[i];
-          }
-        }
+      }
     }
 
     // Multiplies matrix with a Scalar.
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
-      _F_
-        int n=nnz;
+      _F_;
+      int n=nnz;
       for(int i=0;i<n;i++)
       {
         Ax[i]=Ax[i]*value;
@@ -366,8 +366,8 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
     {
-      _F_
-        this->nnz = nnz;
+      _F_;
+      this->nnz = nnz;
       this->size = size;
       this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
       this->Ai = new int[nnz];    assert(this->Ai != NULL);
@@ -388,8 +388,8 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate()
     {
-      _F_
-        SuperLUMatrix<Scalar> * nmat=new SuperLUMatrix<Scalar>();
+      _F_;
+      SuperLUMatrix<Scalar> * nmat=new SuperLUMatrix<Scalar>();
 
       nmat->nnz = nnz;
       nmat->size = this->size;
@@ -413,23 +413,23 @@ namespace Hermes
     template<typename Scalar>
     SuperLUVector<Scalar>::SuperLUVector()
     {
-      _F_
-        v = NULL;
+      _F_;
+      v = NULL;
       this->size = 0;
     }
 
     template<typename Scalar>
     SuperLUVector<Scalar>::~SuperLUVector()
     {
-      _F_
-        this->free();
+      _F_;
+      this->free();
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::alloc(unsigned int n)
     {
-      _F_
-        this->free();
+      _F_;
+      this->free();
       this->size = n;
       v = new Scalar[n];
       zero();
@@ -438,22 +438,22 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUVector<Scalar>::zero()
     {
-      _F_
-        memset(v, 0, this->size * sizeof(Scalar));
+      _F_;
+      memset(v, 0, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::change_sign()
     {
-      _F_
-        for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
+      _F_;
+      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::free()
     {
-      _F_
-        delete [] v;
+      _F_;
+      delete [] v;
       v = NULL;
       this->size = 0;
     }
@@ -461,65 +461,65 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUVector<Scalar>::set(unsigned int idx, Scalar y)
     {
-      _F_
-        v[idx] = y;
+      _F_;
+      v[idx] = y;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::add(unsigned int idx, Scalar y)
     {
-      _F_
-        v[idx] += y;
+      _F_;
+      v[idx] += y;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
-      _F_
-        for (unsigned int i = 0; i < n; i++) 
-        {
-          v[idx[i]] += y[i];
-        }
+      _F_;
+      for (unsigned int i = 0; i < n; i++) 
+      {
+        v[idx[i]] += y[i];
+      }
     }
 
     template<typename Scalar>
     bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
-      _F_
-        switch (fmt) 
+      _F_;
+      switch (fmt) 
       {
-        case DF_NATIVE:
-        case DF_PLAIN_ASCII:
-          for (unsigned int i = 0; i < this->size; i++)
-          {
-            Hermes::Helpers::fprint_num(file, v[i]);
-            fprintf(file, "\n");
-          }
+      case DF_NATIVE:
+      case DF_PLAIN_ASCII:
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file, v[i]);
+          fprintf(file, "\n");
+        }
 
+        return true;
+
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file, v[i]);
+          fprintf(file, "\n");
+        }
+        fprintf(file, " ];\n");
+        return true;
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESR\001", 1, 8, file);
+          int ssize = sizeof(Scalar);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(v, sizeof(Scalar), this->size, file);
           return true;
+        }
 
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-          for (unsigned int i = 0; i < this->size; i++)
-          {
-            Hermes::Helpers::fprint_num(file, v[i]);
-            fprintf(file, "\n");
-          }
-          fprintf(file, " ];\n");
-          return true;
-
-        case DF_HERMES_BIN: 
-          {
-            hermes_fwrite("HERMESR\001", 1, 8, file);
-            int ssize = sizeof(Scalar);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(v, sizeof(Scalar), this->size, file);
-            return true;
-          }
-
-        default:
-          return false;
+      default:
+        return false;
       }
     }
 
@@ -533,31 +533,31 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::check_status(unsigned int info)
     {
-      _F_
-        if (info == 0)
-        {
-          // Success.
-          return true;
-        }
-        else if (info <= m->size)
-        {
-          warning("SuperLU: Factor U is singular, solution could not be computed.");
-          return false;
-        }
-        else if (info == m->size + 1)
-        {
-          warning("SuperLU: RCOND is less than machine precision "
-            "(system matrix is singular to working precision).");
-          return true;
-        }
-        else if (info > m->size + 1)
-        {
-          warning("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
-            (info - m->size)/1e6);
-          return false;
-        }
-
+      _F_;
+      if (info == 0)
+      {
+        // Success.
+        return true;
+      }
+      else if (info <= m->size)
+      {
+        warning("SuperLU: Factor U is singular, solution could not be computed.");
         return false;
+      }
+      else if (info == m->size + 1)
+      {
+        warning("SuperLU: RCOND is less than machine precision "
+          "(system matrix is singular to working precision).");
+        return true;
+      }
+      else if (info > m->size + 1)
+      {
+        warning("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
+          (info - m->size)/1e6);
+        return false;
+      }
+
+      return false;
     }
 
 
@@ -566,8 +566,8 @@ namespace Hermes
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       ,local_Ax(NULL),local_rhs(NULL)
     {
-      _F_
-        R = NULL;
+      _F_;
+      R = NULL;
       C = NULL;
       perm_r = NULL;
       perm_c = NULL;
@@ -634,8 +634,8 @@ namespace Hermes
     template<typename Scalar>
     SuperLUSolver<Scalar>::~SuperLUSolver()
     {
-      _F_
-        free_factorization_data();
+      _F_;
+      free_factorization_data();
       free_matrix();
       free_rhs();
 
@@ -648,8 +648,8 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::solve()
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
 
       Hermes::TimePeriod tmr;
@@ -823,8 +823,8 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::setup_factorization()
     {
-      _F_
-        unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
+      _F_;
+      unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
       if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
       {
         warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
@@ -928,47 +928,47 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_matrix()
     {
-      _F_
-        if (has_A)
-        {
-          Destroy_SuperMatrix_Store(&A);
-          has_A = false;
-        }
+      _F_;
+      if (has_A)
+      {
+        Destroy_SuperMatrix_Store(&A);
+        has_A = false;
+      }
     }
 
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_rhs()
     {
-      _F_
-        if (has_B)
-        {
-          Destroy_SuperMatrix_Store(&B);
-          has_B = false;
-        }
+      _F_;
+      if (has_B)
+      {
+        Destroy_SuperMatrix_Store(&B);
+        has_B = false;
+      }
     }
 
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_factorization_data()
     {
-      _F_
-        if (inited)
-        {
+      _F_;
+      if (inited)
+      {
 #ifdef SLU_MT    
-          SUPERLU_FREE(options.etree);
-          SUPERLU_FREE(options.colcnt_h);
-          SUPERLU_FREE(options.part_super_h);
-          Destroy_CompCol_Permuted(&AC);
+        SUPERLU_FREE(options.etree);
+        SUPERLU_FREE(options.colcnt_h);
+        SUPERLU_FREE(options.part_super_h);
+        Destroy_CompCol_Permuted(&AC);
 #else
-          SUPERLU_FREE (etree);
+        SUPERLU_FREE (etree);
 #endif    
-          SUPERLU_FREE (perm_c);
-          SUPERLU_FREE (perm_r);
-          SUPERLU_FREE (R);
-          SUPERLU_FREE (C);
-          SLU_DESTROY_L(&L);
-          SLU_DESTROY_U(&U);
-          inited = false;
-        }
+        SUPERLU_FREE (perm_c);
+        SUPERLU_FREE (perm_r);
+        SUPERLU_FREE (R);
+        SUPERLU_FREE (C);
+        SLU_DESTROY_L(&L);
+        SLU_DESTROY_U(&U);
+        inited = false;
+      }
     }
 
 #ifdef SLU_MT

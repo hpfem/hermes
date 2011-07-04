@@ -60,16 +60,16 @@ namespace Hermes
     HdivSpace<Scalar>::HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
     HdivSpace<Scalar>::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>

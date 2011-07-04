@@ -173,7 +173,7 @@ namespace Hermes
 
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(Mesh* mesh, int* parents);
-      
+
       /// Obtains an boundary conditions
       EssentialBCs<Scalar>* get_essential_bcs() const;
 
@@ -189,8 +189,8 @@ namespace Hermes
 
       /// \brief Returns the number of basis functions contained in the spaces.
       static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces) {
-        _F_
-          int ndof = 0;
+        _F_;
+        int ndof = 0;
         for (unsigned int i=0; i<spaces.size(); i++) {
           ndof += spaces[i]->get_num_dofs();
         }
@@ -199,8 +199,8 @@ namespace Hermes
 
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces) {
-        _F_
-          int n = spaces.size();
+        _F_;
+        int n = spaces.size();
         // assigning dofs to each space
         int ndof = 0;
         for (int i = 0; i < n; i++) {

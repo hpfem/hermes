@@ -38,8 +38,8 @@ namespace Hermes
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
     {
-      _F_
-        solver = factory.Create(solver_type, problem);
+      _F_;
+      solver = factory.Create(solver_type, problem);
       assert(solver != NULL);
       // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
       //          so don't forget to delete it!
@@ -50,36 +50,36 @@ namespace Hermes
     template<typename Scalar>
     AmesosSolver<Scalar>::~AmesosSolver()
     {
-      _F_
-        delete solver;
+      _F_;
+      delete solver;
     }
 
     template<typename Scalar>
     bool AmesosSolver<Scalar>::is_available(const char *name)
     {
-      _F_
-        return factory.Query(name);
+      _F_;
+      return factory.Query(name);
     }
 
     template<typename Scalar>
     void AmesosSolver<Scalar>::set_use_transpose(bool use_transpose)
     {
-      _F_
-        solver->SetUseTranspose(use_transpose);
+      _F_;
+      solver->SetUseTranspose(use_transpose);
     }
 
     template<typename Scalar>
     bool AmesosSolver<Scalar>::use_transpose()
     {
-      _F_
-        return solver->UseTranspose();
+      _F_;
+      return solver->UseTranspose();
     }
 
     template<>
     bool AmesosSolver<double>::solve()
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
 
       assert(m->size == rhs->size);
@@ -120,8 +120,8 @@ namespace Hermes
     template<>
     bool AmesosSolver<std::complex<double> >::solve()
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
 
       assert(m->size == rhs->size);
@@ -157,9 +157,9 @@ namespace Hermes
     template<typename Scalar>
     bool AmesosSolver<Scalar>::setup_factorization()
     {
-      _F_
-        // Perform both factorization phases for the first time.
-        int eff_fact_scheme;
+      _F_;
+      // Perform both factorization phases for the first time.
+      int eff_fact_scheme;
       if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
         solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;

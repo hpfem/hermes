@@ -35,23 +35,23 @@ namespace Hermes
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : IterSolver<Scalar>(), m(m), rhs(rhs)
     {
-      _F_
+      _F_;
 #ifndef HAVE_TEUCHOS
-        pc = NULL;
+      pc = NULL;
 #endif
     }
 
     template<typename Scalar>
     AztecOOSolver<Scalar>::~AztecOOSolver()
     {
-      _F_
+      _F_;
     }
 
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_solver(const char *name)
     {
-      _F_
-        int az_solver;
+      _F_;
+      int az_solver;
       if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
       else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
       else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
@@ -65,8 +65,8 @@ namespace Hermes
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_precond(const char *name)
     {
-      _F_
-        int az_precond;
+      _F_;
+      int az_precond;
       if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
       else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
       else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
@@ -80,22 +80,22 @@ namespace Hermes
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_option(int option, int value)
     {
-      _F_
-        aztec.SetAztecOption(option, value);
+      _F_;
+      aztec.SetAztecOption(option, value);
     }
 
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_param(int param, double value)
     {
-      _F_
-        aztec.SetAztecParam(param, value);
+      _F_;
+      aztec.SetAztecParam(param, value);
     }
 
     template<>
     bool AztecOOSolver<double>::solve()
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
       assert(m->size == rhs->size);
 
@@ -140,8 +140,8 @@ namespace Hermes
     template<>
     bool AztecOOSolver<std::complex<double> >::solve()
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
       assert(m->size == rhs->size);
 
@@ -178,15 +178,15 @@ namespace Hermes
     template<typename Scalar>
     int AztecOOSolver<Scalar>::get_num_iters()
     {
-      _F_
-        return aztec.NumIters();
+      _F_;
+      return aztec.NumIters();
     }
 
     template<typename Scalar>
     double AztecOOSolver<Scalar>::get_residual()
     {
-      _F_
-        return aztec.TrueResidual();
+      _F_;
+      return aztec.TrueResidual();
     }
 
     template class HERMES_API AztecOOSolver<double>;

@@ -26,9 +26,9 @@ namespace Hermes
     void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm<Scalar>* wf,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
     {
-      _F_
-        // Instantiate a class with global functions.
-        Global<Scalar> hermes2d;
+      _F_;
+      // Instantiate a class with global functions.
+      Global<Scalar> hermes2d;
 
       unsigned int n = spaces.size();
 
@@ -53,7 +53,7 @@ namespace Hermes
         error("Newton's iteration failed.");
 
       delete [] coeff_vec;
-      
+
       if (target_vec != NULL)
         for (int i = 0; i < ndof; i++) 
           target_vec[i] = newton.get_sln_vector()[i];
@@ -63,8 +63,8 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type, Hermes::vector<ProjNormType> proj_norms)
     {
-      _F_
-        int n = spaces.size();
+      _F_;
+      int n = spaces.size();
 
       // define temporary projection weak form
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
@@ -136,9 +136,9 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver_type,
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
-      _F_
+      _F_;
 
-        Scalar* target_vec = new Scalar[Space<Scalar>::get_num_dofs(spaces)];
+      Scalar* target_vec = new Scalar[Space<Scalar>::get_num_dofs(spaces)];
       Hermes::vector<MeshFunction<Scalar>*> ref_slns_mf;
       for (unsigned int i = 0; i < sols_src.size(); i++)
         ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
@@ -183,8 +183,8 @@ namespace Hermes
       Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
     {
-      _F_
-        unsigned int n = spaces.size();
+      _F_;
+      unsigned int n = spaces.size();
       unsigned int n_biforms = mfvol.size();
       if (n_biforms == 0)
         error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");

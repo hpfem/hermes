@@ -32,7 +32,7 @@ namespace Hermes
     static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
     static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
     static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
-    
+
     template<typename Scalar>
     static inline void set_vec_num(int n, Scalar* y, Scalar num)
     {
@@ -53,7 +53,7 @@ namespace Hermes
       for (int i = 0; i < n; i++)
         y[i] = y[i]*x[i] + z[i];
     }
-    
+
     static struct mono_lu_init
     {
     public:
@@ -105,7 +105,7 @@ namespace Hermes
 
       this->set_quad_2d(&g_quad_2d_std);
     }
-    
+
     template<typename Scalar>
     static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
     {
@@ -142,7 +142,7 @@ namespace Hermes
         }
       }
     }
-    
+
     static inline bool is_in_ref_domain(Element* e, double xi1, double xi2)
     {
       const double TOL = 1e-11;
@@ -1079,7 +1079,7 @@ namespace Hermes
       // write element coef table
       for (i = 0; i < this->num_components; i++)
         hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
-      
+
       if (compress) pclose(f); else fclose(f);
     }
 

@@ -33,12 +33,12 @@ using namespace Hermes::Algebra;
 namespace Hermes
 {
   namespace Solvers 
-{
+  {
     template<typename Scalar>
     LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
     {
-      _F_
-        Vector<Scalar>* rhs_dummy = NULL;
+      _F_;
+      Vector<Scalar>* rhs_dummy = NULL;
       switch (matrix_solver_type) 
       {
       case Hermes::SOLVER_AZTECOO:

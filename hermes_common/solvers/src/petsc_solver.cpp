@@ -51,8 +51,8 @@ namespace Hermes
 
     int remove_petsc_object()
     {
-      _F_  
-        PetscTruth petsc_initialized, petsc_finalized;
+      _F_;
+      PetscTruth petsc_initialized, petsc_finalized;
       int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
       if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE) 
@@ -69,8 +69,8 @@ namespace Hermes
 
     int add_petsc_object()
     {
-      _F_
-        int ierr;
+      _F_;
+      int ierr;
       PetscTruth petsc_initialized, petsc_finalized;
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
@@ -103,24 +103,24 @@ namespace Hermes
     template<typename Scalar>
     PetscMatrix<Scalar>::PetscMatrix() 
     {
-      _F_
-        inited = false;
+      _F_;
+      inited = false;
       add_petsc_object();
     }
 
     template<typename Scalar>
     PetscMatrix<Scalar>::~PetscMatrix() 
     {
-      _F_
-        free();
+      _F_;
+      free();
       remove_petsc_object();
     }
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::alloc() 
     {
-      _F_
-        assert(this->pages != NULL);
+      _F_;
+      assert(this->pages != NULL);
 
       // calc nnz
       int *nnz_array = new int[this->size];
@@ -156,24 +156,24 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::free() 
     {
-      _F_
-        if (inited) MatDestroy(matrix);
+      _F_;
+      if (inited) MatDestroy(matrix);
       inited = false;
     }
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::finish()
     {
-      _F_
-        MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
+      _F_;
+      MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(matrix, MAT_FINAL_ASSEMBLY);
     }
 
     template<>
     double PetscMatrix<double>::get(unsigned int m, unsigned int n)
     {
-      _F_
-        double v = 0.0;
+      _F_;
+      double v = 0.0;
       PetscScalar pv;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
       v=pv.real();
@@ -183,8 +183,8 @@ namespace Hermes
     template<>
     std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n)
     {
-      _F_
-        std::complex<double> v = 0.0;
+      _F_;
+      std::complex<double> v = 0.0;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
       return v;
     }
@@ -192,8 +192,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::zero() 
     {
-      _F_
-        MatZeroEntries(matrix);
+      _F_;
+      MatZeroEntries(matrix);
     }
 
     inline PetscScalar to_petsc(double x){
@@ -207,10 +207,10 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) 
     {
-      _F_
-        if (v != 0.0){		// ignore zero values.
-          MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
-        }
+      _F_;
+      if (v != 0.0){		// ignore zero values.
+        MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
+      }
     }
 
     /// Add a number to each diagonal entry.
@@ -227,49 +227,49 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) 
     {
-      _F_
-        //\todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
-        // row and cols for -1)
-        for (unsigned int i = 0; i < m; i++)				// rows
-          for (unsigned int j = 0; j < n; j++)			// cols
-            if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-              add(rows[i], cols[j], mat[i][j]);
+      _F_;
+      //\todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
+      // row and cols for -1)
+      for (unsigned int i = 0; i < m; i++)				// rows
+        for (unsigned int j = 0; j < n; j++)			// cols
+          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+            add(rows[i], cols[j], mat[i][j]);
     }
 
     template<typename Scalar>
     bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
-        switch (fmt) 
+      _F_;
+      switch (fmt) 
       {
-        case DF_MATLAB_SPARSE: //only to stdout
-          PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
-          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-          MatView(matrix,viewer);
-          return true;
+      case DF_MATLAB_SPARSE: //only to stdout
+        PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
+        PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
+        MatView(matrix,viewer);
+        return true;
       }
-        return false;
+      return false;
     }
 
     template<typename Scalar>
     unsigned int PetscMatrix<Scalar>::get_matrix_size() const 
     {
-      _F_
-        return this->size;
+      _F_;
+      return this->size;
     }
 
     template<typename Scalar>
     unsigned int PetscMatrix<Scalar>::get_nnz() const 
     {
-      _F_
-        return nnz;
+      _F_;
+      return nnz;
     }
 
     template<typename Scalar>
     double PetscMatrix<Scalar>::get_fill_in() const 
     {
-      _F_
-        return (double) nnz / ((double)this->size*this->size);
+      _F_;
+      return (double) nnz / ((double)this->size*this->size);
     }
 
 
@@ -295,7 +295,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat)
     {
-      _F_
+      _F_;
       int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof) 
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
@@ -309,7 +309,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
-      _F_
+      _F_;
       if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() )) 
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
       unsigned int block_size=mat->get_size();
@@ -327,16 +327,16 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
-      _F_
-        MatScale(matrix,to_petsc(value));
+      _F_;
+      MatScale(matrix,to_petsc(value));
     }
     // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
     {
-      _F_
-        this->size=size;
+      _F_;
+      this->size=size;
       this->nnz=nnz;
       PetscScalar* pax = new PetscScalar[nnz];
       for (unsigned i=0;i<nnz;i++)
@@ -348,8 +348,8 @@ namespace Hermes
     template<typename Scalar>
     PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate()
     {
-      _F_
-        PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();        
+      _F_;
+      PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();        
       MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
       ptscmatrix->size=this->size;
       ptscmatrix->nnz=nnz;
@@ -359,24 +359,24 @@ namespace Hermes
     template<typename Scalar>
     PetscVector<Scalar>::PetscVector() 
     {
-      _F_
-        inited = false;
+      _F_;
+      inited = false;
       add_petsc_object();
     }
 
     template<typename Scalar>
     PetscVector<Scalar>::~PetscVector() 
     {
-      _F_
-        free();
+      _F_;
+      free();
       remove_petsc_object();
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::alloc(unsigned int n) 
     {
-      _F_
-        free();
+      _F_;
+      free();
       this->size = n;
       VecCreateSeq(PETSC_COMM_SELF, this->size, &vec);
       inited = true;
@@ -385,24 +385,24 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::free() 
     {
-      _F_
-        if (inited) VecDestroy(vec);
+      _F_;
+      if (inited) VecDestroy(vec);
       inited = false;
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::finish()
     {
-      _F_
-        VecAssemblyBegin(vec);
+      _F_;
+      VecAssemblyBegin(vec);
       VecAssemblyEnd(vec);
     }
 
     template<>
     double PetscVector<double>::get(unsigned int idx) 
     {
-      _F_
-        double y = 0;
+      _F_;
+      double y = 0;
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*) &idx, &py);
       y=py.real();
@@ -412,8 +412,8 @@ namespace Hermes
     template<>
     std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) 
     {
-      _F_
-        std::complex<double> y = 0;
+      _F_;
+      std::complex<double> y = 0;
       VecGetValues(vec, 1, (PetscInt*) &idx, &y);
       return y;
     }
@@ -421,8 +421,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const 
     {
-      _F_
-        int *idx = new int [this->size];
+      _F_;
+      int *idx = new int [this->size];
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
       delete [] idx;
@@ -431,15 +431,15 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::zero() 
     {
-      _F_
-        VecZeroEntries(vec);
+      _F_;
+      VecZeroEntries(vec);
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::change_sign() 
     {
-      _F_
-        PetscScalar* y = new PetscScalar [this->size];
+      _F_;
+      PetscScalar* y = new PetscScalar [this->size];
       int *idx = new int [this->size];
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       VecGetValues(vec, this->size, idx, y);
@@ -452,22 +452,22 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::set(unsigned int idx, Scalar y) 
     {
-      _F_
-        VecSetValue(vec, idx, to_petsc(y), INSERT_VALUES);
+      _F_;
+      VecSetValue(vec, idx, to_petsc(y), INSERT_VALUES);
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::add(unsigned int idx, Scalar y) 
     {
-      _F_
-        VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
+      _F_;
+      VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) 
     {
-      _F_
-        PetscScalar py;
+      _F_;
+      PetscScalar py;
       for (unsigned int i = 0; i < n; i++)
       {
         VecSetValue(vec, idx[i],to_petsc(y[i]), ADD_VALUES);
@@ -477,16 +477,16 @@ namespace Hermes
     template<typename Scalar>
     bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
+      _F_;
       switch (fmt) 
       {
-        case DF_MATLAB_SPARSE: //only to stdout
-          PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
-          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-          VecView(vec,viewer);
-          return true;
+      case DF_MATLAB_SPARSE: //only to stdout
+        PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
+        PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
+        VecView(vec,viewer);
+        return true;
       }
-        return false;
+      return false;
     }
 
     template class HERMES_API PetscMatrix<double>;
@@ -500,21 +500,21 @@ namespace Hermes
     PetscLinearSolver<Scalar>::PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
       : DirectSolver<Scalar>(), m(mat), rhs(rhs)
     {
-      _F_
-        add_petsc_object();
+      _F_;
+      add_petsc_object();
     }
 
     template<typename Scalar>
     PetscLinearSolver<Scalar>::~PetscLinearSolver() 
     {
-      _F_
-        remove_petsc_object();
+      _F_;
+      remove_petsc_object();
     }
 
     template<typename Scalar>
     bool PetscLinearSolver<Scalar>::solve() 
     {
-      _F_
+      _F_;
       assert(m != NULL);
       assert(rhs != NULL);
 

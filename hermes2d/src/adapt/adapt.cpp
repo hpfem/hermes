@@ -604,7 +604,7 @@ namespace Hermes
     {
       for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
         elem_ref != elems_to_refine.end(); elem_ref++) 
-          apply_refinement(*elem_ref);
+        apply_refinement(*elem_ref);
     }
 
     template<typename Scalar>
@@ -886,8 +886,8 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
-      _F_
-        int i, j, k;
+      _F_;
+      int i, j, k;
 
       int n = slns.size();
       if (n != this->num) EXIT("Wrong number of solutions.");
