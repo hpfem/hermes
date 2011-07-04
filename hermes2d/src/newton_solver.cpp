@@ -277,7 +277,7 @@ namespace Hermes
 
         // Assemble and keep the jacobian if this has not been done before.
         if(kept_jacobian == NULL) {
-          kept_jacobian = create_matrix<Scalar>(matrix_solver_type);
+          kept_jacobian = create_matrix<Scalar>(this->matrix_solver_type);
           this->dp->assemble(coeff_vec, kept_jacobian);
         }
 
