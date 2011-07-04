@@ -8,28 +8,41 @@ using namespace Hermes;
 using namespace Hermes::Hermes2D;
 
 const bool STOKES = false;                        // For application of Stokes flow (creeping flow).
-#define PRESSURE_IN_L2                            // If this is defined, the pressure is approximated using
+
+// If this is defined, the pressure is approximated using
 // discontinuous L2 elements (making the velocity discreetely
 // divergence-free, more accurate than using a continuous
 // pressure approximation). Otherwise the standard continuous
 // elements are used. The results are striking - check the
 // tutorial for comparisons.
+#define PRESSURE_IN_L2
+
 const int P_INIT_VEL = 2;                         // Initial polynomial degree for velocity components.
-const int P_INIT_PRESSURE = 1;                    // Initial polynomial degree for pressure.
+
+// Initial polynomial degree for pressure.
 // Note: P_INIT_VEL should always be greater than
 // P_INIT_PRESSURE because of the inf-sup condition.
+const int P_INIT_PRESSURE = 1;
+
 const double RE = 200.0;                          // Reynolds number.
 const double VEL_INLET = 1.0;                     // Inlet velocity (reached after STARTUP_TIME).
-const double STARTUP_TIME = 1.0;                  // During this time, inlet velocity increases gradually
+
+// During this time, inlet velocity increases gradually
 // from 0 to VEL_INLET, then it stays constant.
+const double STARTUP_TIME = 1.0;
+
 const double TAU = 0.1;                           // Time step.
 const double T_FINAL = 0.21;                      // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
-const double H = 5;                               // Domain height (necessary to define the parabolic
+
+// Domain height (necessary to define the parabolic
 // velocity profile at inlet).
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
+const double H = 5;
+
+// Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
 // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";

@@ -6,11 +6,14 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 
 // This test makes sure that example 13-complex-adapt works correctly.
 
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 0;
+// Initial polynomial degree of all mesh elements.
+const int P_INIT = 1;
+// This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies (see below).
-const int STRATEGY = 0;                           // Adaptive strategy:
+const double THRESHOLD = 0.3;
+// Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
 //   error is processed. If more elements have similar errors, refine
 //   all to keep the mesh symmetric.
@@ -19,31 +22,40 @@ const int STRATEGY = 0;                           // Adaptive strategy:
 // STRATEGY = 2 ... refine all elements whose error is larger
 //   than THRESHOLD.
 // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
+const int STRATEGY = 0;
+// Predefined list of element refinement candidates. Possible values are
 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
 // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
 // See User Documentation for details.
-const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
+const CandList CAND_LIST = H2D_HP_ANISO;
+// Maximum allowed level of hanging nodes:
 // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
 // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
 // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
 // Note that regular meshes are not supported, this is due to
 // their notoriously bad performance.
-const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
+const int MESH_REGULARITY = -1;
+// Default value is 1.0. This parameter influences the selection of
 // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double CONV_EXP = 1.0;
+// Stopping criterion for adaptivity (rel. error tolerance between the
 // reference mesh and coarse mesh solution in percent).
-const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
+const double ERR_STOP = 1.0;
+// Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
-const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
+const int NDOF_STOP = 60000;
+// Name of the iterative method employed by AztecOO (ignored
 // by the other solvers). 
 // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
+const char* iterative_method = "bicgstab";
+// Name of the preconditioner employed by AztecOO (ignored by
 // the other solvers).
 // Possibilities: none, jacobi, neumann, least-squares, or a
-//  preconditioner from IFPACK (see solver/aztecoo.h)
-MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+// preconditioner from IFPACK (see solver/aztecoo.h).
+const char* preconditioner = "least-squares";
+// Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;
 
 // Problem parameters.
 const double MU_0 = 4.0*M_PI*1e-7;
@@ -162,13 +174,13 @@ int main(int argc, char* argv[])
 
   ndof = space.get_num_dofs();
 
-  printf("ndof allowed = %d\n", 360);
-  printf("ndof actual = %d\n", ndof);
-  if (ndof < 650) {      // ndofs was 352 at the time this test was created
+  if (ndof == 352) // Tested value as of 4 Jul 2011.
+  {
     printf("Success!\n");
     return TEST_SUCCESS;
   }
-  else {
+  else 
+  {
     printf("Failure!\n");
     return TEST_FAILURE;
   }

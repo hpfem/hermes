@@ -94,9 +94,8 @@ int main(int argc, char* argv[])
     bool jacobian_changed = false;
     bool verbose = true;
     if (!runge_kutta.rk_time_step(current_time, time_step, sln_time_prev, 
-                                  sln_time_new, jacobian_changed, verbose)) {
+                                  sln_time_new, jacobian_changed, verbose)) 
       error("Runge-Kutta time step failed, try to decrease time step size.");
-    }
 
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);
@@ -109,25 +108,27 @@ int main(int argc, char* argv[])
 
   /* Begin test */
 
-  info("Coordinate (-2.0, 2.0) value = %lf", sln_time_new->get_pt_value(-2.0, 2.0));
+  info("Coordinate (-2.0, 2.0) value = %lf", sln_time_new->get_pt_value(-3.5, 17.0));
   info("Coordinate (-1.0, 2.0) value = %lf", sln_time_new->get_pt_value(-1.0, 2.0));
-  info("Coordinate ( 0.0, 2.0) value = %lf", sln_time_new->get_pt_value(0.0, 2.0));
+  info("Coordinate ( 0.0, 2.0) value = %lf", sln_time_new->get_pt_value(0.0, 9.5));
   info("Coordinate ( 1.0, 2.0) value = %lf", sln_time_new->get_pt_value(1.0, 2.0));
-  info("Coordinate ( 2.0, 2.0) value = %lf", sln_time_new->get_pt_value(2.0, 2.0));
+  info("Coordinate ( 2.0, 2.0) value = %lf", sln_time_new->get_pt_value(3.5, 17.0));
 
   bool success = true;
 
-  if (fabs(sln_time_new->get_pt_value(-2.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-6) success = false;
   if (fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value( 0.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-6) success = false;
   if (fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if (fabs(sln_time_new->get_pt_value( 2.0, 2.0) - 10.0) > 1E-6) success = false;
+  if (fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-6) success = false;
 
-  if (success) {
+  if (success) 
+  {
     printf("Success!\n");
     return TEST_SUCCESS;
   }
-  else {
+  else 
+  {
     printf("Failure!\n");
     return TEST_FAILURE;
   }
