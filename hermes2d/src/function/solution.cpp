@@ -26,8 +26,8 @@ namespace Hermes
   namespace Hermes2D
   {
     // "static" stuff.
-    static double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
-    static int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
+    double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
+    int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
     
     static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
     static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
@@ -674,7 +674,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-      if (e == element) ///< FIXME
+      if (e == this->element) ///< FIXME
         return;
       if (!e->active) error("Cannot select inactive element. Wrong mesh?");
       MeshFunction<Scalar>::set_active_element(e);
