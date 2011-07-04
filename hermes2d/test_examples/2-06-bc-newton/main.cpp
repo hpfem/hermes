@@ -21,7 +21,7 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -46,13 +46,13 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormPoissonNewton wf("Aluminum", new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_AL), 
-                                 "Copper", new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_CU), 
-                                 new Hermes::Hermes2D::HermesFunction<double>(-VOLUME_HEAT_SRC),
-                                  "Outer", ALPHA, T_EXTERIOR);
-  
+    "Copper", new Hermes::Hermes2D::HermesFunction<double>(LAMBDA_CU), 
+    new Hermes::Hermes2D::HermesFunction<double>(-VOLUME_HEAT_SRC),
+    "Outer", ALPHA, T_EXTERIOR);
+
   // Initialize boundary conditions.
   CustomDirichletCondition bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Left"),
-                                        BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
+    BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   if (HERMES_VISUALIZATION) {
     Hermes::Hermes2D::Views::ScalarView<double> view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
     view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
-   Hermes::Hermes2D::Views::View::wait();
+    Hermes::Hermes2D::Views::View::wait();
   }
 
   // Clean up.

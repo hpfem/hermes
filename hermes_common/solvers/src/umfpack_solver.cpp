@@ -39,8 +39,8 @@ namespace Hermes
   {
     static int find_position(int *Ai, int Alen, int idx) 
     {
-      _F_
-        assert (Ai != NULL);
+      _F_;
+      assert (Ai != NULL);
       assert (Alen > 0);
       assert (idx >= 0);
 
@@ -68,8 +68,8 @@ namespace Hermes
     template<typename Scalar>
     CSCMatrix<Scalar>::CSCMatrix() 
     {
-      _F_
-        this->size = 0; nnz = 0;
+      _F_;
+      this->size = 0; nnz = 0;
       Ap = NULL;
       Ai = NULL;
       Ax = NULL;
@@ -78,16 +78,16 @@ namespace Hermes
     template<typename Scalar>
     CSCMatrix<Scalar>::CSCMatrix(unsigned int size) 
     {
-      _F_
-        this->size = size;
+      _F_;
+      this->size = size;
       this->alloc();
     }
 
     template<typename Scalar>
     CSCMatrix<Scalar>::~CSCMatrix() 
     {
-      _F_
-        free();
+      _F_;
+      free();
     }
 
     template<typename Scalar>
@@ -113,8 +113,8 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::alloc() 
     {
-      _F_
-        assert(this->pages != NULL);
+      _F_;
+      assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
       Ap = new int [this->size + 1];
@@ -146,8 +146,8 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::free() 
     {
-      _F_
-        nnz = 0;
+      _F_;
+      nnz = 0;
       if (Ap != NULL) {delete [] Ap; Ap = NULL;}
       if (Ai != NULL) {delete [] Ai; Ai = NULL;}
       if (Ax != NULL) {delete [] Ax; Ax = NULL;}
@@ -156,9 +156,9 @@ namespace Hermes
     template<typename Scalar>
     Scalar CSCMatrix<Scalar>::get(unsigned int m, unsigned int n)
     {
-      _F_
-        // Find m-th row in the n-th column.
-        int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      _F_;
+      // Find m-th row in the n-th column.
+      int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
 
       if (mid < 0) // if the entry has not been found
         return 0.0;   
@@ -169,34 +169,34 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::zero() 
     {
-      _F_
-        memset(Ax, 0, sizeof(Scalar) * nnz);
+      _F_;
+      memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
     template<typename Scalar>
     void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) 
     {
-      _F_
-        if (v != 0.0)   // ignore zero values.
+      _F_;
+      if (v != 0.0)   // ignore zero values.
+      {
+        // Find m-th row in the n-th column.
+        int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+        // Make sure we are adding to an existing non-zero entry.
+        if (pos < 0) 
         {
-          // Find m-th row in the n-th column.
-          int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
-          // Make sure we are adding to an existing non-zero entry.
-          if (pos < 0) 
-          {
-            info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
-            error("Sparse matrix entry not found");
-          }
-
-          Ax[Ap[n] + pos] += v;
+          info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
+          error("Sparse matrix entry not found");
         }
+
+        Ax[Ap[n] + pos] += v;
+      }
     }
 
     template<typename Scalar>
     void CSCMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat_block)
     {
-      _F_
-        int ndof = mat_block->get_size();
+      _F_;
+      int ndof = mat_block->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof) 
         error("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
@@ -237,8 +237,8 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::add_matrix(CSCMatrix<Scalar>* mat) 
     {
-      _F_
-        assert(this->get_size() == mat->get_size());
+      _F_;
+      assert(this->get_size() == mat->get_size());
       // Create iterators for both matrices. 
       UMFPackIterator<Scalar> mat_it(mat);
       UMFPackIterator<Scalar> this_it(this);
@@ -286,11 +286,11 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) 
     {
-      _F_
-        for (unsigned int i = 0; i < m; i++)       // rows
-          for (unsigned int j = 0; j < n; j++)     // cols
-            if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-              add(rows[i], cols[j], mat[i][j]);
+      _F_;
+      for (unsigned int i = 0; i < m; i++)       // rows
+        for (unsigned int j = 0; j < n; j++)     // cols
+          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+            add(rows[i], cols[j], mat[i][j]);
     }
 
     double inline real(double x)
@@ -316,212 +316,212 @@ namespace Hermes
     template<>
     bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
-        switch (fmt) 
+      _F_;
+      switch (fmt) 
       {
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
-            this->size, this->size, nnz, nnz);
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
+          this->size, this->size, nnz, nnz);
+        for (unsigned int j = 0; j < this->size; j++)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+            fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+            Hermes::Helpers::fprint_num(file, Ax[i]);
+            fprintf(file, "\n");
+          }
+          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+
+          return true;
+
+      case DF_MATRIX_MARKET:
+        {
+          fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+          int nnz_sym=0;
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
-            {
-              fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-              Hermes::Helpers::fprint_num(file, Ax[i]);
-              fprintf(file, "\n");
-            }
-            fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-            return true;
-
-        case DF_MATRIX_MARKET:
-          {
-            fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
-            int nnz_sym=0;
-            for (unsigned int j = 0; j < this->size; j++)
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                if ((int)j <= Ai[i]) nnz_sym++;
-            fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
-            for (unsigned int j = 0; j < this->size; j++)
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                // The following line was replaced with the one below, because it gave a warning 
-                // to cause code abort at runtime. 
-                //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
-                if ((int)j <= Ai[i])
-                {
-                  fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
-                  Hermes::Helpers::fprint_num(file, Ax[i]);
-                  fprintf(file, "\n");
-                }
-
-                return true;
-          }
-
-        case DF_HERMES_BIN: 
-          {
-            hermes_fwrite("HERMESX\001", 1, 8, file);
-            int ssize = sizeof(double);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(&nnz, sizeof(int), 1, file);
-            hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-            hermes_fwrite(Ai, sizeof(int), nnz, file);
-            hermes_fwrite(Ax, sizeof(double), nnz, file);
-            return true;
-          }
-
-        case DF_PLAIN_ASCII:
-          exit(1);
-          {
-            const double zero_cutoff = 1e-10;
-            double *ascii_entry_buff = new double[nnz];
-            int *ascii_entry_i = new int[nnz];
-            int *ascii_entry_j = new int[nnz];
-            int k = 0;
-
-            // If real or imaginary part of Scalar entry is below zero_cutoff
-            // it's not included in ascii file, and number of non-zeros is reduced by one.
-            for (unsigned int j = 0; j < size; j++)
-            {
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              if ((int)j <= Ai[i]) nnz_sym++;
+          fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
+          for (unsigned int j = 0; j < this->size; j++)
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              // The following line was replaced with the one below, because it gave a warning 
+              // to cause code abort at runtime. 
+              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
+              if ((int)j <= Ai[i])
               {
-                if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
-                {
-                  ascii_entry_buff[k] = Ax[i];
-                  ascii_entry_i[k] = Ai[i];
-                  ascii_entry_j[k] = j;
-                  k++;
-                }
-                else
-                  nnz -= 1;            
+                fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
+                Hermes::Helpers::fprint_num(file, Ax[i]);
+                fprintf(file, "\n");
               }
+
+              return true;
+        }
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESX\001", 1, 8, file);
+          int ssize = sizeof(double);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(double), nnz, file);
+          return true;
+        }
+
+      case DF_PLAIN_ASCII:
+        exit(1);
+        {
+          const double zero_cutoff = 1e-10;
+          double *ascii_entry_buff = new double[nnz];
+          int *ascii_entry_i = new int[nnz];
+          int *ascii_entry_j = new int[nnz];
+          int k = 0;
+
+          // If real or imaginary part of Scalar entry is below zero_cutoff
+          // it's not included in ascii file, and number of non-zeros is reduced by one.
+          for (unsigned int j = 0; j < size; j++)
+          {
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            {
+              if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+              {
+                ascii_entry_buff[k] = Ax[i];
+                ascii_entry_i[k] = Ai[i];
+                ascii_entry_j[k] = j;
+                k++;
+              }
+              else
+                nnz -= 1;            
             }
-
-            fprintf(file, "%d\n", size);
-            fprintf(file, "%d\n", nnz);
-            for (unsigned int k = 0; k < nnz; k++)
-              fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
-
-            //Free memory
-            delete [] ascii_entry_buff;
-            delete [] ascii_entry_i;
-            delete [] ascii_entry_j;
-
-            //Clear pointer
-            ascii_entry_buff = NULL;
-            ascii_entry_i = NULL;
-            ascii_entry_j = NULL;
-
-            return true;
           }
 
-        default:
-          return false;
+          fprintf(file, "%d\n", size);
+          fprintf(file, "%d\n", nnz);
+          for (unsigned int k = 0; k < nnz; k++)
+            fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
+
+          //Free memory
+          delete [] ascii_entry_buff;
+          delete [] ascii_entry_i;
+          delete [] ascii_entry_j;
+
+          //Clear pointer
+          ascii_entry_buff = NULL;
+          ascii_entry_i = NULL;
+          ascii_entry_j = NULL;
+
+          return true;
+        }
+
+      default:
+        return false;
       }
     }
 
     template<>
     bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
-        switch (fmt)
+      _F_;
+      switch (fmt)
       {
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
-            this->size, this->size, nnz, nnz);
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", 
+          this->size, this->size, nnz, nnz);
+        for (unsigned int j = 0; j < this->size; j++)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+            fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+            Hermes::Helpers::fprint_num(file, Ax[i]);
+            fprintf(file, "\n");
+          }
+          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+
+          return true;
+
+      case DF_MATRIX_MARKET:
+        {
+          fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+          int nnz_sym=0;
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
-            {
-              fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-              Hermes::Helpers::fprint_num(file, Ax[i]);
-              fprintf(file, "\n");
-            }
-            fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-            return true;
-
-        case DF_MATRIX_MARKET:
-          {
-            fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
-            int nnz_sym=0;
-            for (unsigned int j = 0; j < this->size; j++)
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                if ((int)j <= Ai[i]) nnz_sym++;
-            fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
-            for (unsigned int j = 0; j < this->size; j++)
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                // The following line was replaced with the one below, because it gave a warning 
-                // to cause code abort at runtime. 
-                //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
-                if ((int)j <= Ai[i])
-                {
-                  fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
-                  Hermes::Helpers::fprint_num(file, Ax[i]);
-                  fprintf(file, "\n");
-                }
-
-                return true;
-          }
-
-        case DF_HERMES_BIN: 
-          {
-            hermes_fwrite("HERMESX\001", 1, 8, file);
-            int ssize = sizeof(std::complex<double>);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(&nnz, sizeof(int), 1, file);
-            hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-            hermes_fwrite(Ai, sizeof(int), nnz, file);
-            hermes_fwrite(Ax, sizeof(std::complex<double>), nnz, file);
-            return true;
-          }
-
-        case DF_PLAIN_ASCII:
-          exit(1);
-          {
-            const double zero_cutoff = 1e-10;
-            std::complex<double> *ascii_entry_buff = new std::complex<double>[nnz];
-            int *ascii_entry_i = new int[nnz];
-            int *ascii_entry_j = new int[nnz];
-            int k = 0;
-
-            // If real or imaginary part of Scalar entry is below zero_cutoff
-            // it's not included in ascii file, and number of non-zeros is reduced by one.
-            for (unsigned int j = 0; j < size; j++)
-            {
-              for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              if ((int)j <= Ai[i]) nnz_sym++;
+          fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
+          for (unsigned int j = 0; j < this->size; j++)
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              // The following line was replaced with the one below, because it gave a warning 
+              // to cause code abort at runtime. 
+              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
+              if ((int)j <= Ai[i])
               {
-                if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
-                {
-                  ascii_entry_buff[k] = Ax[i];
-                  ascii_entry_i[k] = Ai[i];
-                  ascii_entry_j[k] = j;
-                  k++;
-                }
-                else
-                  nnz -= 1;            
+                fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
+                Hermes::Helpers::fprint_num(file, Ax[i]);
+                fprintf(file, "\n");
               }
+
+              return true;
+        }
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESX\001", 1, 8, file);
+          int ssize = sizeof(std::complex<double>);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(std::complex<double>), nnz, file);
+          return true;
+        }
+
+      case DF_PLAIN_ASCII:
+        exit(1);
+        {
+          const double zero_cutoff = 1e-10;
+          std::complex<double> *ascii_entry_buff = new std::complex<double>[nnz];
+          int *ascii_entry_i = new int[nnz];
+          int *ascii_entry_j = new int[nnz];
+          int k = 0;
+
+          // If real or imaginary part of Scalar entry is below zero_cutoff
+          // it's not included in ascii file, and number of non-zeros is reduced by one.
+          for (unsigned int j = 0; j < size; j++)
+          {
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            {
+              if (real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+              {
+                ascii_entry_buff[k] = Ax[i];
+                ascii_entry_i[k] = Ai[i];
+                ascii_entry_j[k] = j;
+                k++;
+              }
+              else
+                nnz -= 1;            
             }
-
-            fprintf(file, "%d\n", size);
-            fprintf(file, "%d\n", nnz);
-            for (unsigned int k = 0; k < nnz; k++)
-              fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k].real(), ascii_entry_buff[k].imag());     
-
-            //Free memory
-            delete [] ascii_entry_buff;
-            delete [] ascii_entry_i;
-            delete [] ascii_entry_j;
-
-            //Clear pointer
-            ascii_entry_buff = NULL;
-            ascii_entry_i = NULL;
-            ascii_entry_j = NULL;
-
-            return true;
           }
 
-        default:
-          return false;
+          fprintf(file, "%d\n", size);
+          fprintf(file, "%d\n", nnz);
+          for (unsigned int k = 0; k < nnz; k++)
+            fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k].real(), ascii_entry_buff[k].imag());     
+
+          //Free memory
+          delete [] ascii_entry_buff;
+          delete [] ascii_entry_i;
+          delete [] ascii_entry_j;
+
+          //Clear pointer
+          ascii_entry_buff = NULL;
+          ascii_entry_i = NULL;
+          ascii_entry_j = NULL;
+
+          return true;
+        }
+
+      default:
+        return false;
       }
     }
 
@@ -534,15 +534,15 @@ namespace Hermes
     template<typename Scalar>
     double CSCMatrix<Scalar>::get_fill_in() const 
     {
-      _F_
-        return nnz / (double) (this->size * this->size);
+      _F_;
+      return nnz / (double) (this->size * this->size);
     }
 
     template<typename Scalar>
     void CSCMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax) 
     {
-      _F_
-        this->nnz = nnz;
+      _F_;
+      this->nnz = nnz;
       this->size = size;
       this->Ap = new int[this->size+1]; assert(this->Ap != NULL);
       this->Ai = new int[nnz];    assert(this->Ai != NULL);
@@ -558,8 +558,8 @@ namespace Hermes
     template<typename Scalar>
     CSCMatrix<Scalar>* CSCMatrix<Scalar>::duplicate()
     {
-      _F_
-        CSCMatrix<Scalar>* new_matrix = new CSCMatrix<Scalar>();
+      _F_;
+      CSCMatrix<Scalar>* new_matrix = new CSCMatrix<Scalar>();
       create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
       return new_matrix;
     }
@@ -567,16 +567,16 @@ namespace Hermes
     template<typename Scalar>
     UMFPackVector<Scalar>::UMFPackVector() 
     {
-      _F_
-        v = NULL;
+      _F_;
+      v = NULL;
       this->size = 0;
     }
 
     template<typename Scalar>
     UMFPackVector<Scalar>::UMFPackVector(unsigned int size) 
     {
-      _F_
-        v = NULL;
+      _F_;
+      v = NULL;
       this->size = size;
       this->alloc(size);
     }
@@ -584,15 +584,15 @@ namespace Hermes
     template<typename Scalar>
     UMFPackVector<Scalar>::~UMFPackVector() 
     {
-      _F_
-        free();
+      _F_;
+      free();
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::alloc(unsigned int n) 
     {
-      _F_
-        free();
+      _F_;
+      free();
       this->size = n;
       v = new Scalar [n];
       MEM_CHECK(v);
@@ -602,22 +602,22 @@ namespace Hermes
     template<typename Scalar>
     void UMFPackVector<Scalar>::zero() 
     {
-      _F_
-        memset(v, 0, this->size * sizeof(Scalar));
+      _F_;
+      memset(v, 0, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::change_sign() 
     {
-      _F_
-        for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
+      _F_;
+      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::free() 
     {
-      _F_
-        delete [] v;
+      _F_;
+      delete [] v;
       v = NULL;
       this->size = 0;
     }
@@ -625,108 +625,108 @@ namespace Hermes
     template<typename Scalar>
     void UMFPackVector<Scalar>::set(unsigned int idx, Scalar y) 
     {
-      _F_
-        v[idx] = y;
+      _F_;
+      v[idx] = y;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::add(unsigned int idx, Scalar y) 
     {
-      _F_
-        v[idx] += y;
+      _F_;
+      v[idx] += y;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y) 
     {
-      _F_
-        for (unsigned int i = 0; i < n; i++)
-          v[idx[i]] += y[i];
+      _F_;
+      for (unsigned int i = 0; i < n; i++)
+        v[idx[i]] += y[i];
     }
 
     template<>
     bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
-        switch (fmt) 
+      _F_;
+      switch (fmt) 
       {
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-          for (unsigned int i = 0; i < this->size; i++)
-          {
-            Hermes::Helpers::fprint_num(file,v[i]);
-            fprintf(file, "\n");
-          }
-          fprintf(file, " ];\n");
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file,v[i]);
+          fprintf(file, "\n");
+        }
+        fprintf(file, " ];\n");
+        return true;
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESR\001", 1, 8, file);
+          int ssize = sizeof(double);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(v, sizeof(double), this->size, file);
           return true;
+        }
 
-        case DF_HERMES_BIN: 
+      case DF_PLAIN_ASCII: 
+        {
+          fprintf(file, "\n");
+          for (unsigned int i = 0; i < size; i++) 
           {
-            hermes_fwrite("HERMESR\001", 1, 8, file);
-            int ssize = sizeof(double);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(v, sizeof(double), this->size, file);
-            return true;
-          }
 
-        case DF_PLAIN_ASCII: 
-          {
+            Hermes::Helpers::fprint_num(file, v[i]);
             fprintf(file, "\n");
-            for (unsigned int i = 0; i < size; i++) 
-            {
-
-              Hermes::Helpers::fprint_num(file, v[i]);
-              fprintf(file, "\n");
-            }
-
-            return true;
           }
 
-        default:
-          return false;
+          return true;
+        }
+
+      default:
+        return false;
       }
     }
 
     template<>
     bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt) 
     {
-      _F_
-        switch (fmt) 
+      _F_;
+      switch (fmt) 
       {
-        case DF_MATLAB_SPARSE:
-          fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
-          for (unsigned int i = 0; i < this->size; i++)
-          {
-            Hermes::Helpers::fprint_num(file,v[i]);
-            fprintf(file, "\n");
-          }
-          fprintf(file, " ];\n");
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file,v[i]);
+          fprintf(file, "\n");
+        }
+        fprintf(file, " ];\n");
+        return true;
+
+      case DF_HERMES_BIN: 
+        {
+          hermes_fwrite("HERMESR\001", 1, 8, file);
+          int ssize = sizeof(std::complex<double>);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(v, sizeof(std::complex<double>), this->size, file);
           return true;
+        }
 
-        case DF_HERMES_BIN: 
+      case DF_PLAIN_ASCII: 
+        {
+          fprintf(file, "\n");
+          for (unsigned int i = 0; i < size; i++) 
           {
-            hermes_fwrite("HERMESR\001", 1, 8, file);
-            int ssize = sizeof(std::complex<double>);
-            hermes_fwrite(&ssize, sizeof(int), 1, file);
-            hermes_fwrite(&this->size, sizeof(int), 1, file);
-            hermes_fwrite(v, sizeof(std::complex<double>), this->size, file);
-            return true;
+            fprintf(file, "%E %E\n", v[i].real(), v[i].imag());     
           }
 
-        case DF_PLAIN_ASCII: 
-          {
-            fprintf(file, "\n");
-            for (unsigned int i = 0; i < size; i++) 
-            {
-              fprintf(file, "%E %E\n", v[i].real(), v[i].imag());     
-            }
+          return true;
+        }
 
-            return true;
-          }
-
-        default:
-          return false;
+      default:
+        return false;
       }
     }
 
@@ -742,21 +742,21 @@ namespace Hermes
   {
     static void check_status(const char *fn_name, int status) 
     {
-      _F_
-        switch (status) 
+      _F_;
+      switch (status) 
       {
-        case UMFPACK_OK: break;
-        case UMFPACK_WARNING_singular_matrix:       warning("%s: singular matrix!", fn_name); break;
-        case UMFPACK_ERROR_out_of_memory:           warning("%s: out of memory!", fn_name); break;
-        case UMFPACK_ERROR_argument_missing:        warning("%s: argument missing", fn_name); break;
-        case UMFPACK_ERROR_invalid_Symbolic_object: warning("%s: invalid Symbolic object", fn_name); break;
-        case UMFPACK_ERROR_invalid_Numeric_object:  warning("%s: invalid Numeric object", fn_name); break;
-        case UMFPACK_ERROR_different_pattern:       warning("%s: different pattern", fn_name); break;
-        case UMFPACK_ERROR_invalid_system:          warning("%s: invalid system", fn_name); break;
-        case UMFPACK_ERROR_n_nonpositive:           warning("%s: n nonpositive", fn_name); break;
-        case UMFPACK_ERROR_invalid_matrix:          warning("%s: invalid matrix", fn_name); break;
-        case UMFPACK_ERROR_internal_error:          warning("%s: internal error", fn_name); break;
-        default:                                    warning("%s: unknown error (%d)", fn_name, status); break;
+      case UMFPACK_OK: break;
+      case UMFPACK_WARNING_singular_matrix:       warning("%s: singular matrix!", fn_name); break;
+      case UMFPACK_ERROR_out_of_memory:           warning("%s: out of memory!", fn_name); break;
+      case UMFPACK_ERROR_argument_missing:        warning("%s: argument missing", fn_name); break;
+      case UMFPACK_ERROR_invalid_Symbolic_object: warning("%s: invalid Symbolic object", fn_name); break;
+      case UMFPACK_ERROR_invalid_Numeric_object:  warning("%s: invalid Numeric object", fn_name); break;
+      case UMFPACK_ERROR_different_pattern:       warning("%s: different pattern", fn_name); break;
+      case UMFPACK_ERROR_invalid_system:          warning("%s: invalid system", fn_name); break;
+      case UMFPACK_ERROR_n_nonpositive:           warning("%s: n nonpositive", fn_name); break;
+      case UMFPACK_ERROR_invalid_matrix:          warning("%s: invalid matrix", fn_name); break;
+      case UMFPACK_ERROR_internal_error:          warning("%s: internal error", fn_name); break;
+      default:                                    warning("%s: unknown error (%d)", fn_name, status); break;
       }
     }
 
@@ -812,9 +812,9 @@ namespace Hermes
     template<>
     bool UMFPackLinearSolver<double>::setup_factorization()
     {
-      _F_
-        // Perform both factorization phases for the first time.
-        int eff_fact_scheme;
+      _F_;
+      // Perform both factorization phases for the first time.
+      int eff_fact_scheme;
       if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
@@ -856,22 +856,22 @@ namespace Hermes
     UMFPackLinearSolver<Scalar>::UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
-      _F_
+      _F_;
     }
 
     template<typename Scalar>
     UMFPackLinearSolver<Scalar>::~UMFPackLinearSolver() 
     {
-      _F_
-        free_factorization_data();
+      _F_;
+      free_factorization_data();
     }
 
     template<>
     bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
     {
-      _F_
-        // Perform both factorization phases for the first time.
-        int eff_fact_scheme;
+      _F_;
+      // Perform both factorization phases for the first time.
+      int eff_fact_scheme;
       if (factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
@@ -912,8 +912,8 @@ namespace Hermes
     template<>
     void UMFPackLinearSolver<double>::free_factorization_data()
     {
-      _F_
-        if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
+      _F_;
+      if (symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
       symbolic = NULL;
       if (numeric != NULL) umfpack_di_free_numeric(&numeric);
       numeric = NULL;
@@ -922,8 +922,8 @@ namespace Hermes
     template<>
     void UMFPackLinearSolver<std::complex<double> >::free_factorization_data()
     {
-      _F_
-        if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
+      _F_;
+      if (symbolic != NULL) umfpack_zi_free_symbolic(&symbolic);
       symbolic = NULL;
       if (numeric != NULL) umfpack_zi_free_numeric(&numeric);
       numeric = NULL;
@@ -932,8 +932,8 @@ namespace Hermes
     template<>
     bool UMFPackLinearSolver<double>::solve() 
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
 
       assert(m->get_size() == rhs->length());
@@ -969,8 +969,8 @@ namespace Hermes
     template<>
     bool UMFPackLinearSolver<std::complex<double> >::solve() 
     {
-      _F_
-        assert(m != NULL);
+      _F_;
+      assert(m != NULL);
       assert(rhs != NULL);
 
       assert(m->get_size() == rhs->length());

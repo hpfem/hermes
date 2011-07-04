@@ -166,7 +166,7 @@ namespace Hermes
     {
       return this->wf;
     }
-    
+
     template<typename Scalar>
     Hermes::vector<Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces()
     {
@@ -472,7 +472,7 @@ namespace Hermes
       Scalar* coeff_vec = NULL;
       assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights);
     }
-    
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs,
       bool force_diagonal_blocks, Table* block_weights)

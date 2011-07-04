@@ -727,7 +727,7 @@ namespace Hermes
 
     template HERMES_API Func<double>* init_fn(Solution<double>*fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >*fu, const int order);
-    
+
     template class HERMES_API Func<Hermes::Ord>;
     template class HERMES_API Func<double>;
     template class HERMES_API Func<std::complex<double> >;

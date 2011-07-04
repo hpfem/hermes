@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakForm<double>* wf;
-    wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
@@ -103,11 +103,11 @@ int main(int argc, char* argv[])
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
-    info("Projecting initial condition to obtain initial vector for the Newton's method.");
-    OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-      Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
+  info("Projecting initial condition to obtain initial vector for the Newton's method.");
+  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
+    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
     coeff_vec, matrix_solver_type, 
-      Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   // Time-stepping loop:
   int num_time_steps = T_FINAL / TAU;
@@ -123,9 +123,9 @@ int main(int argc, char* argv[])
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
-      // Perform Newton's iteration.
-      info("Solving nonlinear problem:");
-      bool verbose = true;
+    // Perform Newton's iteration.
+    info("Solving nonlinear problem:");
+    bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
     newton.set_verbose_output(verbose);
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
       error("Newton's iteration failed.");
     else 
       Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-        Hermes::vector<Solution<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+      Hermes::vector<Solution<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
   }
 
   delete [] coeff_vec;

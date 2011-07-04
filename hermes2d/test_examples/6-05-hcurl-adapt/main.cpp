@@ -25,40 +25,40 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 //  The following parameters can be changed:
 
 const int P_INIT = 2;                             // Initial polynomial degree. NOTE: The meaning is different from
-                                                  // standard continuous elements in the space H1. Here, P_INIT refers
-                                                  // to the maximum poly order of the tangential component, and polynomials
-                                                  // of degree P_INIT + 1 are present in element interiors. P_INIT = 0
-                                                  // is for Whitney elements.
+// standard continuous elements in the space H1. Here, P_INIT refers
+// to the maximum poly order of the tangential component, and polynomials
+// of degree P_INIT + 1 are present in element interiors. P_INIT = 0
+// is for Whitney elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
-                                                  // it has different meanings for various adaptive strategies (see below).
+// it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
-                                                  // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-                                                  //   error is processed. If more elements have similar errors, refine
-                                                  //   all to keep the mesh symmetric.
-                                                  // STRATEGY = 1 ... refine all elements whose error is larger
-                                                  //   than THRESHOLD times maximum element error.
-                                                  // STRATEGY = 2 ... refine all elements whose error is larger
-                                                  //   than THRESHOLD.
-                                                  // More adaptive strategies can be created in adapt_ortho_h1.cpp.
+// STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
+//   error is processed. If more elements have similar errors, refine
+//   all to keep the mesh symmetric.
+// STRATEGY = 1 ... refine all elements whose error is larger
+//   than THRESHOLD times maximum element error.
+// STRATEGY = 2 ... refine all elements whose error is larger
+//   than THRESHOLD.
+// More adaptive strategies can be created in adapt_ortho_h1.cpp.
 const CandList CAND_LIST = H2D_HP_ANISO;          // Predefined list of element refinement candidates. Possible values are
-                                                  // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
-                                                  // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-                                                  // See User Documentation for details.
+// H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
+// H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
+// See User Documentation for details.
 const int MESH_REGULARITY = -1;                   // Maximum allowed level of hanging nodes:
-                                                  // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-                                                  // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-                                                  // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-                                                  // Note that regular meshes are not supported, this is due to
-                                                  // their notoriously bad performance.
+// MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
+// MESH_REGULARITY = 1 ... at most one-level hanging nodes,
+// MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
+// Note that regular meshes are not supported, this is due to
+// their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
-                                                  // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
+// cancidates in hp-adaptivity. See get_optimal_refinement() for details.
 const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
-                                                  // reference mesh and coarse mesh solution in percent).
+// reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
-                                                  // over this limit. This is to prevent h-adaptivity to go on forever.
+// over this limit. This is to prevent h-adaptivity to go on forever.
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
 const double MU_R   = 1.0;
@@ -84,8 +84,8 @@ int main(int argc, char* argv[])
   for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
- Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner_horizontal",
-                                                                   "Corner_vertical"), 0);
+  Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner_horizontal",
+    "Corner_vertical"), 0);
   EssentialBCs<std::complex<double> > bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
@@ -109,11 +109,11 @@ int main(int argc, char* argv[])
   Views::VectorView<std::complex<double> > v_view("Solution (magnitude)", new Views::WinGeom(0, 0, 460, 350));
   v_view.set_min_max_range(0, 1.5);
   Views::OrderView<std::complex<double> >  o_view("Polynomial orders", new Views::WinGeom(470, 0, 400, 350));
-  
+
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 
-              graph_dof_exact, graph_cpu_exact;
-  
+    graph_dof_exact, graph_cpu_exact;
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
     OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
-   
+
     // View the coarse mesh solution and polynomial orders.
     v_view.show(&sln);
     o_view.show(&space);
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-      
+
       // Increase the counter of performed adaptivity steps.
       if (done == false)  as++;
     }
@@ -201,13 +201,13 @@ int main(int argc, char* argv[])
     delete ref_space;
   }
   while (done == false);
-  
+
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
   v_view.set_title("Fine mesh solution (magnitude)");
   v_view.show(&ref_sln);
-  
+
   // Wait for all views to be closed.
   Views::View::wait();
   return 0;

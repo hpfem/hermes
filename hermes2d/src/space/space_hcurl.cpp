@@ -61,16 +61,16 @@ namespace Hermes
     HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
     HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
@@ -222,8 +222,8 @@ namespace Hermes
     template<typename Scalar>
     Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      _F_
-        assert(order >= 0);
+      _F_;
+      assert(order >= 0);
       Scalar* proj = new Scalar[order + 1];
 
       Quad1DStd quad1d;

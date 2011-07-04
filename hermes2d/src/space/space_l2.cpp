@@ -47,8 +47,8 @@ namespace Hermes
     L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
     {
-      _F_
-        init(shapeset, Ord2(p_init, p_init));
+      _F_;
+      init(shapeset, Ord2(p_init, p_init));
     }
 
     template<typename Scalar>
@@ -143,7 +143,7 @@ namespace Hermes
     {
       this->get_bubble_assembly_list(e, al);
     }
-    
+
     template<typename Scalar>
     Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {

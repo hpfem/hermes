@@ -51,8 +51,8 @@ namespace Hermes
     template<typename Scalar>
     double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec) 
     {
-      _F_
-        Scalar val = 0;
+      _F_;
+      Scalar val = 0;
       for (unsigned int i = 0; i < vec->length(); i++)
       {
         Scalar inc = vec->get(i);
@@ -105,7 +105,7 @@ namespace Hermes
       trav.finish();
       return sqrt(error);
     }
-    
+
     template<typename Scalar>
     double Global<Scalar>::calc_rel_error(MeshFunction<Scalar>* sln, MeshFunction<Scalar>* ref_sln, int norm_type)
     {
