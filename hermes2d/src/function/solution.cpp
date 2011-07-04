@@ -25,13 +25,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    // "static" stuff.
-    static double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
-    static int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
-
-    static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
-    static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
-    static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
+    // "static stuff"
+    double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
+    int*      cheb_np[2]  = { cheb_np_tri,  cheb_np_quad  };
 
     template<typename Scalar>
     static inline void set_vec_num(int n, Scalar* y, Scalar num)
@@ -53,6 +49,10 @@ namespace Hermes
       for (int i = 0; i < n; i++)
         y[i] = y[i]*x[i] + z[i];
     }
+
+    static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
+    static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
+    static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
 
     static struct mono_lu_init
     {
@@ -79,32 +79,6 @@ namespace Hermes
       }
     }
     mono_lu;
-
-    template<typename Scalar>
-    void Solution<Scalar>::init()
-    {
-      memset(tables, 0, sizeof(tables));
-      memset(elems,  0, sizeof(elems));
-      memset(oldest, 0, sizeof(oldest));
-      transform = true;
-      sln_type = HERMES_UNDEF;
-      own_mesh = false;
-      this->num_components = 0;
-      e_last = NULL;
-
-      for(int i = 0; i < 4; i++)
-        for(int j = 0; j < 4; j++)
-          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
-
-      mono_coefs = NULL;
-      elem_coefs[0] = elem_coefs[1] = NULL;
-      elem_orders = NULL;
-      dxdy_buffer = NULL;
-      num_coefs = num_elems = 0;
-      num_dofs = -1;
-
-      this->set_quad_2d(&g_quad_2d_std);
-    }
 
     template<typename Scalar>
     static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
@@ -152,7 +126,33 @@ namespace Hermes
         return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
     }
 
-    // Solution.
+
+    // Solution
+    template<typename Scalar>
+    void Solution<Scalar>::init()
+    {
+      memset(tables, 0, sizeof(tables));
+      memset(elems,  0, sizeof(elems));
+      memset(oldest, 0, sizeof(oldest));
+      transform = true;
+      sln_type = HERMES_UNDEF;
+      own_mesh = false;
+      this->num_components = 0;
+      e_last = NULL;
+
+      for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++)
+          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
+
+      mono_coefs = NULL;
+      elem_coefs[0] = elem_coefs[1] = NULL;
+      elem_orders = NULL;
+      dxdy_buffer = NULL;
+      num_coefs = num_elems = 0;
+      num_dofs = -1;
+
+      this->set_quad_2d(&g_quad_2d_std);
+    }
 
     template<typename Scalar>
     Solution<Scalar>::Solution()
@@ -422,7 +422,7 @@ namespace Hermes
       sln_type = HERMES_SLN;
       num_dofs = space->get_num_dofs();
 
-      // copy the mesh
+      // copy the mesh   TODO: share meshes between solutions // WHAT???
       this->mesh = space->get_mesh();
 
       // allocate the coefficient arrays
@@ -651,12 +651,11 @@ namespace Hermes
 
       Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, pss_to_pass, add_dir_lift_to_pass);
     }
-
+    
     template<typename Scalar>
     void Solution<Scalar>::enable_transform(bool enable)
     {
-      if (transform != enable) 
-        free_tables();
+      if (transform != enable) free_tables();
       transform = enable;
     }
 
@@ -674,8 +673,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-      if (e == element) ///< FIXME
-        return;
+      // if (e == element) return; // FIXME
       if (!e->active) error("Cannot select inactive element. Wrong mesh?");
       MeshFunction<Scalar>::set_active_element(e);
 
@@ -866,7 +864,6 @@ namespace Hermes
       struct Function<Scalar>::Node* node = NULL;
       Quad2D* quad = this->quads[this->cur_quad];
       quad->set_mode(this->mode);
-      this->check_order(quad, order);
       int np = quad->get_num_points(order);
 
       if (sln_type == HERMES_SLN)
@@ -1080,6 +1077,11 @@ namespace Hermes
       for (i = 0; i < this->num_components; i++)
         hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
 
+      /*
+      // write the mesh
+      this->mesh->save_raw(f);
+      */
+
       if (compress) pclose(f); else fclose(f);
     }
 
@@ -1166,10 +1168,7 @@ namespace Hermes
       own_mesh = true;
       */
 
-      if (compressed) 
-        pclose(f); 
-      else 
-        fclose(f);
+      if (compressed) pclose(f); else fclose(f);
 
       init_dxdy_buffer();
     }
@@ -1314,7 +1313,7 @@ namespace Hermes
       return NAN;
     }
 
-    template class HERMES_API Solution<double>;
-    template class HERMES_API Solution<std::complex<double> >;
+    template HERMES_API class Solution<double>;
+    template HERMES_API class Solution<std::complex<double> >;
   }
 }
