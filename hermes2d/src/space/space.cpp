@@ -687,6 +687,7 @@ namespace Hermes
         " any time the mesh changes.");
 
       // add vertex, edge and bubble functions to the assembly list
+      al->cnt = 0;
       shapeset->set_mode(e->get_mode());
       for (unsigned int i = 0; i < e->nvert; i++)
         get_vertex_assembly_list(e, i, al);
@@ -699,6 +700,7 @@ namespace Hermes
     void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al)
     {
       _F_
+        al->cnt = 0;
       shapeset->set_mode(e->get_mode());
       get_vertex_assembly_list(e, surf_num, al);
       get_vertex_assembly_list(e, e->next_vert(surf_num), al);

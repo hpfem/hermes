@@ -95,9 +95,6 @@ namespace Hermes
       return space;
     }
 
-
-    //// dof assignment ////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::assign_vertex_dofs()
     {
@@ -182,8 +179,6 @@ namespace Hermes
       }
     }
 
-    //// assembly lists ////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al)
     {
@@ -207,7 +202,6 @@ namespace Hermes
           }
       }
     }
-
 
     template<typename Scalar>
     void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
@@ -244,9 +238,6 @@ namespace Hermes
           al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j+2, ori, part), dof, 1.0);
       }
     }
-
-
-    //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
@@ -324,9 +315,6 @@ namespace Hermes
       return proj;
     }
 
-
-    //// hanging nodes /////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     inline void H1Space<Scalar>::output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
       Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
@@ -358,10 +346,6 @@ namespace Hermes
         last = current++;
     }
 
-
-    /// This is a documentation for sadfs
-    ///
-    ///
     template<typename Scalar>
     typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
       Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents)
@@ -412,7 +396,6 @@ namespace Hermes
         return result;
     }
 
-
     static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
     {
       _F_
@@ -421,7 +404,6 @@ namespace Hermes
         else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
         else return e->sons[i]->vn[j];
     }
-
 
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
@@ -576,7 +558,6 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void H1Space<Scalar>::update_constraints()
     {
@@ -586,18 +567,6 @@ namespace Hermes
         update_constrained_nodes(e, NULL, NULL, NULL, NULL);
     }
 
-
-    /*void H1Space<Scalar>::dump_baselist(NodeData& nd)
-    {
-    printf("  { ");
-    for (int i = 0; i < nd.ncomponents; i++)
-    printf("{ %d, %lg } ", nd.baselist[i].dof, nd.baselist[i].coef);
-    printf(" }\n");
-    }*/
-
-
-    //// vertex fixing /////////////////////////////////////////////////////////////////////////////////
-
     template<typename Scalar>
     void H1Space<Scalar>::fix_vertex(int id, Scalar value)
     {
@@ -605,7 +574,6 @@ namespace Hermes
         FixedVertex fv = { id, value };
       fixed_vertices.push_back(fv);
     }
-
 
     template<typename Scalar>
     bool H1Space<Scalar>::is_fixed_vertex(int id) const
@@ -617,7 +585,6 @@ namespace Hermes
 
       return false;
     }
-
 
     template<typename Scalar>
     void H1Space<Scalar>::post_assign()
