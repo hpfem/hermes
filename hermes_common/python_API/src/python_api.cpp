@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <csignal>
 
+#include "config.h"
 #include "python_api.h"
 #include "python_engine_api.h"
 
