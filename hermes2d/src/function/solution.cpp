@@ -673,12 +673,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-<<<<<<< HEAD
       // if (e == element) return; // FIXME
-=======
-      if (e == this->element) ///< FIXME
-        return;
->>>>>>> 3fbd58140e62a042071d6c5305a096f432538dbf
       if (!e->active) error("Cannot select inactive element. Wrong mesh?");
       MeshFunction<Scalar>::set_active_element(e);
 
