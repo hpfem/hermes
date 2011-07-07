@@ -42,7 +42,11 @@ namespace Hermes
       std::string mesh_file_; ///< Mesh Filename (private).
 
       /// Removes brackets, commas and other unessential details from the input file.
+      /// Meaningful blank spaces are temporarily replaced with a ';'
       void strip(std::string &str);
+
+      /// Restores ';' to blank spaces
+      std::string restore(std::string &str);
 
     public:
       std::map< std::string, std::vector< std::string > > vars_; ///< Map for storing variables in input mesh file.

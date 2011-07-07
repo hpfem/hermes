@@ -71,10 +71,12 @@ namespace Hermes
       LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
 
       // Set iterative method and preconditioner in case of iterative solver AztecOO.
+#ifdef HAVE_AZTECOO
       if (this->matrix_solver_type == SOLVER_AZTECOO) {
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(this->preconditioner);
       }
+#endif
 
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -197,10 +199,12 @@ namespace Hermes
       LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
 
       // Set iterative method and preconditioner in case of iterative solver AztecOO.
+#ifdef HAVE_AZTECOO
       if (this->matrix_solver_type == SOLVER_AZTECOO) {
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_precond(this->preconditioner);
       }
+#endif
 
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();

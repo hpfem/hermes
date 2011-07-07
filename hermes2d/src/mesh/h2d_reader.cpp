@@ -503,30 +503,30 @@ namespace Hermes
           }
           fprintf(f, "\n}\n\n");
 
-        // save curved edges
-        first = true;
-        for_all_base_elements(e, mesh)
-          if (e->is_curved())
-            for (unsigned i = 0; i < e->nvert; i++)
-              if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
-                fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
-                save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
-              }
-        if (!first)
-          fprintf(f, "\n}\n\n");
+          // save curved edges
+          first = true;
+          for_all_base_elements(e, mesh)
+            if (e->is_curved())
+              for (unsigned i = 0; i < e->nvert; i++)
+                if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
+                  fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
+                  save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
+                }
+                if (!first)
+                  fprintf(f, "\n}\n\n");
 
-        // save refinements
-        unsigned temp = mesh->seq;
-        mesh->seq = mesh->nbase;
-        first = true;
-        for_all_base_elements(e, mesh)
-          save_refinements(mesh, f, e, e->id, first);
-        if (!first) fprintf(f, "\n}\n\n");
+                // save refinements
+                unsigned temp = mesh->seq;
+                mesh->seq = mesh->nbase;
+                first = true;
+                for_all_base_elements(e, mesh)
+                  save_refinements(mesh, f, e, e->id, first);
+                if (!first) fprintf(f, "\n}\n\n");
 
-        mesh->seq = temp;
-        fclose(f);
+                mesh->seq = temp;
+                fclose(f);
 
-        return true;
+                return true;
     }
   }
 }
