@@ -314,14 +314,11 @@ namespace Hermes
         }
       }
 
-#ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
       // check that all boundary edges have a marker assigned
       for_all_edge_nodes(en, mesh)
-        if (en->ref < 2 && en->marker == 0) {
+        if (en->ref < 2 && en->marker == 0)
           warn("Boundary edge node does not have a boundary marker");
-        }
-#endif
-
+        
         //// curves //////////////////////////////////////////////////////////////////
         if (m.n_curv > 0)
         {

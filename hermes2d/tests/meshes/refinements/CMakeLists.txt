@@ -1,0 +1,10 @@
+project(test-mesh_refinements)
+
+add_executable(${PROJECT_NAME} main.cpp)
+include (${hermes2d_SOURCE_DIR}/CMake.common)
+set_common_target_properties(${PROJECT_NAME})
+set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
+add_test(test-mesh_refinements-1 "${BIN}" domain.mesh)
+add_test(test-mesh_refinements-2 "${BIN}" bracket.mesh)
+add_test(test-mesh_refinements-3 "${BIN}" square.mesh)
+add_test(test-mesh_refinements-4 "${BIN}" square_tri.mesh)

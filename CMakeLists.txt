@@ -7,6 +7,116 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
 set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
 set(HERMES_COMMON_LIB  hermes_common)
 
+#------------------------------------------------------------------------------
+# Main configuration options.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### BEGIN DEFAULT CONFIGURATION ###
+
+# The values below are sane defaults to produce a build on all platforms,
+# if you want to override them, set them in CMake.vars
+
+# HermesCommon
+	# Tests settings.
+	set(HERMES_COMMON_WITH_TESTS YES)
+
+# Hermes2D:
+set(WITH_H2D 									YES)
+	# Release and debug versions.
+	set(H2D_DEBUG 							YES)
+	set(H2D_RELEASE 						YES)
+	# Optional parts of the library.
+	set(H2D_WITH_GLUT 					YES)
+	set(H2D_WITH_VIEWER_GUI 		NO)
+	
+	# Tests settings.
+	set(H2D_WITH_TEST_EXAMPLES  YES)
+	set(H2D_WITH_TESTS          YES)
+
+# Reporting and logging:
+	set(REPORT_WITH_LOGO        YES)  #logo will be shown
+	set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+	set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+																		#The runtime control is intended just for Python wrappers.
+	set(REPORT_ALL              NO)   #do not report all events, just selected ones
+	set(REPORT_WARNING          YES)  #warnings will be reported
+	set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
+	set(REPORT_INFO             YES)  #info will be reported
+	set(REPORT_VERBOSE          NO)   #info details will not be reported
+	set(REPORT_TRACE            NO)   #code execution tracing will not be reported
+	set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
+	#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
+
+#### Solvers ###
+# Standard UMFPACK
+	# UMFPACK is chosen by default.
+	set(WITH_UMFPACK YES)
+	
+# SuperLU
+	# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
+	# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
+	# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
+	# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
+	# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
+	# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
+	# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
+	# header files as the serial library. 
+	set(WITH_SUPERLU            NO)
+	set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
+	set(SUPERLU_MT              NO)
+
+# PETSc
+	# If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
+	# if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
+	set(WITH_PETSC              NO)
+	set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
+	set(PETSC_ARCH              petsc-arch-without-scalar-type)
+
+# MUMPS
+	# Sequential version of MUMPS may be enabled by setting YES on the following line
+	# and pointing to the package installation directory with MUMPS_ROOT. To enable the 
+	# parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
+	# problems arise, it may be that the automatically found SCALAPACK libraries (reported
+	# during the CMake configuration phase) do not match those used when compiling MUMPS.
+	# In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
+	set(WITH_MUMPS              NO)
+	# set(MUMPS_ROOT            root/dir/of/mumps/)
+	# set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
+
+# Trilinos
+	# Enable support for Trilinos solvers.
+	set(WITH_TRILINOS           NO)
+
+### Mesh format ###
+	set(WITH_EXODUSII           NO)
+	set(WITH_HDF5               NO)
+
+### Others ###
+# Parallel execution.
+	# (tells the linker to use parallel versions of the selected solvers, if available):
+	#
+	# Enable OpenMP for shared memory processing.
+	#  
+	set(WITH_OPENMP             NO)
+
+	# If MPI is enabled, the MPI library installed on the system should be found by 
+	# CMake automatically. If the found library doesn't match the one used to compile the
+	# particular MPI-dependent package, the other two options should be used to specify it.
+	#
+	set(WITH_MPI                NO)
+	# set(MPI_LIBRARIES         -lmpi)
+	# set(MPI_INCLUDE_PATH      /usr/include/openmpi
+
+# Enable or disable Python.
+# Python wrappers are disabled.
+	set(WITH_PYTHON             NO)
+
+# Set overrides:
+if(WITH_PYTHON)
+  set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
+endif(WITH_PYTHON)
+### end DEFAULT CONFIGURATION ###
+
 #ADDED BY COLMAN
 IF (APPLE)
     IF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
@@ -43,114 +153,7 @@ IF (APPLE)
         ENDIF ()
     ENDIF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
 ENDIF (APPLE)
-
-#------------------------------------------------------------------------------
-# Main configuration options.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-### BEGIN DEFAULT CONFIGURATION ###
-
-# The values below are sane defaults to produce a build on all platforms,
-# if you want to override them, set them in CMake.vars
-
-# H2D:
-set(WITH_H2D                  YES)
-	# Release and debug versions.
-	set(H2D_DEBUG             YES)
-	set(H2D_RELEASE           YES)
-	# Optional parts of the library.
-	set(H2D_WITH_TEST_EXAMPLES     YES)
-	
-  set(H2D_WITH_GLUT         YES)
-  set(H2D_WITH_TESTS        YES)
-	
-# Hermes_common (linked to all H1D, H2D and H3D):
-set(HERMES_COMMON_WITH_TESTS  YES)
-set(HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS  YES)
-
-# Reporting and logging:
-set(REPORT_WITH_LOGO        YES)  #logo will be shown
-set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
-                                  #The runtime control is intended just for Python wrappers.
-set(REPORT_ALL              NO)   #do not report all events, just selected ones
-set(REPORT_WARNING          YES)  #warnings will be reported
-set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
-set(REPORT_INFO             YES)  #info will be reported
-set(REPORT_VERBOSE          NO)   #info details will not be reported
-set(REPORT_TRACE            NO)   #code execution tracing will not be reported
-set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
-#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
-
-#### Solvers ###
-# Standard UMFPACK.
-set(WITH_UMFPACK            YES)
-
-# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
-# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
-# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
-# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
-# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
-# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
-# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
-# header files as the serial library. 
-#
-set(WITH_SUPERLU            NO)
-set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
-set(SUPERLU_MT              NO)
-
-# If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
-# if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
-#
-set(WITH_PETSC              NO)
-set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
-set(PETSC_ARCH              petsc-arch-without-scalar-type)
-
-# Sequential version of MUMPS may be enabled by setting YES on the following line
-# and pointing to the package installation directory with MUMPS_ROOT. To enable the 
-# parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
-# problems arise, it may be that the automatically found SCALAPACK libraries (reported
-# during the CMake configuration phase) do not match those used when compiling MUMPS.
-# In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
-#
-set(WITH_MUMPS              NO)
-# set(MUMPS_ROOT            root/dir/of/mumps/)
-# set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
-
-# Enable support for Trilinos solvers.
-set(WITH_TRILINOS           NO)
-
-
-### Mesh format ###
-set(WITH_EXODUSII           NO)
-set(WITH_HDF5               NO)
-
-### Others ###
-# Parallel execution (tells the linker to use parallel versions of the selected 
-# solvers, if available):
-#
-# Enable OpenMP for shared memory processing.
-#  
-set(WITH_OPENMP             NO)
-
-# If MPI is enabled, the MPI library installed on the system should be found by 
-# CMake automatically. If the found library doesn't match the one used to compile the
-# particular MPI-dependent package, the other two options should be used to specify it.
-#
-set(WITH_MPI                NO)
-# set(MPI_LIBRARIES         -lmpi)
-# set(MPI_INCLUDE_PATH      /usr/include/openmpi
-
-# Enable or disable Python.
-# Python wrappers are disabled.
-set(WITH_PYTHON             NO)
-
-# Set overrides:
-if(WITH_PYTHON)
-  set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
-endif(WITH_PYTHON)
-
-### end DEFAULT CONFIGURATION ###
+# end ADDED BY COLMAN
 
 # Allow to override the default values in CMake.vars:
 include(CMake.vars OPTIONAL)
@@ -410,7 +413,6 @@ message("Hermes common library:")
 message("\tBuild Debug version: ${HERMES_COMMON_DEBUG}")
 message("\tBuild Release version: ${HERMES_COMMON_RELEASE}")
 message("\tBuild with tests: ${HERMES_COMMON_WITH_TESTS}")
-message("\tBuild with check boundary conditions: ${HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS}")
 
 message("Build Hermes2D: ${WITH_H2D}")
 if(WITH_H2D)

@@ -75,7 +75,7 @@ set(SRC
 #
 if(HERMES_COMMON_WITH_TESTS)
     enable_testing()
-    add_subdirectory(solvers)
+    add_subdirectory(tests)
 endif(HERMES_COMMON_WITH_TESTS)
 
 if(WITH_PYTHON)
