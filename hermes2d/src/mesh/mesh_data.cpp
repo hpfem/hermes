@@ -13,80 +13,75 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-# include "MeshData.h"
+# include "mesh_data.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-	  /// MeshData Constructor.
-      MeshData::MeshData(const std::string &mesh_file) 
-      {
-        mesh_file_ = mesh_file;
-      }
+    MeshData::MeshData(const std::string &mesh_file) 
+    {
+      mesh_file_ = mesh_file;
+    }
 
-      /// MeshData Copy Constructor.
-      MeshData::MeshData(const MeshData &m) : mesh_file_(m.mesh_file_), n_vert(m.n_vert), n_el(m.n_el), n_bdy(m.n_bdy), n_curv(m.n_curv), n_ref(m.n_ref)
-      {
-        vars_ = m.vars_;
+    MeshData::MeshData(const MeshData &m) : mesh_file_(m.mesh_file_), n_vert(m.n_vert), n_el(m.n_el), n_bdy(m.n_bdy), n_curv(m.n_curv), n_ref(m.n_ref)
+    {
+      vars_ = m.vars_;
 
-        x_vertex = m.x_vertex;
-        y_vertex = m.y_vertex;
+      x_vertex = m.x_vertex;
+      y_vertex = m.y_vertex;
 
-        en1 = m.en1; en2 = m.en2; en3 = m.en3; en4 = m.en4;
-        e_mtl = m.e_mtl;
+      en1 = m.en1; en2 = m.en2; en3 = m.en3; en4 = m.en4;
+      e_mtl = m.e_mtl;
 
-        bdy_first = m.bdy_first; bdy_second = m.bdy_second;
-        bdy_type = m.bdy_type;
+      bdy_first = m.bdy_first; bdy_second = m.bdy_second;
+      bdy_type = m.bdy_type;
 
-        curv_first = m.curv_first; curv_second = m.curv_second;
-        curv_third = m.curv_third;
-        curv_inner_pts = m.curv_inner_pts;
-        curv_knots = m.curv_knots;
-        curv_nurbs = m.curv_nurbs;
+      curv_first = m.curv_first; curv_second = m.curv_second;
+      curv_third = m.curv_third;
+      curv_inner_pts = m.curv_inner_pts;
+      curv_knots = m.curv_knots;
+      curv_nurbs = m.curv_nurbs;
 
-        ref_elt = m.ref_elt;
-        ref_type = m.ref_type;
-      }
+      ref_elt = m.ref_elt;
+      ref_type = m.ref_type;
+    }
 
-      /// MeshData Assignment Operator.
-      MeshData& MeshData::operator = (const MeshData &m)
-      {
-        assert(&m != this);
+    /// MeshData Assignment Operator.
+    MeshData& MeshData::operator = (const MeshData &m)
+    {
+      assert(&m != this);
 
-        mesh_file_ = m.mesh_file_;
-        vars_ = m.vars_;
+      mesh_file_ = m.mesh_file_;
+      vars_ = m.vars_;
 
-        n_vert = m.n_vert;
-        n_el = m.n_el;
-        n_bdy = m.n_bdy;
-        n_curv = m.n_curv;
-        n_ref = m.n_ref;
+      n_vert = m.n_vert;
+      n_el = m.n_el;
+      n_bdy = m.n_bdy;
+      n_curv = m.n_curv;
+      n_ref = m.n_ref;
 
-        x_vertex = m.x_vertex;
-        y_vertex = m.y_vertex;
+      x_vertex = m.x_vertex;
+      y_vertex = m.y_vertex;
 
-        en1 = m.en1; en2 = m.en2; en3 = m.en3; en4 = m.en4;
-        e_mtl = m.e_mtl;
+      en1 = m.en1; en2 = m.en2; en3 = m.en3; en4 = m.en4;
+      e_mtl = m.e_mtl;
 
-        bdy_first = m.bdy_first; bdy_second = m.bdy_second;
-        bdy_type = m.bdy_type;
+      bdy_first = m.bdy_first; bdy_second = m.bdy_second;
+      bdy_type = m.bdy_type;
 
-        curv_first = m.curv_first; curv_second = m.curv_second;
-        curv_third = m.curv_third;
-        curv_inner_pts = m.curv_inner_pts;
-        curv_knots = m.curv_knots;
-        curv_nurbs = m.curv_nurbs;
+      curv_first = m.curv_first; curv_second = m.curv_second;
+      curv_third = m.curv_third;
+      curv_inner_pts = m.curv_inner_pts;
+      curv_knots = m.curv_knots;
+      curv_nurbs = m.curv_nurbs;
 
-        ref_elt = m.ref_elt;
-        ref_type = m.ref_type;
+      ref_elt = m.ref_elt;
+      ref_type = m.ref_type;
 
-        return *this;
-      }
+      return *this;
+    }
 
-      /// MeshData Destructor.
-      MeshData::~MeshData() {}
-      
     void MeshData::strip(std::string& str)
     {
       std::string temp;

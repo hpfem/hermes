@@ -31,7 +31,7 @@ set(SRC
    mesh/h2d_reader.cpp
    mesh/mesh.cpp
    mesh/traverse.cpp
-   mesh/mesh2d_parser.cpp
+   mesh/mesh_data.cpp
 
    quadrature/limit_order.cpp
    quadrature/quad_std.cpp

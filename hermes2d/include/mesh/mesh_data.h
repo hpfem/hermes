@@ -40,6 +40,17 @@ namespace Hermes
     class MeshData
     {
     public:
+      /// Constructor.
+      /// \param[in] mesh_file name of the file containing mesh definition.
+      MeshData::MeshData(const std::string &mesh_file);
+
+      /// MeshData Copy Constructor.
+      MeshData::MeshData(const MeshData &m);
+
+      /// MeshData Assignment Operator.
+      MeshData& MeshData::operator = (const MeshData &m);
+
+    private:
       std::map< std::string, std::vector< std::string > > vars_; ///< Map for storing variables in input mesh file.
 
       int n_vert; ///< Number of vertices.
@@ -76,9 +87,8 @@ namespace Hermes
 
       /// This function parses a given input mesh file line by line and extracts the necessary information into the MeshData class variables.
       void parse_mesh(void);
-      
-	private:
-	  std::string mesh_file_; ///< Mesh Filename (private).
+
+      std::string mesh_file_; ///< Mesh Filename (private).
 
       /// Removes brackets, commas and other unessential details from the input file.
       /// Meaningful blank spaces are temporarily replaced with a ';'
@@ -86,6 +96,8 @@ namespace Hermes
 
       /// Restores ';' to blank spaces
       std::string restore(std::string &str);
+
+      friend class H2DReader;
     };
   }
 }
