@@ -6,6 +6,9 @@
 #include "hermes2d.h"
 
 #include <iostream>
+
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
 using std::cout;
 using std::endl;
 
@@ -30,19 +33,6 @@ const int INIT_REF_NUM = 2; // Number of initial uniform mesh refinements.
 
 //******************************************************************************
 // Helper functions
-
-//------------------------------------------------------------------------------
-// Boundary condition types; this does not really affect the testing
-// Set your bc_types() according to the CASE
-//
-BCType bc_types(int marker)
-{
-  if      (marker == 1) return BC_ESSENTIAL; 
-  else if (marker == 2) return BC_NATURAL; 
-  else if (marker == 3) return BC_ESSENTIAL; 
-  else if (marker == 4) return BC_NATURAL; 
-  else                  return BC_NATURAL;
-} // end of bc_types()
 
 //------------------------------------------------------------------------------
 // Compute marked boundary length 
@@ -87,7 +77,7 @@ int main(int argc, char* argv[])
   if (argc != 3)
   {
     printf("Missing mesh filename and domain perimeter as command-line parameters.");
-    return ERR_FAILURE;
+    return TEST_FAILURE;
   }
 
   // Load the mesh.
@@ -111,7 +101,7 @@ int main(int argc, char* argv[])
   for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create H1 space with a default shapeset.
-  H1Space space(&mesh, bc_types, NULL, P_INIT);
+  H1Space<double> space(&mesh, P_INIT);
 
   // FIXME: This Solution is artificial here and it should be removed. The 
   // function CalculateBoundaryLength() should only take a pointer to Mesh and 
@@ -140,11 +130,11 @@ int main(int argc, char* argv[])
 
   if (fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
-    return ERR_SUCCESS;
+    return TEST_SUCCESS;
   }
   else {
     printf("Failure!\n");
-    return ERR_FAILURE;
+    return TEST_FAILURE;
   }
  
 

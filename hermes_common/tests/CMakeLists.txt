@@ -1,2 +1,5 @@
 add_subdirectory(linear-solvers)
-# has to be fixed add_subdirectory(timer)
+# unistd.h needed for this test does not have to be present.
+if (NOT MSVC)
+	add_subdirectory(timer)
+endif( NOT MSVC)
