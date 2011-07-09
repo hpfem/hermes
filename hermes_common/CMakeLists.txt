@@ -152,8 +152,8 @@ project(hermes_common)
 	# the selected Hermes configurations.
 	#
 	if(MSVC)
-		set(BUILD_FLAGS "${DEBUG_FLAGS}")
-		BUILD_COMMON_LIB(${HERMES_COMMON_LIB} ${BUILD_FLAGS})
+		set(FLAGS "${MSVC_DEFINES}")
+		BUILD_COMMON_LIB(${HERMES_COMMON_LIB} ${FLAGS})
 		ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB}
 												 ${HERMES_COMMON_LIB_DEBUG}
 												 ${HERMES_COMMON_LIB_RELEASE})
@@ -178,7 +178,7 @@ project(hermes_common)
 	file(GLOB INC_SOLVER    "solvers/include/*.h")
 	file(GLOB INC_PYTHON    "python_API/include/*.h")
 	file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/include/*.h*")
-	install(FILES ${INC_COMMON}    DESTINATION include)
-	install(FILES ${INC_SOLVER}    DESTINATION include/solvers)
-	install(FILES ${INC_PYTHON}    DESTINATION include/python_API)
-	install(FILES ${INC_TP}        DESTINATION include/third_party_codes/trilinos-teuchos)
+	install(FILES ${INC_COMMON}    DESTINATION ${TARGET_ROOT}/hermes_common/include)
+	install(FILES ${INC_SOLVER}    DESTINATION ${TARGET_ROOT}/hermes_common/include/solvers)
+	install(FILES ${INC_PYTHON}    DESTINATION ${TARGET_ROOT}/hermes_common/include/python_API)
+	install(FILES ${INC_TP}        DESTINATION ${TARGET_ROOT}/hermes_common/include/third_party_codes/trilinos-teuchos)

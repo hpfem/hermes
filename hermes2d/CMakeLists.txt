@@ -7,13 +7,13 @@ project(hermes2d)
 
 	if(MSVC)
 		set(HERMES2D "hermes2d")              # Base name of the library.
-		set(HERMES2D_H2D_RELEASE ${HERMES2D})     # Name of the release version.
-		set(HERMES2D_H2D_DEBUG ${HERMES2D}-debug) # Name of the debug version.
+		set(HERMES2D_RELEASE ${HERMES2D})     # Name of the release version.
+		set(HERMES2D_DEBUG ${HERMES2D}-debug) # Name of the debug version.
 			
 	else(MSVC)
 		if(H2D_DEBUG)
-			set(HERMES2D_H2D_DEBUG "hermes2d-debug")
-			set(HERMES2D ${HERMES2D_H2D_DEBUG})
+			set(HERMES2D_DEBUG "hermes2d-debug")
+			set(HERMES2D ${HERMES2D_DEBUG})
 			# set(CMAKE_BUILD_TYPE Debug) 
 		# This does not work with multi-version configurations,
 		# because it is linked to the project (i.e. we would have
@@ -21,8 +21,8 @@ project(hermes2d)
 		endif(H2D_DEBUG)
 
 		if(H2D_RELEASE)
-			set(HERMES2D_H2D_RELEASE "hermes2d")
-			set(HERMES2D ${HERMES2D_H2D_RELEASE})
+			set(HERMES2D_RELEASE "hermes2d")
+			set(HERMES2D ${HERMES2D_RELEASE})
 			# set(CMAKE_BUILD_TYPE Release)
 		endif(H2D_RELEASE)
 	endif(MSVC)
@@ -86,92 +86,92 @@ project(hermes2d)
 	# Source files for the Hermes2d library.
 	#
 	set(SRC
-		forms.cpp
-		range.cpp
-		asmlist.cpp
-		newton_solver.cpp
-		picard_solver.cpp
+		src/forms.cpp
+		src/range.cpp
+		src/asmlist.cpp
+		src/newton_solver.cpp
+		src/picard_solver.cpp
 
-		adapt/adapt.cpp
-		adapt/kelly_type_adapt.cpp
+		src/adapt/adapt.cpp
+		src/adapt/kelly_type_adapt.cpp
 
-		boundary_conditions/essential_boundary_conditions.cpp
+		src/boundary_conditions/essential_boundary_conditions.cpp
 
-		function/transformable.cpp
-		function/function.cpp
-		function/mesh_function.cpp
-		function/exact_solution.cpp
-		function/solution.cpp 
-		function/filter.cpp
-		function/hermes_function.cpp
+		src/function/transformable.cpp
+		src/function/function.cpp
+		src/function/mesh_function.cpp
+		src/function/exact_solution.cpp
+		src/function/solution.cpp 
+		src/function/filter.cpp
+		src/function/hermes_function.cpp
 
-		mesh/refmap.cpp 
-		mesh/curved.cpp
-		mesh/refinement_type.cpp 
-		mesh/element_to_refine.cpp
-		mesh/exodusii.cpp 
-		mesh/hash.cpp 
-		mesh/h2d_reader.cpp
-		mesh/mesh.cpp
-		mesh/traverse.cpp
-		mesh/mesh_data.cpp
+		src/mesh/refmap.cpp 
+		src/mesh/curved.cpp
+		src/mesh/refinement_type.cpp 
+		src/mesh/element_to_refine.cpp
+		src/mesh/exodusii.cpp 
+		src/mesh/hash.cpp 
+		src/mesh/h2d_reader.cpp
+		src/mesh/mesh.cpp
+		src/mesh/traverse.cpp
+		src/mesh/mesh_data.cpp
 
-		quadrature/limit_order.cpp
-		quadrature/quad_std.cpp
+		src/quadrature/limit_order.cpp
+		src/quadrature/quad_std.cpp
 
-		refinement_selectors/selector.cpp 
-		refinement_selectors/order_permutator.cpp 
-		refinement_selectors/optimum_selector.cpp 
-		refinement_selectors/proj_based_selector.cpp 
-		refinement_selectors/l2_proj_based_selector.cpp 
-		refinement_selectors/h1_proj_based_selector.cpp 
-		refinement_selectors/hcurl_proj_based_selector.cpp
+		src/refinement_selectors/selector.cpp 
+		src/refinement_selectors/order_permutator.cpp 
+		src/refinement_selectors/optimum_selector.cpp 
+		src/refinement_selectors/proj_based_selector.cpp 
+		src/refinement_selectors/l2_proj_based_selector.cpp 
+		src/refinement_selectors/h1_proj_based_selector.cpp 
+		src/refinement_selectors/hcurl_proj_based_selector.cpp
 
-		shapeset/shapeset.cpp 
-		shapeset/shapeset_h1_ortho.cpp 
-		shapeset/shapeset_h1_jacobi.cpp 
-		shapeset/shapeset_h1_quad.cpp
-		shapeset/shapeset_hc_legendre.cpp 
-		shapeset/shapeset_hc_gradleg.cpp
-		shapeset/shapeset_hd_legendre.cpp
-		shapeset/shapeset_l2_legendre.cpp
-		shapeset/precalc.cpp 
+		src/shapeset/shapeset.cpp 
+		src/shapeset/shapeset_h1_ortho.cpp 
+		src/shapeset/shapeset_h1_jacobi.cpp 
+		src/shapeset/shapeset_h1_quad.cpp
+		src/shapeset/shapeset_hc_legendre.cpp 
+		src/shapeset/shapeset_hc_gradleg.cpp
+		src/shapeset/shapeset_hd_legendre.cpp
+		src/shapeset/shapeset_l2_legendre.cpp
+		src/shapeset/precalc.cpp 
 
-		space/space.cpp 
-		space/space_h1.cpp 
-		space/space_hcurl.cpp 
-		space/space_l2.cpp
-		space/space_hdiv.cpp
+		src/space/space.cpp 
+		src/space/space_h1.cpp 
+		src/space/space_hcurl.cpp 
+		src/space/space_l2.cpp
+		src/space/space_hdiv.cpp
 
-		views/base_view.cpp 
-		views/mesh_view.cpp 
-		views/order_view.cpp 
-		views/scalar_view.cpp 
-		views/stream_view.cpp 
-		views/vector_base_view.cpp 
-		views/vector_view.cpp 
-		views/view.cpp 
-		views/view_data.cpp 
-		views/view_support.cpp
-		views/linearizer.cpp
-		views/orderizer.cpp
-		views/vectorizer.cpp
+		src/views/base_view.cpp 
+		src/views/mesh_view.cpp 
+		src/views/order_view.cpp 
+		src/views/scalar_view.cpp 
+		src/views/stream_view.cpp 
+		src/views/vector_base_view.cpp 
+		src/views/vector_view.cpp 
+		src/views/view.cpp 
+		src/views/view_data.cpp 
+		src/views/view_support.cpp
+		src/views/linearizer.cpp
+		src/views/orderizer.cpp
+		src/views/vectorizer.cpp
 
-		weakform/weakform.cpp 
+		src/weakform/weakform.cpp 
 
-		neighbor.cpp
-		graph.cpp
-		ogprojection.cpp
-		hermes2d_common_defs.cpp  
-		discrete_problem.cpp
-		runge_kutta.cpp
-		spline.cpp
+		src/neighbor.cpp
+		src/graph.cpp
+		src/ogprojection.cpp
+		src/hermes2d_common_defs.cpp  
+		src/discrete_problem.cpp
+		src/runge_kutta.cpp
+		src/spline.cpp
 
-		weakform_library/weakforms_elasticity.cpp
-		weakform_library/weakforms_h1.cpp
-		weakform_library/weakforms_hcurl.cpp
-		weakform_library/weakforms_maxwell.cpp
-		weakform_library/weakforms_neutronics.cpp
+		src/weakform_library/weakforms_elasticity.cpp
+		src/weakform_library/weakforms_h1.cpp
+		src/weakform_library/weakforms_hcurl.cpp
+		src/weakform_library/weakforms_maxwell.cpp
+		src/weakform_library/weakforms_neutronics.cpp
 	)
 		
 	#
@@ -256,37 +256,37 @@ project(hermes2d)
 
 	# Install header files.
 
-	file(GLOB INC            "hermes2d/include/*.h")
-	file(GLOB INC_FORM       "hermes2d/include/form/*.h")
-	file(GLOB INC_SPACE      "hermes2d/include/space/*.h")
-	file(GLOB INC_MESH       "hermes2d/include/mesh/*.h")
-	file(GLOB INC_BC         "hermes2d/include/boundary_conditions/*.h")
-	file(GLOB INC_SHAPESET   "hermes2d/include/shapeset/*.h")
-	file(GLOB INC_FUNCTION   "hermes2d/include/function/*.h")
-	file(GLOB INC_INTEGRALS  "hermes2d/include/integrals/*.h")
-	file(GLOB INC_LINEARIZER "hermes2d/include/linearizer/*.h")
-	file(GLOB INC_ADAPT      "hermes2d/include/adapt/*.h")
-	file(GLOB INC_QUAD       "hermes2d/include/quadrature/*.h")
-	file(GLOB INC_REF_SEL    "hermes2d/include/refinement_selectors/*.h")
-	file(GLOB INC_VIEWS      "hermes2d/include/views/*.h")
-	file(GLOB INC_WEAKFORM   "hermes2d/include/weakform/*.h")
-	file(GLOB INC_WEAKFORM_LIBRARY "hermes2d/include/weakform_library/*.h")
+	file(GLOB INC            "include/*.h")
+	file(GLOB INC_FORM       "include/form/*.h")
+	file(GLOB INC_SPACE      "include/space/*.h")
+	file(GLOB INC_MESH       "include/mesh/*.h")
+	file(GLOB INC_BC         "include/boundary_conditions/*.h")
+	file(GLOB INC_SHAPESET   "include/shapeset/*.h")
+	file(GLOB INC_FUNCTION   "include/function/*.h")
+	file(GLOB INC_INTEGRALS  "include/integrals/*.h")
+	file(GLOB INC_LINEARIZER "include/linearizer/*.h")
+	file(GLOB INC_ADAPT      "include/adapt/*.h")
+	file(GLOB INC_QUAD       "include/quadrature/*.h")
+	file(GLOB INC_REF_SEL    "include/refinement_selectors/*.h")
+	file(GLOB INC_VIEWS      "include/views/*.h")
+	file(GLOB INC_WEAKFORM   "include/weakform/*.h")
+	file(GLOB INC_WEAKFORM_LIBRARY "include/weakform_library/*.h")
 
-	install(FILES ${INC}           DESTINATION include)
-	install(FILES ${INC_FORM}      DESTINATION include/form)
-	install(FILES ${INC_SPACE}     DESTINATION include/space)
-	install(FILES ${INC_MESH}      DESTINATION include/mesh)
-	install(FILES ${INC_BC}        DESTINATION include/boundaryconditions)
-	install(FILES ${INC_SHAPESET}  DESTINATION include/shapeset)
-	install(FILES ${INC_FUNCTION}  DESTINATION include/function)
-	install(FILES ${INC_INTEGRALS} DESTINATION include/integrals)
-	install(FILES ${INC_LINEARIZER} DESTINATION include/linearizer)
-	install(FILES ${INC_ADAPT}     DESTINATION include/adapt)
-	install(FILES ${INC_QUAD}      DESTINATION include/quadrature)
-	install(FILES ${INC_REF_SEL}   DESTINATION include/refinement_selectors)
-	install(FILES ${INC_VIEWS}     DESTINATION include/views)
-	install(FILES ${INC_WEAKFORM}  DESTINATION include/weakform)
-	install(FILES ${INC_WEAKFORM_LIBRARY}  DESTINATION include/weakform_library)
+	install(FILES ${INC}           DESTINATION ${TARGET_ROOT}/hermes2d/include)
+	install(FILES ${INC_FORM}      DESTINATION ${TARGET_ROOT}/hermes2d/include/form)
+	install(FILES ${INC_SPACE}     DESTINATION ${TARGET_ROOT}/hermes2d/include/space)
+	install(FILES ${INC_MESH}      DESTINATION ${TARGET_ROOT}/hermes2d/include/mesh)
+	install(FILES ${INC_BC}        DESTINATION ${TARGET_ROOT}/hermes2d/include/boundaryconditions)
+	install(FILES ${INC_SHAPESET}  DESTINATION ${TARGET_ROOT}/hermes2d/include/shapeset)
+	install(FILES ${INC_FUNCTION}  DESTINATION ${TARGET_ROOT}/hermes2d/include/function)
+	install(FILES ${INC_INTEGRALS} DESTINATION ${TARGET_ROOT}/hermes2d/include/integrals)
+	install(FILES ${INC_LINEARIZER} DESTINATION ${TARGET_ROOT}/hermes2d/include/linearizer)
+	install(FILES ${INC_ADAPT}     DESTINATION ${TARGET_ROOT}/hermes2d/include/adapt)
+	install(FILES ${INC_QUAD}      DESTINATION ${TARGET_ROOT}/hermes2d/include/quadrature)
+	install(FILES ${INC_REF_SEL}   DESTINATION ${TARGET_ROOT}/hermes2d/include/refinement_selectors)
+	install(FILES ${INC_VIEWS}     DESTINATION ${TARGET_ROOT}/hermes2d/include/views)
+	install(FILES ${INC_WEAKFORM}  DESTINATION ${TARGET_ROOT}/hermes2d/include/weakform)
+	install(FILES ${INC_WEAKFORM_LIBRARY}  DESTINATION ${TARGET_ROOT}/hermes2d/include/weakform_library)
 
 	if(H2D_WITH_TEST_EXAMPLES)
 		enable_testing()
