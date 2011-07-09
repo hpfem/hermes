@@ -1,5 +1,5 @@
 project(hermes_common)
-	# Match debug or release version.
+	# Match debug or release version of all other libraries.
 	DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
 
 	# Linker settings.
@@ -151,9 +151,8 @@ project(hermes_common)
 	# Configure building and installation of all versions of hermes_common needed by
 	# the selected Hermes configurations.
 	#
-	set(FLAGS "")
 	if(MSVC)
-		set(BUILD_FLAGS "${FLAGS} ${DEBUG_FLAGS}")
+		set(BUILD_FLAGS "${DEBUG_FLAGS}")
 		BUILD_COMMON_LIB(${HERMES_COMMON_LIB} ${BUILD_FLAGS})
 		ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB}
 												 ${HERMES_COMMON_LIB_DEBUG}
@@ -161,13 +160,13 @@ project(hermes_common)
 		INSTALL_LIB(${HERMES_COMMON_LIB})
 	else(MSVC)
 		if(HERMES_COMMON_DEBUG)
-			set(BUILD_FLAGS "${FLAGS} ${DEBUG_FLAGS}")
+			set(BUILD_FLAGS "${DEBUG_FLAGS}")
 			BUILD_COMMON_LIB(${HERMES_COMMON_LIB_DEBUG} ${BUILD_FLAGS})
 			INSTALL_LIB(${HERMES_COMMON_LIB_DEBUG})
 		endif(HERMES_COMMON_DEBUG)
 		
 		if(HERMES_COMMON_RELEASE)
-			set(BUILD_FLAGS "${FLAGS} ${RELEASE_FLAGS}")
+			set(BUILD_FLAGS "${RELEASE_FLAGS}")
 			BUILD_COMMON_LIB(${HERMES_COMMON_LIB_RELEASE} ${BUILD_FLAGS})
 			INSTALL_LIB(${HERMES_COMMON_LIB_RELEASE})
 		endif(HERMES_COMMON_RELEASE)
@@ -183,4 +182,3 @@ project(hermes_common)
 	install(FILES ${INC_SOLVER}    DESTINATION include/solvers)
 	install(FILES ${INC_PYTHON}    DESTINATION include/python_API)
 	install(FILES ${INC_TP}        DESTINATION include/third_party_codes/trilinos-teuchos)
-
