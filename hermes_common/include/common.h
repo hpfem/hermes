@@ -58,8 +58,8 @@
 #include "array.h"
 #include "qsort.h"
 #include "ord.h"
-#include "../python_API/include/python_api.h"
-#include "../python_API/include/python_engine_api.h"
+#include "python_API/python_api.h"
+#include "python_API/python_engine_api.h"
 
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED

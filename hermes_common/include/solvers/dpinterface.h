@@ -22,8 +22,8 @@
 #ifndef DPINTERFACE_H
 #define DPINTERFACE_H
 
-#include "../include/matrix.h"
-#include "../include/tables.h"
+#include "../matrix.h"
+#include "../tables.h"
 
 using namespace Hermes::Algebra;
 

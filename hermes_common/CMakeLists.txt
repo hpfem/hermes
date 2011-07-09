@@ -20,19 +20,19 @@ project(hermes_common)
 	# Teuchos RCP
 	if (NOT WITH_TRILINOS)
 		set( TEUCHOS_SOURCES
-			third_party_codes/trilinos-teuchos/src/Teuchos_TypeNameTraits.cpp
-			third_party_codes/trilinos-teuchos/src/Teuchos_dyn_cast.cpp
-			third_party_codes/trilinos-teuchos/src/Teuchos_Ptr.cpp
-			third_party_codes/trilinos-teuchos/src/Teuchos_RCPNode.cpp
-			third_party_codes/trilinos-teuchos/src/Teuchos_TestForException.cpp
-			third_party_codes/trilinos-teuchos/src/Teuchos_TypeNameTraits.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_dyn_cast.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_Ptr.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_RCPNode.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_TestForException.cpp
+			src/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
 		)
 	endif (NOT WITH_TRILINOS)
 
 	if (WITH_PYTHON)
 		set ( PYTHON_SOURCES
-				python_API/src/python_api.cpp
-				python_API/src/python_engine.cpp
+				src/python_API/python_api.cpp
+				src/python_API/python_engine.cpp
 			)
 	endif (WITH_PYTHON)
 
@@ -50,25 +50,25 @@ project(hermes_common)
 		src/c99_functions.cpp
 		src/ord.cpp
 		
-		third_party_codes/trilinos-teuchos/src/Teuchos_stacktrace.cpp
+		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
 		
-		solvers/src/dpinterface.cpp
-		solvers/src/linear_solver.cpp
-		solvers/src/nonlinear_solver.cpp
-		solvers/src/nox_solver.cpp
-		solvers/src/epetra.cpp
-		solvers/src/aztecoo_solver.cpp
-		solvers/src/amesos_solver.cpp
-		solvers/src/mumps_solver.cpp
-		solvers/src/superlu_solver.cpp
-		solvers/src/superlu_real.cpp
-		solvers/src/superlu_cplx.cpp
-		solvers/src/petsc_solver.cpp
-		solvers/src/umfpack_solver.cpp
-		solvers/src/precond_ml.cpp
-		solvers/src/precond_ifpack.cpp
-	 # solvers/src/eigensolver.cpp
-	 # solvers/src/eigen.cpp
+		src/solvers/dpinterface.cpp
+		src/solvers/linear_solver.cpp
+		src/solvers/nonlinear_solver.cpp
+		src/solvers/nox_solver.cpp
+		src/solvers/epetra.cpp
+		src/solvers/aztecoo_solver.cpp
+		src/solvers/amesos_solver.cpp
+		src/solvers/mumps_solver.cpp
+		src/solvers/superlu_solver.cpp
+		src/solvers/superlu_real.cpp
+		src/solvers/superlu_cplx.cpp
+		src/solvers/petsc_solver.cpp
+		src/solvers/umfpack_solver.cpp
+		src/solvers/precond_ml.cpp
+		src/solvers/precond_ifpack.cpp
+	 # src/solvers/eigensolver.cpp
+	 # src/solvers/eigen.cpp
 		
 		${TEUCHOS_SOURCES}
 		${PYTHON_SOURCES}

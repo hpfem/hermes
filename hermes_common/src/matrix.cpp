@@ -24,14 +24,14 @@
 #include "error.h"
 #include "callstack.h"
 
-#include "linear_solver.h"
-#include "umfpack_solver.h"
-#include "superlu_solver.h"
-#include "amesos_solver.h"
-#include "petsc_solver.h"
-#include "mumps_solver.h"
-#include "nox_solver.h"
-#include "aztecoo_solver.h"
+#include "solvers/linear_solver.h"
+#include "solvers/umfpack_solver.h"
+#include "solvers/superlu_solver.h"
+#include "solvers/amesos_solver.h"
+#include "solvers/petsc_solver.h"
+#include "solvers/mumps_solver.h"
+#include "solvers/nox_solver.h"
+#include "solvers/aztecoo_solver.h"
 #include "qsort.h"
 
 void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx, double *d)

@@ -16,7 +16,7 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "../form/forms.h"
+#include "forms.h"
 #include "../space/space.h"
 #include "../weakform/weakform.h"
 #include "../integrals/h1.h"
