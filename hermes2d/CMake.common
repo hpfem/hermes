@@ -1,45 +1,26 @@
 macro(SET_COMMON_TARGET_PROPERTIES TRGT)
-  # Each project can define the particular Hermes library to link with, or not
-  # define anything, in which case the "real" version will be used if Hermes was
-  # built with "real" support, otherwise the "complex" version will be used:
-  if(${ARGC} EQUAL 1)
-    set(HERMES ${HERMES2D})
-    
-  elseif(${ARGC} EQUAL 2)
-    set(HERMES ${ARGV1})    
-  endif(${ARGC} EQUAL 1) 
-  
-  # If the real version is being used:
+  # Release or debug flags.
   if("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
-	set(FLAGS "${DEBUG_FLAGS}")
+	  set(FLAGS "${DEBUG_FLAGS}")
   elseif("${HERMES}" STREQUAL "${HERMES2D_RELEASE}")
-	set(FLAGS "${RELEASE_FLAGS}")
+	  set(FLAGS "${RELEASE_FLAGS}")
   endif("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
-  
   set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
+  # Where to look for includes.
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
   include_directories(${hermes2d_SOURCE_DIR}/src)
 
-  #target_link_libraries(${TRGT} ${HERMES} ${TRILINOS_LIBRARIES})
-  #add_dependencies(${TRGT} ${HERMES})
-
-  # Only linking to the hermes2d library and to those third party shared 
-  # libraries that do not stay in some standard system directory 
-  # should be needed to build any project outside of Hermes (hermes_common gets
-  # found automatically as long as it has been installed e.g. to /usr/local/lib).
-  # When the CMake command target_link_libraries is used to link to another 
-  # project in current build tree, linking information from that project is 
-  # transitively added to the current project (so now we have some unnecessary
-  # libraries added to ${TRGT}).
-  target_link_libraries(${TRGT} ${HERMES})
+  # Link to Hermes2D.
+  target_link_libraries(${TRGT} ${HERMES2D})
   
+  # If config file present in the current source directory, 
+  # this overrides global config file.
+  # Otherwise hermes_common/config.h will be used
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)
     configure_file(
     	${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
     	${CMAKE_CURRENT_SOURCE_DIR}/config.h
     )
   endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake)
-  # Otherwise hermes_common/config.h will be used
-
 endmacro(SET_COMMON_TARGET_PROPERTIES)
