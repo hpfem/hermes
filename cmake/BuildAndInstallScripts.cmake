@@ -20,23 +20,8 @@ endmacro(ADD_MSVC_BUILD_FLAGS)
 
 # Installs a library to directories relative to CMAKE_INSTALL_PREFIX.
 macro(INSTALL_LIB LIB)
-
-  if (MSVC)
-	  MAKE_PATH(TARGET_DIR "${TARGET_ROOT}/${LIB}/bin")
-    get_target_property(SOURCE_DEBUG_FILE ${LIB} LOCATION_Debug)
-    MAKE_PATH(SOURCE_DEBUG_FILE ${SOURCE_DEBUG_FILE})
-    get_target_property(SOURCE_RELEASE_FILE ${LIB} LOCATION_Release)
-    MAKE_PATH(SOURCE_RELEASE_FILE ${SOURCE_RELEASE_FILE})
-    add_custom_command(TARGET ${LIB}
-      POST_BUILD
-			COMMAND if not exist ${TARGET_DIR} mkdir ${TARGET_DIR}
-      COMMAND if exist ${SOURCE_DEBUG_FILE} copy /Y ${SOURCE_DEBUG_FILE} ${TARGET_DIR}
-      COMMAND if exist ${SOURCE_RELEASE_FILE} copy /Y ${SOURCE_RELEASE_FILE} ${TARGET_DIR})
-    unset(TARGET_DIR)
-  else(MSVC)
-	  install(TARGETS             ${LIB} 
-          RUNTIME DESTINATION bin 
-          LIBRARY DESTINATION lib 
-          ARCHIVE DESTINATION lib)
-  endif (MSVC)
+	install(TARGETS ${LIB} 
+				RUNTIME DESTINATION ${TARGET_ROOT}/bin 
+				LIBRARY DESTINATION ${TARGET_ROOT}/lib 
+				ARCHIVE DESTINATION ${TARGET_ROOT}/lib)
 endmacro(INSTALL_LIB)
