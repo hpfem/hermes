@@ -9,7 +9,6 @@ macro(SET_COMMON_TARGET_PROPERTIES TRGT)
 
   # Where to look for includes.
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-  include_directories(${hermes2d_SOURCE_DIR}/src)
 
   # Link to Hermes2D.
   target_link_libraries(${TRGT} ${HERMES2D})

@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "newton_solver.h"
-#include "hermes_common.h"
+#include "../hermes_common.h"
 
 namespace Hermes
 {

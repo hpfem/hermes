@@ -20,10 +20,6 @@
 
 #include "hermes2d_common_defs.h"
 
-#include "../../hermes_common/include/config.h"
-
-#include "../../hermes_common/include/hermes_common.h"
-
 #include "newton_solver.h"
 #include "picard_solver.h"
 

@@ -1,4 +1,5 @@
 project(hermes_common)
+
 	# Match debug or release version of all other libraries.
 	DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
 
@@ -12,10 +13,11 @@ project(hermes_common)
 	# Additional building steps required by MSVC.
 	include(BuildAndInstallScripts)
 
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/solvers/include)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/python_API/include)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party_codes/trilinos-teuchos/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/python_API)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
 
 	# Teuchos RCP
 	if (NOT WITH_TRILINOS)
@@ -175,9 +177,10 @@ project(hermes_common)
 	# Install header files.
 
 	file(GLOB INC_COMMON    "include/*.h")
-	file(GLOB INC_SOLVER    "solvers/include/*.h")
-	file(GLOB INC_PYTHON    "python_API/include/*.h")
-	file(GLOB INC_TP        "third_party_codes/trilinos-teuchos/include/*.h*")
+	file(GLOB INC_SOLVER    "include/solvers/*.h")
+	file(GLOB INC_PYTHON    "include/python_API/*.h")
+	file(GLOB INC_TP        "include/third_party_codes/trilinos-teuchos/*.h*")
+	install(FILES hermes_common.h  DESTINATION ${TARGET_ROOT}/include)
 	install(FILES ${INC_COMMON}    DESTINATION ${TARGET_ROOT}/include/hermes_common)
 	install(FILES ${INC_SOLVER}    DESTINATION ${TARGET_ROOT}/include/hermes_common/solvers)
 	install(FILES ${INC_PYTHON}    DESTINATION ${TARGET_ROOT}/include/hermes_common/python_API)
