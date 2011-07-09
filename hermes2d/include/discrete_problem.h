@@ -264,6 +264,8 @@ namespace Hermes
 
       void set_fvm();
 
+      Hermes::TimePeriod time;
+
     protected:
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
