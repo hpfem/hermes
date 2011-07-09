@@ -2351,7 +2351,7 @@ extern double fabs ( double );
 // extern double j0 ( double );
 // extern double j1 ( double );
 extern double std::sqrt ( double );
-// extern double cbrt ( double );
+extern double cbrt ( double );
 extern double exp ( double );
 extern double std::log ( double );
 extern double std::sin ( double );
