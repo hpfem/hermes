@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <stddef.h> //allows to use offsetof
 #include <assert.h>
-#include <pthread.h>
 #include <math.h>
 #include <time.h>
 #include <float.h>

@@ -1,11 +1,5 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/hermes_common/cmake/cxx_flag_overrides.cmake)
-project(hermes)
-
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cxx_flag_overrides.cmake)
 cmake_minimum_required(VERSION 2.6)
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/hermes_common/cmake)
-set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR}/hermes_common)
-set(HERMES_COMMON_LIB  hermes_common)
 
 #------------------------------------------------------------------------------
 # Main configuration options.
@@ -17,6 +11,8 @@ set(HERMES_COMMON_LIB  hermes_common)
 # if you want to override them, set them in CMake.vars
 
 # HermesCommon
+	set(HERMES_COMMON_DEBUG     YES)
+	set(HERMES_COMMON_RELEASE   NO)
 	# Tests settings.
 	set(HERMES_COMMON_WITH_TESTS YES)
 
@@ -24,7 +20,7 @@ set(HERMES_COMMON_LIB  hermes_common)
 set(WITH_H2D 									YES)
 	# Release and debug versions.
 	set(H2D_DEBUG 							YES)
-	set(H2D_RELEASE 						YES)
+	set(H2D_RELEASE              NO)
 	# Optional parts of the library.
 	set(H2D_WITH_GLUT 					YES)
 	set(H2D_WITH_VIEWER_GUI 		NO)
@@ -110,7 +106,13 @@ set(WITH_H2D 									YES)
 # Enable or disable Python.
 # Python wrappers are disabled.
 	set(WITH_PYTHON             NO)
-
+	
+### END DEFAULT CONFIGURATION ###
+	
+set(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
+set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR})
+set(HERMES_COMMON_LIB  hermes_common)
+	
 # Set overrides:
 if(WITH_PYTHON)
   set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
@@ -152,6 +154,8 @@ IF (APPLE)
             ENDIF()
         ENDIF ()
     ENDIF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+		# Use modified search procedures for some libraries on MacOS.
+		include(${CMAKE_HOME_DIRECTORY}/OSX.cmake)
 ENDIF (APPLE)
 # end ADDED BY COLMAN
 
@@ -159,220 +163,178 @@ ENDIF (APPLE)
 include(CMake.vars OPTIONAL)
 
 macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
-    if (WITH_${HXD})
-		if(${HXD}_DEBUG)
-		  set(HERMES_COMMON_DEBUG YES)
-		endif(${HXD}_DEBUG)
+	if (WITH_${HXD})
+		if(MSVC)
+				# In MSVC, Release/Debug is distinguished in a special way
+				# (see hermes_common/cmake/BuildAndInstallScripts.cmake)
+				set(HERMES_COMMON_DEBUG YES)
+				set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
+				set(HERMES_COMMON_RELEASE YES)
+				set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
+		else(MSVC)
+			if(${HXD}_DEBUG)
+				set(HERMES_COMMON_DEBUG YES)
+				set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
+			endif(${HXD}_DEBUG)
 
-		if(${HXD}_RELEASE)
-		  set(HERMES_COMMON_RELEASE YES)
-		endif(${HXD}_RELEASE)
-		
-        if(MSVC)
-            # In MSVC, Release/Debug is distinguished in a special way
-            # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
-            set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
-            set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
-        else(MSVC)        
-          if(${HXD}_DEBUG)
-            set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
-          endif(${HXD}_DEBUG)
-
-          if(${HXD}_RELEASE)
-            set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
-          endif(${HXD}_RELEASE)
-        endif(MSVC)
-    endif (WITH_${HXD})   
+			if(${HXD}_RELEASE)
+				set(HERMES_COMMON_RELEASE YES)
+				set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
+			endif(${HXD}_RELEASE)
+		endif(MSVC)
+	endif (WITH_${HXD})   
 endmacro(DETERMINE_HERMES_COMMON_RELEASE_DEBUG)
-
-if (NOT MSVC)
-  set(HERMES_COMMON_RELEASE   NO)
-  set(HERMES_COMMON_DEBUG     NO)
-endif (NOT MSVC)
-
-DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
-
-#------------------------------------------------------------------------------
-# Find necessary packages according to the settings above.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-find_package(PTHREAD REQUIRED)
-
-# Python
-if(WITH_PYTHON)
-  find_package(Python REQUIRED)
-  find_package(NumPy REQUIRED)
-  find_package(Cython REQUIRED)
-  include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-endif(WITH_PYTHON)
-
-# Solvers (TODO: This could maybe go into hermes_common/solver/CMakeLists.txt).
-if(MSVC)
-	if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-	    # The search for CLAPACK and associated libraries will be performed 
-	    # every time the project is configured in MSVC (TODO: Find out if 
-	    # CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
-	    # could be cached to improve subsequent configuration performance).
-	    find_package(CLAPACK REQUIRED)
-	    include_directories(${CLAPACK_INCLUDE_DIRS})
-	endif(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-else(MSVC)
-  # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
-  # FindLAPACK is Fortran-only so Fortran must be enabled as well.
-  if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-    if (NOT LAPACK_FOUND)
-        enable_language(Fortran)
-        find_package(LAPACK REQUIRED)
-            
-        # If no error occured, LAPACK library has been found. Save the path to
-        # it to cache, so that it will not be searched for during next 'cmake .'
-        set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES} 
-                CACHE STRING  "Path to LAPACK/BLAS libraries.")
-        set(LAPACK_FOUND      YES 
-                CACHE STRING  "Have LAPACK/BLAS libraries been found?")
-    endif (NOT LAPACK_FOUND)
-    
-    add_definitions(-DWITH_BLAS)	
-  endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-endif(MSVC)  
-
-if(WITH_PETSC)
-	find_package(PETSC REQUIRED)
-	# For some header files, PETSc uses the same name for both real and complex 
-	# versions (they only reside in different directories), so we can't globally
-	# set the architecture-specific include directory here, but rather on a 
-	# per-target basis.
-	include_directories(${COMMON_PETSC_INCLUDE_DIRS})
-	include_directories(${PETSC_CPLX_INCLUDE_DIRS})
-	set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
-endif(WITH_PETSC)
-
-if(WITH_UMFPACK)
-	find_package(UMFPACK REQUIRED)
-	include_directories(${UMFPACK_INCLUDE_DIRS})
-endif(WITH_UMFPACK)
-
-if(WITH_MUMPS)
-	find_package(MUMPS REQUIRED)
-	if(WITH_MPI)
-		find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
-  endif(WITH_MPI)
-  include_directories(${MUMPS_INCLUDE_DIR})
-	set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
-	LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
-endif(WITH_MUMPS)
-
-if(WITH_TRILINOS)
-	find_package(TRILINOS REQUIRED)
-	include_directories(${TRILINOS_INCLUDE_DIR})
-endif(WITH_TRILINOS)
-
-if(WITH_SUPERLU)
-  find_package(SUPERLU REQUIRED)
-  include_directories(${SUPERLU_INCLUDE_DIR})
-  if(SUPERLU_MT)
-    add_definitions(-DSLU_MT)
-  endif(SUPERLU_MT)
-endif(WITH_SUPERLU)
-
-# SMP.
-if(WITH_OPENMP)
-	find_package(OpenMP REQUIRED)
-	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
-endif(WITH_OPENMP)
-
-# Mesh format.
-if(WITH_HDF5)
-	find_package(HDF5 REQUIRED)
-	include_directories(${HDF5_INCLUDE_DIR})
-endif(WITH_HDF5)
-
-if(WITH_EXODUSII)
-	find_package(EXODUSII REQUIRED)
-	include_directories(${EXODUSII_INCLUDE_DIR})
-endif(WITH_EXODUSII)
-
-# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC).
-if(WITH_MPI)
-  if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
-    find_package(MPI REQUIRED)
-  else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-    if(NOT EXISTS MPI_INCLUDE_PATH)
-      message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
-    endif(NOT EXISTS MPI_INCLUDE_PATH)
-  endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-  include_directories(MPI_INCLUDE_PATH)	  
-endif(WITH_MPI)
-
-# Use modified search procedures for some libraries on MacOS.
-IF (APPLE)
-    include(${CMAKE_HOME_DIRECTORY}/OSX.cmake)
-ENDIF (APPLE)
-
-
-#------------------------------------------------------------------------------
-# Project-wide compiler settings.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Enable debugging symbols for all files all the time:
 # set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Stop on first error (sometimes gcc doesn't print all the possible
-    # candidates when a function signature is wrong if this is enabled, so we
-    # leave it disabled by default):
-    # set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
+		# Stop on first error (sometimes gcc doesn't print all the possible
+		# candidates when a function signature is wrong if this is enabled, so we
+		# leave it disabled by default):
+		# set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
 
-    # All warnings are errors
-    #set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
+		# All warnings are errors
+		#set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
 
-    # Disable the "unused variable/parameters/functions" warnings (as those are
-    # not really problematic, it doesn't cause any harm):
-    set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
+		# Disable the "unused variable/parameters/functions" warnings (as those are
+		# not really problematic, it doesn't cause any harm):
+		set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
 
-    # Disable all switch warnings for now (until all code is fixed)
-    set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
+		# Disable all switch warnings for now (until all code is fixed)
+		set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
 
-    # Enable all warnings:
-    set(CMAKE_CXX_FLAGS "-W -Wuninitialized -Wall ${CMAKE_CXX_FLAGS}")
+		# Enable all warnings:
+		set(CMAKE_CXX_FLAGS "-W -Wuninitialized -Wall ${CMAKE_CXX_FLAGS}")
 
-    set(RELEASE_FLAGS "-DNDEBUG -O3")
-    set(DEBUG_FLAGS   "-g")
+		set(RELEASE_FLAGS "-DNDEBUG -O3")
+		set(DEBUG_FLAGS   "-g")
 endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 # Enabling multiprocessor build on MSVC
 if(MSVC)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
 endif(MSVC)
 
-
-#------------------------------------------------------------------------------
-# Project-wide linker settings.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-include(ConfigureRPATH)
-ConfigureRPATH()
-
-#------------------------------------------------------------------------------
-# Add project subdirectories and custom targets.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-add_subdirectory(${HERMES_COMMON_DIR})
-
-if(WITH_H2D)
-    add_subdirectory(hermes2d)
-endif(WITH_H2D)
-
 if(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
-  enable_testing()
-  add_custom_target(test COMMAND ctest)
+	enable_testing()
+	add_custom_target(test COMMAND ctest)
 endif(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
+
+#------------------------------------------------------------------------------
+# Find necessary packages according to the settings above.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	find_package(PTHREAD REQUIRED)
+
+	# Python
+	if(WITH_PYTHON)
+		find_package(Python REQUIRED)
+		find_package(NumPy REQUIRED)
+		find_package(Cython REQUIRED)
+		include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
+	endif(WITH_PYTHON)
+
+	# Solvers.
+	if(WITH_UMFPACK)
+		find_package(UMFPACK REQUIRED)
+		include_directories(${UMFPACK_INCLUDE_DIRS})
+	endif(WITH_UMFPACK)
+
+	if(MSVC)
+		if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+				# The search for CLAPACK and associated libraries will be performed 
+				# every time the project is configured in MSVC (TODO: Find out if 
+				# CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
+				# could be cached to improve subsequent configuration performance).
+				find_package(CLAPACK REQUIRED)
+				include_directories(${CLAPACK_INCLUDE_DIRS})
+		endif(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+	else(MSVC)
+		# All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
+		# FindLAPACK is Fortran-only so Fortran must be enabled as well.
+		if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+			if (NOT LAPACK_FOUND)
+					enable_language(Fortran)
+					find_package(LAPACK REQUIRED)
+							
+					# If no error occured, LAPACK library has been found. Save the path to
+					# it to cache, so that it will not be searched for during next 'cmake .'
+					set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES} 
+									CACHE STRING  "Path to LAPACK/BLAS libraries.")
+					set(LAPACK_FOUND      YES 
+									CACHE STRING  "Have LAPACK/BLAS libraries been found?")
+			endif (NOT LAPACK_FOUND)
+			
+			add_definitions(-DWITH_BLAS)	
+		endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+	endif(MSVC)  
+
+	if(WITH_PETSC)
+		find_package(PETSC REQUIRED)
+		# For some header files, PETSc uses the same name for both real and complex 
+		# versions (they only reside in different directories), so we can't globally
+		# set the architecture-specific include directory here, but rather on a 
+		# per-target basis.
+		include_directories(${COMMON_PETSC_INCLUDE_DIRS})
+		include_directories(${PETSC_CPLX_INCLUDE_DIRS})
+		set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
+	endif(WITH_PETSC)
+
+	if(WITH_MUMPS)
+		find_package(MUMPS REQUIRED)
+		if(WITH_MPI)
+			find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
+		endif(WITH_MPI)
+		include_directories(${MUMPS_INCLUDE_DIR})
+		set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
+		LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
+	endif(WITH_MUMPS)
+
+	if(WITH_TRILINOS)
+		find_package(TRILINOS REQUIRED)
+		include_directories(${TRILINOS_INCLUDE_DIR})
+	endif(WITH_TRILINOS)
+
+	if(WITH_SUPERLU)
+		find_package(SUPERLU REQUIRED)
+		include_directories(${SUPERLU_INCLUDE_DIR})
+		if(SUPERLU_MT)
+			add_definitions(-DSLU_MT)
+		endif(SUPERLU_MT)
+	endif(WITH_SUPERLU)
+
+	# SMP.
+	if(WITH_OPENMP)
+		find_package(OpenMP REQUIRED)
+		set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
+		set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
+	endif(WITH_OPENMP)
+
+	# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC).
+	if(WITH_MPI)
+		if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
+			find_package(MPI REQUIRED)
+		else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+			if(NOT EXISTS MPI_INCLUDE_PATH)
+				message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
+			endif(NOT EXISTS MPI_INCLUDE_PATH)
+		endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+		include_directories(MPI_INCLUDE_PATH)	  
+	endif(WITH_MPI)
+
+
+# Main CMakeLists.txt for each library are in the following directories.
+add_subdirectory(hermes_common)
+	
+if(WITH_H2D)
+  add_subdirectory(hermes2d)
+endif(WITH_H2D)
 
 
 #------------------------------------------------------------------------------
 # Report.
 #~~~~~~~~
-
 message("\nConfiguration results")
 message("---------------------")
 message("Build with Python: ${WITH_PYTHON}")
