@@ -17,9 +17,8 @@
 #ifndef __H2D_OGPROJECTION_H
 #define __H2D_OGPROJECTION_H
 
-#include "common.h"
 #include "function/solution.h"
-#include "form/forms.h"
+#include "forms.h"
 #include "weakform/weakform.h"
 
 namespace Hermes

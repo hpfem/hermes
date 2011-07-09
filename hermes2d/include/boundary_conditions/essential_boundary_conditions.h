@@ -20,9 +20,6 @@
 #ifndef __HERMES_COMMON_BOUNDARYCONDITIONS_H
 #define __HERMES_COMMON_BOUNDARYCONDITIONS_H
 
-#include "vector.h"
-#include "map"
-
 #include "../hermes2d_common_defs.h"
 namespace Hermes
 {

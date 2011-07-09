@@ -16,18 +16,15 @@
 #ifndef __H2D_DISCRETE_PROBLEM_H
 #define __H2D_DISCRETE_PROBLEM_H
 
-#include "matrix.h"
 #include "../hermes_common.h"
-#include "tables.h"
 #include "adapt/adapt.h"
 #include "graph.h"
-#include "form/forms.h"
+#include "forms.h"
 #include "weakform/weakform.h"
 #include "function/function.h"
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
 #include "adapt/kelly_type_adapt.h"
-#include <map>
 
 namespace Hermes
 {

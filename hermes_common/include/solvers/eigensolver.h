@@ -22,10 +22,10 @@
 #ifndef __HERMES_EIGENSOLVER_H
 #define __HERMES_EIGENSOLVER_H
 
-#include "config.h"
+#include "../config.h"
 #ifdef WITH_PYTHON
 
-#include "matrix.h"
+#include "../matrix.h"
 
 #include "python_api.h"
 

@@ -1,14 +1,13 @@
 #ifndef NEIGHBOR_H_
 #define NEIGHBOR_H_
 
-#include "common.h"
-#include "mesh.h"
-#include "quad.h"
-#include "solution.h"
+#include "mesh/mesh.h"
+#include "quadrature/quad.h"
+#include "function/solution.h"
 #include "forms.h"
-#include "refmap.h"
+#include "mesh/refmap.h"
 #include "asmlist.h"
-#include "space.h"
+#include "space/space.h"
 namespace Hermes
 {
   namespace Hermes2D

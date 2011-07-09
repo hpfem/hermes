@@ -21,9 +21,9 @@
 */
 #ifndef __HERMES_COMMON_SOLVER_EPETRA_H_
 #define __HERMES_COMMON_SOLVER_EPETRA_H_
-#include "config.h"
+#include "../config.h"
 #ifdef HAVE_EPETRA
-#include "matrix.h"
+#include "../matrix.h"
 #include <Epetra_SerialComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Vector.h>

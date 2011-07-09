@@ -17,7 +17,6 @@
 #define __H2D_QUAD_H
 
 #include "../hermes2d_common_defs.h"
-#include "config.h"
 namespace Hermes
 {
   namespace Hermes2D

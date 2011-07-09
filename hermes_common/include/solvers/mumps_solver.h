@@ -21,10 +21,10 @@
 */
 #ifndef __HERMES_COMMON_MUMPS_SOLVER_H_
 #define __HERMES_COMMON_MUMPS_SOLVER_H_
-#include "config.h"
+#include "../config.h"
 #ifdef WITH_MUMPS
 #include "linear_solver.h"
-#include "matrix.h"
+#include "../matrix.h"
 
 #define USE_COMM_WORLD  -987654
 

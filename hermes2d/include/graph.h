@@ -16,7 +16,7 @@
 #ifndef __H2D_GRAPH_H
 #define __H2D_GRAPH_H
 
-#include "../hermes2d_common_defs.h"
+#include "hermes2d_common_defs.h"
 namespace Hermes
 {
   namespace Hermes2D

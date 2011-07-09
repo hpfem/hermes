@@ -22,10 +22,10 @@
 #ifndef __HERMES_COMMON_SUPERLU_SOLVER_H_
 #define __HERMES_COMMON_SUPERLU_SOLVER_H_
 
-#include "config.h"
+#include "../config.h"
 #ifdef WITH_SUPERLU  
 #include "linear_solver.h"
-#include "matrix.h"
+#include "../matrix.h"
 
 #include <supermatrix.h>
 #include <slu_util.h>

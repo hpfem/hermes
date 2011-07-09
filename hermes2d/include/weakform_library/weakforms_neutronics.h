@@ -2,7 +2,7 @@
 #define __H2D_NEUTRONICS_WEAK_FORMS_H
 
 #include "weakforms_h1.h"
-#include "../form/forms.h"
+#include "../forms.h"
 #include "../function/hermes_function.h"
 
 namespace Hermes

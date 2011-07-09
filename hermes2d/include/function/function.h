@@ -17,7 +17,7 @@
 #define __H2D_FUNCTION_H
 
 #include "transformable.h"
-#include "quad.h"
+#include "../quadrature/quad.h"
 
 namespace Hermes
 {
