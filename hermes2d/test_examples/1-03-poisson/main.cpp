@@ -28,7 +28,7 @@
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
 
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -79,6 +79,8 @@ int main(int argc, char* argv[])
     error("Newton's iteration failed.");
   else
     Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+
+  dp.get_profiling_output(std::cout);
 
   // VTK output.
   if (VTK_VISUALIZATION)
