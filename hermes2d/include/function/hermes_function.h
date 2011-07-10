@@ -18,7 +18,7 @@
 
 #include "mesh_function.h"
 #include "../mesh/refmap.h"
-#include "../form/forms.h"
+#include "../forms.h"
 
 namespace Hermes
 {

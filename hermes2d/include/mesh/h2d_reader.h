@@ -17,7 +17,7 @@
 #define _H2D_READER_H_
 
 #include "mesh_loader.h"
-#include "mesh2d_parser.h"
+#include "mesh_data.h"
 
 namespace Hermes
 {

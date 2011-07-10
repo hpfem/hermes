@@ -16,18 +16,15 @@
 #ifndef __H2D_DISCRETE_PROBLEM_H
 #define __H2D_DISCRETE_PROBLEM_H
 
-#include "matrix.h"
-#include "../../hermes_common/include/hermes_common.h"
-#include "tables.h"
+#include "hermes_common.h"
 #include "adapt/adapt.h"
 #include "graph.h"
-#include "form/forms.h"
+#include "forms.h"
 #include "weakform/weakform.h"
 #include "function/function.h"
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
 #include "adapt/kelly_type_adapt.h"
-#include <map>
 
 namespace Hermes
 {
@@ -265,6 +262,7 @@ namespace Hermes
 
       void invalidate_matrix();
 
+      /// Set this problem to Finite Volume.
       void set_fvm();
 
     protected:
@@ -434,10 +432,14 @@ namespace Hermes
       /// Uses assembling_caches to get (possibly chached) dummy function for calculation of the integration order.  
       Func<Hermes::Ord>* get_fn_ord(const int order);
 
-      /// There is a matrix form set on DG_INNER_EDGE area or not.
-      bool DG_matrix_forms_present;
-      /// There is a vector form set on DG_INNER_EDGE area or not.
-      bool DG_vector_forms_present;
+      /// Initialize all caches.
+      void init_cache();
+
+      /// Deinitialize all caches.
+      void delete_cache();
+
+      /// Deinitialize a single geometry cache.
+      void delete_single_geom_cache(int order);
 
       /// Initialize neighbors.
       void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, const Stage<Scalar>& stage, const int& isurf);
@@ -469,11 +471,29 @@ namespace Hermes
       void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
         Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
+      /// Returns the matrix_buffer of the size n.
+      Scalar** get_matrix_buffer(int n);
+
+      /// Matrix structure as well as spaces and weak formulation is up-to-date.
+      bool is_up_to_date();
+
       /// Minimum identifier of the meshes used in DG assembling in one stage.
       unsigned int min_dg_mesh_seq;
 
       /// Weak formulation.
       WeakForm<Scalar>* wf;
+
+      /// Seq number of the WeakForm.
+      int wf_seq;
+
+      /// Space instances for all equations in the system.
+      Hermes::vector<Space<Scalar>*> spaces;
+
+      /// Seq numbers of Space instances in spaces.
+      int* sp_seq;
+
+      /// Number of DOFs of all Space instances in spaces.
+      int ndof;
 
       /// A conversion table of user's (string) element markers and the internal (int) ones.
       Mesh::ElementMarkersConversion* element_markers_conversion;
@@ -488,33 +508,13 @@ namespace Hermes
       /// which saves time.
       bool is_fvm;
 
-      /// Experimental caching of vector valued forms.
-      bool vector_valued_forms;
-
-      /// Number of DOFs of all Space instances in spaces.
-      int ndof;
-
-      /// Seq numbers of Space instances in spaces.
-      int* sp_seq;
-
-      /// Seq number of the WeakForm.
-      int wf_seq;
-
-      /// Space instances for all equations in the system.
-      Hermes::vector<Space<Scalar>*> spaces;
-
       Scalar** matrix_buffer;///< buffer for holding square matrix (during assembling)
-      int matrix_buffer_dim;///< dimension of the matrix held by 'matrix_buffer'
 
-      /// Returns the matrix_buffer of the size n.
-      Scalar** get_matrix_buffer(int n);
+      int matrix_buffer_dim;///< dimension of the matrix held by 'matrix_buffer'
 
       /// Matrix structure can be reused.
       /// If other conditions apply.
       bool have_matrix;
-
-      /// Matrix structure as well as spaces and weak formulation is up-to-date.
-      bool is_up_to_date();
 
       /// PrecalcShapeset instances for the problem (as many as equations in the system).
       PrecalcShapeset** pss;
@@ -525,14 +525,11 @@ namespace Hermes
       /// Jacobian * weights cache.
       double* cache_jwt[g_max_quad + 1 + 4* g_max_quad + 4];
 
-      /// Initialize all caches.
-      void init_cache();
+      /// There is a matrix form set on DG_INNER_EDGE area or not.
+      bool DG_matrix_forms_present;
 
-      /// Deinitialize all caches.
-      void delete_cache();
-
-      /// Deinitialize a single geometry cache.
-      void delete_single_geom_cache(int order);
+      /// There is a vector form set on DG_INNER_EDGE area or not.
+      bool DG_vector_forms_present;
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches 
@@ -612,6 +609,65 @@ namespace Hermes
 
       /// An AssemblingCaches instance for this instance of DiscreteProblem.
       AssemblingCaches assembling_caches;
+
+
+      /// Class used for profiling of DiscreteProblem (assembling).
+      class Profiling
+      {
+      public:
+        Profiling();
+
+        /// Utility time measurement.
+        /// For measuring parts of assembling in methods "assemble_*".
+        /// Also for initialization parts.
+        Hermes::TimePeriod assemble_util_time;
+
+        /// Utility time measurement.
+        /// For measuring parts of assembling in methods "eval_*_form".
+        /// Except for numerical integration.
+        Hermes::TimePeriod eval_util_time;
+
+        /// Total time measurement.
+        /// For measuring the whole assembling.
+        Hermes::TimePeriod total_time;
+
+        /// Integration time measurement.
+        /// For measuring the numerical integration.
+        /// Also, the numerical integration when calculating the integration order is counted.
+        Hermes::TimePeriod integration_time;
+
+        /// One record stores information about one matrix assembling.
+        class Record
+        {
+        public:
+          Record();
+          void reset();
+
+          double total;
+          double create_sparse_structure;
+          double initialization;
+          double state_init;
+          /// In assemble_* methods.
+          double form_preparation_assemble;
+          /// In eval_*_form methods.
+          double form_preparation_eval;
+          double form_evaluation;
+        };
+
+        Record current_record;
+
+      protected:
+        Hermes::vector<Record> profile;
+
+        friend class DiscreteProblem<Scalar>;
+      };
+
+      /// An AssemblingCaches instance for this instance of DiscreteProblem.
+      Profiling profiling;
+
+    public:
+      /// Returns the profiling info.
+      void get_profiling_output(std::ostream & out);
 
       friend class KellyTypeAdapt<Scalar>;
       friend class Global<Scalar>;

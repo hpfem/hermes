@@ -775,6 +775,67 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int NeighborSearch<Scalar>::get_active_segment()
+    {
+      _F_;
+      return this->active_segment;
+    }
+
+    template<typename Scalar>
+    void NeighborSearch<Scalar>::set_active_segment(unsigned int index)
+    {
+      _F_;
+      if(index >= n_neighbors)
+        error("NeighborSearch<Scalar>::set_active_segment() called with an incorrect index.");
+
+      this->active_segment = index;
+      this->neighb_el = this->neighbors[index];
+      this->neighbor_edge = this->neighbor_edges[index];
+    }
+      
+    template<typename Scalar>
+    Element* NeighborSearch<Scalar>::get_neighb_el()
+    { 
+      _F_;
+      return this->neighb_el;
+    }
+      
+    template<typename Scalar>
+    typename NeighborSearch<Scalar>::NeighborEdgeInfo NeighborSearch<Scalar>::get_neighbor_edge()
+    {
+      _F_;
+      return this->neighbor_edge;
+    }
+      
+    template<typename Scalar>
+    unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index)
+    {
+      _F_;
+      return this->central_n_trans[index];
+    }
+
+    template<typename Scalar>
+    unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2)
+    { 
+      _F_;
+      return this->central_transformations[index_1][index_2];
+    }
+      
+    template<typename Scalar>
+    unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index)
+    { 
+      _F_;
+      return this->neighbor_n_trans[index];
+    }
+      
+    template<typename Scalar>
+    unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2)
+    { 
+      _F_;
+      return this->neighbor_transformations[index_1][index_2];
+    }
+
+    template<typename Scalar>
     DiscontinuousFunc<Scalar>* NeighborSearch<Scalar>::init_ext_fn(MeshFunction<Scalar>* fu)
     {
       _F_;

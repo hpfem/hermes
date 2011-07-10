@@ -1,6 +1,0 @@
-#
-# DOC specific files
-#
-
-#re-include dat files since they are used for documentation
-!*.dat

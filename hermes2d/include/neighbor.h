@@ -1,14 +1,13 @@
 #ifndef NEIGHBOR_H_
 #define NEIGHBOR_H_
 
-#include "common.h"
-#include "mesh.h"
-#include "quad.h"
-#include "solution.h"
+#include "mesh/mesh.h"
+#include "quadrature/quad.h"
+#include "function/solution.h"
 #include "forms.h"
-#include "refmap.h"
+#include "mesh/refmap.h"
 #include "asmlist.h"
-#include "space.h"
+#include "space/space.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -77,6 +76,9 @@ namespace Hermes
       ///
       NeighborSearch(Element* el, Mesh* mesh);
       NeighborSearch(const NeighborSearch& ns);
+      
+      /// Destructor.
+      ~NeighborSearch();
 
       /*** Methods for changing active state for further calculations. ***/
 
@@ -186,11 +188,100 @@ namespace Hermes
       void clear_supported_shapes() {
         if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
       }
-      /// Destructor.
-      ~NeighborSearch();
 
       /// Function that sets the variable ignore_errors. See the variable description.
       void set_ignore_errors(bool value) {this->ignore_errors = value;};
+
+      /// This class represents the extended shapeset, consisting of shape functions from both the central element and
+      /// current neighbor element, extended by zero to the union of these elements.
+      class ExtendedShapeset
+      {
+      public:
+        /// Constructor.
+        ///
+        /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
+        /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
+        /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
+        ///
+        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
+
+        ExtendedShapeset(const ExtendedShapeset & other);
+
+        /// Destructor.
+        ~ExtendedShapeset() {
+          delete [] dof; delete neighbor_al;
+        }
+
+        void free_central_al() {
+          delete central_al;
+        }
+
+        /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
+        void combine_assembly_lists();
+
+        /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
+        ///
+        /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
+        /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
+        ///
+        void update(NeighborSearch* neighborhood, Space<Scalar>* space) {
+          delete [] this->dof;
+          space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
+          combine_assembly_lists();
+        }
+
+      public:
+        int cnt;  ///< Number of shape functions in the extended shapeset.
+        int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
+
+        bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
+
+        AsmList<Scalar>* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
+        AsmList<Scalar>* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
+
+        friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
+      };
+      
+      /*** Neighborhood information. ***/
+      /// Structure containing all the needed information about the active edge from the neighbor's side.
+      class NeighborEdgeInfo
+      {
+      public:
+        NeighborEdgeInfo() : local_num_of_edge(-1), orientation(-1) {};
+
+        int local_num_of_edge;  ///< Local number of the edge on neighbor element.
+        int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
+        ///< (0 - same orientation, 1 - reverse orientation).
+      };
+
+
+      /// When creating sparse structure of a matrix using this class, we want to ignore errors
+      /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
+      bool ignore_errors;
+
+      /// Returns the current active segment.
+      int get_active_segment();
+
+      /// Sets the active segment, neighbor element, and neighbor edge accordingly.
+      void set_active_segment(unsigned int index);
+      
+      /// Returns the current neighbor element according to the current active segment.
+      Element* get_neighb_el();
+      
+      /// Returns the current active neighbor edge according to the current active segment.
+      NeighborEdgeInfo get_neighbor_edge();
+      
+      /// Returns the number(depth) of the current central transformation according to the current active segment.
+      unsigned int get_central_n_trans(unsigned int index);
+      
+      /// Returns the current central transformations according to the current active segment.
+      unsigned int get_central_transformations(unsigned int index_1, unsigned int index_2);
+      
+      /// Returns the number(depth) of the current neighbor transformation according to the current active segment.
+      unsigned int get_neighbor_n_trans(unsigned int index);
+      
+      /// Returns the current neighbor transformations according to the current active segment.
+      unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2);
 
     private:
 
@@ -221,17 +312,6 @@ namespace Hermes
       Element* central_el;          ///< Central (currently assembled) element.
       Element* neighb_el;           ///< Currently selected neighbor element (on the other side of active segment).
 
-      /*** Neighborhood information. ***/
-      /// Structure containing all the needed information about the active edge from the neighbor's side.
-      class NeighborEdgeInfo
-      {
-      public:
-        NeighborEdgeInfo() : local_num_of_edge(-1), orientation(-1) {};
-
-        int local_num_of_edge;  ///< Local number of the edge on neighbor element.
-        int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
-        ///< (0 - same orientation, 1 - reverse orientation).
-      };
 
       int active_edge;               ///< Local number of the currently assembled edge, w.r.t. the central element.
       NeighborEdgeInfo neighbor_edge;///< Assembled edge, w.r.t. the element on the other side.
@@ -331,67 +411,12 @@ namespace Hermes
           this->eo = eo;
         }
       };
+
       QuadInfo central_quad;  ///< Quadrature data of the active edge with respect to the central element.
       QuadInfo neighb_quad;   ///< Quadrature data of the active edge with respect to the element on the other side.
 
-    public:
-      /// This class represents the extended shapeset, consisting of shape functions from both the central element and
-      /// current neighbor element, extended by zero to the union of these elements.
-      class ExtendedShapeset
-      {
-      public:
-        /// Constructor.
-        ///
-        /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
-        /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
-        /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
-        ///
-        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
-
-        ExtendedShapeset(const ExtendedShapeset & other);
-
-        /// Destructor.
-        ~ExtendedShapeset() {
-          delete [] dof; delete neighbor_al;
-        }
-
-        void free_central_al() {
-          delete central_al;
-        }
-
-        /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
-        void combine_assembly_lists();
-
-        /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
-        ///
-        /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
-        /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
-        ///
-        void update(NeighborSearch* neighborhood, Space<Scalar>* space) {
-          delete [] this->dof;
-          space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
-          combine_assembly_lists();
-        }
-
-      public:
-        int cnt;  ///< Number of shape functions in the extended shapeset.
-        int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
-
-        bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
-
-        AsmList<Scalar>* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
-        AsmList<Scalar>* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
-
-        friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
-      };
-
-      /// When creating sparse structure of a matrix using this class, we want to ignore errors
-      /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
-      bool ignore_errors;
-
       friend class DiscreteProblem<Scalar>;
       friend class KellyTypeAdapt<Scalar>;
-      friend class DiscontinuityDetector;
     };
   }
 }

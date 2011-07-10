@@ -17,7 +17,7 @@
 #define __H2D_INTEGRALS_HCURL_H
 
 #include "../quadrature/limit_order.h"
-#include "../form/forms.h"
+#include "../forms.h"
 #include "../function/function.h"
 #include "../weakform/weakform.h"
 

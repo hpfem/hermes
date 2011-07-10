@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "umfpack.h"
 #include "adapt.h"
 #include "hermes2d.h"
 #include "hermes2d_common_defs.h"
@@ -887,7 +888,7 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
       _F_;
-      int i, j, k;
+      int i, j;
 
       int n = slns.size();
       if (n != this->num) EXIT("Wrong number of solutions.");

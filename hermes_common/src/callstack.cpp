@@ -20,7 +20,7 @@
     \brief File containing functionality for investigating call stack.
 */
 #include "callstack.h"
-#include "../third_party_codes/trilinos-teuchos/include/Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 #include <signal.h>
 #include <stdlib.h>
 

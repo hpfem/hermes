@@ -71,7 +71,7 @@ namespace Hermes
       int inner = 1, outer;
       if (!circle)
       {
-        for (int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
+        for (unsigned int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_inner_pts[id]][i]);
 
@@ -123,7 +123,7 @@ namespace Hermes
       inner = 0;
       if (!circle)
       {
-        for (int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
+        for (unsigned int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_knots[id]][i]);
 
@@ -314,14 +314,11 @@ namespace Hermes
         }
       }
 
-#ifdef HERMES_COMMON_CHECK_BOUNDARY_CONDITIONS
       // check that all boundary edges have a marker assigned
       for_all_edge_nodes(en, mesh)
-        if (en->ref < 2 && en->marker == 0) {
+        if (en->ref < 2 && en->marker == 0)
           warn("Boundary edge node does not have a boundary marker");
-        }
-#endif
-
+        
         //// curves //////////////////////////////////////////////////////////////////
         if (m.n_curv > 0)
         {
@@ -503,30 +500,30 @@ namespace Hermes
           }
           fprintf(f, "\n}\n\n");
 
-        // save curved edges
-        first = true;
-        for_all_base_elements(e, mesh)
-          if (e->is_curved())
-            for (unsigned i = 0; i < e->nvert; i++)
-              if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
-                fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
-                save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
-              }
-        if (!first)
-          fprintf(f, "\n}\n\n");
+          // save curved edges
+          first = true;
+          for_all_base_elements(e, mesh)
+            if (e->is_curved())
+              for (unsigned i = 0; i < e->nvert; i++)
+                if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
+                  fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
+                  save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
+                }
+                if (!first)
+                  fprintf(f, "\n}\n\n");
 
-        // save refinements
-        unsigned temp = mesh->seq;
-        mesh->seq = mesh->nbase;
-        first = true;
-        for_all_base_elements(e, mesh)
-          save_refinements(mesh, f, e, e->id, first);
-        if (!first) fprintf(f, "\n}\n\n");
+                // save refinements
+                unsigned temp = mesh->seq;
+                mesh->seq = mesh->nbase;
+                first = true;
+                for_all_base_elements(e, mesh)
+                  save_refinements(mesh, f, e, e->id, first);
+                if (!first) fprintf(f, "\n}\n\n");
 
-        mesh->seq = temp;
-        fclose(f);
+                mesh->seq = temp;
+                fclose(f);
 
-        return true;
+                return true;
     }
   }
 }

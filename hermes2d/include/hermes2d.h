@@ -20,10 +20,6 @@
 
 #include "hermes2d_common_defs.h"
 
-#include "../../hermes_common/include/config.h"
-
-#include "../../hermes_common/include/hermes_common.h"
-
 #include "newton_solver.h"
 #include "picard_solver.h"
 
@@ -55,7 +51,7 @@
 
 #include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "form/forms.h"
+#include "forms.h"
 
 #include "integrals/h1.h"
 #include "integrals/hcurl.h"
@@ -63,8 +59,8 @@
 #include "integrals/l2.h"
 
 #include "function/exact_solution.h"
-#include "solution.h"
-#include "mesh_function.h"
+#include "function/solution.h"
+#include "function/mesh_function.h"
 #include "function/filter.h"
 
 #include "graph.h"
@@ -95,7 +91,6 @@
 
 #include "runge_kutta.h"
 #include "spline.h"
-#include "tables.h"
 
 #include "weakform_library/weakforms_elasticity.h"
 #include "weakform_library/weakforms_h1.h"

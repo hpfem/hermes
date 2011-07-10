@@ -27,7 +27,7 @@
 #include "view.h"
 #include "solution.h"
 #include "view_data.cpp"
-#include "third_party_codes/trilinos-teuchos/include/Teuchos_stacktrace.hpp"
+#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 
 namespace Hermes
 {
