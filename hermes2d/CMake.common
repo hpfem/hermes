@@ -1,10 +1,10 @@
 macro(SET_COMMON_TARGET_PROPERTIES TRGT)
   # Release or debug flags.
-  if("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
+  if(H2D_DEBUG)
 	  set(FLAGS "${DEBUG_FLAGS}")
-  elseif("${HERMES}" STREQUAL "${HERMES2D_RELEASE}")
+  elseif(H2D_DEBUG)
 	  set(FLAGS "${RELEASE_FLAGS}")
-  endif("${HERMES}" STREQUAL "${HERMES2D_DEBUG}")
+  endif(H2D_DEBUG)
   set_property(TARGET ${TRGT} PROPERTY COMPILE_FLAGS ${FLAGS})
 
   # Where to look for includes.

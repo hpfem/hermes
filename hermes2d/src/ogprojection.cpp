@@ -27,9 +27,6 @@ namespace Hermes
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
     {
       _F_;
-      // Instantiate a class with global functions.
-      Global<Scalar> hermes2d;
-
       unsigned int n = spaces.size();
 
       // sanity checks

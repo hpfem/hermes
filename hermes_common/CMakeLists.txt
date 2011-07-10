@@ -154,8 +154,7 @@ project(hermes_common)
 	# the selected Hermes configurations.
 	#
 	if(MSVC)
-		set(FLAGS "${MSVC_DEFINES}")
-		BUILD_COMMON_LIB(${HERMES_COMMON_LIB} ${FLAGS})
+		BUILD_COMMON_LIB(${HERMES_COMMON_LIB} ${DEBUG_FLAGS})
 		ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB}
 												 ${HERMES_COMMON_LIB_DEBUG}
 												 ${HERMES_COMMON_LIB_RELEASE})

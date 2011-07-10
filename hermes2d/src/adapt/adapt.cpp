@@ -888,7 +888,7 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
       _F_;
-      int i, j, k;
+      int i, j;
 
       int n = slns.size();
       if (n != this->num) EXIT("Wrong number of solutions.");
