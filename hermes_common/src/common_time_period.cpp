@@ -99,9 +99,8 @@ namespace Hermes
       last_period = secs;
     }
     else 
-    {
-      last_period = -1;
-    }
+      last_period = 0.0;
+
     last_time = cur_time;
     return *this;
   }
@@ -116,7 +115,8 @@ namespace Hermes
   const TimePeriod& TimePeriod::reset() 
   {
     accum = 0;
-    last_period = -1;
+    last_time = get_time();
+    last_period = 0.0;
     return *this;
   }
 

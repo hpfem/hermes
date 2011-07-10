@@ -280,7 +280,7 @@ namespace Hermes
       ls_pars.set("Max Iterations", ls_max_iters);
       ls_pars.set("Tolerance", ls_tolerance);
       ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
-      //\todo parametrize me.
+      /// \todo parametrize me.
       ls_pars.set("Preconditioner Reuse Policy", "Recompute");
       ls_pars.set("Output Frequency", AZ_all);
 
@@ -305,7 +305,7 @@ namespace Hermes
             }
         }
 
-        //\todo Parametrize me.
+        /// \todo Parametrize me.
         ls_pars.set("Max Age Of Prec", 999);
 
         Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcp(this);

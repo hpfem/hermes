@@ -46,6 +46,8 @@ namespace Hermes
 
       // Perform Newton's iteration.
       NewtonSolver<Scalar> newton(&dp, matrix_solver_type);
+      // No output for the Newton's loop.
+      newton.set_verbose_output(false);
       if (!newton.solve(coeff_vec)) 
         error("Newton's iteration failed.");
 

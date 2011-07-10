@@ -212,7 +212,7 @@ namespace Hermes
 
     void GnuplotGraph::set_legend_pos(const char* posspec)
     {
-      //\todo check that input string is admissible for gnuplot 'set key' command
+      /// \todo check that input string is admissible for gnuplot 'set key' command
       legend_pos = posspec;
       if (legend_pos.length() && !legend) legend = true;
     }

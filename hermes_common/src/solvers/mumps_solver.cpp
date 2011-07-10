@@ -589,7 +589,7 @@ namespace Hermes
       {
       case 0: return true; // no error
       case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
-        //\todo add the rest according to the MUMPS docs
+        /// \todo add the rest according to the MUMPS docs
       default: warning("INFOG(1) = %d", param.INFOG(1)); break;
       }
       return false;
