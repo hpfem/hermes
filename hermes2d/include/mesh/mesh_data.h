@@ -42,13 +42,13 @@ namespace Hermes
     public:
       /// Constructor.
       /// \param[in] mesh_file name of the file containing mesh definition.
-      MeshData::MeshData(const std::string &mesh_file);
+      MeshData(const std::string &mesh_file);
 
       /// MeshData Copy Constructor.
-      MeshData::MeshData(const MeshData &m);
+      MeshData(const MeshData &m);
 
       /// MeshData Assignment Operator.
-      MeshData& MeshData::operator = (const MeshData &m);
+      MeshData& operator = (const MeshData &m);
 
     private:
       std::map< std::string, std::vector< std::string > > vars_; ///< Map for storing variables in input mesh file.

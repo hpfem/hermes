@@ -1,8 +1,11 @@
 project(test-mesh_copy)
 
 add_executable(${PROJECT_NAME} main.cpp)
-include (${hermes2d_SOURCE_DIR}/CMake.common)
-set_common_target_properties(${PROJECT_NAME})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_FLAGS ${FLAGS})
+
+target_link_libraries(${PROJECT_NAME} ${HERMES2D})
+
 set(BIN ${PROJECT_BINARY_DIR}/${PROJECT_NAME})
 add_test(test-mesh_copy-1 "${BIN}" domain.mesh 1)
 add_test(test-mesh_copy-2 "${BIN}" bracket.mesh 1)
