@@ -614,7 +614,7 @@ namespace Hermes
       /// Class used for profiling of DiscreteProblem (assembling).
       class Profiling
       {
-      public:
+      private:
         Profiling();
 
         /// Utility time measurement.
@@ -656,8 +656,10 @@ namespace Hermes
 
         Record current_record;
 
-      protected:
         Hermes::vector<Record> profile;
+
+        /// Returns the profiling info.
+        void get_profiling_output(std::ostream & out, unsigned int order);
 
         friend class DiscreteProblem<Scalar>;
       };
@@ -666,8 +668,11 @@ namespace Hermes
       Profiling profiling;
 
     public:
-      /// Returns the profiling info.
-      void get_profiling_output(std::ostream & out);
+      /// Returns all profiling info.
+      void get_all_profiling_output(std::ostream & out);
+
+      /// Returns the profiling info from the last call to assemble().
+      void get_last_profiling_output(std::ostream & out);
 
       friend class KellyTypeAdapt<Scalar>;
       friend class Global<Scalar>;

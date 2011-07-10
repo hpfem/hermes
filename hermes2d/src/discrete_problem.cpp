@@ -5134,24 +5134,37 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::get_profiling_output(std::ostream & out)
+    void DiscreteProblem<Scalar>::Profiling::get_profiling_output(std::ostream & out, unsigned int order)
+    {
+        out << std::endl;
+        out << "Assembly no. " << order + 1 << ":" << std::endl;
+        out << "\t" << "Total assembly time: " << profile[order].total << " s"  << std::endl;
+        out << "\t" << "Sparse structure creation: " << profile[order].create_sparse_structure << " s"  << std::endl;
+        out << "\t" << "Global initialization time: " << profile[order].initialization << " s"  << std::endl;
+        out << "\t" << "State initialization (accumulated): " << profile[order].state_init << " s"  << std::endl;
+        out << "\t" << "Form calculation preparations (assemble_* methods): " << profile[order].form_preparation_assemble << " s"  << std::endl;
+        out << "\t" << "Form calculation preparations (eval_*_form methods): " << profile[order].form_preparation_eval << " s"  << std::endl;
+        out << "\t" << "Form calculations (accumulated): " << profile[order].form_evaluation << " s"  << std::endl;
+        out << std::endl;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::get_all_profiling_output(std::ostream & out)
     {
       if(profiling.profile.size() == 0)
         info("No assemblies were done yet to get an output for.");
 
       for(unsigned int i = 0; i < profiling.profile.size(); i++)
-      {
-        out << std::endl;
-        out << "Assembly no. " << i + 1 << ":" << std::endl;
-        out << "\t" << "Total assembly time: " << profiling.profile[i].total << " s"  << std::endl;
-        out << "\t" << "Sparse structure creation: " << profiling.profile[i].create_sparse_structure << " s"  << std::endl;
-        out << "\t" << "Global initialization time: " << profiling.profile[i].initialization << " s"  << std::endl;
-        out << "\t" << "State initialization (accumulated): " << profiling.profile[i].state_init << " s"  << std::endl;
-        out << "\t" << "Form calculation preparations (assemble_* methods): " << profiling.profile[i].form_preparation_assemble << " s"  << std::endl;
-        out << "\t" << "Form calculation preparations (eval_*_form methods): " << profiling.profile[i].form_preparation_eval << " s"  << std::endl;
-        out << "\t" << "Form calculations (accumulated): " << profiling.profile[i].form_evaluation << " s"  << std::endl;
-        out << std::endl;
-      }
+        profiling.get_profiling_output(out, i);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::get_last_profiling_output(std::ostream & out)
+    {
+      if(profiling.profile.size() == 0)
+        info("No assemblies were done yet to get an output for.");
+
+      profiling.get_profiling_output(out, profiling.profile.size() - 1);
     }
 
     template class HERMES_API DiscreteProblem<double>;
