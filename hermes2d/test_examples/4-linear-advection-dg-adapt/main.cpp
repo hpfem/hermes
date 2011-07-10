@@ -44,7 +44,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
                                                   // Note that regular meshes are not supported, this is due to
                                                   // their notoriously bad performance.
-const double ERR_STOP = 3.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 10.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // fine mesh and coarse mesh solution in percent).
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
@@ -140,6 +140,9 @@ int main(int argc, char* args[])
     // Assemble the linear problem.
     info("Assembling (ndof: %d).", ref_space->get_num_dofs());
     dp->assemble(matrix, rhs);
+
+    // Get info about time spent during assembling in its respective parts.
+    dp->get_profiling_output(std::cout);
 
     // Solve the linear system. If successful, obtain the solution.
     info("Solving.");

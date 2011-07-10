@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
   else
     Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
+  // Get info about time spent during assembling in its respective parts.
   dp.get_profiling_output(std::cout);
 
   // VTK output.

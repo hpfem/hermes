@@ -23,7 +23,7 @@
 #ifndef __H2D_COMMON_H_
 #define __H2D_COMMON_H_
 
-#include "../hermes_common.h"
+#include "hermes_common.h"
 
 namespace Hermes
 {

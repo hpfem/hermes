@@ -16,7 +16,7 @@
 #ifndef __H2D_HASH_H
 #define __H2D_HASH_H
 
-#include "../../hermes_common.h"
+#include "hermes_common.h"
 
 namespace Hermes
 {

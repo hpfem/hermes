@@ -21,7 +21,7 @@ project(hermes)
 	set(WITH_H2D 									YES)
 		# Release and debug versions.
 		set(H2D_DEBUG 							YES)
-		set(H2D_RELEASE              NO)
+		set(H2D_RELEASE             YES)
 		# Optional parts of the library.
 		set(H2D_WITH_GLUT 					YES)
 		set(H2D_WITH_VIEWER_GUI 		NO)

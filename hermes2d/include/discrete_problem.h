@@ -16,7 +16,7 @@
 #ifndef __H2D_DISCRETE_PROBLEM_H
 #define __H2D_DISCRETE_PROBLEM_H
 
-#include "../hermes_common.h"
+#include "hermes_common.h"
 #include "adapt/adapt.h"
 #include "graph.h"
 #include "forms.h"
