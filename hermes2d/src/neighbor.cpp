@@ -782,7 +782,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::set_active_segment(int index)
+    void NeighborSearch<Scalar>::set_active_segment(unsigned int index)
     {
       _F_;
       if(index >= n_neighbors)

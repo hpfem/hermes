@@ -339,6 +339,8 @@ project(hermes)
 			include_directories(MPI_INCLUDE_PATH)	  
 		endif(WITH_MPI)
 
+	# Match debug or release version of all other libraries.
+	DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
 
 	# Main CMakeLists.txt for each library are in the following directories.
 	add_subdirectory(hermes_common)

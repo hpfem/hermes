@@ -124,7 +124,6 @@ namespace Hermes
       assert_msg(this->mesh->get_element(id)->is_quad() || H2D_GET_V_ORDER(order) == 0, "Element #%d is triangle but vertical order is not zero", id);
       if (id < 0 || id >= this->mesh->get_max_element_id())
         error("Invalid element id.");
-      assert(order >= 0 && order <= shapeset->get_max_order());
 
       this->resize_tables();
       this->edata[id].order = order;

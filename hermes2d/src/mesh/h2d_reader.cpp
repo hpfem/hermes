@@ -71,7 +71,7 @@ namespace Hermes
       int inner = 1, outer;
       if (!circle)
       {
-        for (int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
+        for (unsigned int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_inner_pts[id]][i]);
 
@@ -123,7 +123,7 @@ namespace Hermes
       inner = 0;
       if (!circle)
       {
-        for (int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
+        for (unsigned int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_knots[id]][i]);
 

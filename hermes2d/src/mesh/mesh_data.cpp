@@ -19,9 +19,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    MeshData::MeshData(const std::string &mesh_file) 
+    MeshData::MeshData(const std::string &mesh_file) : mesh_file_(mesh_file)
     {
-      mesh_file_ = mesh_file;
     }
 
     MeshData::MeshData(const MeshData &m) : mesh_file_(m.mesh_file_), n_vert(m.n_vert), n_el(m.n_el), n_bdy(m.n_bdy), n_curv(m.n_curv), n_ref(m.n_ref)

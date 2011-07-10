@@ -1,8 +1,5 @@
 project(hermes_common)
 
-	# Match debug or release version of all other libraries.
-	DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
-
 	# Linker settings.
 	include(ConfigureRPATH)
 		ConfigureRPATH()

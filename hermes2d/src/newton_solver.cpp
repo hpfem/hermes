@@ -140,7 +140,7 @@ namespace Hermes
         if (residual_norm < newton_tol && it > 1) {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
-          for (unsigned int i = 0; i < ndof; i++)
+          for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
           // Clean up.
@@ -248,9 +248,9 @@ namespace Hermes
           if(this->verbose_output)
             info("---- Newton initial residual norm: %g", residual_norm);
         }
-	else 
-	  if(this->verbose_output)
-	    info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+        else 
+          if(this->verbose_output)
+            info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
@@ -269,7 +269,7 @@ namespace Hermes
         if (residual_norm < newton_tol && it > 1) {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
-          for (unsigned int i = 0; i < ndof; i++)
+          for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
           // Clean up.
@@ -307,13 +307,13 @@ namespace Hermes
             info("Maximum allowed number of Newton iterations exceeded, returning false.");
           break;
         }
-
-        // Clean up and return false.
-        // All 'bad' situations end here.
-        delete residual;
-        delete linear_solver;
-        return false;
       }
+
+      // Clean up and return false.
+      // All 'bad' situations end here.
+      delete residual;
+      delete linear_solver;
+      return false;
     }
 
     template class HERMES_API NewtonSolver<double>;

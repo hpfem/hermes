@@ -51,6 +51,8 @@ namespace Hermes
       MeshData& operator = (const MeshData &m);
 
     private:
+      std::string mesh_file_; ///< Mesh Filename (private).
+
       std::map< std::string, std::vector< std::string > > vars_; ///< Map for storing variables in input mesh file.
 
       int n_vert; ///< Number of vertices.
@@ -87,8 +89,6 @@ namespace Hermes
 
       /// This function parses a given input mesh file line by line and extracts the necessary information into the MeshData class variables.
       void parse_mesh(void);
-
-      std::string mesh_file_; ///< Mesh Filename (private).
 
       /// Removes brackets, commas and other unessential details from the input file.
       /// Meaningful blank spaces are temporarily replaced with a ';'

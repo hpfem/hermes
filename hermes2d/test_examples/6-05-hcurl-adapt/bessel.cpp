@@ -1449,14 +1449,12 @@ static unsigned short APGD[40] = {
 #ifdef ANSIPROT
 extern double fabs ( double );
 extern double exp ( double );
-extern double std::sqrt ( double );
-// extern double polevl ( double, void *, int );
-// extern double p1evl ( double, void *, int );
-extern double std::sin ( double );
-extern double std::cos ( double );
+extern double sqrt ( double );
+extern double sin ( double );
+extern double cos ( double );
 #else
-double fabs(), exp(), std::sqrt();
-double polevl(), p1evl(), std::sin(), std::cos();
+double fabs(), exp(), sqrt();
+double polevl(), p1evl(), sin(), cos();
 #endif
 
 int airy(double x, double *ai, double *aip, double *bi, double *bip)
@@ -1869,10 +1867,10 @@ int sgngam = 0;
 extern int sgngam;
 extern double MAXLOG, MAXNUM, PI;
 #ifdef ANSIPROT
-extern double std::pow ( double, double );
-extern double std::log ( double );
+extern double pow ( double, double );
+extern double log ( double );
 extern double exp ( double );
-extern double std::sin ( double );
+extern double sin ( double );
 // extern double polevl ( double, void *, int );
 // extern double p1evl ( double, void *, int );
 // extern double floor ( double );
@@ -1882,7 +1880,7 @@ extern int isnan ( double );
 static double stirf ( double );
 double lgam ( double );
 #else
-double std::pow(), std::log(), exp(), std::sin(), polevl(), p1evl(), floor(), fabs();
+double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
 int isnan(), isfinite();
 static double stirf();
 double lgam();
@@ -2350,15 +2348,14 @@ extern double fabs ( double );
 // extern double polevl ( double, void *, int );
 // extern double j0 ( double );
 // extern double j1 ( double );
-extern double std::sqrt ( double );
+extern double sqrt ( double );
 extern double cbrt ( double );
 extern double exp ( double );
-extern double std::log ( double );
-extern double std::sin ( double );
-extern double std::cos ( double );
+extern double log ( double );
+extern double sin ( double );
+extern double cos ( double );
 extern double acos ( double );
-extern double std::pow ( double, double );
-// extern double gamma ( double );
+extern double pow ( double, double );
 extern double lgam ( double );
 static double recur(double *, double, double *, int);
 static double jvs(double, double);
@@ -2367,8 +2364,8 @@ static double jnx(double, double);
 static double jnt(double, double);
 #else
 int airy();
-double fabs(), floor(), frexp(), polevl(), j0(), j1(), std::sqrt(), cbrt();
-double exp(), std::log(), std::sin(), std::cos(), astd::cos(), std::pow(), gamma(), lgam();
+double fabs(), floor(), frexp(), polevl(), j0(), j1(), sqrt(), cbrt();
+double exp(), log(), sin(), cos(), acos(), pow(), gamma(), lgam();
 static double recur(), jvs(), hankel(), jnx(), jnt();
 #endif
 

@@ -263,7 +263,7 @@ namespace Hermes
       int get_active_segment();
 
       /// Sets the active segment, neighbor element, and neighbor edge accordingly.
-      void set_active_segment(int index);
+      void set_active_segment(unsigned int index);
       
       /// Returns the current neighbor element according to the current active segment.
       Element* get_neighb_el();
