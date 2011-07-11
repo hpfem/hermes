@@ -63,9 +63,8 @@ project(hermes2d)
 	# Header files location for the Hermes2d library.
 	#
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include)
-	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/solvers/include)
-	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/python_API/include)
-	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/hermes2d/include)
+	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include/solvers)
+	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include/python_API)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/form)
