@@ -254,12 +254,7 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
 
 // Test code.
 void solve(LinearSolver<double> &solver, int n) {
-  if (solver.solve()) {
-    double *sln = solver.get_solution();
-    for (int i = 0; i < n; i++)
-      std::cout << std::endl << sln[i];
-  }
-  else
+  if (!solver.solve())
     printf("Unable to solve.\n");
 }
 
@@ -280,8 +275,23 @@ int main(int argc, char *argv[]) {
   else
     cplx_2_real = false;
 
-  if (read_matrix_and_rhs(argv[2], n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
+  switch(atoi(argv[2]))
+  {
+  case 1:
+  if (read_matrix_and_rhs((char*)"in/linsys-1", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
     error("Failed to read the matrix and rhs.");
+break;
+  case 2:
+  if (read_matrix_and_rhs((char*)"in/linsys-2", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
+    error("Failed to read the matrix and rhs.");
+break;
+  case 3:
+  if (read_matrix_and_rhs((char*)"in/linsys-3", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
+    error("Failed to read the matrix and rhs.");
+break;
+}
+
+double* sln;
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC
@@ -291,6 +301,7 @@ int main(int argc, char *argv[]) {
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "petsc-block") == 0) {
@@ -301,6 +312,7 @@ int main(int argc, char *argv[]) {
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack") == 0) {
@@ -311,6 +323,7 @@ int main(int argc, char *argv[]) {
 
     UMFPackLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack-block") == 0) {
@@ -321,6 +334,7 @@ int main(int argc, char *argv[]) {
 
     UMFPackLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
@@ -331,6 +345,7 @@ int main(int argc, char *argv[]) {
 
     AztecOOSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
@@ -341,6 +356,7 @@ int main(int argc, char *argv[]) {
 
     AztecOOSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
@@ -352,6 +368,7 @@ int main(int argc, char *argv[]) {
     if (AmesosSolver<double>::is_available("Klu")) {
       AmesosSolver<double> solver("Klu", &mat, &rhs);
       solve(solver, n);
+	sln = solver.get_solution();
     }
 #endif
   }
@@ -364,6 +381,7 @@ int main(int argc, char *argv[]) {
     if (AmesosSolver<double>::is_available("Klu")) {
       AmesosSolver<double> solver("Klu", &mat, &rhs);
       solve(solver, n);
+	sln = solver.get_solution();
     } 
 #endif
   }
@@ -375,6 +393,7 @@ int main(int argc, char *argv[]) {
 
     MumpsSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "mumps-block") == 0) {
@@ -385,10 +404,38 @@ int main(int argc, char *argv[]) {
 
     MumpsSolver<double> solver(&mat, &rhs);
     solve(solver, n);
+	sln = solver.get_solution();
 #endif
   }  
   else
     ret = TEST_FAILURE;
 
-  return ret;
+switch(atoi(argv[2]))
+  {
+  case 1:
+  if (std::abs(sln[0] - 4) > 1E-6 || std::abs(sln[1] - 2) > 1E-6 || std::abs(sln[2] - 3) > 1E-6)
+    ret = TEST_FAILURE;
+else
+    ret = TEST_SUCCESS;
+break;
+  case 2:
+  if (std::abs(sln[0] - 2) > 1E-6 || std::abs(sln[1] - 3) > 1E-6 || std::abs(sln[2] - 1) > 1E-6 || std::abs(sln[3] + 3) > 1E-6 || std::abs(sln[4] + 1) > 1E-6)
+    ret = TEST_FAILURE;
+else
+    ret = TEST_SUCCESS;
+break;
+  case 3:
+  if (std::abs(sln[0] - 1) > 1E-6 || std::abs(sln[1] - 2) > 1E-6 || std::abs(sln[2] - 3) > 1E-6 || std::abs(sln[3] - 4) > 1E-6 || std::abs(sln[4] - 5) > 1E-6)
+    ret = TEST_FAILURE;
+else
+    ret = TEST_SUCCESS;
+break;
+}
+
+  // Test
+  if (ret == TEST_FAILURE)
+    printf("Failure!\n");
+  else
+    printf("Success!\n");        
+
 }
