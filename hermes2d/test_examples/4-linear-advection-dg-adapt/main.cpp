@@ -142,7 +142,7 @@ int main(int argc, char* args[])
     dp->assemble(matrix, rhs);
 
     // Get info about time spent during assembling in its respective parts.
-    dp->get_profiling_output(std::cout);
+    dp->get_last_profiling_output(std::cout);
 
     // Solve the linear system. If successful, obtain the solution.
     info("Solving.");

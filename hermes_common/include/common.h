@@ -24,6 +24,12 @@
 #ifdef _XOPEN_SOURCE
 # undef _XOPEN_SOURCE	// typeinfo defines it
 #endif
+
+// In Trilinos preconditioning, unistd.h is used if this flag is not defined.
+#ifdef _MSC_VER
+#define ICL
+#endif
+
 #include <typeinfo>
 #include <complex>
 
