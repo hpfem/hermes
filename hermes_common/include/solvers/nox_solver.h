@@ -25,7 +25,7 @@
 #include "linear_solver.h"
 #include "nonlinear_solver.h"
 #include "epetra.h"
-#ifdef HAVE_NOX
+#if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 #include <NOX.H>
 #ifdef _POSIX_C_SOURCE
 # undef _POSIX_C_SOURCE	// pyconfig.h included by NOX_Epetra defines it
@@ -143,14 +143,7 @@ namespace Hermes {
         conv.wrms_atol = atol;
       }
 
-#ifdef HAVE_TEUCHOS
       virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
-#else
-      virtual void set_precond(Precond<Scalar>* pc) 
-      { 
-        warning("Teuchos is currently required to use IFPACK/ML preconditioners. No preconditioning will be performed.");  
-      }
-#endif
       virtual void set_precond(const char *pc);
 
     protected:

@@ -14,19 +14,7 @@ project(hermes_common)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/python_API)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
-
-	# Teuchos RCP
-	if (NOT WITH_TRILINOS)
-		set( TEUCHOS_SOURCES
-			src/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
-			src/third_party_codes/trilinos-teuchos/Teuchos_dyn_cast.cpp
-			src/third_party_codes/trilinos-teuchos/Teuchos_Ptr.cpp
-			src/third_party_codes/trilinos-teuchos/Teuchos_RCPNode.cpp
-			src/third_party_codes/trilinos-teuchos/Teuchos_TestForException.cpp
-			src/third_party_codes/trilinos-teuchos/Teuchos_TypeNameTraits.cpp
-		)
-	endif (NOT WITH_TRILINOS)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
 
 	if (WITH_PYTHON)
 		set ( PYTHON_SOURCES
@@ -69,7 +57,6 @@ project(hermes_common)
 	 # src/solvers/eigensolver.cpp
 	 # src/solvers/eigen.cpp
 		
-		${TEUCHOS_SOURCES}
 		${PYTHON_SOURCES}
 	)
 

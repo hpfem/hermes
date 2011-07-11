@@ -17,7 +17,7 @@
 */
 #include "nox_solver.h"
 
-#if (defined HAVE_NOX && defined HAVE_EPETRA)
+#if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
 namespace Hermes 
 {
@@ -186,8 +186,6 @@ namespace Hermes
       this->dp->invalidate_matrix();
     }
 
-#ifdef HAVE_TEUCHOS
-
     template<typename Scalar>
     void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
@@ -195,7 +193,6 @@ namespace Hermes
       precond = pc;
       prealloc_jacobian();
     }
-#endif
 
     template<typename Scalar>
     void NoxSolver<Scalar>::set_precond(const char *pc)
