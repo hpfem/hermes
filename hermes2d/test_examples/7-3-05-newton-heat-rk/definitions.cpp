@@ -1,7 +1,7 @@
 #include "definitions.h"
 
 CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
-                                           double* current_time_ptr, double temp_init, double t_final) : WeakForm(1)
+                                           double* current_time_ptr, double temp_init, double t_final) : Hermes::Hermes2D::WeakForm<double>(1)
 {
   // Jacobian volumetric part.
   add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, new HermesFunction<double>(-lambda / (heatcap * rho))));
