@@ -53,7 +53,7 @@ const double CONV_EXP = 1.0;
 
 // Stopping criterion for adaptivity (rel. error tolerance between the
 // reference mesh and coarse mesh solution in percent).
-const double ERR_STOP = 1.0;
+const double ERR_STOP = 10.0;
 
 // Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -186,9 +186,8 @@ int main(int argc, char* argv[])
 
   ndof = space.get_num_dofs();
 
-  printf("ndof allowed = %d\n", 1400);
-  printf("ndof actual = %d\n", ndof);
-  if (ndof < 1400) {      // ndofs was 1384 atthe time this test was created
+  if (ndof == 382) // Tested value as of 12 Jul 2011.
+  {
     printf("Success!\n");
     return TEST_SUCCESS;
   }
