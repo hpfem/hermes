@@ -320,9 +320,10 @@ namespace Hermes
       {
         for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++)
         {
-          idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col],mat->Ai[n]+i);
+          idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col+j],mat->Ai[n]+i);
           if (idx<0)
             error("Sparse matrix entry not found");
+          idx+=Ap[col+j];
           Ax[idx]+=mat->Ax[n];
         }
       }
@@ -341,7 +342,7 @@ namespace Hermes
       for (unsigned int i=0;i<nnz;i++)
       {
         a=mumps_to_Scalar(Ax[i]);
-        vector_out[jcn[i]]+=vector_in[irn[i]]*a;
+        vector_out[jcn[i]-1]+=vector_in[irn[i]-1]*a;
       }
     }
     // Multiplies matrix with a Scalar.
