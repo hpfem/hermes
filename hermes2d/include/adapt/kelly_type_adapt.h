@@ -81,18 +81,18 @@ namespace Hermes
       {
       public:
         int i; ///< Component.
-        std::string area; ///< Area.
-        Hermes::vector<MeshFunction<Scalar>*> ext; ///< External functions.
+        std::string area; ///< Geometric region where this estimator is applied.
+        Hermes::vector<MeshFunction<Scalar>*> ext; ///< Additional functions required by the estimator.
         
         /// Constructor.
         ErrorEstimatorForm(int i, std::string area = HERMES_ANY, 
-          Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>()) :
-        i(i), area(area), ext(ext) {}
+                           Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>()) 
+          : i(i), area(area), ext(ext) {}
 
         /// Value calculation.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
-          Func<Scalar> *u, Geom<double> *e,
-          ExtData<Scalar> *ext) const
+                             Func<Scalar> *u, Geom<double> *e,
+                             ExtData<Scalar> *ext) const
         {
           error("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
           return 0.0;
@@ -100,8 +100,8 @@ namespace Hermes
 
         /// Integration order.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-          Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
-          ExtData<Hermes::Ord> *ext) const
+                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
+                                ExtData<Hermes::Ord> *ext) const
         {
           error("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overridden.");
           return Hermes::Ord();
@@ -118,18 +118,18 @@ namespace Hermes
       /// Functions used for evaluating the actual error estimator forms for an active element or edge segment.
       ///
       double eval_volumetric_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
-        RefMap* rm);
+                                       RefMap* rm);
       double eval_boundary_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
-        RefMap* rm,
-        SurfPos* surf_pos);
+                                     RefMap* rm,
+                                     SurfPos* surf_pos);
       double eval_interface_estimator(typename KellyTypeAdapt::ErrorEstimatorForm* err_est_form,
-        RefMap *rm,
-        SurfPos* surf_pos,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
-        int neighbor_index);
+                                      RefMap *rm,
+                                      SurfPos* surf_pos,
+                                      LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
+                                      int neighbor_index);
       double eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-        RefMap* rm,
-        MeshFunction<Scalar>* sln);
+                                RefMap* rm,
+                                MeshFunction<Scalar>* sln);
 
       ///
       /// Linear forms used to calculate the error estimator value for each component.
@@ -144,8 +144,8 @@ namespace Hermes
       ///
       Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns;
       bool use_aposteriori_interface_scaling; ///< Specifies whether the interface error estimators for each
-      ///< component will be multiplied by \c interface_scaling_fns
-      ///< after being evaluated.
+                                              ///< component will be multiplied by \c interface_scaling_fns
+                                              ///< after being evaluated.
 
       ///
       /// Constant scaling. Reserved for the derived classes, not to be used by the user explicitly.
@@ -164,8 +164,8 @@ namespace Hermes
       /// done when comparing approximate solution to the exact one - in this case, we do not want to compute 
       /// the Kelly estimator value, but rather the ordinary difference between the solutions).
       virtual double calc_err_internal(Hermes::vector<Solution<Scalar>*> slns,
-        Hermes::vector<double>* component_errors,
-        unsigned int error_flags);
+                                       Hermes::vector<double>* component_errors,
+                                       unsigned int error_flags);
 
     public:
 
@@ -178,7 +178,7 @@ namespace Hermes
       ///
       /// \param[in]  ignore_visited_segments_ If true, error estimator for each inner edge will be evaluated only
       ///                                      once. It will be added to the total error estimate for both the active
-      ///                                      element and its neighbors across that edge, after possible scaling by
+      ///                                      element and its neighbors across that edge, after possibly being scaled by
       ///                                      \c interface_scaling_fns_ for the current component (with the diameter of
       ///                                      the appropriate element). This saves duplicate evaluations with same
       ///                                      results when the estimator is given e.g. by the jumps of the solution.
@@ -192,7 +192,7 @@ namespace Hermes
       ///                                      switched off by a call to \c disable_aposteriori_interface_scaling.
       ///
       /// \param[in]  interface_scaling_fns_  Specifies functions used for scaling the interface error estimator for
-      ///                                     each component. The scale is defined as a Real function of the element
+      ///                                     each component. The scale is defined as a real function of the element
       ///                                     diameter and multiplies the result of the interface estimators.
       ///                                     It may thus be already present in the interface estimator forms
       ///                                     themselves, in which case call \c disable_aposteriori_interface_scaling.
@@ -201,15 +201,14 @@ namespace Hermes
       ///                                     whose error is being calculated.
       ///
       KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces_,
-        Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-        bool ignore_visited_segments_ = true,
-        Hermes::vector<interface_estimator_scaling_fn_t>
-        interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
+                     Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
+                     bool ignore_visited_segments_ = true,
+                     Hermes::vector<interface_estimator_scaling_fn_t>
+                     interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
 
-      KellyTypeAdapt(Space<Scalar>* space_,
-        ProjNormType norm_ = HERMES_UNSET_NORM,
-        bool ignore_visited_segments_ = true,
-        interface_estimator_scaling_fn_t interface_scaling_fn_ = NULL);
+      KellyTypeAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM,
+                     bool ignore_visited_segments_ = true,
+                     interface_estimator_scaling_fn_t interface_scaling_fn_ = NULL);
 
       /// Destructor.
       virtual ~KellyTypeAdapt()
@@ -218,8 +217,14 @@ namespace Hermes
         error_estimators_vol.clear();
       }
 
-      Mesh::ElementMarkersConversion* get_element_markers_conversion() { return &this->element_markers_conversion; };
-      Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { return &this->boundary_markers_conversion; };
+      Mesh::ElementMarkersConversion* get_element_markers_conversion() 
+      { 
+        return &this->element_markers_conversion; 
+      }
+      Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() 
+      { 
+        return &this->boundary_markers_conversion; 
+      }
 
       /// Append volumetric error estimator form.
       ///
@@ -243,7 +248,7 @@ namespace Hermes
       ///
 
       double calc_err_est(Solution<Scalar>*sln,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+                          unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         if (this->num != 1) EXIT("Wrong number of solutions.");
         Hermes::vector<Solution<Scalar>*> slns;
@@ -253,8 +258,8 @@ namespace Hermes
 
 
       double calc_err_est(Hermes::vector<Solution<Scalar>*> slns,
-        Hermes::vector<double>* component_errors = NULL,
-        unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
+                          Hermes::vector<double>* component_errors = NULL,
+                          unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         return calc_err_internal(slns, component_errors, error_flags);
       }
@@ -292,27 +297,28 @@ namespace Hermes
         ErrorEstimatorFormKelly(int i) : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
-          Func<Scalar> *u, Geom<double> *e,
-          ExtData<Scalar> *ext) const
+                             Func<Scalar> *u, Geom<double> *e,
+                             ExtData<Scalar> *ext) const
         {
           return original_kelly_interface_estimator<double, Scalar>(n, wt, u_ext, u, e, ext);
         }
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-          Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
-          ExtData<Hermes::Ord> *ext) const
+                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
+                                ExtData<Hermes::Ord> *ext) const
         {
           return original_kelly_interface_estimator<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, e, ext);
         }
 
       private:
         template<typename TestFunctionDomain, typename SolFunctionDomain>
-        static SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+        static SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, 
+                                                                    Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                                                                    Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           SolFunctionDomain result = 0.;
           for (int i = 0; i < n; i++)
             result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-            e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+                      e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
           return result;
         }
       };
@@ -322,15 +328,17 @@ namespace Hermes
       /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
       ///
       BasicKellyAdapt(Hermes::vector<Space<Scalar>*> spaces_,
-        Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-        double const_by_laplacian = 1.0) : KellyTypeAdapt<Scalar>(spaces_, norms_)
+                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
+                      double const_by_laplacian = 1.0) 
+        : KellyTypeAdapt<Scalar>(spaces_, norms_)
       {
         set_scaling_consts(const_by_laplacian);   
         for (int i = 0; i < this->num; i++)
           this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
       }
 
-      BasicKellyAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0) : KellyTypeAdapt<Scalar>(space_, norm_) 
+      BasicKellyAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0)
+        : KellyTypeAdapt<Scalar>(space_, norm_) 
       {
         set_scaling_consts(const_by_laplacian);
         this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0));
