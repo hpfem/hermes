@@ -19,13 +19,6 @@ if(WITH_UMFPACK)
 endif(WITH_UMFPACK)
 
 if(WITH_TRILINOS)
-  if(HAVE_AMESOS)
-    add_test(test-amesos-solver-cplx-1 ${BIN} amesos)
-    add_test(test-amesos-solver-cplx-b-1 ${BIN} amesos-block)
-  endif(HAVE_AMESOS)
-endif(WITH_TRILINOS)
-
-if(WITH_TRILINOS)
   if(HAVE_AZTECOO)
     add_test(test-aztecoo-solver-cplx-1 ${BIN} aztecoo)
     add_test(test-aztecoo-solver-cplx-b-1 ${BIN} aztecoo-block)
