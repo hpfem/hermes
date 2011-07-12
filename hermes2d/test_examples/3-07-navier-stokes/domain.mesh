@@ -7,30 +7,39 @@ R = 1             # circle radius
 A = 1/(2*sqrt(2)) # helper length
 EPS = 0.10        # vertical shift of the circle
 
+S1minusA = 2.1464466094
+S1plusA = 2.8535533906
+S2minusA = 2.1464466094
+S2plusA = 2.8535533906
+S2minusAplusEPS = 2.2464466094
+S2plusAplusEPS = 2.9535533906
+Ldiv3 = 5
+TwiceLdiv3 = 10
+
 vertices = [
   [ 0, 0 ],                 # 0
-  [ S1 - A, 0 ],            # 1
-  [ S1 + A, 0 ],            # 2
-  [ L/3, 0 ],               # 3
-  [ 2*L/3, 0 ],             # 4
+  [ S1minusA, 0 ],            # 1
+  [ S1plusA, 0 ],            # 2
+  [ Ldiv3, 0 ],               # 3
+  [ TwiceLdiv3, 0 ],             # 4
   [ L, 0 ],                 # 5
-  [ 0, S2 - A ],            # 6
-  [ S1 - A, S2 - A + EPS],  # 7
-  [ S1 + A, S2 - A + EPS ], # 8
-  [ L/3, S2 - A ],          # 9
-  [ 2*L/3, S2 - A ],        # 10
-  [ L, S2 - A ],            # 11
-  [ 0, S2 + A ],            # 12
-  [ S1 - A, S2 + A + EPS ], # 13
-  [ S1 + A, S2 + A + EPS ], # 14
-  [ L/3, S2 + A],           # 15
-  [ 2*L/3, S2 + A ],        # 16
-  [ L, S2 + A ],            # 17
+  [ 0, S2minusA ],            # 6
+  [ S1minusA, S2minusAplusEPS],  # 7
+  [ S1plusA, S2minusAplusEPS ], # 8
+  [ Ldiv3, S2minusA ],          # 9
+  [ TwiceLdiv3, S2minusA ],        # 10
+  [ L, S2minusA ],            # 11
+  [ 0, S2plusA ],            # 12
+  [ S1minusA, S2plusAplusEPS ], # 13
+  [ S1plusA, S2plusAplusEPS ], # 14
+  [ Ldiv3, S2plusA],           # 15
+  [ TwiceLdiv3, S2plusA ],        # 16
+  [ L, S2plusA ],            # 17
   [ 0, H ],                 # 18
-  [ S1 - A, H ],            # 19
-  [ S1 + A, H ],            # 20
-  [ L/3, H ],               # 21
-  [ 2*L/3, H ],             # 22
+  [ S1minusA, H ],            # 19
+  [ S1plusA, H ],            # 20
+  [ Ldiv3, H ],               # 21
+  [ TwiceLdiv3, H ],             # 22
   [ L, H ]                  # 23
 ]
 

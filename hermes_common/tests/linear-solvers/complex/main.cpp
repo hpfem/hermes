@@ -231,7 +231,7 @@ void solve(LinearSolver<std::complex<double> > &solver, int n) {
 int main(int argc, char *argv[]) {
   int ret = TEST_SUCCESS;
 
-  if (argc < 3) error("Not enough parameters.");
+  if (argc < 2) error("Not enough parameters.");
 
   int n;
   int nnz;
@@ -240,13 +240,15 @@ int main(int argc, char *argv[]) {
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, std::complex<double> > ar_rhs;
 
-  if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
+  if (argc == 3 && strcasecmp(argv[2],"complex-matrix-to-real") == 0)
     cplx_2_real = true;
   else
     cplx_2_real = false;
 
-  if (read_matrix_and_rhs(argv[2], n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
+  if (read_matrix_and_rhs((char*)"in/linsys-cplx-4", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
     error("Failed to read the matrix and rhs.");
+
+  std::complex<double>* sln;
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC
@@ -256,6 +258,7 @@ int main(int argc, char *argv[]) {
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "petsc-block") == 0) {
@@ -266,6 +269,7 @@ int main(int argc, char *argv[]) {
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack") == 0) {
@@ -276,6 +280,7 @@ int main(int argc, char *argv[]) {
 
     UMFPackLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack-block") == 0) {
@@ -286,6 +291,7 @@ int main(int argc, char *argv[]) {
 
     UMFPackLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
@@ -296,6 +302,7 @@ int main(int argc, char *argv[]) {
 
     AztecOOSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
@@ -306,6 +313,7 @@ int main(int argc, char *argv[]) {
 
     AztecOOSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
@@ -317,6 +325,7 @@ int main(int argc, char *argv[]) {
     if (AmesosSolver<std::complex<double> >::is_available("Klu")) {
       AmesosSolver<std::complex<double> > solver("Klu", &mat, &rhs);
       solve(solver, n);
+sln = solver.get_solution();
     }
 #endif
   }
@@ -329,6 +338,7 @@ int main(int argc, char *argv[]) {
     if (AmesosSolver<std::complex<double> >::is_available("Klu")) {
       AmesosSolver<std::complex<double> > solver("Klu", &mat, &rhs);
       solve(solver, n);
+sln = solver.get_solution();
     } 
 #endif
   }
@@ -340,6 +350,7 @@ int main(int argc, char *argv[]) {
 
     MumpsSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }
   else if (strcasecmp(argv[1], "mumps-block") == 0) {
@@ -350,10 +361,22 @@ int main(int argc, char *argv[]) {
 
     MumpsSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
+sln = solver.get_solution();
 #endif
   }  
   else
     ret = TEST_FAILURE;
 
-  return ret;
+std::cout << sln[0] << sln[1] << sln[2];
+
+  if (std::abs(sln[0] - std::complex<double>(0.800000, -0.600000)) > 1E-6 || std::abs(sln[1] - std::complex<double>(0.470588, -0.882353)) > 1E-6 || std::abs(sln[2] - std::complex<double>(0.486486, -0.918919)) > 1E-6)
+    ret = TEST_FAILURE;
+  else
+    ret = TEST_SUCCESS;
+
+  // Test
+  if (ret == TEST_FAILURE)
+    printf("Failure!\n");
+  else
+    printf("Success!\n");      
 }

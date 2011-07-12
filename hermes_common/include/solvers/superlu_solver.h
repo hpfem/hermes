@@ -24,6 +24,7 @@
 
 #include "../config.h"
 #ifdef WITH_SUPERLU  
+typedef int int_t;
 #include "linear_solver.h"
 #include "../matrix.h"
 
@@ -59,7 +60,7 @@ namespace Hermes {
 #define SLU_INIT_STAT(stat_ptr)   StatInit(stat_ptr)
 #define SLU_PRINT_STAT(stat_ptr)  StatPrint(stat_ptr)
 
-#define SLU_DTYPE                 SLU_Z
+#define SLU_DTYPE                 SLU_D
 
 #define SLU_PRINT_CSC_MATRIX    zPrint_CompCol_Matrix
 #define Scalar_MALLOC       doublecomplexMalloc

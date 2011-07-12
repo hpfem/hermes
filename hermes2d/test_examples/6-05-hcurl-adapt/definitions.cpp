@@ -65,10 +65,10 @@ static void exact_sol_der(double x, double y, std::complex<double>& e1dx, std::c
   e0dy = (t11*y+2.0/3.0*t15*y-2.0/3.0*t22*y)*t6*y*t29-t32*t2*t29+t36-t47-4.0/9.0*t48*t41*t53+4.0/3.0*t57*t59*t53*y;
 }
 
-class CustomExactSolution : public ExactSolutionVector<std::complex<double> >
+class CustomExactSolution : public Hermes::Hermes2D::ExactSolutionVector<std::complex<double> >
 {
 public:
-  CustomExactSolution(Mesh* mesh) : ExactSolutionVector(mesh) {};
+  CustomExactSolution(Mesh* mesh) : Hermes::Hermes2D::ExactSolutionVector<std::complex<double> >(mesh) {};
   ~CustomExactSolution() {};
 
   virtual Scalar2<std::complex<double> > value(double x, double y) const 
@@ -97,10 +97,10 @@ public:
 
 /* Weak forms */
 
-class CustomWeakForm : public WeakForm<std::complex<double> >
+class CustomWeakForm : public Hermes::Hermes2D::WeakForm<std::complex<double> >
 {
 public:
-  CustomWeakForm(double mu_r, double kappa) : WeakForm(1)
+  CustomWeakForm(double mu_r, double kappa) : Hermes::Hermes2D::WeakForm<std::complex<double> >(1)
   {
     std::complex<double> ii = std::complex<double>(0.0, 1.0);
 

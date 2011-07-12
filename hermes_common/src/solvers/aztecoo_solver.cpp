@@ -52,12 +52,14 @@ namespace Hermes
     {
       _F_;
       int az_solver;
-      if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
-      else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
-      else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
-      else if (strcasecmp(name, "tfqmr") == 0) az_solver = AZ_tfqmr;
-      else if (strcasecmp(name, "bicgstab") == 0) az_solver = AZ_bicgstab;
-      else az_solver = AZ_gmres;
+      if (name){
+        if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
+        else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
+        else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
+        else if (strcasecmp(name, "tfqmr") == 0) az_solver = AZ_tfqmr;
+        else if (strcasecmp(name, "bicgstab") == 0) az_solver = AZ_bicgstab;
+        else az_solver = AZ_gmres;
+      }else az_solver = AZ_gmres;
 
       aztec.SetAztecOption(AZ_solver, az_solver);
     }
@@ -67,11 +69,13 @@ namespace Hermes
     {
       _F_;
       int az_precond;
-      if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
-      else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
-      else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
-      else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
-      else az_precond = AZ_none;
+      if (name){
+        if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
+        else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
+        else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
+        else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
+        else az_precond = AZ_none;
+      }else az_precond = AZ_none; //asi by to melo byt nastaveno
 
       this->precond_yes = (az_precond != AZ_none);
       aztec.SetAztecOption(AZ_precond, az_precond);
