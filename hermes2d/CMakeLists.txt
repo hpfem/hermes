@@ -276,7 +276,6 @@ project(hermes2d)
 	file(GLOB INC_WEAKFORM_LIBRARY "include/weakform_library/*.h")
 
 	install(FILES ${INC}           DESTINATION ${TARGET_ROOT}/include/hermes2d)
-	install(FILES ${INC_FORM}      DESTINATION ${TARGET_ROOT}/include/hermes2d/form)
 	install(FILES ${INC_SPACE}     DESTINATION ${TARGET_ROOT}/include/hermes2d/space)
 	install(FILES ${INC_MESH}      DESTINATION ${TARGET_ROOT}/include/hermes2d/mesh)
 	install(FILES ${INC_BC}        DESTINATION ${TARGET_ROOT}/include/hermes2d/boundary_conditions)
