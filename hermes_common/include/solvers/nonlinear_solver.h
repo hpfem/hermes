@@ -65,8 +65,10 @@ namespace Hermes
       DiscreteProblemInterface<Scalar>* dp; ///< FE problem being solved (not NULL in case of using
       ///< NonlinearProblem(DiscreteProblemInterface *) ctor.
 
+      /// The solution vector.
       Scalar* sln_vector;
 
+      /// For use of error measurement.
       int error;
 
       double time;  ///< time spent on solving (in secs)

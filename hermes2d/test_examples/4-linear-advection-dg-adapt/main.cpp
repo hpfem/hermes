@@ -146,7 +146,7 @@ int main(int argc, char* args[])
 
     // Solve the linear system. If successful, obtain the solution.
     info("Solving.");
-    if(solver->solve()) Solution<double>::vector_to_solution(solver->get_solution(), ref_space, &ref_sln);
+    if(solver->solve()) Solution<double>::vector_to_solution(solver->get_sln_vector(), ref_space, &ref_sln);
     else error ("Matrix solver failed.\n");
     
     // Project the fine mesh solution onto the coarse mesh.

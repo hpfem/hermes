@@ -16,13 +16,12 @@
 \brief NOX (nonliner) solver interface.
 */
 #include "nox_solver.h"
-
 #if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
 namespace Hermes 
 {
   namespace Solvers 
-{
+  {
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
@@ -92,11 +91,8 @@ namespace Hermes
     template<typename Scalar>
     NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem)
     {
-      this->fep = problem;
-      int ndof = this->dp->get_num_dofs();
-      // allocate initial solution
-      init_sln.alloc(ndof);
-      if(!this->dp->is_matrix_free()) prealloc_jacobian();
+      if(!this->dp->is_matrix_free()) 
+        prealloc_jacobian();
 
       this->precond = Teuchos::null;
 
@@ -143,13 +139,10 @@ namespace Hermes
       double wrms_atol,
       unsigned flag_update,
       unsigned flag_wrms
-      ) 
+      ) : NonlinearSolver<Scalar>(problem)
     {
-      this->fep = problem;
-      int ndof = this->dp->get_num_dofs();
-      // allocate initial solution
-      init_sln.alloc(ndof);
-      if(!this->dp->is_matrix_free()) prealloc_jacobian();
+      if(!this->dp->is_matrix_free()) 
+        prealloc_jacobian();
 
       this->precond = Teuchos::null;
 
@@ -201,25 +194,6 @@ namespace Hermes
       precond_type = pc;
     }
 
-    template<typename Scalar>
-    bool NoxSolver<Scalar>::set_init_sln(double *ic)
-    {
-      int size = this->dp->get_num_dofs();
-      int *idx = new int[size];
-      for (int i = 0; i < size; i++) init_sln.set(i, ic[i]);
-      delete [] idx;
-      return true;
-    }
-
-    template<typename Scalar>
-    bool NoxSolver<Scalar>::set_init_sln(EpetraVector<Scalar> *ic)
-    {
-      double *vals;
-      ic->vec->ExtractView(&vals);
-      set_init_sln(vals);
-      return true;
-    }
-
     template<>
     void NoxSolver<double>::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver)
     {
@@ -246,8 +220,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxSolver<Scalar>::solve()
+    bool NoxSolver<Scalar>::solve(Scalar* coeff_vec)
     {
+      // Put the initial coeff_vec into the inner structure for the initial guess.
+      /// \todo Put this into a separate method.
+      Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
+      temp_init_sln.alloc(dp->get_num_dofs());
+      for (int i = 0; i < dp->get_num_dofs(); i++)
+        temp_init_sln.set(i, coeff_vec[i]);
+      NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
+
       // Create the top level parameter list
       Teuchos::RCP<Teuchos::ParameterList> nl_pars_ptr = Teuchos::rcp(new Teuchos::ParameterList);
       Teuchos::ParameterList &nl_pars = *nl_pars_ptr.get();
@@ -311,7 +293,6 @@ namespace Hermes
         Teuchos::RCP<Epetra_RowMatrix> jac_mat;
         Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
 
-        NOX::Epetra::Vector init_sln(*this->get_init_sln()->vec);
 
         if(this->dp->is_matrix_free()) 
         {
@@ -419,6 +400,8 @@ namespace Hermes
         }
         return success;
     }
+    template class HERMES_API NoxSolver<double>;
+    template class HERMES_API NoxSolver<std::complex<double> >;
   }
 }
 #endif

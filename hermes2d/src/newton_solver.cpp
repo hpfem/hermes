@@ -167,7 +167,7 @@ namespace Hermes
 
         // Add \deltaY^{n+1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += linear_solver->get_solution()[i];
+          coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
@@ -298,7 +298,7 @@ namespace Hermes
 
         // Add \deltaY^{n+1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += linear_solver->get_solution()[i];
+          coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)

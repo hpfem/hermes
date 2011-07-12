@@ -15,8 +15,8 @@
 /*! \file precond_ml.cpp
 \brief ML (Trilinos package) preconditioners interface.
 */
-#ifdef HAVE_ML
 #include "config.h"
+#ifdef HAVE_ML
 #include "precond_ml.h"
 
 namespace Hermes 
@@ -121,6 +121,8 @@ namespace Hermes
     {
       return mat->mat->OperatorRangeMap();
     }
+    template class HERMES_API MlPrecond<double>;
+    template class HERMES_API MlPrecond<std::complex<double> >;
   }
 }
 #endif

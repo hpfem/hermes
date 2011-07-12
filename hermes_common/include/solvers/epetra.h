@@ -37,6 +37,9 @@ namespace Hermes
     template <typename Scalar> class AmesosSolver;
     template <typename Scalar> class AztecOOSolver;
     template <typename Scalar> class NoxSolver;
+  }
+  namespace Preconditioners
+  {
     template <typename Scalar> class IfpackPrecond;
     template <typename Scalar> class MlPrecond;
   }
@@ -86,8 +89,8 @@ namespace Hermes {
       friend class Hermes::Solvers::AmesosSolver<Scalar>;
       friend class Hermes::Solvers::AztecOOSolver<Scalar>;
       friend class Hermes::Solvers::NoxSolver<Scalar>;
-      friend class Hermes::Solvers::IfpackPrecond<Scalar>;
-      friend class Hermes::Solvers::MlPrecond<Scalar>;
+      friend class Hermes::Preconditioners::IfpackPrecond<Scalar>;
+      friend class Hermes::Preconditioners::MlPrecond<Scalar>;
     };
 
     template <typename Scalar>

@@ -232,7 +232,7 @@ namespace Hermes
 
           // Add \deltaK^{n+1} to K^n.
           for (unsigned int i = 0; i < num_stages*ndof; i++)
-            K_vector[i] += newton_damping_coeff * solver->get_solution()[i];
+            K_vector[i] += newton_damping_coeff * solver->get_sln_vector()[i];
 
           // Increase iteration counter.
           it++;

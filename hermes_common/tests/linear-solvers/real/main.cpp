@@ -301,7 +301,7 @@ double* sln;
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "petsc-block") == 0) {
@@ -312,7 +312,7 @@ double* sln;
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack") == 0) {
@@ -323,7 +323,7 @@ double* sln;
 
     UMFPackLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack-block") == 0) {
@@ -334,7 +334,7 @@ double* sln;
 
     UMFPackLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
@@ -345,7 +345,7 @@ double* sln;
 
     AztecOOSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
@@ -356,7 +356,7 @@ double* sln;
 
     AztecOOSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
@@ -368,7 +368,7 @@ double* sln;
     if (AmesosSolver<double>::is_available("Klu")) {
       AmesosSolver<double> solver("Klu", &mat, &rhs);
       solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
     }
 #endif
   }
@@ -381,7 +381,7 @@ double* sln;
     if (AmesosSolver<double>::is_available("Klu")) {
       AmesosSolver<double> solver("Klu", &mat, &rhs);
       solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
     } 
 #endif
   }
@@ -393,7 +393,7 @@ double* sln;
 
     MumpsSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "mumps-block") == 0) {
@@ -404,7 +404,7 @@ double* sln;
 
     MumpsSolver<double> solver(&mat, &rhs);
     solve(solver, n);
-	sln = solver.get_solution();
+	sln = solver.get_sln_vector();
 #endif
   }  
   else

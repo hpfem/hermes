@@ -104,7 +104,7 @@ namespace Hermes
 
       virtual bool solve() = 0;
 
-      Scalar *get_solution() { return sln; }
+      Scalar *get_sln_vector() { return sln; }
 
       int get_error() { return error; }
       double get_time() { return time; }

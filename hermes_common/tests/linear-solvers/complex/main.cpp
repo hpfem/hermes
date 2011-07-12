@@ -217,7 +217,7 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
 // Test code.
 void solve(LinearSolver<std::complex<double> > &solver, int n) {
   if (solver.solve()) {
-    std::complex<double> *sln = solver.get_solution();
+    std::complex<double> *sln = solver.get_sln_vector();
     for (int i = 0; i < n; i++)
       if(sln[i].imag() < 0.0)
         std::cout << std::endl << sln[i].real() << sln[i].imag();
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "petsc-block") == 0) {
@@ -269,7 +269,7 @@ sln = solver.get_solution();
 
     PetscLinearSolver solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack") == 0) {
@@ -280,7 +280,7 @@ sln = solver.get_solution();
 
     UMFPackLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "umfpack-block") == 0) {
@@ -291,7 +291,7 @@ sln = solver.get_solution();
 
     UMFPackLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo") == 0) {
@@ -302,7 +302,7 @@ sln = solver.get_solution();
 
     AztecOOSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "aztecoo-block") == 0) {
@@ -313,7 +313,7 @@ sln = solver.get_solution();
 
     AztecOOSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "amesos") == 0) {
@@ -325,7 +325,7 @@ sln = solver.get_solution();
     if (AmesosSolver<std::complex<double> >::is_available("Klu")) {
       AmesosSolver<std::complex<double> > solver("Klu", &mat, &rhs);
       solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
     }
 #endif
   }
@@ -338,7 +338,7 @@ sln = solver.get_solution();
     if (AmesosSolver<std::complex<double> >::is_available("Klu")) {
       AmesosSolver<std::complex<double> > solver("Klu", &mat, &rhs);
       solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
     } 
 #endif
   }
@@ -350,7 +350,7 @@ sln = solver.get_solution();
 
     MumpsSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }
   else if (strcasecmp(argv[1], "mumps-block") == 0) {
@@ -361,7 +361,7 @@ sln = solver.get_solution();
 
     MumpsSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
-sln = solver.get_solution();
+sln = solver.get_sln_vector();
 #endif
   }  
   else
