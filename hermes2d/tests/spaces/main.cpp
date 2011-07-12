@@ -20,7 +20,7 @@ public:
 class BCNonConst : public DefaultEssentialBCNonConst<double>
 {
 public:
-  BCNonConst(std::string marker, ExactSolutionScalar<double>* exact_solution) : DefaultEssentialBCNonConst(marker, exact_solution) {};
+  BCNonConst(std::string marker, ExactSolutionScalar<double>* exact_solution) : DefaultEssentialBCNonConst<double>(marker, exact_solution) {};
 
   double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
   { 
