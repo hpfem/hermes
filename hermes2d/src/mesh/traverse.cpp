@@ -251,7 +251,6 @@ namespace Hermes
               // Retrieve the Element with this id on the i-th mesh.
               s->e[i] = meshes[i]->get_element(id);
               if (!s->e[i]->used)
-
               {
                 s->e[i] = NULL;
                 continue;
@@ -320,7 +319,6 @@ namespace Hermes
         for (i = 0; i < num; i++)
           if (s->e[i] != NULL)
             if (!s->e[i]->active)
-
             {
               leaf = false;
               break;

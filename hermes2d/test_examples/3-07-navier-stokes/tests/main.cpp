@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  mesh.refine_all_elements();
+  //mesh.refine_all_elements();
   mesh.refine_towards_boundary(BDY_OBSTACLE, 4, false);
   mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
   mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
@@ -113,6 +113,9 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
+  // Initialize the Newton solver.
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
   double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
@@ -140,7 +143,6 @@ int main(int argc, char* argv[])
     info("Solving nonlinear problem:");
     bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
-    Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
     newton.set_verbose_output(verbose);
     if (!newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER)) 
       error("Newton's iteration failed.");
@@ -171,23 +173,23 @@ int main(int argc, char* argv[])
     printf("Coordinate (   0, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(0.0, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(5, 2.5) - 0.130866) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(5, 2.5) - 0.134291) > eps) {
     printf("Coordinate (   5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(7.5, 2.5) - 0.134637) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(7.5, 2.5) - 0.135088) > eps) {
     printf("Coordinate ( 7.5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(7.5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(10, 2.5) - 0.134801) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(10, 2.5) - 0.134944) > eps) {
     printf("Coordinate (  10, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(10, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(12.5, 2.5) - 0.134826) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(12.5, 2.5) - 0.134888) > eps) {
     printf("Coordinate (12.5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(12.5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(15, 2.5) - 0.134840) > eps) {
+  if (fabs(xvel_prev_time.get_pt_value(15, 2.5) - 0.134864) > eps) {
     printf("Coordinate (  15, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(15, 2.5));
     success = 0;
   }
@@ -196,23 +198,23 @@ int main(int argc, char* argv[])
     printf("Coordinate (   0, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(0.0, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(5, 2.5) - 0.000584) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(5, 2.5) - 0.000493) > eps) {
     printf("Coordinate (   5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(7.5, 2.5) - 0.000101) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(7.5, 2.5) - 0.000070) > eps) {
     printf("Coordinate ( 7.5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(7.5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(10, 2.5) - 0.000029) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(10, 2.5) - 0.000008) > eps) {
     printf("Coordinate (  10, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(10, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(12.5, 2.5) - 0.000013) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(12.5, 2.5) + 0.000003) > eps) {
     printf("Coordinate (12.5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(12.5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(15, 2.5) - 0.000009) > eps) {
+  if (fabs(yvel_prev_time.get_pt_value(15, 2.5) + 0.000006) > eps) {
     printf("Coordinate (  15, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(15, 2.5));
     success = 0;
   }

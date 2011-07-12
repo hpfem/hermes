@@ -143,6 +143,9 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
+  // Initialize the Newton solver.
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+
   // Initialize views.
   Views::VectorView<double> vview("velocity [m/s]", new Views::WinGeom(0, 0, 750, 240));
   Views::ScalarView<double> pview("pressure [Pa]", new Views::WinGeom(0, 290, 750, 240));
@@ -180,7 +183,6 @@ int main(int argc, char* argv[])
     info("Solving nonlinear problem:");
     bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
-    Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
     newton.set_verbose_output(verbose);
     if (!newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER)) 
       error("Newton's iteration failed.");

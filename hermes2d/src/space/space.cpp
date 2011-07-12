@@ -194,7 +194,8 @@ namespace Hermes
     void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
       int n = spaces.size();
       for (int i = 0; i < n; i++) {
-        spaces[i]->get_essential_bcs()->set_current_time(time);
+        if(spaces[i]->get_essential_bcs() != NULL)
+          spaces[i]->get_essential_bcs()->set_current_time(time);
         spaces[i]->update_essential_bc_values();
       }
     }

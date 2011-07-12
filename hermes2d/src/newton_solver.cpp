@@ -29,11 +29,22 @@ namespace Hermes
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL)
     {
+      init_linear_solver();
     }
 
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type), kept_jacobian(NULL)
     {
+      init_linear_solver();
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::init_linear_solver()
+    {
+      // Set up the solver, jacobian, and residual according to the solver selection.
+      jacobian = create_matrix<Scalar>(this->matrix_solver_type);
+      residual = create_vector<Scalar>(this->matrix_solver_type);
+      linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
     }
 
     template<typename Scalar>
@@ -41,6 +52,9 @@ namespace Hermes
     {
       if(kept_jacobian != NULL)
         delete kept_jacobian;
+      delete jacobian;
+      delete residual;
+      delete linear_solver;
     }
 
     template<typename Scalar>
@@ -64,19 +78,6 @@ namespace Hermes
         delete [] this->sln_vector;
         this->sln_vector = NULL;
       }
-
-      // Set up the solver, jacobian, and residual according to the solver selection.
-      SparseMatrix<Scalar>* jacobian = create_matrix<Scalar>(this->matrix_solver_type);
-      Vector<Scalar>* residual = create_vector<Scalar>(this->matrix_solver_type);
-      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
-
-      // Set iterative method and preconditioner in case of iterative solver AztecOO.
-#ifdef HAVE_AZTECOO
-      if (this->matrix_solver_type == SOLVER_AZTECOO) {
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(this->preconditioner);
-      }
-#endif
 
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -143,11 +144,6 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          // Clean up.
-          delete jacobian;
-          delete residual;
-          delete linear_solver;
-
           return true;
         }
 
@@ -177,11 +173,8 @@ namespace Hermes
           break;
         }
       }
-      // Clean up and return false.
+      // Return false.
       // All 'bad' situations end here.
-      delete jacobian;
-      delete residual;
-      delete linear_solver;
       return false;
     }
 
@@ -194,18 +187,6 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
-      // Set up the solver, and residual according to the solver selection.
-      Vector<Scalar>* residual = create_vector<Scalar>(this->matrix_solver_type);
-      LinearSolver<Scalar>* linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
-
-      // Set iterative method and preconditioner in case of iterative solver AztecOO.
-#ifdef HAVE_AZTECOO
-      if (this->matrix_solver_type == SOLVER_AZTECOO) {
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(this->iterative_method);
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_precond(this->preconditioner);
-      }
-#endif
-
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
 
@@ -272,10 +253,6 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          // Clean up.
-          delete residual;
-          delete linear_solver;
-
           return true;
         }
 
@@ -309,11 +286,45 @@ namespace Hermes
         }
       }
 
-      // Clean up and return false.
+      // Return false.
       // All 'bad' situations end here.
-      delete residual;
-      delete linear_solver;
       return false;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
+    {
+      NonlinearSolver<Scalar>::set_iterative_method(iterative_method_name);
+      // Set iterative method and preconditioner in case of iterative solver AztecOO.
+#ifdef HAVE_AZTECOO
+      if(this->matrix_solver_type != SOLVER_AZTECOO)
+      {
+        warning("Trying to set iterative method for a different solver than AztecOO.");
+        return;
+      }
+      if (this->matrix_solver_type == SOLVER_AZTECOO)
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
+#else
+      warning("Trying to set iterative method without AztecOO present.");
+#endif
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_preconditioner(const char* preconditioner_name)
+    {
+      NonlinearSolver<Scalar>::set_preconditioner(preconditioner_name);
+      // Set iterative method and preconditioner in case of iterative solver AztecOO.
+#ifdef HAVE_AZTECOO
+      if(this->matrix_solver_type != SOLVER_AZTECOO)
+      {
+        warning("Trying to set iterative method for a different solver than AztecOO.");
+        return;
+      }
+      if (this->matrix_solver_type == SOLVER_AZTECOO)
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
+#else
+      warning("Trying to set iterative method without AztecOO present.");
+#endif
     }
 
     template class HERMES_API NewtonSolver<double>;

@@ -36,6 +36,8 @@ namespace Hermes
     public:
       NewtonSolver(DiscreteProblem<Scalar>* dp);
       NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
+      void init_linear_solver();
+
       ~NewtonSolver();
 
       /// Solve with default tolerances.
@@ -66,7 +68,22 @@ namespace Hermes
       /// Sets the maximum allowed norm of the residual during the calculation.
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
 
+      /// Call NonlinearSolver::set_iterative_method() and set the method to the linear solver (if applicable).
+      virtual void set_iterative_method(const char* iterative_method_name);
+
+      /// Call NonlinearSolver::set_preconditioner() and set the method to the linear solver (if applicable).
+      virtual void set_preconditioner(const char* preconditioner_name);
+
     protected:
+      /// Jacobian.
+      SparseMatrix<Scalar>* jacobian;
+
+      /// Residual.
+      Vector<Scalar>* residual;
+
+      /// Linear solver.
+      LinearSolver<Scalar>* linear_solver;
+
       /// Used by method solve_keep_jacobian().
       Hermes::Algebra::SparseMatrix<Scalar>* kept_jacobian;
 

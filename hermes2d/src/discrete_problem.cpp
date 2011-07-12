@@ -231,7 +231,14 @@ namespace Hermes
           mat->zero();
         }
         if (rhs != NULL)
-          rhs->zero();
+        {
+          // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
+          // we end up with everything up_to_date, but unallocated Vector.
+          if(rhs->length() == 0)
+            rhs->alloc(ndof);
+          else
+            rhs->zero();
+        }
         return;
       }
 
@@ -294,8 +301,8 @@ namespace Hermes
         while ((e = trav.get_next_state(NULL, NULL)) != NULL)
         {
           // Obtain assembly lists for the element at all spaces.
+          /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
-            // \todo do not get the assembly list again if the element was not changed.
             if (e[i] != NULL) 
               spaces[i]->get_element_assembly_list(e[i], &(al[i]));
 

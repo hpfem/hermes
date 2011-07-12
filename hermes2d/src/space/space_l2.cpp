@@ -120,6 +120,7 @@ namespace Hermes
         " any time the mesh changes.");
 
       // add bubble functions to the assembly list
+      al->cnt = 0;
       this->shapeset->set_mode(e->get_mode());
       get_bubble_assembly_list(e, al);
     }

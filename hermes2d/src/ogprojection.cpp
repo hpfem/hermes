@@ -30,9 +30,9 @@ namespace Hermes
       unsigned int n = spaces.size();
 
       // sanity checks
-      if (n <= 0 || n > 10) error("Wrong number of projected functions in project_internal().");
-      for (unsigned int i = 0; i < n; i++) if(spaces[i] == NULL) error("this->spaces[%d] == NULL in project_internal().", i);
-      if (spaces.size() != n) error("Number of spaces must match number of projected functions in project_internal().");
+      for (unsigned int i = 0; i < n; i++) 
+        if(spaces[i] == NULL) 
+          error("this->spaces[%d] == NULL in project_internal().", i);
 
       // this is needed since spaces may have their DOFs enumerated only locally.
       int ndof = Space<Scalar>::assign_dofs(spaces);
@@ -67,8 +67,12 @@ namespace Hermes
 
       // define temporary projection weak form
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
-      int found[100];
-      for (int i = 0; i < 100; i++) found[i] = 0;
+      
+      // For error detection.
+      bool* found = new bool[n];
+      for (int i = 0; i < n; i++) 
+        found[i] = false;
+
       for (int i = 0; i < n; i++)
       {
         ProjNormType norm = HERMES_UNSET_NORM;
@@ -88,7 +92,7 @@ namespace Hermes
 
         // FIXME - memory leak - create Projection class and encapsulate this function project_global(...)
         // maybe in more general form
-        found[i] = 1;
+        found[i] = true;
         // Jacobian.
         proj_wf->add_matrix_form(new ProjectionMatrixFormVol(i, i, norm));
         // Residual.
@@ -96,7 +100,7 @@ namespace Hermes
       }
       for (int i=0; i < n; i++)
       {
-        if (found[i] == 0)
+        if (!found[i])
         {
           warn("Index of component: %d\n", i);
           error("Wrong projection norm in project_global().");
