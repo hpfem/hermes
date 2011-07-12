@@ -2,7 +2,7 @@
   
 CustomWeakForm::CustomWeakForm(std::string mat_air,  double mu_air,
                                std::string mat_iron, double mu_iron, double gamma_iron,
-                               std::string mat_wire, double mu_wire, std::complex<double> j_ext, double omega) : WeakForm(1) 
+                               std::string mat_wire, double mu_wire, std::complex<double> j_ext, double omega) : Hermes::Hermes2D::WeakForm<std::complex<double> >(1) 
 {
   std::complex<double> ii =  std::complex<double>(0.0, 1.0);
 

@@ -5,7 +5,7 @@
 CustomWeakFormPoissonNewton::CustomWeakFormPoissonNewton(std::string mat_al, Hermes::Hermes2D::HermesFunction<double>* lambda_al,
   std::string mat_cu, Hermes::Hermes2D::HermesFunction<double>* lambda_cu,
   Hermes::Hermes2D::HermesFunction<double>* vol_src_term, std::string bdy_heat_flux,
-  double alpha, double t_exterior) : WeakForm<double>(1)
+  double alpha, double t_exterior) : Hermes::Hermes2D::WeakForm<double>(1)
 {
   // Jacobian forms - volumetric.
   add_matrix_form(new Hermes::Hermes2D::WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, mat_al, lambda_al));
@@ -34,7 +34,7 @@ CustomDirichletCondition::CustomDirichletCondition(Hermes::vector<std::string> m
 
 Hermes::Hermes2D::EssentialBoundaryCondition<double>::EssentialBCValueType CustomDirichletCondition::get_value_type() const
 { 
-  return EssentialBoundaryCondition<double>::BC_FUNCTION; 
+  return Hermes::Hermes2D::EssentialBoundaryCondition<double>::BC_FUNCTION; 
 }
 
 double CustomDirichletCondition::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
