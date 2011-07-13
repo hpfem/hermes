@@ -225,8 +225,8 @@ namespace Hermes
       // Put the initial coeff_vec into the inner structure for the initial guess.
       /// \todo Put this into a separate method.
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
-      temp_init_sln.alloc(dp->get_num_dofs());
-      for (int i = 0; i < dp->get_num_dofs(); i++)
+      temp_init_sln.alloc(this->dp->get_num_dofs());
+      for (int i = 0; i < this->dp->get_num_dofs(); i++)
         temp_init_sln.set(i, coeff_vec[i]);
       NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
 
