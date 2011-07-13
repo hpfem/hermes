@@ -525,7 +525,7 @@ namespace Hermes
         oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
       // Polynomial order of additional external functions.
-      ExtData<Hermes::Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext);
+      ExtData<Hermes::Ord>* fake_ext = this->dp.init_ext_fns_ord(err_est_form->ext);
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
@@ -560,7 +560,7 @@ namespace Hermes
         for (int i = 0; i < this->num; i++)
           ui[i] = init_fn(this->sln[i], order);
 
-        ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, order);
+        ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, rm, order);
 
         Scalar res = volumetric_scaling_const *
           err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
@@ -586,7 +586,7 @@ namespace Hermes
         oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
       // Polynomial order of additional external functions.
-      ExtData<Hermes::Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext, surf_pos->surf_num);
+      ExtData<Hermes::Ord>* fake_ext = this->dp.init_ext_fns_ord(err_est_form->ext, surf_pos->surf_num);
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
@@ -598,43 +598,57 @@ namespace Hermes
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
-        if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-        delete [] oi;
-        delete fake_e;
-        delete fake_ext;
+        if (oi[i] != NULL) 
+        { 
+          oi[i]->free_ord(); 
+          delete oi[i]; 
+        }
+      
+      delete [] oi;
+      delete fake_e;
+      delete fake_ext;
 
-        // Evaluate the form.
-        Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
-        int eo = quad->get_edge_points(surf_pos->surf_num, order);
-        double3* pt = quad->get_points(eo);
-        int np = quad->get_num_points(eo);
+      // Evaluate the form.
+      Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
+      int eo = quad->get_edge_points(surf_pos->surf_num, order);
+      double3* pt = quad->get_points(eo);
+      int np = quad->get_num_points(eo);
 
-        // Initialize geometry and jacobian*weights.
-        Geom<double>* e = init_geom_surf(rm, surf_pos, eo);
-        double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
-        double* jwt = new double[np];
-        for(int i = 0; i < np; i++)
-          jwt[i] = pt[i][2] * tan[i][2];
+      // Initialize geometry and jacobian*weights.
+      Geom<double>* e = init_geom_surf(rm, surf_pos, eo);
+      double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
+      double* jwt = new double[np];
+      for(int i = 0; i < np; i++)
+        jwt[i] = pt[i][2] * tan[i][2];
 
-        // Function values
-        Func<Scalar>** ui = new Func<Scalar>* [this->num];
-        for (int i = 0; i < this->num; i++)
-          ui[i] = init_fn(this->sln[i], eo);
-        ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, rm, eo);
+      // Function values
+      Func<Scalar>** ui = new Func<Scalar>* [this->num];
+      for (int i = 0; i < this->num; i++)
+        ui[i] = init_fn(this->sln[i], eo);
+      ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, rm, eo);
 
-        Scalar res = boundary_scaling_const *
-          err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+      Scalar res = boundary_scaling_const *
+        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
-        for (int i = 0; i < this->num; i++)
-          if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
-          delete [] ui;
-          if (ext != NULL) { ext->free(); delete ext; }
-          e->free(); delete e;
-          delete [] jwt;
+      for (int i = 0; i < this->num; i++)
+        if (ui[i] != NULL) 
+        { 
+          ui[i]->free_fn(); 
+          delete ui[i]; 
+        }
+        
+      delete [] ui;
+      if (ext != NULL) 
+      { 
+        ext->free(); 
+        delete ext; 
+      }
+      e->free(); delete e;
+      delete [] jwt;
 
-          return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
-                                      // are defined in (-1, 1). Thus multiplying with 0.5 to correct
-                                      // the weights.
+      return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
+                                  // are defined in (-1, 1). Thus multiplying with 0.5 to correct
+                                  // the weights.
     }
 
     template<typename Scalar>
@@ -649,10 +663,10 @@ namespace Hermes
         slns.push_back(this->sln[i]);
 
       // Determine integration order.
-      ExtData<Hermes::Ord>* fake_ui = dp.init_ext_fns_ord(slns, neighbor_searches);
+      ExtData<Hermes::Ord>* fake_ui = this->dp.init_ext_fns_ord(slns, neighbor_searches);
 
       // Polynomial order of additional external functions.
-      // ExtData<Hermes::Ord>* fake_ext = dp.init_ext_fns_ord(err_est_form->ext, nbs);
+      // ExtData<Hermes::Ord>* fake_ext = this->dp.init_ext_fns_ord(err_est_form->ext, nbs);
 
       // Polynomial order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
       Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, nbs->neighb_el->get_diameter());
@@ -689,18 +703,22 @@ namespace Hermes
         jwt[i] = pt[i][2] * tan[i][2];
 
       Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos, eo), 
-        nbs->neighb_el->marker, 
-        nbs->neighb_el->id, 
-        nbs->neighb_el->get_diameter());
+                                                  nbs->neighb_el->marker, 
+                                                  nbs->neighb_el->id, 
+                                                  nbs->neighb_el->get_diameter());
 
       // Function values.
-      ExtData<Scalar>* ui = dp.init_ext_fns(slns, neighbor_searches, order);
-      //ExtData<Scalar>* ext = dp.init_ext_fns(err_est_form->ext, nbs);
+      ExtData<Scalar>* ui = this->dp.init_ext_fns(slns, neighbor_searches, order);
+      //ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, nbs);
 
       Scalar res = interface_scaling_const *
         err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
-      if (ui != NULL) { ui->free(); delete ui; }
+      if (ui != NULL) 
+      {
+        ui->free(); 
+        delete ui; 
+      }
       //if (ext != NULL) { ext->free(); delete ext; }
       e->free(); delete e;
       delete [] jwt;
