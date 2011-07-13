@@ -169,6 +169,10 @@ namespace Hermes
       /// Copies the active elements of a converted mesh.
       void copy_converted(Mesh* mesh);
 
+      /// Creates a mesh from given vertex, triangle, quad, and marker arrays
+      void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
+                  int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers);
+
       /// Frees all data associated with the mesh.
       void free();
 

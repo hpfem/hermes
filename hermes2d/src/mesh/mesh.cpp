@@ -127,6 +127,72 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
+    void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
+                  int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
+    {
+      //printf("Calling Mesh::free() in Mesh::create().\n");
+      free();
+
+      // initialize hash table
+      int size = 16;
+      while (size < 2*nv) size *= 2;
+      HashTable::init(size);
+
+      // create vertex nodes
+      for (int i = 0; i < nv; i++)
+      {
+        Node* node = nodes.add();
+        assert(node->id == i);
+        node->ref = TOP_LEVEL_REF;
+        node->type = HERMES_TYPE_VERTEX;
+        node->bnd = 0;
+        node->p1 = node->p2 = -1;
+        node->next_hash = NULL;
+        node->x = verts[i][0];
+        node->y = verts[i][1];
+      }
+      ntopvert = nv;
+
+      // create triangles
+      Element* e;
+      for (int i = 0; i < nt; i++)
+      {
+        this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, tri_markers[i]);
+
+        e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]), &nodes[tris[i][0]], &nodes[tris[i][1]],
+                            &nodes[tris[i][2]], NULL);
+      }
+        
+
+      // create quads
+      for (int i = 0; i < nq; i++)
+      {
+        this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, quad_markers[i]);
+       
+        e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]), &nodes[quads[i][0]], &nodes[quads[i][1]],
+                        &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
+      }
+
+      // set boundary markers
+      for (int i = 0; i < nm; i++)
+      {
+        Node* en = peek_edge_node(mark[i][0], mark[i][1]);
+        if (en == NULL) 
+          error("Boundary data error (edge does not exist)");
+
+        this->boundary_markers_conversion.insert_marker(this->boundary_markers_conversion.min_marker_unused, boundary_markers[i]);
+
+        en->marker = this->boundary_markers_conversion.get_internal_marker(boundary_markers[i]);
+
+        nodes[mark[i][0]].bnd = 1;
+        nodes[mark[i][1]].bnd = 1;
+        en->bnd = 1;
+      }
+
+      nbase = nactive = ninitial = nt + nq;
+      seq = g_mesh_seq++;
+    }
+
     Element* Mesh::get_element(int id) const
     {
       if (id < 0 || id >= elements.get_size())
