@@ -25,12 +25,13 @@ namespace Hermes
       central_el(el),
       neighb_el(NULL),
       quad(&g_quad_2d_std)
-    {
-      memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
-      memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
-
+    { 
+      int num_possible_neighbors = mesh->get_num_active_elements()-1;
+      memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+      memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+      memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+      memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+      
       assert_msg(central_el != NULL && central_el->active == 1,
         "You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
@@ -52,11 +53,6 @@ namespace Hermes
       active_segment(ns.active_segment)
     {
       _F_;
-      memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
-      memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
-
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
@@ -103,6 +99,22 @@ namespace Hermes
     void NeighborSearch<Scalar>::reset_neighb_info()
     {
       _F_;
+      
+      // Reset transformations.
+      for(unsigned int i = 0; i < n_neighbors; i++)
+        for(unsigned int j = 0; j < central_n_trans[i]; j++)
+          this->central_transformations[i][j] = 0;
+        
+      for(unsigned int i = 0; i < n_neighbors; i++)
+        this->central_n_trans[i] = 0;
+      
+      for(unsigned int i = 0; i < n_neighbors; i++)
+        for(unsigned int j = 0; j < neighbor_n_trans[i]; j++)
+          this->neighbor_transformations[i][j] = 0;
+        
+      for(unsigned int i = 0; i < n_neighbors; i++)
+        this->neighbor_n_trans[i] = 0;
+      
       // Reset information about the neighborhood's active state.
       active_segment = 0;
       active_edge = 0;
@@ -113,12 +125,7 @@ namespace Hermes
       neighbor_edges.clear();
       neighbors.clear();
       n_neighbors = 0;
-
-      // Reset transformations.
-      memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
-      memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
+          
       neighborhood_type = H2D_DG_NOT_INITIALIZED;
     }
 
