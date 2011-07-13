@@ -654,8 +654,10 @@ namespace Hermes
           double form_evaluation;
         };
 
+        /// The Record instance that is currently being filled.
         Record current_record;
 
+        /// Stores all Records.
         Hermes::vector<Record> profile;
 
         /// Returns the profiling info.
@@ -664,7 +666,7 @@ namespace Hermes
         friend class DiscreteProblem<Scalar>;
       };
 
-      /// An AssemblingCaches instance for this instance of DiscreteProblem.
+      /// A Profiling instance for this instance of DiscreteProblem.
       Profiling profiling;
 
     public:
