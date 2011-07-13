@@ -83,6 +83,9 @@ project(hermes)
 	# Trilinos
 		# Enable support for Trilinos solvers.
 		set(WITH_TRILINOS           NO)
+		
+		# Experimental
+		set(WITH_ZOLTAN             NO)
 
 	### Mesh format ###
 		set(WITH_EXODUSII           NO)
@@ -310,6 +313,12 @@ project(hermes)
 			find_package(TRILINOS REQUIRED)
 			include_directories(${TRILINOS_INCLUDE_DIR})
 		endif(WITH_TRILINOS)
+		
+		# Experimental
+		if(WITH_ZOLTAN)
+			find_package(ZOLTAN REQUIRED)
+			include_directories(${ZOLTAN_INCLUDE_DIR})
+		endif(WITH_ZOLTAN)
 
 		if(WITH_SUPERLU)
 			find_package(SUPERLU REQUIRED)
@@ -335,7 +344,7 @@ project(hermes)
 					message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
 				endif(NOT EXISTS MPI_INCLUDE_PATH)
 			endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-			include_directories(MPI_INCLUDE_PATH)	  
+			include_directories(${MPI_INCLUDE_PATH})
 		endif(WITH_MPI)
 
 	# Match debug or release version of all other libraries.

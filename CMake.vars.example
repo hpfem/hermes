@@ -22,3 +22,7 @@ set(WITH_PYTHON NO)
 
 # Turn on Trilinos
 SET(WITH_TRILINOS YES)
+
+# Experimental
+# Turn on Zoltan
+# SET(WITH_ZOLTAN YES)
