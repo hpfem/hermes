@@ -148,7 +148,7 @@ namespace Hermes
       this->errors_squared_sum = 0.0;
       double total_error = 0.0;
 
-      bool bnd[4];          // FIXME: magic number - maximal possible number of element surfaces
+      bool bnd[4];          
       SurfPos surf_pos[4];
       Element **ee;
       Traverse trav;
@@ -190,15 +190,14 @@ namespace Hermes
           {
             // Skip current error estimator if it is assigned to a different component or geometric area
             // different from that of the current active element.
+
             if (error_estimators_vol[iest]->i != i)
               continue;
-            /*
-            if (error_estimators_vol[iest].area != ee[i]->marker)
-            continue;
-            */
-            else if (error_estimators_vol[iest]->area != HERMES_ANY)
-              continue;
-
+            
+            if (error_estimators_vol[iest]->area != HERMES_ANY)
+              if (element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area) != ee[i]->marker)
+                continue;
+            
             err += eval_volumetric_estimator(error_estimators_vol[iest], rm);
           }
 
@@ -210,25 +209,25 @@ namespace Hermes
 
             for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
             {
-              /*
-              if (error_estimators_surf[iest].area > 0 &&
-              error_estimators_surf[iest].area != surf_pos[isurf].marker) continue;
-              */
               if (bnd[isurf])   // Boundary
               {
-                if (error_estimators_surf[iest]->area == H2D_DG_INNER_EDGE) continue;
-
-                /*
-                if (boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest].area) < 0 &&
-                error_estimators_surf[iest].area != HERMES_ANY) continue;
-                */    
+                if (error_estimators_surf[iest]->area != HERMES_ANY)
+                {
+                  int imarker = boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area);
+                  
+                  if (imarker == H2D_DG_INNER_EDGE_INT)
+                    continue;
+                  if (imarker != surf_pos[isurf].marker) 
+                    continue;
+                }
 
                 err += eval_boundary_estimator(error_estimators_surf[iest], rm, surf_pos);
               }
               else              // Interface
               {
-                if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE) continue;
-
+                if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE) 
+                  continue;
+                
                 /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
 
                 // 5 is for bits per page in the array.
@@ -237,22 +236,22 @@ namespace Hermes
                 NeighborNode* root;
                 int ns_index;
 
-                dp.min_dg_mesh_seq = 0;
+                this->dp.min_dg_mesh_seq = 0;
                 for(int j = 0; j < this->num; j++)
-                  if(stage.meshes[j]->get_seq() < dp.min_dg_mesh_seq || j == 0)
-                    dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
+                  if(stage.meshes[j]->get_seq() < this->dp.min_dg_mesh_seq || j == 0)
+                    this->dp.min_dg_mesh_seq = stage.meshes[j]->get_seq();
 
-                ns_index = stage.meshes[i]->get_seq() - dp.min_dg_mesh_seq; // = 0 for single mesh
-
+                ns_index = stage.meshes[i]->get_seq() - this->dp.min_dg_mesh_seq; // = 0 for single mesh
+                
                 // Determine the minimum mesh seq in this stage.
                 if (multimesh) 
                 {
                   // Initialize the NeighborSearches.
-                  dp.init_neighbors(neighbor_searches, stage, isurf);
+                  this->dp.init_neighbors(neighbor_searches, stage, isurf);
 
                   // Create a multimesh tree;
                   root = new NeighborNode(NULL, 0);
-                  dp.build_multimesh_tree(root, neighbor_searches);
+                  this->dp.build_multimesh_tree(root, neighbor_searches);
 
                   // Update all NeighborSearches according to the multimesh tree.
                   // After this, all NeighborSearches in neighbor_searches should have the same count 
@@ -263,7 +262,7 @@ namespace Hermes
                     if(neighbor_searches.present(j)) 
                     {
                       NeighborSearch<Scalar>* ns = neighbor_searches.get(j);
-                      dp.update_neighbor_search(ns, root);
+                      this->dp.update_neighbor_search(ns, root);
                       if(num_neighbors == 0)
                         num_neighbors = ns->n_neighbors;
                       if(ns->n_neighbors != num_neighbors)
@@ -296,6 +295,8 @@ namespace Hermes
                         }
                         if (processed) continue;
                   }
+                  
+                  // We do not use cache_e and cache_jwt here.
 
                   // Set the active segment in all NeighborSearches
                   for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
@@ -312,8 +313,8 @@ namespace Hermes
                     if (multimesh) 
                     {
                       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                        for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
-                          stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
+                        for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
+                          stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
                     }
                     else
                     {
@@ -327,8 +328,8 @@ namespace Hermes
                     // The estimate is multiplied by 0.5 in order to distribute the error equally onto
                     // the two neighboring elements.
                     double central_err = 0.5 * eval_interface_estimator(error_estimators_surf[iest],
-                      rm, surf_pos, neighbor_searches, 
-                      ns_index);
+                                                                        rm, surf_pos, neighbor_searches, 
+                                                                        ns_index);
                     double neighb_err = central_err;
 
                     // Scale the error estimate by the scaling function dependent on the element diameter
@@ -360,7 +361,7 @@ namespace Hermes
                     // Clear the transformations from the RefMaps and all functions.
                     if (multimesh)
                       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                        stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - dp.min_dg_mesh_seq)->original_central_el_transform);
+                        stage.fns[fns_i]->set_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq)->original_central_el_transform);
                     else
                       stage.fns[i]->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
 
@@ -380,6 +381,24 @@ namespace Hermes
                 for(unsigned int j = 0; j < neighbor_searches.get_size(); j++) 
                   if(neighbor_searches.present(j))
                     delete neighbor_searches.get(j);
+                  
+                typename std::map< typename DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst, Func<double>*, 
+                                   typename DiscreteProblem<Scalar>::AssemblingCaches::CompareNonConst >::const_iterator it1;
+                for (it1 = this->dp.assembling_caches.cache_fn_quads.begin() ; it1 != this->dp.assembling_caches.cache_fn_quads.end(); it1++)
+                {
+                  (it1->second)->free_fn(); 
+                  delete (it1->second);
+                }
+                this->dp.assembling_caches.cache_fn_quads.clear();
+
+                typename std::map< typename DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst, Func<double>*, 
+                                   typename DiscreteProblem<Scalar>::AssemblingCaches::CompareNonConst>::const_iterator it2;
+                for (it2 = this->dp.assembling_caches.cache_fn_triangles.begin(); it2 != this->dp.assembling_caches.cache_fn_triangles.end(); it2++)
+                {
+                  (it2->second)->free_fn();
+                  delete (it2->second);
+                }
+                this->dp.assembling_caches.cache_fn_triangles.clear();
 
                 /* END COPY FROM DISCRETE_PROBLEM.CPP */
 
