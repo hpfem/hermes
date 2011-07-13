@@ -705,29 +705,37 @@ namespace Hermes
           {
             bool found = true;
             for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
+            {
               if (e->sons[i] != NULL && ((!e->sons[i]->active) || (e->sons[i]->is_curved())))
-              { found = false;  break; }
-
-              if (found)
-              {
-                double sum_squared = 0.0;
-                int max = 0;
-                for (int i = 0; i < 4; i++)
-                  if (e->sons[i] != NULL)
-                  {
-                    sum_squared += errors[m][e->sons[i]->id];
-                    int oo = this->spaces[m]->get_element_order(e->sons[i]->id);
-                    if (oo > max) max = oo;
-                  }
-                  if ((sum_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]))
-                    //if ((sum < 0.1 * thr))
-                  {
-                    mesh[m]->unrefine_element_id(e->id);
-                    errors[m][e->id] = sum_squared;
-                    this->spaces[m]->set_element_order_internal(e->id, max);
-                    k++; // number of unrefined elements
-                  }
+              { 
+                found = false;  
+                break; 
               }
+            }
+            
+            if (found)
+            {
+              double sum_squared = 0.0;
+              int max = 0;
+              for (int i = 0; i < 4; i++)
+              {
+                if (e->sons[i] != NULL)
+                {
+                  sum_squared += errors[m][e->sons[i]->id];
+                  int oo = this->spaces[m]->get_element_order(e->sons[i]->id);
+                  if (oo > max) max = oo;
+                }
+              }
+              
+              if ((sum_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]))
+                //if ((sum < 0.1 * thr))
+              {
+                mesh[m]->unrefine_element_id(e->id);
+                errors[m][e->id] = sum_squared;
+                this->spaces[m]->set_element_order_internal(e->id, max);
+                k++; // number of unrefined elements
+              }
+            }
           }
           for_all_active_elements(e, mesh[m])
           {
