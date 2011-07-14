@@ -27,11 +27,20 @@ namespace Hermes
       quad(&g_quad_2d_std)
     { 
       int num_possible_neighbors = mesh->get_num_active_elements()-1;
-      memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-      memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-      memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-      
+      if(num_possible_neighbors < max_neighbors)
+      {
+        memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+        memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+      }
+      else
+      {
+        memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
+        memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
+      }
       assert_msg(central_el != NULL && central_el->active == 1,
         "You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
@@ -55,6 +64,24 @@ namespace Hermes
       _F_;
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
+
+      /// \todo Take a look at this, it is slow, and there should be no constants limiting the number
+      /// of possible neighbors.
+      int num_possible_neighbors = mesh->get_num_active_elements()-1;
+      if(num_possible_neighbors < max_neighbors)
+      {
+        memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+        memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
+      }
+      else
+      {
+        memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
+        memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
+        memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
+      }
 
       for(unsigned int i = 0; i < ns.n_neighbors; i++)
         for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
