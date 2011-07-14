@@ -60,7 +60,7 @@ namespace Hermes
     template<typename T>
     void Func<T>::subtract(T* attribute, T* other_attribute)
     {
-      if (attribute != NULL) 
+      if (attribute != NULL && other_attribute != NULL)
       {
         assert_msg(other_attribute != NULL, "Unable to subtract a function expansion, the desired attribute is NULL in the other function.");
         for(int i = 0; i < num_gip; i++) 
@@ -95,7 +95,7 @@ namespace Hermes
     template<typename T>
     void Func<T>::add(T* attribute, T* other_attribute)
     {
-      if (attribute != NULL) 
+      if (attribute != NULL && other_attribute != NULL) 
       {
         assert_msg(other_attribute != NULL, "Unable to add a function expansion, the desired attribute is NULL in the other function.");
         for(int i = 0; i < num_gip; i++) 

@@ -56,6 +56,11 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init()
     {
       _F_;
+
+      // Initialize special variable for Runge-Kutta time integration.
+      RungeKutta = false;
+      RK_original_spaces_count = 0;
+
       // Sanity checks.
       if(wf == NULL)
         error("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
@@ -2831,6 +2836,10 @@ namespace Hermes
       // Values of the previous Newton iteration, shape functions 
       // and external functions in quadrature points.
       int prev_size = u_ext.size() - mfv->u_ext_offset;
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(RungeKutta)
+        prev_size = RK_original_spaces_count;
+
       Func<Scalar>** prev = new Func<Scalar>*[prev_size];
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
@@ -2846,6 +2855,11 @@ namespace Hermes
       Func<double>* v = get_fn(fv, rv, order);
 
       ExtData<Scalar>* ext = init_ext_fns(mfv->ext, rv, order);
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
       // Time measurement.
@@ -3271,6 +3285,11 @@ namespace Hermes
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - vfv->u_ext_offset;
+      
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(RungeKutta)
+        prev_size = RK_original_spaces_count;
+
       Func<Scalar>** prev = new Func<Scalar>*[prev_size];
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
@@ -3284,6 +3303,11 @@ namespace Hermes
 
       Func<double>* v = get_fn(fv, rv, order);
       ExtData<Scalar>* ext = init_ext_fns(vfv->ext, rv, order);
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          prev[ext_i]->add(*ext->fn[vfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
       // Time measurement.
@@ -3687,6 +3711,10 @@ namespace Hermes
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - mfs->u_ext_offset;
       Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(RungeKutta)
+        prev_size = RK_original_spaces_count;
+
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + mfs->u_ext_offset] != NULL)
@@ -3700,6 +3728,11 @@ namespace Hermes
       Func<double>* u = get_fn(fu, ru, eo);
       Func<double>* v = get_fn(fv, rv, eo);
       ExtData<Scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          prev[ext_i]->add(*ext->fn[mfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
       // Time measurement.
@@ -4105,6 +4138,10 @@ namespace Hermes
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - vfs->u_ext_offset;
       Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(RungeKutta)
+        prev_size = RK_original_spaces_count;
+
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + vfs->u_ext_offset] != NULL)
@@ -4117,6 +4154,11 @@ namespace Hermes
 
       Func<double>* v = get_fn(fv, rv, eo);
       ExtData<Scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          prev[ext_i]->add(*ext->fn[vfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
       // Time measurement.

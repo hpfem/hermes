@@ -265,6 +265,9 @@ namespace Hermes
       /// Set this problem to Finite Volume.
       void set_fvm();
 
+      /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
+      void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
+
     protected:
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
@@ -531,6 +534,12 @@ namespace Hermes
       /// There is a vector form set on DG_INNER_EDGE area or not.
       bool DG_vector_forms_present;
 
+      /// Turn on Runge-Kutta specific handling of external functions.
+      bool RungeKutta;
+      
+      /// Number of spaces in the original problem in a Runge-Kutta method.
+      int RK_original_spaces_count;
+
       /// Class handling various caches used in assembling.
       class AssemblingCaches 
       {
@@ -677,7 +686,6 @@ namespace Hermes
       void get_last_profiling_output(std::ostream & out);
 
       friend class KellyTypeAdapt<Scalar>;
-      friend class Global<Scalar>;
     };
   }
 }

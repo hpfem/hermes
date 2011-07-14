@@ -126,15 +126,10 @@ namespace Hermes
       /// matrix, Y the coefficient vector, and F the (nonlinear) stationary residual.
       /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side
       /// and right-hand side of the equation, respectively.
-      void create_stage_wf(unsigned int size, double current_time, double time_step);
+      void create_stage_wf(unsigned int size, double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev);
 
       // Prepare u_ext_vec.
-      void prepare_u_ext_vec(double time_step, Scalar* slns_prev_time_projection);
-
-
-      /// Members.
-      /// Global function class.
-      Global<Scalar> hermes2d;
+      void prepare_u_ext_vec(double time_step);
 
       /// Matrix for the time derivative part of the equation (left-hand side).
       SparseMatrix<Scalar>* matrix_left;
