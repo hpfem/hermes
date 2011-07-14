@@ -27,7 +27,7 @@
 
 #include "../matrix.h"
 
-#include "python_api.h"
+#include "python_API/python_api.h"
 
 // RCP
 #ifndef WITH_TRILINOS
