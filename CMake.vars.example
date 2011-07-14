@@ -24,5 +24,6 @@ set(WITH_PYTHON NO)
 SET(WITH_TRILINOS YES)
 
 # Experimental
-# Turn on Zoltan
+# Turn on Zoltan AND MPI
 # SET(WITH_ZOLTAN YES)
+# SET(WITH_MPI NO)
