@@ -4501,6 +4501,8 @@ namespace Hermes
     {
       _F_;
 
+
+
       // Time measurements.
       profiling.assemble_util_time.tick();
       profiling.eval_util_time.reset();
@@ -4555,7 +4557,7 @@ namespace Hermes
         neighbor_supp_u, nbs_u->neighbor_edge.orientation);
       nbs_v->set_quad_order(order);
       DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(get_fn(fv, rv, nbs_v->get_quad_eo(neighbor_supp_v)),
-        neighbor_supp_v, nbs_v->neighbor_edge.orientation == 0);
+        neighbor_supp_v, nbs_v->neighbor_edge.orientation);
 
       ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
