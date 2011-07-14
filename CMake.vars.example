@@ -1,7 +1,7 @@
 # This is a sample CMake.vars file for Hermes.
 set(DEP_ROOT "d:/hpfem/hermes/dependencies/")    # Root of a directory with dependecies. This line has to be modified. Don't forget to replace all backslashes '\' with slashes '/'.
 
-# Seach paths. None of these lines needs to be modified in an usual case.
+# Search paths. None of these lines needs to be modified in an usual case.
 set(GLUT_ROOT ${DEP_ROOT})
 set(GLEW_ROOT ${DEP_ROOT})
 set(PTHREAD_ROOT ${DEP_ROOT})
