@@ -823,17 +823,18 @@ namespace Hermes
     {
       _F_;
       if (this->central_transformations.present(index))
-        error("Out of bounds of central_transformations.");
-      return this->central_transformations.get(index)->num_levels;
+        return this->central_transformations.get(index)->num_levels;
+      else
+        return 0;
     }
 
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2)
     { 
       _F_;
-      if (this->central_transformations.present(index_1))
+      if (!this->central_transformations.present(index_1))
         error("Out of bounds of central_transformations.");
-      if (index_2 > Transformations::max_level)
+      if (index_2 >= Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
       
       return this->central_transformations.get(index_1)->transf[index_2];
@@ -843,18 +844,19 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index)
     { 
       _F_;
-      if (this->neighbor_transformations.present(index))
-        error("Out of bounds of neighbor_transformations.");
-      return this->neighbor_transformations.get(index)->num_levels;
+      if (this->neighbor_transformations.present(index))        
+        return this->neighbor_transformations.get(index)->num_levels;
+      else
+        return 0;
     }
       
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2)
     { 
       _F_;
-      if (this->neighbor_transformations.present(index_1))
+      if (!this->neighbor_transformations.present(index_1))
         error("Out of bounds of neighbor_transformations.");
-      if (index_2 > Transformations::max_level)
+      if (index_2 >= Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
       
       return this->neighbor_transformations.get(index_1)->transf[index_2];
