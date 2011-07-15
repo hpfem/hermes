@@ -293,7 +293,8 @@ namespace Hermes
                           processed = false;
                           break;
                         }
-                        if (processed) continue;
+                        
+                    if (processed) continue;
                   }
                   
                   // We do not use cache_e and cache_jwt here.

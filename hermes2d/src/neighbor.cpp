@@ -268,7 +268,7 @@ namespace Hermes
         neighbor_edge.local_num_of_edge = active_edge = edge;
         NeighborEdgeInfo local_edge_info;
         local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
-        //! The "opposite" view of the same edge has the same orientation.
+        // The "opposite" view of the same edge has the same orientation.
         local_edge_info.orientation = 0;
         neighbor_edges.push_back(local_edge_info);
 

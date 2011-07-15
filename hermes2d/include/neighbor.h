@@ -39,7 +39,7 @@ namespace Hermes
     *      across the active edge. Hence, we "go down" in the central element in order to find a (virtual) sub-element
     *      matching the currently processed neighbor and store the corresponding transformations in the neighbor's field
     *      of the array \c transformations. This way, we obtain for each neighbor a set of transformations which have to
-    *      be applied on the central element to transform integration points to its correct part matching the neighbor.
+      *      be applied on the central element to transform integration points to its correct part matching the neighbor.
     *
     * There may be either one or more neighbors (see below). In the second case, each of the neighbors shares with the
     * central element a unique segment of the active edge. The next step is therefore a loop through all neighbors,
@@ -251,7 +251,7 @@ namespace Hermes
 
         int local_num_of_edge;  ///< Local number of the edge on neighbor element.
         int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
-        ///< (0 - same orientation, 1 - reverse orientation).
+                                ///< (0 - same orientation, 1 - reverse orientation).
       };
 
 
@@ -320,7 +320,7 @@ namespace Hermes
 
       Hermes::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
       Hermes::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
-      unsigned int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
+      unsigned int n_neighbors;                          ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
 
       /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the
       /// other side of the neighbor. The way is characterized by transformations needed to be pushed either on the

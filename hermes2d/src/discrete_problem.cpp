@@ -1655,7 +1655,7 @@ namespace Hermes
       }
 
       // Return the number of neighbors deleted.
-      return - 1;
+      return -1;
     }
 
     template<typename Scalar>
