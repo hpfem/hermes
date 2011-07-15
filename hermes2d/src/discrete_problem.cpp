@@ -4543,8 +4543,6 @@ namespace Hermes
     {
       _F_;
 
-
-
       // Time measurements.
       profiling.assemble_util_time.tick();
       profiling.eval_util_time.reset();

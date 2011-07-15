@@ -557,10 +557,16 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
       Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions,
+      Hermes::vector<Solution<Scalar>*> & solutions,
       Hermes::vector<bool> add_dir_lift)
     {
-      assert(spaces.size() == solutions.size());
+      // If solutions have been passed.
+      if(solutions.size() != 0)
+        assert(spaces.size() == solutions.size());
+      else
+        for(unsigned int i = 0; i < spaces.size(); i++)
+          solutions.push_back(new Solution<Scalar>(spaces[i]->get_mesh()));
+
       for(unsigned int i = 0; i < solutions.size(); i++)
         if(add_dir_lift == Hermes::vector<bool>())
           solutions[i]->set_coeff_vector(spaces[i], solution_vector, true);
@@ -578,7 +584,8 @@ namespace Hermes
       spaces_to_pass.push_back(space);
 
       Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
+      if(solution != NULL)
+        solutions_to_pass.push_back(solution);
 
       Hermes::vector<bool> add_dir_lift_to_pass;
       add_dir_lift_to_pass.push_back(add_dir_lift);
@@ -588,7 +595,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions,
+      Hermes::vector<Solution<Scalar>*> & solutions,
       Hermes::vector<bool> add_dir_lift)
     {
       assert(spaces.size() == solutions.size());
@@ -609,7 +616,8 @@ namespace Hermes
       spaces_to_pass.push_back(space);
 
       Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
+      if(solution != NULL)
+        solutions_to_pass.push_back(solution);
 
       Hermes::vector<bool> add_dir_lift_to_pass;
       add_dir_lift_to_pass.push_back(add_dir_lift);
@@ -619,11 +627,17 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions,
+      Hermes::vector<Solution<Scalar>*> & solutions,
       Hermes::vector<PrecalcShapeset *> pss,
       Hermes::vector<bool> add_dir_lift)
     {
-      assert(spaces.size() == solutions.size());
+      // If solutions have been passed.
+      if(solutions.size() != 0)
+        assert(spaces.size() == solutions.size());
+      else
+        for(unsigned int i = 0; i < spaces.size(); i++)
+          solutions.push_back(new Solution<Scalar>(spaces[i]->get_mesh()));
+
       for(unsigned int i = 0; i < solutions.size(); i++)
         if(add_dir_lift == Hermes::vector<bool>())
           solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, true);
@@ -641,7 +655,8 @@ namespace Hermes
       spaces_to_pass.push_back(space);
 
       Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
+      if(solution != NULL)
+        solutions_to_pass.push_back(solution);
 
       Hermes::vector<PrecalcShapeset*> pss_to_pass;
       pss_to_pass.push_back(pss);

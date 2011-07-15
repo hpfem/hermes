@@ -223,21 +223,21 @@ namespace Hermes
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions,
+        Hermes::vector<Solution<Scalar>*> & solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
         bool add_dir_lift = true);
 
       static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions,
+        Hermes::vector<Solution<Scalar>*> & solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
 
       static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
         bool add_dir_lift = true);
 
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
+        Hermes::vector<Solution<Scalar>*> & solutions, Hermes::vector<PrecalcShapeset *> pss,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
