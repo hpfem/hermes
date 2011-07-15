@@ -282,6 +282,52 @@ namespace Hermes
       
       /// Returns the current neighbor transformations according to the current active segment.
       unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2);
+      
+      /// Transformations of an element to one of its neighbors.
+      struct Transformations
+      {
+        static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
+                                                                       ///< in a go-down neighborhood) - see Transformable::push_transform.
+        
+        unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
+        unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
+        
+        Transformations() : num_levels(0) { memset(transf, 0, max_level * sizeof(int)); }
+        Transformations(const Transformations* t) { copy_from(t); }
+        Transformations(const Hermes::vector<unsigned int>& t) { copy_from(t); }
+        
+        void copy_from(const Hermes::vector<unsigned int>& t)
+        {
+          num_levels = std::min<unsigned int>(t.size(), max_level);
+          std::copy( t.begin(), t.begin()+num_levels, transf);
+        }
+        
+        void copy_from(const Transformations* t)
+        {
+          num_levels = t->num_levels;
+          memcpy(transf, t->transf, max_level * sizeof(unsigned int));
+        }
+        
+        void copy_to(Hermes::vector<unsigned int>* t)
+        {
+          t->assign(transf, transf+num_levels);
+        }
+        
+        void reset()
+        {
+          memset(transf, 0, num_levels * sizeof(unsigned int));
+          num_levels = 0;
+        }
+        
+        void strip_initial_transformations(unsigned int number_of_stripped);
+        
+        void apply_on(Transformable* tr) const
+        {
+          for(unsigned int i = 0; i < num_levels; i++)
+            tr->push_transform(transf[i]);
+        }
+      };
+      
 
     private:
 
@@ -289,24 +335,13 @@ namespace Hermes
 
       /*** Transformations. ***/
 
-      static const unsigned int max_n_trans = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
-      ///< in a go-down neighborhood) - see Transformable::push_transform.
-
-      /// This variable has the meaning how many neighbors have been used for a single edge so far,
-      /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
-      static const unsigned int max_neighbors = 1 << max_n_trans;
-
-      unsigned int central_transformations[max_neighbors][max_n_trans]; ///< Vector of transformations of the central element to each neighbor
-      ///< (in a go-down neighborhood; stored row-wise for each neighbor).
-      unsigned int central_n_trans[max_neighbors];                      ///< Number of transforms stored in each row of \c central_transformations.
-
-      unsigned int neighbor_transformations[max_neighbors][max_n_trans];///< Vector of transformations of the neighbor to the central element (go-up).
-      unsigned int neighbor_n_trans[max_neighbors];                     ///< Number of transforms stored in each row of \c neighbor_transformations.
-
-      uint64_t original_central_el_transform;                           ///< Sub-element transformation of any function that comes from the
-      ///< assembly, before transforms from \c transformations are pushed
-      ///< to it.
-
+      LightArray< Transformations* > central_transformations;     ///< Array of transformations of the central element to each neighbor
+                                                                  ///< (in a go-down neighborhood; stored as on \c Transformation structure
+                                                                  ///< for each neighbor).
+      LightArray< Transformations* > neighbor_transformations;    ///< Array of transformations of the neighbor to the central element (go-up).
+      
+      uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
+                                                               ///< assembly, before transforms from \c transformations are pushed to it.
 
       /*** Significant objects of the neighborhood. ***/
       Element* central_el;          ///< Central (currently assembled) element.
