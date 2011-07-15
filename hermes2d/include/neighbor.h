@@ -326,6 +326,13 @@ namespace Hermes
           for(unsigned int i = 0; i < num_levels; i++)
             tr->push_transform(transf[i]);
         }
+        
+        void apply_on(const Hermes::vector<Transformable*>& tr) const
+        {
+          for(Hermes::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
+            for(unsigned int i = 0; i < num_levels; i++)
+              (*it)->push_transform(transf[i]);
+        }
       };
       
 
