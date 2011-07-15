@@ -22,25 +22,12 @@ namespace Hermes
     NeighborSearch<Scalar>::NeighborSearch(Element* el, Mesh* mesh) :
     supported_shapes(NULL),
       mesh(mesh),
+      central_transformations(LightArray<Transformations*>(4)),
+      neighbor_transformations(LightArray<Transformations*>(4)),
       central_el(el),
       neighb_el(NULL),
       quad(&g_quad_2d_std)
     { 
-      int num_possible_neighbors = mesh->get_num_active_elements()-1;
-      if(num_possible_neighbors < max_neighbors)
-      {
-        memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-        memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-      }
-      else
-      {
-        memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
-        memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
-      }
       assert_msg(central_el != NULL && central_el->active == 1,
         "You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
@@ -56,6 +43,8 @@ namespace Hermes
     NeighborSearch<Scalar>::NeighborSearch(const NeighborSearch& ns) :
     supported_shapes(NULL),
       mesh(ns.mesh),
+      central_transformations(LightArray<Transformations*>(4)),
+      neighbor_transformations(LightArray<Transformations*>(4)),
       central_el(ns.central_el),
       neighb_el(NULL),
       neighbor_edge(ns.neighbor_edge),
@@ -65,37 +54,20 @@ namespace Hermes
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      /// \todo Take a look at this, it is slow, and there should be no constants limiting the number
-      /// of possible neighbors.
-      int num_possible_neighbors = mesh->get_num_active_elements()-1;
-      if(num_possible_neighbors < max_neighbors)
-      {
-        memset(central_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(neighbor_transformations, 0, num_possible_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(central_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-        memset(neighbor_n_trans, 0, num_possible_neighbors*sizeof(unsigned int));
-      }
-      else
-      {
-        memset(central_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(neighbor_transformations, 0, max_neighbors*max_n_trans*sizeof(unsigned int));
-        memset(central_n_trans, 0, max_neighbors*sizeof(unsigned int));
-        memset(neighbor_n_trans, 0, max_neighbors*sizeof(unsigned int));
-      }
-
-      for(unsigned int i = 0; i < ns.n_neighbors; i++)
-        for(unsigned int j = 0; j < ns.central_n_trans[i]; j++)
-          this->central_transformations[i][j] = ns.central_transformations[i][j];
-
-      for(unsigned int i = 0; i < ns.n_neighbors; i++)
-        this->central_n_trans[i] = ns.central_n_trans[i];
-
-      for(unsigned int i = 0; i < ns.n_neighbors; i++)
-        for(unsigned int j = 0; j < ns.neighbor_n_trans[i]; j++)
-          this->neighbor_transformations[i][j] = ns.neighbor_transformations[i][j];
-
-      for(unsigned int i = 0; i < ns.n_neighbors; i++)
-        this->neighbor_n_trans[i] = ns.neighbor_n_trans[i];
+      for(unsigned int j = 0; j < ns.central_transformations.get_size(); j++)
+        if (ns.central_transformations.present(j))
+        {
+          // Copy current array of transformations into new memory location.
+          Transformations *tmp = new Transformations(ns.central_transformations.get(j));
+          this->central_transformations.add(tmp, j); 
+        }
+      for(unsigned int j = 0; j < ns.neighbor_transformations.get_size(); j++)
+        if (ns.neighbor_transformations.present(j))
+        {
+          // Copy current array of transformations into new memory location.
+          Transformations *tmp = new Transformations(ns.neighbor_transformations.get(j));
+          this->neighbor_transformations.add(tmp, j); 
+        }
 
       assert_msg(central_el != NULL && central_el->active == 1,
         "You must pass an active element to the NeighborSearch constructor.");
@@ -129,19 +101,13 @@ namespace Hermes
       
       // Reset transformations.
       for(unsigned int i = 0; i < n_neighbors; i++)
-        for(unsigned int j = 0; j < central_n_trans[i]; j++)
-          this->central_transformations[i][j] = 0;
-        
-      for(unsigned int i = 0; i < n_neighbors; i++)
-        this->central_n_trans[i] = 0;
-      
-      for(unsigned int i = 0; i < n_neighbors; i++)
-        for(unsigned int j = 0; j < neighbor_n_trans[i]; j++)
-          this->neighbor_transformations[i][j] = 0;
-        
-      for(unsigned int i = 0; i < n_neighbors; i++)
-        this->neighbor_n_trans[i] = 0;
-      
+      {
+        if (this->central_transformations.present(i))
+          this->central_transformations.get(i)->reset();
+        if (this->neighbor_transformations.present(i))
+          this->neighbor_transformations.get(i)->reset();  
+      }
+             
       // Reset information about the neighborhood's active state.
       active_segment = 0;
       active_edge = 0;
@@ -215,11 +181,11 @@ namespace Hermes
             Element* parent = central_el->parent;
 
             // Array of middle-point vertices of the intermediate parent edges that we climb up to the correct parent element.
-            Node** par_mid_vertices = new Node*[max_n_trans];
+            Node** par_mid_vertices = new Node*[Transformations::max_level];
             // Number of visited intermediate parents.
             int n_parents = 0;
 
-            for (unsigned int j = 0; j < max_n_trans; j++)
+            for (unsigned int j = 0; j < Transformations::max_level; j++)
               par_mid_vertices[j] = NULL;
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
@@ -230,7 +196,7 @@ namespace Hermes
           {
             neighborhood_type = H2D_DG_GO_DOWN;
 
-            int sons[max_n_trans]; // array of virtual sons of the central el. visited on the way down to the neighbor
+            int sons[Transformations::max_level]; // array of virtual sons of the central el. visited on the way down to the neighbor
             int n_sons = 0; // number of used transformations
 
             // Start the search by going down to the first son.
@@ -261,14 +227,12 @@ namespace Hermes
       {
         neighb_el = central_el;
 
-        for(unsigned int i = 0; i < transformations.size(); i++)
-          neighbor_transformations[0][i] = transformations[i];
-        neighbor_n_trans[0] = transformations.size();
+        neighbor_transformations.add(new Transformations(transformations), 0);
 
         neighbor_edge.local_num_of_edge = active_edge = edge;
         NeighborEdgeInfo local_edge_info;
         local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
-        //! The "opposite" view of the same edge has the same orientation.
+        // The "opposite" view of the same edge has the same orientation.
         local_edge_info.orientation = 0;
         neighbor_edges.push_back(local_edge_info);
 
@@ -331,27 +295,30 @@ namespace Hermes
       _F_;
       if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) 
       {
+        neighbor_transformations.add(new Transformations, 0); 
+        Transformations *tr = neighbor_transformations.get(0);
+        
         for(unsigned int i = 0; i < transformations.size(); i++)
           // Triangles.
           if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
             if ((active_edge == 0 && transformations[i] == 0) ||
-              (active_edge == 1 && transformations[i] == 1) ||
-              (active_edge == 2 && transformations[i] == 2))
-              neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+                (active_edge == 1 && transformations[i] == 1) ||
+                (active_edge == 2 && transformations[i] == 2))
+              tr->transf[tr->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
             else
-              neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edges[0].orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-        // Quads.
+              tr->transf[tr->num_levels++] = (neighbor_edges[0].orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+          // Quads.
           else
             if ((active_edge == 0 && (transformations[i] == 0 || transformations[i] == 6)) ||
-              (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
-              (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
-              (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
-              neighbor_transformations[0][neighbor_n_trans[0]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+                (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
+                (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
+                (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
+              tr->transf[tr->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
             else if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
-              (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
-              (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
-              (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
-              neighbor_transformations[0][neighbor_n_trans[0]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+                     (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+                     (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
+                     (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
+              tr->transf[tr->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
       }
       else handle_sub_idx_way_down(transformations);
     }
@@ -367,9 +334,12 @@ namespace Hermes
       for(unsigned int neighbor_i = 0; neighbor_i < n_neighbors; neighbor_i++) 
       {
         bool deleted = false;
-        for(unsigned int level = 0; level < std::min((unsigned int)transformations.size(), central_n_trans[neighbor_i]); level++)
+        
+        Transformations* current_transforms = central_transformations.get(neighbor_i);
+        
+        for(unsigned int level = 0; level < std::min((unsigned int)transformations.size(), current_transforms->num_levels); level++)
           // If the found neighbor is not a neighbor of this subelement.
-          if(!compatible_transformations(central_transformations[neighbor_i][level], transformations[level], active_edge)) 
+          if(!compatible_transformations(current_transforms->transf[level], transformations[level], active_edge)) 
           {
             deleted = true;
             break;
@@ -384,6 +354,9 @@ namespace Hermes
       for(unsigned int neighbors_not_to_be_deleted_i = 0; neighbors_not_to_be_deleted_i < neighbors_not_to_be_deleted.size(); neighbors_not_to_be_deleted_i++) 
       {
         unsigned int neighbor_i = neighbors_not_to_be_deleted[neighbors_not_to_be_deleted_i];
+                 
+        Transformations* central_transforms = central_transformations.get(neighbor_i);
+        
         for(unsigned int level = 0; level < transformations.size(); level++) 
         {
           // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
@@ -397,35 +370,38 @@ namespace Hermes
             (active_edge == 3 && transformations[level] == 6))
             ) 
           {
-            central_transformations[neighbor_i][level] = transformations[level];
+            central_transforms->transf[level] = transformations[level];
             // Also if the transformation count is already bigger than central_n_trans, we need to raise it.
-            if(level >= central_n_trans[neighbor_i])
-              central_n_trans[neighbor_i] = level + 1;
+            if(level >= central_transforms->num_levels)
+              central_transforms->num_levels = level + 1;
           }
           // If we are already on a bigger (i.e. ~ way up) neighbor.
-          if(central_n_trans[neighbor_i] == level + 1) 
+          if(central_transforms->num_levels == level + 1) 
           {
+            neighbor_transformations.add(new Transformations, neighbor_i);            
+            Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
+            
             for(unsigned int i = level + 1; i < transformations.size(); i++)
               // Triangles.
               if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
                 if ((active_edge == 0 && transformations[i] == 0) ||
-                  (active_edge == 1 && transformations[i] == 1) ||
-                  (active_edge == 2 && transformations[i] == 2))
-                  neighbor_transformations[neighbor_i][neighbor_n_trans[i]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+                    (active_edge == 1 && transformations[i] == 1) ||
+                    (active_edge == 2 && transformations[i] == 2))
+                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
                 else
-                  neighbor_transformations[neighbor_i][neighbor_n_trans[i]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-            // Quads.
+                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+              // Quads.
               else
                 if ((active_edge == 0 && (transformations[i] == 0 || transformations[i] == 6)) ||
-                  (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
-                  (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
-                  (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
-                  neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+                    (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
+                    (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
+                    (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
+                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
                 else if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
-                  (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
-                  (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
-                  (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
-                  neighbor_transformations[neighbor_i][neighbor_n_trans[neighbor_i]++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+                         (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
+                         (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
+                         (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
+                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
           }
         }
       }
@@ -488,6 +464,7 @@ namespace Hermes
       // Test for active element.
       if(transformations.empty())
         return;
+      
       for(unsigned int i = 0; i < n_neighbors; i++) 
       {
         // Find the index where the additional subelement mapping (on top of the initial one from assembling) starts.
@@ -496,22 +473,26 @@ namespace Hermes
         // longer than transformations (and that is tested).
         // Also the function compatible_transformations() does not have to be used, as now the array central_transformations
         // has been adjusted so that it contains the array transformations.
-        while(central_transformations[i][j] == transformations[j])
+        while(central_transformations.get(i)->transf[j] == transformations[j])
           if(++j > transformations.size() - 1)
             break;
-        // Create a new array of transformations.
-        unsigned int* shifted_trfs = new unsigned int[max_n_trans];
-        // Clear it.
-        memset(shifted_trfs, 0, max_n_trans * sizeof(unsigned int));
-        // Move the old one to the new one.
-        for(unsigned int k = j; k < central_n_trans[i]; k++)
-          shifted_trfs[k - j] = central_transformations[i][k];
-        // Point to the new one.
-        for(unsigned int l = 0; l < max_n_trans; l++)
-          central_transformations[i][l] = shifted_trfs[l];
-        // We also have to store the information about length of the transformation array for this neighbor.
-        central_n_trans[i] -= j;
+        central_transformations.get(i)->strip_initial_transformations(j);
       }
+    }
+    
+    template<typename Scalar>
+    void NeighborSearch<Scalar>::Transformations::strip_initial_transformations(unsigned int number_of_stripped)
+    {
+      // Create a new clear array for the remaining transformations.
+      unsigned int shifted_trfs[max_level];
+      memset(shifted_trfs, 0, max_level * sizeof(unsigned int));
+      // Move the old one to the new one.
+      for(unsigned int k = number_of_stripped; k < num_levels; k++)
+        shifted_trfs[k - number_of_stripped] = transf[k];
+      // Point to the new one.
+      memcpy(transf, shifted_trfs, max_level*sizeof(unsigned int));
+      // We also have to store the information about length of the transformation array for this neighbor.
+      num_levels -= number_of_stripped;
     }
 
     template<typename Scalar>
@@ -519,22 +500,12 @@ namespace Hermes
     {
       _F_;
       for(unsigned int i = position; i < n_neighbors - 1; i++)
-        for(unsigned int j = 0; j < max_n_trans; j++)
-          central_transformations[i][j] = central_transformations[i + 1][j];
-      for(unsigned int j = 0; j < max_n_trans; j++)
-        central_transformations[n_neighbors - 1][j] = 0;
+        central_transformations.get(i)->copy_from(central_transformations.get(i + 1));
+      central_transformations.get(n_neighbors - 1)->reset();
+        
       for(unsigned int i = position; i < n_neighbors - 1; i++)
-        central_n_trans[i] = central_n_trans[i + 1];
-      central_n_trans[n_neighbors - 1] = 0;
-
-      for(unsigned int i = position; i < n_neighbors - 1; i++)
-        for(unsigned int j = 0; j < max_n_trans; j++)
-          neighbor_transformations[i][j] = neighbor_transformations[i + 1][j];
-      for(unsigned int j = 0; j < max_n_trans; j++)
-        neighbor_transformations[n_neighbors - 1][j] = 0;
-      for(unsigned int i = position; i < n_neighbors - 1; i++)
-        neighbor_n_trans[i] = neighbor_n_trans[i + 1];
-      neighbor_n_trans[n_neighbors - 1] = 0;
+        neighbor_transformations.get(i)->copy_from(neighbor_transformations.get(i + 1));
+      neighbor_transformations.get(n_neighbors - 1)->reset();
 
       neighbor_edges.erase (neighbor_edges.begin() + position);
       neighbors.erase (neighbors.begin() + position);
@@ -548,7 +519,7 @@ namespace Hermes
       Node* edge = NULL;
       Node* vertex = NULL;
 
-      assert(n_parents <= (int)max_n_trans);
+      assert(n_parents <= (int)Transformations::max_level);
 
       // IDs of vertices bounding the current intermediate parent edge.
       int p1 = elem->vn[active_edge]->id;
@@ -568,7 +539,7 @@ namespace Hermes
         if (n_parents == 0)
           par_mid_vertices[n_parents++] = vertex;
         else
-          if (n_parents == max_n_trans - 1)
+          if (n_parents == Transformations::max_level - 1)
             error("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
           else
             if(par_mid_vertices[n_parents - 1]->id != vertex->id)
@@ -604,8 +575,11 @@ namespace Hermes
               // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
               // adjacent to the single big neighbor.
               assert(n_neighbors == 0);
-
-              neighbor_n_trans[n_neighbors] = n_parents;
+              
+              neighbor_transformations.add(new Transformations, n_neighbors);
+              Transformations *neighbor_transforms = neighbor_transformations.get(n_neighbors);
+              
+              neighbor_transforms->num_levels = n_parents;
 
               // Go back through the intermediate inactive parents down to the central element and stack corresponding
               // neighbor_transformations into the array 'neighbor_transformations'.
@@ -614,19 +588,19 @@ namespace Hermes
                 n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
                 if(n == NULL) 
                 {
-                  neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
+                  neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                   p1 = par_mid_vertices[j]->id;
                 }
                 else 
                 {
                   if(n->id == par_mid_vertices[j-1]->id) 
                   {
-                    neighbor_transformations[n_neighbors][n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+                    neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
                     p2 = par_mid_vertices[j]->id;
                   }
                   else 
                   {
-                    neighbor_transformations[n_neighbors][n_parents - j - 1] = neighbor_edge.local_num_of_edge;
+                    neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                     p1 = par_mid_vertices[j]->id;
                   }
                 }
@@ -634,9 +608,9 @@ namespace Hermes
 
               // Final transformation to the central element itself.
               if (orig_vertex_id[0] == par_mid_vertices[0]->id)
-                neighbor_transformations[n_neighbors][n_parents - 1] = neighbor_edge.local_num_of_edge;
+                neighbor_transforms->transf[n_parents - 1] = neighbor_edge.local_num_of_edge;
               else
-                neighbor_transformations[n_neighbors][n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+                neighbor_transforms->transf[n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
 
               NeighborEdgeInfo local_edge_info;
               local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
@@ -665,7 +639,7 @@ namespace Hermes
       bnd_verts[0] = bounding_verts_id[0];
       bnd_verts[1] = bounding_verts_id[1];
 
-      assert(n_sons < max_n_trans);
+      assert(n_sons < Transformations::max_level);
 
       for (int i = 0; i < 2; i++)
       {
@@ -711,24 +685,27 @@ namespace Hermes
                   neighbor_edge.local_num_of_edge = k;
                   break;
                 }
-                if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
+                
+              if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
-                // Construct the transformation path to the current neighbor.
-                for(unsigned int k = 0; k < n_sons; k++)
-                  central_transformations[n_neighbors][k] = sons[k];
+              central_transformations.add(new Transformations, n_neighbors);
+              Transformations *tr = central_transformations.get(n_neighbors);
+              
+              // Construct the transformation path to the current neighbor.
+              for(unsigned int k = 0; k < n_sons; k++)
+                tr->transf[k] = sons[k];
+              tr->num_levels = n_sons;
 
-                central_n_trans[n_neighbors] = n_sons;
+              NeighborEdgeInfo local_edge_info;
+              local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
+              // Query the orientation of the neighbor edge relative to the central el.
+              local_edge_info.orientation = neighbor_edge_orientation(bnd_verts[0], bnd_verts[1], i);
 
-                NeighborEdgeInfo local_edge_info;
-                local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
-                // Query the orientation of the neighbor edge relative to the central el.
-                local_edge_info.orientation = neighbor_edge_orientation(bnd_verts[0], bnd_verts[1], i);
+              neighbor_edges.push_back(local_edge_info);
 
-                neighbor_edges.push_back(local_edge_info);
-
-                // Append the new neighbor.
-                n_neighbors++;
-                neighbors.push_back(neighb_el);
+              // Append the new neighbor.
+              n_neighbors++;
+              neighbors.push_back(neighb_el);
             }
           }
         }
@@ -845,28 +822,44 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index)
     {
       _F_;
-      return this->central_n_trans[index];
+      if (this->central_transformations.present(index))
+        return this->central_transformations.get(index)->num_levels;
+      else
+        return 0;
     }
 
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2)
     { 
       _F_;
-      return this->central_transformations[index_1][index_2];
+      if (!this->central_transformations.present(index_1))
+        error("Out of bounds of central_transformations.");
+      if (index_2 >= Transformations::max_level)
+        error("Trying to access transformation deeper than allowed.");
+      
+      return this->central_transformations.get(index_1)->transf[index_2];
     }
       
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index)
     { 
       _F_;
-      return this->neighbor_n_trans[index];
+      if (this->neighbor_transformations.present(index))        
+        return this->neighbor_transformations.get(index)->num_levels;
+      else
+        return 0;
     }
       
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2)
     { 
       _F_;
-      return this->neighbor_transformations[index_1][index_2];
+      if (!this->neighbor_transformations.present(index_1))
+        error("Out of bounds of neighbor_transformations.");
+      if (index_2 >= Transformations::max_level)
+        error("Trying to access transformation deeper than allowed.");
+      
+      return this->neighbor_transformations.get(index_1)->transf[index_2];
     }
 
     template<typename Scalar>
@@ -880,8 +873,8 @@ namespace Hermes
       // Change the active element of the function. Note that this also resets the transformations on the function.
       fu->set_active_element(neighbors[active_segment]);
 
-      for(unsigned int i = 0; i < neighbor_n_trans[active_segment]; i++)
-        fu->push_transform(neighbor_transformations[active_segment][i]);
+      if (neighbor_transformations.present(active_segment))
+        neighbor_transformations.get(active_segment)->apply_on(fu);
 
       Func<Scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
 

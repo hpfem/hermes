@@ -39,7 +39,7 @@ namespace Hermes
     *      across the active edge. Hence, we "go down" in the central element in order to find a (virtual) sub-element
     *      matching the currently processed neighbor and store the corresponding transformations in the neighbor's field
     *      of the array \c transformations. This way, we obtain for each neighbor a set of transformations which have to
-    *      be applied on the central element to transform integration points to its correct part matching the neighbor.
+      *      be applied on the central element to transform integration points to its correct part matching the neighbor.
     *
     * There may be either one or more neighbors (see below). In the second case, each of the neighbors shares with the
     * central element a unique segment of the active edge. The next step is therefore a loop through all neighbors,
@@ -251,7 +251,7 @@ namespace Hermes
 
         int local_num_of_edge;  ///< Local number of the edge on neighbor element.
         int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
-        ///< (0 - same orientation, 1 - reverse orientation).
+                                ///< (0 - same orientation, 1 - reverse orientation).
       };
 
 
@@ -282,6 +282,59 @@ namespace Hermes
       
       /// Returns the current neighbor transformations according to the current active segment.
       unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2);
+      
+      /// Transformations of an element to one of its neighbors.
+      struct Transformations
+      {
+        static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
+                                                                       ///< in a go-down neighborhood) - see Transformable::push_transform.
+        
+        unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
+        unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
+        
+        Transformations() : num_levels(0) { memset(transf, 0, max_level * sizeof(int)); }
+        Transformations(const Transformations* t) { copy_from(t); }
+        Transformations(const Hermes::vector<unsigned int>& t) { copy_from(t); }
+        
+        void copy_from(const Hermes::vector<unsigned int>& t)
+        {
+          num_levels = std::min<unsigned int>(t.size(), max_level);
+          std::copy( t.begin(), t.begin()+num_levels, transf);
+        }
+        
+        void copy_from(const Transformations* t)
+        {
+          num_levels = t->num_levels;
+          memcpy(transf, t->transf, max_level * sizeof(unsigned int));
+        }
+        
+        void copy_to(Hermes::vector<unsigned int>* t)
+        {
+          t->assign(transf, transf+num_levels);
+        }
+        
+        void reset()
+        {
+          memset(transf, 0, num_levels * sizeof(unsigned int));
+          num_levels = 0;
+        }
+        
+        void strip_initial_transformations(unsigned int number_of_stripped);
+        
+        void apply_on(Transformable* tr) const
+        {
+          for(unsigned int i = 0; i < num_levels; i++)
+            tr->push_transform(transf[i]);
+        }
+        
+        void apply_on(const Hermes::vector<Transformable*>& tr) const
+        {
+          for(Hermes::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
+            for(unsigned int i = 0; i < num_levels; i++)
+              (*it)->push_transform(transf[i]);
+        }
+      };
+      
 
     private:
 
@@ -289,24 +342,13 @@ namespace Hermes
 
       /*** Transformations. ***/
 
-      static const unsigned int max_n_trans = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
-      ///< in a go-down neighborhood) - see Transformable::push_transform.
-
-      /// This variable has the meaning how many neighbors have been used for a single edge so far,
-      /// and it is used for the allocation of the arrays NeighborSearch::transformations and NeighborSearch::n_trans.
-      static const unsigned int max_neighbors = 1 << max_n_trans;
-
-      unsigned int central_transformations[max_neighbors][max_n_trans]; ///< Vector of transformations of the central element to each neighbor
-      ///< (in a go-down neighborhood; stored row-wise for each neighbor).
-      unsigned int central_n_trans[max_neighbors];                      ///< Number of transforms stored in each row of \c central_transformations.
-
-      unsigned int neighbor_transformations[max_neighbors][max_n_trans];///< Vector of transformations of the neighbor to the central element (go-up).
-      unsigned int neighbor_n_trans[max_neighbors];                     ///< Number of transforms stored in each row of \c neighbor_transformations.
-
-      uint64_t original_central_el_transform;                           ///< Sub-element transformation of any function that comes from the
-      ///< assembly, before transforms from \c transformations are pushed
-      ///< to it.
-
+      LightArray< Transformations* > central_transformations;     ///< Array of transformations of the central element to each neighbor
+                                                                  ///< (in a go-down neighborhood; stored as on \c Transformation structure
+                                                                  ///< for each neighbor).
+      LightArray< Transformations* > neighbor_transformations;    ///< Array of transformations of the neighbor to the central element (go-up).
+      
+      uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
+                                                               ///< assembly, before transforms from \c transformations are pushed to it.
 
       /*** Significant objects of the neighborhood. ***/
       Element* central_el;          ///< Central (currently assembled) element.
@@ -320,7 +362,7 @@ namespace Hermes
 
       Hermes::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
       Hermes::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
-      unsigned int n_neighbors;                                ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
+      unsigned int n_neighbors;                          ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
 
       /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the
       /// other side of the neighbor. The way is characterized by transformations needed to be pushed either on the

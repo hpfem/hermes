@@ -146,9 +146,11 @@ int main(int argc, char* argv[])
     newton.set_verbose_output(verbose);
     if (!newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER)) 
       error("Newton's iteration failed.");
-    else 
-      Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-      Hermes::vector<Solution<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time));
+    else
+    {
+      Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
+      Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
+    }
   }
 
   delete [] coeff_vec;

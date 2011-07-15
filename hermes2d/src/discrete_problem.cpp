@@ -1341,16 +1341,20 @@ namespace Hermes
         // Push all the necessary transformations to all functions of this stage.
         // The important thing is that the transformations to the current subelement are already there.
         for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-          for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_n_trans[neighbor_i]; trf_i++)
-            stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq)->central_transformations[neighbor_i][trf_i]);
+        {
+          NeighborSearch<Scalar>* ns = neighbor_searches.get(stage.meshes[fns_i]->get_seq() - min_dg_mesh_seq);
+          if (ns->central_transformations.present(neighbor_i)) 
+            ns->central_transformations.get(neighbor_i)->apply_on(stage.fns[fns_i]);
+        }
 
         // For neighbor psss.
         if(DG_matrix_forms_present && !edge_processed)
           for(unsigned int idx_i = 0; idx_i < stage.idx.size(); idx_i++)
           {
-            npss[stage.idx[idx_i]]->set_active_element((*neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->get_neighbors())[neighbor_i]);
-            for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_n_trans[neighbor_i]; trf_i++)
-              npss[stage.idx[idx_i]]->push_transform(neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq)->neighbor_transformations[neighbor_i][trf_i]);
+            NeighborSearch<Scalar>* ns = neighbor_searches.get(stage.meshes[idx_i]->get_seq() - min_dg_mesh_seq);
+            npss[stage.idx[idx_i]]->set_active_element((*ns->get_neighbors())[neighbor_i]);
+            if (ns->neighbor_transformations.present(neighbor_i))
+              ns->neighbor_transformations.get(neighbor_i)->apply_on(npss[stage.idx[idx_i]]);
           }
 
           // Also push the transformations to the slave psss and refmaps.
@@ -1440,14 +1444,16 @@ namespace Hermes
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
     {
       _F_;
-      for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
+        for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
         if(neighbor_searches.present(i))
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
-          if(ns->n_neighbors == 1 && ns->central_n_trans[0] == 0)
+          if (ns->n_neighbors == 1 && 
+              (ns->central_transformations.get_size() == 0 || ns->central_transformations.get(0)->num_levels == 0))
             continue;
           for(unsigned int j = 0; j < ns->n_neighbors; j++)
-            insert_into_multimesh_tree(root, ns->central_transformations[j], ns->central_n_trans[j]);
+            if (ns->central_transformations.present(j))
+              insert_into_multimesh_tree(root, ns->central_transformations.get(j)->transf, ns->central_transformations.get(j)->num_levels);
         }
     }
 
@@ -1555,7 +1561,12 @@ namespace Hermes
       for(unsigned int i = 0; i < num_neighbors; i++)
       {
         // Find the node corresponding to this neighbor in the tree.
-        NeighborNode* node = find_node(ns->central_transformations[i], ns->central_n_trans[i], multimesh_tree);
+        NeighborNode* node;
+        if (ns->central_transformations.present(i))
+          node = find_node(ns->central_transformations.get(i)->transf, ns->central_transformations.get(i)->num_levels, multimesh_tree);
+        else
+          node = multimesh_tree;
+        
         // Update the NeighborSearch.
         unsigned int added = update_ns_subtree(ns, node, i);
         i += added;
@@ -1613,15 +1624,15 @@ namespace Hermes
       Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
       running_central_transformations.push_back(new Hermes::vector<unsigned int>);
-      for(unsigned int i = 0; i < ns->central_n_trans[ith_neighbor]; i++)
-        running_central_transformations.back()->push_back(ns->central_transformations[ith_neighbor][i]);
-
+      if (ns->central_transformations.present(ith_neighbor))
+        ns->central_transformations.get(ith_neighbor)->copy_to(running_central_transformations.back());
+      
       // Initialize the vector for neighbor transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
       running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
-      for(unsigned int i = 0; i < ns->neighbor_n_trans[ith_neighbor]; i++)
-        running_neighbor_transformations.back()->push_back(ns->neighbor_transformations[ith_neighbor][i]);
+      if (ns->neighbor_transformations.present(ith_neighbor))
+        ns->neighbor_transformations.get(ith_neighbor)->copy_to(running_neighbor_transformations.back());
 
       // Delete the current neighbor.
       ns->delete_neighbor(ith_neighbor);
@@ -1645,17 +1656,13 @@ namespace Hermes
       {
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
-        ns->central_n_trans[ns->n_neighbors] = running_central_transformations[i]->size();
-        ns->neighbor_n_trans[ns->n_neighbors] = running_neighbor_transformations[i]->size();
-        for(unsigned int ii = 0; ii < ns->central_n_trans[ns->n_neighbors]; ii++)
-          ns->central_transformations[ns->n_neighbors][ii] = (*running_central_transformations[i])[ii];
-        for(unsigned int ii = 0; ii < ns->neighbor_n_trans[ns->n_neighbors]; ii++)
-          ns->neighbor_transformations[ns->n_neighbors][ii] = (*running_neighbor_transformations[i])[ii];
+        ns->central_transformations.add(new typename NeighborSearch<Scalar>::Transformations(*running_central_transformations[i]), ns->n_neighbors);
+        ns->neighbor_transformations.add(new typename NeighborSearch<Scalar>::Transformations(*running_neighbor_transformations[i]), ns->n_neighbors);
         ns->n_neighbors++;
       }
 
       // Return the number of neighbors deleted.
-      return - 1;
+      return -1;
     }
 
     template<typename Scalar>

@@ -293,7 +293,8 @@ namespace Hermes
                           processed = false;
                           break;
                         }
-                        if (processed) continue;
+                        
+                    if (processed) continue;
                   }
                   
                   // We do not use cache_e and cache_jwt here.
@@ -313,15 +314,20 @@ namespace Hermes
                     if (multimesh) 
                     {
                       for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
-                        for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq)->central_n_trans[neighbor]; trf_i++)
-                          stage.fns[fns_i]->push_transform(neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq)->central_transformations[neighbor][trf_i]);
+                      {
+                        NeighborSearch<Scalar> *ns = neighbor_searches.get(stage.meshes[fns_i]->get_seq() - this->dp.min_dg_mesh_seq);
+                        if (ns->central_transformations.present(neighbor))
+                          ns->central_transformations.get(neighbor)->apply_on(stage.fns[fns_i]);
+                      }
                     }
                     else
                     {
                       // Push the transformations only to the solution on the current mesh
-                      for(unsigned int trf_i = 0; trf_i < neighbor_searches.get(ns_index)->central_n_trans[neighbor]; trf_i++)
-                        stage.fns[i]->push_transform(neighbor_searches.get(ns_index)->central_transformations[neighbor][trf_i]);
+                      NeighborSearch<Scalar> *ns = neighbor_searches.get(ns_index);
+                      if (ns->central_transformations.present(neighbor))
+                        ns->central_transformations.get(neighbor)->apply_on(stage.fns[i]);
                     }
+                    
                     /* END COPY FROM DISCRETE_PROBLEM.CPP */
                     rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
 
