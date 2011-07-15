@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// AsmList<Scalar> is a simple container for the element assembly arrays idx, dof and coef.
+    /// AsmList is a simple container for the element assembly arrays idx, dof and coef.
     /// These arrays are filled by Space::get_element_assembly_list() and used by the
     /// assembling procedure and the Solution class. The arrays are allocated and deallocated
     /// automatically by the class. The class provides a list of triples (idx, dof, coef).
@@ -40,13 +40,13 @@ namespace Hermes
       unsigned int cap;       ///< internal
 
       /// Copy constructor.
-      AsmList<Scalar>(const AsmList<Scalar> & other);
+      AsmList(const AsmList<Scalar> & other);
 
       /// Constructor.
-      AsmList<Scalar>();
+      AsmList();
 
       /// Destructor.
-      ~AsmList<Scalar>();
+      ~AsmList();
 
       /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).
       void add_triplet(int i, int d, Scalar c);
