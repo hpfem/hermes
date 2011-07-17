@@ -29,7 +29,7 @@ namespace Hermes
           this->current_max_order = (20 - element->iro_cache)/2 - 2; // default
         else
           this->current_max_order = std::min(this->current_max_order, (20 - element->iro_cache)/2 - 2); // user specified
-        this->current_min_order = 1;
+        this->current_min_order = 0;
       }
 
       template<typename Scalar>
