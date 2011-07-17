@@ -270,6 +270,9 @@ namespace Hermes
       bool adapt(double thr, int strat = 0, int regularize = -1, double to_be_processed = 0.0);
 
       void disable_aposteriori_interface_scaling() { use_aposteriori_interface_scaling = false; }
+      
+      void set_volumetric_scaling_const(double C) { volumetric_scaling_const = C; }
+      void set_boundary_scaling_const(double C) { boundary_scaling_const = C; }
     };
 
     /// \class BasicKellyAdapt
@@ -317,8 +320,8 @@ namespace Hermes
         {
           SolFunctionDomain result = 0.;
           for (int i = 0; i < n; i++)
-            result += wt[i] * sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                      e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+            result += wt[i] * Hermes::sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
+                                           e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
           return result;
         }
       };

@@ -127,7 +127,7 @@ namespace Hermes
 
         if (this->errors[i] != NULL) delete [] this->errors[i];
         this->errors[i] = new double[max];
-        memset(this->errors[i], 0.0, sizeof(double) * max);
+        memset(this->errors[i], 0, sizeof(double) * max);
       }
 
       double total_norm = 0.0;
@@ -140,7 +140,7 @@ namespace Hermes
       if (calc_norm)
       {
         norms = new double[this->num];
-        memset(norms, 0.0, this->num * sizeof(double));
+        memset(norms, 0, this->num * sizeof(double));
       }
 
       double *errors_components = new double[this->num];
