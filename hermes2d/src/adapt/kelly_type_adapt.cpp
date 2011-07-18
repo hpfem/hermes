@@ -465,7 +465,7 @@ namespace Hermes
       // Element error mask is used here, because this variable is used in the adapt()
       // function, where the processed error (sum of errors of processed element errors)
       // is matched to this variable.
-      if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+      if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
         this->errors_squared_sum /= total_norm;
 
       // Prepare an ordered list of elements according to an error.
