@@ -69,6 +69,6 @@ Installation
 		
 The default installation paths are::
 
-			/usr/local on Linux
+			/include and /lib (runtime paths of the library /usr/local/lib) on Linux
 			"C:\Program Files" on Win32
 			"C:\Program Files (x86)" on Win64

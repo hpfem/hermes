@@ -121,7 +121,7 @@ namespace Hermes
 
       // Prepare residuals of stage solutions.
       Hermes::vector<Solution<Scalar>*> residuals_vector;
-      // A technical workabout.
+      // A technical workaround.
       Hermes::vector<bool> add_dir_lift;
       for (unsigned int i = 0; i < num_stages; i++)
         for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++) 
