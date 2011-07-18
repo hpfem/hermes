@@ -333,7 +333,7 @@ namespace Hermes
         iso_p = false;
         int start_order_h = std::max(current_min_order, (order_h+1) / 2), start_order_v = std::max(current_min_order, (order_v+1) / 2);
         start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
-        last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, std::min(start_order_h + H2DRS_MAX_ORDER_INC, order_h)), std::min(max_ha_order_v, std::min(start_order_v + H2DRS_MAX_ORDER_INC, order_v)));
+        last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, start_order_h + H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, start_order_v + H2DRS_MAX_ORDER_INC ));
         switch(cand_list) 
         {
         case H2D_H_ISO:
