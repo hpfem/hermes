@@ -347,7 +347,7 @@ namespace Hermes
                     // the other side, add the now computed error to that element as well.
                     if (ignore_visited_segments)
                     {
-                      Element *neighb = neighbor_searches.get(i)->neighb_el;
+                      Element *neighb = neighbor_searches.get(ns_index)->neighb_el;
 
                       // Scale the error estimate by the scaling function dependent on the element diameter
                       // (use the diameter of the element on the other side).
