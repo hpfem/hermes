@@ -20,9 +20,9 @@ namespace Hermes
   {
     template<typename Scalar>
     KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
-                                           Hermes::vector< ProjNormType > norms_,
                                            bool ignore_visited_segments_,
-                                           Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns_)
+                                           Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns_, 
+                                           Hermes::vector< ProjNormType > norms_)
       : Adapt<Scalar>(spaces_, norms_)
     {
       error_estimators_surf.reserve(this->num);
@@ -32,7 +32,7 @@ namespace Hermes
       {
         interface_scaling_fns_.reserve(this->num);
         for (int i = 0; i < this->num; i++)
-          interface_scaling_fns_.push_back(scale_by_element_diameter);
+          interface_scaling_fns_.push_back(new ScaleByElementDiameter);
       }
       use_aposteriori_interface_scaling = true;
       interface_scaling_fns = interface_scaling_fns_;
@@ -45,13 +45,13 @@ namespace Hermes
 
     template<typename Scalar>
     KellyTypeAdapt<Scalar>::KellyTypeAdapt(Space<Scalar>* space_, 
-                                           ProjNormType norm_, 
-                                           bool ignore_visited_segments_, 
-                                           interface_estimator_scaling_fn_t interface_scaling_fn_) 
+                                           bool ignore_visited_segments_,
+                                           const InterfaceEstimatorScalingFunction* interface_scaling_fn_,
+                                           ProjNormType norm_) 
       : Adapt<Scalar>(space_, norm_)
     {
       if (interface_scaling_fn_ == NULL)
-        interface_scaling_fns.push_back(scale_by_element_diameter);
+        interface_scaling_fns.push_back(new ScaleByElementDiameter);
       else
         interface_scaling_fns.push_back(interface_scaling_fn_);
 
@@ -341,18 +341,18 @@ namespace Hermes
                     // Scale the error estimate by the scaling function dependent on the element diameter
                     // (use the central element's diameter).
                     if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                      central_err *= interface_scaling_fns[i](ee[i]->get_diameter());
+                      central_err *= interface_scaling_fns[i]->value(ee[i]->get_diameter(), element_markers_conversion.get_user_marker(ee[i]->marker));
 
                     // In the case this edge will be ignored when calculating the error for the element on
                     // the other side, add the now computed error to that element as well.
                     if (ignore_visited_segments)
                     {
-                      Element *neighb = neighbor_searches.get(i)->neighb_el;
+                      Element *neighb = neighbor_searches.get(ns_index)->neighb_el;
 
                       // Scale the error estimate by the scaling function dependent on the element diameter
                       // (use the diameter of the element on the other side).
                       if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                        neighb_err *= interface_scaling_fns[i](neighb->get_diameter());
+                        neighb_err *= interface_scaling_fns[i]->value(neighb->get_diameter(), element_markers_conversion.get_user_marker(neighb->marker));
 
                       errors_components[i] += central_err + neighb_err;
                       total_error += central_err + neighb_err;
@@ -465,7 +465,7 @@ namespace Hermes
       // Element error mask is used here, because this variable is used in the adapt()
       // function, where the processed error (sum of errors of processed element errors)
       // is matched to this variable.
-      if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+      if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
         this->errors_squared_sum /= total_norm;
 
       // Prepare an ordered list of elements according to an error.

@@ -23,13 +23,21 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Functor representing the interface estimator scaling function.
+    class InterfaceEstimatorScalingFunction
+    {
+      public:
+        virtual double value(double e_diam, const std::string& e_marker) const = 0;
+    };
+    
     /// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
-    inline double scale_by_element_diameter(double e_diam) {
-      return e_diam;
-    }
-
-    /// Type of a pointer to the interface estimator scaling function.
-    typedef double (*interface_estimator_scaling_fn_t)(double e_diam);
+    class ScaleByElementDiameter : public InterfaceEstimatorScalingFunction
+    {
+      public:
+        virtual double value(double e_diam, const std::string& e_marker) const {
+          return e_diam;
+        }
+    };
 
     /// \class KellyTypeAdapt
     /// \ingroup g_adapt
@@ -142,7 +150,7 @@ namespace Hermes
 
       /// Scaling of the interface error estimates. May be specified by the user during construction.
       ///
-      Hermes::vector<interface_estimator_scaling_fn_t> interface_scaling_fns;
+      Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns;
       bool use_aposteriori_interface_scaling; ///< Specifies whether the interface error estimators for each
                                               ///< component will be multiplied by \c interface_scaling_fns
                                               ///< after being evaluated.
@@ -172,10 +180,6 @@ namespace Hermes
       /// Constructor.
       ///
       /// \param[in]  spaces_   Approximation space of each solution component.
-      ///
-      /// \param[in]  norms_    Norms used for making relative error estimates.
-      ///                       If not specified, they are defined according to the spaces.
-      ///
       /// \param[in]  ignore_visited_segments_ If true, error estimator for each inner edge will be evaluated only
       ///                                      once. It will be added to the total error estimate for both the active
       ///                                      element and its neighbors across that edge, after possibly being scaled by
@@ -190,31 +194,44 @@ namespace Hermes
       ///                                      Note that if \c interface_scaling_fns_ is empty (or unspecified) then the
       ///                                      default scaling by element diameter will be always performed unless it is
       ///                                      switched off by a call to \c disable_aposteriori_interface_scaling.
-      ///
       /// \param[in]  interface_scaling_fns_  Specifies functions used for scaling the interface error estimator for
       ///                                     each component. The scale is defined as a real function of the element
-      ///                                     diameter and multiplies the result of the interface estimators.
-      ///                                     It may thus be already present in the interface estimator forms
-      ///                                     themselves, in which case call \c disable_aposteriori_interface_scaling.
-      ///                                     In this case, it may also be required that \c ignore_visited_segments be
-      ///                                     false in order to always ensure that the diameter belongs to the element
-      ///                                     whose error is being calculated.
+      ///                                     diameter (and possibly equation coefficients associated to the element)
+      ///                                     and multiplies the result of the interface estimators. It may thus be already
+      ///                                     present in the interface estimator forms themselves, in which case call 
+      ///                                     \c disable_aposteriori_interface_scaling. In this case, it may also be required
+      ///                                     that \c ignore_visited_segments be false in order to always ensure that the 
+      ///                                     diameter belongs to the element whose error is being calculated.
+      /// \param[in]  norms_    Norms used for making relative error estimates.
+      ///                       If not specified, they are defined according to the spaces.
+      ///
       ///
       KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces_,
-                     Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
                      bool ignore_visited_segments_ = true,
-                     Hermes::vector<interface_estimator_scaling_fn_t>
-                     interface_scaling_fns_ = Hermes::vector<interface_estimator_scaling_fn_t>());
+                     Hermes::vector<const InterfaceEstimatorScalingFunction*>
+                       interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
+                     Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>());
+                     
 
-      KellyTypeAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM,
+      KellyTypeAdapt(Space<Scalar>* space_, 
                      bool ignore_visited_segments_ = true,
-                     interface_estimator_scaling_fn_t interface_scaling_fn_ = NULL);
+                     const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = NULL,
+                     ProjNormType norm_ = HERMES_UNSET_NORM);
 
       /// Destructor.
       virtual ~KellyTypeAdapt()
       {
+        for (unsigned int i = 0; i < error_estimators_surf.size(); i++)
+          delete error_estimators_surf[i];
         error_estimators_surf.clear();
+
+        for (unsigned int i = 0; i < error_estimators_vol.size(); i++)
+          delete error_estimators_vol[i];        
         error_estimators_vol.clear();
+        
+        for (unsigned int i = 0; i < interface_scaling_fns.size(); i++)
+          delete interface_scaling_fns[i];
+        interface_scaling_fns.clear();
       }
 
       Mesh::ElementMarkersConversion* get_element_markers_conversion() 
@@ -297,7 +314,9 @@ namespace Hermes
       {
       public:
         /// Constructor.
-        ErrorEstimatorFormKelly(int i) : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE) {}
+        ErrorEstimatorFormKelly(int i = 0, double const_by_laplacian = 1.0) 
+          : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE), const_by_laplacian(const_by_laplacian)
+        {}
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
                              Func<Scalar> *u, Geom<double> *e,
@@ -313,38 +332,40 @@ namespace Hermes
         }
 
       private:
+        double const_by_laplacian;
+        
         template<typename TestFunctionDomain, typename SolFunctionDomain>
-        static SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, 
-                                                                    Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-                                                                    Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+        SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, 
+                                                             Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
+                                                             Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           SolFunctionDomain result = 0.;
           for (int i = 0; i < n; i++)
-            result += wt[i] * Hermes::sqr( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                                           e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i))  );
+            result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
+                                                                  e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i)) ) );
           return result;
         }
       };
 
       /// Constructor.
       ///
-      /// For the equation \f$ K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
+      /// For the equation \f$ -K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
       ///
       BasicKellyAdapt(Hermes::vector<Space<Scalar>*> spaces_,
-                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>(),
-                      double const_by_laplacian = 1.0) 
-        : KellyTypeAdapt<Scalar>(spaces_, norms_)
+                      double const_by_laplacian = 1.0,
+                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>()) 
+        : KellyTypeAdapt<Scalar>(spaces_, true, Hermes::vector<const InterfaceEstimatorScalingFunction*>(), norms_)
       {
         set_scaling_consts(const_by_laplacian);   
         for (int i = 0; i < this->num; i++)
-          this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i));
+          this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i, const_by_laplacian));
       }
 
-      BasicKellyAdapt(Space<Scalar>* space_, ProjNormType norm_ = HERMES_UNSET_NORM, double const_by_laplacian = 1.0)
-        : KellyTypeAdapt<Scalar>(space_, norm_) 
+      BasicKellyAdapt(Space<Scalar>* space_, double const_by_laplacian = 1.0, ProjNormType norm_ = HERMES_UNSET_NORM)
+        : KellyTypeAdapt<Scalar>(space_, true, NULL, norm_) 
       {
         set_scaling_consts(const_by_laplacian);
-        this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0));
+        this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0, const_by_laplacian));
       }
 
     private:
