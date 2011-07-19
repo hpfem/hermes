@@ -144,6 +144,9 @@ namespace Hermes
       /// Calculates the inverse Jacobi matrix of reference map at a particular point (xi1, xi2).
       void inv_ref_map_at_point(double xi1, double xi2, double& x, double& y, double2x2& m);
 
+      /// Calculates the second reference map at a particular point (xi1, xi2).
+      void second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm);
+
       /// See Transformable::push_transform()
       virtual void push_transform(int son);
 

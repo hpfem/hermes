@@ -416,6 +416,54 @@ namespace Hermes
       m[1][1] =  tmp[0][0] / jac;
     }
 
+    void RefMap::second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm)
+    {
+      double3x2 k;
+      memset(k, 0, sizeof(double3x2));
+      x = y = 0;
+      for (unsigned int i = 0; i < nc; i++)
+      {
+        double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0);
+        x += coeffs[i][0] * val;
+        y += coeffs[i][1] * val;
+
+        double dxy, dxx, dyy;
+
+        dxx = ref_map_shapeset.get_dxx_value(indices[i], xi1, xi2, 0);
+        dxy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
+        dyy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
+        
+        k[0][0] += coeffs[i][0] * dxx;
+        k[0][1] += coeffs[i][1] * dxx;
+        k[1][0] += coeffs[i][0] * dxy;
+        k[1][1] += coeffs[i][1] * dxy;
+        k[2][0] += coeffs[i][0] * dyy;
+        k[2][1] += coeffs[i][1] * dyy;
+      }
+
+      double2x2 m;
+      this->inv_ref_map_at_point(xi1, xi2, x, y, m);
+      double a, b;
+
+      // coefficients in second derivative with respect to xx
+      a = sqr(m[0][0])*k[0][0] + 2*m[0][0]*m[0][1]*k[1][0] + sqr(m[0][1])*k[2][0];
+      b = sqr(m[0][0])*k[0][1] + 2*m[0][0]*m[0][1]*k[1][1] + sqr(m[0][1])*k[2][1];
+      mm[0][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
+      mm[0][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+
+      // coefficients in second derivative with respect to xy
+      a = m[0][0]*m[1][0]*k[0][0] + (m[0][1]*m[1][0] + m[0][0]*m[1][1])*k[1][0] + m[0][1]*m[1][1]*k[2][0];
+      b = m[0][0]*m[1][0]*k[0][1] + (m[0][1]*m[1][0] + m[0][0]*m[1][1])*k[1][1] + m[0][1]*m[1][1]*k[2][1];
+      mm[1][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
+      mm[1][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+
+      // coefficients in second derivative with respect to yy
+      a = sqr(m[1][0])*k[0][0] + 2*m[1][0]*m[1][1]*k[1][0] + sqr(m[1][1])*k[2][0];
+      b = sqr(m[1][0])*k[0][1] + 2*m[1][0]*m[1][1]*k[1][1] + sqr(m[1][1])*k[2][1];
+      mm[2][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
+      mm[2][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+    }
+
     void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi2)
     {
       const double TOL = 1e-12;

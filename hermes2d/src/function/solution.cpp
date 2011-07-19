@@ -1216,7 +1216,28 @@ namespace Hermes
           if (b == 2) return m[1][0]*dx + m[1][1]*dy; // H2D_FN_DY
         }
         else
-          error("Getting second derivatives of the solution: Not implemented yet.");
+        {
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+          double2x2 mat;
+          double3x2 mat2;
+          double xx, yy;
+           
+          this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
+          this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
+             
+          Scalar vx = get_ref_value(e, xi1, xi2, a, 1);
+          Scalar vy = get_ref_value(e, xi1, xi2, a, 2);
+          Scalar vxx = get_ref_value(e, xi1, xi2, a, 3);
+          Scalar vyy = get_ref_value(e, xi1, xi2, a, 4);
+          Scalar vxy = get_ref_value(e, xi1, xi2, a, 5);
+          if (b == 3)
+            return sqr(mat[0][0])*vxx + 2*mat[0][1]*mat[0][0]*vxy + sqr(mat[0][1])*vyy + mat2[0][0]*vx + mat2[0][1]*vy;   // dxx
+          if (b == 4)
+            return sqr(mat[1][0])*vxx + 2*mat[1][1]*mat[1][0]*vxy + sqr(mat[1][1])*vyy + mat2[2][0]*vx + mat2[2][1]*vy;   // dyy
+          if (b == 5)
+            return mat[0][0]*mat[1][0]*vxx + (mat[0][0]*mat[1][1]+mat[1][0]*mat[0][1])*vxy + mat[0][1]*mat[1][1]*vyy + mat2[1][0]*vx + mat2[1][1]*vy;   //dxy
+#endif
+        }
       }
       else // vector solution
       {
