@@ -388,24 +388,6 @@ namespace Hermes
                   if(neighbor_searches.present(j))
                     delete neighbor_searches.get(j);
                   
-                typename std::map< typename DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst, Func<double>*, 
-                                   typename DiscreteProblem<Scalar>::AssemblingCaches::CompareNonConst >::const_iterator it1;
-                for (it1 = this->dp.assembling_caches.cache_fn_quads.begin() ; it1 != this->dp.assembling_caches.cache_fn_quads.end(); it1++)
-                {
-                  (it1->second)->free_fn(); 
-                  delete (it1->second);
-                }
-                this->dp.assembling_caches.cache_fn_quads.clear();
-
-                typename std::map< typename DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst, Func<double>*, 
-                                   typename DiscreteProblem<Scalar>::AssemblingCaches::CompareNonConst>::const_iterator it2;
-                for (it2 = this->dp.assembling_caches.cache_fn_triangles.begin(); it2 != this->dp.assembling_caches.cache_fn_triangles.end(); it2++)
-                {
-                  (it2->second)->free_fn();
-                  delete (it2->second);
-                }
-                this->dp.assembling_caches.cache_fn_triangles.clear();
-
                 /* END COPY FROM DISCRETE_PROBLEM.CPP */
 
               }
