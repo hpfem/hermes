@@ -221,7 +221,7 @@ namespace Hermes
                     continue;
                 }
 
-                err += eval_boundary_estimator(error_estimators_surf[iest], rm, surf_pos);
+                err += eval_boundary_estimator(error_estimators_surf[iest], rm, &surf_pos[isurf]);
               }
               else              // Interface
               {
@@ -334,7 +334,7 @@ namespace Hermes
                     // The estimate is multiplied by 0.5 in order to distribute the error equally onto
                     // the two neighboring elements.
                     double central_err = 0.5 * eval_interface_estimator(error_estimators_surf[iest],
-                                                                        rm, surf_pos, neighbor_searches, 
+                                                                        rm, &surf_pos[isurf], neighbor_searches, 
                                                                         ns_index);
                     double neighb_err = central_err;
 

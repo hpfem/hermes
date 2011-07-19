@@ -310,7 +310,7 @@ namespace Hermes
     class HERMES_API BasicKellyAdapt : public KellyTypeAdapt<Scalar>
     {
     public:
-      class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
+            class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
       {
       public:
         /// Constructor.
@@ -322,29 +322,23 @@ namespace Hermes
                              Func<Scalar> *u, Geom<double> *e,
                              ExtData<Scalar> *ext) const
         {
-          return original_kelly_interface_estimator<double, Scalar>(n, wt, u_ext, u, e, ext);
-        }
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
-                                ExtData<Hermes::Ord> *ext) const
-        {
-          return original_kelly_interface_estimator<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, e, ext);
-        }
-
-      private:
-        double const_by_laplacian;
-        
-        template<typename TestFunctionDomain, typename SolFunctionDomain>
-        SolFunctionDomain original_kelly_interface_estimator(int n, double *wt, 
-                                                             Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-                                                             Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
-        {
-          SolFunctionDomain result = 0.;
+          Scalar result = 0.;
           for (int i = 0; i < n; i++)
             result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
                                                                   e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i)) ) );
           return result;
         }
+        
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
+                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
+                                ExtData<Hermes::Ord> *ext) const
+        {
+          return Hermes::sqr( (u->get_dx_central(0) - u->get_dx_neighbor(0)) +
+                              (u->get_dy_central(0) - u->get_dy_neighbor(0)) );
+        }
+
+      private:
+        double const_by_laplacian;
       };
 
       /// Constructor.
