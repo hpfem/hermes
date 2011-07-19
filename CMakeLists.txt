@@ -44,6 +44,9 @@ project(hermes)
 		set(REPORT_TIME             NO)   #time will not be measured and time measurement will not be reported
 		#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
+  # Installation path:
+    set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib, 
+                                            #for include files /usr/local/include
 	#### Solvers ###
 	# Standard UMFPACK
 		# UMFPACK is chosen by default.
@@ -119,7 +122,7 @@ project(hermes)
 		
 	# Set overrides:
 	if(WITH_PYTHON)
-		set(REPORT_RUNTIME_CONTROL YES) #reuired by python wrappers
+		set(REPORT_RUNTIME_CONTROL YES) #required by python wrappers
 	endif(WITH_PYTHON)
 	### end DEFAULT CONFIGURATION ###
 
