@@ -30,7 +30,7 @@
 #endif
 
 /* constants */
-#define MIN_CONT_STEP 1.0E-4 ///< A minimal step of a contour.
+#define MIN_CONT_STEP 1.0E-2 ///< A minimal step of a contour.
 #define CONT_CHANGE 1.0E-2 ///< A change of a contour in GUI
 #define D3DV_SCALE_STEP_COEF 1.1 ///< A scale coefficient for changing contours and scaling along the Y-axis using keyboard.
 
@@ -725,10 +725,12 @@ namespace Hermes
         int r1 = 0, r2 = 2;
 
         // Adjustment of the contour step.
+        /*
         while(std::abs(val - vert[idx[r2]][2]) > 50 * cont_step)
-          cont_step *= 10;
+          cont_step *= 2;
         while(std::abs(val - vert[idx[r2]][2]) < 2E-2 * cont_step)
-          cont_step /= 10;
+          cont_step /= 2;
+        */
 
         while (val < vert[idx[r2]][2])
         {
