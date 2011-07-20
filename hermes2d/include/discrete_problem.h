@@ -53,7 +53,7 @@ namespace Hermes
 
     /// Discrete problem class.
     ///
-    /// This class does assembling into external matrix / vactor structures.
+    /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>
