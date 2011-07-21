@@ -59,6 +59,9 @@ namespace Hermes
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
         virtual Scalar** precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order);
 
+        /**  Overriden function. For details, see OptimumSelector::create_candidates(). */
+        void create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order);
+
         /// Calculates values of shape function at GIP for all transformations.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
         virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals);

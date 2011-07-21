@@ -81,6 +81,84 @@ namespace Hermes
         }
         error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
+      
+      template<typename Scalar>
+      void L2ProjBasedSelector<Scalar>::create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order) 
+      {
+        int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
+        int max_p_order_h = H2D_GET_H_ORDER(max_p_quad_order), max_p_order_v = H2D_GET_V_ORDER(max_p_quad_order);
+        int max_ha_order_h = H2D_GET_H_ORDER(max_ha_quad_order), max_ha_order_v = H2D_GET_V_ORDER(max_ha_quad_order);
+        bool tri = e->is_triangle();
+
+        //clear list of candidates
+        candidates.clear();
+        if (candidates.capacity() < H2DRS_ASSUMED_MAX_CANDS)
+          candidates.reserve(H2DRS_ASSUMED_MAX_CANDS);
+
+        //generate all P-candidates (start from intention of generating all possible candidates
+        //and restrict it according to the given adapt-type)
+        bool iso_p = false;
+        int start_quad_order = quad_order;
+        int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v+H2DRS_MAX_ORDER_INC));
+        switch(cand_list) 
+        {
+        case H2D_H_ISO:
+        case H2D_H_ANISO: last_quad_order = start_quad_order; break; //no P-candidates except the original candidate
+        case H2D_P_ISO:
+        case H2D_HP_ISO:
+        case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
+        }
+        append_candidates_split(quad_order, last_quad_order, H2D_REFINEMENT_P, tri || iso_p);
+
+        //generate all H-candidates
+        iso_p = false;
+        int start_order_h = std::max(current_min_order, (order_h+1) / 2), start_order_v = std::max(current_min_order, (order_v+1) / 2);
+        start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
+        last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, start_order_h + H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, start_order_v + H2DRS_MAX_ORDER_INC));
+        switch(cand_list) 
+        {
+        case H2D_H_ISO:
+        case H2D_H_ANISO:
+          last_quad_order = start_quad_order = quad_order; break; //no only one candidate will be created
+        case H2D_P_ISO:
+        case H2D_P_ANISO: last_quad_order = -1; break; //no H-candidate will be generated
+        case H2D_HP_ISO:
+        case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
+        }
+        append_candidates_split(start_quad_order, last_quad_order, H2D_REFINEMENT_H, tri || iso_p);
+
+        //generate all ANISO-candidates
+        if (!tri && e->iro_cache < 8 /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
+          && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO)) 
+        {
+          iso_p = false;
+          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v+1) / 2));
+          int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC));
+          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h+1) / 2), order_v);
+          int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, order_v+H2DRS_MAX_ORDER_INC));
+          switch(cand_list) 
+          {
+          case H2D_H_ANISO:
+            last_quad_order_hz = start_quad_order_hz = quad_order;
+            last_quad_order_vt = start_quad_order_vt = quad_order;
+            break; //only one candidate will be created
+          case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
+          }
+          if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
+            int order = std::min(H2D_GET_H_ORDER(start_quad_order_hz), H2D_GET_V_ORDER(start_quad_order_hz));
+            start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
+            order = std::min(H2D_GET_H_ORDER(start_quad_order_vt), H2D_GET_V_ORDER(start_quad_order_vt));
+            start_quad_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
+
+            order = std::min(H2D_GET_H_ORDER(last_quad_order_hz), H2D_GET_V_ORDER(last_quad_order_hz));
+            last_quad_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
+            order = std::min(H2D_GET_H_ORDER(last_quad_order_vt), H2D_GET_V_ORDER(last_quad_order_vt));
+            last_quad_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
+          }
+          append_candidates_split(start_quad_order_hz, last_quad_order_hz, H2D_REFINEMENT_ANISO_H, iso_p);
+          append_candidates_split(start_quad_order_vt, last_quad_order_vt, H2D_REFINEMENT_ANISO_V, iso_p);
+        }
+      }
 
       template<typename Scalar>
       void L2ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals) 
