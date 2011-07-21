@@ -37,14 +37,14 @@ namespace Hermes
       int i;
 
       // check to see if we already have the quadrature
-      for (i = 0; i < 4; i++)
+      for (i = 0; i < 8; i++)
         if (quads[i] == quad_2d) {
           cur_quad = i;
           return;
         }
 
         // if not, add the quadrature to a free slot
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < 8; i++)
           if (quads[i] == NULL) {
             quads[i] = quad_2d;
             cur_quad = i;

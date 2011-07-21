@@ -274,7 +274,7 @@ namespace Hermes
         update_nodes_ptr();
       }
 
-      Quad2D* quads[4]; ///< list of available quadratures
+      Quad2D* quads[8]; ///< list of available quadratures
 
       int cur_quad;     ///< active quadrature (index into 'quads')
 
