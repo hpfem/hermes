@@ -46,6 +46,7 @@ namespace Hermes
       residual = create_vector<Scalar>(this->matrix_solver_type);
       linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
       reset_times();
+      this->timer = NULL;
     }
 
     template<typename Scalar>
@@ -86,6 +87,13 @@ namespace Hermes
       // The Newton's loop.
       double residual_norm;
       int it = 1;
+      
+      bool delete_timer = false;
+      if (this->timer == NULL)
+      {
+        this->timer = new TimePeriod;
+        delete_timer = true;
+      }
             
       this->timer->tick();
       setup_time += this->timer->last();
@@ -155,6 +163,12 @@ namespace Hermes
           this->timer->tick();
           solve_time += this->timer->last();
           
+          if (delete_timer)
+          {
+            delete this->timer;
+            this->timer = NULL;
+          }
+          
           return true;
         }
         
@@ -194,7 +208,14 @@ namespace Hermes
         solve_time += this->timer->last();
       }
       // Return false.
-      // All 'bad' situations end here.      
+      // All 'bad' situations end here. 
+      
+      if (delete_timer)
+      {
+        delete this->timer;
+        this->timer = NULL;
+      }
+      
       return false;
     }
 
