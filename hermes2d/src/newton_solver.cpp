@@ -45,6 +45,8 @@ namespace Hermes
       jacobian = create_matrix<Scalar>(this->matrix_solver_type);
       residual = create_vector<Scalar>(this->matrix_solver_type);
       linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, jacobian, residual);
+      reset_times();
+      this->timer = NULL;
     }
 
     template<typename Scalar>
@@ -71,7 +73,7 @@ namespace Hermes
 
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
-    {
+    {      
       // Delete the old solution vector, if there is any.
       if(this->sln_vector != NULL)
       {
@@ -85,10 +87,24 @@ namespace Hermes
       // The Newton's loop.
       double residual_norm;
       int it = 1;
-      while (1)
+      
+      bool delete_timer = false;
+      if (this->timer == NULL)
       {
+        this->timer = new TimePeriod;
+        delete_timer = true;
+      }
+            
+      this->timer->tick();
+      setup_time += this->timer->last();
+      
+      while (1)
+      {        
         // Assemble the residual vector.
         this->dp->assemble(coeff_vec, residual);
+        
+        this->timer->tick();
+        assemble_time += this->timer->last();
 
         // Measure the residual norm.
         if (residual_as_function)
@@ -144,23 +160,38 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
+          this->timer->tick();
+          solve_time += this->timer->last();
+          
+          if (delete_timer)
+          {
+            delete this->timer;
+            this->timer = NULL;
+          }
+          
           return true;
         }
+        
+        this->timer->tick();
+        solve_time += this->timer->last();
 
         // Assemble the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
+        
+        this->timer->tick();
+        assemble_time += this->timer->last();
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
         residual->change_sign();
-
+        
         // Solve the linear system.
         if(!linear_solver->solve()) {
           if (this->verbose_output) 
             info ("Matrix<Scalar> solver failed. Returning false.\n");
           break;
         }
-
+        
         // Add \deltaY^{n+1} to Y^n.
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
@@ -172,9 +203,19 @@ namespace Hermes
             info("Maximum allowed number of Newton iterations exceeded, returning false.");
           break;
         }
+        
+        this->timer->tick();
+        solve_time += this->timer->last();
       }
       // Return false.
-      // All 'bad' situations end here.
+      // All 'bad' situations end here. 
+      
+      if (delete_timer)
+      {
+        delete this->timer;
+        this->timer = NULL;
+      }
+      
       return false;
     }
 
