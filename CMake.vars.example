@@ -1,21 +1,14 @@
 # This is a sample CMake.vars file for Hermes.
-set(DEP_ROOT "d:/hpfem/hermes/dependencies/")    # Root of a directory with dependecies. This line has to be modified. Don't forget to replace all backslashes '\' with slashes '/'.
-
-# Search paths. None of these lines needs to be modified in an usual case.
-set(GLUT_ROOT ${DEP_ROOT})
-set(GLEW_ROOT ${DEP_ROOT})
-set(PTHREAD_ROOT ${DEP_ROOT})
-set(UMFPACK_ROOT ${DEP_ROOT})
-set(AMD_ROOT ${DEP_ROOT})
-set(ANTTWEAKBAR_ROOT ${DEP_ROOT})
-set(NETCDF_ROOT ${DEP_ROOT})
-set(EXODUSII_ROOT ${DEP_ROOT})
-set(CLAPACK_ROOT ${DEP_ROOT})
-set(TRILINOS_ROOT ${DEP_ROOT})
-set(PYTHON_ROOT ${DEP_ROOT})
+# Search paths.
+set(GLUT_ROOT "d:/hpfem/hermes/dependencies/glut")
+set(GLEW_ROOT "d:/hpfem/hermes/dependencies/glew")
+set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies/pthread")
+set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies/umfpack")
+set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies/clapack")
+set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
 
 # Target (installation) path.
-set(TARGET_ROOT ${DEP_ROOT})
+set(TARGET_ROOT "d:/hpfem/hermes/dependencies")
 
 # Turn off Python.
 set(WITH_PYTHON NO)
