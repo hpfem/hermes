@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d.h"
-
 #ifndef __H2D_SPLINE_H
 #define __H2D_SPLINE_H
+
+#include "hermes2d_common_defs.h"
+
 namespace Hermes
 {
   namespace Hermes2D
