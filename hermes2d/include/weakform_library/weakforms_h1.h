@@ -424,9 +424,11 @@ namespace Hermes
       class HERMES_API DefaultWeakFormPoisson : public WeakForm<Scalar>
       {
       public:
-        DefaultWeakFormPoisson(std::string area = HERMES_ANY,
-          HermesFunction<Scalar>* coeff = HERMES_ONE,
-          HermesFunction<Scalar>* f = HERMES_ONE,
+        DefaultWeakFormPoisson();
+
+        DefaultWeakFormPoisson(std::string area,
+          HermesFunction<Scalar>* coeff,
+          HermesFunction<Scalar>* f,
           GeomType gt = HERMES_PLANAR);
       };
     };

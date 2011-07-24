@@ -1005,6 +1005,11 @@ namespace Hermes
       };
 
       template<typename Scalar>
+      DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson() : WeakForm<Scalar>()
+      {
+      };
+
+      template<typename Scalar>
       DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson(std::string area,
         HermesFunction<Scalar>* coeff,
         HermesFunction<Scalar>* f,
