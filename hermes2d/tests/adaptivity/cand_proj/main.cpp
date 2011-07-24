@@ -181,18 +181,26 @@ Mesh* init_mesh(bool tri) {
   if (tri) {
     const int vertex_num = 3, tria_num = 1, quad_num = 0, marker_num = 3;
     double2 vertex_array[3] = {{-1,-1}, { 1,-1}, {-1, 1}};
-    int4 tria_array[1] = {{0, 1, 2, 0}};
-    int5 *quad_array = NULL;
-    int3 marker_array[3] = {{0, 1, 2}, {1, 2, 1}, {2, 0, 3}};
-    mesh->create(vertex_num, vertex_array, tria_num, tria_array, quad_num, quad_array, marker_num, marker_array);
+    int3 tria_array[1] = {{0, 1, 2}};
+    std::string tria_markers[1] = {"0"};
+    int4 *quad_array = NULL;
+    std::string *quad_markers = NULL;
+    int2 marker_array[3] = {{0, 1}, {1, 2}, {2, 0}};
+    std::string markers[3] = {"2", "1", "3"};
+    mesh->create(vertex_num, vertex_array, tria_num, tria_array, tria_markers,
+                  quad_num, quad_array, quad_markers, marker_num, marker_array, markers);
   }
   else {
     const int vertex_num = 4, tria_num = 0, quad_num = 1, marker_num = 4;
     double2 vertex_array[4] = {{-1,-1}, { 1,-1}, { 1, 1}, {-1, 1}};
-    int4 *tria_array = NULL;
-    int5 quad_array[1] = {{0, 1, 2, 3, 0}};
-    int3 marker_array[4] = {{0, 1, 3}, {1, 2, 2}, {2, 3, 4}, {3, 0, 1}};
-    mesh->create(vertex_num, vertex_array, tria_num, tria_array, quad_num, quad_array, marker_num, marker_array);
+    int3 *tria_array = NULL;
+    std::string *tria_markers = NULL;
+    int4 quad_array[1] = {{0, 1, 2, 3}};
+    std::string quad_markers[1] = {"0"};
+    int2 marker_array[4] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
+    std::string markers[4] = {"3", "2", "4", "1"};
+    mesh->create(vertex_num, vertex_array, tria_num, tria_array, tria_markers,
+                  quad_num, quad_array, quad_markers, marker_num, marker_array, markers);
   }
   return mesh;
 }
@@ -442,7 +450,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 
     info("Solving the matrix problem.");
     if(solver->solve())
-      Solution<double>::vector_to_solution(solver->get_solution(), ref_space, &rsln);
+      Solution<double>::vector_to_solution(solver->get_sln_vector(), ref_space, &rsln);
     else
       error ("Matrix solver failed.\n");
 
@@ -522,11 +530,11 @@ int main(int argc, char* argv[])
 quit:
   if (test_success)
   {
-    info("!Test: Success");
+    info("Success!");
     return TEST_SUCCESS;
   }
   else {
-    info("!Test: Failed!");
+    info("Failure!");
     return TEST_FAILURE;
   }
 }

@@ -1,4 +1,5 @@
 # has to be fixed add_subdirectory(adaptivity)
+add_subdirectory(adaptivity)
 add_subdirectory(assembling)
 add_subdirectory(integrals)
 add_subdirectory(meshes)
