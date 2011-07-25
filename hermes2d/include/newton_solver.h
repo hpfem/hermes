@@ -97,7 +97,7 @@ namespace Hermes
       LinearSolver<Scalar>* linear_solver;
 
       /// Used by method solve_keep_jacobian().
-      Hermes::Algebra::SparseMatrix<Scalar>* kept_jacobian;
+      SparseMatrix<Scalar>* kept_jacobian;
 
       /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
       /// By default set to 1E6.

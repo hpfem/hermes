@@ -298,9 +298,11 @@ namespace Hermes
         }
 
         // Assemble and keep the jacobian if this has not been done before.
+        // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
         if(kept_jacobian == NULL) {
           kept_jacobian = create_matrix<Scalar>(this->matrix_solver_type);
           this->dp->assemble(coeff_vec, kept_jacobian);
+          linear_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         }
 
         // Multiply the residual vector with -1 since the matrix
