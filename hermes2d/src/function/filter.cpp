@@ -689,6 +689,8 @@ namespace Hermes
       }
     }
 
+    template class HERMES_API Filter<double>;
+    template class HERMES_API Filter<std::complex<double> >;
     template class HERMES_API SimpleFilter<double>;
     template class HERMES_API SimpleFilter<std::complex<double> >;
     template class HERMES_API DXDYFilter<double>;
