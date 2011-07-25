@@ -1086,6 +1086,7 @@ namespace Hermes
       free();
       HashTable::copy(mesh);
       this->boundary_markers_conversion = mesh->boundary_markers_conversion;
+      this->element_markers_conversion = mesh->element_markers_conversion;
 
       // clear reference for all nodes
       for(int i = 0; i < nodes.get_size(); i++)
