@@ -338,6 +338,11 @@ project(hermes)
 			set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 		endif(WITH_OPENMP)
 
+    if(WITH_EXODUSII)
+      find_package(EXODUSII REQUIRED)
+      include_directories(${EXODUSII_INCLUDE_DIR})
+    endif(WITH_EXODUSII)
+
 		# If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC).
 		if(WITH_MPI)
 			if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
@@ -374,6 +379,7 @@ project(hermes)
 	message("Build with TRILINOS: ${WITH_TRILINOS}")
 	message("Build with MPI: ${WITH_MPI}")
 	message("Build with OPENMP: ${WITH_OPENMP}")
+	message("Build with EXODUSII: ${WITH_EXODUSII}")
 	if(HAVE_TEUCHOS_STACKTRACE)
 			message("Print Teuchos stacktrace on segfault: YES")
 	else(HAVE_TEUCHOS_STACKTRACE)
