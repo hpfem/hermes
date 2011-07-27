@@ -108,6 +108,8 @@ namespace Hermes
       }
 
       project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      
+      delete proj_wf;
     }
 
     template<typename Scalar>
