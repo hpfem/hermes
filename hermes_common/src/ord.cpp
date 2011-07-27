@@ -33,7 +33,7 @@ namespace Hermes
   Ord Ord::operator-(double d) { return *this; }
   Ord Ord::operator*(const Ord &o) { return Ord(this->order + o.order); }
   Ord Ord::operator*(double d) { return *this; }
-  Ord Ord::operator/(const Ord &o) { return Ord(get_max_order()); }
+  Ord Ord::operator/(const Ord &o) { return Ord::get_max_order(); }
   Ord Ord::operator/(double d) { return *this; }
 
   Ord Ord::operator+=(const Ord &o) { this->order = std::max(this->order, o.order); return *this; }
