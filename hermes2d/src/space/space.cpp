@@ -159,7 +159,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase) {
+    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase, int refinement_type) {
       _F_;
       Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
       bool same_meshes = true;
@@ -169,7 +169,7 @@ namespace Hermes
           same_meshes = false;
         Mesh* ref_mesh = new Mesh;
         ref_mesh->copy(coarse[i]->get_mesh());
-        ref_mesh->refine_all_elements();
+        ref_mesh->refine_all_elements(refinement_type);
         ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
       }
 
@@ -180,18 +180,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase) {
+    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, 
+                                                          int order_increase, 
+                                                          int refinement_type) 
+    {
       _F_;
       Mesh* ref_mesh = new Mesh;
       ref_mesh->copy(coarse->get_mesh());
-      ref_mesh->refine_all_elements();
+      ref_mesh->refine_all_elements(refinement_type);
       Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
 
       return ref_space;
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) {
+    void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) 
+    {
       int n = spaces.size();
       for (int i = 0; i < n; i++) {
         if(spaces[i]->get_essential_bcs() != NULL)
