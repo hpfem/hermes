@@ -46,9 +46,9 @@ double func_val(double** poly_matrix, int quad_order, double x, double y) {
   for(int i = 0; i <= order_v; i++) {
     double val = 0;
     for(int k = 0; k <= order_h; k++) {
-      val += pow(x, k) * poly_matrix[i][k];
+      val += Hermes::pow(x, k) * poly_matrix[i][k];
     }
-    res += val * pow(y, i);
+    res += val * Hermes::pow(y, i);
   }
 
   return res;
@@ -62,9 +62,9 @@ double func_dx(double** poly_matrix, int quad_order, double x, double y) {
   for(int i = 0; i <= order_v; i++) {
     double val = 0;
     for(int k = 1; k <= order_h; k++) {
-      val += pow(x, k-1) * k * poly_matrix[i][k];
+      val += Hermes::pow(x, k-1) * k * poly_matrix[i][k];
     }
-    res += val * pow(y, i);
+    res += val * Hermes::pow(y, i);
   }
 
   return res;
@@ -79,9 +79,9 @@ double func_dy(double** poly_matrix, int quad_order, double x, double y) {
   for(int i = 1; i <= order_v; i++) {
     double val = 0;
     for(int k = 0; k <= order_h; k++) {
-      val += pow(x, k) * poly_matrix[i][k];
+      val += Hermes::pow(x, k) * poly_matrix[i][k];
     }
-    res += val * i * pow(y, i-1);
+    res += val * i * Hermes::pow(y, i-1);
   }
 
   return res;
