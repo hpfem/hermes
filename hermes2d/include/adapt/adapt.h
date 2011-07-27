@@ -95,10 +95,12 @@ namespace Hermes
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
           ExtData<Hermes::Ord> *ext) const;
 
-      private:
+      
+      protected:
         /// Norm used.
         ProjNormType projNormType;
-
+        
+      private:
         /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
