@@ -23,7 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Filter<Scalar>::Filter(Hermes::vector<MeshFunction<Scalar>*> solutions) : MeshFunction<Scalar>()
+    Filter<Scalar>::Filter(const Hermes::vector<MeshFunction<Scalar>*>& solutions) : MeshFunction<Scalar>()
     {
       this->num = solutions.size();
       if(num > 10)
@@ -34,7 +34,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Filter<Scalar>::init(Hermes::vector<MeshFunction<Scalar>*> solutions)
+    void Filter<Scalar>::init(const Hermes::vector<MeshFunction<Scalar>*>& solutions)
     {
       this->num = solutions.size();
       if(num > 10)
@@ -209,7 +209,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items)
+    SimpleFilter<Scalar>::SimpleFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions, const Hermes::vector<int>& items)
     {
       this->num = solutions.size();
       if(this->num > 10)
@@ -232,7 +232,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<int> items)
+    SimpleFilter<Scalar>::SimpleFilter(const Hermes::vector<Solution<Scalar>*>& solutions, const Hermes::vector<int>& items)
     {
       this->num = solutions.size();
       if(this->num > 10)
@@ -333,13 +333,13 @@ namespace Hermes
 
 
     template<typename Scalar>
-    DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions) : Filter<Scalar>(solutions)
+    DXDYFilter<Scalar>::DXDYFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions) : Filter<Scalar>(solutions)
     {
       init_components();
     }
 
     template<typename Scalar>
-    DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<Solution<Scalar>*> solutions) : Filter<Scalar>(solutions)
+    DXDYFilter<Scalar>::DXDYFilter(const Hermes::vector<Solution<Scalar>*>& solutions) : Filter<Scalar>(solutions)
     {
       init_components();
     }
@@ -354,7 +354,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DXDYFilter<Scalar>::init(Hermes::vector<MeshFunction<Scalar>*> solutions)
+    void DXDYFilter<Scalar>::init(const Hermes::vector<MeshFunction<Scalar>*>& solutions)
     {
       Filter<Scalar>::init(solutions);
       init_components();
