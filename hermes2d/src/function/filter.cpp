@@ -32,6 +32,18 @@ namespace Hermes
         this->sln[i] = solutions.at(i);
       this->init();
     }
+    
+    template<typename Scalar>
+    Filter<Scalar>::Filter(const Hermes::vector<Solution<Scalar>*>& solutions) : MeshFunction<Scalar>()
+    {
+      this->num = solutions.size();
+      if(num > 10)
+        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+      for(int i = 0; i < this->num; i++)
+        this->sln[i] = solutions.at(i);
+      this->init();
+    }
+
 
     template<typename Scalar>
     void Filter<Scalar>::init(const Hermes::vector<MeshFunction<Scalar>*>& solutions)
