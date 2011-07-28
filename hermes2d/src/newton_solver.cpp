@@ -222,7 +222,7 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function)
     {
-      return solve(coeff_vec, 1E-8, 100, residual_as_function);
+      return solve_keep_jacobian(coeff_vec, 1E-8, 100, residual_as_function);
     }
 
     template<typename Scalar>
@@ -298,9 +298,20 @@ namespace Hermes
         }
 
         // Assemble and keep the jacobian if this has not been done before.
+        // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
         if(kept_jacobian == NULL) {
           kept_jacobian = create_matrix<Scalar>(this->matrix_solver_type);
+
+          // Give the matrix solver the correct Jacobian. NOTE: It would be cleaner if the whole decision whether to keep 
+          // Jacobian or not was made in the constructor.
+          //
+          // Delete the matrix solver created in the constructor.
+          delete linear_solver; 
+          // Create new matrix solver with correct matrix.
+          linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
+          
           this->dp->assemble(coeff_vec, kept_jacobian);
+          linear_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         }
 
         // Multiply the residual vector with -1 since the matrix

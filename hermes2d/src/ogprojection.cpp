@@ -108,6 +108,8 @@ namespace Hermes
       }
 
       project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      
+      delete proj_wf;
     }
 
     template<typename Scalar>
@@ -181,35 +183,70 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol,
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol,
-      Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+      Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
+      Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
     {
       _F_;
       unsigned int n = spaces.size();
-      unsigned int n_biforms = mfvol.size();
+      unsigned int n_biforms = custom_projection_jacobian.size();
       if (n_biforms == 0)
         error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");
-      if (n_biforms != vfvol.size())
+      if (n_biforms != custom_projection_residual.size())
         error("Mismatched numbers of projection forms in project_global().");
       if (n != n_biforms)
         error("Mismatched numbers of projected functions and projection forms in project_global().");
 
-      // This is needed since spaces may have their DOFs enumerated only locally
-      // when they come here.
-      int ndof = Space<Scalar>::assign_dofs(spaces);
-
-      // Define projection weak form.
+      // Define local projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
       for (unsigned int i = 0; i < n; i++) 
       {
-        proj_wf->add_matrix_form(mfvol[i]);
-        // FIXME
-        // proj_wf->add_vector_form(i, proj_liforms[i].first, proj_liforms[i].second, HERMES_ANY, source_meshfns[i]);
+        proj_wf->add_matrix_form(custom_projection_jacobian[i]);
+        proj_wf->add_vector_form(custom_projection_residual[i]);
       }
 
       project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      
+      delete proj_wf;
+    }
+    
+    template<typename Scalar>
+    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar> *> spaces,
+                                              Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
+                                              Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
+                                              Hermes::vector<Solution<Scalar> *> sols_dest, Hermes::MatrixSolverType matrix_solver)
+    {
+      _F_
+      Scalar* target_vec = new Scalar[Space<Scalar>::get_num_dofs(spaces)];
+      OGProjection<Scalar>::project_global(spaces, custom_projection_jacobian, custom_projection_residual, target_vec, matrix_solver);
+      Solution<Scalar>::vector_to_solutions(target_vec, spaces, sols_dest);
+      delete [] target_vec;
+    }
+
+    template<typename Scalar>
+    void OGProjection<Scalar>::project_global(Space<Scalar>* space,
+                                              MatrixFormVol<Scalar>* custom_projection_jacobian,
+                                              VectorFormVol<Scalar>* custom_projection_residual,
+                                              Solution<Scalar>* sol_dest, Hermes::MatrixSolverType matrix_solver)
+    {
+      _F_
+      Hermes::vector<Space<Scalar>*> space_vector;
+      space_vector.push_back(space);
+      
+      Hermes::vector<MatrixFormVol<Scalar>*> custom_projection_jacobian_vector;
+      custom_projection_jacobian_vector.push_back(custom_projection_jacobian);
+      
+      Hermes::vector<VectorFormVol<Scalar>*> custom_projection_residual_vector;
+      custom_projection_residual_vector.push_back(custom_projection_residual);
+      
+      Hermes::vector<Solution<Scalar>*> sol_dest_vector;
+      sol_dest_vector.push_back(sol_dest);
+      
+      project_global(space_vector,
+                     custom_projection_jacobian_vector,
+                     custom_projection_residual_vector,
+                     sol_dest_vector, 
+                     matrix_solver);
     }
 
     template class HERMES_API OGProjection<double>;

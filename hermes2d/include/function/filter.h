@@ -38,11 +38,13 @@ namespace Hermes
 
       Filter() {};
 
-      Filter(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      Filter(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
+      
+      Filter(const Hermes::vector<Solution<Scalar>*>& solutions);
 
       virtual ~Filter();
 
-      void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 
       virtual void set_quad_2d(Quad2D* quad_2d);
 
@@ -109,9 +111,9 @@ namespace Hermes
 
       SimpleFilter() {};
 
-      SimpleFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      SimpleFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions, const Hermes::vector<int>& items = Hermes::vector<int>());
 
-      SimpleFilter(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      SimpleFilter(const Hermes::vector<Solution<Scalar>*>& solutions, const Hermes::vector<int>& items = Hermes::vector<int>());
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
@@ -138,9 +140,11 @@ namespace Hermes
       // one result (rslt), all inputs and result including derivatives
       DXDYFilter() {};
 
-      DXDYFilter(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      DXDYFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
+      
+      DXDYFilter(const Hermes::vector<Solution<Scalar>*>& solutions);
 
-      void init(Hermes::vector<MeshFunction<Scalar>*> solutions);
+      void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) { 
         error("Not implemented yet"); 

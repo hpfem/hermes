@@ -125,7 +125,8 @@ namespace Hermes
       // free error_form
       for (int i = 0; i < this->num; i++)
         for (int j = 0; j < this->num; j++)
-          delete error_form[i][j];
+          if (error_form[i][j] != NULL)
+            delete error_form[i][j];
     }
 
     template<typename Scalar>
@@ -758,6 +759,8 @@ namespace Hermes
       error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
         "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
 
+      // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
+      //        if user does not delete previously set error forms by himself.
       error_form[i][j] = form;
     }
 

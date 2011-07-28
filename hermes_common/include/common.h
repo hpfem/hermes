@@ -192,6 +192,10 @@ namespace Hermes
   // For internal use.
   const int H2D_DG_INNER_EDGE_INT = -1234567;
   const int H2D_DG_BOUNDARY_EDGE_INT = -12345;
+  
+  // For internal use (inside Geom<Ord>).
+  const int HERMES_DUMMY_ELEM_MARKER = -9999;
+  const int HERMES_DUMMY_EDGE_MARKER = -8888;
 
   namespace Helpers
   {

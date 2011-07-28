@@ -484,9 +484,11 @@ namespace Hermes
         if (!e->used)
           fprintf(f, "%s  { }", nl);
         else if (e->is_triangle())
-          fprintf(f, "%s  { %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->marker);
+          fprintf(f, "%s  { %d, %d, %d, \"%s\" }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id,
+              mesh->element_markers_conversion.get_user_marker(e->marker).c_str());
         else
-          fprintf(f, "%s  { %d, %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, e->marker);
+          fprintf(f, "%s  { %d, %d, %d, %d, \"%s\" }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id,
+                  mesh->element_markers_conversion.get_user_marker(e->marker).c_str());
       }
 
       // save boundary markers

@@ -138,8 +138,11 @@ namespace Hermes
           return false;
         }
       }
-      int4 *tri = n_tri > 0 ? new int4 [n_tri] : NULL;		// triangles
-      int5 *quad = n_quad > 0 ? new int5 [n_quad] : NULL;		// quads
+      int3 *tri = n_tri > 0 ? new int3 [n_tri] : NULL;		// triangles
+      std::string *tri_markers = n_tri > 0 ? new std::string [n_tri] : NULL;
+      int4 *quad = n_quad > 0 ? new int4 [n_quad] : NULL;		// quads
+      std::string *quad_markers = n_quad > 0 ? new std::string [n_quad] : NULL;
+      
       int n_els = n_tri + n_quad;								// total number of elements
       int **els = n_els > 0 ? new int * [n_els] : NULL;		// elements
       int *el_nv = n_els > 0 ? new int [n_els] : NULL;		// number of vertices for each element
@@ -166,7 +169,6 @@ namespace Hermes
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
         mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
-        int marker = mesh->element_markers_conversion.get_internal_marker(el_marker);
 
         int ic = 0;
         for (int j = 0; j < n_elems_in_blk; j++)
@@ -177,7 +179,7 @@ namespace Hermes
             tri[it][0] = vmap[connect[ic++]];
             tri[it][1] = vmap[connect[ic++]];
             tri[it][2] = vmap[connect[ic++]];
-            tri[it][3] = marker;
+            tri_markers[it] = el_marker;
             els[iel] = tri[it];
             it++;
           }
@@ -187,7 +189,7 @@ namespace Hermes
             quad[iq][1] = vmap[connect[ic++]];
             quad[iq][2] = vmap[connect[ic++]];
             quad[iq][3] = vmap[connect[ic++]];
-            quad[iq][4] = marker;
+            quad_markers[iq] = el_marker;
             els[iel] = quad[iq];
             iq++;
           }
@@ -215,7 +217,8 @@ namespace Hermes
         err = ex_get_side_set_param(exoid, sid, &n_sides_in_set, &n_df_in_set);
         n_mark += n_sides_in_set;
       }
-      int3 *marks = new int3 [n_mark];
+      int2 *marks = new int2 [n_mark];
+      std::string *bnd_markers = new std::string [n_mark];
 
       int im = 0;
       for (int i = 0; i < n_sidesets; i++)
@@ -237,7 +240,6 @@ namespace Hermes
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
         mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
-        int marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker);
 
         for (int j = 0; j < num_elem_in_set; j++)
         {
@@ -245,7 +247,7 @@ namespace Hermes
           int vt = side_list[j] - 1;
           marks[im][0] = els[elem_list[j] - 1][vt];
           marks[im][1] = els[elem_list[j] - 1][(vt + 1) % nv];
-          marks[im][2] = marker;
+          bnd_markers[im] = bnd_marker;
           im++;
         }
 
@@ -257,12 +259,15 @@ namespace Hermes
       // we are done
       err = ex_close(exoid);
 
-      mesh->create(n_vtx, vtx, n_tri, tri, n_quad, quad, n_mark, marks);
+      mesh->create(n_vtx, vtx, n_tri, tri, tri_markers, n_quad, quad, quad_markers, n_mark, marks, bnd_markers);
 
       // clean-up
       delete [] marks;
       delete [] tri;
       delete [] quad;
+      delete [] tri_markers;
+      delete [] quad_markers;
+      delete [] bnd_markers;
       delete [] vtx;
       delete [] el_nv;
       delete [] els;
