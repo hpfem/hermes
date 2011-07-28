@@ -70,9 +70,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new, 
-      Solution<Scalar>* error_fn, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
-      double newton_damping_coeff, double newton_max_allowed_residual_norm)
+    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
+                                          Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn, 
+                                          bool freeze_jacobian, bool verbose, double newton_tol, int newton_max_iter,
+                                          double newton_damping_coeff, double newton_max_allowed_residual_norm)
     {
       Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
       slns_time_prev.push_back(sln_time_prev);
@@ -81,14 +82,18 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
       error_fns.push_back(error_fn);
       return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
-        error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
+        error_fns, freeze_jacobian, verbose, newton_tol, newton_max_iter,
         newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, 
-      Hermes::vector<Solution<Scalar>*> error_fns, bool jacobian_changed, bool verbose, double newton_tol, int newton_max_iter,
-      double newton_damping_coeff, double newton_max_allowed_residual_norm)
+    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, 
+                                          Hermes::vector<Solution<Scalar>*> slns_time_prev, 
+                                          Hermes::vector<Solution<Scalar>*> slns_time_new, 
+                                          Hermes::vector<Solution<Scalar>*> error_fns, 
+                                          bool freeze_jacobian, bool verbose, double newton_tol, 
+                                          int newton_max_iter, double newton_damping_coeff, 
+                                          double newton_max_allowed_residual_norm)
     {
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
       if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
@@ -153,9 +158,8 @@ namespace Hermes
           // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
           multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
 
-          // Assemble the block Jacobian matrix of the stationary residual F
-          // Diagonal blocks are created even if empty, so that matrix_left
-          // can be added later.
+          // Assemble the block Jacobian matrix of the stationary residual F.
+          // Diagonal blocks are created even if empty, so that matrix_left can be added later.
           bool force_diagonal_blocks = true;
           bool add_dir_lift = false;
           stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks, add_dir_lift);
@@ -177,7 +181,8 @@ namespace Hermes
             Hermes::vector<bool> add_dir_lift_vector;
             add_dir_lift_vector.reserve(1);
             add_dir_lift_vector.push_back(add_dir_lift);
-            Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), residuals_vector, add_dir_lift_vector);
+            Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), 
+              residuals_vector, add_dir_lift_vector);
             residual_norm = Global<Scalar>::calc_norms(residuals_vector);
           }
 
@@ -208,7 +213,7 @@ namespace Hermes
           if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) 
             break;
 
-          bool rhs_only = (!jacobian_changed && it > 1);
+          bool rhs_only = (freeze_jacobian && it > 1);
           if (!rhs_only) 
           {
             // Assemble the block Jacobian matrix of the stationary residual F
@@ -289,21 +294,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
-      Hermes::vector<Solution<Scalar>*> slns_time_new, bool jacobian_changed,
-      bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
-      double newton_max_allowed_residual_norm) 
+    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, 
+                                          Hermes::vector<Solution<Scalar>*> slns_time_prev, 
+                                          Hermes::vector<Solution<Scalar>*> slns_time_new, bool freeze_jacobian,
+                                          bool verbose, double newton_tol, int newton_max_iter,
+                                          double newton_damping_coeff, 
+                                          double newton_max_allowed_residual_norm) 
     {
       return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
-        Hermes::vector<Solution<Scalar>*>(), jacobian_changed, verbose, newton_tol, newton_max_iter,
+        Hermes::vector<Solution<Scalar>*>(), freeze_jacobian, verbose, newton_tol, newton_max_iter,
         newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
     bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
-      Solution<Scalar>* sln_time_new, bool jacobian_changed,
-      bool verbose, double newton_tol, int newton_max_iter,double newton_damping_coeff, 
-      double newton_max_allowed_residual_norm) 
+                                          Solution<Scalar>* sln_time_new, bool freeze_jacobian,
+                                          bool verbose, double newton_tol, int newton_max_iter,
+                                          double newton_damping_coeff, double newton_max_allowed_residual_norm) 
     {
       Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
       slns_time_prev.push_back(sln_time_prev);
@@ -311,12 +318,13 @@ namespace Hermes
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
       return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
-        error_fns, jacobian_changed, verbose, newton_tol, newton_max_iter,
+        error_fns, freeze_jacobian, verbose, newton_tol, newton_max_iter,
         newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev)
+    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step, 
+                                             Hermes::vector<Solution<Scalar>*> slns_time_prev)
     {
       // Clear the WeakForms.
       stage_wf_left.delete_all();

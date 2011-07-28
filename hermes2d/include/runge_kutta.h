@@ -100,22 +100,22 @@ namespace Hermes
       // the corresponding .cpp file.
       bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
                         Hermes::vector<Solution<Scalar>*> slns_time_new, Hermes::vector<Solution<Scalar>*> error_fns, 
-                        bool jacobian_changed = true, bool verbose = false, double newton_tol = 1e-6, 
+                        bool freeze_jacobian = true, bool verbose = false, double newton_tol = 1e-6, 
                         int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                         double newton_max_allowed_residual_norm = 1e6);
       bool rk_time_step(double current_time, double time_step, Solution<Scalar>* slns_time_prev, 
-                        Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn, bool jacobian_changed = true, 
+                        Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn, bool freeze_jacobian = true, 
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                         double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted). 
       bool rk_time_step(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev, 
-                        Hermes::vector<Solution<Scalar>*> slns_time_new, bool jacobian_changed = true, 
+                        Hermes::vector<Solution<Scalar>*> slns_time_new, bool freeze_jacobian = true, 
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
                         double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
       bool rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
-                        Solution<Scalar>* sln_time_new, bool jacobian_changed = true, bool verbose = false, 
+                        Solution<Scalar>* sln_time_new, bool freeze_jacobian = true, bool verbose = false, 
                         double newton_tol = 1e-6, int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
                         double newton_max_allowed_residual_norm = 1e6);
 
