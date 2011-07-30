@@ -87,10 +87,6 @@ namespace Hermes
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
 
-      // The Newton's loop.
-      double residual_norm;
-      int it = 1;
-      
       bool delete_timer = false;
       if (this->timer == NULL)
       {
@@ -101,8 +97,10 @@ namespace Hermes
       this->timer->tick();
       setup_time += this->timer->last();
       
-      bool first_run = true;
-      while (1)
+      // The Newton's loop.
+      double residual_norm;
+      int it = 1;
+      while (true)
       {        
         // Assemble the residual vector.
         this->dp->assemble(coeff_vec, residual);
@@ -181,9 +179,8 @@ namespace Hermes
         solve_time += this->timer->last();
 
         // Assemble the Jacobian.
-        if (!freeze_jacobian || first_run == true)
+        if (freeze_jacobian == false || it == 1)
           this->dp->assemble(coeff_vec, jacobian);
-        first_run = false;
         
         this->timer->tick();
         assemble_time += this->timer->last();
@@ -213,6 +210,8 @@ namespace Hermes
         
         this->timer->tick();
         solve_time += this->timer->last();
+
+        it++;
       }
       // Return false.
       // All 'bad' situations end here. 
