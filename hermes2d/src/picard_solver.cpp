@@ -51,21 +51,30 @@ namespace Hermes
       {
         // Translate the previous coefficient vector into a Solution sln_prev_iter.
         Solution<Scalar> sln_prev_iter;
-        Solution<Scalar>::vector_to_solution(coeff_vec, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_prev_iter);
+        Solution<Scalar>::vector_to_solution(coeff_vec, 
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_prev_iter);
 
         // Perform Newton's iteration to solve the linear problem.
         // Translate the resulting coefficient vector into the Solution sln_new.
-        NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), this->matrix_solver_type);
+        NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), 
+          this->matrix_solver_type);
         Solution<Scalar> sln_new;
         if (!newton.solve(coeff_vec, tol, max_iter))
-          error("Newton's iteration failed.");
+	{
+          warn("Newton's iteration in the Picard's method failed.");
+          return false;
+        }
         else
-          Solution<Scalar>::vector_to_solution(newton.get_sln_vector(), static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_new);
+          Solution<Scalar>::vector_to_solution(newton.get_sln_vector(), 
+            static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_new);
 
-        double rel_error = Global<Scalar>::calc_rel_error(&sln_prev_iter, &sln_new, HERMES_L2_NORM);
+        double rel_error = Global<Scalar>::calc_rel_error(&sln_prev_iter, &sln_new, 
+                           HERMES_L2_NORM);
 
         if (this->verbose_output) 
-          info("---- Picard iter %d, ndof %d, rel. error %g%%", it+1, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs(), rel_error);
+          info("---- Picard iter %d, ndof %d, rel. error %g%%", 
+               it+1, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs(), 
+               rel_error);
 
         // Stopping criterion.
         if (rel_error < tol)

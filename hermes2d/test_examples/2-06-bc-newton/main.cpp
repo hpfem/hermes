@@ -69,9 +69,11 @@ int main(int argc, char* argv[])
   double* coeff_vec = new double[ndof];
   memset(coeff_vec, 0, ndof*sizeof(double));
 
+  // Initialize the Newton solver.
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
   if (!newton.solve(coeff_vec)) 
     error("Newton's iteration failed.");
   else

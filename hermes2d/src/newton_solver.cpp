@@ -62,17 +62,20 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      return solve(coeff_vec, 1E-8, 100, false);
+      bool freeze_jacobian = false;
+      bool residual_as_function = false;
+      return solve(coeff_vec, 1E-8, 100, freeze_jacobian, residual_as_function);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool residual_as_function)
+    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool freeze_jacobian, bool residual_as_function)
     {
-      return solve(coeff_vec, 1E-8, 100, residual_as_function);
+      return solve(coeff_vec, 1E-8, 100, freeze_jacobian, residual_as_function);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
+    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, 
+                                     bool freeze_jacobian, bool residual_as_function)
     {      
       // Delete the old solution vector, if there is any.
       if(this->sln_vector != NULL)
@@ -98,6 +101,7 @@ namespace Hermes
       this->timer->tick();
       setup_time += this->timer->last();
       
+      bool first_run = true;
       while (1)
       {        
         // Assemble the residual vector.
@@ -116,7 +120,8 @@ namespace Hermes
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
-          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
+          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), 
+                                                solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
@@ -175,8 +180,10 @@ namespace Hermes
         this->timer->tick();
         solve_time += this->timer->last();
 
-        // Assemble the jacobian.
-        this->dp->assemble(coeff_vec, jacobian);
+        // Assemble the Jacobian.
+        if (!freeze_jacobian || first_run == true)
+          this->dp->assemble(coeff_vec, jacobian);
+        first_run = false;
         
         this->timer->tick();
         assemble_time += this->timer->last();
