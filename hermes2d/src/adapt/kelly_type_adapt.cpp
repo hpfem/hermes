@@ -370,7 +370,7 @@ namespace Hermes
 
           if (calc_norm)
           {
-            double nrm = eval_solution_norm(this->error_form[i][i], rm, this->sln[i]);
+            double nrm = eval_solution_norm(this->norm_form[i][i], rm, this->sln[i]);
             norms[i] += nrm;
             total_norm += nrm;
           }
