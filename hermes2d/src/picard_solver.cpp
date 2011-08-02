@@ -62,13 +62,13 @@ namespace Hermes
 
         // Project the previous solution in order to get a vector of coefficient.
         this->sln_vector = new Scalar[static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs()];
-        memset(sln_vector, 0, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs() * sizeof(Scalar));
+        memset(this->sln_vector, 0, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs() * sizeof(Scalar));
 
         // Perform Newton's iteration to solve the linear problem.
         // Translate the resulting coefficient vector into the Solution sln_new.
         
         Solution<Scalar> sln_new;
-        if (!newton.solve(sln_vector, tol, max_iter))
+        if (!newton.solve(this->sln_vector, tol, max_iter))
 	      {
           warn("Newton's iteration in the Picard's method failed.");
           return false;
