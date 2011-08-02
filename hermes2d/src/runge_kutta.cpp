@@ -116,6 +116,10 @@ namespace Hermes
       create_stage_wf(dp->get_spaces().size(), current_time, time_step, 
                       slns_time_prev, block_diagonal_jacobian);
 
+      // Set the correct time to the essential boundary conditions.
+      for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
+        Space<Scalar>::update_essential_bc_values(dp->get_spaces(), current_time + bt->get_C(stage_i)*time_step);
+
       // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian 
       // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is 
       // a block-diagonal mass matrix. The corresponding part of the residual is obtained by multiplying
@@ -132,11 +136,13 @@ namespace Hermes
       // A technical workaround.
       Hermes::vector<bool> add_dir_lift;
       for (unsigned int i = 0; i < num_stages; i++)
+      {
         for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++) 
         {
           residuals_vector.push_back(new Solution<Scalar>(dp->get_space(sln_i)->get_mesh()));
           add_dir_lift.push_back(false);
         }
+      }
 
         // Zero utility vectors.
         if(start_from_zero_K_vector || !iteration)

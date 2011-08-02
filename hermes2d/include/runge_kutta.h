@@ -24,9 +24,6 @@ namespace Hermes
   {
     // TODO LIST: 
     //
-    // BUG: If time-dependent Ditichlet boundary conditions are used, the 
-    //      Dirichlet lift is not updated for different stage times as it should 
-    //      be. 
     //
     // (1) With explicit and diagonally implicit methods, the matrix is treated
     //     in the same way as with fully implicit ones. To make this more 
@@ -66,10 +63,8 @@ namespace Hermes
     //     to a multiplicative constant. Thus they do not have to be aassembled 
     //     from scratch.
     // 
-    // (8) If the problem is linear, then the Jacobian is constant. If Space 
-    //     does not change between time steps, we should keep it. 
     //
-    // (9) In practice, Butcher's tables are being transformed to the 
+    // (8) In practice, Butcher's tables are being transformed to the 
     //     Jordan canonical form (I think) for better performance. This 
     //     can be found, I think, in newer Butcher's papers or presentation 
     //     (he has them online), and possibly in his book. 
