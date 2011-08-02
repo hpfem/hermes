@@ -286,7 +286,7 @@ namespace Hermes
       /// Transformations of an element to one of its neighbors.
       struct Transformations
       {
-        static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
+        static const unsigned int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
                                                                        ///< in a go-down neighborhood) - see Transformable::push_transform.
         
         unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.

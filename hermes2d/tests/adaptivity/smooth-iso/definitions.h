@@ -25,7 +25,7 @@ public:
 class CustomFunction : public Hermes::Hermes2DFunction<double>
 {
 public:
-  CustomFunction() : Hermes2DFunction<double>() 
+  CustomFunction() : Hermes::Hermes2DFunction<double>() 
   {
   }
 

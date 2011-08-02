@@ -421,7 +421,7 @@ namespace Hermes
       double3x2 k;
       memset(k, 0, sizeof(double3x2));
       x = y = 0;
-      for (unsigned int i = 0; i < nc; i++)
+      for (int i = 0; i < nc; i++)
       {
         double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0);
         x += coeffs[i][0] * val;

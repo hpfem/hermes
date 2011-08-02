@@ -2865,7 +2865,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
@@ -3313,7 +3313,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           prev[ext_i]->add(*ext->fn[vfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
@@ -3738,7 +3738,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           prev[ext_i]->add(*ext->fn[mfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
@@ -4164,7 +4164,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-        for(unsigned int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           prev[ext_i]->add(*ext->fn[vfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
