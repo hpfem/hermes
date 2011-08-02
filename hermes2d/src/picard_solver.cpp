@@ -24,51 +24,60 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type)
+    PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type),
+      sln_prev_iter(sln_prev_iter)
     {
       if(dp->get_spaces().size() > 1)
         error("PicardSolver so far works only for scalar equations.");
     }
     
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp, SOLVER_UMFPACK)
+    PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter) : NonlinearSolver<Scalar>(dp, SOLVER_UMFPACK),
+      sln_prev_iter(sln_prev_iter)
     {
       if(dp->get_spaces().size() > 1)
         error("PicardSolver so far works only for scalar equations.");
     }
     
     template<typename Scalar>
-    bool PicardSolver<Scalar>::solve(Scalar* coeff_vec)
+    bool PicardSolver<Scalar>::solve()
     {
-      return solve(coeff_vec, 1e-8, 100);
+      return solve(1e-8, 100);
     }
 
     template<typename Scalar>
-    bool PicardSolver<Scalar>::solve(Scalar* coeff_vec, double tol, int max_iter)
+    bool PicardSolver<Scalar>::solve(double tol, int max_iter)
     {
       int it = 0;
+      NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), 
+          this->matrix_solver_type);
       while (true)
       {
-        // Translate the previous coefficient vector into a Solution sln_prev_iter.
-        Solution<Scalar> sln_prev_iter;
-        Solution<Scalar>::vector_to_solution(coeff_vec, 
-          static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_prev_iter);
+        // Delete the old solution vector, if there is any.
+        if(this->sln_vector != NULL)
+        {
+          delete [] this->sln_vector;
+          this->sln_vector = NULL;
+        }
+
+        // Project the previous solution in order to get a vector of coefficient.
+        this->sln_vector = new Scalar[static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs()];
+        memset(sln_vector, 0, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs() * sizeof(Scalar));
 
         // Perform Newton's iteration to solve the linear problem.
         // Translate the resulting coefficient vector into the Solution sln_new.
-        NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), 
-          this->matrix_solver_type);
+        
         Solution<Scalar> sln_new;
-        if (!newton.solve(coeff_vec, tol, max_iter))
-	{
+        if (!newton.solve(sln_vector, tol, max_iter))
+	      {
           warn("Newton's iteration in the Picard's method failed.");
           return false;
         }
         else
-          Solution<Scalar>::vector_to_solution(newton.get_sln_vector(), 
+          Solution<Scalar>::vector_to_solution(newton.get_sln_vector(),
             static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0), &sln_new);
 
-        double rel_error = Global<Scalar>::calc_rel_error(&sln_prev_iter, &sln_new, 
+        double rel_error = Global<Scalar>::calc_rel_error(sln_prev_iter, &sln_new, 
                            HERMES_L2_NORM);
 
         if (this->verbose_output) 
@@ -78,14 +87,20 @@ namespace Hermes
 
         // Stopping criterion.
         if (rel_error < tol)
+        {
+          for (int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs(); i++)
+            this->sln_vector[i] = newton.get_sln_vector()[i];
           return true;
-
+        }
         if (it++ >= max_iter)
         {
           if (this->verbose_output) 
             info("Maximum allowed number of Picard iterations exceeded, returning false.");
           return false;
         }
+
+        // Copy the solution into the previous iteration.
+        sln_prev_iter->copy(&sln_new);
       }
     }
     template class HERMES_API PicardSolver<double>;

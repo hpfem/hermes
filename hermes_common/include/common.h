@@ -55,6 +55,7 @@
 #include <cstring>
 
 #include "hermes_logging.h"
+#include "hermes_function.h"
 #include "common_time_period.h"
 #include "compat.h"
 #include "callstack.h"

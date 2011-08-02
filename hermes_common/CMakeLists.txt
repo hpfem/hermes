@@ -36,6 +36,7 @@ project(hermes_common)
 		src/qsort.cpp
 		src/c99_functions.cpp
 		src/ord.cpp
+		src/hermes_function.cpp
 		
 		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
 		

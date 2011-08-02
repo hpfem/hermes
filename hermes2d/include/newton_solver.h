@@ -52,12 +52,11 @@ namespace Hermes
       ///                                 since in the FE space not all components in the residual vector have the same weight.
       ///                                 On the other hand, this is slower as it requires global norm calculation, and thus
       ///                                 numerical integration over the entire domain. Therefore this option is off by default.
-      virtual bool solve(Scalar* coeff_vec, bool freeze_jacobian, bool residual_as_function = false);
+      virtual bool solve(Scalar* coeff_vec, bool residual_as_function);
 
       /// Solve with user-defined tolerances.
-      /// \param[in] residual_as_function See the method solve(Scalar*, bool, bool).
-      bool solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool freeze_jacobian = false, 
-                 bool residual_as_function = false);
+      /// \param[in] residual_as_function See the method solve(Scalar*, bool).
+      bool solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
 
       /// A solve() method where the jacobian is reused.
       /// Version with default tolerances.

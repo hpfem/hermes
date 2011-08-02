@@ -57,25 +57,23 @@ namespace Hermes
       delete jacobian;
       delete residual;
       delete linear_solver;
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->invalidate_matrix();
     }
 
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      bool freeze_jacobian = false;
-      bool residual_as_function = false;
-      return solve(coeff_vec, 1E-8, 100, freeze_jacobian, residual_as_function);
+      return solve(coeff_vec, 1E-8, 100, false);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool freeze_jacobian, bool residual_as_function)
+    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool residual_as_function)
     {
-      return solve(coeff_vec, 1E-8, 100, freeze_jacobian, residual_as_function);
+      return solve(coeff_vec, 1E-8, 100, residual_as_function);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, 
-                                     bool freeze_jacobian, bool residual_as_function)
+    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {      
       // Delete the old solution vector, if there is any.
       if(this->sln_vector != NULL)
@@ -87,6 +85,10 @@ namespace Hermes
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
 
+      // The Newton's loop.
+      double residual_norm;
+      int it = 1;
+      
       bool delete_timer = false;
       if (this->timer == NULL)
       {
@@ -97,12 +99,9 @@ namespace Hermes
       this->timer->tick();
       setup_time += this->timer->last();
       
-      // The Newton's loop.
-      double residual_norm;
-      int it = 1;
-      while (true)
+      while (1)
       {        
-        // Assemble the residual vector.
+        // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
         
         this->timer->tick();
@@ -118,8 +117,7 @@ namespace Hermes
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
-          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), 
-                                                solutions, dir_lift_false);
+          Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
@@ -178,10 +176,8 @@ namespace Hermes
         this->timer->tick();
         solve_time += this->timer->last();
 
-        // Assemble the Jacobian.
-        if (freeze_jacobian == false || it == 1)
-          this->dp->assemble(coeff_vec, jacobian);
-        
+        // Assemble just the jacobian.
+        this->dp->assemble(coeff_vec, jacobian);
         this->timer->tick();
         assemble_time += this->timer->last();
 
@@ -210,8 +206,6 @@ namespace Hermes
         
         this->timer->tick();
         solve_time += this->timer->last();
-
-        it++;
       }
       // Return false.
       // All 'bad' situations end here. 

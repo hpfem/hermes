@@ -22,10 +22,10 @@ public:
 
 /* Custom function f */
 
-class CustomFunction: public HermesFunction<double>
+class CustomFunction : public Hermes::Hermes2DFunction<double>
 {
 public:
-  CustomFunction() : HermesFunction<double>() 
+  CustomFunction() : Hermes2DFunction<double>() 
   {
   }
 

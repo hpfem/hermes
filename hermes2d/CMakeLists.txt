@@ -99,11 +99,10 @@ project(hermes2d)
 
 		src/function/transformable.cpp
 		src/function/function.cpp
-		src/function/mesh_function.cpp
 		src/function/exact_solution.cpp
 		src/function/solution.cpp 
 		src/function/filter.cpp
-		src/function/hermes_function.cpp
+		src/function/mesh_function.cpp
 
 		src/mesh/refmap.cpp 
 		src/mesh/curved.cpp

@@ -18,6 +18,9 @@
 #include <complex>
 #include "compat.h"
 
+#ifndef __HERMES_COMMON_ORD_H_
+#define __HERMES_COMMON_ORD_H_
+
 namespace Hermes
 {
   /// Base type for orders of functions.
@@ -88,3 +91,5 @@ namespace Hermes
   HERMES_API Ord log(const Ord &a);
   HERMES_API Ord exp(const Ord &a);
 }
+
+#endif

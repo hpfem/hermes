@@ -36,14 +36,16 @@ namespace Hermes
     class HERMES_API PicardSolver : public NonlinearSolver<Scalar>
     {
     public:
-      PicardSolver(DiscreteProblem<Scalar>* dp);
-      PicardSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
+      PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter);
+      PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter, Hermes::MatrixSolverType matrix_solver_type);
 
       /// Solve with default tolerances.
-      virtual bool solve(Scalar* coeff_vec);
+      virtual bool solve();
 
       /// Solve with user-defined tolerances.
-      bool solve(Scalar* coeff_vec, double tol, int max_iter);
+      bool solve(double tol, int max_iter);
+    private:
+      Solution<Scalar>* sln_prev_iter;
     };
   }
 }

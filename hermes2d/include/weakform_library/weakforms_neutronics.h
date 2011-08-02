@@ -3,7 +3,6 @@
 
 #include "weakforms_h1.h"
 #include "../forms.h"
-#include "../function/hermes_function.h"
 
 namespace Hermes
 {
@@ -1038,22 +1037,22 @@ namespace Hermes
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                HermesFunction<Scalar>*f_src,
+                Hermes2DFunction<Scalar>*f_src,
                 std::string src_area = HERMES_ANY,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                HermesFunction<Scalar>*f_src,
+                Hermes2DFunction<Scalar>*f_src,
                 Hermes::vector<std::string> src_areas,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                const Hermes::vector<HermesFunction<Scalar>*>& f_src,
+                const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
                 std::string src_area = HERMES_ANY,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, 
-                const Hermes::vector<HermesFunction<Scalar>*>& f_src,
+                const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
                 Hermes::vector<std::string> src_areas,
                 GeomType geom_type = HERMES_PLANAR);
             };
