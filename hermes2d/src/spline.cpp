@@ -24,37 +24,31 @@ namespace Hermes
     CubicSpline::CubicSpline(Hermes::vector<double> points, Hermes::vector<double> values, 
       double bc_left, double bc_right, 
       bool first_der_left, bool first_der_right,
-      bool extrapolate_der_left, bool extrapolate_der_right) 
-      : is_constant(false), const_value(-9999), points(points), values(values), 
+      bool extrapolate_der_left, bool extrapolate_der_right) : Hermes::Hermes1DFunction<double>(), points(points), values(values), 
       bc_left(bc_left), bc_right(bc_right), first_der_left(first_der_left), 
       first_der_right(first_der_right), extrapolate_der_left(extrapolate_der_left), 
       extrapolate_der_right(extrapolate_der_right) 
     {
+      this->is_const = false;
       bool success = this->calculate_coeffs(); 
       if (!success) error("There was a problem constructing a cubic spline.");
     }
 
-    double CubicSpline::get_value(double x_in) 
+    double CubicSpline::value(double x) const
     {
-      // For constant case.
-      if (this->is_constant) 
-      {
-        return this->const_value;
-      }
-
       // For general case.
       int m = -1;
-      if (!this->find_interval(x_in, m)) 
+      if (!this->find_interval(x, m)) 
       {
         // Point lies on the left of interval of definition.
-        if (x_in <= point_left) 
+        if (x <= point_left) 
         {
           // Spline should be extrapolated by constant function 
           // matching the value at the end.
           if (extrapolate_der_left == false) return value_left;
           // Spline should be extrapolated as a linear function 
           // matching the derivative at the end.
-          else return extrapolate_value(point_left, value_left, derivative_left, x_in);
+          else return extrapolate_value(point_left, value_left, derivative_left, x);
         }
         // Point lies on the right of interval of definition.
         else 
@@ -64,38 +58,21 @@ namespace Hermes
           if (extrapolate_der_right == false) return value_right;
           // Spline should be extrapolated as a linear function 
           // matching the derivative at the end.
-          else return extrapolate_value(point_right, value_right, derivative_right, x_in);
+          else return extrapolate_value(point_right, value_right, derivative_right, x);
         }
       }
 
-      return get_value_from_interval(x_in, m); 
-    }
-
-    double CubicSpline::extrapolate_value(double point_end, double value_end, 
-      double derivative_end, double x_in)
+      return get_value_from_interval(x, m); 
+    };
+    
+    double CubicSpline::derivative(double x) const
     {
-      return value_end + derivative_end * (x_in - point_end);
-    }
-
-    double CubicSpline::get_value_from_interval(double x_in, int m) 
-    {
-      double x2 = x_in * x_in;
-      double x3 = x2 * x_in;
-      return   this->coeffs[m].a + this->coeffs[m].b * x_in + this->coeffs[m].c * x2
-        + this->coeffs[m].d * x3;
-    }
-
-    double CubicSpline::get_derivative(double x_in) 
-    {
-      // For constant case.
-      if (this->is_constant) return 0.0;
-
       // For general case.
       int m = -1;
-      if (!this->find_interval(x_in, m)) 
+      if (!this->find_interval(x, m)) 
       {
         // Point lies on the left of interval of definition.
-        if (x_in <= point_left) 
+        if (x <= point_left) 
         {
           // Spline should be extrapolated by constant function 
           // matching the value at the end.
@@ -116,17 +93,32 @@ namespace Hermes
         }
       }
 
-      return get_derivative_from_interval(x_in, m); 
+      return get_derivative_from_interval(x, m); 
     };
 
-    double CubicSpline::get_derivative_from_interval(double x_in, int m) 
+    double CubicSpline::extrapolate_value(double point_end, double value_end, 
+      double derivative_end, double x_in) const
+    {
+      return value_end + derivative_end * (x_in - point_end);
+    }
+
+    double CubicSpline::get_value_from_interval(double x_in, int m) const
+    {
+      double x2 = x_in * x_in;
+      double x3 = x2 * x_in;
+      return   this->coeffs[m].a + this->coeffs[m].b * x_in + this->coeffs[m].c * x2
+        + this->coeffs[m].d * x3;
+    }
+
+
+    double CubicSpline::get_derivative_from_interval(double x_in, int m) const
     {
       double x2 = x_in * x_in;
       return this->coeffs[m].b + 2 * this->coeffs[m].c * x_in
         + 3 * this->coeffs[m].d * x2;
     }
 
-    bool CubicSpline::find_interval(double x_in, int &m) 
+    bool CubicSpline::find_interval(double x_in, int &m) const
     {
       int i_left = 0;
       int i_right = points.size() - 1;
@@ -145,7 +137,7 @@ namespace Hermes
       return true;
     };
 
-    void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) 
+    void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) const
     {
       FILE *f = fopen(filename, "wb");
       if (f == NULL) error("Could not open a spline file for writing."); 
@@ -157,14 +149,14 @@ namespace Hermes
       {
         double x = x_left + j * h;
         double val;
-        if (!plot_derivative) val = get_value(x);
-        else val = get_derivative(x); 
+        if (!plot_derivative) val = value(x);
+        else val = derivative(x); 
         fprintf(f, "%g %g\n", x, val);
       }
       double x_last = point_left;
       double val_last;
-      if (!plot_derivative) val_last = get_value(x_last);
-      else val_last = get_derivative(x_last); 
+      if (!plot_derivative) val_last = value(x_last);
+      else val_last = derivative(x_last); 
       fprintf(f, "%g %g\n", x_last, val_last);
 
       // Plotting inside the interval of definition.
@@ -176,15 +168,15 @@ namespace Hermes
           double x = points[i] + j * h;
           double val;
           // Do not use get_value_from_interval() here.
-          if (!plot_derivative) val = this->get_value(x); 
-          else val = get_derivative(x); 
+          if (!plot_derivative) val = this->value(x); 
+          else val = derivative(x); 
           fprintf(f, "%g %g\n", x, val);
         }
       }
       x_last = points[points.size() - 1];
       // Do not use get_value_from_interval() here.
-      if (!plot_derivative) val_last = get_value(x_last); 
-      else val_last = get_derivative(x_last);
+      if (!plot_derivative) val_last = value(x_last); 
+      else val_last = derivative(x_last);
       fprintf(f, "%g %g\n", x_last, val_last);
 
       // Plotting on the right of the area of definition.
@@ -194,19 +186,19 @@ namespace Hermes
       {
         double x = point_right + j * h;
         double val;
-        if (!plot_derivative) val = get_value(x); 
-        else val = get_derivative(x); 
+        if (!plot_derivative) val = value(x); 
+        else val = derivative(x); 
         fprintf(f, "%g %g\n", x, val);
       }
       x_last = x_right;
-      if (!plot_derivative) val_last = get_value(x_last);
-      else val_last = get_derivative(x_last);
+      if (!plot_derivative) val_last = value(x_last);
+      else val_last = derivative(x_last);
       fprintf(f, "%g %g\n", x_last, val_last);
 
       fclose(f);
     }
 
-    bool CubicSpline::calculate_coeffs() 
+    bool CubicSpline::calculate_coeffs()
     {
       int nelem = points.size() - 1;
 

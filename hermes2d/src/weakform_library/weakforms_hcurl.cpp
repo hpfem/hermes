@@ -327,7 +327,7 @@ namespace Hermes
             double mag0_i = std::abs(u_prev->val0[i]);
             double mag1_i = std::abs(u_prev->val1[i]);
             double mag_i = sqrt(sqr(mag0_i) + sqr(mag1_i));
-            result += wt[i] * const_coeff*spline_coeff->get_value(mag_i) 
+            result += wt[i] * const_coeff*spline_coeff->value(mag_i) 
               * (u_prev->curl[i] * conj(v->curl[i]));
           }
         }
@@ -349,7 +349,7 @@ namespace Hermes
             Ord mag0_i = u_prev->val0[i];
             Ord mag1_i = u_prev->val1[i];
             Ord mag_i = sqrt(sqr(mag0_i) + sqr(mag1_i));
-            result += wt[i] * const_coeff*spline_coeff->get_value(mag_i) 
+            result += wt[i] * const_coeff*spline_coeff->value_ord(mag_i) 
               * (u_prev->curl[i] * conj(v->curl[i]));
           }
         }
