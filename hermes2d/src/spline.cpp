@@ -34,6 +34,10 @@ namespace Hermes
       if (!success) error("There was a problem constructing a cubic spline.");
     }
 
+    CubicSpline::CubicSpline(double const_value) : Hermes::Hermes1DFunction<double>(const_value)
+    {
+    }
+
     double CubicSpline::value(double x) const
     {
       // For general case.

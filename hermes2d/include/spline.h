@@ -31,6 +31,8 @@ namespace Hermes
         bool first_der_left = true, bool first_der_right = true,
         bool extend_der_left = true, bool extend_der_right = true);
 
+      CubicSpline(double const_value);
+
       /// Destructor.
       ~CubicSpline() { 
         if (coeffs != NULL) 

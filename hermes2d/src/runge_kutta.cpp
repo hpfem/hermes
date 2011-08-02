@@ -27,8 +27,6 @@ namespace Hermes
       : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
       stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) , matrix_solver_type(matrix_solver_type)
     {
-      // Check for not implemented features.
-
       matrix_right=create_matrix<Scalar>(matrix_solver_type);
       matrix_left=create_matrix<Scalar>(matrix_solver_type);
       vector_right=create_vector<Scalar>(matrix_solver_type);

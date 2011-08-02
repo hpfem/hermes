@@ -59,32 +59,32 @@ namespace Hermes
           Scalar B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
           if (std::abs(B_i) > 1e-12) 
           {
-            planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i
+            planar_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
               * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]);
             if (gt == HERMES_AXISYM_X) 
             {
-              axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->y[i]
+              axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->y[i]
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
                 * u_ext[idx_j]->val[i] * v->dy[i];
             }
             else if (gt == HERMES_AXISYM_Y) 
             {
-              axisym_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i / e->x[i]
+              axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->x[i]
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
                 * u_ext[idx_j]->val[i] * v->dx[i];
             }
           }
-          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i)
+          planar_part += wt[i] * const_coeff*spline_coeff->value(B_i)
             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           if (gt == HERMES_AXISYM_X) 
           {
-            axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i]
+            axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
             * u->val[i] * v->dy[i];
           }
           else if (gt == HERMES_AXISYM_Y) 
           {
-            axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i]
+            axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
             * u->val[i] * v->dx[i];
           }
         }
@@ -100,10 +100,10 @@ namespace Hermes
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
-          planar_part += wt[i] * const_coeff*spline_coeff->get_derivative(B_i) / B_i
+          planar_part += wt[i] * const_coeff*spline_coeff->derivative_ord(B_i) / B_i
             * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
             * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]);
-          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i)
+          planar_part += wt[i] * const_coeff*spline_coeff->value_ord(B_i)
             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
 
@@ -152,11 +152,11 @@ namespace Hermes
         for (int i = 0; i < n; i++) 
         {
           Scalar B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
-          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) *
+          planar_part += wt[i] * const_coeff*spline_coeff->value(B_i) *
             (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
-          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->y[i]
+          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
           * u_ext[idx_i]->val[i] * v->dy[i];
-          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) / e->x[i]
+          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
           * u_ext[idx_i]->val[i] * v->dx[i];
         }
         return planar_part + axisym_part;
@@ -170,7 +170,7 @@ namespace Hermes
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
-          planar_part += wt[i] * const_coeff*spline_coeff->get_value(B_i) *
+          planar_part += wt[i] * const_coeff*spline_coeff->value_ord(B_i) *
             (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
         }
         return planar_part * Ord(order_increase);
