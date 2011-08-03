@@ -310,7 +310,7 @@ namespace Hermes
     class HERMES_API BasicKellyAdapt : public KellyTypeAdapt<Scalar>
     {
     public:
-            class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
+      class HERMES_API ErrorEstimatorFormKelly : public KellyTypeAdapt<Scalar>::ErrorEstimatorForm
       {
       public:
         /// Constructor.
