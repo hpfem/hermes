@@ -295,7 +295,8 @@ namespace Hermes
       _F_;
       if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) 
       {
-        neighbor_transformations.add(new Transformations, 0); 
+        if (!neighbor_transformations.present(0)) // in case of neighborhood_type == H2D_DG_NO_TRANSF
+          neighbor_transformations.add(new Transformations, 0); 
         Transformations *tr = neighbor_transformations.get(0);
         
         for(unsigned int i = 0; i < transformations.size(); i++)
@@ -501,11 +502,22 @@ namespace Hermes
       _F_;
       for(unsigned int i = position; i < n_neighbors - 1; i++)
         central_transformations.get(i)->copy_from(central_transformations.get(i + 1));
-      central_transformations.get(n_neighbors - 1)->reset();
+      
+      if (central_transformations.present(n_neighbors - 1)) // may not be true when position == n_neighbors - 1
+        central_transformations.get(n_neighbors - 1)->reset();
         
       for(unsigned int i = position; i < n_neighbors - 1; i++)
-        neighbor_transformations.get(i)->copy_from(neighbor_transformations.get(i + 1));
-      neighbor_transformations.get(n_neighbors - 1)->reset();
+      {
+        if (neighbor_transformations.present(i + 1))
+        {
+          if (!neighbor_transformations.present(i))
+            neighbor_transformations.add(new Transformations, i);
+          
+          neighbor_transformations.get(i)->copy_from(neighbor_transformations.get(i + 1));
+        }
+      }
+      if (neighbor_transformations.present(n_neighbors - 1)) // may not be true when position == n_neighbors - 1
+        neighbor_transformations.get(n_neighbors - 1)->reset();
 
       neighbor_edges.erase (neighbor_edges.begin() + position);
       neighbors.erase (neighbors.begin() + position);
