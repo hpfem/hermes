@@ -568,63 +568,63 @@ namespace Hermes
                 neighbor_edge.local_num_of_edge = j;
                 break;
               }
-              if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
+            if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
-              Node* n = NULL;
+            Node* n = NULL;
 
-              // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
-              // adjacent to the single big neighbor.
-              assert(n_neighbors == 0);
-              
-              neighbor_transformations.add(new Transformations, n_neighbors);
-              Transformations *neighbor_transforms = neighbor_transformations.get(n_neighbors);
-              
-              neighbor_transforms->num_levels = n_parents;
+            // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
+            // adjacent to the single big neighbor.
+            assert(n_neighbors == 0);
+            
+            neighbor_transformations.add(new Transformations, n_neighbors);
+            Transformations *neighbor_transforms = neighbor_transformations.get(n_neighbors);
+            
+            neighbor_transforms->num_levels = n_parents;
 
-              // Go back through the intermediate inactive parents down to the central element and stack corresponding
-              // neighbor_transformations into the array 'neighbor_transformations'.
-              for(int j = n_parents - 1; j > 0; j-- ) 
+            // Go back through the intermediate inactive parents down to the central element and stack corresponding
+            // neighbor_transformations into the array 'neighbor_transformations'.
+            for(int j = n_parents - 1; j > 0; j-- ) 
+            {
+              n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
+              if(n == NULL) 
               {
-                n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
-                if(n == NULL) 
+                neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
+                p1 = par_mid_vertices[j]->id;
+              }
+              else 
+              {
+                if(n->id == par_mid_vertices[j-1]->id) 
+                {
+                  neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+                  p2 = par_mid_vertices[j]->id;
+                }
+                else 
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                   p1 = par_mid_vertices[j]->id;
                 }
-                else 
-                {
-                  if(n->id == par_mid_vertices[j-1]->id) 
-                  {
-                    neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
-                    p2 = par_mid_vertices[j]->id;
-                  }
-                  else 
-                  {
-                    neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
-                    p1 = par_mid_vertices[j]->id;
-                  }
-                }
               }
+            }
 
-              // Final transformation to the central element itself.
-              if (orig_vertex_id[0] == par_mid_vertices[0]->id)
-                neighbor_transforms->transf[n_parents - 1] = neighbor_edge.local_num_of_edge;
-              else
-                neighbor_transforms->transf[n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+            // Final transformation to the central element itself.
+            if (orig_vertex_id[0] == par_mid_vertices[0]->id)
+              neighbor_transforms->transf[n_parents - 1] = neighbor_edge.local_num_of_edge;
+            else
+              neighbor_transforms->transf[n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
 
-              NeighborEdgeInfo local_edge_info;
-              local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
+            NeighborEdgeInfo local_edge_info;
+            local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
 
-              // Query the orientation of the neighbor edge relative to the central el.
-              local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, 0);
+            // Query the orientation of the neighbor edge relative to the central el.
+            local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, 0);
 
-              neighbor_edges.push_back(local_edge_info);
+            neighbor_edges.push_back(local_edge_info);
 
-              // There is only one neighbor,...
-              n_neighbors = 1;
+            // There is only one neighbor,...
+            n_neighbors = 1;
 
-              // ...add it to the vector of neighbors.
-              neighbors.push_back(neighb_el);
+            // ...add it to the vector of neighbors.
+            neighbors.push_back(neighb_el);
           }
         }
       }
