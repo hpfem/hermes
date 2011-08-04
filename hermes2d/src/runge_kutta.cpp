@@ -233,6 +233,8 @@ namespace Hermes
             matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
             matrix_right->finish();
           }
+          else
+            solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
           // Solve the linear system.
           if(!solver->solve()) 
