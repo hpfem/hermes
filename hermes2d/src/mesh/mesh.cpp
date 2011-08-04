@@ -949,6 +949,35 @@ namespace Hermes
       if(!vertex_0_ok) error("Vertex v0 of quad element #%d does not lie on the left of the diagonal v2-v1.", i);
     }
 
+    bool Mesh::rescale(double x_ref, double y_ref)
+    {
+      // Sanity checks.
+      if (fabs(x_ref) < 1e-10) return false;
+      if (fabs(y_ref) < 1e-10) return false;
+
+      // If curvilinear, the mesh cannot be rescaled.
+      bool curved = false;
+      Element* e;
+      for_all_elements(e, this) {
+        if (e->cm != NULL) {
+          curved = true;
+          break;
+        }
+      }
+      if (curved == true) return false;
+
+      // Go through all vertices and rescale coordinates.
+      Node* n;
+      for_all_vertex_nodes(n, this) {
+        n->x /= x_ref;
+        n->y /= y_ref;
+      }
+
+      return true;
+    }
+
+
+
     void Mesh::copy(const Mesh* mesh)
     {
       unsigned int i;
