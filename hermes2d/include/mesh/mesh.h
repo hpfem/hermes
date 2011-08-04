@@ -160,6 +160,10 @@ namespace Hermes
         free();
         dump_hash_stat();
       }
+
+      /// Rescales the mesh.
+      bool rescale(double x_ref, double y_ref);
+
       /// Creates a copy of another mesh.
       void copy(const Mesh* mesh);
 
