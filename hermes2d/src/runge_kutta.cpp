@@ -23,9 +23,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver_type, bool start_from_zero_K_vector, bool residual_as_vector)
+    RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver_type, bool start_from_zero_K_vector, bool residual_as_vector, Hermes::vector<int> stationary_spaces)
       : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
-      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) , matrix_solver_type(matrix_solver_type)
+          stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector),
+          residual_as_vector(residual_as_vector), iteration(0) , matrix_solver_type(matrix_solver_type),
+          stationary_spaces(stationary_spaces)
     {
       matrix_right=create_matrix<Scalar>(matrix_solver_type);
       matrix_left=create_matrix<Scalar>(matrix_solver_type);
@@ -154,6 +156,26 @@ namespace Hermes
       // FIXME: This should not be repeated if spaces have not changed.
       stage_dp_left.assemble(matrix_left, NULL);
 
+              // In the block-diagonal mass matrix M, zero the blocks
+        // that correspond to stationary equations
+      if (!stationary_spaces.empty()) {
+        int current_ndof = 0;
+
+        // Iterate over all the spaces
+        for (unsigned int i = 0; i < dp->get_spaces().size(); i++) {
+          int space_ndof = dp->get_space(i)->get_num_dofs();
+
+          // Find if the space is in the stationary_spaces list
+          if (stationary_spaces.find_index(i, false) != -1) {
+            for (int m = current_ndof; m < (current_ndof + space_ndof); m++) {
+              Scalar val = matrix_left->get(m, m);
+              matrix_left->add(m, m, -val);
+            }
+          }
+          current_ndof += space_ndof;
+        }
+      }
+      
       // The Newton's loop.
       double residual_norm;
       int it = 1;
