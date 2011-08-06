@@ -29,6 +29,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class Adapt;
+    template<typename Scalar> class DiscreteProblem;
+
     /// \brief Represents a finite element space over a domain.
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
@@ -91,6 +94,9 @@ namespace Hermes
       Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init);
 
       virtual ~Space();
+      
+      void operator = (const Space<Scalar> & other);
+
       virtual void free();
 
       /// Sets the boundary condition.
@@ -210,6 +216,16 @@ namespace Hermes
         return ndof;
       }
 
+      class ElementData
+      {
+      public:
+        ElementData() : changed_in_last_adaptation(true) {};
+        int order;
+        int bdof, n;
+        bool changed_in_last_adaptation;
+      };
+      ElementData* edata; ///< element data table
+
     protected:
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
@@ -264,15 +280,8 @@ namespace Hermes
         NodeData() : dof(0), edge_bc_proj(NULL) {}
       };
 
-      struct ElementData
-      {
-        int order;
-        int bdof, n;
-      };
-
       NodeData* ndata;    ///< node data table
       int nsize, ndata_allocated; ///< number of items in ndata, allocated space
-      ElementData* edata; ///< element data table
       int esize;
 
       virtual int get_edge_order_internal(Node* en);
@@ -340,6 +349,9 @@ namespace Hermes
       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
 
       static void update_essential_bc_values(Space<Scalar>*s, double time);
+
+      friend class Adapt<Scalar>;
+      friend class DiscreteProblem<Scalar>;
     };
   }
 }

@@ -560,7 +560,7 @@ namespace Hermes
     {
       _F_;
       CSCMatrix<Scalar>* new_matrix = new CSCMatrix<Scalar>();
-      create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
+      new_matrix->create(this->get_size(), this->get_nnz(), this->get_Ap(),  this->get_Ai(),  this->get_Ax());
       return new_matrix;
     }
 

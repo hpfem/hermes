@@ -105,19 +105,28 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
+  Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+  
+  DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
+  dp.set_adaptivity_cache();
+    
+  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+
+  Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
   {
     info("---- Adaptivity step %d:", as);
 
-    // Construct globally refined reference mesh and setup reference space.
-    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    dp.set_spaces(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
@@ -127,8 +136,6 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::Solution<std::complex<double> > sln;
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
     // For iterative solver.
     if (matrix_solver_type == SOLVER_AZTECOO)
     {
@@ -150,7 +157,7 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate."); 
-    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
+
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // Report results.
@@ -177,10 +184,6 @@ int main(int argc, char* argv[])
 
     // Clean up.
     delete [] coeff_vec;
-    delete adaptivity;
-    if (done == false)
-      delete ref_space->get_mesh();
-    delete ref_space;
 
     // Increase counter.
     as++;

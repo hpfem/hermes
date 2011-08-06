@@ -91,6 +91,12 @@ namespace Hermes
     {
       _F_;
       H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
+
+      // Set all elements not to have changed from the adaptation.
+      Element *e;
+      for_all_active_elements(e, space->get_mesh())
+        space->edata[e->id].changed_in_last_adaptation = false;
+
       space->copy_orders(this, order_increase);
       return space;
     }

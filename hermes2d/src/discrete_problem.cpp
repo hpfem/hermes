@@ -79,6 +79,8 @@ namespace Hermes
       matrix_buffer_dim = 0;
       have_matrix = false;
 
+      cache_for_adaptivity = false;
+
       // Initialize precalc shapesets according to spaces provided.
       pss = new PrecalcShapeset*[wf->get_neq()];
 
@@ -123,6 +125,12 @@ namespace Hermes
           delete pss[i];
         delete [] pss;
       }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_adaptivity_cache()
+    {
+      cache_for_adaptivity = true;
     }
 
     template<typename Scalar>
@@ -445,6 +453,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<Space<Scalar>*> spaces)
+    {
+      this->spaces = spaces;
+      this->ndof = Space<Scalar>::get_num_dofs(spaces);
+      this->invalidate_matrix();
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_spaces(Space<Scalar>* space)
+    {
+      Hermes::vector<Space<Scalar>*> spaces;
+      spaces.push_back(space);
+      this->spaces = spaces;
+      this->ndof = Space<Scalar>::get_num_dofs(spaces);
+      this->invalidate_matrix();
+    }
+
+    template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_sanity_checks(Table* block_weights)
     {
       _F_;
@@ -582,6 +608,44 @@ namespace Hermes
       for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
         delete *it;
 
+      // If cached matrix for adaptivity was stored, delete it.
+      if(this->cache_for_adaptivity)
+      {
+        if(mat != NULL)
+        {
+          if(this->assembling_caches.stored_matrix_for_adaptivity != NULL)
+          {
+            delete this->assembling_caches.stored_matrix_for_adaptivity;
+            this->assembling_caches.stored_matrix_for_adaptivity = NULL;
+          }
+        
+          this->assembling_caches.stored_matrix_for_adaptivity = mat->duplicate();
+          
+          if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
+          {
+            for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
+            {   
+              delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
+              delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
+            }
+            this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
+          }
+        }
+        
+        if(rhs != NULL)
+        {
+          if(this->assembling_caches.stored_vector_for_adaptivity != NULL)
+          {
+            delete assembling_caches.stored_vector_for_adaptivity;
+            assembling_caches.stored_vector_for_adaptivity = NULL;
+          }
+      
+          this->assembling_caches.stored_vector_for_adaptivity = new UMFPackVector<Scalar>(rhs->length());
+          for(unsigned int i = 0; i < rhs->length(); i++)
+            this->assembling_caches.stored_vector_for_adaptivity->set(i, rhs->get(i));
+        }
+      }
+
       // Time measurement.
       profiling.total_time.tick();
       profiling.current_record.total = profiling.total_time.last();
@@ -667,9 +731,80 @@ namespace Hermes
         // The proper sub-element mappings to all the functions of
         // this stage is supplied by the function Traverse::get_next_state()
         // called in the while loop.
-        assemble_one_state(stage, mat, rhs, force_diagonal_blocks, 
-        block_weights, spss, refmap, 
-        u_ext, e, bnd, surf_pos, trav.get_base());
+      {
+        if(this->cache_for_adaptivity)
+        {
+          bool stored_value = true;
+
+          // Check that this is the first assembly of the matrix in this adaptivity step.
+          // If not, we have to calculate the matrix again.
+          if(this->assembling_caches.stored_spaces_for_adaptivity.size() > 0)
+          {
+            if(spaces[0]->get_seq() == this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq())
+              stored_value = false;
+          }
+          else
+            stored_value = false;
+
+          // Test if we want to use the stored value (when the last adaptation did not change this element in any space)
+          for (unsigned int i = 0; i < stage.idx.size(); i++)
+            if(spaces[stage.idx[i]]->edata[e[i]->id].changed_in_last_adaptation)
+              stored_value = false;
+
+          if(stored_value)
+          {
+            // We want the current assembly lists in order to know where in the matrix to insert.
+            AsmList<Scalar>* al = new AsmList<Scalar>[stage.idx.size()];
+
+            // Also we need to find out the id of the element in the previous reference mesh.
+            // So we want to know what son of the parent of e[i] is e[i]. Because this
+            // is the only same thing in the current and previous reference meshes.
+            unsigned int *son = new unsigned int[stage.idx.size()];
+            for (unsigned int i = 0; i < stage.idx.size(); i++)
+            {
+              spaces[stage.idx[i]]->get_element_assembly_list(e[i], &al[i]);
+              for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
+                if(e[i]->parent->sons[sons_i] == e[i])
+                  son[i] = sons_i;
+            }
+
+            // Previous reference solution assembly lists.
+            AsmList<Scalar>* al_prev = new AsmList<Scalar>[stage.idx.size()];
+            for (unsigned int i = 0; i < stage.idx.size(); i++)
+              this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(
+              this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_mesh()->get_element(e[i]->parent->id)->sons[son[i]], &al_prev[i]);
+              for (unsigned int i = 0; i < stage.idx.size(); i++)
+              {
+                if(mat != NULL)
+                {
+                  for (unsigned int j = 0; j < stage.idx.size(); j++)
+                    for(unsigned int ai = 0; ai < al[i].cnt; ai++)
+                      for(unsigned int aj = 0; aj < al[j].cnt; aj++)
+                        if(al[i].dof[ai] > -1 && al[j].dof[aj] > -1)
+                          mat->add(al[i].dof[ai], al[j].dof[aj], this->assembling_caches.stored_matrix_for_adaptivity->get(al_prev[i].dof[ai], al_prev[j].dof[aj]));
+                }
+
+                if(rhs != NULL)
+                  for(unsigned int ai = 0; ai < al[i].cnt; ai++)
+                    if(al[i].dof[ai] > -1)
+                      rhs->add(al[i].dof[ai], this->assembling_caches.stored_vector_for_adaptivity->get(al_prev[i].dof[ai]));
+              }
+              delete [] al;
+          }
+          else
+          {
+            assemble_one_state(stage, mat, rhs, force_diagonal_blocks, 
+            block_weights, spss, refmap, 
+            u_ext, e, bnd, surf_pos, trav.get_base());
+          }
+        }
+        else
+        {
+          assemble_one_state(stage, mat, rhs, force_diagonal_blocks, 
+          block_weights, spss, refmap, 
+          u_ext, e, bnd, surf_pos, trav.get_base());
+        }
+      }
 
       if (mat != NULL)
         mat->finish();
@@ -4607,6 +4742,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::AssemblingCaches::AssemblingCaches()
     {
+      this->stored_matrix_for_adaptivity = NULL;
+      this->stored_vector_for_adaptivity = NULL;
     };
 
     template<typename Scalar>
@@ -4633,6 +4770,10 @@ namespace Hermes
           cache_fn_ord.get(i)->free_ord();
           delete cache_fn_ord.get(i);
         }
+      if(this->stored_matrix_for_adaptivity != NULL)
+        delete this->stored_matrix_for_adaptivity;
+      if(this->stored_vector_for_adaptivity != NULL)
+        delete this->stored_vector_for_adaptivity;
     };
 
 #ifdef _MSC_VER

@@ -94,6 +94,9 @@ namespace Hermes
       /// Get info about presence of a matrix.
       bool is_matrix_free() ;
 
+      /// Sets the storing of the previous matrix in adaptivity.
+      void set_adaptivity_cache();
+
       /// Preassembling.
       /// Precalculate matrix sparse structure.
       /// If force_diagonal_block == true, then (zero) matrix
@@ -265,10 +268,16 @@ namespace Hermes
       /// Set this problem to Finite Volume.
       void set_fvm();
 
+      void set_spaces(Hermes::vector<Space<Scalar>*> spaces);
+
+      void set_spaces(Space<Scalar>* space);
+
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
     protected:
+      bool cache_for_adaptivity;
+
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
       /// Main function for the evaluation of volumetric matrix forms. 
@@ -589,6 +598,10 @@ namespace Hermes
 
         /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for quads.
         std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_quads;
+
+        SparseMatrix<Scalar>* stored_matrix_for_adaptivity;
+        Vector<Scalar>* stored_vector_for_adaptivity;
+        Hermes::vector<Space<Scalar>*> stored_spaces_for_adaptivity;
 
         LightArray<Func<Hermes::Ord>*> cache_fn_ord;
       };

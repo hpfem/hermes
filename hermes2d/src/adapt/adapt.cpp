@@ -157,6 +157,11 @@ namespace Hermes
       int** idx = new int*[max_id];
       for(int i = 0; i < max_id; i++)
         idx[i] = new int[num];
+      
+      Element* e;
+      for (int i = 0; i < this->num; i++) 
+        for_all_active_elements(e, this->spaces[i]->get_mesh())
+          this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
 
       for(int j = 0; j < max_id; j++)
         for(int l = 0; l < this->num; l++)
@@ -246,6 +251,7 @@ namespace Hermes
             elem_inx_to_proc.push_back(elem_ref);
             err0_squared = err_squared;
             processed_error_squared += err_squared;
+            spaces[comp]->edata[elem_ref.id].changed_in_last_adaptation = true;
           }
           else 
           {
@@ -619,20 +625,29 @@ namespace Hermes
       e = mesh->get_element(elem_ref.id);
 
       if (elem_ref.split == H2D_REFINEMENT_P)
+      {
         space->set_element_order_internal(elem_ref.id, elem_ref.p[0]);
+        space->edata[elem_ref.id].changed_in_last_adaptation = true;
+      }
       else if (elem_ref.split == H2D_REFINEMENT_H) 
       {
         if (e->active)
           mesh->refine_element_id(elem_ref.id);
         for (int j = 0; j < 4; j++)
+        {
           space->set_element_order_internal(e->sons[j]->id, elem_ref.p[j]);
+          space->edata[e->sons[j]->id].changed_in_last_adaptation = true;
+        }
       }
       else 
       {
         if (e->active)
           mesh->refine_element_id(elem_ref.id, elem_ref.split);
         for (int j = 0; j < 2; j++)
+        {
           space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j+2 ]->id, elem_ref.p[j]);
+          space->edata[e->sons[ (elem_ref.split == 1) ? j : j+2 ]->id].changed_in_last_adaptation = true;
+        }
       }
     }
 
