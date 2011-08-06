@@ -53,13 +53,12 @@ namespace Hermes
 
       void MeshView::show(Mesh* mesh)
       {
-        Solution<double> sln;
+        ZeroSolution sln(mesh);
         if (mesh == NULL) error("mesh == NULL in MeshView::show().");
         if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
 
         this->mesh = mesh;
 
-        sln.set_zero(mesh);
         lin.process_solution(&sln);
         lin.lock_data();
         lin.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);

@@ -472,9 +472,6 @@ namespace Hermes
           u_ext.push_back(external_solution_i);
         }
       }
-      else 
-        for (unsigned int i = 0; i < wf->get_neq(); i++)
-          u_ext.push_back(new Solution<Scalar>(spaces[i]->get_mesh(), 0.0));
     }
 
     template<typename Scalar>

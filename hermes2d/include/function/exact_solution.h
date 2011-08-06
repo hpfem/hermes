@@ -35,6 +35,9 @@ namespace Hermes
 
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
+
+      /// For scaling of the solution.
+      Scalar exact_multiplicator;
     };
 
     /// These classes are abstract (pure virtual destructor).
@@ -44,8 +47,6 @@ namespace Hermes
     {
     public:
       ExactSolutionScalar(Mesh* mesh);
-
-      ~ExactSolutionScalar() = 0;
 
       /// For Scalar-valued solutions this returns 1.
       virtual unsigned int get_dimension() const;
@@ -72,8 +73,6 @@ namespace Hermes
     {
     public:
       ExactSolutionVector(Mesh* mesh);
-
-      ~ExactSolutionVector() = 0;
 
       /// For vector-valued solutions this returns 2.
       virtual unsigned int get_dimension() const;

@@ -42,14 +42,45 @@ namespace Hermes
     MeshFunction<Scalar>::~MeshFunction()
     {
       delete refmap;
-      if(overflow_nodes != NULL) {
-        for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
-          if(overflow_nodes->present(i))
-            ::free(overflow_nodes->get(i));
-        delete overflow_nodes;
+      if(this->overflow_nodes != NULL)
+      {
+        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
+          if(this->overflow_nodes->present(i))
+            ::free(this->overflow_nodes->get(i));
+        delete this->overflow_nodes;
       }
     }
 
+    template<typename Scalar>
+    void MeshFunction<Scalar>::init()
+    {
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::reinit()
+    { 
+      this->free();
+      init();
+    }
+
+    template<typename Scalar>
+    int MeshFunction<Scalar>::get_edge_fn_order(int edge)
+    {
+      return Function<Scalar>::get_edge_fn_order(edge);
+    }
+
+    template<typename Scalar>
+    Mesh* MeshFunction<Scalar>::get_mesh() const
+    {
+      return mesh;
+    }
+
+    template<typename Scalar>
+    RefMap* MeshFunction<Scalar>::get_refmap()
+    {
+      this->update_refmap();
+      return refmap;
+    }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
@@ -94,7 +125,26 @@ namespace Hermes
       Transformable::pop_transform();
       update_nodes_ptr();
     }
-    
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::force_transform(MeshFunction<Scalar>* mf)
+    { 
+      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::update_refmap()
+    { 
+      refmap->force_transform(this->sub_idx, this->ctm);
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
+    }    
+
     template class HERMES_API MeshFunction<double>;
     template class HERMES_API MeshFunction<std::complex<double> >;
   }

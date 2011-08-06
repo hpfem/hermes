@@ -697,8 +697,6 @@ namespace Hermes
             for (int i = 0; i < np; i++)
               u->laplace[i] = dxx[i] + dyy[i];
           }
-          else if (sln_type == HERMES_CONST)
-            memset(u->laplace, 0, np * sizeof(Scalar));
         }
 #endif
       }

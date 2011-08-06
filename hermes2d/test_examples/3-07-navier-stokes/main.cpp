@@ -131,10 +131,7 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  Solution<double> xvel_prev_time, yvel_prev_time, p_prev_time; 
-  xvel_prev_time.set_zero(&mesh);
-  yvel_prev_time.set_zero(&mesh);
-  p_prev_time.set_zero(&mesh);
+  ZeroInitialCondition xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh); 
 
   // Initialize weak formulation.
   WeakForm<double>* wf;

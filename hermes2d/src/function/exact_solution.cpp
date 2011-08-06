@@ -23,6 +23,7 @@ namespace Hermes
     {
       this->sln_type = HERMES_EXACT;
       this->num_dofs = -1;
+      this->exact_multiplicator = 1.0;
     }
 
     template<typename Scalar>
@@ -30,11 +31,7 @@ namespace Hermes
     {
       this->num_components = 1;
     }
-
-    template<typename Scalar>
-    ExactSolutionScalar<Scalar>::~ExactSolutionScalar()
-    {}
-
+    
     template<typename Scalar>
     unsigned int ExactSolutionScalar<Scalar>::get_dimension() const
     {
@@ -46,11 +43,7 @@ namespace Hermes
     {
       this->num_components = 2;
     }
-
-    template<typename Scalar>
-    ExactSolutionVector<Scalar>::~ExactSolutionVector()
-    {}
-
+    
     template<typename Scalar>
     unsigned int ExactSolutionVector<Scalar>::get_dimension() const
     {

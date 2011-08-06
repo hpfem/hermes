@@ -16,9 +16,9 @@
 #ifndef __H2D_MESH_FUNCTION_H
 #define __H2D_MESH_FUNCTION_H
 
-#include "../function/function.h"
-#include "../space/space.h"
+#include "function.h"
 #include "../mesh/refmap.h"
+#include "../mesh/mesh.h"
 
 namespace Hermes
 {
@@ -42,16 +42,17 @@ namespace Hermes
       MeshFunction(Mesh *mesh);
       virtual ~MeshFunction();
 
-      virtual void init() {};
-      virtual void reinit() {free(); init();};
+      virtual void init();
+      virtual void reinit();
 
       virtual void set_quad_2d(Quad2D* quad_2d);
+
       virtual void set_active_element(Element* e);
 
-      virtual int get_edge_fn_order(int edge) { return Function<Scalar>::get_edge_fn_order(edge); }
+      Mesh*   get_mesh() const;
+      RefMap* get_refmap();
 
-      Mesh*   get_mesh() const { return mesh; }
-      RefMap* get_refmap() { update_refmap(); return refmap; }
+      virtual int get_edge_fn_order(int edge);
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 
@@ -73,16 +74,11 @@ namespace Hermes
     public:
 
       /// For internal use only.
-      void force_transform(MeshFunction* mf)
-      { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
-      void update_refmap()
-      { refmap->force_transform(sub_idx, ctm); }
-      void force_transform(uint64_t sub_idx, Trf* ctm)
-      {
-        this->sub_idx = sub_idx;
-        this->ctm = ctm;
-      }
+      void force_transform(MeshFunction<Scalar>* mf);
 
+      void update_refmap();
+
+      void force_transform(uint64_t sub_idx, Trf* ctm);
     };
   }
 }

@@ -20,9 +20,6 @@
 #include "../space/space.h"
 #include "../mesh/refmap.h"
 
-class PrecalcShapeset;
-class Ord;
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -71,8 +68,7 @@ namespace Hermes
     enum SolutionType {
       HERMES_UNDEF = -1,
       HERMES_SLN = 0,
-      HERMES_EXACT = 1,
-      HERMES_CONST = 2
+      HERMES_EXACT = 1
     };
 
     template<typename Scalar>
@@ -83,8 +79,6 @@ namespace Hermes
       virtual void init();
       Solution();
       Solution(Mesh *mesh);
-      Solution(Mesh *mesh, Scalar init_const);
-      Solution(Mesh *mesh, Scalar init_const_0, Scalar init_const_1);
       Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
       virtual ~Solution();
@@ -92,20 +86,14 @@ namespace Hermes
 
       void assign(Solution* sln);
       Solution& operator = (Solution& sln) { assign(&sln); return *this; }
-      void copy(const Solution* sln);
 
-      int* get_element_orders() { return this->elem_orders;}
-
-      void set_const(Mesh* mesh, Scalar c);
-      void set_const(Mesh* mesh, Scalar c0, Scalar c1); // two-component (Hcurl) const
-
-      void set_zero(Mesh* mesh);
-      void set_zero_2(Mesh* mesh); // two-component (Hcurl) zero
+      void copy(const Solution<Scalar>* sln);
 
       virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
+
       int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
-      /// Sets solution equal to Dirichlet lift only, solution vector = 0
+      /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
 
       /// Enables or disables transformation of the solution derivatives (H1 case)
@@ -143,11 +131,7 @@ namespace Hermes
       /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
       /// slow. Prefer Solution::get_ref_value if possible.
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
-
-      /// Returns the number of degrees of freedom of the solution.
-      /// Returns -1 for exact or constant solutions.
-      int get_num_dofs() const { return num_dofs; };
-
+      
       /// Multiplies the function represented by this class by the given coefficient.
       void multiply(Scalar coef);
 
@@ -163,33 +147,45 @@ namespace Hermes
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
-        Hermes::vector<Solution *> solutions,
+        Hermes::vector<Solution<Scalar>*> solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution* solution,
+
+      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
         bool add_dir_lift = true);
+
       static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar> *> spaces,
-        Hermes::vector<Solution*> solutions,
+        Hermes::vector<Solution<Scalar>*> solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-      static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution* solution,
+
+      static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
         bool add_dir_lift = true);
+
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
-        Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss,
+        Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution* solution,
+
+      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift = true);
 
+      /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
 
+      /// In case this is valid.
       Space<Scalar>* get_space();
 
+      /// In case this is valid.
+      Scalar* sln_vector;
     protected:
 
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
+
       virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
+
       virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift);
 
       SolutionType sln_type;
+      SpaceType space_type;
 
       /// In case this is valid.
       Space<Scalar>* space;
@@ -204,7 +200,7 @@ namespace Hermes
       /// a table from the lowest layer.
       /// The highest layer (in contrast to the PrecalcShapeset class) is represented
       /// here only by this array.
-      std::map<uint64_t, LightArray<Node*>*>* tables[4][4];
+      std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[4][4];
 
       Element* elems[4][4];
       int cur_elem, oldest[4];
@@ -215,19 +211,18 @@ namespace Hermes
       int num_coefs, num_elems;
       int num_dofs;
 
-      SpaceType space_type;
-      void transform_values(int order, Node* node, int newmask, int oldmask, int np);
-
-      Scalar   cnst[2];
-      Scalar   exact_mult;
+      void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
 
       virtual void precalculate(int order, int mask);
 
       Scalar* dxdy_coefs[2][6];
+
       Scalar* dxdy_buffer;
 
       double** calc_mono_matrix(int o, int*& perm);
+
       void init_dxdy_buffer();
+
       void free_tables();
 
       Element* e_last; ///< last visited element when getting solution values at specific points

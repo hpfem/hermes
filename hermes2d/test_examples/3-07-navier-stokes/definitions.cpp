@@ -576,3 +576,23 @@ protected:
   double H;
   double startup_time;
 };
+
+class ZeroInitialCondition : public ExactSolutionScalar<double>
+{
+public:
+  ZeroInitialCondition(Mesh* mesh) : ExactSolutionScalar<double>(mesh) {};
+
+  virtual double value (double x, double y) const {
+    return 0.0; 
+  };
+
+  virtual void derivatives (double x, double y, double& dx, double& dy) const {
+    dx = 0;
+    dy = 0;
+  };
+
+  virtual Ord ord(Ord x, Ord y) const {
+    return Ord(0);
+  }
+
+};
