@@ -87,7 +87,7 @@ namespace Hermes
 
       for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
-          tables[i][j] = new std::map<uint64_t, LightArray<Node*>*>;
+          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
 
       mono_coefs = NULL;
       elem_coefs[0] = elem_coefs[1] = NULL;
@@ -128,7 +128,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solution<Scalar>::Solution(Space<Scalar>* s, Scalar* coeff_vec) : MeshFunction(s->get_mesh())
+    Solution<Scalar>::Solution(Space<Scalar>* s, Scalar* coeff_vec) : MeshFunction<Scalar>(s->get_mesh())
     {
       space_type = s->get_type();
       space = s;
@@ -216,8 +216,10 @@ namespace Hermes
     {
       for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-          if(tables[i][j] != NULL) {
-            for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) {
+          if(tables[i][j] != NULL) 
+          {
+            for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) 
+            {
               for(unsigned int l = 0; l < it->second->get_size(); l++)
                 if(it->second->present(l))
                   ::free(it->second->get(l));
@@ -695,7 +697,7 @@ namespace Hermes
       }
       else if (sln_type == HERMES_EXACT)
       {
-        order = Hermes::Hermes2D::g_max_quad;
+        this->order = Hermes::Hermes2D::g_max_quad;
       }
       else
         error("Uninitialized solution.");
@@ -731,7 +733,7 @@ namespace Hermes
     static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
 
     template<typename Scalar>
-    void Solution<Scalar>::transform_values(int order, Node* node, int newmask, int oldmask, int np)
+    void Solution<Scalar>::transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np)
     {
       double2x2 *mat, *m;
       double3x2 *mat2, *mm;

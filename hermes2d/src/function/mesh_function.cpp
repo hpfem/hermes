@@ -25,7 +25,7 @@ namespace Hermes
     {
       refmap = new RefMap;
       mesh = NULL;
-      element = NULL;
+      this->element = NULL;
     }
 
     template<typename Scalar>
@@ -93,37 +93,37 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_active_element(Element* e)
     {
-      element = e;
+      this->element = e;
       mode = e->get_mode();
       refmap->set_active_element(e);
-      reset_transform();
+      Function<Scalar>::reset_transform();
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::handle_overflow_idx()
     {
-      if(overflow_nodes != NULL) {
-        for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
-          if(overflow_nodes->present(i))
-            ::free(overflow_nodes->get(i));
-        delete overflow_nodes;
+      if(this->overflow_nodes != NULL) {
+        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
+          if(this->overflow_nodes->present(i))
+            ::free(this->overflow_nodes->get(i));
+        delete this->overflow_nodes;
       }
-      nodes = new LightArray<Node *>;
-      overflow_nodes = nodes;
+      this->nodes = new LightArray<typename Function<Scalar>::Node *>;
+      this->overflow_nodes = this->nodes;
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::push_transform(int son)
     {
       Transformable::push_transform(son);
-      update_nodes_ptr();
+      Function<Scalar>::update_nodes_ptr();
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::pop_transform()
     {
       Transformable::pop_transform();
-      update_nodes_ptr();
+      Function<Scalar>::update_nodes_ptr();
     }
 
     template<typename Scalar>

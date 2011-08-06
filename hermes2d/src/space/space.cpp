@@ -525,9 +525,11 @@ namespace Hermes
         {
           if(mesh->get_element(e->id)->active)
             edata[e->id].changed_in_last_adaptation = true;
-          for(unsigned int i = 0; i < 4; i++)
-            if(mesh->get_element(e->id)->sons[i]->active)
-              edata[mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
+          else
+            for(unsigned int i = 0; i < 4; i++)
+              if(mesh->get_element(e->id)->sons[i] != NULL)
+                if(mesh->get_element(e->id)->sons[i]->active)
+                  edata[mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
         }
 
         Element * e;

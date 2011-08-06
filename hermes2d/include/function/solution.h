@@ -89,7 +89,7 @@ namespace Hermes
 
       void copy(const Solution<Scalar>* sln);
 
-      virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
+      virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
 
       int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
