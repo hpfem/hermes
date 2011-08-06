@@ -85,7 +85,6 @@ namespace Hermes
       public:
         ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
         {
-          this->adapt_eval = false;
           this->projNormType = projNormType;
         }
 
@@ -200,7 +199,6 @@ namespace Hermes
       public:
         ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
         {
-          this->adapt_eval = false;
           this->projNormType = projNormType;
           this->ext = Hermes::vector<MeshFunction<Scalar>*>();
           this->ext.push_back(ext);

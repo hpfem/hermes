@@ -40,6 +40,9 @@ namespace Hermes
 
     double CubicSpline::value(double x) const
     {
+      // For simple constant case.
+      if(this->is_const)
+        return const_value;
       // For general case.
       int m = -1;
       if (!this->find_interval(x, m)) 

@@ -290,18 +290,6 @@ namespace Hermes
       /// external coefficient vector.
       int u_ext_offset;
 
-      /// If true, the form will be evaluated using adaptive
-      /// numerical integration.
-      bool adapt_eval;
-
-      /// To obtain reference value, the element is split into
-      /// four sons. In addition, the order is increased by this value.
-      int adapt_order_increase;
-
-      /// Max. allowed relative error (stopping criterion for adaptive
-      /// numerical quadrature.
-      double adapt_rel_error_tol;
-
     protected:
       WeakForm<Scalar>* wf;
       double stage_time;

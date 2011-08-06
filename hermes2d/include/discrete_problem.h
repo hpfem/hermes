@@ -293,15 +293,6 @@ namespace Hermes
         PrecalcShapeset* fu, PrecalcShapeset* fv, 
         RefMap* ru, RefMap* rv);
 
-      /// Main function for the evaluation of volumetric matrix forms. 
-      /// Evaluates weak form on element given by the RefMap.
-      /// Integration order is chosen adaptively.
-      Scalar eval_form_adaptive(int order_init, Scalar result_init,
-        MatrixFormVol<Scalar>* mfv, 
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, 
-        RefMap* ru, RefMap* rv);
-
       /// Vector<Scalar> volume forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
       Scalar eval_form(VectorFormVol<Scalar>* vfv, Hermes::vector<Solution<Scalar>*> u_ext,
@@ -315,11 +306,6 @@ namespace Hermes
         PrecalcShapeset* fv, RefMap* rv);
 
       Scalar eval_form_subelement(int order, VectorFormVol<Scalar>* vfv, 
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv);
-
-      Scalar eval_form_adaptive(int order_init, Scalar result_init,
-        VectorFormVol<Scalar>* vfv, 
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
@@ -344,11 +330,6 @@ namespace Hermes
       Scalar eval_form_subelement(int order, MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos);
 
-      Scalar eval_form_adaptive(int order_init, Scalar result_init,
-        MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, 
-        RefMap* rv, SurfPos* surf_pos);
-
       /// Vector<Scalar> surface forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
       Scalar eval_form(VectorFormSurf<Scalar>* vfs, 
@@ -364,10 +345,6 @@ namespace Hermes
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
 
       Scalar eval_form_subelement(int order, VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-
-      Scalar eval_form_adaptive(int order_init, Scalar result_init,
-        VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
 
       /// Calculates integration order for DG matrix forms.

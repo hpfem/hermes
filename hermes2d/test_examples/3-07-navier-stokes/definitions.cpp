@@ -44,7 +44,6 @@ public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) : MatrixFormVol<double>(i, j), Stokes(Stokes), 
       Reynolds(Reynolds), time_step(time_step) {
         sym = HERMES_SYM;
-        adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -73,7 +72,6 @@ public:
   {
   public:
     BilinearFormUnSymVel(int i, int j, bool Stokes) : MatrixFormVol<double>(i, j), Stokes(Stokes) {
-      adapt_eval = false;
       sym = HERMES_NONSYM;
     }
 
@@ -107,7 +105,6 @@ public:
   public:
     BilinearFormUnSymXVelPressure(int i, int j) : MatrixFormVol<double>(i, j) {
       sym = HERMES_ANTISYM;
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -125,7 +122,6 @@ public:
   public:
     BilinearFormUnSymYVelPressure(int i, int j) : MatrixFormVol<double>(i, j) {
       sym = HERMES_ANTISYM;
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -142,7 +138,6 @@ public:
   {
   public:
     VectorFormVolVel(int i, bool Stokes, double time_step) : VectorFormVol<double>(i), Stokes(Stokes), time_step(time_step) {
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -218,7 +213,6 @@ public:
     BilinearFormSymVel(int i, int j, bool Stokes, double Reynolds, double time_step) : MatrixFormVol<double>(i, j), Stokes(Stokes), 
       Reynolds(Reynolds), time_step(time_step) {
         sym = HERMES_SYM;
-        adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -247,7 +241,6 @@ public:
   {
   public:
     BilinearFormUnSymVel_0_0(int i, int j, bool Stokes) : MatrixFormVol<double>(i, j), Stokes(Stokes) {
-      adapt_eval = false;
       sym = HERMES_NONSYM;
     }
 
@@ -284,7 +277,6 @@ public:
   {
   public:
     BilinearFormUnSymVel_0_1(int i, int j, bool Stokes) : MatrixFormVol<double>(i, j), Stokes(Stokes) {
-      adapt_eval = false;
       sym = HERMES_NONSYM;
     }
 
@@ -317,7 +309,6 @@ public:
   {
   public:
     BilinearFormUnSymVel_1_0(int i, int j, bool Stokes) : MatrixFormVol<double>(i, j), Stokes(Stokes) {
-      adapt_eval = false;
       sym = HERMES_NONSYM;
     }
 
@@ -350,7 +341,6 @@ public:
   {
   public:
     BilinearFormUnSymVel_1_1(int i, int j, bool Stokes) : MatrixFormVol<double>(i, j), Stokes(Stokes) {
-      adapt_eval = false;
       sym = HERMES_NONSYM;
     }
 
@@ -388,7 +378,6 @@ public:
   public:
     BilinearFormUnSymXVelPressure(int i, int j) : MatrixFormVol<double>(i, j) {
       sym = HERMES_ANTISYM;
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -406,7 +395,6 @@ public:
   public:
     BilinearFormUnSymYVelPressure(int i, int j) : MatrixFormVol<double>(i, j) {
       sym = HERMES_ANTISYM;
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -423,7 +411,6 @@ public:
   {
   public:
     VectorFormNS_0(int i, bool Stokes, double Reynolds, double time_step) : VectorFormVol<double>(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -468,7 +455,6 @@ public:
   {
   public:
     VectorFormNS_1(int i, bool Stokes, double Reynolds, double time_step) : VectorFormVol<double>(i), Stokes(Stokes), Reynolds(Reynolds), time_step(time_step) {
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -513,7 +499,6 @@ public:
   {
   public:
     VectorFormNS_2(int i) : VectorFormVol<double>(i) {
-      adapt_eval = false;
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
@@ -594,5 +579,4 @@ public:
   virtual Ord ord(Ord x, Ord y) const {
     return Ord(0);
   }
-
 };

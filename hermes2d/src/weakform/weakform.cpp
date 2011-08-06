@@ -29,7 +29,6 @@ namespace Hermes
       double scaling_factor, int u_ext_offset) :
     ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
     {
-      adapt_eval = false;
       areas.push_back(area);
       stage_time = 0.0;
     }
@@ -39,7 +38,6 @@ namespace Hermes
       double scaling_factor, int u_ext_offset) :
     ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
     {
-      adapt_eval = false;
       this->areas = areas;
       stage_time = 0.0;
     }

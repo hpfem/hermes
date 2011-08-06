@@ -95,10 +95,9 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  mesh.refine_all_elements();
-  mesh.refine_towards_boundary(BDY_OBSTACLE, 4, false);
-  mesh.refine_towards_boundary(BDY_TOP, 4, true);     // '4' is the number of levels,
-  mesh.refine_towards_boundary(BDY_BOTTOM, 4, true);  // 'true' stands for anisotropic refinements.
+  mesh.refine_towards_boundary(BDY_OBSTACLE,1, false);
+  mesh.refine_towards_boundary(BDY_TOP, 1, true);     // '4' is the number of levels,
+  mesh.refine_towards_boundary(BDY_BOTTOM, 1, true);  // 'true' stands for anisotropic refinements.
 
   // Initialize boundary conditions.
   EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);

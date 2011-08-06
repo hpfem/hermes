@@ -2534,50 +2534,19 @@ namespace Hermes
       _F_;
       Scalar result = 0;
 
-      if (mfv->adapt_eval == false)
-      {
-        // Time measurement.
-        profiling.assemble_util_time.tick();
-        profiling.eval_util_time.reset();
+      // Time measurement.
+      profiling.assemble_util_time.tick();
+      profiling.eval_util_time.reset();
 
-        // Determine the integration order by parsing the form.
-        int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
-        // Perform non-adaptive numerical quadrature of order "order".
-        result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
+      // Determine the integration order by parsing the form.
+      int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
+      // Perform non-adaptive numerical quadrature of order "order".
+      result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
 
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-      }
-      else 
-      {
-        // Perform adaptive numerical quadrature starting with order = 2.
-        // \todo The choice of initial order matters a lot for efficiency,
-        //       this needs more research.
-        Shapeset* fu_shapeset = fu->get_shapeset();
-        Shapeset* fv_shapeset = fv->get_shapeset();
-        int fu_index = fu->get_active_shape();
-        int fv_index = fv->get_active_shape();
-        int fu_order = fu_shapeset->get_order(fu_index);
-        int fv_order = fv_shapeset->get_order(fv_index);
-        int fu_order_h = H2D_GET_H_ORDER(fu_order);
-        int fu_order_v = H2D_GET_V_ORDER(fu_order);
-        int fv_order_h = H2D_GET_H_ORDER(fv_order);
-        int fv_order_v = H2D_GET_V_ORDER(fv_order);
-
-        // FIXME - this needs more research.
-        int order_init = (fu_order_h + fu_order_v) / 2 + (fv_order_h + fv_order_v) / 2;
-
-        // Calculate initial value of the form on coarse element.
-        Scalar result_init = eval_form_subelement(order_init, mfv, u_ext, fu, fv, ru, rv);
-
-        //printf("Eval_form: initial result = %g\n", result_init);
-
-        // Calculate the value of the form using adaptive quadrature.    
-        result = eval_form_adaptive(order_init, result_init,
-          mfv, u_ext, fu, fv, ru, rv);
-      }
+      // Time measurement.
+      profiling.eval_util_time.tick();
+      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
+      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
 
       return result;
     }
@@ -2894,91 +2863,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result_init,
-      MatrixFormVol<Scalar> *mfv, 
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, 
-      RefMap *ru, RefMap *rv)
-    {
-      // Initialize set of all transformable entities.
-      std::set<Transformable *> transformable_entities;
-      transformable_entities.insert(fu);
-      transformable_entities.insert(fv);
-      transformable_entities.insert(ru);
-      transformable_entities.insert(rv);
-      transformable_entities.insert(mfv->ext.begin(), mfv->ext.end());
-      transformable_entities.insert(u_ext.begin(), u_ext.end());
-
-      Scalar result = 0;
-
-      int order_increase = mfv->adapt_order_increase;
-
-      Scalar subs_value[4];
-
-      Scalar result_current_subelements = 0;
-
-      // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
-      // as the further division to subelements must be only local.
-      this->delete_single_geom_cache(order_init + order_increase);
-      for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-      {
-        // Push the transformation to the current son to all functions and reference mappings involved.
-        Transformable::push_transforms(transformable_entities, sons_i);
-
-        // The actual calculation.
-        subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfv, 
-          u_ext, fu, fv, ru, rv);
-
-        // Clear of the geometry cache for the current active subelement.
-        this->delete_single_geom_cache(order_init + order_increase);
-
-        //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
-
-        result_current_subelements += subs_value[sons_i];
-
-        // Reset the transformation.
-        Transformable::pop_transforms(transformable_entities);
-      }
-
-      // Tolerance checking.
-      // First, if the result is negligible.
-      if (std::abs(result_current_subelements) < 1e-6)
-        return result_current_subelements;
-
-      // Relative error.
-      double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
-
-      if (rel_error < mfv->adapt_rel_error_tol)
-        // Relative error in tolerance.
-        return result_current_subelements;
-      else 
-      {
-        Scalar result_recursion = 0;
-        // Relative error exceeds allowed tolerance: Call the function 
-        // eval_form_adaptive() in each subelement, with initial values
-        // subs_value[sons_i].
-
-        // Call the function eval_form_adaptive() recursively in all sons.
-        for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-        {
-          // Push the transformation to the current son to all functions and reference mappings involved.
-          Transformable::push_transforms(transformable_entities, sons_i);
-
-          // Recursion.
-          subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
-            mfv, u_ext, fu, fv, ru, rv);
-
-          result_recursion += subs_value[sons_i];
-
-          // Reset the transformation.
-          Transformable::pop_transforms(transformable_entities);
-        }
-
-        return result_recursion;
-      }
-    }
-
-    template<typename Scalar>
     Scalar DiscreteProblem<Scalar>::eval_form(VectorFormVol<Scalar> *vfv, 
       Hermes::vector<Solution<Scalar>*> u_ext, 
       PrecalcShapeset *fv, RefMap *rv)
@@ -2987,10 +2871,7 @@ namespace Hermes
 
       Scalar result = 0;
 
-      if (vfv->adapt_eval == false)
-      {
-
-        // Time measurement.
+     // Time measurement.
         profiling.assemble_util_time.tick();
         profiling.eval_util_time.reset();
 
@@ -3003,31 +2884,7 @@ namespace Hermes
         profiling.eval_util_time.tick();
         profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
         profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-      }
-      else 
-      {
-        // Perform adaptive numerical quadrature starting with order = 2.
-        // \todo The choice of initial order matters a lot for efficiency,
-        //       this needs more research.
-        Shapeset* fv_shapeset = fv->get_shapeset();
-        int fv_index = fv->get_active_shape();
-        int fv_order = fv_shapeset->get_order(fv_index);
-        int fv_order_h = H2D_GET_H_ORDER(fv_order);
-        int fv_order_v = H2D_GET_V_ORDER(fv_order);
-
-        // FIXME - this needs more research.
-        int order_init = (fv_order_h + fv_order_v) / 2;
-
-        // Calculate initial value of the form on coarse element.
-        Scalar result_init = eval_form_subelement(order_init, vfv, u_ext, fv, rv);
-
-        //printf("Eval_form: initial result = %g\n", result_init);
-
-        // Calculate the value of the form using adaptive quadrature.    
-        result = eval_form_adaptive(order_init, result_init,
-          vfv, u_ext, fv, rv);
-      }
-
+      
       return result;
     }
     template<typename Scalar>
@@ -3342,87 +3199,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result_init,
-      VectorFormVol<Scalar> *vfv, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv)
-    {
-      // Initialize set of all transformable entities.
-      std::set<Transformable *> transformable_entities;
-      transformable_entities.insert(fv);
-      transformable_entities.insert(rv);
-      transformable_entities.insert(vfv->ext.begin(), vfv->ext.end());
-      transformable_entities.insert(u_ext.begin(), u_ext.end());
-
-      Scalar result = 0;
-
-      int order_increase = vfv->adapt_order_increase;
-
-      Scalar subs_value[4];
-
-      Scalar result_current_subelements = 0;
-
-      // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
-      // as the further division to subelements must be only local.
-      this->delete_single_geom_cache(order_init + order_increase);
-      for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-      {
-        // Push the transformation to the current son to all functions and reference mappings involved.
-        Transformable::push_transforms(transformable_entities, sons_i);
-
-        // The actual calculation.
-        subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfv, 
-          u_ext, fv, rv);
-
-        // Clear of the geometry cache for the current active subelement.
-        this->delete_single_geom_cache(order_init + order_increase);
-
-        //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
-
-        result_current_subelements += subs_value[sons_i];
-
-        // Reset the transformation.
-        Transformable::pop_transforms(transformable_entities);
-      }
-
-      // Tolerance checking.
-      // First, if the result is negligible.
-      if (std::abs(result_current_subelements) < 1e-6)
-        return result_current_subelements;
-
-      // Relative error.
-      double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
-
-      if (rel_error < vfv->adapt_rel_error_tol)
-        // Relative error in tolerance.
-        return result_current_subelements;
-      else 
-      {
-        Scalar result_recursion = 0;
-        // Relative error exceeds allowed tolerance: Call the function 
-        // eval_form_adaptive() in each subelement, with initial values
-        // subs_value[sons_i].
-
-        // Call the function eval_form_adaptive() recursively in all sons.
-        for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-        {
-          // Push the transformation to the current son to all functions and reference mappings involved.
-          Transformable::push_transforms(transformable_entities, sons_i);
-
-          // Recursion.
-          subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
-            vfv, u_ext, fv, rv);
-
-          result_recursion += subs_value[sons_i];
-
-          // Reset the transformation.
-          Transformable::pop_transforms(transformable_entities);
-        }
-
-        return result_recursion;
-      }
-    }
-
-    template<typename Scalar>
     Scalar DiscreteProblem<Scalar>::eval_form(MatrixFormSurf<Scalar> *mfs, 
       Hermes::vector<Solution<Scalar>*> u_ext, 
       PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
@@ -3430,8 +3206,6 @@ namespace Hermes
       _F_;
       Scalar result = 0;
 
-      if (mfs->adapt_eval == false)
-      {
         // Time measurement.
         profiling.assemble_util_time.tick();
         profiling.eval_util_time.reset();
@@ -3445,25 +3219,7 @@ namespace Hermes
         profiling.eval_util_time.tick();
         profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
         profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-      }
-      else 
-      {
-        // Perform adaptive numerical quadrature starting with order = 2.
-        // \todo The choice of initial order matters a lot for efficiency,
-        //       this needs more research.
-        int fu_order = fu->get_edge_fn_order(surf_pos->surf_num);
-        int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
-
-        // FIXME - this needs more research.
-        int order_init = fu_order + fv_order;
-
-        // Calculate initial value of the form on coarse element.
-        Scalar result_init = eval_form_subelement(order_init, mfs, u_ext, fu, fv, ru, rv, surf_pos);
-
-        // Calculate the value of the form using adaptive quadrature.    
-        result = eval_form_adaptive(order_init, result_init,
-          mfs, u_ext, fu, fv, ru, rv, surf_pos);
-      }
+    
 
       return result;
     }
@@ -3769,98 +3525,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result_init,
-      MatrixFormSurf<Scalar> *mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
-    {
-      // Initialize set of all transformable entities.
-      std::set<Transformable *> transformable_entities;
-      transformable_entities.insert(fu);
-      transformable_entities.insert(fv);
-      transformable_entities.insert(ru);
-      transformable_entities.insert(rv);
-      transformable_entities.insert(mfs->ext.begin(), mfs->ext.end());
-      transformable_entities.insert(u_ext.begin(), u_ext.end());
-
-      Scalar result = 0;
-
-      int order_increase = mfs->adapt_order_increase;
-
-      Scalar subs_value[4];
-
-      Scalar result_current_subelements = 0;
-
-      // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
-      // as the further division to subelements must be only local.
-      this->delete_single_geom_cache(order_init + order_increase);
-      for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-      {
-        // Push the transformation to the current son to all functions and reference mappings involved.
-        Transformable::push_transforms(transformable_entities, sons_i);
-
-        // The actual calculation.
-        subs_value[sons_i] = eval_form_subelement(order_init + order_increase, mfs, 
-          u_ext, fu, fv, ru, rv, surf_pos);
-
-        // Clear of the geometry cache for the current active subelement.
-        this->delete_single_geom_cache(order_init + order_increase);
-
-        //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
-
-        result_current_subelements += subs_value[sons_i];
-
-        // Reset the transformation.
-        Transformable::pop_transforms(transformable_entities);
-      }
-
-      // Tolerance checking.
-      // First, if the result is negligible.
-      if (std::abs(result_current_subelements) < 1e-6)
-        return result_current_subelements;
-
-      // Relative error.
-      double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
-
-      if (rel_error < mfs->adapt_rel_error_tol)
-        // Relative error in tolerance.
-        return result_current_subelements;
-      else 
-      {
-        Scalar result_recursion = 0;
-        // Relative error exceeds allowed tolerance: Call the function 
-        // eval_form_adaptive() in each subelement, with initial values
-        // subs_value[sons_i].
-
-        // Call the function eval_form_adaptive() recursively in all sons.
-        for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-        {
-          // Push the transformation to the current son to all functions and reference mappings involved.
-          Transformable::push_transforms(transformable_entities, sons_i);
-
-          // Recursion.
-          subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
-            mfs, u_ext, fu, fv, ru, rv, surf_pos);
-
-          result_recursion += subs_value[sons_i];
-
-          // Reset the transformation.
-          Transformable::pop_transforms(transformable_entities);
-        }
-
-        return result_recursion;
-      }
-    }
-
-    template<typename Scalar>
     Scalar DiscreteProblem<Scalar>::eval_form(VectorFormSurf<Scalar> *vfs, 
       Hermes::vector<Solution<Scalar>*> u_ext, 
       PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
     {
       _F_;
       Scalar result = 0;
-
-      if (vfs->adapt_eval == false)
-      {
 
         // Time measurement.
         profiling.assemble_util_time.tick();
@@ -3874,27 +3544,7 @@ namespace Hermes
         profiling.eval_util_time.tick();
         profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
         profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-      }
-      else 
-      {
-        // Perform adaptive numerical quadrature starting with order = 2.
-        // \todo The choice of initial order matters a lot for efficiency,
-        //       this needs more research.
-        int fv_order = fv->get_edge_fn_order(surf_pos->surf_num);
-
-        // FIXME - this needs more research.
-        int order_init = fv_order;
-
-        // Calculate initial value of the form on coarse element.
-        Scalar result_init = eval_form_subelement(order_init, vfs, u_ext, fv, rv, surf_pos);
-
-        //printf("Eval_form: initial result = %g\n", result_init);
-
-        // Calculate the value of the form using adaptive quadrature.    
-        result = eval_form_adaptive(order_init, result_init,
-          vfs, u_ext, fv, rv, surf_pos);
-      }
-
+      
       return result;
     }
     template<typename Scalar>
@@ -4192,87 +3842,6 @@ namespace Hermes
         return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
         // are defined in (-1, 1). Thus multiplying with 0.5 to correct
         // the weights.
-    }
-
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_adaptive(int order_init, Scalar result_init,
-      VectorFormSurf<Scalar> *vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
-    {
-      // Initialize set of all transformable entities.
-      std::set<Transformable *> transformable_entities;
-      transformable_entities.insert(fv);
-      transformable_entities.insert(rv);
-      transformable_entities.insert(vfs->ext.begin(), vfs->ext.end());
-      transformable_entities.insert(u_ext.begin(), u_ext.end());
-
-      Scalar result = 0;
-
-      int order_increase = vfs->adapt_order_increase;
-
-      Scalar subs_value[4];
-
-      Scalar result_current_subelements = 0;
-
-      // Clear of the geometry cache for the current active subelement. This needs to be done before AND after
-      // as the further division to subelements must be only local.
-      this->delete_single_geom_cache(order_init + order_increase);
-      for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-      {
-        // Push the transformation to the current son to all functions and reference mappings involved.
-        Transformable::push_transforms(transformable_entities, sons_i);
-
-        // The actual calculation.
-        subs_value[sons_i] = eval_form_subelement(order_init + order_increase, vfs, 
-          u_ext, fv, rv, surf_pos);
-
-        // Clear of the geometry cache for the current active subelement.
-        this->delete_single_geom_cache(order_init + order_increase);
-
-        //printf("subs_value[%d] = %g\n", sons_i, subs_value[sons_i]);
-
-        result_current_subelements += subs_value[sons_i];
-
-        // Reset the transformation.
-        Transformable::pop_transforms(transformable_entities);
-      }
-
-      // Tolerance checking.
-      // First, if the result is negligible.
-      if (std::abs(result_current_subelements) < 1e-6)
-        return result_current_subelements;
-
-      // Relative error.
-      double rel_error = std::abs(result_current_subelements - result_init) / std::abs(result_current_subelements);
-
-      if (rel_error < vfs->adapt_rel_error_tol)
-        // Relative error in tolerance.
-        return result_current_subelements;
-      else 
-      {
-        Scalar result_recursion = 0;
-        // Relative error exceeds allowed tolerance: Call the function 
-        // eval_form_adaptive() in each subelement, with initial values
-        // subs_value[sons_i].
-
-        // Call the function eval_form_adaptive() recursively in all sons.
-        for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-        {
-          // Push the transformation to the current son to all functions and reference mappings involved.
-          Transformable::push_transforms(transformable_entities, sons_i);
-
-          // Recursion.
-          subs_value[sons_i] = eval_form_adaptive(order_init + order_increase, subs_value[sons_i],
-            vfs, u_ext, fv, rv, surf_pos);
-
-          result_recursion += subs_value[sons_i];
-
-          // Reset the transformation.
-          Transformable::pop_transforms(transformable_entities);
-        }
-
-        return result_recursion;
-      }
     }
 
     template<typename Scalar>

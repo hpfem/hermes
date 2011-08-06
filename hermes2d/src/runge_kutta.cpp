@@ -353,9 +353,6 @@ namespace Hermes
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;
-          proj_form->adapt_eval = false;
-          proj_form->adapt_order_increase = -1;
-          proj_form->adapt_rel_error_tol = -1;
           stage_wf_left.add_matrix_form(proj_form);
         }
         if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE 
@@ -365,9 +362,6 @@ namespace Hermes
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;
-          proj_form->adapt_eval = false;
-          proj_form->adapt_order_increase = -1;
-          proj_form->adapt_rel_error_tol = -1;
           stage_wf_left.add_matrix_form(proj_form);
         }
       }
@@ -408,12 +402,7 @@ namespace Hermes
             mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
             mfv_ij->u_ext_offset = i * dp->get_spaces().size();
-
-            // This form will not be integrated adaptively.
-            mfv_ij->adapt_eval = false;
-            mfv_ij->adapt_order_increase = -1;
-            mfv_ij->adapt_rel_error_tol = -1;
-
+            
             for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
@@ -446,11 +435,6 @@ namespace Hermes
 
             mfs_ij->u_ext_offset = i * dp->get_spaces().size();
 
-            // This form will not be integrated adaptively.
-            mfs_ij->adapt_eval = false;
-            mfs_ij->adapt_order_increase = -1;
-            mfs_ij->adapt_rel_error_tol = -1;
-
             for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
@@ -477,11 +461,6 @@ namespace Hermes
           vfv_i->scaling_factor = -1.0;
           vfv_i->u_ext_offset = i * dp->get_spaces().size();
 
-          // This form will not be integrated adaptively.
-          vfv_i->adapt_eval = false;
-          vfv_i->adapt_order_increase = -1;
-          vfv_i->adapt_rel_error_tol = -1;
-
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
@@ -506,11 +485,6 @@ namespace Hermes
 
           vfs_i->scaling_factor = -1.0;
           vfs_i->u_ext_offset = i * dp->get_spaces().size();
-
-          // This form will not be integrated adaptively.
-          vfs_i->adapt_eval = false;
-          vfs_i->adapt_order_increase = -1;
-          vfs_i->adapt_rel_error_tol = -1;
 
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
