@@ -16,90 +16,29 @@
 #ifndef __H2D_SOLUTION_H
 #define __H2D_SOLUTION_H
 
-#include "mesh_function.h"
+#include "../function/mesh_function.h"
+#include "../space/space.h"
+#include "../mesh/refmap.h"
+
+class PrecalcShapeset;
+class Ord;
 
 namespace Hermes
 {
-  class Ord;
-
   namespace Hermes2D
   {
-    static double3* cheb_tab_tri[11];
-    static double3* cheb_tab_quad[11];
-    static int      cheb_np_tri[11];
-    static int      cheb_np_quad[11];
-
-    extern double3** cheb_tab[2];
-    extern int*      cheb_np[2];
-
     /// Quad2DCheb is a special "quadrature" consisting of product Chebyshev
     /// points on the reference triangle and quad. It is used for expressing
     /// the solution on an element as a linear combination of monomials.
     ///
-    class Quad2DCheb : public Quad2D
-    {
-    public:
-
-      Quad2DCheb()
-      {
-        mode = HERMES_MODE_TRIANGLE;
-        max_order[0]  = max_order[1]  = 10;
-        num_tables[0] = num_tables[1] = 11;
-        tables = cheb_tab;
-        np = cheb_np;
-
-        tables[0][0] = tables[1][0] = NULL;
-        np[0][0] = np[1][0] = 0;
-
-        int i, j, k, n, m;
-        double3* pt;
-        for (mode = 0; mode <= 1; mode++)
-        {
-          for (k = 0; k <= 10; k++)
-          {
-            np[mode][k] = n = mode ? sqr(k+1) : (k+1)*(k+2)/2;
-            tables[mode][k] = pt = new double3[n];
-
-            for (i = k, m = 0; i >= 0; i--)
-              for (j = k; j >= (mode ? 0 : k-i); j--, m++) 
-              {
-                pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
-                pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
-                pt[m][2] = 1.0;
-              }
-          }
-        }
-      };
-
-      ~Quad2DCheb()
-      {
-        for (int mode = 0; mode <= 1; mode++)
-          for (int k = 0; k <= 10; k++){
-            if (tables[mode][k])
-            {
-              delete[] tables[mode][k];
-              tables[mode][k]=NULL;
-            }
-          }
-      }
-
-      virtual void dummy_fn() {}
-
-    };
-
-    enum SolutionType {
-      HERMES_UNDEF = -1,
-      HERMES_SLN = 0,
-      HERMES_EXACT = 1,
-      HERMES_CONST = 2
-    };
+    class Quad2DCheb;
 
     /// \brief Represents the solution of a PDE.
     ///
     /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
     /// it calculates the appropriate linear combination of basis functions at the specified
     /// element and integration points.
-
+    ///
     ///  The higher-order solution on elements is best calculated not as a linear  combination
     ///  of shape functions (the usual approach), but as a linear combination of monomials.
     ///  This has the advantage that no shape function table calculation and look-ups are
@@ -128,48 +67,46 @@ namespace Hermes
     ///  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
     ///   'n' is the polynomial degree.)
     ///
+
+    enum SolutionType {
+      HERMES_UNDEF = -1,
+      HERMES_SLN = 0,
+      HERMES_EXACT = 1,
+      HERMES_CONST = 2
+    };
+
     template<typename Scalar>
     class HERMES_API Solution : public MeshFunction<Scalar>
     {
     public:
 
-      void init();
-
+      virtual void init();
       Solution();
-
       Solution(Mesh *mesh);
-
       Solution(Mesh *mesh, Scalar init_const);
-
       Solution(Mesh *mesh, Scalar init_const_0, Scalar init_const_1);
-
       Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
-
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
-
       virtual ~Solution();
-
       virtual void free();
 
-      void assign(Solution<Scalar>* sln);
-
+      void assign(Solution* sln);
       Solution& operator = (Solution& sln) { assign(&sln); return *this; }
-
-      void copy(const Solution<Scalar>* sln);
+      void copy(const Solution* sln);
 
       int* get_element_orders() { return this->elem_orders;}
 
       void set_const(Mesh* mesh, Scalar c);
-
-      void set_const(Mesh* mesh, Scalar c0, Scalar c1); ///< two-component (Hcurl) const
+      void set_const(Mesh* mesh, Scalar c0, Scalar c1); // two-component (Hcurl) const
 
       void set_zero(Mesh* mesh);
+      void set_zero_2(Mesh* mesh); // two-component (Hcurl) zero
 
-      void set_zero_2(Mesh* mesh); ///< two-component (Hcurl) zero
-
-      int get_edge_fn_order(int edge);
-
+      virtual int get_edge_fn_order(int edge) { return MeshFunction::get_edge_fn_order(edge); }
       int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
+
+      /// Sets solution equal to Dirichlet lift only, solution vector = 0
+      void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
 
       /// Enables or disables transformation of the solution derivatives (H1 case)
       /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
@@ -211,6 +148,9 @@ namespace Hermes
       /// Returns -1 for exact or constant solutions.
       int get_num_dofs() const { return num_dofs; };
 
+      /// Multiplies the function represented by this class by the given coefficient.
+      void multiply(Scalar coef);
+
       /// Returns solution type.
       SolutionType get_type() const { return sln_type; };
 
@@ -222,41 +162,37 @@ namespace Hermes
       virtual void set_active_element(Element* e);
 
       /// Passes solution components calculated from solution vector as Solutions.
-      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions,
+      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
+        Hermes::vector<Solution *> solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution* solution,
         bool add_dir_lift = true);
-
-      static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions,
+      static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar> *> spaces,
+        Hermes::vector<Solution*> solutions,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-
-      static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution* solution,
         bool add_dir_lift = true);
-
-      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
+      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
+        Hermes::vector<Solution *> solutions, Hermes::vector<PrecalcShapeset *> pss,
         Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>());
-
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution* solution,
         PrecalcShapeset* pss, bool add_dir_lift = true);
 
-      /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
-    protected:
 
-      static Quad2DCheb g_quad_2d_cheb;
+      Space<Scalar>* get_space();
+
+    protected:
 
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
-
       virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
-
       virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift);
 
       SolutionType sln_type;
+
+      /// In case this is valid.
+      Space<Scalar>* space;
 
       bool transform;
 
@@ -268,38 +204,30 @@ namespace Hermes
       /// a table from the lowest layer.
       /// The highest layer (in contrast to the PrecalcShapeset class) is represented
       /// here only by this array.
-      std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[8][4];
+      std::map<uint64_t, LightArray<Node*>*>* tables[4][4];
 
-      Element* elems[8][4];
-
-      int cur_elem, oldest[8];
+      Element* elems[4][4];
+      int cur_elem, oldest[4];
 
       Scalar* mono_coefs;  ///< monomial coefficient array
-
       int* elem_coefs[2];  ///< array of pointers into mono_coefs
-
       int* elem_orders;    ///< stored element orders
-
       int num_coefs, num_elems;
-
       int num_dofs;
 
       SpaceType space_type;
-
-      void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
+      void transform_values(int order, Node* node, int newmask, int oldmask, int np);
 
       Scalar   cnst[2];
+      Scalar   exact_mult;
 
       virtual void precalculate(int order, int mask);
 
       Scalar* dxdy_coefs[2][6];
-
       Scalar* dxdy_buffer;
 
       double** calc_mono_matrix(int o, int*& perm);
-
       void init_dxdy_buffer();
-
       void free_tables();
 
       Element* e_last; ///< last visited element when getting solution values at specific points
@@ -307,4 +235,5 @@ namespace Hermes
     };
   }
 }
+
 #endif

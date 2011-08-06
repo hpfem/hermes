@@ -13,18 +13,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_MESH_FN_H
-#define __H2D_MESH_FN_H
+#ifndef __H2D_MESH_FUNCTION_H
+#define __H2D_MESH_FUNCTION_H
 
-#include "function.h"
+#include "../function/function.h"
+#include "../space/space.h"
 #include "../mesh/refmap.h"
-#include "../mesh/mesh.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    class PrecalcShapeset;
     /// \brief Represents a function defined on a mesh.
     ///
     /// MeshFunction is a base class for all classes representing an arbitrary function
@@ -38,32 +37,32 @@ namespace Hermes
     class HERMES_API MeshFunction : public Function<Scalar>
     {
     public:
+
       MeshFunction();
       MeshFunction(Mesh *mesh);
-      virtual ~MeshFunction() = 0;
+      virtual ~MeshFunction();
 
-      virtual void init();
-      virtual void reinit();
+      virtual void init() {};
+      virtual void reinit() {free(); init();};
 
-      void set_quad_2d(Quad2D* quad_2d);
-
+      virtual void set_quad_2d(Quad2D* quad_2d);
       virtual void set_active_element(Element* e);
 
-      Mesh*   get_mesh() const;
-      RefMap* get_refmap();
+      virtual int get_edge_fn_order(int edge) { return Function<Scalar>::get_edge_fn_order(edge); }
 
-      virtual int get_edge_fn_order(int edge);
+      Mesh*   get_mesh() const { return mesh; }
+      RefMap* get_refmap() { update_refmap(); return refmap; }
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) = 0;
 
-      /// Handling overflows. Has to be virtual, because
+      /// Virtual function handling overflows. Has to be virtual, because
       /// the necessary iterators in the templated class do not work with GCC.
       virtual void handle_overflow_idx();
 
       /// See Transformable::push_transform.
-      void push_transform(int son);
+      virtual void push_transform(int son);
 
-      void pop_transform();
+      virtual void pop_transform();
 
     protected:
 
@@ -74,12 +73,18 @@ namespace Hermes
     public:
 
       /// For internal use only.
-      void force_transform(MeshFunction<Scalar>* mf);
+      void force_transform(MeshFunction* mf)
+      { Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm()); }
+      void update_refmap()
+      { refmap->force_transform(sub_idx, ctm); }
+      void force_transform(uint64_t sub_idx, Trf* ctm)
+      {
+        this->sub_idx = sub_idx;
+        this->ctm = ctm;
+      }
 
-      void update_refmap();
-
-      void force_transform(uint64_t sub_idx, Trf* ctm);
     };
   }
 }
+
 #endif

@@ -20,15 +20,17 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    MeshFunction<Scalar>::MeshFunction() : Function<Scalar>()
+    MeshFunction<Scalar>::MeshFunction()
+      : Function<Scalar>()
     {
       refmap = new RefMap;
       mesh = NULL;
-      this->element = NULL;
+      element = NULL;
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>::MeshFunction(Mesh *mesh) : Function<Scalar>()
+    MeshFunction<Scalar>::MeshFunction(Mesh *mesh) :
+    Function<Scalar>()
     {
       this->mesh = mesh;
       this->refmap = new RefMap;
@@ -40,46 +42,14 @@ namespace Hermes
     MeshFunction<Scalar>::~MeshFunction()
     {
       delete refmap;
-      if(this->overflow_nodes != NULL)
-      {
-        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-          if(this->overflow_nodes->present(i))
-            ::free(this->overflow_nodes->get(i));
-        delete this->overflow_nodes;
+      if(overflow_nodes != NULL) {
+        for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+          if(overflow_nodes->present(i))
+            ::free(overflow_nodes->get(i));
+        delete overflow_nodes;
       }
     }
 
-    template<typename Scalar>
-    void MeshFunction<Scalar>::init()
-    {
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::reinit()
-    { 
-      this->free();
-      init();
-    }
-
-    template<typename Scalar>
-    int MeshFunction<Scalar>::get_edge_fn_order(int edge)
-    {
-      return Function<Scalar>::get_edge_fn_order(edge);
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::handle_overflow_idx()
-    {
-      if(this->overflow_nodes != NULL)
-      {
-        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-          if(this->overflow_nodes->present(i))
-            ::free(this->overflow_nodes->get(i));
-        delete this->overflow_nodes;
-      }
-      this->nodes = new LightArray<typename Function<Scalar>::Node *>;
-      this->overflow_nodes = this->nodes;
-    }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
@@ -88,61 +58,43 @@ namespace Hermes
       refmap->set_quad_2d(quad_2d);
     }
 
+
     template<typename Scalar>
-    Mesh* MeshFunction<Scalar>::get_mesh() const
+    void MeshFunction<Scalar>::set_active_element(Element* e)
     {
-      return mesh;
+      element = e;
+      mode = e->get_mode();
+      refmap->set_active_element(e);
+      reset_transform();
     }
 
     template<typename Scalar>
-    RefMap* MeshFunction<Scalar>::get_refmap()
+    void MeshFunction<Scalar>::handle_overflow_idx()
     {
-      this->update_refmap();
-      return refmap;
+      if(overflow_nodes != NULL) {
+        for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
+          if(overflow_nodes->present(i))
+            ::free(overflow_nodes->get(i));
+        delete overflow_nodes;
+      }
+      nodes = new LightArray<Node *>;
+      overflow_nodes = nodes;
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::push_transform(int son)
     {
       Transformable::push_transform(son);
-      this->update_nodes_ptr();
+      update_nodes_ptr();
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::pop_transform()
     {
       Transformable::pop_transform();
-      this->update_nodes_ptr();
+      update_nodes_ptr();
     }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::set_active_element(Element* e)
-    {
-      this->element = e;
-      this->mode = e->get_mode();
-      refmap->set_active_element(e);
-      this->reset_transform();
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(MeshFunction<Scalar>* mf)
-    { 
-      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::update_refmap()
-    { 
-      refmap->force_transform(this->sub_idx, this->ctm);
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
-    {
-      this->sub_idx = sub_idx;
-      this->ctm = ctm;
-    }
-
+    
     template class HERMES_API MeshFunction<double>;
     template class HERMES_API MeshFunction<std::complex<double> >;
   }
