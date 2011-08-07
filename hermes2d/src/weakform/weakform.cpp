@@ -425,7 +425,7 @@ namespace Hermes
 
     template<typename Scalar>
     void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
-      Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector)
+      Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage)
     {
       _F_;
 
@@ -444,7 +444,7 @@ namespace Hermes
           unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
-          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext);
+          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext, one_stage);
           s->mfvol.push_back(mfvol[i]);
         }
 
@@ -454,7 +454,7 @@ namespace Hermes
           unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
-          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext);
+          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext, one_stage);
           s->mfsurf.push_back(mfsurf[i]);
         }
 
@@ -470,7 +470,7 @@ namespace Hermes
               error("When using multi-component forms, the Meshes have to be identical.");
           }
 
-          Stage<Scalar>* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext);
+          Stage<Scalar>* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext, one_stage);
           s->mfvol_mc.push_back(mfvol_mc[i]);
         }
         for (unsigned i = 0; i < mfsurf_mc.size(); i++) 
@@ -484,7 +484,7 @@ namespace Hermes
               error("When using multi-component forms, the Meshes have to be identical.");
           }
 
-          Stage<Scalar>* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext);
+          Stage<Scalar>* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext, one_stage);
           s->mfsurf_mc.push_back(mfsurf_mc[i]);
         }
       }
@@ -495,7 +495,7 @@ namespace Hermes
         {
           unsigned int ii = vfvol[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
-          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext);
+          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext, one_stage);
           s->vfvol.push_back(vfvol[i]);
         }
 
@@ -504,7 +504,7 @@ namespace Hermes
         {
           unsigned int ii = vfsurf[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
-          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext);
+          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext, one_stage);
           s->vfsurf.push_back(vfsurf[i]);
         }
 
@@ -516,7 +516,7 @@ namespace Hermes
             if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
               error("When using multi-component forms, the Meshes have to be identical.");
 
-          Stage<Scalar>*s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext);
+          Stage<Scalar>*s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext, one_stage);
           s->vfvol_mc.push_back(vfvol_mc[i]);
         }
 
@@ -527,7 +527,7 @@ namespace Hermes
             if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
               error("When using multi-component forms, the Meshes have to be identical.");
 
-          Stage<Scalar>*s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext);
+          Stage<Scalar>*s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext, one_stage);
           s->vfsurf_mc.push_back(vfsurf_mc[i]);
         }
       }
@@ -569,7 +569,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) 
     {
 
       _F_;
@@ -596,21 +596,40 @@ namespace Hermes
 
       // find a suitable existing stage for the form
       Stage<Scalar>* s = NULL;
+      if(one_stage)
+        assert(stages.size() <= 1);
+
       for (unsigned i = 0; i < stages.size(); i++)
         if (seq.size() == stages[i].seq_set.size() &&
           equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
         {
-          s = &stages[i]; break;
+          s = &stages[i];
+          break;
         }
 
         // create a new stage if not found
         if (s == NULL) 
         {
-
-          Stage<Scalar> newstage;
-          stages.push_back(newstage);
-          s = &stages.back();
-          s->seq_set = seq;
+          if(stages.size() > 0 && one_stage)
+          {
+            s = &stages[0];
+            for(std::set<unsigned>::iterator it = seq.begin(); it != seq.end(); it++)
+            {
+              bool is_already_in_the_set = false;
+              for(std::set<unsigned>::iterator s_it = s->seq_set.begin(); s_it != s->seq_set.end(); s_it++)
+                if(*it == *s_it)
+                  is_already_in_the_set = true;
+              if(!is_already_in_the_set)
+                s->seq_set.insert(*it);
+            }
+          }
+          else
+          {
+            Stage<Scalar> newstage;
+            stages.push_back(newstage);
+            s = &stages.back();
+            s->seq_set = seq;
+          }
         }
 
         // update and return the stage
@@ -628,7 +647,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) 
     {
 
       _F_;
@@ -655,22 +674,41 @@ namespace Hermes
 
       // find a suitable existing stage for the form
       Stage<Scalar>* s = NULL;
+      if(one_stage)
+        assert(stages.size() <= 1);
       for (unsigned i = 0; i < stages.size(); i++)
         if (seq.size() == stages[i].seq_set.size() &&
           equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
         {
-          s = &stages[i]; break;
+          s = &stages[i];
+          break;
         }
 
         // create a new stage if not found
         if (s == NULL) 
         {
-
-          Stage<Scalar> newstage;
-          stages.push_back(newstage);
-          s = &stages.back();
-          s->seq_set = seq;
+          if(stages.size() > 0 && one_stage)
+          {
+            s = &stages[0];
+            for(std::set<unsigned>::iterator it = seq.begin(); it != seq.end(); it++)
+            {
+              bool is_already_in_the_set = false;
+              for(std::set<unsigned>::iterator s_it = s->seq_set.begin(); s_it != s->seq_set.end(); s_it++)
+                if(*it == *s_it)
+                  is_already_in_the_set = true;
+              if(!is_already_in_the_set)
+                s->seq_set.insert(*it);
+            }
+          }
+          else
+          {
+            Stage<Scalar> newstage;
+            stages.push_back(newstage);
+            s = &stages.back();
+            s->seq_set = seq;
+          }
         }
+
 
         // update and return the stage
         for (unsigned int i = 0; i < ext.size(); i++)
@@ -690,7 +728,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext) 
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) 
     {
 
       _F_;
@@ -721,17 +759,33 @@ namespace Hermes
         if (seq.size() == stages[i].seq_set.size() &&
           equal(seq.begin(), seq.end(), stages[i].seq_set.begin())) 
         {
-          s = &stages[i]; break;
+          s = &stages[i];
+          break;
         }
 
         // create a new stage if not found
         if (s == NULL) 
         {
-
-          Stage<Scalar> newstage;
-          stages.push_back(newstage);
-          s = &stages.back();
-          s->seq_set = seq;
+          if(stages.size() > 0 && one_stage)
+          {
+            s = &stages[0];
+            for(std::set<unsigned>::iterator it = seq.begin(); it != seq.end(); it++)
+            {
+              bool is_already_in_the_set = false;
+              for(std::set<unsigned>::iterator s_it = s->seq_set.begin(); s_it != s->seq_set.end(); s_it++)
+                if(*it == *s_it)
+                  is_already_in_the_set = true;
+              if(!is_already_in_the_set)
+                s->seq_set.insert(*it);
+            }
+          }
+          else
+          {
+            Stage<Scalar> newstage;
+            stages.push_back(newstage);
+            s = &stages.back();
+            s->seq_set = seq;
+          }
         }
 
         // update and return the stage

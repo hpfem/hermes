@@ -96,6 +96,8 @@ namespace Hermes
 
       /// Sets the storing of the previous matrix in adaptivity.
       void set_adaptivity_cache();
+      void temp_enable_adaptivity_cache();
+      void temp_disable_adaptivity_cache();
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.
@@ -277,6 +279,7 @@ namespace Hermes
 
     protected:
       bool cache_for_adaptivity;
+      bool temp_cache_for_adaptivity;
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
@@ -599,8 +602,15 @@ namespace Hermes
         /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for quads.
         std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_quads;
 
-        SparseMatrix<Scalar>* stored_matrix_for_adaptivity;
-        Vector<Scalar>* stored_vector_for_adaptivity;
+        std::map<int, bool> element_reassembled_matrix;
+        std::map<int, bool> element_reassembled_vector;
+
+        unsigned int** cache_matrix_size;
+        unsigned int* cache_vector_size;
+
+        Scalar***** previous_reference_dp_cache_matrix;
+        Scalar*** previous_reference_dp_cache_vector;
+
         Hermes::vector<Space<Scalar>*> stored_spaces_for_adaptivity;
 
         LightArray<Func<Hermes::Ord>*> cache_fn_ord;

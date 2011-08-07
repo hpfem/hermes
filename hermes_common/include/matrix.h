@@ -52,6 +52,18 @@ namespace Hermes
         return vec;
       }
 
+      template<typename T>
+      T **new_matrix_malloc(unsigned int m, unsigned int n = 0)
+      {
+        if (!n) n = m;
+        T **vec = (T **) malloc(sizeof(T *) * m + sizeof(T) * m * n);
+        MEM_CHECK(vec);
+        memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
+        T *row = (T *) (vec + m);
+        for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;
+        return vec;
+      }
+
       /// Copies a matrix. Both matrices has to be equal to or larger than provided sizes.
       /// Size compatibility check is not done.
       template<typename T>

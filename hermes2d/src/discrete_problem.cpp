@@ -80,6 +80,7 @@ namespace Hermes
       have_matrix = false;
 
       cache_for_adaptivity = false;
+      temp_cache_for_adaptivity = false;
 
       // Initialize precalc shapesets according to spaces provided.
       pss = new PrecalcShapeset*[wf->get_neq()];
@@ -125,12 +126,85 @@ namespace Hermes
           delete pss[i];
         delete [] pss;
       }
+      if(cache_for_adaptivity)
+      {
+        // Matrix.
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
+        {
+          for(unsigned int j = 0; j < this->spaces.size(); j++)
+          {
+            for(unsigned int k = 0; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
+                std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k]);
+            std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j]);
+          }
+          delete [] this->assembling_caches.previous_reference_dp_cache_matrix[i];
+        }
+        delete [] this->assembling_caches.previous_reference_dp_cache_matrix;
+
+        // Vector.
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
+        {
+          for(unsigned int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
+              std::free(this->assembling_caches.previous_reference_dp_cache_vector[i][j]);
+          std::free(this->assembling_caches.previous_reference_dp_cache_vector[i]);
+        }
+        delete [] this->assembling_caches.previous_reference_dp_cache_vector;
+      }
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_adaptivity_cache()
     {
       cache_for_adaptivity = true;
+      
+      // Matrix.
+      this->assembling_caches.previous_reference_dp_cache_matrix = new Scalar****[this->spaces.size()];
+      this->assembling_caches.cache_matrix_size = new unsigned int*[this->spaces.size()];
+      // Vector.
+      this->assembling_caches.previous_reference_dp_cache_vector = new Scalar**[this->spaces.size()];
+      this->assembling_caches.cache_vector_size = new unsigned int[this->spaces.size()];
+
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+      {
+        // Matrix.
+        this->assembling_caches.previous_reference_dp_cache_matrix[i] = new Scalar***[this->spaces.size()];
+          this->assembling_caches.cache_matrix_size[i] = new unsigned int[this->spaces.size()];
+        for(unsigned int j = 0; j < this->spaces.size(); j++)
+        {
+          this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+          this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          for(unsigned int k = 0; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
+            this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
+        }
+
+        // Vector.
+        this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) malloc(sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+        this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+        for(unsigned int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
+          this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
+      }
+    }
+    
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::temp_disable_adaptivity_cache()
+    {
+      if(this->cache_for_adaptivity)
+      {
+        this->temp_cache_for_adaptivity = true;
+        this->cache_for_adaptivity = false;
+        return;
+      }
+      this->temp_cache_for_adaptivity = false;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::temp_enable_adaptivity_cache()
+    {
+      if(this->temp_cache_for_adaptivity)
+      {
+        this->cache_for_adaptivity = true;
+        this->temp_cache_for_adaptivity = false;
+      }
     }
 
     template<typename Scalar>
@@ -455,8 +529,29 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<Space<Scalar>*> spaces)
     {
+      if(this->spaces.size() != spaces.size())
+        error("DiscreteProblem can not change the number of spaces.");
       this->spaces = spaces;
       this->ndof = Space<Scalar>::get_num_dofs(spaces);
+      if(this->cache_for_adaptivity)
+      {
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
+        {
+          for(unsigned int j = 0; j < this->spaces.size(); j++)
+          {
+            this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+            for(unsigned int k = this->assembling_caches.cache_matrix_size[i][j]; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
+              this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
+            this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+          }
+
+          // Vector.
+          this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          for(unsigned int j = this->assembling_caches.cache_vector_size[i]; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
+              this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
+          this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+        }
+      }
       this->invalidate_matrix();
     }
 
@@ -465,8 +560,29 @@ namespace Hermes
     {
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
+      if(this->spaces.size() != spaces.size())
+        error("DiscreteProblem can not change the number of spaces.");
       this->spaces = spaces;
       this->ndof = Space<Scalar>::get_num_dofs(spaces);
+      if(this->cache_for_adaptivity)
+      {
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
+        {
+          for(unsigned int j = 0; j < this->spaces.size(); j++)
+          {
+            this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+            for(unsigned int k = this->assembling_caches.cache_matrix_size[i][j]; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
+              this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
+            this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+          }
+
+          // Vector.
+          this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          for(unsigned int j = this->assembling_caches.cache_vector_size[i]; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
+              this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
+          this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
+        }
+      }
       this->invalidate_matrix();
     }
 
@@ -566,11 +682,17 @@ namespace Hermes
       if (mat != NULL)
         get_matrix_buffer(9);
 
+      if(cache_for_adaptivity)
+      {
+        this->assembling_caches.element_reassembled_matrix.clear();
+        this->assembling_caches.element_reassembled_vector.clear();
+      }
+
       // Create assembling stages.
       Hermes::vector<Stage<Scalar> > stages = Hermes::vector<Stage<Scalar> >();
       bool want_matrix = (mat != NULL);
       bool want_vector = (rhs != NULL);
-      wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector);
+      wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector, cache_for_adaptivity);
 
       // Time measurement.
       profiling.assemble_util_time.tick();
@@ -608,44 +730,16 @@ namespace Hermes
       for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
         delete *it;
 
-      // If cached matrix for adaptivity was stored, delete it.
-      if(this->cache_for_adaptivity)
+      // Handle the previous spaces when caching previous reference spaces integrals.
+      if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
       {
-        if(mat != NULL)
-        {
-          if(this->assembling_caches.stored_matrix_for_adaptivity != NULL)
-          {
-            delete this->assembling_caches.stored_matrix_for_adaptivity;
-            this->assembling_caches.stored_matrix_for_adaptivity = NULL;
-          }
-        
-          this->assembling_caches.stored_matrix_for_adaptivity = mat->duplicate();
-          
-          if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
-          {
-            for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
-            {   
-              delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
-              delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
-            }
-            this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
-          }
+        for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
+        {   
+          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
+          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
         }
-        
-        if(rhs != NULL)
-        {
-          if(this->assembling_caches.stored_vector_for_adaptivity != NULL)
-          {
-            delete assembling_caches.stored_vector_for_adaptivity;
-            assembling_caches.stored_vector_for_adaptivity = NULL;
-          }
-      
-          this->assembling_caches.stored_vector_for_adaptivity = new UMFPackVector<Scalar>(rhs->length());
-          for(unsigned int i = 0; i < rhs->length(); i++)
-            this->assembling_caches.stored_vector_for_adaptivity->set(i, rhs->get(i));
-        }
+        this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
       }
-
       // Time measurement.
       profiling.total_time.tick();
       profiling.current_record.total = profiling.total_time.last();
@@ -770,29 +864,109 @@ namespace Hermes
 
             // Previous reference solution assembly lists.
             AsmList<Scalar>* al_prev = new AsmList<Scalar>[stage.idx.size()];
+            Element** e_prev = new Element*[stage.idx.size()];
             for (unsigned int i = 0; i < stage.idx.size(); i++)
-              this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(
-              this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_mesh()->get_element(e[i]->parent->id)->sons[son[i]], &al_prev[i]);
+            {
+              if(stored_value)
+              {
+                e_prev[i] = this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_mesh()->get_element(e[i]->parent->id)->sons[son[i]];
+
+                // If we have already reassembled this element.
+                if( (mat != NULL && this->assembling_caches.element_reassembled_matrix.find(e_prev[i]->id) != this->assembling_caches.element_reassembled_matrix.end())
+                    ||
+                    (rhs != NULL && this->assembling_caches.element_reassembled_vector.find(e_prev[i]->id) != this->assembling_caches.element_reassembled_vector.end()) )
+                {
+                  stored_value = false;
+                  break;
+                }
+
+                this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(e_prev[i], &al_prev[i]);
+                if(al[i].cnt != al_prev[i].cnt)
+                  stored_value = false;
+                for(unsigned int ai = 0; ai < al[i].cnt; ai++)
+                {
+                  if(al[i].idx[ai] != al_prev[i].idx[ai] || (al[i].dof[ai] != al_prev[i].dof[ai] && al[i].dof[ai] < 0))
+                  {
+                    stored_value = false;
+                    break;
+                  }
+                }
+              }
+            }
+            if(stored_value)
+            {
               for (unsigned int i = 0; i < stage.idx.size(); i++)
               {
                 if(mat != NULL)
                 {
                   for (unsigned int j = 0; j < stage.idx.size(); j++)
+                  {
                     for(unsigned int ai = 0; ai < al[i].cnt; ai++)
                       for(unsigned int aj = 0; aj < al[j].cnt; aj++)
                         if(al[i].dof[ai] > -1 && al[j].dof[aj] > -1)
-                          mat->add(al[i].dof[ai], al[j].dof[aj], this->assembling_caches.stored_matrix_for_adaptivity->get(al_prev[i].dof[ai], al_prev[j].dof[aj]));
+                          mat->add(al[i].dof[ai], al[j].dof[aj], 
+                            this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e_prev[i]->id][ai][aj]);
+                          
+                    if(e[i]->id != e_prev[i]->id)
+                    {
+                      if(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] != NULL)
+                        std::free(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id]);
+                      this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] = new_matrix_malloc<Scalar>(al[i].cnt, al[j].cnt);
+          
+                      for (unsigned int j = 0; j < stage.idx.size(); j++)
+                        for(unsigned int ai = 0; ai < al[i].cnt; ai++)
+                          for(unsigned int aj = 0; aj < al[j].cnt; aj++)
+                            if(al[i].dof[ai] > -1 && al[j].dof[aj] > -1)
+                              this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id][ai][aj] = 
+                                this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e_prev[i]->id][ai][aj];
+                    }
+                    this->assembling_caches.element_reassembled_matrix.insert(std::pair<int, bool>(e[i]->id, true));
+                  }
                 }
-
                 if(rhs != NULL)
+                {
                   for(unsigned int ai = 0; ai < al[i].cnt; ai++)
                     if(al[i].dof[ai] > -1)
-                      rhs->add(al[i].dof[ai], this->assembling_caches.stored_vector_for_adaptivity->get(al_prev[i].dof[ai]));
+                      rhs->add(al[i].dof[ai], this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e_prev[i]->id][ai]);
+                  
+                  if(e[i]->id != e_prev[i]->id)
+                  {
+                    if(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] != NULL)
+                      std::free(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id]);
+                    this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] = (Scalar*) malloc(sizeof(Scalar) * al[i].cnt);
+
+                    for(unsigned int ai = 0; ai < al[i].cnt; ai++)
+                      if(al[i].dof[ai] > -1)
+                        this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id][ai] =
+                          this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e_prev[i]->id][ai];
+                  }
+                  this->assembling_caches.element_reassembled_vector.insert(std::pair<int, bool>(e[i]->id, true));
+                }
               }
-              delete [] al;
+            }
+            delete [] al;
+            delete [] al_prev;
           }
-          else
+          if(!stored_value)
           {
+            for (unsigned int i = 0; i < stage.idx.size(); i++)
+            {
+              if(mat != NULL)
+                for (unsigned int j = 0; j < stage.idx.size(); j++)
+                  if(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] != NULL)
+                  {
+                    std::free(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id]);
+                    this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] = NULL;
+                    this->assembling_caches.element_reassembled_matrix.insert(std::pair<int, bool>(e[i]->id, true));
+                  }
+              if(rhs != NULL)
+                if(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] != NULL)
+                {
+                  std::free(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id]);
+                  this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] = NULL;
+                  this->assembling_caches.element_reassembled_vector.insert(std::pair<int, bool>(e[i]->id, true));
+                }
+            }
             assemble_one_state(stage, mat, rhs, force_diagonal_blocks, 
             block_weights, spss, refmap, 
             u_ext, e, bnd, surf_pos, trav.get_base());
@@ -1052,7 +1226,40 @@ namespace Hermes
         }
         // Insert the local stiffness matrix into the global one.
         if (mat != NULL)
+        {
           mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
+          if(this->cache_for_adaptivity)
+          {
+            Scalar** matrix = NULL;
+            if(this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id] == NULL)
+            {
+              // This also zeroes the matrix.
+              matrix = new_matrix_malloc<Scalar>(al[m]->cnt, al[n]->cnt);
+              this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id] = matrix;
+            }
+            else
+              matrix = this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id];
+            for (unsigned int i = 0; i < al[m]->cnt; i++)
+              for (unsigned int j = 0; j < al[n]->cnt; j++)
+                if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
+                  matrix[i][j] += local_stiffness_matrix[i][j];
+            if(sym)
+            {
+              if(this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] == NULL)
+              {
+                // This also zeroes the matrix.
+                matrix = new_matrix_malloc<Scalar>(al[n]->cnt, al[m]->cnt);
+                this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] = matrix;
+              }
+              else
+                matrix = this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id];
+              for (unsigned int i = 0; i < al[m]->cnt; i++)
+                for (unsigned int j = 0; j < al[n]->cnt; j++)
+                  if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
+                    matrix[j][i] += local_stiffness_matrix[j][i];
+            }
+          }
+        }
 
         // Insert also the off-diagonal (anti-)symmetric block, if required.
         if (tra)
@@ -1063,7 +1270,25 @@ namespace Hermes
           transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
           if (mat != NULL)
+          {
             mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
+            if(this->cache_for_adaptivity)
+            {
+              Scalar** matrix = NULL;
+              if(this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] == NULL)
+              {
+                // This also zeroes the matrix.
+                matrix = new_matrix_malloc<Scalar>(al[n]->cnt, al[m]->cnt);
+                this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] = matrix;
+              }
+              else
+                matrix = this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id];
+              for (unsigned int i = 0; i < al[m]->cnt; i++)
+                for (unsigned int j = 0; j < al[n]->cnt; j++)
+                  if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
+                    matrix[j][i] += local_stiffness_matrix[j][i];
+            }
+          }
         }
       }
     }
@@ -1211,6 +1436,18 @@ namespace Hermes
         }
         if (assemble_this_form == false) continue;
 
+        Scalar* vector = NULL;
+        if(this->cache_for_adaptivity)
+        {
+          if(this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id] == NULL)
+          {
+            vector = (Scalar*) malloc(al[m]->cnt * sizeof(Scalar));
+            this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id] = vector;
+            memset(vector, 0, al[m]->cnt * sizeof(Scalar));
+          }
+          else
+            vector = this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id];
+        }
         for (unsigned int i = 0; i < al[m]->cnt; i++)
         {
           if (al[m]->dof[i] < 0) continue;
@@ -1221,7 +1458,11 @@ namespace Hermes
           // multiplying the form is nonzero.
           if (std::abs(al[m]->coef[i]) > 1e-12)
           {
-            rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
+            Scalar result = eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i];
+            rhs->add(al[m]->dof[i], result);
+            
+            if(this->cache_for_adaptivity)
+              vector[i] += result;
           }
         }
       }
@@ -4756,8 +4997,6 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::AssemblingCaches::AssemblingCaches()
     {
-      this->stored_matrix_for_adaptivity = NULL;
-      this->stored_vector_for_adaptivity = NULL;
     };
 
     template<typename Scalar>
@@ -4784,10 +5023,6 @@ namespace Hermes
           cache_fn_ord.get(i)->free_ord();
           delete cache_fn_ord.get(i);
         }
-      if(this->stored_matrix_for_adaptivity != NULL)
-        delete this->stored_matrix_for_adaptivity;
-      if(this->stored_vector_for_adaptivity != NULL)
-        delete this->stored_vector_for_adaptivity;
     };
 
 #ifdef _MSC_VER

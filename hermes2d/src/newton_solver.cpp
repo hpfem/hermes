@@ -102,6 +102,8 @@ namespace Hermes
       while (1)
       {        
         // Assemble just the residual vector.
+        if(it > 1)
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->temp_disable_adaptivity_cache();
         this->dp->assemble(coeff_vec, residual);
         
         this->timer->tick();
@@ -170,6 +172,8 @@ namespace Hermes
             this->timer = NULL;
           }
           
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->temp_enable_adaptivity_cache();
+
           return true;
         }
         
