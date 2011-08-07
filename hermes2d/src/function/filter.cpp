@@ -105,13 +105,6 @@ namespace Hermes
     Filter<Scalar>::~Filter()
     {
       free();
-      if (unimesh)
-      {
-        delete this->mesh;
-        for (int i = 0; i < num; i++)
-          ::free(unidata[i]);
-        delete [] unidata;
-      }
     }
 
     template<typename Scalar>
@@ -166,6 +159,7 @@ namespace Hermes
     void Filter<Scalar>::free()
     {
       for (int i = 0; i < num; i++)
+      {
         if (tables[i] != NULL) 
         {
           for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i]->begin(); it != tables[i]->end(); it++) 
@@ -177,6 +171,15 @@ namespace Hermes
           }
           delete tables[i];
         }
+      }
+      
+      if (unimesh)
+      {
+        delete this->mesh;
+        for (int i = 0; i < num; i++)
+          ::free(unidata[i]);
+        delete [] unidata;
+      }
     }
 
     template<typename Scalar>
