@@ -94,9 +94,6 @@ namespace Hermes
       this->num_components = 1;
       this->order = 0;
 
-      for(int i = 0; i < 10; i++)
-        tables[i] = new std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>;
-
       memset(sln_sub, 0, sizeof(sln_sub));
       set_quad_2d(&g_quad_2d_std);
     }
@@ -135,21 +132,16 @@ namespace Hermes
         }
       }
 
-      if (tables[this->cur_quad] != NULL) 
+      for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++) 
       {
-        for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad]->begin(); it != tables[this->cur_quad]->end(); it++) 
-        {
-          for(unsigned int l = 0; l < it->second->get_size(); l++)
-            if(it->second->present(l))
-              ::free(it->second->get(l));
-          delete it->second;
-        }
-        delete tables[this->cur_quad];
+        for(unsigned int l = 0; l < it->second->get_size(); l++)
+          if(it->second->present(l))
+            ::free(it->second->get(l));
+        delete it->second;
       }
+      tables[this->cur_quad].clear();
 
-      tables[this->cur_quad] = new std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>;
-
-      this->sub_tables = tables[this->cur_quad];
+      this->sub_tables = &tables[this->cur_quad];
       this->update_nodes_ptr();
 
       this->order = 20; // fixme
@@ -160,17 +152,14 @@ namespace Hermes
     {
       for (int i = 0; i < num; i++)
       {
-        if (tables[i] != NULL) 
+        for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++) 
         {
-          for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i]->begin(); it != tables[i]->end(); it++) 
-          {
-            for(unsigned int l = 0; l < it->second->get_size(); l++)
-              if(it->second->present(l))
-                ::free(it->second->get(l));
-            delete it->second;
-          }
-          delete tables[i];
+          for(unsigned int l = 0; l < it->second->get_size(); l++)
+            if(it->second->present(l))
+              ::free(it->second->get(l));
+          delete it->second;
         }
+        tables[i].clear();
       }
       
       if (unimesh)
