@@ -92,6 +92,13 @@ namespace Hermes
       neighbor_edges.clear();
       neighbors.clear();
       clear_supported_shapes();
+            
+      for(unsigned int i = 0; i < central_transformations.get_size(); i++)
+        if (this->central_transformations.present(i))
+          delete this->central_transformations.get(i);
+      for(unsigned int i = 0; i < neighbor_transformations.get_size(); i++)  
+        if (this->neighbor_transformations.present(i))
+          delete this->neighbor_transformations.get(i);  
     }
 
     template<typename Scalar>
@@ -379,7 +386,8 @@ namespace Hermes
           // If we are already on a bigger (i.e. ~ way up) neighbor.
           if(central_transforms->num_levels == level + 1) 
           {
-            neighbor_transformations.add(new Transformations, neighbor_i);            
+            if (!neighbor_transformations.present(neighbor_i))
+              neighbor_transformations.add(new Transformations, neighbor_i);            
             Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
             
             for(unsigned int i = level + 1; i < transformations.size(); i++)
