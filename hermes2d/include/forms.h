@@ -191,6 +191,7 @@ namespace Hermes
 
       /// Deallocation.
       virtual void free();
+      virtual void free_ord() {};
 
       /// Methods designed for discontinuous functions, return errors here.
       virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
@@ -204,8 +205,8 @@ namespace Hermes
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
-    /// instance is not touched - it must be destroyed separately. You may call the overriden method 
-    /// \c free in order to do this via the instance of InterfaceGeom.
+    /// instance is not touched - it must be destroyed separately. You may call the overriden methods 
+    /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///
     template<typename T>
     class HERMES_API InterfaceGeom : public Geom<T>
@@ -218,7 +219,8 @@ namespace Hermes
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
       
-      virtual void free() { delete wrapped_geom; }
+      virtual void free() { wrapped_geom->free(); delete wrapped_geom; }
+      virtual void free_ord() { delete wrapped_geom; }
 
     private:
       int neighb_marker;

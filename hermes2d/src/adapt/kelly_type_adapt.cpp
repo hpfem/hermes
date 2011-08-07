@@ -692,7 +692,7 @@ namespace Hermes
         delete fake_ui;
       }
 
-      fake_e->free();
+      fake_e->free_ord();
       delete fake_e;
 
       //delete fake_ext;
