@@ -288,6 +288,10 @@ namespace Hermes
 
       //fix refinement if multimesh is used
       fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, refinement_selectors);
+      
+      for(int i = 0; i < max_id; i++)
+        delete [] idx[i];
+      delete [] idx;
 
       //apply refinements
       apply_refinements(elem_inx_to_proc);
