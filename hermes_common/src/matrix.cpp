@@ -139,7 +139,13 @@ template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::~SparseMatrix()
 {
   _F_;
-  delete [] pages;
+  if (pages)
+  {
+    for (unsigned int i = 0; i < this->size; i++)
+      if(pages[i])
+        delete pages[i];
+    delete [] pages;
+  }
 }
 
 template<typename Scalar>

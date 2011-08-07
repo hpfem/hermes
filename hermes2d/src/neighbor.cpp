@@ -92,6 +92,13 @@ namespace Hermes
       neighbor_edges.clear();
       neighbors.clear();
       clear_supported_shapes();
+            
+      for(unsigned int i = 0; i < central_transformations.get_size(); i++)
+        if (this->central_transformations.present(i))
+          delete this->central_transformations.get(i);
+      for(unsigned int i = 0; i < neighbor_transformations.get_size(); i++)  
+        if (this->neighbor_transformations.present(i))
+          delete this->neighbor_transformations.get(i);  
     }
 
     template<typename Scalar>
@@ -185,7 +192,7 @@ namespace Hermes
             // Number of visited intermediate parents.
             int n_parents = 0;
 
-            for (unsigned int j = 0; j < Transformations::max_level; j++)
+            for (unsigned int j = 0; j < (unsigned) Transformations::max_level; j++)
               par_mid_vertices[j] = NULL;
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
@@ -379,7 +386,8 @@ namespace Hermes
           // If we are already on a bigger (i.e. ~ way up) neighbor.
           if(central_transforms->num_levels == level + 1) 
           {
-            neighbor_transformations.add(new Transformations, neighbor_i);            
+            if (!neighbor_transformations.present(neighbor_i))
+              neighbor_transformations.add(new Transformations, neighbor_i);            
             Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
             
             for(unsigned int i = level + 1; i < transformations.size(); i++)
@@ -651,7 +659,7 @@ namespace Hermes
       bnd_verts[0] = bounding_verts_id[0];
       bnd_verts[1] = bounding_verts_id[1];
 
-      assert(n_sons < Transformations::max_level);
+      assert(n_sons < (unsigned) Transformations::max_level);
 
       for (int i = 0; i < 2; i++)
       {
@@ -846,7 +854,7 @@ namespace Hermes
       _F_;
       if (!this->central_transformations.present(index_1))
         error("Out of bounds of central_transformations.");
-      if (index_2 >= Transformations::max_level)
+      if (index_2 >= (unsigned) Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
       
       return this->central_transformations.get(index_1)->transf[index_2];
@@ -868,7 +876,7 @@ namespace Hermes
       _F_;
       if (!this->neighbor_transformations.present(index_1))
         error("Out of bounds of neighbor_transformations.");
-      if (index_2 >= Transformations::max_level)
+      if (index_2 >= (unsigned) Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
       
       return this->neighbor_transformations.get(index_1)->transf[index_2];

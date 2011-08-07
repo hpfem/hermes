@@ -609,131 +609,140 @@ namespace Hermes
       // are we at the bottom?
       bool leaf = true;
       for (i = 0; i < num; i++)
-        if (!e[i]->active) { leaf = false; break; }
-
-        // if yes, store the element transformation indices
-        if (leaf)
-        {
-          if (udsize <= uni->id)
-          {
-            if (!udsize) udsize = 1024;
-            while (udsize <= uni->id) udsize *= 2;
-            for (i = 0; i < num; i++)
-              unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
-          }
-          for (i = 0; i < num; i++)
-          {
-            unidata[i][uni->id].e = e[i];
-            unidata[i][uni->id].idx = idx[i];
-          }
-          return;
+        if (!e[i]->active) 
+        { 
+          leaf = false; 
+          break; 
         }
 
-        // state arrays
-        Element** e_new = new Element*[num];
-        Rect* er_new = new Rect[num];
-        Rect cr_new;
-
-        int4* sons = new int4[num];
-        uint64_t* idx_new = new uint64_t[num];
-        memcpy(idx_new, idx, num*sizeof(uint64_t));
-
-        if (tri)
+      // if yes, store the element transformation indices
+      if (leaf)
+      {
+        if (udsize <= uni->id)
         {
-          // visit all sons of the triangle
-          unimesh->refine_element_id(uni->id);
+          if (!udsize) udsize = 1024;
+          while (udsize <= uni->id) udsize *= 2;
+          for (i = 0; i < num; i++)
+            unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
+        }
+        for (i = 0; i < num; i++)
+        {
+          unidata[i][uni->id].e = e[i];
+          unidata[i][uni->id].idx = idx[i];
+        }
+        return;
+      }
+
+      // state arrays
+      Element** e_new = new Element*[num];
+      Rect* er_new = new Rect[num];
+      Rect cr_new;
+
+      int4* sons = new int4[num];
+      uint64_t* idx_new = new uint64_t[num];
+      memcpy(idx_new, idx, num*sizeof(uint64_t));
+
+      if (tri)
+      {
+        // visit all sons of the triangle
+        unimesh->refine_element_id(uni->id);
+        for (son = 0; son <= 3; son++)
+        {
+          for (i = 0; i < num; i++)
+          {
+            if (e[i]->active) 
+            {
+              e_new[i] = e[i];
+              idx_new[i] = (idx[i] << 3) + son + 1;
+            } else
+              e_new[i] = e[i]->sons[son];
+          }
+          union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
+        }
+      }
+      else
+      {
+        // obtain split types and son numbers for the current rectangle on all elements
+        int split = 0;
+        for (i = 0; i < num; i++)
+          if (!e[i]->active)
+            split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
+
+        // both splits: recur to four sons
+        if (split == 3)
+        {
+          unimesh->refine_element_id(uni->id, 0);
+
           for (son = 0; son <= 3; son++)
           {
+            move_to_son(&cr_new, cr, son);
             for (i = 0; i < num; i++)
             {
               if (e[i]->active) 
               {
                 e_new[i] = e[i];
                 idx_new[i] = (idx[i] << 3) + son + 1;
-              } else
-                e_new[i] = e[i]->sons[son];
-            }
-            union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
-          }
-        }
-        else
-        {
-          // obtain split types and son numbers for the current rectangle on all elements
-          int split = 0;
-          for (i = 0; i < num; i++)
-            if (!e[i]->active)
-              split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
-
-          // both splits: recur to four sons
-          if (split == 3)
-          {
-            unimesh->refine_element_id(uni->id, 0);
-
-            for (son = 0; son <= 3; son++)
-            {
-              move_to_son(&cr_new, cr, son);
-              for (i = 0; i < num; i++)
+              } else 
               {
-                if (e[i]->active) 
-                {
-                  e_new[i] = e[i];
-                  idx_new[i] = (idx[i] << 3) + son + 1;
-                } else 
-                {
-                  e_new[i] = e[i]->sons[sons[i][son] & 3];
-                  move_to_son(&(er_new[i]), er+i, sons[i][son]);
-                  if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-                }
-              }
-              union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
-            }
-          }
-          // v or h split, recur to two sons
-          else if (split > 0)
-          {
-            unimesh->refine_element_id(uni->id, split);
-
-            int son0 = 4, son1 = 5;
-            if (split == 2) { son0 = 6; son1 = 7; }
-
-            for (son = son0; son <= son1; son++)
-            {
-              move_to_son(&cr_new, cr, son);
-              j = (son == 4 || son == 6) ? 0 : 2;
-              for (i = 0; i < num; i++)
-              {
-                if (e[i]->active) 
-                {
-                  e_new[i] = e[i];
-                  idx_new[i] = (idx[i] << 3) + son + 1;
-                } else 
-                {
-                  e_new[i] = e[i]->sons[sons[i][j] & 3];
-                  move_to_son(&(er_new[i]), er+i, sons[i][j]);
-                  if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-                }
-              }
-              union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
-            }
-          }
-          // no splits, recur to one son
-          else
-          {
-            memcpy(&cr_new, cr, sizeof(Rect));
-            for (i = 0; i < num; i++)
-            {
-              if (e[i]->active)
-                e_new[i] = e[i];
-              else 
-              {
-                e_new[i] = e[i]->sons[sons[i][0] & 3];
-                move_to_son(&(er_new[i]), er+i, sons[i][0]);
+                e_new[i] = e[i]->sons[sons[i][son] & 3];
+                move_to_son(&(er_new[i]), er+i, sons[i][son]);
                 if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
               }
             }
-            union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
+            union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
           }
         }
+        // v or h split, recur to two sons
+        else if (split > 0)
+        {
+          unimesh->refine_element_id(uni->id, split);
+
+          int son0 = 4, son1 = 5;
+          if (split == 2) { son0 = 6; son1 = 7; }
+
+          for (son = son0; son <= son1; son++)
+          {
+            move_to_son(&cr_new, cr, son);
+            j = (son == 4 || son == 6) ? 0 : 2;
+            for (i = 0; i < num; i++)
+            {
+              if (e[i]->active) 
+              {
+                e_new[i] = e[i];
+                idx_new[i] = (idx[i] << 3) + son + 1;
+              } else 
+              {
+                e_new[i] = e[i]->sons[sons[i][j] & 3];
+                move_to_son(&(er_new[i]), er+i, sons[i][j]);
+                if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+              }
+            }
+            union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
+          }
+        }
+        // no splits, recur to one son
+        else
+        {
+          memcpy(&cr_new, cr, sizeof(Rect));
+          for (i = 0; i < num; i++)
+          {
+            if (e[i]->active)
+              e_new[i] = e[i];
+            else 
+            {
+              e_new[i] = e[i]->sons[sons[i][0] & 3];
+              move_to_son(&(er_new[i]), er+i, sons[i][0]);
+              if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+            }
+          }
+          union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
+        }
+      }
+      
+      delete [] e_new;
+      delete [] er_new;
+      delete [] sons;
+      delete [] idx_new;
     }
 
 
@@ -766,6 +775,10 @@ namespace Hermes
         tri = base->is_triangle();
         union_recurrent(&cr, e, er, idx, unimesh->get_element(id));
       }
+      
+      delete [] e;
+      delete [] er;
+      delete [] idx;
 
       return unidata;
     }

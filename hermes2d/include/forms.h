@@ -185,9 +185,12 @@ namespace Hermes
 
       /// Constructor.
       Geom();
+      
+      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
+      virtual ~Geom() {};
 
       /// Deallocation.
-      void free();
+      virtual void free();
 
       /// Methods designed for discontinuous functions, return errors here.
       virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
@@ -201,7 +204,8 @@ namespace Hermes
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
-    /// instance is also automatically destroyed.
+    /// instance is not touched - it must be destroyed separately. You may call the overriden method 
+    /// \c free in order to do this via the instance of InterfaceGeom.
     ///
     template<typename T>
     class HERMES_API InterfaceGeom : public Geom<T>
@@ -209,15 +213,18 @@ namespace Hermes
     public:
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-
+      
       int get_neighbor_marker() const;
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
+      
+      virtual void free() { delete wrapped_geom; }
 
     private:
       int neighb_marker;
       int neighb_id;
       T   neighb_diam;
+      Geom<T>* wrapped_geom;
     };
 
     /// Init element geometry for calculating the integration order.
