@@ -288,6 +288,7 @@ namespace Hermes
       this->nx = geom->nx;
       this->ny = geom->ny;
       this->orientation = geom->orientation;
+      this->wrapped_geom = geom;
     }
 
     template<typename T>

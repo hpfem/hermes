@@ -75,10 +75,16 @@ namespace Hermes
       // assign norm weak forms  according to norms selection
       for (int i = 0; i < this->num; i++)
         for (int j = 0; j < this->num; j++)
+        {
           error_form[i][j] = NULL;
+          norm_form[i][j] = NULL;
+        }
 
       for (int i = 0; i < this->num; i++)
+      {
         error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
+        norm_form[i][i] = error_form[i][i];
+      }
     }
 
     template<typename Scalar>
@@ -114,6 +120,7 @@ namespace Hermes
 
       // assign norm weak forms  according to norms selection
       error_form[0][0] = new MatrixFormVolError(proj_norm);
+      norm_form[0][0] = error_form[0][0];
     }
 
     template<typename Scalar>
@@ -126,7 +133,7 @@ namespace Hermes
       for (int i = 0; i < this->num; i++)
         for (int j = 0; j < this->num; j++)
           if (error_form[i][j] != NULL)
-            delete error_form[i][j];
+            delete error_form[i][j];  // The same memory is used for norm_form[i][j] unless set_norm_form is called.
     }
 
     template<typename Scalar>
@@ -281,6 +288,10 @@ namespace Hermes
 
       //fix refinement if multimesh is used
       fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, refinement_selectors);
+      
+      for(int i = 0; i < max_id; i++)
+        delete [] idx[i];
+      delete [] idx;
 
       //apply refinements
       apply_refinements(elem_inx_to_proc);
@@ -777,12 +788,28 @@ namespace Hermes
       // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
       //        if user does not delete previously set error forms by himself.
       error_form[i][j] = form;
+      norm_form[i][j] = error_form[i][j];
     }
 
     template<typename Scalar>
     void Adapt<Scalar>::set_error_form(typename Adapt<Scalar>::MatrixFormVolError* form)
     {
       set_error_form(0, 0, form);
+    }
+    
+    template<typename Scalar>
+    void Adapt<Scalar>::set_norm_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
+    {
+      error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
+        "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
+
+      norm_form[i][j] = form;
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_norm_form(typename Adapt<Scalar>::MatrixFormVolError* form)
+    {
+      set_norm_form(0, 0, form);
     }
 
     template<typename Scalar>
@@ -984,7 +1011,7 @@ namespace Hermes
             {
               double err, nrm;
               err = eval_error(error_form[i][j], sln[i], sln[j], rsln[i], rsln[j]);
-              nrm = eval_error_norm(error_form[i][j], rsln[i], rsln[j]);
+              nrm = eval_error_norm(norm_form[i][j], rsln[i], rsln[j]);
 
               norms[i] += nrm;
               total_norm  += nrm;

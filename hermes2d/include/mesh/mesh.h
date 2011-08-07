@@ -333,8 +333,7 @@ namespace Hermes
       class HERMES_API MarkersConversion
       {
       public:
-        MarkersConversion();
-        ~MarkersConversion();
+        MarkersConversion() : min_marker_unused(1) {};
 
         /// Info about the maximum marker used so far, used in determining
         /// of the internal marker for a user-supplied std::string identification for
@@ -363,11 +362,12 @@ namespace Hermes
       protected:
         /// Conversion tables between the std::string markers the user sets and
         /// the markers used internally as members of Elements, Nodes.
-        std::map<int, std::string>* conversion_table;
+        std::map<int, std::string> conversion_table;
 
         /// Inverse tables, so that it is possible to search using either
         /// the internal representation, or the user std::string value.
-        std::map<std::string, int>* conversion_table_inverse;
+        std::map<std::string, int> conversion_table_inverse;
+        
         friend class Space<double>;
         friend class Space<std::complex<double> >;
         friend class Mesh;
@@ -376,18 +376,14 @@ namespace Hermes
       class ElementMarkersConversion : public MarkersConversion
       {
       public:
-        ElementMarkersConversion(){};
-        ElementMarkersConversion(const ElementMarkersConversion& src);  // Copy constructor.
-        void operator=(const ElementMarkersConversion& src);  // Assignment operator.
+        ElementMarkersConversion() {};
         virtual MarkersConversionType get_type() { return HERMES_ELEMENT_MARKERS_CONVERSION; };
       };
 
       class BoundaryMarkersConversion : public MarkersConversion
       {
       public:
-        BoundaryMarkersConversion(){};
-        BoundaryMarkersConversion(const BoundaryMarkersConversion& src);  // Copy constructor.
-        void operator=(const BoundaryMarkersConversion& src);  // Assignment operator.
+        BoundaryMarkersConversion() {};
         virtual MarkersConversionType get_type() { return HERMES_BOUNDARY_MARKERS_CONVERSION; };
       };
 

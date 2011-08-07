@@ -30,13 +30,13 @@ namespace Hermes
     H1ShapesetJacobi CurvMap::ref_map_shapeset;
     PrecalcShapeset CurvMap::ref_map_pss(&ref_map_shapeset);
 
-    double** CurvMap::edge_proj_matrix;
-    double** CurvMap::bubble_proj_matrix_tri;
-    double** CurvMap::bubble_proj_matrix_quad;
+    double** CurvMap::edge_proj_matrix = NULL;
+    double** CurvMap::bubble_proj_matrix_tri = NULL;
+    double** CurvMap::bubble_proj_matrix_quad = NULL;
 
-    double* CurvMap::edge_p;
-    double* CurvMap::bubble_tri_p;
-    double* CurvMap::bubble_quad_p;
+    double* CurvMap::edge_p = NULL;
+    double* CurvMap::bubble_tri_p = NULL;
+    double* CurvMap::bubble_quad_p = NULL;
 
     Quad1DStd CurvMap::quad1d;
     Quad2DStd CurvMap::quad2d;
@@ -394,7 +394,9 @@ namespace Hermes
       _F_;
       int order = ref_map_shapeset.get_max_order();
       int n = order - 1; // number of edge basis functions
-      edge_proj_matrix = new_matrix<double>(n, n);
+      
+      if (!edge_proj_matrix)
+        edge_proj_matrix = new_matrix<double>(n, n);
 
       // calculate projection matrix of maximum order
       for (int i = 0; i < n; i++)
@@ -494,7 +496,8 @@ namespace Hermes
       }
 
       // Cholesky factorization of the matrix
-      edge_p = new double[n];
+      if (!edge_p)
+        edge_p = new double[n];
       choldc(edge_proj_matrix, n, edge_p);
     }
 
@@ -541,13 +544,16 @@ namespace Hermes
       int order = ref_map_shapeset.get_max_order();
 
       // calculate projection matrix of maximum order
-      int nb = ref_map_shapeset.get_num_bubbles(order);
-      int* indices = ref_map_shapeset.get_bubble_indices(order);
-      bubble_proj_matrix_tri = calculate_bubble_projection_matrix(nb, indices);
+      if (!bubble_proj_matrix_tri)
+      {
+        int nb = ref_map_shapeset.get_num_bubbles(order);
+        int* indices = ref_map_shapeset.get_bubble_indices(order);
+        bubble_proj_matrix_tri = calculate_bubble_projection_matrix(nb, indices);
 
-      // cholesky factorization of the matrix
-      bubble_tri_p = new double[nb];
-      choldc(bubble_proj_matrix_tri, nb, bubble_tri_p);
+        // cholesky factorization of the matrix
+        bubble_tri_p = new double[nb];
+        choldc(bubble_proj_matrix_tri, nb, bubble_tri_p);
+      }
 
       // *** quads ***
       ref_map_pss.set_mode(HERMES_MODE_QUAD);
@@ -555,13 +561,17 @@ namespace Hermes
       order = H2D_MAKE_QUAD_ORDER(order, order);
 
       // calculate projection matrix of maximum order
-      nb = ref_map_shapeset.get_num_bubbles(order);
-      indices = ref_map_shapeset.get_bubble_indices(order);
-      bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices);
+      if (!bubble_proj_matrix_quad)
+      {
+        int nb = ref_map_shapeset.get_num_bubbles(order);
+        int *indices = ref_map_shapeset.get_bubble_indices(order);
+        
+        bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices);
 
-      // cholesky factorization of the matrix
-      bubble_quad_p = new double[nb];
-      choldc(bubble_proj_matrix_quad, nb, bubble_quad_p);
+        // cholesky factorization of the matrix
+        bubble_quad_p = new double[nb];
+        choldc(bubble_proj_matrix_quad, nb, bubble_quad_p);
+      }
     }
 
 
@@ -924,6 +934,7 @@ namespace Hermes
         delete [] coeffs;
         coeffs = NULL;
       }
+      
       if (toplevel)
         for (int i = 0; i < 4; i++)
           if (nurbs[i] != NULL)

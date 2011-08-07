@@ -370,7 +370,7 @@ namespace Hermes
 
           if (calc_norm)
           {
-            double nrm = eval_solution_norm(this->error_form[i][i], rm, this->sln[i]);
+            double nrm = eval_solution_norm(this->norm_form[i][i], rm, this->sln[i]);
             norms[i] += nrm;
             total_norm += nrm;
           }
@@ -518,42 +518,62 @@ namespace Hermes
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
-        if (oi[i] != NULL) { oi[i]->free_ord(); delete oi[i]; }
-        delete [] oi;
-        delete fake_e;
-        delete fake_ext;
+      {
+        if (oi[i] != NULL) 
+        { 
+          oi[i]->free_ord(); 
+          delete oi[i]; 
+        }
+      }
+      delete [] oi;
+      delete fake_e;
+      fake_ext->free_ord();
+      delete fake_ext;
 
-        // eval the form
-        Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
-        double3* pt = quad->get_points(order);
-        int np = quad->get_num_points(order);
+      // eval the form
+      Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
+      double3* pt = quad->get_points(order);
+      int np = quad->get_num_points(order);
 
-        // Initialize geometry and jacobian*weights
-        Geom<double>* e = init_geom_vol(rm, order);
-        double* jac = rm->get_jacobian(order);
-        double* jwt = new double[np];
-        for(int i = 0; i < np; i++)
-          jwt[i] = pt[i][2] * jac[i];
+      // Initialize geometry and jacobian*weights
+      Geom<double>* e = init_geom_vol(rm, order);
+      double* jac = rm->get_jacobian(order);
+      double* jwt = new double[np];
+      for(int i = 0; i < np; i++)
+        jwt[i] = pt[i][2] * jac[i];
 
-        // Function values.
-        Func<Scalar>** ui = new Func<Scalar>* [this->num];
+      // Function values.
+      Func<Scalar>** ui = new Func<Scalar>* [this->num];
 
-        for (int i = 0; i < this->num; i++)
-          ui[i] = init_fn(this->sln[i], order);
+      for (int i = 0; i < this->num; i++)
+        ui[i] = init_fn(this->sln[i], order);
 
-        ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, rm, order);
+      ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, rm, order);
 
-        Scalar res = volumetric_scaling_const *
-          err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+      Scalar res = volumetric_scaling_const * err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
-        for (int i = 0; i < this->num; i++)
-          if (ui[i] != NULL) { ui[i]->free_fn(); delete ui[i]; }
-          delete [] ui;
-          if (ext != NULL) { ext->free(); delete ext; }
-          e->free(); delete e;
-          delete [] jwt;
+      for (int i = 0; i < this->num; i++)
+      {
+        if (ui[i] != NULL) 
+        { 
+          ui[i]->free_fn(); 
+          delete ui[i]; 
+        }
+      }
+      delete [] ui;
+      
+      if (ext != NULL) 
+      { 
+        ext->free(); 
+        delete ext; 
+      }
+      
+      e->free(); 
+      delete e;
+      
+      delete [] jwt;
 
-          return std::abs(res);
+      return std::abs(res);
     }
 
     template<typename Scalar>
@@ -587,6 +607,7 @@ namespace Hermes
       
       delete [] oi;
       delete fake_e;
+      fake_ext->free_ord();
       delete fake_ext;
 
       // Evaluate the form.
@@ -624,7 +645,10 @@ namespace Hermes
         ext->free(); 
         delete ext; 
       }
-      e->free(); delete e;
+      
+      e->free(); 
+      delete e;
+      
       delete [] jwt;
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
@@ -668,6 +692,7 @@ namespace Hermes
         delete fake_ui;
       }
 
+      fake_e->free();
       delete fake_e;
 
       //delete fake_ext;
@@ -701,7 +726,10 @@ namespace Hermes
         delete ui; 
       }
       //if (ext != NULL) { ext->free(); delete ext; }
-      e->free(); delete e;
+      
+      e->free(); 
+      delete e;
+      
       delete [] jwt;
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights

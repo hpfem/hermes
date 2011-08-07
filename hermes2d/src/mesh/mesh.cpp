@@ -766,7 +766,7 @@ namespace Hermes
     void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool mark_as_initial)
     {
       if(marker == HERMES_ANY)
-        for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table->begin(); it != this->boundary_markers_conversion.conversion_table->end(); it++)
+        for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table.begin(); it != this->boundary_markers_conversion.conversion_table.end(); it++)
           refine_towards_boundary(it->second, depth, aniso, mark_as_initial);
 
       else 
@@ -1833,29 +1833,16 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
-    Mesh::MarkersConversion::MarkersConversion()
-    {
-      conversion_table = new std::map<int, std::string>;
-      conversion_table_inverse = new std::map<std::string, int>;
-      min_marker_unused = 1;
-    }
-
-    Mesh::MarkersConversion::~MarkersConversion()
-    {
-      delete conversion_table;
-      delete conversion_table_inverse;
-    }
-
     void Mesh::MarkersConversion::insert_marker(int internal_marker, std::string user_marker)
     {
       // First a check that the string value is not already present.
       if(user_marker != "")
-        if(conversion_table_inverse->find(user_marker) != conversion_table_inverse->end())
+        if(conversion_table_inverse.find(user_marker) != conversion_table_inverse.end())
           return;
-      if(conversion_table->size() == 0 || conversion_table->find(internal_marker) == conversion_table->end()) 
+      if(conversion_table.size() == 0 || conversion_table.find(internal_marker) == conversion_table.end()) 
       {
-        conversion_table->insert(std::pair<int, std::string>(internal_marker, user_marker));
-        conversion_table_inverse->insert(std::pair<std::string, int>(user_marker, internal_marker));
+        conversion_table.insert(std::pair<int, std::string>(internal_marker, user_marker));
+        conversion_table_inverse.insert(std::pair<std::string, int>(user_marker, internal_marker));
         if(user_marker != "")
           this->min_marker_unused++;
       }
@@ -1872,9 +1859,9 @@ namespace Hermes
         return
         H2D_DG_BOUNDARY_EDGE;
 
-      if(conversion_table->find(internal_marker) == conversion_table->end())
+      if(conversion_table.find(internal_marker) == conversion_table.end())
         error("MarkersConversions class asked for a non existing marker %d", internal_marker);
-      return conversion_table->find(internal_marker)->second;
+      return conversion_table.find(internal_marker)->second;
     }
 
     int Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
@@ -1887,53 +1874,9 @@ namespace Hermes
         return
         H2D_DG_BOUNDARY_EDGE_INT;
 
-      if(conversion_table_inverse->find(user_marker) == conversion_table_inverse->end())
+      if(conversion_table_inverse.find(user_marker) == conversion_table_inverse.end())
         error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
-      return conversion_table_inverse->find(user_marker)->second;
-    }
-
-    Mesh::ElementMarkersConversion::ElementMarkersConversion(const Mesh::ElementMarkersConversion& src)
-    {
-      conversion_table = new std::map<int, std::string>;
-      conversion_table_inverse = new std::map<std::string, int>;
-
-      *conversion_table = *src.conversion_table;
-      *conversion_table_inverse = *src.conversion_table_inverse;
-
-      min_marker_unused = src.min_marker_unused;
-    }
-
-    void Mesh::ElementMarkersConversion::operator=(const ElementMarkersConversion& src)
-    {
-      conversion_table = new std::map<int, std::string>;
-      conversion_table_inverse = new std::map<std::string, int>;
-
-      *conversion_table = *src.conversion_table;
-      *conversion_table_inverse = *src.conversion_table_inverse;
-
-      min_marker_unused = src.min_marker_unused;
-    }
-
-    Mesh::BoundaryMarkersConversion::BoundaryMarkersConversion(const Mesh::BoundaryMarkersConversion& src)
-    {
-      conversion_table = new std::map<int, std::string>;
-      conversion_table_inverse = new std::map<std::string, int>;
-
-      *conversion_table = *src.conversion_table;
-      *conversion_table_inverse = *src.conversion_table_inverse;
-
-      min_marker_unused = src.min_marker_unused;
-    }
-
-    void Mesh::BoundaryMarkersConversion::operator=(const BoundaryMarkersConversion& src)
-    {
-      conversion_table = new std::map<int, std::string>;
-      conversion_table_inverse = new std::map<std::string, int>;
-
-      *conversion_table = *src.conversion_table;
-      *conversion_table_inverse = *src.conversion_table_inverse;
-
-      min_marker_unused = src.min_marker_unused;
+      return conversion_table_inverse.find(user_marker)->second;
     }
 
     void Mesh::convert_triangles_to_base(Element *e)

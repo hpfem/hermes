@@ -252,7 +252,7 @@ namespace Hermes
 
       Matrix(unsigned int size) { this->size = size;};
 
-      ~Matrix() {};
+      virtual ~Matrix() {};
 
       Matrix() { this->size = 0;};
 

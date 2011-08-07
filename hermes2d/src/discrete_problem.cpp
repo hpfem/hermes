@@ -1653,6 +1653,7 @@ namespace Hermes
         if(node->get_right_son() != NULL)
           traverse_multimesh_tree(node->get_right_son(), running_transformations);
         // Delete the vector prepared by the last accessed leaf.
+        delete running_transformations.back();
         running_transformations.pop_back();
         return;
       }
@@ -1780,7 +1781,9 @@ namespace Hermes
         ns->central_el->get_mode());
 
       // Delete the last neighbors' info (this is a dead end, caused by the function traverse_multimesh_subtree.
+      delete running_central_transformations.back();
       running_central_transformations.pop_back();
+      delete running_neighbor_transformations.back();
       running_neighbor_transformations.pop_back();
 
       // Insert new neighbors.
@@ -1788,11 +1791,22 @@ namespace Hermes
       {
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
-        ns->central_transformations.add(new typename NeighborSearch<Scalar>::Transformations(*running_central_transformations[i]), ns->n_neighbors);
-        ns->neighbor_transformations.add(new typename NeighborSearch<Scalar>::Transformations(*running_neighbor_transformations[i]), ns->n_neighbors);
+        
+        if (!ns->central_transformations.present(ns->n_neighbors))
+          ns->central_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
+        if (!ns->neighbor_transformations.present(ns->n_neighbors))
+          ns->neighbor_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
+        ns->central_transformations.get(ns->n_neighbors)->copy_from(*running_central_transformations[i]);
+        ns->neighbor_transformations.get(ns->n_neighbors)->copy_from(*running_neighbor_transformations[i]);
+        
         ns->n_neighbors++;
       }
-
+      
+      for(unsigned int i = 0; i < running_central_transformations.size(); i++)
+        delete running_central_transformations[i];
+      for(unsigned int i = 0; i < running_neighbor_transformations.size(); i++)
+        delete running_neighbor_transformations[i];
+      
       // Return the number of neighbors deleted.
       return -1;
     }
