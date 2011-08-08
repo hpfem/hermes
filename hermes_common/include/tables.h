@@ -22,7 +22,7 @@
 #ifndef __HERMES_COMMON_TABLES_H_
 #define __HERMES_COMMON_TABLES_H_
 
-#include "common.h"
+#include "compat.h"
 
 namespace Hermes
 {

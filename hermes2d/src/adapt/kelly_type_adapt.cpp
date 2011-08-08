@@ -233,6 +233,7 @@ namespace Hermes
                 NeighborNode* root;
                 int ns_index;
 
+                // Determine the minimum mesh seq in this stage.
                 this->dp.min_dg_mesh_seq = 0;
                 for(int j = 0; j < this->num; j++)
                   if(stage.meshes[j]->get_seq() < this->dp.min_dg_mesh_seq || j == 0)
@@ -240,7 +241,6 @@ namespace Hermes
 
                 ns_index = stage.meshes[i]->get_seq() - this->dp.min_dg_mesh_seq; // = 0 for single mesh
                 
-                // Determine the minimum mesh seq in this stage.
                 // Initialize the NeighborSearches.
                 this->dp.init_neighbors(neighbor_searches, stage, isurf);
 
