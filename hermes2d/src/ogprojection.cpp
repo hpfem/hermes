@@ -23,6 +23,14 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    int OGProjection<Scalar>::ndof = 0;
+
+    template<typename Scalar>
+    OGProjection<Scalar>::OGProjection()
+    {
+    }
+
+    template<typename Scalar>
     void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm<Scalar>* wf,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
     {
@@ -33,9 +41,6 @@ namespace Hermes
       for (unsigned int i = 0; i < n; i++) 
         if(spaces[i] == NULL) 
           error("this->spaces[%d] == NULL in project_internal().", i);
-
-      // this is needed since spaces may have their DOFs enumerated only locally.
-      int ndof = Space<Scalar>::assign_dofs(spaces);
 
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, spaces);
@@ -64,6 +69,30 @@ namespace Hermes
     {
       _F_;
       int n = spaces.size();
+      
+      // this is needed since spaces may have their DOFs enumerated only locally.
+      ndof = Space<Scalar>::assign_dofs(spaces);
+      int ndof_start_running = 0;
+      bool all_slns_vectors_stored = true;
+      for (int i = 0; i < n; i++)
+      {
+        if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i]) != NULL)
+          if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->sln_vector != NULL)
+            for(int j = ndof_start_running; j < ndof_start_running + spaces[i]->get_num_dofs(); j++)
+              target_vec[j] = dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->sln_vector[j - ndof_start_running];
+          else
+          {
+            all_slns_vectors_stored = false;
+            break;
+          }
+        else
+        {
+          all_slns_vectors_stored = false;
+          break;
+        }
+      }
+      if(all_slns_vectors_stored)
+        return;
 
       // define temporary projection weak form
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
@@ -189,6 +218,8 @@ namespace Hermes
     {
       _F_;
       unsigned int n = spaces.size();
+      ndof = Space<Scalar>::assign_dofs(spaces);
+
       unsigned int n_biforms = custom_projection_jacobian.size();
       if (n_biforms == 0)
         error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");

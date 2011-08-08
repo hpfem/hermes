@@ -31,6 +31,8 @@ namespace Hermes
     class HERMES_API OGProjection
     {
     public:
+      OGProjection();
+
       static void project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
         Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
         Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
@@ -315,6 +317,8 @@ namespace Hermes
           return result;
         }
       };
+
+      static int ndof;
     };
   }
 }

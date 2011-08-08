@@ -80,6 +80,7 @@ namespace Hermes
       memset(oldest, 0, sizeof(oldest));
       transform = true;
       sln_type = HERMES_UNDEF;
+      sln_vector = NULL;
       space = NULL;
       own_mesh = false;
       this->num_components = 0;
@@ -147,6 +148,7 @@ namespace Hermes
       free();
 
       this->mesh = sln->mesh;
+      this->sln_vector = sln->sln_vector;
       own_mesh = sln->own_mesh;
       sln->own_mesh = false;
 
@@ -202,6 +204,12 @@ namespace Hermes
         memcpy(elem_orders, sln->elem_orders, sizeof(int) * num_elems);
 
         init_dxdy_buffer();
+
+        if(this->sln_vector == NULL)
+          delete [] this->sln_vector;
+        this->sln_vector = new Scalar[sln->space->get_num_dofs()];
+        for(int i = 0; i < sln->space->get_num_dofs(); i++)
+          this->sln_vector[i] = sln->sln_vector[i];
       }
       else // Const, exact handled differently.
         error("Undefined or exact solutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
@@ -255,6 +263,12 @@ namespace Hermes
         free_tables();
 
         space = NULL;
+
+        if(this->sln_vector != NULL)
+        {
+          delete [] this->sln_vector;
+          this->sln_vector = NULL;
+        }
     }
 
 
@@ -370,8 +384,15 @@ namespace Hermes
         error("Provided 'space' and 'pss' must have the same shapesets.");
 
       free();
+      
+      if(this->sln_vector != NULL)
+        delete [] this->sln_vector;
+      this->sln_vector = new Scalar[space->get_num_dofs()];
+      for(int i = 0; i < space->get_num_dofs(); i++)
+        this->sln_vector[i] = coeffs[i];
 
       space_type = space->get_type();
+
       this->space = space;
 
       this->num_components = pss->get_num_components();

@@ -142,164 +142,162 @@ namespace Hermes
         }
       }
 
-        // Zero utility vectors.
-        if(start_from_zero_K_vector || !iteration)
-          memset(K_vector, 0, num_stages * ndof * sizeof(Scalar));
-        memset(u_ext_vec, 0, num_stages * ndof * sizeof(Scalar));
-        memset(vector_left, 0, num_stages * ndof * sizeof(Scalar));
+      // Zero utility vectors.
+      if(start_from_zero_K_vector || !iteration)
+        memset(K_vector, 0, num_stages * ndof * sizeof(Scalar));
+      memset(u_ext_vec, 0, num_stages * ndof * sizeof(Scalar));
+      memset(vector_left, 0, num_stages * ndof * sizeof(Scalar));
 
-        // Assemble the block-diagonal mass matrix M of size ndof times ndof.
-        // The corresponding part of the global residual vector is obtained 
-        // just by multiplication with the stage vector K.
-        // FIXME: This should not be repeated if spaces have not changed.
-        stage_dp_left.assemble(matrix_left, NULL);
+      // Assemble the block-diagonal mass matrix M of size ndof times ndof.
+      // The corresponding part of the global residual vector is obtained 
+      // just by multiplication with the stage vector K.
+      // FIXME: This should not be repeated if spaces have not changed.
+      stage_dp_left.assemble(matrix_left, NULL);
 
-        // The Newton's loop.
-        double residual_norm;
-        int it = 1;
-        while (true) 
+      // The Newton's loop.
+      double residual_norm;
+      int it = 1;
+      while (true) 
+      {
+        // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
+        prepare_u_ext_vec(time_step);
+
+        // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
+        multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
+
+        // Assemble the block Jacobian matrix of the stationary residual F.
+        // Diagonal blocks are created even if empty, so that matrix_left can be added later.
+        bool force_diagonal_blocks = true;
+        bool add_dir_lift = false;
+        stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks, add_dir_lift);
+
+        // Finalizing the residual vector.
+        vector_right->add_vector(vector_left);
+
+        // Multiply the residual vector with -1 since the matrix
+        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        vector_right->change_sign();
+
+        // Measure the residual norm.
+        if (residual_as_vector)
+          // Calculate the l2-norm of residual vector.
+          residual_norm = Global<Scalar>::get_l2_norm(vector_right);
+        else 
         {
-          // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
-          prepare_u_ext_vec(time_step);
-
-          // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
-          multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
-
-          // Assemble the block Jacobian matrix of the stationary residual F.
-          // Diagonal blocks are created even if empty, so that matrix_left can be added later.
-          bool force_diagonal_blocks = true;
-          bool add_dir_lift = false;
-          stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks, add_dir_lift);
-
-          // Finalizing the residual vector.
-          vector_right->add_vector(vector_left);
-
-          // Multiply the residual vector with -1 since the matrix
-          // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
-          vector_right->change_sign();
-
-          // Measure the residual norm.
-          if (residual_as_vector)
-            // Calculate the l2-norm of residual vector.
-            residual_norm = Global<Scalar>::get_l2_norm(vector_right);
-          else 
-          {
-            // Translate residual vector into residual functions.
-            Hermes::vector<bool> add_dir_lift_vector;
-            add_dir_lift_vector.reserve(1);
-            add_dir_lift_vector.push_back(add_dir_lift);
-            Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), 
-              residuals_vector, add_dir_lift_vector);
-            residual_norm = Global<Scalar>::calc_norms(residuals_vector);
-          }
-
-          // Info for the user.
-          if (it == 1) 
-          {
-            if(verbose) 
-              info("---- Newton initial residual norm: %g", residual_norm);
-          }
-          else
-            if(verbose) 
-              info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
-
-          // If maximum allowed residual norm is exceeded, fail.
-          if (residual_norm > newton_max_allowed_residual_norm) 
-          {
-            if (verbose) 
-            {
-              info("Current residual norm: %g", residual_norm);
-              info("Maximum allowed residual norm: %g", newton_max_allowed_residual_norm);
-              info("Newton solve not successful, returning false.");
-            }
-            return false;
-          }
-
-          // If residual norm is within tolerance, or the maximum number
-          // of iteration has been reached, or the problem is linear, then quit.
-          if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) 
-            break;
-
-          bool rhs_only = (freeze_jacobian && it > 1);
-          if (!rhs_only) 
-          {
-            // Assemble the block Jacobian matrix of the stationary residual F
-            // Diagonal blocks are created even if empty, so that matrix_left
-            // can be added later.
-            stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
-
-            // Adding the block mass matrix M to matrix_right. This completes the 
-            // resulting tensor Jacobian.
-            matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
-            matrix_right->finish();
-          }
-          else
-            solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
-
-          // Solve the linear system.
-          if(!solver->solve()) 
-            error ("Matrix solver failed.\n");
-
-          // Add \deltaK^{n+1} to K^n.
-          for (unsigned int i = 0; i < num_stages*ndof; i++)
-            K_vector[i] += newton_damping_coeff * solver->get_sln_vector()[i];
-
-          // Increase iteration counter.
-          it++;
+          // Translate residual vector into residual functions.
+          Hermes::vector<bool> add_dir_lift_vector;
+          add_dir_lift_vector.reserve(1);
+          add_dir_lift_vector.push_back(add_dir_lift);
+          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), 
+            residuals_vector, add_dir_lift_vector);
+          residual_norm = Global<Scalar>::calc_norms(residuals_vector);
         }
 
-        // If max number of iterations was exceeded, fail.
-        if (it >= newton_max_iter) 
+        // Info for the user.
+        if (it == 1) 
+        {
+          if(verbose) 
+            info("---- Newton initial residual norm: %g", residual_norm);
+        }
+        else
+          if(verbose) 
+            info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
+
+        // If maximum allowed residual norm is exceeded, fail.
+        if (residual_norm > newton_max_allowed_residual_norm) 
         {
           if (verbose) 
-            info("Maximum allowed number of Newton iterations exceeded, returning false.");
+          {
+            info("Current residual norm: %g", residual_norm);
+            info("Maximum allowed residual norm: %g", newton_max_allowed_residual_norm);
+            info("Newton solve not successful, returning false.");
+          }
           return false;
         }
 
-        // Project previous time level solution on the stage space,
-        // to be able to add them together. The result of the projection 
-        // will be stored in the vector coeff_vec.
-        // FIXME - this projection is slow and it is not needed when the 
-        //         spaces are the same (if spatial adaptivity does not take place). 
-        Scalar* coeff_vec = new Scalar[ndof];
-        OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+        // If residual norm is within tolerance, or the maximum number
+        // of iteration has been reached, or the problem is linear, then quit.
+        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) 
+          break;
 
-        // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
-        for (int i = 0; i < ndof; i++)
-          for (unsigned int j = 0; j < num_stages; j++)
-            coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];
-
-        Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), slns_time_new);
-
-        // If error_fn is not NULL, use the B2-row in the Butcher's
-        // table to calculate the temporal error estimate.
-        if (error_fns != Hermes::vector<Solution<Scalar>*>()) 
+        bool rhs_only = (freeze_jacobian && it > 1);
+        if (!rhs_only) 
         {
-          for (int i = 0; i < ndof; i++) 
-          {
-            coeff_vec[i] = 0;
-            for (unsigned int j = 0; j < num_stages; j++) 
-            {
-              coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
-            }
-            coeff_vec[i] *= time_step;
-          }
-          Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), error_fns, add_dir_lift);
+          // Assemble the block Jacobian matrix of the stationary residual F
+          // Diagonal blocks are created even if empty, so that matrix_left
+          // can be added later.
+          stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
+
+          // Adding the block mass matrix M to matrix_right. This completes the 
+          // resulting tensor Jacobian.
+          matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
+          matrix_right->finish();
         }
+        else
+          solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
-        // Delete stage spaces.
-        for (unsigned int i = 0; i < num_stages; i++) 
-          delete stage_spaces_vector[i];
+        // Solve the linear system.
+        if(!solver->solve()) 
+          error ("Matrix solver failed.\n");
 
-        // Delete all residuals.
-        for (unsigned int i = 0; i < num_stages; i++) 
-          delete residuals_vector[i];
+        // Add \deltaK^{n+1} to K^n.
+        for (unsigned int i = 0; i < num_stages*ndof; i++)
+          K_vector[i] += newton_damping_coeff * solver->get_sln_vector()[i];
 
-        // Clean up.
-        delete [] coeff_vec;
+        // Increase iteration counter.
+        it++;
+      }
 
-        iteration++;
-        return true;
+      // If max number of iterations was exceeded, fail.
+      if (it >= newton_max_iter) 
+      {
+        if (verbose) 
+          info("Maximum allowed number of Newton iterations exceeded, returning false.");
+        return false;
+      }
+
+      // Project previous time level solution on the stage space,
+      // to be able to add them together. The result of the projection 
+      // will be stored in the vector coeff_vec.
+      // FIXME - this projection is slow and it is not needed when the 
+      //         spaces are the same (if spatial adaptivity does not take place). 
+      Scalar* coeff_vec = new Scalar[ndof];
+      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+
+      // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
+      for (int i = 0; i < ndof; i++)
+        for (unsigned int j = 0; j < num_stages; j++)
+          coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];
+
+      Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), slns_time_new);
+
+      // If error_fn is not NULL, use the B2-row in the Butcher's
+      // table to calculate the temporal error estimate.
+      if (error_fns != Hermes::vector<Solution<Scalar>*>()) 
+      {
+        for (int i = 0; i < ndof; i++) 
+        {
+          coeff_vec[i] = 0;
+          for (unsigned int j = 0; j < num_stages; j++) 
+            coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
+          coeff_vec[i] *= time_step;
+        }
+        Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), error_fns, add_dir_lift);
+      }
+
+      // Delete stage spaces.
+      for (unsigned int i = 0; i < num_stages; i++) 
+        delete stage_spaces_vector[i];
+
+      // Delete all residuals.
+      for (unsigned int i = 0; i < num_stages; i++) 
+        delete residuals_vector[i];
+
+      // Clean up.
+      delete [] coeff_vec;
+
+      iteration++;
+      return true;
     }
 
     template<typename Scalar>
@@ -402,7 +400,7 @@ namespace Hermes
             mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
             mfv_ij->u_ext_offset = i * dp->get_spaces().size();
-            
+
             for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
@@ -462,7 +460,7 @@ namespace Hermes
           vfv_i->u_ext_offset = i * dp->get_spaces().size();
 
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-              vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
+            vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
           vfv_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
 
@@ -487,7 +485,7 @@ namespace Hermes
           vfs_i->u_ext_offset = i * dp->get_spaces().size();
 
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-              vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
+            vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
           vfs_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
 
