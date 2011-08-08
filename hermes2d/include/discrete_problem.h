@@ -602,15 +602,33 @@ namespace Hermes
         /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for quads.
         std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_quads;
 
-        std::map<int, bool> element_reassembled_matrix;
-        std::map<int, bool> element_reassembled_vector;
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// Contains true if the matrix entry for the Element has already been recalculated, and the value
+        /// saved is therefore not possible to use.
+        bool** element_reassembled_matrix;
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// Contains pair<Element id, true> if the vector entry for the Element has already been recalculated, and the value
+        /// saved is therefore not possible to use.
+        bool** element_reassembled_vector;
 
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// The matrix cache, coordinates are : [Space_1][Space_2][Element id on Space_1][DOF on Space_1][DOF on Space_2].
+        Scalar***** previous_reference_dp_cache_matrix;
+
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// The vector cache, coordinates are : [Space][Element id on Space][DOF on Space].
+        Scalar*** previous_reference_dp_cache_vector;
+        
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// Current size of the [Element id on Space_1] dimension in previous_reference_dp_cache_matrix.
         unsigned int** cache_matrix_size;
+
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// Current size of the [Element id on Space] dimension in previous_reference_dp_cache_vector.
         unsigned int* cache_vector_size;
 
-        Scalar***** previous_reference_dp_cache_matrix;
-        Scalar*** previous_reference_dp_cache_vector;
-
+        /// For caching of values calculated on the previous reference space during adaptivity.
+        /// Previous spaces (incl. mesh) to be able to determine the previous element assembly lists etc.
         Hermes::vector<Space<Scalar>*> stored_spaces_for_adaptivity;
 
         LightArray<Func<Hermes::Ord>*> cache_fn_ord;

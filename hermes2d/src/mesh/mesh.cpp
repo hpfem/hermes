@@ -234,7 +234,6 @@ namespace Hermes
       // initialize the new element
       e->active = 1;
       e->marker = marker;
-      e->userdata = 0;
       e->nvert = 3;
       e->iro_cache = -1;
       e->cm = cm;
@@ -265,7 +264,6 @@ namespace Hermes
       // initialize the new element
       e->active = 1;
       e->marker = marker;
-      e->userdata = 0;
       e->nvert = 4;
       e->iro_cache = -1;
       e->cm = cm;
@@ -1086,7 +1084,6 @@ namespace Hermes
           enew->en[j]->marker = en->marker;
         }
 
-        enew->userdata = e->userdata;
         if (e->is_curved())
           enew->cm = new CurvMap(e->cm);
       }
@@ -1144,7 +1141,6 @@ namespace Hermes
           enew = elements.add();
           enew->active = 1;
           enew->marker = e->marker;
-          enew->userdata = 0;
           enew->nvert = 3;
           enew->iro_cache = -1;
           enew->cm = e->cm;
@@ -1165,7 +1161,6 @@ namespace Hermes
           enew = elements.add();
           enew->active = 1;
           enew->marker = e->marker;
-          enew->userdata = 0;
           enew->nvert = 4;
           enew->iro_cache = -1;
           enew->cm = e->cm;
@@ -1191,7 +1186,6 @@ namespace Hermes
           enew->en[j]->marker = en->marker;
         }
 
-        enew->userdata = e->userdata;
         if (e->is_curved())
           enew->cm = new CurvMap(e->cm);
       }

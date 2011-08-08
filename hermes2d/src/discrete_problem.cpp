@@ -134,10 +134,11 @@ namespace Hermes
           for(unsigned int j = 0; j < this->spaces.size(); j++)
           {
             for(unsigned int k = 0; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
-                std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k]);
+              std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k]);
             std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j]);
           }
           delete [] this->assembling_caches.previous_reference_dp_cache_matrix[i];
+          std::free(this->assembling_caches.element_reassembled_matrix[i]);
         }
         delete [] this->assembling_caches.previous_reference_dp_cache_matrix;
 
@@ -147,8 +148,16 @@ namespace Hermes
           for(unsigned int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
               std::free(this->assembling_caches.previous_reference_dp_cache_vector[i][j]);
           std::free(this->assembling_caches.previous_reference_dp_cache_vector[i]);
+          std::free(this->assembling_caches.element_reassembled_vector[i]);
         }
         delete [] this->assembling_caches.previous_reference_dp_cache_vector;
+
+        // Spaces.
+        for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
+        {   
+          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
+          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
+        }
       }
     }
 
@@ -160,13 +169,17 @@ namespace Hermes
       // Matrix.
       this->assembling_caches.previous_reference_dp_cache_matrix = new Scalar****[this->spaces.size()];
       this->assembling_caches.cache_matrix_size = new unsigned int*[this->spaces.size()];
+      this->assembling_caches.element_reassembled_matrix = new bool*[this->spaces.size()];
       // Vector.
       this->assembling_caches.previous_reference_dp_cache_vector = new Scalar**[this->spaces.size()];
       this->assembling_caches.cache_vector_size = new unsigned int[this->spaces.size()];
+      this->assembling_caches.element_reassembled_vector = new bool*[this->spaces.size()];
 
       for(unsigned int i = 0; i < this->spaces.size(); i++)
       {
         // Matrix.
+        this->assembling_caches.element_reassembled_matrix[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+
         this->assembling_caches.previous_reference_dp_cache_matrix[i] = new Scalar***[this->spaces.size()];
           this->assembling_caches.cache_matrix_size[i] = new unsigned int[this->spaces.size()];
         for(unsigned int j = 0; j < this->spaces.size(); j++)
@@ -178,6 +191,8 @@ namespace Hermes
         }
 
         // Vector.
+        this->assembling_caches.element_reassembled_vector[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+
         this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) malloc(sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
         this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
         for(unsigned int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
@@ -390,7 +405,7 @@ namespace Hermes
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
-            if (e[i] != NULL) 
+            if (e[i] != NULL)
               spaces[i]->get_element_assembly_list(e[i], &(al[i]));
 
           if(is_DG)
@@ -531,22 +546,58 @@ namespace Hermes
     {
       if(this->spaces.size() != spaces.size())
         error("DiscreteProblem can not change the number of spaces.");
+
+      // After derefinement, the spaces' sizes can go down, in this case there is no sense in reallocing stuff, freeing and allocating again is the way.
+      bool smaller_spaces = false;
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        if(this->spaces[i]->get_num_dofs() > spaces[i]->get_num_dofs())
+        {
+          smaller_spaces = true;
+          break;
+        }
+
       this->spaces = spaces;
       this->ndof = Space<Scalar>::get_num_dofs(spaces);
       if(this->cache_for_adaptivity)
       {
         for(unsigned int i = 0; i < this->spaces.size(); i++)
         {
+          if(smaller_spaces)
+          {
+            std::free(this->assembling_caches.element_reassembled_matrix[i]);
+            this->assembling_caches.element_reassembled_matrix[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          }
+          else
+            this->assembling_caches.element_reassembled_matrix[i] = (bool*) realloc(this->assembling_caches.element_reassembled_matrix[i], sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
           for(unsigned int j = 0; j < this->spaces.size(); j++)
           {
-            this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+            if(smaller_spaces)
+            {
+              std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j]);
+              this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+            }
+            else
+              this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
             for(unsigned int k = this->assembling_caches.cache_matrix_size[i][j]; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
               this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
             this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
           }
 
           // Vector.
-          this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          if(smaller_spaces)
+          {
+            std::free(this->assembling_caches.element_reassembled_vector[i]);
+            this->assembling_caches.element_reassembled_vector[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          }
+          else
+            this->assembling_caches.element_reassembled_vector[i] = (bool*) realloc(this->assembling_caches.element_reassembled_vector[i], sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+          if(smaller_spaces)
+            {
+              std::free(this->assembling_caches.previous_reference_dp_cache_vector[i]);
+              this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
+            }
+          else
+            this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
           for(unsigned int j = this->assembling_caches.cache_vector_size[i]; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
               this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
           this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
@@ -560,30 +611,7 @@ namespace Hermes
     {
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
-      if(this->spaces.size() != spaces.size())
-        error("DiscreteProblem can not change the number of spaces.");
-      this->spaces = spaces;
-      this->ndof = Space<Scalar>::get_num_dofs(spaces);
-      if(this->cache_for_adaptivity)
-      {
-        for(unsigned int i = 0; i < this->spaces.size(); i++)
-        {
-          for(unsigned int j = 0; j < this->spaces.size(); j++)
-          {
-            this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-            for(unsigned int k = this->assembling_caches.cache_matrix_size[i][j]; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
-              this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
-            this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-          }
-
-          // Vector.
-          this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          for(unsigned int j = this->assembling_caches.cache_vector_size[i]; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
-              this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
-          this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-        }
-      }
-      this->invalidate_matrix();
+      set_spaces(spaces);
     }
 
     template<typename Scalar>
@@ -684,8 +712,12 @@ namespace Hermes
 
       if(cache_for_adaptivity)
       {
-        this->assembling_caches.element_reassembled_matrix.clear();
-        this->assembling_caches.element_reassembled_vector.clear();
+        for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+          for(unsigned int i = 0; i <= this->spaces[space_i]->get_mesh()->get_max_element_id(); i++)
+          {
+            this->assembling_caches.element_reassembled_matrix[space_i][i] = false;
+            this->assembling_caches.element_reassembled_vector[space_i][i] = false;
+          }
       }
 
       // Create assembling stages.
@@ -731,14 +763,17 @@ namespace Hermes
         delete *it;
 
       // Handle the previous spaces when caching previous reference spaces integrals.
-      if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
+      if(this->cache_for_adaptivity)
       {
-        for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
-        {   
-          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
-          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
+        if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
+        {
+          for(int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
+          {   
+            delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
+            delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
+          }
+          this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
         }
-        this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
       }
       // Time measurement.
       profiling.total_time.tick();
@@ -872,9 +907,9 @@ namespace Hermes
                 e_prev[i] = this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_mesh()->get_element(e[i]->parent->id)->sons[son[i]];
 
                 // If we have already reassembled this element.
-                if( (mat != NULL && this->assembling_caches.element_reassembled_matrix.find(e_prev[i]->id) != this->assembling_caches.element_reassembled_matrix.end())
+                if( (mat != NULL && this->assembling_caches.element_reassembled_matrix[i][e_prev[i]->id])
                     ||
-                    (rhs != NULL && this->assembling_caches.element_reassembled_vector.find(e_prev[i]->id) != this->assembling_caches.element_reassembled_vector.end()) )
+                    (rhs != NULL && this->assembling_caches.element_reassembled_vector[i][e_prev[i]->id]) )
                 {
                   stored_value = false;
                   break;
@@ -920,7 +955,7 @@ namespace Hermes
                               this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id][ai][aj] = 
                                 this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e_prev[i]->id][ai][aj];
                     }
-                    this->assembling_caches.element_reassembled_matrix.insert(std::pair<int, bool>(e[i]->id, true));
+                    this->assembling_caches.element_reassembled_matrix[i][e[i]->id] = true;
                   }
                 }
                 if(rhs != NULL)
@@ -940,7 +975,7 @@ namespace Hermes
                         this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id][ai] =
                           this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e_prev[i]->id][ai];
                   }
-                  this->assembling_caches.element_reassembled_vector.insert(std::pair<int, bool>(e[i]->id, true));
+                  this->assembling_caches.element_reassembled_vector[i][e[i]->id] = true;
                 }
               }
             }
@@ -957,14 +992,14 @@ namespace Hermes
                   {
                     std::free(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id]);
                     this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] = NULL;
-                    this->assembling_caches.element_reassembled_matrix.insert(std::pair<int, bool>(e[i]->id, true));
+                    this->assembling_caches.element_reassembled_matrix[i][e[i]->id] = true;
                   }
               if(rhs != NULL)
                 if(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] != NULL)
                 {
                   std::free(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id]);
                   this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] = NULL;
-                  this->assembling_caches.element_reassembled_vector.insert(std::pair<int, bool>(e[i]->id, true));
+                  this->assembling_caches.element_reassembled_vector[i][e[i]->id] = true;
                 }
             }
             assemble_one_state(stage, mat, rhs, force_diagonal_blocks, 

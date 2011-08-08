@@ -47,41 +47,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::operator = (const Space<Scalar> & other)
-    {
-      _F_;
-      free();
-      if ((nsize < other.nsize) || (ndata == NULL))
-      {
-        //HACK: definition of allocated size and the result number of elements
-        nsize = other.nsize;
-        if ((nsize > other.nsize) || (ndata == NULL))
-        {
-          int prev_allocated = ndata_allocated;
-          if (ndata_allocated == 0)
-            ndata_allocated = 1024;
-          while (ndata_allocated < nsize)
-            ndata_allocated = ndata_allocated * 3 / 2;
-          ndata = (NodeData*)realloc(ndata, ndata_allocated * sizeof(NodeData));
-          for(int i = prev_allocated; i < ndata_allocated; i++)
-            ndata[i] = other.ndata[i];
-        }
-      }
-
-      if ((esize < other.esize) || (edata == NULL))
-      {
-        int oldsize = esize;
-        if (!esize) esize = 1024;
-        while (esize < mesh->get_max_element_id()) esize = esize * 3 / 2;
-        edata = (ElementData*) realloc(edata, sizeof(ElementData) * esize);
-        for (int i = oldsize; i < esize; i++)
-          edata[i].order = other.edata[i].order;
-        for (int i = oldsize; i < esize; i++)
-          edata[i].changed_in_last_adaptation = other.edata[i].changed_in_last_adaptation;
-      }
-    }
-
-    template<typename Scalar>
     Space<Scalar>::~Space()
     {
       _F_;
@@ -487,6 +452,10 @@ namespace Hermes
           edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
         this->mesh->unrefine_element_id(list[i]);
       }
+
+      // Recalculate all integrals, do not use previous adaptivity step.
+      for_all_active_elements(e, this->mesh)
+        this->edata[e->id].changed_in_last_adaptation = true;
 
       this->assign_dofs();
     }

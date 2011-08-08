@@ -100,7 +100,6 @@ namespace Hermes
       unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons
       unsigned used:1;   ///< array item usage flag
       int marker;        ///< element marker
-      int userdata;     ///< arbitrary user-defined data
       int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
       Element* parent;   ///< pointer to the parent element for the current son
       bool visited;      ///< true if the element has been visited during assembling

@@ -94,8 +94,6 @@ namespace Hermes
       Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init);
 
       virtual ~Space();
-      
-      void operator = (const Space<Scalar> & other);
 
       virtual void free();
 
@@ -216,16 +214,6 @@ namespace Hermes
         return ndof;
       }
 
-      class ElementData
-      {
-      public:
-        ElementData() : changed_in_last_adaptation(true) {};
-        int order;
-        int bdof, n;
-        bool changed_in_last_adaptation;
-      };
-      ElementData* edata; ///< element data table
-
     protected:
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
@@ -279,8 +267,18 @@ namespace Hermes
         };
         NodeData() : dof(0), edge_bc_proj(NULL) {}
       };
+      
+      class ElementData
+      {
+      public:
+        ElementData() : changed_in_last_adaptation(true) {};
+        int order;
+        int bdof, n;
+        bool changed_in_last_adaptation;
+      };
 
       NodeData* ndata;    ///< node data table
+      ElementData* edata; ///< element data table
       int nsize, ndata_allocated; ///< number of items in ndata, allocated space
       int esize;
 
