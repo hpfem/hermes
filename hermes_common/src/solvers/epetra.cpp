@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file epetra_solver.cpp
+/*! \file epetra.cpp
 \brief EpetraMatrix and EpetraVector storage classes for Amesos, AztecOO, ... .
 */
 #include "config.h"

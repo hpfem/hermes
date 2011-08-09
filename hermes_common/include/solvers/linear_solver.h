@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file linear_solver.h
-\brief General linear/nonlinear/iterative solver functionality.
+\brief General linear/iterative solver functionality.
 */
 #ifndef __HERMES_COMMON_SOLVER_H_
 #define __HERMES_COMMON_SOLVER_H_
@@ -102,11 +102,18 @@ namespace Hermes
 
       virtual ~LinearSolver() { if (sln != NULL) delete [] sln; }
 
+      /// Solve
+      /// @return true on succes
       virtual bool solve() = 0;
 
+      /// get solution vector
+      /// @return solution vector ( #sln )
       Scalar *get_sln_vector() { return sln; }
 
+      /// @return #error
       int get_error() { return error; }
+      /// get time spent on solving
+      /// @return time spent on solving in secs ( #time )
       double get_time() { return time; }
 
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
@@ -117,7 +124,9 @@ namespace Hermes
       }
 
     protected:
+      /// solution vector
       Scalar *sln;
+      /// \todo document (not sure what it do)
       int error;
       double time;  ///< time spent on solving (in secs)
     };
@@ -180,19 +189,15 @@ namespace Hermes
     };
 
     /// \brief Function returning a solver according to the users's choice.
-    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @param[in] matrix_solver_type the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @param[in] matrix matrix
+    /// @param[in] rhs right hand side vector
+    /// @return created linear solver
     template<typename Scalar> 
     HERMES_API LinearSolver<Scalar>*  
       create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
 
-    /*@}*/ // End of documentation group Solvers.
-
-    template class HERMES_API LinearSolver<double>;
-    template class HERMES_API LinearSolver<std::complex<double> >;
-    template class HERMES_API DirectSolver<double>;
-    template class HERMES_API DirectSolver<std::complex<double> >;
-    template class HERMES_API IterSolver<double>;
-    template class HERMES_API IterSolver<std::complex<double> >;
   }
 }
+/*@}*/ // End of documentation group Solvers.
 #endif

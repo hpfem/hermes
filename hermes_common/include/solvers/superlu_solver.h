@@ -22,11 +22,11 @@
 #ifndef __HERMES_COMMON_SUPERLU_SOLVER_H_
 #define __HERMES_COMMON_SUPERLU_SOLVER_H_
 
-#include "../config.h"
+#include "config.h"
 #ifdef WITH_SUPERLU  
 typedef int int_t;
 #include "linear_solver.h"
-#include "../matrix.h"
+#include "matrix.h"
 
 #include <supermatrix.h>
 #include <slu_util.h>
@@ -65,15 +65,20 @@ namespace Hermes {
 #define SLU_PRINT_CSC_MATRIX    zPrint_CompCol_Matrix
 #define Scalar_MALLOC       doublecomplexMalloc
 
+    /** Type for storing number in SuperLU structures */
     template<typename Scalar> struct SuperLuType;
 
+    /** Type for storing number in SuperLU real structures */
     template<>
     struct SuperLuType<double>{
+    /** Type for storing scalar number in SuperLU real structures */
       typedef double Scalar;
     };
 
+    /** Type for storing number in SuperLU complex structures */
     template<>
     struct SuperLuType<std::complex<double> >{
+    /** Type for storing scalar number in SuperLU complex structures */
       typedef struct { double r, i; } Scalar;
     };
 #endif //SLU_MT
@@ -82,6 +87,7 @@ namespace Hermes {
 
 namespace Hermes {
   namespace Algebra {
+    /** \brief Matrix used with SuperLU solver */
     template <typename Scalar>
     class SuperLUMatrix : public SparseMatrix<Scalar> {
     public:
@@ -99,32 +105,51 @@ namespace Hermes {
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
+      /// add matrix 
+      /// @param[in] mat matrix to be added
       virtual void add_matrix(SuperLUMatrix* mat);
+      /// Add matrix to diagonal
+      /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
+      /// @param[in] mat added matrix 
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<SuperLUMatrix*>(mat));
       }
+      /// Add matrix to specific position
+      /// @param[in] i row in target matrix coresponding with top row of added matrix
+      /// @param[in] j column in target matrix coresponding with lef column of added matrix
+      /// @param[in] mat added matrix
       virtual void add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat);
 
       // Applies the matrix to vector_in and saves result to vector_out.
       void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
       // Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
-      // Creates matrix using size, nnz, and the three arrays.
+      /// Creates matrix in SuperLU format using size, nnz, and the three arrays.
+      /// @param[in] size size of matrix (num of rows and columns)
+      /// @param[in] nnz number of nonzero values
+      /// @param[in] ap index to ap/ax, where each column starts (size is matrix size + 1) 
+      /// @param[in] ai row indices 
+      /// @param[in] ax values
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
       // Duplicates a matrix (including allocation).
       SuperLUMatrix<Scalar>* duplicate();
 
     protected:
       // SUPERLU specific data structures for storing the matrix (CSC format).
-      Scalar *Ax; // Matrix entries (column-wise).
-      int *Ai;        // Row indices of values in Ax.
-      unsigned int *Ap;        // Index to Ax/Ai, where each column starts.
-      unsigned int nnz;        // Number of non-zero entries (= Ap[size]).
+      /// Matrix entries (column-wise)
+      Scalar *Ax; 
+      /// Row indices of values in Ax.
+      int *Ai;
+      /// Index to Ax/Ai, where each column starts.
+      unsigned int *Ap;
+      /// Number of non-zero entries (= Ap[size]).
+      unsigned int nnz;
 
       friend class Solvers::SuperLUSolver<Scalar>;
     };
 
+    /** \brief Vector used with SuperLU solver */
     template <typename Scalar>
     class SuperLUVector : public Vector<Scalar> {
     public:
@@ -150,7 +175,7 @@ namespace Hermes {
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:
-      // SUPERLU specific data structures for storing the rhs.
+      /// SUPERLU specific data structures for storing the rhs.
       Scalar *v;     // Vector entries.
 
       friend class Solvers::SuperLUSolver<Scalar>;

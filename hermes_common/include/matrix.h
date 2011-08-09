@@ -297,15 +297,20 @@ namespace Hermes
       ///
       /// @param[in] m         - number of rows of given block
       /// @param[in] n         - number of columns of given block
-      /// @param[in] matrix    - block of values
+      /// @param[in] mat    - block of values
       /// @param[in] rows      - array with row indexes
       /// @param[in] cols      - array with column indexes
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) = 0;
 
       /// dumping matrix and right-hand side
-      ///
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
+      /// @param[in] file file handle
+      /// @param[in] var_name name of variable (will be written to output file)
+      /// @param[in] fmt output file format
+      /// @return true on succes
+      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
 
+      /// Get size of matrix
+      /// @return size of matrix
       virtual unsigned int get_matrix_size() const = 0;
 
     protected:
@@ -332,6 +337,7 @@ namespace Hermes
       /// @param[in] col  - column index
       virtual void pre_add_ij(unsigned int row, unsigned int col);
 
+      /// Finish manipulation with matrix (called before solving)
       virtual void finish() { }
 
       virtual unsigned int get_size() { return this->size; }
@@ -343,6 +349,8 @@ namespace Hermes
 
       /// Add matrix to diagonal
       /// Matrices must be the same type of solver
+      /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
+      /// @param[in] mat added matrix 
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
       { 
         error("add_sparse_to_diagonal_blocks() undefined.");
@@ -388,7 +396,9 @@ namespace Hermes
       };
 
       /// Multiply with a Scalar.
-      virtual void multiply_with_Scalar(Scalar value) { };
+      virtual void multiply_with_Scalar(Scalar value) {
+        error("multiply_with_Scalar() undefined.");
+      };
 
       /// Duplicate sparse matrix (including allocation).
       virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
@@ -398,6 +408,13 @@ namespace Hermes
 
       unsigned row_storage:1;
       unsigned col_storage:1;
+
+      /// get number of nonzero numbers in matrix
+      /// @return number of nonzero numbers in matrix
+      virtual unsigned int get_nnz() const {
+        error("get_nnz() undefined.");
+        return 0;
+      }
 
     protected:
       static const int PAGE_SIZE = 62;
@@ -461,6 +478,7 @@ namespace Hermes
 
       /// Add a vector.
       virtual void add_vector(Vector<Scalar>* vec) = 0;
+      /// Add a vector.
       virtual void add_vector(Scalar* vec) = 0;
 
       /// update subset of the elements
@@ -473,9 +491,13 @@ namespace Hermes
       /// Get vector length.
       unsigned int length() {return this->size;}
 
-      // Write to file.
+      /// Write to file.
+      /// @param[in] file file handle
+      /// @param[in] var_name name of variable (will be written to output file)
+      /// @param[in] fmt output file format
+      /// @return true on succes
       virtual bool dump(FILE *file, const char *var_name, 
-        EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
+        EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
 
     protected:
       unsigned int size;
