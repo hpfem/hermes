@@ -379,7 +379,7 @@ namespace Hermes
             ) 
           {
             central_transforms->transf[level] = transformations[level];
-            // Also if the transformation count is already bigger than central_n_trans, we need to raise it.
+            // Also if the transformation count is already bigger than central_transforms->num_levels, we need to raise it.
             if(level >= central_transforms->num_levels)
               central_transforms->num_levels = level + 1;
           }
@@ -387,30 +387,30 @@ namespace Hermes
           if(central_transforms->num_levels == level + 1) 
           {
             if (!neighbor_transformations.present(neighbor_i))
-              neighbor_transformations.add(new Transformations, neighbor_i);            
-            Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
+              neighbor_transformations.add(new Transformations, neighbor_i);
             
-            for(unsigned int i = level + 1; i < transformations.size(); i++)
-              // Triangles.
-              if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
-                if ((active_edge == 0 && transformations[i] == 0) ||
-                    (active_edge == 1 && transformations[i] == 1) ||
-                    (active_edge == 2 && transformations[i] == 2))
-                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-                else
-                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
-              // Quads.
+            Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
+
+            // Triangles.
+            if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
+              if ((active_edge == 0 && transformations[level] == 0) ||
+                  (active_edge == 1 && transformations[level] == 1) ||
+                  (active_edge == 2 && transformations[level] == 2))
+                neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
               else
-                if ((active_edge == 0 && (transformations[i] == 0 || transformations[i] == 6)) ||
-                    (active_edge == 1 && (transformations[i] == 1 || transformations[i] == 4)) ||
-                    (active_edge == 2 && (transformations[i] == 2 || transformations[i] == 7)) ||
-                    (active_edge == 3 && (transformations[i] == 3 || transformations[i] == 5)))
-                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
-                else if ((active_edge == 0 && (transformations[i] == 1 || transformations[i] == 7)) ||
-                         (active_edge == 1 && (transformations[i] == 2 || transformations[i] == 5)) ||
-                         (active_edge == 2 && (transformations[i] == 3 || transformations[i] == 6)) ||
-                         (active_edge == 3 && (transformations[i] == 0 || transformations[i] == 4)))
-                  neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+                neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 3);
+            // Quads.
+            else
+              if ((active_edge == 0 && (transformations[level] == 0 || transformations[level] == 6)) ||
+                  (active_edge == 1 && (transformations[level] == 1 || transformations[level] == 4)) ||
+                  (active_edge == 2 && (transformations[level] == 2 || transformations[level] == 7)) ||
+                  (active_edge == 3 && (transformations[level] == 3 || transformations[level] == 5)))
+                neighbor_transforms->transf[neighbor_transforms->num_levels++] = (!neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
+              else if ((active_edge == 0 && (transformations[level] == 1 || transformations[level] == 7)) ||
+                        (active_edge == 1 && (transformations[level] == 2 || transformations[level] == 5)) ||
+                        (active_edge == 2 && (transformations[level] == 3 || transformations[level] == 6)) ||
+                        (active_edge == 3 && (transformations[level] == 0 || transformations[level] == 4)))
+                neighbor_transforms->transf[neighbor_transforms->num_levels++] = (neighbor_edge.orientation ? neighbor_edge.local_num_of_edge : (neighbor_edge.local_num_of_edge + 1) % 4);
           }
         }
       }

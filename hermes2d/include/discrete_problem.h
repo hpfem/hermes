@@ -24,7 +24,6 @@
 #include "function/function.h"
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
-#include "adapt/kelly_type_adapt.h"
 
 namespace Hermes
 {
