@@ -12,3 +12,5 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
+
+#include "mesh_reader_h2d_xml.h"

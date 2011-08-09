@@ -16,14 +16,14 @@
 #ifndef _EXODUSII_LOADER_H_
 #define _EXODUSII_LOADER_H_
 
-#include "mesh_loader.h"
+#include "mesh_reader.h"
 namespace Hermes
 {
   namespace Hermes2D
   {
     /// Mesh loader from EXODUSII format
     ///
-    /// @ingroup meshloaders
+    /// @ingroup mesh_readers
     class HERMES_API MeshReaderExodusII : public MeshReader
     {
     public:

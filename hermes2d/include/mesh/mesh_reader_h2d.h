@@ -16,7 +16,7 @@
 #ifndef _MESH_READER_H2D_H_
 #define _MESH_READER_H2D_H_
 
-#include "mesh_loader.h"
+#include "mesh_reader.h"
 #include "mesh_data.h"
 
 namespace Hermes
@@ -25,8 +25,7 @@ namespace Hermes
   {
     /// Mesh loader from Hermes2D format
     ///
-    /// @ingroup meshloaders
-    /// \todo Change the name to H2DMeshLoader
+    /// @ingroup mesh_readers
     class HERMES_API MeshReaderH2D : public MeshReader
     {
     public:

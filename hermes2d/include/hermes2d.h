@@ -29,7 +29,7 @@
 #include "quadrature/limit_order.h"
 
 #include "mesh/mesh.h"
-#include "mesh/mesh_loader.h"
+#include "mesh/mesh_reader.h"
 #include "mesh/mesh_reader_h2d.h"
 #include "mesh/mesh_reader_exodusii.h"
 
