@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 
   // Load the mesh_lshape.
   Mesh mesh_lshape, mesh_square;
-  H2DReader mloader;
+  MeshReaderH2D mloader;
   mloader.load("domain.mesh", &mesh_lshape);
   mloader.load("square.mesh", &mesh_square);
 

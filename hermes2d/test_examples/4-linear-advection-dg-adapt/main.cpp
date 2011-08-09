@@ -71,7 +71,7 @@ int main(int argc, char* args[])
 {
   // Load the mesh.
   Mesh mesh;
-  H2DReader mloader;
+  MeshReaderH2D mloader;
   mloader.load("square.mesh", &mesh);
 
   // Perform initial mesh refinement.

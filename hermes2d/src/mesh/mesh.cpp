@@ -15,7 +15,7 @@
 
 #include "hermes2d_common_defs.h"
 #include "mesh.h"
-#include "h2d_reader.h"
+#include "mesh_reader_h2d.h"
 
 namespace Hermes
 {
@@ -1213,7 +1213,7 @@ namespace Hermes
           mesh_tmp_for_convert.nodes[i].y = 0.0;
         }
       }
-      H2DReader loader_mesh_tmp_for_convert;
+      MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
       loader_mesh_tmp_for_convert.save(mesh_file_tmp, &mesh_tmp_for_convert);
@@ -1241,7 +1241,7 @@ namespace Hermes
           mesh_tmp_for_convert.nodes[i].y = 0.0;
         }
       }
-      H2DReader loader_mesh_tmp_for_convert;
+      MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
       loader_mesh_tmp_for_convert.save(mesh_file_tmp, &mesh_tmp_for_convert);
@@ -1268,7 +1268,7 @@ namespace Hermes
           mesh_tmp_for_convert.nodes[i].y = 0.0;
         }
       }
-      H2DReader loader_mesh_tmp_for_convert;
+      MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
       loader_mesh_tmp_for_convert.save(mesh_file_tmp, &mesh_tmp_for_convert);

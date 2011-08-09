@@ -108,7 +108,7 @@ namespace Hermes
       void copy_list(Node** ptr, Node* node);
 
       friend struct Node;
-      friend class H2DReader;
+      friend class MeshReaderH2D;
     };
   }
 }

@@ -30,8 +30,8 @@
 
 #include "mesh/mesh.h"
 #include "mesh/mesh_loader.h"
-#include "mesh/h2d_reader.h"
-#include "mesh/exodusii.h"
+#include "mesh/mesh_reader_h2d.h"
+#include "mesh/mesh_reader_exodusii.h"
 
 #include "quadrature/quad.h"
 #include "quadrature/quad_all.h"

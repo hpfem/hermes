@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
   Mesh mesh;
   Mesh dup;
   Element* e;
-  H2DReader mloader;
+  MeshReaderH2D mloader;
   mloader.load(argv[1], &mesh);
   int mesh_base_element = mesh.get_num_base_elements();
 

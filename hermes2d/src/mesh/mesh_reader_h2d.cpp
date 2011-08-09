@@ -18,7 +18,7 @@
 #include <map>
 #include "hash.h"
 #include <iostream>
-#include "h2d_reader.h"
+#include "mesh_reader_h2d.h"
 
 namespace Hermes
 {
@@ -26,21 +26,21 @@ namespace Hermes
   {
     extern unsigned g_mesh_seq;
 
-    H2DReader::H2DReader()
+    MeshReaderH2D::MeshReaderH2D()
     {
     }
 
-    H2DReader::~H2DReader()
+    MeshReaderH2D::~MeshReaderH2D()
     {
     }
 
-    void H2DReader::load_str(const char* mesh_str, Mesh *mesh)
+    void MeshReaderH2D::load_str(const char* mesh_str, Mesh *mesh)
     {
       std::istringstream s(mesh_str);
       this->load_stream(s, mesh, "");
     }
 
-    Nurbs* H2DReader::load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
+    Nurbs* MeshReaderH2D::load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
     {
       double dummy_dbl;
 
@@ -160,7 +160,7 @@ namespace Hermes
       return nurbs;
     }
 
-    bool H2DReader::load(const char *filename, Mesh *mesh)
+    bool MeshReaderH2D::load(const char *filename, Mesh *mesh)
     {
       // Both load_str and load_stream are unnecessary. Remove them??		
 
@@ -169,7 +169,7 @@ namespace Hermes
       return this->load_stream(s, mesh, filename);
     }
 
-    bool H2DReader::load_stream(std::istream &is, Mesh *mesh,
+    bool MeshReaderH2D::load_stream(std::istream &is, Mesh *mesh,
       const char *filename)
     {
       int i, j, k, n;
@@ -400,7 +400,7 @@ namespace Hermes
 
     //// save ////////////////////////////////////////////////////////////////////////////////////
 
-    void H2DReader::save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first)
+    void MeshReaderH2D::save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first)
     {
       if (e->active) return;
       fprintf(f, first ? "refinements =\n{\n" : ",\n"); first = false;
@@ -428,7 +428,7 @@ namespace Hermes
     }
 
 
-    void H2DReader::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
+    void MeshReaderH2D::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
     {
       if (nurbs->arc)
       {
@@ -459,7 +459,7 @@ namespace Hermes
       return e->cm->nurbs[i]->twin && e->en[i]->ref == 2;
     }
 
-    bool H2DReader::save(const char* filename, Mesh *mesh)
+    bool MeshReaderH2D::save(const char* filename, Mesh *mesh)
     {
       int i, mrk;
       Element* e;

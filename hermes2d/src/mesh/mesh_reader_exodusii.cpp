@@ -16,7 +16,7 @@
 #include "config.h"
 
 #include <string.h>
-#include "exodusii.h"
+#include "mesh_reader_exodusii.h"
 #include "mesh.h"
 #include <map>
 
@@ -27,7 +27,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    ExodusIIReader::ExodusIIReader()
+    MeshReaderExodusII::MeshReaderExodusII()
     {
 #ifdef WITH_EXODUSII
 #else
@@ -35,7 +35,7 @@ namespace Hermes
 #endif
     }
 
-    ExodusIIReader::~ExodusIIReader()
+    MeshReaderExodusII::~MeshReaderExodusII()
     {
     }
 
@@ -59,7 +59,7 @@ namespace Hermes
       }
     };
 
-    bool ExodusIIReader::load(const char *file_name, Mesh *mesh)
+    bool MeshReaderExodusII::load(const char *file_name, Mesh *mesh)
     {
 #ifdef WITH_EXODUSII
       int err;

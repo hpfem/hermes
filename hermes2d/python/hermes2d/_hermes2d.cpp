@@ -3770,14 +3770,14 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_copy(PyObject *__pyx_v_self
  *         self.thisptr.copy(m.thisptr)
  * 
  *     def load(self, char* filename):             # <<<<<<<<<<<<<<
- *         cdef c_H2DReader mloader
+ *         cdef c_MeshReaderH2D mloader
  *         mloader.load(filename, self.thisptr)
  */
 
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load(PyObject *__pyx_v_self, PyObject *__pyx_arg_filename); /*proto*/
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load(PyObject *__pyx_v_self, PyObject *__pyx_arg_filename) {
   char *__pyx_v_filename;
-  struct H2DReader __pyx_v_mloader;
+  struct MeshReaderH2D __pyx_v_mloader;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannySetupContext("load");
   assert(__pyx_arg_filename); {
@@ -3791,7 +3791,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load(PyObject *__pyx_v_self
 
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":201
  *     def load(self, char* filename):
- *         cdef c_H2DReader mloader
+ *         cdef c_MeshReaderH2D mloader
  *         mloader.load(filename, self.thisptr)             # <<<<<<<<<<<<<<
  * 
  *     def load_str(self, char* mesh):
@@ -3808,14 +3808,14 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load(PyObject *__pyx_v_self
  *         mloader.load(filename, self.thisptr)
  * 
  *     def load_str(self, char* mesh):             # <<<<<<<<<<<<<<
- *         cdef c_H2DReader mloader
+ *         cdef c_MeshReaderH2D mloader
  *         mloader.load_str(mesh, self.thisptr)
  */
 
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load_str(PyObject *__pyx_v_self, PyObject *__pyx_arg_mesh); /*proto*/
 static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load_str(PyObject *__pyx_v_self, PyObject *__pyx_arg_mesh) {
   char *__pyx_v_mesh;
-  struct H2DReader __pyx_v_mloader;
+  struct MeshReaderH2D __pyx_v_mloader;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannySetupContext("load_str");
   assert(__pyx_arg_mesh); {
@@ -3829,7 +3829,7 @@ static PyObject *__pyx_pf_8hermes2d_9_hermes2d_4Mesh_load_str(PyObject *__pyx_v_
 
   /* "/home/ondrej/repos/hermes/hermes2d/python/hermes2d/_hermes2d.pyx":205
  *     def load_str(self, char* mesh):
- *         cdef c_H2DReader mloader
+ *         cdef c_MeshReaderH2D mloader
  *         mloader.load_str(mesh, self.thisptr)             # <<<<<<<<<<<<<<
  * 
  *     @property

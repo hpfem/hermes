@@ -108,9 +108,10 @@ project(hermes2d)
 		src/mesh/curved.cpp
 		src/mesh/refinement_type.cpp 
 		src/mesh/element_to_refine.cpp
-		src/mesh/exodusii.cpp 
+		src/mesh/mesh_reader_exodusii.cpp 
 		src/mesh/hash.cpp 
-		src/mesh/h2d_reader.cpp
+		src/mesh/mesh_reader_h2d.cpp
+		src/mesh/mesh_reader_h2d_xml.cpp
 		src/mesh/mesh.cpp
 		src/mesh/traverse.cpp
 		src/mesh/mesh_data.cpp

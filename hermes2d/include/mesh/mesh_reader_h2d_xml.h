@@ -13,30 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
 
-#ifndef _MESHLOADER_H_
-#define _MESHLOADER_H_
-
-#include "mesh.h"
+#ifndef _MESH_READER_H2D_XML_H_
+#define _MESH_READER_H2D_XML_H_
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @defgroup mesh_readers Mesh readers
-
-    /// Abstract class for mesh readers
-    ///
-    /// @ingroup mesh_readers
-    class HERMES_API MeshReader
-    {
-    public:
-      virtual ~MeshReader() { }
-
-      /// Loads the mesh from a file. Aborts the program on error.
-      /// @param filename [in] The name of the file.
-      /// @param mesh [out] The mesh.
-      virtual bool load(const char *file_name, Mesh *mesg) = 0;
-    };
   }
 }
 #endif
+

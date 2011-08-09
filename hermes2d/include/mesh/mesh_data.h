@@ -97,7 +97,7 @@ namespace Hermes
       /// Restores ';' to blank spaces
       std::string restore(std::string &str);
 
-      friend class H2DReader;
+      friend class MeshReaderH2D;
     };
   }
 }

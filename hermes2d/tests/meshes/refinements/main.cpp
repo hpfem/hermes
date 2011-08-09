@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
   // load the mesh file
   Mesh mesh;
-  H2DReader mloader;
+  MeshReaderH2D mloader;
   Element* e;
   mloader.load(argv[1], &mesh);
 

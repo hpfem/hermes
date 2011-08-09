@@ -389,8 +389,8 @@ namespace Hermes
       ElementMarkersConversion element_markers_conversion;
       BoundaryMarkersConversion boundary_markers_conversion;
 
-      friend class H2DReader;
-      friend class ExodusIIReader;
+      friend class MeshReaderH2D;
+      friend class MeshReaderExodusII;
       friend class DiscreteProblem<double>;
       friend class DiscreteProblem<std::complex<double> >;
       friend class WeakForm<double>;

@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 {
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
-  Hermes::Hermes2D::H2DReader mloader;
+  Hermes::Hermes2D::MeshReaderH2D mloader;
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).

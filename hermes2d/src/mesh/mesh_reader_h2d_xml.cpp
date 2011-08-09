@@ -12,26 +12,3 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
-
-#ifndef _EXODUSII_LOADER_H_
-#define _EXODUSII_LOADER_H_
-
-#include "mesh_loader.h"
-namespace Hermes
-{
-  namespace Hermes2D
-  {
-    /// Mesh loader from EXODUSII format
-    ///
-    /// @ingroup meshloaders
-    class HERMES_API ExodusIIReader : public MeshLoader
-    {
-    public:
-      ExodusIIReader();
-      virtual ~ExodusIIReader();
-
-      virtual bool load(const char *file_name, Mesh *mesh);
-    };
-  }
-}
-#endif
