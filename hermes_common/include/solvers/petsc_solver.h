@@ -58,17 +58,17 @@ namespace Hermes {
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
-      /// add matrix 
+      /// Add matrix.
       /// @param[in] mat matrix to be added
       virtual void add_matrix(PetscMatrix* mat);
-      /// Add matrix to diagonal
+      /// Add matrix to diagonal.
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix 
       virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<PetscMatrix<Scalar>*>(mat));
       }
-      /// Add matrix to specific position
+      /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
       /// @param[in] mat added matrix
@@ -90,17 +90,17 @@ namespace Hermes {
       // Duplicates a matrix (including allocation).
       PetscMatrix* duplicate();
     protected:
-      /// Petsc matrix data structure
+      /// Petsc matrix data structure.
       Mat matrix;
-      /// Number of nonzero values
+      /// Number of nonzero values.
       unsigned int nnz;
-      /// Is matrix initiated (allocated)?
+      /// Is matrix inited (allocated)?
       bool inited;
 
       friend class Solvers::PetscLinearSolver<Scalar>;
     };
 
-    /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format
+    /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format.
     ///
     template <typename Scalar>
     class PetscVector : public Vector<Scalar> {
@@ -110,7 +110,7 @@ namespace Hermes {
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      /// Finish manipulation with vector
+      /// Finish manipulation with vector.
       virtual void finish();
       virtual Scalar get(unsigned int idx);
       virtual void extract(Scalar *v) const;
@@ -129,7 +129,7 @@ namespace Hermes {
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:
-      /// Petsc vectroe data structure
+      /// Petsc vectore data structure.
       Vec vec;
       /// Is vector initiated (allocated)?
       bool inited;
@@ -139,7 +139,7 @@ namespace Hermes {
   }
   namespace Solvers
   {
-    /// Encapsulation of PETSc linear solver
+    /// Encapsulation of PETSc linear solver.
     ///
     /// @ingroup solvers
     template <typename Scalar>
@@ -151,9 +151,9 @@ namespace Hermes {
       virtual bool solve();
 
     protected:
-      /// matrix to solve
+      /// Matrix to solve.
       PetscMatrix<Scalar> *m;
-      /// right hand side vector
+      /// Right hand side vector.
       PetscVector<Scalar> *rhs;
     };
   }

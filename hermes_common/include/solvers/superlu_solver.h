@@ -105,17 +105,17 @@ namespace Hermes {
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
-      /// add matrix 
+      /// Add matrix.
       /// @param[in] mat matrix to be added
       virtual void add_matrix(SuperLUMatrix* mat);
-      /// Add matrix to diagonal
+      /// Add matrix to diagonal.
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix 
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<SuperLUMatrix*>(mat));
       }
-      /// Add matrix to specific position
+      /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
       /// @param[in] mat added matrix
@@ -137,7 +137,7 @@ namespace Hermes {
 
     protected:
       // SUPERLU specific data structures for storing the matrix (CSC format).
-      /// Matrix entries (column-wise)
+      /// Matrix entries (column-wise).
       Scalar *Ax; 
       /// Row indices of values in Ax.
       int *Ai;
@@ -184,7 +184,7 @@ namespace Hermes {
   }
   namespace Solvers{
 
-    /// Encapsulation of SUPERLU linear solver
+    /// Encapsulation of SUPERLU linear solver.
     ///
     /// @ingroup solvers
     template <typename Scalar>
@@ -199,7 +199,7 @@ namespace Hermes {
       void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  //SLU_MT
     public:
-      /// Constructor of SuperLU solver
+      /// Constructor of SuperLU solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
       SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
@@ -208,14 +208,14 @@ namespace Hermes {
       virtual bool solve();
 
     protected:
-      /// matrix to solve
+      /// Matrix to solve.
       SuperLUMatrix<Scalar> *m;       
-      /// right hand side vector
+      /// Right hand side vector.
       SuperLUVector<Scalar> *rhs;
 
       bool has_A, has_B;            ///<  Have the native SuperLU matrices been created?
       bool inited;                  ///< Have the factorization structures been allocated?
-      bool A_changed;               ///< Indicates that the system matrix has been changed
+      bool A_changed;               ///< Indicates that the system matrix has been changed.
       // internally during factorization or externally by
       // the user.
 
@@ -237,7 +237,7 @@ namespace Hermes {
       SuperMatrix L, U;             ///< L/U factors of A.
       double *R, *C;                ///< Row/column scaling factors of A.
       int *perm_r;                  ///< Row permutations from partial pivoting.
-      int *perm_c;                  ///< Column permutations to reduce fill-in (=> matrix Pc)
+      int *perm_c;                  ///< Column permutations to reduce fill-in (=> matrix Pc).
       int *etree;                   ///< Elimination tree of Pc'*A'*A*Pc.
       slu_options_t options;        ///< Structure holding the input options for the solver.
 

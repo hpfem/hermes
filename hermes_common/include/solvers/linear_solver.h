@@ -102,36 +102,36 @@ namespace Hermes
 
       virtual ~LinearSolver() { if (sln != NULL) delete [] sln; }
 
-      /// Solve
+      /// Solve.
       /// @return true on succes
       virtual bool solve() = 0;
 
-      /// get solution vector
+      /// Get solution vector.
       /// @return solution vector ( #sln )
       Scalar *get_sln_vector() { return sln; }
 
       /// @return #error
       int get_error() { return error; }
-      /// get time spent on solving
+      /// Get time spent on solving.
       /// @return time spent on solving in secs ( #time )
       double get_time() { return time; }
 
-      /// Set factorization scheme
+      /// Set factorization scheme.
       /// @param[in] reuse_scheme factoriztion scheme to set
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
 
-      /// Set factorization scheme to default 
+      /// Set factorization scheme to default.
       virtual void set_factorization_scheme() 
       {
         set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 
       }
 
     protected:
-      /// solution vector
+      /// Solution vector.
       Scalar *sln;
       /// \todo document (not sure what it do)
       int error;
-      double time;  ///< time spent on solving (in secs)
+      double time;  ///< Time spent on solving (in secs).
     };
 
 
@@ -163,14 +163,14 @@ namespace Hermes
       virtual int get_num_iters() = 0;
       virtual double get_residual() = 0;
 
-      /// Set the convergence tolerance
+      /// Set the convergence tolerance.
       /// @param[in] tol - the tolerance to set
       void set_tolerance(double tol)
       {
         this->tolerance = tol;
       }
 
-      /// Set maximum number of iterations to perform
+      /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
       void set_max_iters(int iters)
       {

@@ -35,13 +35,13 @@ namespace Hermes
     using namespace Hermes::Solvers;
     /// \brief General CSC Matrix class.
     /// (can be used in umfpack, in that case use the
-    /// UMFPackMatrix subclass, or with EigenSolver, or anything else)
+    /// UMFPackMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
     class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
     public:
       CSCMatrix();
       /// \brief Constructor with specific size
-      /// Calls alloc
+      /// Calls alloc.
       /// @param[in] size size of matrix (number of rows and columns)
       CSCMatrix(unsigned int size);
       virtual ~CSCMatrix();
@@ -52,17 +52,17 @@ namespace Hermes
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
-      /// add matrix 
+      /// Add matrix.
       /// @param[in] mat matrix to be added
       virtual void add_matrix(CSCMatrix<Scalar>* mat);
-      /// Add matrix to diagonal
+      /// Add matrix to diagonal.
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix 
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }
-      /// Add matrix to specific position
+      /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
       /// @param[in] mat added matrix
@@ -125,7 +125,7 @@ namespace Hermes
     class HERMES_API UMFPackVector : public Vector<Scalar> {
     public:
       UMFPackVector();
-      /// Constructor of vector with specific size
+      /// Constructor of vector with specific size.
       /// @param[in] size size of vector
       UMFPackVector(unsigned int size);
       virtual ~UMFPackVector();
@@ -167,7 +167,7 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> {
     public:
-      /// Constructor of UMFPack solver
+      /// Constructor of UMFPack solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
       UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
@@ -176,9 +176,9 @@ namespace Hermes
       virtual bool solve();
 
     protected:
-      /// matrix to solve`
+      /// Matrix to solve.
       UMFPackMatrix<Scalar> *m;
-      /// right hand side vector
+      /// Right hand side vector.
       UMFPackVector<Scalar> *rhs;
 
       /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').

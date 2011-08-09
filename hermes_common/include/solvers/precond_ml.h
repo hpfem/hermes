@@ -40,7 +40,7 @@ namespace Hermes {
       /// - sa = smooth aggregation
       /// - dd = domain decomposition
       MlPrecond(const char *type);
-      /// Wrap ML object
+      /// Wrap ML object.
       MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
       virtual ~MlPrecond();
 
@@ -48,9 +48,9 @@ namespace Hermes {
 
       /// @param[in] a
       virtual void create(Matrix<Scalar> *mat);
-      /// Destroy the preconditioner object
+      /// Destroy the preconditioner object.
       virtual void destroy();
-      /// Compute the preconditioner
+      /// Compute the preconditioner.
       virtual void compute();
 
       void set_param(const char *name, const char *value);
