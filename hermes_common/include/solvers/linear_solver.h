@@ -116,8 +116,11 @@ namespace Hermes
       /// @return time spent on solving in secs ( #time )
       double get_time() { return time; }
 
+      /// Set factorization scheme
+      /// @param[in] reuse_scheme factoriztion scheme to set
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
 
+      /// Set factorization scheme to default 
       virtual void set_factorization_scheme() 
       {
         set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY); 

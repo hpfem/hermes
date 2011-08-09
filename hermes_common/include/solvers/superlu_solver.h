@@ -199,25 +199,32 @@ namespace Hermes {
       void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  //SLU_MT
     public:
+      /// Constructor of SuperLU solver
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
       SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
       virtual ~SuperLUSolver();
 
       virtual bool solve();
 
     protected:
+      /// matrix to solve
       SuperLUMatrix<Scalar> *m;       
+      /// right hand side vector
       SuperLUVector<Scalar> *rhs;
 
-      bool has_A, has_B;            // Have the native SuperLU matrices been created?
-      bool inited;                  // Have the factorization structures been allocated?
-      bool A_changed;               // Indicates that the system matrix has been changed
+      bool has_A, has_B;            ///<  Have the native SuperLU matrices been created?
+      bool inited;                  ///< Have the factorization structures been allocated?
+      bool A_changed;               ///< Indicates that the system matrix has been changed
       // internally during factorization or externally by
       // the user.
 
-      bool check_status(unsigned int info);  // Check the status returned from the solver routine.
+      /// Check the status returned from the solver routine.
+      /// @param[in] info info returned from the solver routine
+      bool check_status(unsigned int info);  
 
-      // Deep copies of matrix and rhs data vectors (they may be changed by the solver driver,
-      // hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
+      /// Deep copies of matrix and rhs data vectors (they may be changed by the solver driver,
+      /// hence we need a copy so that the original SuperLUMatrix/Vector is preserved).
       int *local_Ai, *local_Ap;
       typename SuperLuType<Scalar>::Scalar *local_Ax, *local_rhs;
 
@@ -226,20 +233,20 @@ namespace Hermes {
       void free_matrix();
       void free_rhs();
 
-      SuperMatrix A, B;             // Native SuperLU representations of 'm' and 'rhs'.
-      SuperMatrix L, U;             // L/U factors of A.
-      double *R, *C;                // Row/column scaling factors of A.
-      int *perm_r;                  // Row permutations from partial pivoting.
-      int *perm_c;                  // Column permutations to reduce fill-in (=> matrix Pc)
-      int *etree;                   // Elimination tree of Pc'*A'*A*Pc.
-      slu_options_t options;        // Structure holding the input options for the solver.
+      SuperMatrix A, B;             ///< Native SuperLU representations of 'm' and 'rhs'.
+      SuperMatrix L, U;             ///< L/U factors of A.
+      double *R, *C;                ///< Row/column scaling factors of A.
+      int *perm_r;                  ///< Row permutations from partial pivoting.
+      int *perm_c;                  ///< Column permutations to reduce fill-in (=> matrix Pc)
+      int *etree;                   ///< Elimination tree of Pc'*A'*A*Pc.
+      slu_options_t options;        ///< Structure holding the input options for the solver.
 
 
 #ifndef SLU_MT
-      char equed[1];              // Form of equilibration that was done on A.
+      char equed[1];              ///< Form of equilibration that was done on A.
 #else  
-      equed_t equed;              // Form of equilibration that was done on A.
-      SuperMatrix AC;             // Matrix A permuted by perm_c.
+      equed_t equed;              ///< Form of equilibration that was done on A.
+      SuperMatrix AC;             ///< Matrix A permuted by perm_c.
 #endif //SLU_MT 
     };
   }

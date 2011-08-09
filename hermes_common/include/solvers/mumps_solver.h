@@ -166,23 +166,34 @@ namespace Hermes {
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
     public:
+      /// Constructor of MumpsSolver 
+      /// @param[in] m matrix pointer
+      /// @param[in] rhs right hand side pointer
       MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
       virtual ~MumpsSolver();
 
       virtual bool solve();
 
     protected:
+      /// matrix to solve
       MumpsMatrix<Scalar> *m;
+      /// right hand side
       MumpsVector<Scalar> *rhs;
 
+      /// \todo document
       bool setup_factorization();
 
+      /// MUMPS specific structure with solver parameters
       typename mumps_type<Scalar>::mumps_struct param;
 
+      /// @return false on error
       bool check_status();
 
       /// (Re)initialize a MUMPS instance.
+      /// @return true on succes 
+      /// \sa #check_status()
       bool reinit();
+      /// true if solver is inited
       bool inited;
     };
   }

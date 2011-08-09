@@ -167,24 +167,32 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> {
     public:
+      /// Constructor of UMFPack solver
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
       UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
       virtual ~UMFPackLinearSolver();
 
       virtual bool solve();
 
     protected:
+      /// matrix to solve`
       UMFPackMatrix<Scalar> *m;
+      /// right hand side vector
       UMFPackVector<Scalar> *rhs;
 
       /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').
-      void *symbolic; /// Reordering of matrix A to reduce fill-in during factorization.
-      void *numeric;  /// LU factorization of matrix A.
+      /// Reordering of matrix A to reduce fill-in during factorization.
+      void *symbolic; 
+      void *numeric;  ///< LU factorization of matrix A.
 
+      /// \todo document
       void free_factorization_data();
+      /// \todo document
       bool setup_factorization();
     };
 
-    /// \brief UMFPack matrix iterator.
+    /// \brief UMFPack matrix iterator. \todo document members
     template <typename Scalar>
     class UMFPackIterator {
     public:

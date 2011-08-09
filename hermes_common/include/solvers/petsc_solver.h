@@ -151,7 +151,9 @@ namespace Hermes {
       virtual bool solve();
 
     protected:
+      /// matrix to solve
       PetscMatrix<Scalar> *m;
+      /// right hand side vector
       PetscVector<Scalar> *rhs;
     };
   }
