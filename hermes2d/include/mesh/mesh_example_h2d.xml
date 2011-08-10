@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+
+<mesh_h2d xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../include/mesh/mesh_h2d_xml.xsd">
+
+  <variables>
+    <variable>
+      <name>a</name>
+      <value>1.0</value>
+    </variable>
+    <variable>
+      <name>-a</name>
+      <value>-1.0</value>
+    </variable>
+    <variable>
+      <name>b</name>
+      <value>0.70710678118654757</value>
+    </variable>
+  </variables>
+
+  <vertices>
+    <vertex>
+      <x> 0 </x>
+      <y> -1.0 </y>
+    </vertex>
+    <vertex>
+      <x> 1.0 </x>
+      <y> -1.0 </y>
+    </vertex>
+    <vertex>
+      <x> -1.0 </x>
+      <y> 0 </y>
+    </vertex>
+    <vertex>
+      <x> 0 </x>
+      <y> 0 </y>
+    </vertex>
+    <vertex>
+      <x> 1.0 </x>
+      <y> 0 </y>
+    </vertex>
+    <vertex>
+      <x> -1.0 </x>
+      <y> 1.0 </y>
+    </vertex>
+    <vertex>
+      <x> 0 </x>
+      <y> 1.0 </y>
+    </vertex>
+    <vertex>
+      <x> 0.70710678118654757 </x>
+      <y> 0.70710678118654757 </y>
+    </vertex>
+  </vertices>
+
+  <elements>
+    <quad>
+      <vertices>
+        <vertex>
+          0
+        </vertex>
+        <vertex>
+          1
+        </vertex>
+        <vertex>
+          4
+        </vertex>
+        <vertex>
+          3
+        </vertex>
+      </vertices>
+      <marker>
+        Copper
+      </marker>
+    </quad>
+    <triangle>
+      <vertices>
+        <vertex>
+          3
+        </vertex>
+        <vertex>
+          4
+        </vertex>
+        <vertex>
+          7
+        </vertex>
+      </vertices>
+      <marker>
+        Copper
+      </marker>
+    </triangle>
+    <triangle>
+      <vertices>
+        <vertex>
+          3
+        </vertex>
+        <vertex>
+          7
+        </vertex>
+        <vertex>
+          6
+        </vertex>
+      </vertices>
+      <marker>
+        Aluminum
+      </marker>
+    </triangle>
+    <quad>
+      <vertices>
+        <vertex>
+          2
+        </vertex>
+        <vertex>
+          3
+        </vertex>
+        <vertex>
+          6
+        </vertex>
+        <vertex>
+          5
+        </vertex>
+      </vertices>
+      <marker>
+        Aluminum
+      </marker>
+    </quad>
+  </elements>
+
+  <boundaries>
+    <boundary_edge>
+      <vertex>
+        0
+      </vertex>
+      <vertex>
+        1
+      </vertex>
+      <marker>
+        Bottom
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        1
+      </vertex>
+      <vertex>
+        4
+      </vertex>
+      <marker>
+        Outer
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        3
+      </vertex>
+      <vertex>
+        0
+      </vertex>
+      <marker>
+        Inner
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        4
+      </vertex>
+      <vertex>
+        7
+      </vertex>
+      <marker>
+        Outer
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        7
+      </vertex>
+      <vertex>
+        6
+      </vertex>
+      <marker>
+        Outer
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        2
+      </vertex>
+      <vertex>
+        3
+      </vertex>
+      <marker>
+        Inner
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        6
+      </vertex>
+      <vertex>
+        5
+      </vertex>
+      <marker>
+        Outer
+      </marker>
+    </boundary_edge>
+    <boundary_edge>
+      <vertex>
+        5
+      </vertex>
+      <vertex>
+        2
+      </vertex>
+      <marker>
+        Left
+      </marker>
+    </boundary_edge>
+  </boundaries>
+
+  <curves>
+    <curve>
+      <vertex>
+        4
+      </vertex>
+      <vertex>
+        7
+      </vertex>
+      <angle>
+        45
+      </angle>
+    </curve>
+    <curve>
+      <vertex>
+        7
+      </vertex>
+      <vertex>
+        6
+      </vertex>
+      <angle>
+        45
+      </angle>
+    </curve>
+  </curves>
+</mesh_h2d>

@@ -16,7 +16,6 @@
 #include <string.h>
 #include "mesh.h"
 #include <map>
-#include "hash.h"
 #include <iostream>
 #include "mesh_reader_h2d.h"
 

@@ -247,7 +247,9 @@ project(hermes)
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 		find_package(PTHREAD REQUIRED)
-
+		find_package(XSD REQUIRED)
+		find_package(XERCES REQUIRED)
+		
 		# Python
 		if(WITH_PYTHON)
 			find_package(Python REQUIRED)

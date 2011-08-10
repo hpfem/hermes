@@ -31,6 +31,7 @@
 #include "mesh/mesh.h"
 #include "mesh/mesh_reader.h"
 #include "mesh/mesh_reader_h2d.h"
+#include "mesh/mesh_reader_h2d_xml.h"
 #include "mesh/mesh_reader_exodusii.h"
 
 #include "quadrature/quad.h"

@@ -23,7 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// Mesh loader from Hermes2D format
+    /// Mesh reader from Hermes2D format
     ///
     /// @ingroup mesh_readers
     class HERMES_API MeshReaderH2D : public MeshReader

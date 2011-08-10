@@ -390,6 +390,7 @@ namespace Hermes
       BoundaryMarkersConversion boundary_markers_conversion;
 
       friend class MeshReaderH2D;
+      friend class MeshReaderH2DXML;
       friend class MeshReaderExodusII;
       friend class DiscreteProblem<double>;
       friend class DiscreteProblem<std::complex<double> >;

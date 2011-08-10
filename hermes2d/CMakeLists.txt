@@ -112,6 +112,7 @@ project(hermes2d)
 		src/mesh/hash.cpp 
 		src/mesh/mesh_reader_h2d.cpp
 		src/mesh/mesh_reader_h2d_xml.cpp
+		src/mesh/mesh_h2d_xml.cpp
 		src/mesh/mesh.cpp
 		src/mesh/traverse.cpp
 		src/mesh/mesh_data.cpp
@@ -229,6 +230,8 @@ project(hermes2d)
 			${HERMES_COMMON_LIB}
 			${GLUT_LIBRARY} ${GLEW_LIBRARY}
 			${ANTTWEAKBAR_LIBRARY}
+			${XSD_LIBRARY}
+			${XERCES_LIBRARY}
 			${LAPACK_LIBRARY}
 			${CLAPACK_LIBRARY} ${BLAS_LIBRARY}
 			${PYTHON_LIBRARY}
