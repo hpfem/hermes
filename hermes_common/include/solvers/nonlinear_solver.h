@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file solver.h
-\brief General linear/nonlinear/iterative solver functionality.
+/*! \file nonlinear_solver.h
+\brief General nonlinear solver functionality.
 */
 #ifndef __HERMES_COMMON_NONLINEAR_SOLVER_H_
 #define __HERMES_COMMON_NONLINEAR_SOLVER_H_
