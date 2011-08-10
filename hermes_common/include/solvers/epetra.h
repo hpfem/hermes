@@ -16,14 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file epetra_solver.h
+/*! \file epetra.h
 \brief EpetraMatrix and EpetraVector storage classes for Amesos, AztecOO, ... .
 */
 #ifndef __HERMES_COMMON_SOLVER_EPETRA_H_
 #define __HERMES_COMMON_SOLVER_EPETRA_H_
-#include "../config.h"
+#include "config.h"
 #ifdef HAVE_EPETRA
-#include "../matrix.h"
+#include "matrix.h"
 #include <Epetra_SerialComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Vector.h>

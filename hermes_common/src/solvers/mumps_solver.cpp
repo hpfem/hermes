@@ -38,6 +38,9 @@ namespace Hermes
       extern void zmumps_c(ZMUMPS_STRUC_C *mumps_param_ptr);
     }
 
+#define USE_COMM_WORLD  -987654
+
+
     /// Binary search for the location of a particular CSC/CSR matrix entry.
     ///
     /// Typically, we search for the index into Ax that corresponds to a given 
