@@ -6,13 +6,11 @@
         <xs:element maxOccurs="1" name="variables">
           <xs:complexType>
             <xs:sequence>
-              <xs:element minOccurs="1" maxOccurs="unbounded" name="variable">
+              <xs:element maxOccurs="unbounded" name="variable">
                 <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="name" type="xs:string" />
-                    <xs:element name="value" type="xs:decimal" />
-                  </xs:sequence>
-                </xs:complexType>
+									<xs:attribute name="name" type="xs:string" use="required" />
+									<xs:attribute name="value" type="xs:decimal" use="required" />
+								</xs:complexType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
@@ -22,10 +20,8 @@
             <xs:sequence>
               <xs:element minOccurs="3" maxOccurs="unbounded" name="vertex">
                 <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="x" type="xs:decimal" />
-                    <xs:element name="y" type="xs:decimal" />
-                  </xs:sequence>
+                  <xs:attribute name="x" type="xs:decimal" use="required" />
+									<xs:attribute name="y" type="xs:decimal" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -35,33 +31,22 @@
           <xs:complexType>
             <xs:sequence>
               <xs:choice minOccurs="1" maxOccurs="unbounded">
-                <xs:element maxOccurs="unbounded" name="quad">
-                  <xs:complexType mixed="true">
-                    <xs:sequence>
-                      <xs:element name="vertices">
-                        <xs:complexType>
-                          <xs:sequence>
-                            <xs:element minOccurs="4" maxOccurs="4" name="vertex" type="xs:integer" />
-                          </xs:sequence>
-                        </xs:complexType>
-                      </xs:element>
-                      <xs:element minOccurs="1" maxOccurs="1" name="marker" type="xs:string" />
-                    </xs:sequence>
+                <xs:element maxOccurs="unbounded" name="triangle">
+                  <xs:complexType>
+                    <xs:attribute name="v1" type="xs:integer" use="required" />
+										<xs:attribute name="v2" type="xs:integer" use="required" />
+										<xs:attribute name="v3" type="xs:integer" use="required" />										
+										<xs:attribute name="marker" type="xs:string" use="required" />
                     <xs:attribute name="empty" type="xs:boolean" />
                   </xs:complexType>
                 </xs:element>
-                <xs:element maxOccurs="unbounded" name="triangle">
+								<xs:element maxOccurs="unbounded" name="quad">
                   <xs:complexType>
-                    <xs:sequence>
-                      <xs:element name="vertices">
-                        <xs:complexType>
-                          <xs:sequence>
-                            <xs:element minOccurs="3" maxOccurs="3" name="vertex" type="xs:integer" />
-                          </xs:sequence>
-                        </xs:complexType>
-                      </xs:element>
-                      <xs:element minOccurs="1" maxOccurs="1" name="marker" type="xs:string" />
-                    </xs:sequence>
+                    <xs:attribute name="v1" type="xs:integer" use="required" />
+										<xs:attribute name="v2" type="xs:integer" use="required" />
+										<xs:attribute name="v3" type="xs:integer" use="required" />
+										<xs:attribute name="v4" type="xs:integer" use="required" />										
+										<xs:attribute name="marker" type="xs:string" use="required" />
                     <xs:attribute name="empty" type="xs:boolean" />
                   </xs:complexType>
                 </xs:element>
@@ -74,10 +59,9 @@
             <xs:sequence>
               <xs:element maxOccurs="unbounded" name="boundary_edge">
                 <xs:complexType>
-                  <xs:sequence>
-                    <xs:element minOccurs="2" maxOccurs="2" name="vertex" type="xs:integer" />
-                    <xs:element minOccurs="1" maxOccurs="1" name="marker" type="xs:string" />
-                  </xs:sequence>
+                  <xs:attribute name="v1" type="xs:integer" use="required" />
+									<xs:attribute name="v2" type="xs:integer" use="required" />										
+									<xs:attribute name="marker" type="xs:string" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -88,10 +72,9 @@
             <xs:sequence>
               <xs:element maxOccurs="unbounded" name="curve">
                 <xs:complexType>
-                  <xs:sequence>
-                    <xs:element minOccurs="2" maxOccurs="2" name="vertex" type="xs:integer" />
-                    <xs:element minOccurs="1" maxOccurs="1" name="angle" type="xs:unsignedByte" />
-                  </xs:sequence>
+                  <xs:attribute name="v1" type="xs:integer" use="required" />
+									<xs:attribute name="v2" type="xs:integer" use="required" />										
+									<xs:attribute name="angle" type="xs:decimal" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>

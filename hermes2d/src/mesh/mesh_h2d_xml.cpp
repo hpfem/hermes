@@ -211,24 +211,6 @@ vertex (const vertex_sequence& s)
 // elements
 // 
 
-const elements::quad_sequence& elements::
-quad () const
-{
-  return this->quad_;
-}
-
-elements::quad_sequence& elements::
-quad ()
-{
-  return this->quad_;
-}
-
-void elements::
-quad (const quad_sequence& s)
-{
-  this->quad_ = s;
-}
-
 const elements::triangle_sequence& elements::
 triangle () const
 {
@@ -245,6 +227,24 @@ void elements::
 triangle (const triangle_sequence& s)
 {
   this->triangle_ = s;
+}
+
+const elements::quad_sequence& elements::
+quad () const
+{
+  return this->quad_;
+}
+
+elements::quad_sequence& elements::
+quad ()
+{
+  return this->quad_;
+}
+
+void elements::
+quad (const quad_sequence& s)
+{
+  this->quad_ = s;
 }
 
 
@@ -378,107 +378,61 @@ y (const y_type& x)
 }
 
 
-// quad
-// 
-
-const quad::vertices_type& quad::
-vertices () const
-{
-  return this->vertices_.get ();
-}
-
-quad::vertices_type& quad::
-vertices ()
-{
-  return this->vertices_.get ();
-}
-
-void quad::
-vertices (const vertices_type& x)
-{
-  this->vertices_.set (x);
-}
-
-void quad::
-vertices (::std::auto_ptr< vertices_type > x)
-{
-  this->vertices_.set (x);
-}
-
-const quad::marker_type& quad::
-marker () const
-{
-  return this->marker_.get ();
-}
-
-quad::marker_type& quad::
-marker ()
-{
-  return this->marker_.get ();
-}
-
-void quad::
-marker (const marker_type& x)
-{
-  this->marker_.set (x);
-}
-
-void quad::
-marker (::std::auto_ptr< marker_type > x)
-{
-  this->marker_.set (x);
-}
-
-const quad::empty_optional& quad::
-empty () const
-{
-  return this->empty_;
-}
-
-quad::empty_optional& quad::
-empty ()
-{
-  return this->empty_;
-}
-
-void quad::
-empty (const empty_type& x)
-{
-  this->empty_.set (x);
-}
-
-void quad::
-empty (const empty_optional& x)
-{
-  this->empty_ = x;
-}
-
-
 // triangle
 // 
 
-const triangle::vertices_type& triangle::
-vertices () const
+const triangle::v1_type& triangle::
+v1 () const
 {
-  return this->vertices_.get ();
+  return this->v1_.get ();
 }
 
-triangle::vertices_type& triangle::
-vertices ()
+triangle::v1_type& triangle::
+v1 ()
 {
-  return this->vertices_.get ();
-}
-
-void triangle::
-vertices (const vertices_type& x)
-{
-  this->vertices_.set (x);
+  return this->v1_.get ();
 }
 
 void triangle::
-vertices (::std::auto_ptr< vertices_type > x)
+v1 (const v1_type& x)
 {
-  this->vertices_.set (x);
+  this->v1_.set (x);
+}
+
+const triangle::v2_type& triangle::
+v2 () const
+{
+  return this->v2_.get ();
+}
+
+triangle::v2_type& triangle::
+v2 ()
+{
+  return this->v2_.get ();
+}
+
+void triangle::
+v2 (const v2_type& x)
+{
+  this->v2_.set (x);
+}
+
+const triangle::v3_type& triangle::
+v3 () const
+{
+  return this->v3_.get ();
+}
+
+triangle::v3_type& triangle::
+v3 ()
+{
+  return this->v3_.get ();
+}
+
+void triangle::
+v3 (const v3_type& x)
+{
+  this->v3_.set (x);
 }
 
 const triangle::marker_type& triangle::
@@ -530,25 +484,167 @@ empty (const empty_optional& x)
 }
 
 
+// quad
+// 
+
+const quad::v1_type& quad::
+v1 () const
+{
+  return this->v1_.get ();
+}
+
+quad::v1_type& quad::
+v1 ()
+{
+  return this->v1_.get ();
+}
+
+void quad::
+v1 (const v1_type& x)
+{
+  this->v1_.set (x);
+}
+
+const quad::v2_type& quad::
+v2 () const
+{
+  return this->v2_.get ();
+}
+
+quad::v2_type& quad::
+v2 ()
+{
+  return this->v2_.get ();
+}
+
+void quad::
+v2 (const v2_type& x)
+{
+  this->v2_.set (x);
+}
+
+const quad::v3_type& quad::
+v3 () const
+{
+  return this->v3_.get ();
+}
+
+quad::v3_type& quad::
+v3 ()
+{
+  return this->v3_.get ();
+}
+
+void quad::
+v3 (const v3_type& x)
+{
+  this->v3_.set (x);
+}
+
+const quad::v4_type& quad::
+v4 () const
+{
+  return this->v4_.get ();
+}
+
+quad::v4_type& quad::
+v4 ()
+{
+  return this->v4_.get ();
+}
+
+void quad::
+v4 (const v4_type& x)
+{
+  this->v4_.set (x);
+}
+
+const quad::marker_type& quad::
+marker () const
+{
+  return this->marker_.get ();
+}
+
+quad::marker_type& quad::
+marker ()
+{
+  return this->marker_.get ();
+}
+
+void quad::
+marker (const marker_type& x)
+{
+  this->marker_.set (x);
+}
+
+void quad::
+marker (::std::auto_ptr< marker_type > x)
+{
+  this->marker_.set (x);
+}
+
+const quad::empty_optional& quad::
+empty () const
+{
+  return this->empty_;
+}
+
+quad::empty_optional& quad::
+empty ()
+{
+  return this->empty_;
+}
+
+void quad::
+empty (const empty_type& x)
+{
+  this->empty_.set (x);
+}
+
+void quad::
+empty (const empty_optional& x)
+{
+  this->empty_ = x;
+}
+
+
 // boundary_edge
 // 
 
-const boundary_edge::vertex_sequence& boundary_edge::
-vertex () const
+const boundary_edge::v1_type& boundary_edge::
+v1 () const
 {
-  return this->vertex_;
+  return this->v1_.get ();
 }
 
-boundary_edge::vertex_sequence& boundary_edge::
-vertex ()
+boundary_edge::v1_type& boundary_edge::
+v1 ()
 {
-  return this->vertex_;
+  return this->v1_.get ();
 }
 
 void boundary_edge::
-vertex (const vertex_sequence& s)
+v1 (const v1_type& x)
 {
-  this->vertex_ = s;
+  this->v1_.set (x);
+}
+
+const boundary_edge::v2_type& boundary_edge::
+v2 () const
+{
+  return this->v2_.get ();
+}
+
+boundary_edge::v2_type& boundary_edge::
+v2 ()
+{
+  return this->v2_.get ();
+}
+
+void boundary_edge::
+v2 (const v2_type& x)
+{
+  this->v2_.set (x);
 }
 
 const boundary_edge::marker_type& boundary_edge::
@@ -579,22 +675,40 @@ marker (::std::auto_ptr< marker_type > x)
 // curve
 // 
 
-const curve::vertex_sequence& curve::
-vertex () const
+const curve::v1_type& curve::
+v1 () const
 {
-  return this->vertex_;
+  return this->v1_.get ();
 }
 
-curve::vertex_sequence& curve::
-vertex ()
+curve::v1_type& curve::
+v1 ()
 {
-  return this->vertex_;
+  return this->v1_.get ();
 }
 
 void curve::
-vertex (const vertex_sequence& s)
+v1 (const v1_type& x)
 {
-  this->vertex_ = s;
+  this->v1_.set (x);
+}
+
+const curve::v2_type& curve::
+v2 () const
+{
+  return this->v2_.get ();
+}
+
+curve::v2_type& curve::
+v2 ()
+{
+  return this->v2_.get ();
+}
+
+void curve::
+v2 (const v2_type& x)
+{
+  this->v2_.set (x);
 }
 
 const curve::angle_type& curve::
@@ -613,50 +727,6 @@ void curve::
 angle (const angle_type& x)
 {
   this->angle_.set (x);
-}
-
-
-// vertices1
-// 
-
-const vertices1::vertex_sequence& vertices1::
-vertex () const
-{
-  return this->vertex_;
-}
-
-vertices1::vertex_sequence& vertices1::
-vertex ()
-{
-  return this->vertex_;
-}
-
-void vertices1::
-vertex (const vertex_sequence& s)
-{
-  this->vertex_ = s;
-}
-
-
-// vertices2
-// 
-
-const vertices2::vertex_sequence& vertices2::
-vertex () const
-{
-  return this->vertex_;
-}
-
-vertices2::vertex_sequence& vertices2::
-vertex ()
-{
-  return this->vertex_;
-}
-
-void vertices2::
-vertex (const vertex_sequence& s)
-{
-  this->vertex_ = s;
 }
 
 
@@ -1003,8 +1073,8 @@ vertices::
 elements::
 elements ()
 : ::xml_schema::type (),
-  quad_ (::xml_schema::flags (), this),
-  triangle_ (::xml_schema::flags (), this)
+  triangle_ (::xml_schema::flags (), this),
+  quad_ (::xml_schema::flags (), this)
 {
 }
 
@@ -1013,8 +1083,8 @@ elements (const elements& x,
           ::xml_schema::flags f,
           ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
-  quad_ (x.quad_, f, this),
-  triangle_ (x.triangle_, f, this)
+  triangle_ (x.triangle_, f, this),
+  quad_ (x.quad_, f, this)
 {
 }
 
@@ -1023,8 +1093,8 @@ elements (const ::xercesc::DOMElement& e,
           ::xml_schema::flags f,
           ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  quad_ (f, this),
-  triangle_ (f, this)
+  triangle_ (f, this),
+  quad_ (f, this)
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
@@ -1043,17 +1113,6 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // quad
-    //
-    if (n.name () == "quad" && n.namespace_ ().empty ())
-    {
-      ::std::auto_ptr< quad_type > r (
-        quad_traits::create (i, f, this));
-
-      this->quad_.push_back (r);
-      continue;
-    }
-
     // triangle
     //
     if (n.name () == "triangle" && n.namespace_ ().empty ())
@@ -1062,6 +1121,17 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
         triangle_traits::create (i, f, this));
 
       this->triangle_.push_back (r);
+      continue;
+    }
+
+    // quad
+    //
+    if (n.name () == "quad" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< quad_type > r (
+        quad_traits::create (i, f, this));
+
+      this->quad_.push_back (r);
       continue;
     }
 
@@ -1253,7 +1323,7 @@ variable (const ::xercesc::DOMElement& e,
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
     this->parse (p, f);
   }
 }
@@ -1262,50 +1332,38 @@ void variable::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
-  for (; p.more_elements (); p.next_element ())
+  while (p.more_attributes ())
   {
-    const ::xercesc::DOMElement& i (p.cur_element ());
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // name
-    //
     if (n.name () == "name" && n.namespace_ ().empty ())
     {
       ::std::auto_ptr< name_type > r (
         name_traits::create (i, f, this));
 
-      if (!name_.present ())
-      {
-        this->name_.set (r);
-        continue;
-      }
+      this->name_.set (r);
+      continue;
     }
 
-    // value
-    //
     if (n.name () == "value" && n.namespace_ ().empty ())
     {
-      if (!value_.present ())
-      {
-        this->value_.set (value_traits::create (i, f, this));
-        continue;
-      }
+      this->value_.set (value_traits::create (i, f, this));
+      continue;
     }
-
-    break;
   }
 
   if (!name_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "name",
       "");
   }
 
   if (!value_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "value",
       "");
   }
@@ -1355,7 +1413,7 @@ vertex (const ::xercesc::DOMElement& e,
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
     this->parse (p, f);
   }
 }
@@ -1364,47 +1422,35 @@ void vertex::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
-  for (; p.more_elements (); p.next_element ())
+  while (p.more_attributes ())
   {
-    const ::xercesc::DOMElement& i (p.cur_element ());
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // x
-    //
     if (n.name () == "x" && n.namespace_ ().empty ())
     {
-      if (!x_.present ())
-      {
-        this->x_.set (x_traits::create (i, f, this));
-        continue;
-      }
+      this->x_.set (x_traits::create (i, f, this));
+      continue;
     }
 
-    // y
-    //
     if (n.name () == "y" && n.namespace_ ().empty ())
     {
-      if (!y_.present ())
-      {
-        this->y_.set (y_traits::create (i, f, this));
-        continue;
-      }
+      this->y_.set (y_traits::create (i, f, this));
+      continue;
     }
-
-    break;
   }
 
   if (!x_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "x",
       "");
   }
 
   if (!y_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "y",
       "");
   }
@@ -1422,155 +1468,18 @@ vertex::
 {
 }
 
-// quad
-//
-
-quad::
-quad (const vertices_type& vertices,
-      const marker_type& marker)
-: ::xml_schema::type (),
-  vertices_ (vertices, ::xml_schema::flags (), this),
-  marker_ (marker, ::xml_schema::flags (), this),
-  empty_ (::xml_schema::flags (), this)
-{
-}
-
-quad::
-quad (::std::auto_ptr< vertices_type >& vertices,
-      const marker_type& marker)
-: ::xml_schema::type (),
-  vertices_ (vertices, ::xml_schema::flags (), this),
-  marker_ (marker, ::xml_schema::flags (), this),
-  empty_ (::xml_schema::flags (), this)
-{
-}
-
-quad::
-quad (const quad& x,
-      ::xml_schema::flags f,
-      ::xml_schema::container* c)
-: ::xml_schema::type (x, f, c),
-  vertices_ (x.vertices_, f, this),
-  marker_ (x.marker_, f, this),
-  empty_ (x.empty_, f, this)
-{
-}
-
-quad::
-quad (const ::xercesc::DOMElement& e,
-      ::xml_schema::flags f,
-      ::xml_schema::container* c)
-: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertices_ (f, this),
-  marker_ (f, this),
-  empty_ (f, this)
-{
-  if ((f & ::xml_schema::flags::base) == 0)
-  {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, true);
-    this->parse (p, f);
-  }
-}
-
-void quad::
-parse (::xsd::cxx::xml::dom::parser< char >& p,
-       ::xml_schema::flags f)
-{
-  for (; p.more_elements (); p.next_element ())
-  {
-    const ::xercesc::DOMElement& i (p.cur_element ());
-    const ::xsd::cxx::xml::qualified_name< char > n (
-      ::xsd::cxx::xml::dom::name< char > (i));
-
-    // vertices
-    //
-    if (n.name () == "vertices" && n.namespace_ ().empty ())
-    {
-      ::std::auto_ptr< vertices_type > r (
-        vertices_traits::create (i, f, this));
-
-      if (!vertices_.present ())
-      {
-        this->vertices_.set (r);
-        continue;
-      }
-    }
-
-    // marker
-    //
-    if (n.name () == "marker" && n.namespace_ ().empty ())
-    {
-      ::std::auto_ptr< marker_type > r (
-        marker_traits::create (i, f, this));
-
-      if (!marker_.present ())
-      {
-        this->marker_.set (r);
-        continue;
-      }
-    }
-
-    break;
-  }
-
-  if (!vertices_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "vertices",
-      "");
-  }
-
-  if (!marker_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "marker",
-      "");
-  }
-
-  while (p.more_attributes ())
-  {
-    const ::xercesc::DOMAttr& i (p.next_attribute ());
-    const ::xsd::cxx::xml::qualified_name< char > n (
-      ::xsd::cxx::xml::dom::name< char > (i));
-
-    if (n.name () == "empty" && n.namespace_ ().empty ())
-    {
-      this->empty_.set (empty_traits::create (i, f, this));
-      continue;
-    }
-  }
-}
-
-quad* quad::
-_clone (::xml_schema::flags f,
-        ::xml_schema::container* c) const
-{
-  return new class quad (*this, f, c);
-}
-
-quad::
-~quad ()
-{
-}
-
 // triangle
 //
 
 triangle::
-triangle (const vertices_type& vertices,
+triangle (const v1_type& v1,
+          const v2_type& v2,
+          const v3_type& v3,
           const marker_type& marker)
 : ::xml_schema::type (),
-  vertices_ (vertices, ::xml_schema::flags (), this),
-  marker_ (marker, ::xml_schema::flags (), this),
-  empty_ (::xml_schema::flags (), this)
-{
-}
-
-triangle::
-triangle (::std::auto_ptr< vertices_type >& vertices,
-          const marker_type& marker)
-: ::xml_schema::type (),
-  vertices_ (vertices, ::xml_schema::flags (), this),
+  v1_ (v1, ::xml_schema::flags (), this),
+  v2_ (v2, ::xml_schema::flags (), this),
+  v3_ (v3, ::xml_schema::flags (), this),
   marker_ (marker, ::xml_schema::flags (), this),
   empty_ (::xml_schema::flags (), this)
 {
@@ -1581,7 +1490,9 @@ triangle (const triangle& x,
           ::xml_schema::flags f,
           ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
-  vertices_ (x.vertices_, f, this),
+  v1_ (x.v1_, f, this),
+  v2_ (x.v2_, f, this),
+  v3_ (x.v3_, f, this),
   marker_ (x.marker_, f, this),
   empty_ (x.empty_, f, this)
 {
@@ -1592,13 +1503,15 @@ triangle (const ::xercesc::DOMElement& e,
           ::xml_schema::flags f,
           ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertices_ (f, this),
+  v1_ (f, this),
+  v2_ (f, this),
+  v3_ (f, this),
   marker_ (f, this),
   empty_ (f, this)
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, true);
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
     this->parse (p, f);
   }
 }
@@ -1607,68 +1520,72 @@ void triangle::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
-  for (; p.more_elements (); p.next_element ())
-  {
-    const ::xercesc::DOMElement& i (p.cur_element ());
-    const ::xsd::cxx::xml::qualified_name< char > n (
-      ::xsd::cxx::xml::dom::name< char > (i));
-
-    // vertices
-    //
-    if (n.name () == "vertices" && n.namespace_ ().empty ())
-    {
-      ::std::auto_ptr< vertices_type > r (
-        vertices_traits::create (i, f, this));
-
-      if (!vertices_.present ())
-      {
-        this->vertices_.set (r);
-        continue;
-      }
-    }
-
-    // marker
-    //
-    if (n.name () == "marker" && n.namespace_ ().empty ())
-    {
-      ::std::auto_ptr< marker_type > r (
-        marker_traits::create (i, f, this));
-
-      if (!marker_.present ())
-      {
-        this->marker_.set (r);
-        continue;
-      }
-    }
-
-    break;
-  }
-
-  if (!vertices_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "vertices",
-      "");
-  }
-
-  if (!marker_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "marker",
-      "");
-  }
-
   while (p.more_attributes ())
   {
     const ::xercesc::DOMAttr& i (p.next_attribute ());
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
+    if (n.name () == "v1" && n.namespace_ ().empty ())
+    {
+      this->v1_.set (v1_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v2" && n.namespace_ ().empty ())
+    {
+      this->v2_.set (v2_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v3" && n.namespace_ ().empty ())
+    {
+      this->v3_.set (v3_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "marker" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< marker_type > r (
+        marker_traits::create (i, f, this));
+
+      this->marker_.set (r);
+      continue;
+    }
+
     if (n.name () == "empty" && n.namespace_ ().empty ())
     {
       this->empty_.set (empty_traits::create (i, f, this));
       continue;
     }
+  }
+
+  if (!v1_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v1",
+      "");
+  }
+
+  if (!v2_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v2",
+      "");
+  }
+
+  if (!v3_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v3",
+      "");
+  }
+
+  if (!marker_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "marker",
+      "");
   }
 }
 
@@ -1684,13 +1601,166 @@ triangle::
 {
 }
 
+// quad
+//
+
+quad::
+quad (const v1_type& v1,
+      const v2_type& v2,
+      const v3_type& v3,
+      const v4_type& v4,
+      const marker_type& marker)
+: ::xml_schema::type (),
+  v1_ (v1, ::xml_schema::flags (), this),
+  v2_ (v2, ::xml_schema::flags (), this),
+  v3_ (v3, ::xml_schema::flags (), this),
+  v4_ (v4, ::xml_schema::flags (), this),
+  marker_ (marker, ::xml_schema::flags (), this),
+  empty_ (::xml_schema::flags (), this)
+{
+}
+
+quad::
+quad (const quad& x,
+      ::xml_schema::flags f,
+      ::xml_schema::container* c)
+: ::xml_schema::type (x, f, c),
+  v1_ (x.v1_, f, this),
+  v2_ (x.v2_, f, this),
+  v3_ (x.v3_, f, this),
+  v4_ (x.v4_, f, this),
+  marker_ (x.marker_, f, this),
+  empty_ (x.empty_, f, this)
+{
+}
+
+quad::
+quad (const ::xercesc::DOMElement& e,
+      ::xml_schema::flags f,
+      ::xml_schema::container* c)
+: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
+  v1_ (f, this),
+  v2_ (f, this),
+  v3_ (f, this),
+  v4_ (f, this),
+  marker_ (f, this),
+  empty_ (f, this)
+{
+  if ((f & ::xml_schema::flags::base) == 0)
+  {
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
+    this->parse (p, f);
+  }
+}
+
+void quad::
+parse (::xsd::cxx::xml::dom::parser< char >& p,
+       ::xml_schema::flags f)
+{
+  while (p.more_attributes ())
+  {
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
+    const ::xsd::cxx::xml::qualified_name< char > n (
+      ::xsd::cxx::xml::dom::name< char > (i));
+
+    if (n.name () == "v1" && n.namespace_ ().empty ())
+    {
+      this->v1_.set (v1_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v2" && n.namespace_ ().empty ())
+    {
+      this->v2_.set (v2_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v3" && n.namespace_ ().empty ())
+    {
+      this->v3_.set (v3_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v4" && n.namespace_ ().empty ())
+    {
+      this->v4_.set (v4_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "marker" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< marker_type > r (
+        marker_traits::create (i, f, this));
+
+      this->marker_.set (r);
+      continue;
+    }
+
+    if (n.name () == "empty" && n.namespace_ ().empty ())
+    {
+      this->empty_.set (empty_traits::create (i, f, this));
+      continue;
+    }
+  }
+
+  if (!v1_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v1",
+      "");
+  }
+
+  if (!v2_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v2",
+      "");
+  }
+
+  if (!v3_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v3",
+      "");
+  }
+
+  if (!v4_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v4",
+      "");
+  }
+
+  if (!marker_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "marker",
+      "");
+  }
+}
+
+quad* quad::
+_clone (::xml_schema::flags f,
+        ::xml_schema::container* c) const
+{
+  return new class quad (*this, f, c);
+}
+
+quad::
+~quad ()
+{
+}
+
 // boundary_edge
 //
 
 boundary_edge::
-boundary_edge (const marker_type& marker)
+boundary_edge (const v1_type& v1,
+               const v2_type& v2,
+               const marker_type& marker)
 : ::xml_schema::type (),
-  vertex_ (::xml_schema::flags (), this),
+  v1_ (v1, ::xml_schema::flags (), this),
+  v2_ (v2, ::xml_schema::flags (), this),
   marker_ (marker, ::xml_schema::flags (), this)
 {
 }
@@ -1700,7 +1770,8 @@ boundary_edge (const boundary_edge& x,
                ::xml_schema::flags f,
                ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
-  vertex_ (x.vertex_, f, this),
+  v1_ (x.v1_, f, this),
+  v2_ (x.v2_, f, this),
   marker_ (x.marker_, f, this)
 {
 }
@@ -1710,12 +1781,13 @@ boundary_edge (const ::xercesc::DOMElement& e,
                ::xml_schema::flags f,
                ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertex_ (f, this),
+  v1_ (f, this),
+  v2_ (f, this),
   marker_ (f, this)
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
     this->parse (p, f);
   }
 }
@@ -1724,40 +1796,51 @@ void boundary_edge::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
-  for (; p.more_elements (); p.next_element ())
+  while (p.more_attributes ())
   {
-    const ::xercesc::DOMElement& i (p.cur_element ());
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // vertex
-    //
-    if (n.name () == "vertex" && n.namespace_ ().empty ())
+    if (n.name () == "v1" && n.namespace_ ().empty ())
     {
-      this->vertex_.push_back (vertex_traits::create (i, f, this));
+      this->v1_.set (v1_traits::create (i, f, this));
       continue;
     }
 
-    // marker
-    //
+    if (n.name () == "v2" && n.namespace_ ().empty ())
+    {
+      this->v2_.set (v2_traits::create (i, f, this));
+      continue;
+    }
+
     if (n.name () == "marker" && n.namespace_ ().empty ())
     {
       ::std::auto_ptr< marker_type > r (
         marker_traits::create (i, f, this));
 
-      if (!marker_.present ())
-      {
-        this->marker_.set (r);
-        continue;
-      }
+      this->marker_.set (r);
+      continue;
     }
+  }
 
-    break;
+  if (!v1_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v1",
+      "");
+  }
+
+  if (!v2_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v2",
+      "");
   }
 
   if (!marker_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "marker",
       "");
   }
@@ -1779,9 +1862,12 @@ boundary_edge::
 //
 
 curve::
-curve (const angle_type& angle)
+curve (const v1_type& v1,
+       const v2_type& v2,
+       const angle_type& angle)
 : ::xml_schema::type (),
-  vertex_ (::xml_schema::flags (), this),
+  v1_ (v1, ::xml_schema::flags (), this),
+  v2_ (v2, ::xml_schema::flags (), this),
   angle_ (angle, ::xml_schema::flags (), this)
 {
 }
@@ -1791,7 +1877,8 @@ curve (const curve& x,
        ::xml_schema::flags f,
        ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
-  vertex_ (x.vertex_, f, this),
+  v1_ (x.v1_, f, this),
+  v2_ (x.v2_, f, this),
   angle_ (x.angle_, f, this)
 {
 }
@@ -1801,12 +1888,13 @@ curve (const ::xercesc::DOMElement& e,
        ::xml_schema::flags f,
        ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertex_ (f, this),
+  v1_ (f, this),
+  v2_ (f, this),
   angle_ (f, this)
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
     this->parse (p, f);
   }
 }
@@ -1815,37 +1903,48 @@ void curve::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
-  for (; p.more_elements (); p.next_element ())
+  while (p.more_attributes ())
   {
-    const ::xercesc::DOMElement& i (p.cur_element ());
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // vertex
-    //
-    if (n.name () == "vertex" && n.namespace_ ().empty ())
+    if (n.name () == "v1" && n.namespace_ ().empty ())
     {
-      this->vertex_.push_back (vertex_traits::create (i, f, this));
+      this->v1_.set (v1_traits::create (i, f, this));
       continue;
     }
 
-    // angle
-    //
-    if (n.name () == "angle" && n.namespace_ ().empty ())
+    if (n.name () == "v2" && n.namespace_ ().empty ())
     {
-      if (!angle_.present ())
-      {
-        this->angle_.set (angle_traits::create (i, f, this));
-        continue;
-      }
+      this->v2_.set (v2_traits::create (i, f, this));
+      continue;
     }
 
-    break;
+    if (n.name () == "angle" && n.namespace_ ().empty ())
+    {
+      this->angle_.set (angle_traits::create (i, f, this));
+      continue;
+    }
+  }
+
+  if (!v1_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v1",
+      "");
+  }
+
+  if (!v2_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v2",
+      "");
   }
 
   if (!angle_.present ())
   {
-    throw ::xsd::cxx::tree::expected_element< char > (
+    throw ::xsd::cxx::tree::expected_attribute< char > (
       "angle",
       "");
   }
@@ -1860,140 +1959,6 @@ _clone (::xml_schema::flags f,
 
 curve::
 ~curve ()
-{
-}
-
-// vertices1
-//
-
-vertices1::
-vertices1 ()
-: ::xml_schema::type (),
-  vertex_ (::xml_schema::flags (), this)
-{
-}
-
-vertices1::
-vertices1 (const vertices1& x,
-           ::xml_schema::flags f,
-           ::xml_schema::container* c)
-: ::xml_schema::type (x, f, c),
-  vertex_ (x.vertex_, f, this)
-{
-}
-
-vertices1::
-vertices1 (const ::xercesc::DOMElement& e,
-           ::xml_schema::flags f,
-           ::xml_schema::container* c)
-: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertex_ (f, this)
-{
-  if ((f & ::xml_schema::flags::base) == 0)
-  {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
-    this->parse (p, f);
-  }
-}
-
-void vertices1::
-parse (::xsd::cxx::xml::dom::parser< char >& p,
-       ::xml_schema::flags f)
-{
-  for (; p.more_elements (); p.next_element ())
-  {
-    const ::xercesc::DOMElement& i (p.cur_element ());
-    const ::xsd::cxx::xml::qualified_name< char > n (
-      ::xsd::cxx::xml::dom::name< char > (i));
-
-    // vertex
-    //
-    if (n.name () == "vertex" && n.namespace_ ().empty ())
-    {
-      this->vertex_.push_back (vertex_traits::create (i, f, this));
-      continue;
-    }
-
-    break;
-  }
-}
-
-vertices1* vertices1::
-_clone (::xml_schema::flags f,
-        ::xml_schema::container* c) const
-{
-  return new class vertices1 (*this, f, c);
-}
-
-vertices1::
-~vertices1 ()
-{
-}
-
-// vertices2
-//
-
-vertices2::
-vertices2 ()
-: ::xml_schema::type (),
-  vertex_ (::xml_schema::flags (), this)
-{
-}
-
-vertices2::
-vertices2 (const vertices2& x,
-           ::xml_schema::flags f,
-           ::xml_schema::container* c)
-: ::xml_schema::type (x, f, c),
-  vertex_ (x.vertex_, f, this)
-{
-}
-
-vertices2::
-vertices2 (const ::xercesc::DOMElement& e,
-           ::xml_schema::flags f,
-           ::xml_schema::container* c)
-: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  vertex_ (f, this)
-{
-  if ((f & ::xml_schema::flags::base) == 0)
-  {
-    ::xsd::cxx::xml::dom::parser< char > p (e, true, false);
-    this->parse (p, f);
-  }
-}
-
-void vertices2::
-parse (::xsd::cxx::xml::dom::parser< char >& p,
-       ::xml_schema::flags f)
-{
-  for (; p.more_elements (); p.next_element ())
-  {
-    const ::xercesc::DOMElement& i (p.cur_element ());
-    const ::xsd::cxx::xml::qualified_name< char > n (
-      ::xsd::cxx::xml::dom::name< char > (i));
-
-    // vertex
-    //
-    if (n.name () == "vertex" && n.namespace_ ().empty ())
-    {
-      this->vertex_.push_back (vertex_traits::create (i, f, this));
-      continue;
-    }
-
-    break;
-  }
-}
-
-vertices2* vertices2::
-_clone (::xml_schema::flags f,
-        ::xml_schema::container* c) const
-{
-  return new class vertices2 (*this, f, c);
-}
-
-vertices2::
-~vertices2 ()
 {
 }
 
@@ -2039,18 +2004,18 @@ operator<< (::std::ostream& o, const vertices& i)
 ::std::ostream&
 operator<< (::std::ostream& o, const elements& i)
 {
-  for (elements::quad_const_iterator
-       b (i.quad ().begin ()), e (i.quad ().end ());
-       b != e; ++b)
-  {
-    o << ::std::endl << "quad: " << *b;
-  }
-
   for (elements::triangle_const_iterator
        b (i.triangle ().begin ()), e (i.triangle ().end ());
        b != e; ++b)
   {
     o << ::std::endl << "triangle: " << *b;
+  }
+
+  for (elements::quad_const_iterator
+       b (i.quad ().begin ()), e (i.quad ().end ());
+       b != e; ++b)
+  {
+    o << ::std::endl << "quad: " << *b;
   }
 
   return o;
@@ -2099,9 +2064,11 @@ operator<< (::std::ostream& o, const vertex& i)
 }
 
 ::std::ostream&
-operator<< (::std::ostream& o, const quad& i)
+operator<< (::std::ostream& o, const triangle& i)
 {
-  o << ::std::endl << "vertices: " << i.vertices ();
+  o << ::std::endl << "v1: " << i.v1 ();
+  o << ::std::endl << "v2: " << i.v2 ();
+  o << ::std::endl << "v3: " << i.v3 ();
   o << ::std::endl << "marker: " << i.marker ();
   if (i.empty ())
   {
@@ -2112,9 +2079,12 @@ operator<< (::std::ostream& o, const quad& i)
 }
 
 ::std::ostream&
-operator<< (::std::ostream& o, const triangle& i)
+operator<< (::std::ostream& o, const quad& i)
 {
-  o << ::std::endl << "vertices: " << i.vertices ();
+  o << ::std::endl << "v1: " << i.v1 ();
+  o << ::std::endl << "v2: " << i.v2 ();
+  o << ::std::endl << "v3: " << i.v3 ();
+  o << ::std::endl << "v4: " << i.v4 ();
   o << ::std::endl << "marker: " << i.marker ();
   if (i.empty ())
   {
@@ -2127,13 +2097,8 @@ operator<< (::std::ostream& o, const triangle& i)
 ::std::ostream&
 operator<< (::std::ostream& o, const boundary_edge& i)
 {
-  for (boundary_edge::vertex_const_iterator
-       b (i.vertex ().begin ()), e (i.vertex ().end ());
-       b != e; ++b)
-  {
-    o << ::std::endl << "vertex: " << *b;
-  }
-
+  o << ::std::endl << "v1: " << i.v1 ();
+  o << ::std::endl << "v2: " << i.v2 ();
   o << ::std::endl << "marker: " << i.marker ();
   return o;
 }
@@ -2141,40 +2106,9 @@ operator<< (::std::ostream& o, const boundary_edge& i)
 ::std::ostream&
 operator<< (::std::ostream& o, const curve& i)
 {
-  for (curve::vertex_const_iterator
-       b (i.vertex ().begin ()), e (i.vertex ().end ());
-       b != e; ++b)
-  {
-    o << ::std::endl << "vertex: " << *b;
-  }
-
+  o << ::std::endl << "v1: " << i.v1 ();
+  o << ::std::endl << "v2: " << i.v2 ();
   o << ::std::endl << "angle: " << i.angle ();
-  return o;
-}
-
-::std::ostream&
-operator<< (::std::ostream& o, const vertices1& i)
-{
-  for (vertices1::vertex_const_iterator
-       b (i.vertex ().begin ()), e (i.vertex ().end ());
-       b != e; ++b)
-  {
-    o << ::std::endl << "vertex: " << *b;
-  }
-
-  return o;
-}
-
-::std::ostream&
-operator<< (::std::ostream& o, const vertices2& i)
-{
-  for (vertices2::vertex_const_iterator
-       b (i.vertex ().begin ()), e (i.vertex ().end ());
-       b != e; ++b)
-  {
-    o << ::std::endl << "vertex: " << *b;
-  }
-
   return o;
 }
 

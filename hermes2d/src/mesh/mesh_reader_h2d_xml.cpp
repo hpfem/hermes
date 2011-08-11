@@ -76,14 +76,16 @@ namespace Hermes
           // read and check vertex indices
           int* idx = new int[3];
           std::string el_marker;
-          if (parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).empty()) { 
-            mesh->elements.skip_slot();
-            continue;
-          }
+          if (parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).empty().present())
+            if (parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).empty().get())
+            { 
+              mesh->elements.skip_slot();
+              continue;
+            }
 
-          idx[0] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).vertices().vertex().at(0);
-          idx[1] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).vertices().vertex().at(1);
-          idx[2] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).vertices().vertex().at(2);
+          idx[0] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).v1();
+          idx[1] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).v2();
+          idx[2] = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).v3();
 
           el_marker = parsed_h2d_xml_mesh->elements().triangle().at(triangles_i).marker();
           
@@ -119,15 +121,17 @@ namespace Hermes
           // read and check vertex indices
           int* idx = new int[4];
           std::string el_marker;
-          if (parsed_h2d_xml_mesh->elements().quad().at(quads_i).empty()) { 
-            mesh->elements.skip_slot();
-            continue;
-          }
+          if (parsed_h2d_xml_mesh->elements().quad().at(quads_i).empty().present())
+            if (parsed_h2d_xml_mesh->elements().quad().at(quads_i).empty().get())
+            { 
+              mesh->elements.skip_slot();
+              continue;
+            }
 
-          idx[0] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).vertices().vertex().at(0);
-          idx[1] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).vertices().vertex().at(1);
-          idx[2] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).vertices().vertex().at(2);
-          idx[3] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).vertices().vertex().at(3);
+          idx[0] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).v1();
+          idx[1] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).v2();
+          idx[2] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).v3();
+          idx[3] = parsed_h2d_xml_mesh->elements().quad().at(quads_i).v4();
 
           el_marker = parsed_h2d_xml_mesh->elements().quad().at(quads_i).marker();
           
@@ -166,8 +170,8 @@ namespace Hermes
         Node* en;
         for (unsigned int boundaries_i = 0; boundaries_i < boundaries_count; boundaries_i++)
         {
-          int v1 = parsed_h2d_xml_mesh->boundaries().boundary_edge().at(boundaries_i).vertex().at(0);
-          int v2 = parsed_h2d_xml_mesh->boundaries().boundary_edge().at(boundaries_i).vertex().at(1);
+          int v1 = parsed_h2d_xml_mesh->boundaries().boundary_edge().at(boundaries_i).v1();
+          int v2 = parsed_h2d_xml_mesh->boundaries().boundary_edge().at(boundaries_i).v2();
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
@@ -272,8 +276,8 @@ namespace Hermes
       nurbs->arc = true;
 
       // read the end point indices
-      p1 = m->curves().curve().at(id).vertex().at(0);
-      p2 = m->curves().curve().at(id).vertex().at(1);
+      p1 = m->curves().curve().at(id).v1();
+      p2 = m->curves().curve().at(id).v2();
 
       *en = mesh->peek_edge_node(p1, p2);
       if (*en == NULL)

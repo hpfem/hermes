@@ -1,4 +1,4 @@
-set(XERCES_LIBRARY_NAMES xerces-c_3)
+set(XERCES_LIBRARY_NAMES xerces-c_3 xerces-c)
 
 FIND_PATH(XERCES_INCLUDE_DIR xercesc/sax/InputSource.hpp xercesc/dom/DOMDocument.hpp xercesc/dom/DOMErrorHandler.hpp ${XERCES_ROOT}/include)
 
