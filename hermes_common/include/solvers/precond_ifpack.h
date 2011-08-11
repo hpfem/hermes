@@ -37,7 +37,7 @@ namespace Hermes {
     template <typename Scalar>
     class HERMES_API IfpackPrecond: public Precond<Scalar> {
     public:
-      /// Constructor for relaxation methods
+      /// Constructor for relaxation methods.
       /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]
       /// @param[in] name - the name of the relaxation type
       /// Possible values are: [ Jacobi | Gauss-Seidel | symmetric Gauss-Seidel ]
@@ -47,7 +47,7 @@ namespace Hermes {
       /// @param[in] name: [ ic | ict | ilu | ilut ]
       /// @param[in] overlap - number
       IfpackPrecond(const char *cls, const char *type, int overlap);
-      /// Wrap IFPACK object
+      /// Wrap IFPACK object.
       IfpackPrecond(Ifpack_Preconditioner *ipc);
       virtual ~IfpackPrecond();
 

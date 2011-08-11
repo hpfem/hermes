@@ -247,21 +247,32 @@ namespace Hermes
       }
     }
 
+    /// Format of file matrix and vector output
     enum EMatrixDumpFormat 
     {
-      DF_MATLAB_SPARSE,
-      DF_PLAIN_ASCII,
+      DF_MATLAB_SPARSE, ///< matlab file
+      /// \brief plain ascii file
+      /// first line is matrix size
+      /// second line in number of nonzero values
+      /// next lines contains row column and value
+      DF_PLAIN_ASCII, 
+      /// \brief Hermes binary format
+      /// 
       DF_HERMES_BIN,
-      DF_NATIVE,	 // native format for the linear solver,
-      DF_MATRIX_MARKET // Matrix Market which can be read by pysparse library
+      DF_NATIVE,	 ///< native format for the linear solver,
+      DF_MATRIX_MARKET ///< Matrix Market which can be read by pysparse library
     };
 
     /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
     class HERMES_API Matrix {
     public:
+      /// get size of matrix
+      /// @return size of matrix
       unsigned int get_size() { return this->size;};
 
+      /// constructor of matrix
+      /// @param[in] size size of matrix
       Matrix(unsigned int size) { this->size = size;};
 
       virtual ~Matrix() {};
@@ -297,20 +308,25 @@ namespace Hermes
       ///
       /// @param[in] m         - number of rows of given block
       /// @param[in] n         - number of columns of given block
-      /// @param[in] matrix    - block of values
+      /// @param[in] mat    - block of values
       /// @param[in] rows      - array with row indexes
       /// @param[in] cols      - array with column indexes
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) = 0;
 
       /// dumping matrix and right-hand side
-      ///
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
+      /// @param[in] file file handle
+      /// @param[in] var_name name of variable (will be written to output file)
+      /// @param[in] fmt output file format
+      /// @return true on succes
+      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
 
+      /// Get size of matrix
+      /// @return size of matrix
       virtual unsigned int get_matrix_size() const = 0;
 
     protected:
 
-      unsigned int size;  // matrix size
+      unsigned int size;  ///< matrix size
     };
 
     /// \brief General (abstract) sparse matrix representation in Hermes.
@@ -318,12 +334,14 @@ namespace Hermes
     class HERMES_API SparseMatrix : public Matrix<Scalar> {
     public:
       SparseMatrix();
+      /// Constructor of sparse matrix
+      /// @param[in] size size of matrix
       SparseMatrix(unsigned int size);
       virtual ~SparseMatrix();
 
       /// prepare memory
       ///
-      /// @param[in] ndofs - number of unknowns
+      /// @param[in] n - number of unknowns
       virtual void prealloc(unsigned int n);
 
       /// add indices of nonzero matrix element
@@ -332,10 +350,13 @@ namespace Hermes
       /// @param[in] col  - column index
       virtual void pre_add_ij(unsigned int row, unsigned int col);
 
+      /// Finish manipulation with matrix (called before solving)
       virtual void finish() { }
 
       virtual unsigned int get_size() { return this->size; }
 
+      /// Add matrix
+      /// @param mat matrix to add
       virtual void add_sparse_matrix(SparseMatrix* mat) 
       { 
         error("add_sparse_matrix() undefined.");
@@ -343,6 +364,8 @@ namespace Hermes
 
       /// Add matrix to diagonal
       /// Matrices must be the same type of solver
+      /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
+      /// @param[in] mat added matrix 
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
       { 
         error("add_sparse_to_diagonal_blocks() undefined.");
@@ -367,13 +390,13 @@ namespace Hermes
 
       /// Return the number of entries in a specified column
       ///
-      /// @param[in] row - index of the column
+      /// @param[in] col - index of the column
       /// @return - the number of entries in the column 'col'
       virtual int get_num_col_entries(unsigned int col) { return -1; }
 
       /// Extract the copy of a column
       ///
-      /// @param[in] row - global column to extract
+      /// @param[in] col - global column to extract
       /// @param[in] len - length of 'vals' and 'idxs' arrays.
       /// @param[out] n_entries - number of nonzero entries extracted.
       /// @param[out] vals - extracted values for this column.
@@ -382,13 +405,15 @@ namespace Hermes
         unsigned int &n_entries, double *vals, 
         unsigned int *idxs) { }
 
-      /// Multiply with a vector.
+      /// Multiply with a vector.    
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) { 
         error("multiply_with_vector() undefined.");
       };
 
       /// Multiply with a Scalar.
-      virtual void multiply_with_Scalar(Scalar value) { };
+      virtual void multiply_with_Scalar(Scalar value) {
+        error("multiply_with_Scalar() undefined.");
+      };
 
       /// Duplicate sparse matrix (including allocation).
       virtual SparseMatrix* duplicate() { return (SparseMatrix*)NULL;};
@@ -396,24 +421,45 @@ namespace Hermes
       /// Get fill-in.
       virtual double get_fill_in() const = 0;
 
-      unsigned row_storage:1;
-      unsigned col_storage:1;
+      unsigned row_storage:1; ///< \todo document
+      unsigned col_storage:1; ///< \todo document
+
+      /// get number of nonzero numbers in matrix
+      /// @return number of nonzero numbers in matrix
+      virtual unsigned int get_nnz() const {
+        error("get_nnz() undefined.");
+        return 0;
+      }
 
     protected:
+      /// Size of page (max number of indices stored in one page). 
       static const int PAGE_SIZE = 62;
 
+      /// Structure for storing indices in sparse matrix
       struct Page {
+        /// number of indices stored
         int count;
+        /// buffer for storring indices
         int idx[PAGE_SIZE];
+        /// pointer to next page
         Page *next;
       };
 
+      /// array of pages with indices array. Each field of arra contains pages for one column
       Page **pages;
 
+      /// gather all pages in the buffer, delete them, sort buffer and remove duplicities
+      /// @param[in] page first page with indices
+      /// @param[out] buffer buffer to which indices will be copied
+      /// @param[in] max maximum indices to be stored (probably)
+      /// \todo max parameter does nothing (not implemented)
+      /// @return number of indices
       int sort_and_store_indices(Page *page, int *buffer, int *max);
+      /// get number of indices in all pages
+      /// @return number of indices
       int get_num_indices();
 
-      // mem stat
+      /// mem stat
       int mem_size;
     };
 
@@ -429,7 +475,7 @@ namespace Hermes
       virtual void alloc(unsigned int ndofs) = 0;
       /// free the memory
       virtual void free() = 0;
-      // finish the assembly of the vector
+      /// finish the assembly of the vector
       virtual void finish() { }
 
       /// Get the value from a position
@@ -461,6 +507,7 @@ namespace Hermes
 
       /// Add a vector.
       virtual void add_vector(Vector<Scalar>* vec) = 0;
+      /// Add a vector.
       virtual void add_vector(Scalar* vec) = 0;
 
       /// update subset of the elements
@@ -473,21 +520,28 @@ namespace Hermes
       /// Get vector length.
       unsigned int length() {return this->size;}
 
-      // Write to file.
+      /// Write to file.
+      /// @param[in] file file handle
+      /// @param[in] var_name name of variable (will be written to output file)
+      /// @param[in] fmt output file format
+      /// @return true on succes
       virtual bool dump(FILE *file, const char *var_name, 
-        EMatrixDumpFormat = DF_MATLAB_SPARSE) = 0;
+        EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
 
     protected:
+      /// size of vector
       unsigned int size;
     };
 
     /// \brief Function returning a vector according to the users's choice.
-    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @param[in] matrix_solver_type the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @return created vector
     template<typename Scalar> HERMES_API 
       Vector<Scalar>* create_vector(Hermes::MatrixSolverType matrix_solver_type);
 
     /// \brief Function returning a matrix according to the users's choice.
-    /// @param[in] matrix_solver - the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @param[in] matrix_solver_type the choice of solver, an element of enum Hermes::MatrixSolverType.
+    /// @return created matrix
     template<typename Scalar> HERMES_API 
       SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
 

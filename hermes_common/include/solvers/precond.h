@@ -22,10 +22,10 @@
 #ifndef __HERMES_COMMON_PRECOND_H_
 #define __HERMES_COMMON_PRECOND_H_
 
-#include "../common.h"  // Also includes preprocessor definitions for the various 
+#include "common.h"  // Also includes preprocessor definitions for the various 
 // solver libraries via config.h.
 
-#include "../matrix.h"
+#include "matrix.h"
 
 #ifdef HAVE_EPETRA
 #include <Epetra_Operator.h>

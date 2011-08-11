@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file solver.cpp
-\brief General linear/nonlinear/iterative solver functionality.
+/*! \file linear_solver.cpp
+\brief General linear solver functionality.
 */
 #include "linear_solver.h"
 #include "umfpack_solver.h"
@@ -118,5 +118,12 @@ namespace Hermes
 
     template HERMES_API LinearSolver<std::complex<double> >*  create_linear_solver(Hermes::MatrixSolverType matrix_solver, 
       Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
+
+    template class HERMES_API LinearSolver<double>;
+    template class HERMES_API LinearSolver<std::complex<double> >;
+    template class HERMES_API DirectSolver<double>;
+    template class HERMES_API DirectSolver<std::complex<double> >;
+    template class HERMES_API IterSolver<double>;
+    template class HERMES_API IterSolver<std::complex<double> >;
   }
 }

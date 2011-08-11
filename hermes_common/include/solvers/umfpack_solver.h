@@ -21,10 +21,10 @@
 */
 #ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
-#include "../config.h"
+#include "config.h"
 #ifdef WITH_UMFPACK
 #include "linear_solver.h"
-#include "../matrix.h"
+#include "matrix.h"
 
 using namespace Hermes::Algebra;
 
@@ -35,11 +35,14 @@ namespace Hermes
     using namespace Hermes::Solvers;
     /// \brief General CSC Matrix class.
     /// (can be used in umfpack, in that case use the
-    /// UMFPackMatrix subclass, or with EigenSolver, or anything else)
+    /// UMFPackMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
     class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
     public:
       CSCMatrix();
+      /// \brief Constructor with specific size
+      /// Calls alloc.
+      /// @param[in] size size of matrix (number of rows and columns)
       CSCMatrix(unsigned int size);
       virtual ~CSCMatrix();
 
@@ -49,46 +52,66 @@ namespace Hermes
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
-      /// \todo implement this for other matrix types.
+      /// Add matrix.
+      /// @param[in] mat matrix to be added
       virtual void add_matrix(CSCMatrix<Scalar>* mat);
-      /// \todo implement this for other matrix types.
+      /// Add matrix to diagonal.
+      /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
+      /// @param[in] mat added matrix 
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
-      /// \todo implement this for other matrix types.
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }
+      /// Add matrix to specific position.
+      /// @param[in] i row in target matrix coresponding with top row of added matrix
+      /// @param[in] j column in target matrix coresponding with lef column of added matrix
+      /// @param[in] mat added matrix
       virtual void add_as_block(unsigned int i, unsigned int j, CSCMatrix<Scalar>* mat);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
       virtual unsigned int get_matrix_size() const;
-      unsigned int get_nnz() {return this->nnz;}
+      virtual unsigned int get_nnz() const {return this->nnz;}
       virtual double get_fill_in() const;
 
       // Applies the matrix to vector_in and saves result to vector_out.
       void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
       // Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
-      // Creates matrix in CSC format using size, nnz, and the three arrays.
+      /// Creates matrix in CSC format using size, nnz, and the three arrays.
+      /// @param[in] size size of matrix (num of rows and columns)
+      /// @param[in] nnz number of nonzero values
+      /// @param[in] ap index to ap/ax, where each column starts (size is matrix size + 1) 
+      /// @param[in] ai row indices 
+      /// @param[in] ax values
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
       // Duplicates a matrix (including allocation).
       CSCMatrix* duplicate();
       // Exposes pointers to the CSC arrays.
+      /// @return pointer to #Ap
       int *get_Ap() {
         return this->Ap;
       }
+      // Exposes pointers to the CSC arrays.
+      /// @return pointer to #Ai
       int *get_Ai() {
         return this->Ai;
       }
+      // Exposes pointers to the CSC arrays.
+      /// @return pointer to #Ax
       Scalar *get_Ax() {
         return this->Ax;
       }
 
     protected:
       // UMFPack specific data structures for storing the system matrix (CSC format).
-      Scalar *Ax;            // Matrix entries (column-wise).
-      int *Ai;               // Row indices of values in Ax.
-      int *Ap;               // Index to Ax/Ai, where each column starts.
-      unsigned int nnz;      // Number of non-zero entries (= Ap[size]).
+      /// Matrix entries (column-wise).
+      Scalar *Ax;            
+      /// Row indices of values in Ax.
+      int *Ai;               
+      /// Index to Ax/Ai, where each column starts.
+      int *Ap;               
+      /// Number of non-zero entries (= Ap[size]).
+      unsigned int nnz;      
 
     };
 
@@ -102,6 +125,8 @@ namespace Hermes
     class HERMES_API UMFPackVector : public Vector<Scalar> {
     public:
       UMFPackVector();
+      /// Constructor of vector with specific size.
+      /// @param[in] size size of vector
       UMFPackVector(unsigned int size);
       virtual ~UMFPackVector();
 
@@ -123,12 +148,14 @@ namespace Hermes
       };
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
+      /// @return pointer to array with vector data 
+      /// \sa #v
       Scalar *get_c_array() {
         return this->v;
       }
 
     protected:
-      //UMFPack specific data structures for storing the rhs.
+      /// UMFPack specific data structures for storing the rhs.
       Scalar *v;
     };
   }
@@ -140,24 +167,32 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> {
     public:
+      /// Constructor of UMFPack solver.
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
       UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
       virtual ~UMFPackLinearSolver();
 
       virtual bool solve();
 
     protected:
+      /// Matrix to solve.
       UMFPackMatrix<Scalar> *m;
+      /// Right hand side vector.
       UMFPackVector<Scalar> *rhs;
 
       /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').
-      void *symbolic; /// Reordering of matrix A to reduce fill-in during factorization.
-      void *numeric;  /// LU factorization of matrix A.
+      /// Reordering of matrix A to reduce fill-in during factorization.
+      void *symbolic; 
+      void *numeric;  ///< LU factorization of matrix A.
 
+      /// \todo document
       void free_factorization_data();
+      /// \todo document
       bool setup_factorization();
     };
 
-    /// \brief UMFPack matrix iterator.
+    /// \brief UMFPack matrix iterator. \todo document members
     template <typename Scalar>
     class UMFPackIterator {
     public:
