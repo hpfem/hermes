@@ -208,7 +208,7 @@ namespace Hermes
       ///&nbsp;                    If not specified, they are defined according to the spaces.
       ///
       ///
-      KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces,
+      KellyTypeAdapt(const Hermes::vector<Space<Scalar>*>& spaces,
                      bool ignore_visited_segments = true,
                      Hermes::vector<const InterfaceEstimatorScalingFunction*>
                        interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
