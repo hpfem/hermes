@@ -36,33 +36,33 @@ namespace Hermes
     /// it calculates the appropriate linear combination of basis functions at the specified
     /// element and integration points.
     ///
-    ///  The higher-order solution on elements is best calculated not as a linear  combination
-    ///  of shape functions (the usual approach), but as a linear combination of monomials.
-    ///  This has the advantage that no shape function table calculation and look-ups are
-    ///  necessary (except for the conversion of the solution coefficients), which means that
-    ///  visualization and multi-mesh calculations are much faster (all the push_transforms
-    ///  and table searches take the most time when evaluating the solution).
+    /// The higher-order solution on elements is best calculated not as a linear combination
+    /// of shape functions (the usual approach), but as a linear combination of monomials.
+    /// This has the advantage that no shape function table calculation and look-ups are
+    /// necessary (except for the conversion of the solution coefficients), which means that
+    /// visualization and multi-mesh calculations are much faster (all the push_transforms
+    /// and table searches take the most time when evaluating the solution).
     ///
-    ///  The linear combination of monomials can be calculated using the Horner's scheme, which
-    ///  requires the same number of multiplications as the calculation of the linear combination
-    ///  of shape functions. However, sub-element transforms are trivial and cheap. Moreover,
-    ///  after the solution on all elements is expressed as a combination of monomials, the
-    ///  Space can be forgotten. This is comfortable for the user, since the Solution class acts
-    ///  as a self-contained unit, internally containing just a copy of the mesh and a table of
-    ///  monomial coefficients. It is also very straight-forward to obtain all derivatives of
-    ///  a solution defined in this way. Finally, it is possible to store the solution on the
-    ///  disk easily (no need to store the Space, which is difficult).
+    /// The linear combination of monomials can be calculated using the Horner's scheme, which
+    /// requires the same number of multiplications as the calculation of the linear combination
+    /// of shape functions. However, sub-element transforms are trivial and cheap. Moreover,
+    /// after the solution on all elements is expressed as a combination of monomials, the
+    /// Space can be forgotten. This is comfortable for the user, since the Solution class acts
+    /// as a self-contained unit, internally containing just a copy of the mesh and a table of
+    /// monomial coefficients. It is also very straight-forward to obtain all derivatives of
+    /// a solution defined in this way. Finally, it is possible to store the solution on the
+    /// disk easily (no need to store the Space, which is difficult).
     ///
-    ///  The following is an example of the set of monomials for a cubic quad and a cubic triangle.
-    ///  (Note that these are actually the definitions of the polynomial spaces on these elements.)
+    /// The following is an example of the set of monomials for a cubic quad and a cubic triangle.
+    /// (Note that these are actually the definitions of the polynomial spaces on these elements.)
     ///
-    ///    [ x^3*y^3  x^2*y^3  x*y^3  y^3 ]       [                    y^3 ]
-    ///    [ x^3*y^2  x^2*y^2  x*y^2  y^2 ]       [             x*y^2  y^2 ]
-    ///    [ x^3*y    x^2*y    x*y    y   ]       [      x^2*y  x*y    y   ]
-    ///    [ x^3      x^2      x      1   ]       [ x^3  x^2    x      1   ]
+    ///   [ x^3*y^3  x^2*y^3  x*y^3  y^3 ]       [                    y^3 ]
+    ///   [ x^3*y^2  x^2*y^2  x*y^2  y^2 ]       [             x*y^2  y^2 ]
+    ///   [ x^3*y    x^2*y    x*y    y   ]       [      x^2*y  x*y    y   ]
+    ///   [ x^3      x^2      x      1   ]       [ x^3  x^2    x      1   ]
     ///
-    ///  (The number of monomials is (n+1)^2 for quads and (n+1)*(n+2)/2 for triangles, where
-    ///   'n' is the polynomial degree.)
+    /// The number of monomials is (p+1)^2 for quads and (p+1)*(p+2)/2 for triangles, where
+    /// 'p' is the polynomial degree.
     ///
 
     enum SolutionType {
