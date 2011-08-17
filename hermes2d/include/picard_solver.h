@@ -42,8 +42,9 @@ namespace Hermes
       /// Solve with default tolerances.
       virtual bool solve();
 
-      /// Solve with user-defined tolerances.
-      bool solve(double tol, int max_iter);
+      /// Solve with user-defined tolerances. 
+      /// Anderson_n ... number of last iterations used to do acceleration.
+      bool solve(double tol, int max_iter, int number_of_last_iterations_used = 3, double anderson_beta = 1.0);
     private:
       Solution<Scalar>* sln_prev_iter;
     };
