@@ -76,8 +76,9 @@ namespace Hermes
       bool all_slns_vectors_stored = true;
       for (int i = 0; i < n; i++)
       {
-        if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i]) != NULL)
-          if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->sln_vector != NULL)
+        if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i]) != NULL && dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_space() != NULL)
+        {
+          if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_space()->get_seq() == spaces[i]->get_seq() && dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->sln_vector != NULL)
             for(int j = ndof_start_running; j < ndof_start_running + spaces[i]->get_num_dofs(); j++)
               target_vec[j] = dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->sln_vector[j - ndof_start_running];
           else
@@ -85,6 +86,7 @@ namespace Hermes
             all_slns_vectors_stored = false;
             break;
           }
+        }
         else
         {
           all_slns_vectors_stored = false;
