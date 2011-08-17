@@ -48,19 +48,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void calculate_anderson_coeffs(Scalar** anderson_vec, Scalar* anderson_coeffs, int last_iter_used, int ndof)
+    void calculate_anderson_coeffs(Scalar** anderson_vec, Scalar* anderson_coeffs, int num_last_iter_used, int ndof)
     {
-      if (last_iter_used <= 1) error("Anderson acceleration makes sense only if at least two last iterations are used.");
+      if (num_last_iter_used <= 1) error("Anderson acceleration makes sense only if at least two last iterations are used.");
 
-      // If last_iter_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
-      if (last_iter_used == 2) 
+      // If num_last_iter_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
+      if (num_last_iter_used == 2) 
       {
         anderson_coeffs[0] = 1.0;
         return;
       }
 
-      // In the following, last_iter_used is at least three.
-      int n = last_iter_used - 2;
+      // In the following, num_last_iter_used is at least three.
+      int n = num_last_iter_used - 2;
 
       // Allocate the matrix system for the Anderson coefficients.
       double** mat = new_matrix<double>(n, n);
@@ -119,8 +119,8 @@ namespace Hermes
     template<typename Scalar>
     bool PicardSolver<Scalar>::solve(double tol, int max_iter, int number_of_last_iterations_used, double anderson_beta)
     {
-      int last_iter_used = number_of_last_iterations_used;
-      if (last_iter_used < 1) error("PicardSolver: Bad number of last iterations to be used (this must be at least one).");
+      int num_last_iter_used = number_of_last_iterations_used;
+      if (num_last_iter_used < 1) error("PicardSolver: Bad number of last iterations to be used (this must be at least one).");
 
       int it = 0;
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs();
@@ -146,18 +146,18 @@ namespace Hermes
 
       // If the number of last iterations used is greater than one, Anderson acceleration will be employed.
       // In this case, allocate memory for Anderson vectors and coeffs.
-      Scalar** anderson_vec = NULL;      // To store last_iter_used last coefficient vectors.
-      Scalar* anderson_coeffs = NULL;    // To store last_iter_used - 1 Anderson coefficients.
-      if (last_iter_used > 1) 
+      Scalar** anderson_vec = NULL;      // To store num_last_iter_used last coefficient vectors.
+      Scalar* anderson_coeffs = NULL;    // To store num_last_iter_used - 1 Anderson coefficients.
+      if (num_last_iter_used > 1) 
       {
-        anderson_vec = new Scalar*[last_iter_used];
-        for (int i = 0; i < last_iter_used; i++) anderson_vec[i] = new Scalar[ndof];
-        anderson_coeffs = new Scalar[last_iter_used-1];
+        anderson_vec = new Scalar*[num_last_iter_used];
+        for (int i = 0; i < num_last_iter_used; i++) anderson_vec[i] = new Scalar[ndof];
+        anderson_coeffs = new Scalar[num_last_iter_used-1];
       }
 
       // Saving this->sln_vector as the first Anderson vector.
       int anderson_counter = 0;
-      if (last_iter_used > 1) 
+      if (num_last_iter_used > 1) 
       {
         for (int i = 0; i < ndof; i++) anderson_vec[anderson_counter][i] = this->sln_vector[i];
       }
@@ -171,9 +171,9 @@ namespace Hermes
 	{
           warn("Newton's iteration in the Picard's method failed.");
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
-          if (last_iter_used > 1) 
+          if (num_last_iter_used > 1) 
 	  {
-            for (int i = 0; i < last_iter_used; i++) delete [] anderson_vec[i];
+            for (int i = 0; i < num_last_iter_used; i++) delete [] anderson_vec[i];
             delete [] anderson_vec;
             delete [] anderson_coeffs;
           }
@@ -183,10 +183,10 @@ namespace Hermes
         // Copy the Newton solution vector into this->sln_vector;
         for (int i = 0; i < ndof; i++) this->sln_vector[i] = newton.get_sln_vector()[i];
 
-        if (last_iter_used > 1) 
+        if (num_last_iter_used > 1) 
 	{
-          // Store solution vectors until there is last_iter_used of them.
-          if (anderson_counter < last_iter_used)
+          // Store solution vectors until there is num_last_iter_used of them.
+          if (anderson_counter < num_last_iter_used)
   	  {
             for (int i = 0; i < ndof; i++) anderson_vec[anderson_counter][i] = this->sln_vector[i];
             anderson_counter++;
@@ -197,15 +197,15 @@ namespace Hermes
             // second etc., and copy the saved oldest vector at the newest position. Then 
             // overwrite it with the new vector.
             Scalar* oldest_vec = anderson_vec[0];
-            for (int i = 0; i < last_iter_used-1; i++) anderson_vec[i] = anderson_vec[i+1];
-            anderson_vec[last_iter_used-1] = oldest_vec;
-            for (int j = 0; j < ndof; j++) anderson_vec[last_iter_used-1][j] = this->sln_vector[j];
+            for (int i = 0; i < num_last_iter_used-1; i++) anderson_vec[i] = anderson_vec[i+1];
+            anderson_vec[num_last_iter_used-1] = oldest_vec;
+            for (int j = 0; j < ndof; j++) anderson_vec[num_last_iter_used-1][j] = this->sln_vector[j];
 
             // Calculate Anderson coefficients. 
-            calculate_anderson_coeffs(anderson_vec, anderson_coeffs, last_iter_used, ndof);
+            calculate_anderson_coeffs(anderson_vec, anderson_coeffs, num_last_iter_used, ndof);
             /*
             printf("Anderson coeffs: ");
-            for (int m = 0; m < last_iter_used - 1;  m++) printf("%g ", std::abs(anderson_coeffs[m]));
+            for (int m = 0; m < num_last_iter_used - 1;  m++) printf("%g ", std::abs(anderson_coeffs[m]));
             printf("\n");
             */
 
@@ -213,7 +213,7 @@ namespace Hermes
             for (int i = 0; i < ndof; i++)
 	    {
               this->sln_vector[i] = 0;
-              for (int j = 0; j < last_iter_used-1; j++)
+              for (int j = 0; j < num_last_iter_used-1; j++)
 	      {
                 this->sln_vector[i] += anderson_coeffs[j] * anderson_vec[j+1][i]; 
 	      }
@@ -235,9 +235,9 @@ namespace Hermes
         if (rel_error < tol)
         {
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
-          if (last_iter_used > 1) 
+          if (num_last_iter_used > 1) 
 	  {
-            for (int i = 0; i < last_iter_used; i++) delete [] anderson_vec[i];
+            for (int i = 0; i < num_last_iter_used; i++) delete [] anderson_vec[i];
             delete [] anderson_vec;
             delete [] anderson_coeffs;
           }
@@ -248,9 +248,9 @@ namespace Hermes
           if (this->verbose_output) 
             info("Maximum allowed number of Picard iterations exceeded, returning false.");
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
-          if (last_iter_used > 1) 
+          if (num_last_iter_used > 1) 
 	  {
-            for (int i = 0; i < last_iter_used; i++) delete [] anderson_vec[i];
+            for (int i = 0; i < num_last_iter_used; i++) delete [] anderson_vec[i];
             delete [] anderson_vec;
             delete [] anderson_coeffs;
           }          

@@ -37,14 +37,15 @@ namespace Hermes
     {
     public:
       PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter);
-      PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter, Hermes::MatrixSolverType matrix_solver_type);
+      PicardSolver(DiscreteProblem<Scalar>* dp, Solution<Scalar>* sln_prev_iter, 
+                   Hermes::MatrixSolverType matrix_solver_type);
 
       /// Solve with default tolerances.
       virtual bool solve();
 
       /// Solve with user-defined tolerances. 
       /// Anderson_n ... number of last iterations used to do acceleration.
-      bool solve(double tol, int max_iter, int number_of_last_iterations_used = 3, double anderson_beta = 1.0);
+      bool solve(double tol, int max_iter, int num_last_iter_used = 3, double anderson_beta = 1.0);
     private:
       Solution<Scalar>* sln_prev_iter;
     };
