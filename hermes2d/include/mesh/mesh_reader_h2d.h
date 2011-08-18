@@ -35,12 +35,7 @@ namespace Hermes
       virtual bool load(const char *file_name, Mesh *mesh);
       virtual bool save(const char *file_name, Mesh *mesh);
 
-      void load_str(const char* mesh_str, Mesh *mesh);
-      bool load_stream(std::istream &is, Mesh *mesh, const char *filename);
-
     protected:
-      Nurbs* load_nurbs_old(Mesh *mesh, FILE* f, Node** en, int &p1, int &p2);
-      /// Load NURBS.
       Nurbs* load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
 
       void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);

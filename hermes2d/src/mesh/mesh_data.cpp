@@ -22,6 +22,8 @@ namespace Hermes
     MeshData::MeshData(const std::string &mesh_file) : mesh_file_(mesh_file)
     {
     }
+    
+    MeshData::~MeshData() {}
 
     MeshData::MeshData(const MeshData &m) : mesh_file_(m.mesh_file_), n_vert(m.n_vert), n_el(m.n_el), n_bdy(m.n_bdy), n_curv(m.n_curv), n_ref(m.n_ref)
     {
@@ -46,7 +48,6 @@ namespace Hermes
       ref_type = m.ref_type;
     }
 
-    /// MeshData Assignment Operator.
     MeshData& MeshData::operator = (const MeshData &m)
     {
       assert(&m != this);
@@ -89,11 +90,11 @@ namespace Hermes
       if (str.find('#') != str.npos)
         str.erase(str.find('#'));
 
-      // Remove brackets, commas and unnecessary blank spaces
+      // Remove brackets, commas and unnecessary tab spaces
       for (size_t i = 0; i < str.length(); i++)
       {
         //if (str[i] != ' ' && str[i] != '\t' && str[i] != '[' && str[i] != ']' && str[i] != '{' && str[i] != '}' && str[i] != '"')
-        if (str[i] != '\t' && str[i] != '[' && str[i] != ']' && str[i] != '{' && str[i] != '}' && str[i] != '"')
+        if (str[i] != '\t' && str[i] != '[' && str[i] != ']' && str[i] != '{' && str[i] != '}')
         {
           if (str[i] == ',' || str[i] == ';')
             temp.append("\t");
@@ -135,10 +136,13 @@ namespace Hermes
 
       for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == ';')
-          temp.append(1,' ');
-        else
-          temp.append(1,str[i]);
+        if (str[i] != '"')
+        {	
+          if (str[i] == ';')
+            temp.append(1,' ');
+          else
+            temp.append(1,str[i]);
+        }
       }
 
       str.assign(temp);
@@ -154,7 +158,7 @@ namespace Hermes
       std::string dummy_str;
 
       std::ifstream inFile(mesh_file_.c_str());
-      std::string line, word, temp_word;
+      std::string line, word, temp_word, next_word;
 
       int counter(0);
       bool isVert(false), isElt(false), isBdy(false), isCurv(false), isRef(false), isVar(false);
@@ -403,7 +407,16 @@ namespace Hermes
                 if (istr >> dummy_dbl)
                 {
                   curv_third.push_back(atof(word.c_str()));
+                }
+                else
+                {	
+                  curv_third.push_back(atof(vars_[restore(word)][0].c_str()));
+                }
 
+                stream >> next_word;
+
+                if (next_word == "")
+                {
                   curv_nurbs.push_back(false);
 
                   curv_inner_pts.push_back("none");
@@ -413,14 +426,15 @@ namespace Hermes
                 }
                 else
                 {	
-                  curv_third.push_back(atof(vars_[restore(word)][0].c_str()));
                   curv_nurbs.push_back(true);
                 }	
               }
               else if (counter%5 == 3)
-                curv_inner_pts.push_back(restore(word));
-              else
+              {	
+                curv_inner_pts.push_back(restore(next_word));
                 curv_knots.push_back(restore(word));
+                ++counter;
+              }
 
               ++counter;
             }
