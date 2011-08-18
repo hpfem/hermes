@@ -117,10 +117,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PicardSolver<Scalar>::solve(double tol, int max_iter, int number_of_last_iterations_used, double anderson_beta)
+    bool PicardSolver<Scalar>::solve(double tol, int max_iter, int num_last_iter_used, 
+                                     double anderson_beta)
     {
-      int num_last_iter_used = number_of_last_iterations_used;
-      if (num_last_iter_used < 1) error("PicardSolver: Bad number of last iterations to be used (this must be at least one).");
+      if (num_last_iter_used < 1) 
+        error("PicardSolver: Bad number of last iterations to be used (must be at least one).");
 
       int it = 0;
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(0)->get_num_dofs();
@@ -143,6 +144,12 @@ namespace Hermes
 
       // This makes the Solution sln_prev_iter compatible with this->sln_vector.
       Solution<Scalar>::vector_to_solution(this->sln_vector, space, this->sln_prev_iter);
+
+      /*
+      Views::ScalarView<Scalar> view("Projected initial condition", new Views::WinGeom(0, 0, 600, 500));
+      view.show(this->sln_prev_iter);
+      Views::View::wait();
+      */
 
       // If the number of last iterations used is greater than one, Anderson acceleration will be employed.
       // In this case, allocate memory for Anderson vectors and coeffs.
@@ -181,7 +188,8 @@ namespace Hermes
         }
 
         // Copy the Newton solution vector into this->sln_vector;
-        for (int i = 0; i < ndof; i++) this->sln_vector[i] = newton.get_sln_vector()[i];
+        Scalar* ptr = newton.get_sln_vector();
+        for (int i = 0; i < ndof; i++) this->sln_vector[i] = ptr[i];
 
         if (num_last_iter_used > 1) 
 	{

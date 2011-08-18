@@ -24,6 +24,7 @@
 
 #include "hermes2d_common_defs.h"
 #include "discrete_problem.h"
+#include "views/scalar_view.h"
 
 namespace Hermes
 {
