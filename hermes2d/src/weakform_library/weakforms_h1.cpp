@@ -97,21 +97,21 @@ namespace Hermes
       Ord DefaultMatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
           }
         }
@@ -191,29 +191,29 @@ namespace Hermes
       Ord DefaultJacobianDiffusion<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (coeff->derivative_ord(u_ext[idx_j]->val[i]) * u->val[i] *
+            result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
               (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-              + coeff->value_ord(u_ext[idx_j]->val[i])
+              + coeff->value(u_ext[idx_j]->val[i])
               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * (coeff->derivative_ord(u_ext[idx_j]->val[i]) * u->val[i] *
+              result += wt[i] * e->y[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
                 (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value_ord(u_ext[idx_j]->val[i])
+                + coeff->value(u_ext[idx_j]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * (coeff->derivative_ord(u_ext[idx_j]->val[i]) * u->val[i] *
+              result += wt[i] * e->x[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
                 (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value_ord(u_ext[idx_j]->val[i])
+                + coeff->value(u_ext[idx_j]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
@@ -285,12 +285,12 @@ namespace Hermes
       Ord DefaultJacobianAdvection<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (  coeff1->derivative_ord(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
-          + coeff1->value_ord(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
-          + coeff2->derivative_ord(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
-          + coeff2->value_ord(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
+          result += wt[i] * (  coeff1->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
+          + coeff1->value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
+          + coeff2->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
+          + coeff2->value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
         }
         return result;
       }
@@ -359,21 +359,21 @@ namespace Hermes
       Ord DefaultVectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
           }
         }
@@ -444,21 +444,21 @@ namespace Hermes
       Ord DefaultResidualVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
           }
         }
@@ -531,9 +531,9 @@ namespace Hermes
       Ord DefaultResidualDiffusion<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * coeff->value_ord(u_ext[idx_i]->val[i])
+          result += wt[i] * coeff->value(u_ext[idx_i]->val[i])
             * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
         }
         if (gt != HERMES_PLANAR) result = result * Ord(1);
@@ -602,11 +602,11 @@ namespace Hermes
       Ord DefaultResidualAdvection<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         Func<Ord>* u_prev = u_ext[idx_i];
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff1->value_ord(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
-            + coeff2->value_ord(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
+          result += wt[i] * (coeff1->value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
+            + coeff2->value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
         }
         return result;
       }
@@ -675,21 +675,21 @@ namespace Hermes
       Ord DefaultMatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
           }
         }
@@ -750,10 +750,10 @@ namespace Hermes
       Ord DefaultJacobianFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff->derivative_ord(u_ext[idx_j]->val[i]) * u_ext[idx_j]->val[i]
-          + coeff->value_ord(u_ext[idx_j]->val[i]))
+          result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u_ext[idx_j]->val[i]
+          + coeff->value(u_ext[idx_j]->val[i]))
             * u->val[i] * v->val[i];
         }
         return result;
@@ -823,21 +823,21 @@ namespace Hermes
       Ord DefaultVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
           }
         }
@@ -963,21 +963,21 @@ namespace Hermes
       Ord DefaultResidualSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
           }
         }

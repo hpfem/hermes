@@ -67,7 +67,7 @@ namespace Hermes
       Ord DefaultMatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           result = const_coeff * int_e_f<Ord, Ord>(n, wt, u, v);
@@ -132,7 +132,7 @@ namespace Hermes
       Ord DefaultJacobianCurlCurl<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           result = const_coeff * int_curl_e_curl_f<Ord, Ord>(n, wt, u, v);
@@ -199,7 +199,7 @@ namespace Hermes
       Ord DefaultVectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord int_v0 = 0, int_v1 = 0;
+        Ord int_v0 = Ord(0), int_v1 = Ord(0);
         for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
         for (int i = 0; i < n; i++) int_v1 += wt[i] * v->val1[i];
         return const_coeff0 * int_v0 + const_coeff1 * int_v1;
@@ -264,12 +264,12 @@ namespace Hermes
       Ord DefaultResidualVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           for (int i = 0; i < n; i++) 
           {
-            result += wt[i] * function_coeff->value_ord(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else error("Axisymmetric Hcurl forms not implemented yet.");
@@ -341,7 +341,7 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
         Func<Ord>* u_prev = u_ext[idx_i];
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           for (int i = 0; i < n; i++) 
@@ -349,7 +349,7 @@ namespace Hermes
             Ord mag0_i = u_prev->val0[i];
             Ord mag1_i = u_prev->val1[i];
             Ord mag_i = sqrt(sqr(mag0_i) + sqr(mag1_i));
-            result += wt[i] * const_coeff*spline_coeff->value_ord(mag_i) 
+            result += wt[i] * const_coeff*spline_coeff->value(mag_i) 
               * (u_prev->curl[i] * conj(v->curl[i]));
           }
         }
@@ -411,7 +411,7 @@ namespace Hermes
       Ord DefaultMatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           result = const_coeff * int_e_tau_f_tau<Ord, Ord>(n, wt, u, v, e);
@@ -477,7 +477,7 @@ namespace Hermes
       Ord DefaultResidualSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[],
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           for (int i = 0; i < n; i++)
@@ -545,7 +545,7 @@ namespace Hermes
       Ord DefaultVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord result = 0;
+        Ord result = Ord(0);
         if (gt == HERMES_PLANAR) 
         {
           for (int i = 0; i < n; i++) 

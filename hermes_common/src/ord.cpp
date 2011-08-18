@@ -21,8 +21,7 @@ namespace Hermes
 {
   Ord::Ord(): order(0) {}
   Ord::Ord(int o): order(o) {}
-  Ord::Ord(double d): order(0) {}
-  Ord::Ord(std::complex<double> d): order(0) {}
+  Ord::Ord(double o): order(0) {}
 
   int Ord::get_order() const { return order; }
 

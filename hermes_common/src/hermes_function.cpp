@@ -74,7 +74,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes1DFunction<Scalar>::value_ord(Ord x) const
+  Ord Hermes1DFunction<Scalar>::value(Ord x) const
   {
     if(this->is_const)
       return Ord(0);
@@ -109,7 +109,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes1DFunction<Scalar>::derivative_ord(Ord x) const
+  Ord Hermes1DFunction<Scalar>::derivative(Ord x) const
   {
     if(this->is_const)
       return Ord(0);
@@ -159,7 +159,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes2DFunction<Scalar>::value_ord(Ord x, Ord y) const
+  Ord Hermes2DFunction<Scalar>::value(Ord x, Ord y) const
   {
     if(this->is_const)
       return Ord(0);
@@ -194,7 +194,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes2DFunction<Scalar>::derivative_ord(Ord x, Ord y) const
+  Ord Hermes2DFunction<Scalar>::derivative(Ord x, Ord y) const
   {
     if(this->is_const)
       return Ord(0);
@@ -243,7 +243,7 @@ namespace Hermes
 
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::value_ord(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::value(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);
@@ -278,7 +278,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::derivative_ord(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::derivative(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);

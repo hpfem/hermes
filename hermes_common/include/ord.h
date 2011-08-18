@@ -34,8 +34,7 @@ namespace Hermes
 
     Ord();
     explicit Ord(int o);
-    Ord(double d);
-    Ord(std::complex<double> d);
+    explicit Ord(double o);
 
     int get_order() const;
 

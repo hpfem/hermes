@@ -18,7 +18,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += -wt[i] * u->val[i] * static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(e->x[i], e->y[i], v->dx[i], v->dy[i]);
       return result;
@@ -40,7 +40,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * F(e->x[i], e->y[i]) * v->val[i];
       return result;
@@ -56,7 +56,7 @@ private:
 
     template<typename Real>
     Real F(Real x, Real y) const {
-      return 0;
+      return Real(0);
     }
   };
 
@@ -67,12 +67,12 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
 
       for (int i = 0; i < n; i++) {
         Real x = e->x[i], y = e->y[i];
         Real a_dot_n = static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(x, y, e->nx[i], e->ny[i]);
-        result += wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(u->val[i], 0, a_dot_n) * v->val[i];
+        result += wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(u->val[i], Scalar(0), a_dot_n) * v->val[i];
       }
 
       return result;
@@ -94,7 +94,7 @@ private:
 
     template<typename Real, typename Scalar>
     Scalar matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
 
       for (int i = 0; i < n; i++) {
         Real a_dot_n = static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(e->x[i], e->y[i], e->nx[i], e->ny[i]);
@@ -131,7 +131,7 @@ private:
     }
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const {
-      Ord result = 0;
+      Ord result = Ord(0);
       for (int i = 0; i < n; i++)
         result += -wt[i] * v->val[i];
       return result;
@@ -139,7 +139,7 @@ private:
 
     template<typename Real>
     Real F(Real x, Real y) const{
-      return 0;
+      return Real(0);
     }
 
     template<typename Real, typename Scalar>

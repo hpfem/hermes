@@ -36,13 +36,13 @@ namespace Hermes
     virtual Scalar value(Scalar x) const;
 
     /// One-dimensional function integration order.
-    virtual Hermes::Ord value_ord(Hermes::Ord x) const;
+    virtual Hermes::Ord value(Hermes::Ord x) const;
 
     /// One-dimensional function derivative value.
     virtual Scalar derivative(Scalar x) const;
 
     /// One-dimensional function derivative integration order.
-    virtual Hermes::Ord derivative_ord(Hermes::Ord x) const;
+    virtual Hermes::Ord derivative(Hermes::Ord x) const;
 
     /// The function is constant.
     /// Returns the value of is_const.
@@ -70,13 +70,13 @@ namespace Hermes
     virtual Scalar value(Scalar x, Scalar y) const;
 
     /// Two-dimensional function integration order.
-    virtual Hermes::Ord value_ord(Hermes::Ord x, Hermes::Ord y) const;
+    virtual Hermes::Ord value(Hermes::Ord x, Hermes::Ord y) const;
 
     /// Two-dimensional function derivative value.
     virtual Scalar derivative(Scalar x, Scalar y) const;
 
     /// Two-dimensional function derivative integration order.
-    virtual Hermes::Ord derivative_ord(Hermes::Ord x, Hermes::Ord y) const;
+    virtual Hermes::Ord derivative(Hermes::Ord x, Hermes::Ord y) const;
 
     /// The function is constant.
     /// Returns the value of is_const.
@@ -104,13 +104,13 @@ namespace Hermes
     virtual Scalar value(Scalar x, Scalar y, Scalar z) const;
 
     /// Two-dimensional function integration order.
-    virtual Hermes::Ord value_ord(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
+    virtual Hermes::Ord value(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
     /// Two-dimensional function derivative value.
     virtual Scalar derivative(Scalar x, Scalar y, Scalar z) const;
 
     /// Two-dimensional function derivative integration order.
-    virtual Hermes::Ord derivative_ord(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
+    virtual Hermes::Ord derivative(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
     /// The function is constant.
     /// Returns the value of is_const.
