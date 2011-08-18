@@ -217,6 +217,38 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces) 
+    {
+      _F_;
+      int ndof = 0;
+      for (unsigned int i=0; i<spaces.size(); i++) {
+        ndof += spaces[i]->get_num_dofs();
+      }
+      return ndof;
+    }
+
+    template<typename Scalar>
+    int Space<Scalar>::get_num_dofs(Space<Scalar>* space) 
+    {
+      return space->get_num_dofs();
+    }
+
+    template<typename Scalar>
+    int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces) 
+    {
+      _F_;
+      int n = spaces.size();
+      // assigning dofs to each space
+      int ndof = 0;
+      for (int i = 0; i < n; i++) {
+        ndof += spaces[i]->assign_dofs(ndof);
+      }
+
+      return ndof;
+    }
+
+
+    template<typename Scalar>
     int Space<Scalar>::get_element_order(int id) const
     {
       _F_;
