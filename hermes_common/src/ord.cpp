@@ -21,7 +21,7 @@ namespace Hermes
 {
   Ord::Ord(): order(0) {}
   Ord::Ord(int o): order(o) {}
-  Ord::Ord(double d): order(0) {}
+  Ord::Ord(double o): order(0) {}
 
   int Ord::get_order() const { return order; }
 
@@ -29,23 +29,33 @@ namespace Hermes
 
   Ord Ord::operator+(const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord Ord::operator+(double d) { return *this; }
+  Ord Ord::operator+(std::complex<double> d) { return *this; }
   Ord Ord::operator-(const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord Ord::operator-(double d) { return *this; }
+  Ord Ord::operator-(std::complex<double> d) { return *this; }
   Ord Ord::operator*(const Ord &o) { return Ord(this->order + o.order); }
   Ord Ord::operator*(double d) { return *this; }
+  Ord Ord::operator*(std::complex<double> d) { return *this; }
   Ord Ord::operator/(const Ord &o) { return Ord::get_max_order(); }
   Ord Ord::operator/(double d) { return *this; }
+  Ord Ord::operator/(std::complex<double> d) { return *this; }
 
   Ord Ord::operator+=(const Ord &o) { this->order = std::max(this->order, o.order); return *this; }
   Ord Ord::operator-=(const Ord &o) { this->order = std::max(this->order, o.order); return *this; }
 
   Ord Ord::operator+=(const double &d) { return *this; }
+  Ord Ord::operator+=(const std::complex<double> &d) { return *this; }
   Ord Ord::operator-=(const double &d) { return *this; }
+  Ord Ord::operator-=(const std::complex<double> &d) { return *this; }
   Ord Ord::operator*=(const double &d) { return *this; }
+  Ord Ord::operator*=(const std::complex<double> &d) { return *this; }
   Ord Ord::operator/=(const double &d) { return *this; }
+  Ord Ord::operator/=(const std::complex<double> &d) { return *this; }
 
   bool Ord::operator<(double d) { return true; }
+  bool Ord::operator<(std::complex<double> d) { return true; }
   bool Ord::operator>(double d) { return false; }
+  bool Ord::operator>(std::complex<double> d) { return false; }
   bool Ord::operator<(const Ord &o) { return this->order < o.order; }
   bool Ord::operator>(const Ord &o) { return this->order > o.order; }
 

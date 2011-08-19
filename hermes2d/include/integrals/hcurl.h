@@ -29,7 +29,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_e_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
       return result;
@@ -62,7 +62,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_curl_e_curl_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]));
       return result;
@@ -71,7 +71,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_v0(int n, double *wt, Func<Scalar> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * v->val0[i];
       return result;
@@ -80,7 +80,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_v1(int n, double *wt, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (v->val1[i]);
       return result;
@@ -89,7 +89,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_F_e_f(int n, double *wt, double (*F)(int marker, Real x, Real y), Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (*F)(e->elem_marker, e->x[i], e->y[i]) * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
       return result;
@@ -98,7 +98,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_e_tau_f_tau(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (    (u->val0[i] * e->tx[i] + u->val1[i] * e->ty[i]) *
         conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));

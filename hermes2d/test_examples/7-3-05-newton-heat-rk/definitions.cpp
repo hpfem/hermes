@@ -21,8 +21,8 @@ template<typename Real, typename Scalar>
 Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
                                                                       Geom<Real> *e, ExtData<Scalar> *ext) const 
 {
-  Scalar T_ext = temp_ext(get_current_stage_time());
-  Scalar result = 0;
+  Scalar T_ext = Scalar(temp_ext(get_current_stage_time()));
+  Scalar result = Scalar(0);
 
   for (int i = 0; i < n; i++) 
   {

@@ -100,10 +100,10 @@ namespace Hermes
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
-          planar_part += wt[i] * const_coeff*spline_coeff->derivative_ord(B_i) / B_i
+          planar_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i
             * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
             * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]);
-          planar_part += wt[i] * const_coeff*spline_coeff->value_ord(B_i)
+          planar_part += wt[i] * const_coeff*spline_coeff->value(B_i)
             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
         }
 
@@ -170,7 +170,7 @@ namespace Hermes
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
-          planar_part += wt[i] * const_coeff*spline_coeff->value_ord(B_i) *
+          planar_part += wt[i] * const_coeff*spline_coeff->value(B_i) *
             (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
         }
         return planar_part * Ord(order_increase);
@@ -216,7 +216,7 @@ namespace Hermes
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
     {
-    Ord result = 0;
+    Ord result = Ord(0);
     for (int i = 0; i < n; i++)
     result += wt[i] * u->val[i] * (v->dx[i] + v->dy[i]);
 
@@ -325,7 +325,7 @@ namespace Hermes
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
     Geom<Ord> *e, ExtData<Ord> *ext) const 
     {
-    Ord result = 0;
+    Ord result = Ord(0);
     for (int i = 0; i < n; i++)
     result += wt[i] * (v->dx[i] + v->dy[i]);
 

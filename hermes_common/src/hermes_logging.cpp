@@ -32,14 +32,11 @@ class HermesLogoMessage
 public:
   HermesLogoMessage() 
   {
-    printf("\n-------------------------------------------------\n");
-    printf("         This application uses Hermes.\n");
-    printf("       Hermes is a C++ library for rapid \n");
-    printf("  development of adaptive FEM and hp-FEM solvers\n");
-    printf("      developed by the hp-FEM group at UNR\n");
-    printf("     and distributed under the GPL license.\n");
-    printf("    For more details visit http://hpfem.org/.\n");
-    printf("-------------------------------------------------\n");
+    printf("\n------------------------------------------------\n");
+    printf("  This application uses Hermes,  a C++ library \n");
+    printf("  for rapid development of adaptive hp-FEM and \n");
+    printf("  hp-DG solvers. Visit http://hpfem.org/hermes.\n");
+    printf("------------------------------------------------\n");
     fflush(stdout);
   }
 };

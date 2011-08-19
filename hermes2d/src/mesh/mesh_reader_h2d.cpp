@@ -33,12 +33,6 @@ namespace Hermes
     {
     }
 
-    void MeshReaderH2D::load_str(const char* mesh_str, Mesh *mesh)
-    {
-      std::istringstream s(mesh_str);
-      this->load_stream(s, mesh, "");
-    }
-
     Nurbs* MeshReaderH2D::load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
     {
       double dummy_dbl;
@@ -161,16 +155,11 @@ namespace Hermes
 
     bool MeshReaderH2D::load(const char *filename, Mesh *mesh)
     {
-      // Both load_str and load_stream are unnecessary. Remove them??		
-
+      // Check if file exists
       std::ifstream s(filename);
       if (!s.good()) error("Mesh file not found.");
-      return this->load_stream(s, mesh, filename);
-    }
+      s.close();
 
-    bool MeshReaderH2D::load_stream(std::istream &is, Mesh *mesh,
-      const char *filename)
-    {
       int i, j, k, n;
       Node* en;
       bool debug = false;
@@ -313,91 +302,84 @@ namespace Hermes
         }
       }
 
-      // check that all boundary edges have a marker assigned
-      for_all_edge_nodes(en, mesh)
-        if (en->ref < 2 && en->marker == 0)
-          warn("Boundary edge node does not have a boundary marker");
-        
-        //// curves //////////////////////////////////////////////////////////////////
-        if (m.n_curv > 0)
+      //// curves //////////////////////////////////////////////////////////////////
+      if (m.n_curv > 0)
+      {
+        n = m.n_curv;
+        if (n < 0) error("File %s: 'curves' must be a list.", filename);
+
+        // load curved edges
+        for (i = 0; i < n; i++)
         {
-          n = m.n_curv;
-          if (n < 0) error("File %s: 'curves' must be a list.", filename);
+          // load the control points, knot vector, etc.
+          Node* en;
+          int p1, p2;
 
-          // load curved edges
-          for (i = 0; i < n; i++)
+          Nurbs* nurbs = load_nurbs(mesh, &m, i, &en, p1, p2);
+
+          // assign the nurbs to the elements sharing the edge node
+          for (k = 0; k < 2; k++)
           {
-            // load the control points, knot vector, etc.
-            Node* en;
-            int p1, p2;
+            Element* e = en->elem[k];
+            if (e == NULL) continue;
 
-            Nurbs* nurbs = load_nurbs(mesh, &m, i, &en, p1, p2);
-
-            // assign the nurbs to the elements sharing the edge node
-            for (k = 0; k < 2; k++)
+            if (e->cm == NULL)
             {
-              Element* e = en->elem[k];
-              if (e == NULL) continue;
-
-              if (e->cm == NULL)
-              {
-                e->cm = new CurvMap;
-                memset(e->cm, 0, sizeof(CurvMap));
-                e->cm->toplevel = 1;
-                e->cm->order = 4;
-              }
-
-              int idx = -1;
-              for (unsigned j = 0; j < e->nvert; j++)
-                if (e->en[j] == en) { idx = j; break; }
-                assert(idx >= 0);
-
-                if (e->vn[idx]->id == p1)
-                {
-                  e->cm->nurbs[idx] = nurbs;
-                  nurbs->ref++;
-                }
-                else
-                {
-                  Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-                  e->cm->nurbs[idx] = nurbs_rev;
-                  nurbs_rev->ref++;
-                }
+              e->cm = new CurvMap;
+              memset(e->cm, 0, sizeof(CurvMap));
+              e->cm->toplevel = 1;
+              e->cm->order = 4;
             }
-            if (!nurbs->ref) delete nurbs;
+
+            int idx = -1;
+            for (unsigned j = 0; j < e->nvert; j++)
+              if (e->en[j] == en) { idx = j; break; }
+              assert(idx >= 0);
+
+              if (e->vn[idx]->id == p1)
+              {
+                e->cm->nurbs[idx] = nurbs;
+                nurbs->ref++;
+              }
+              else
+              {
+                Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
+                e->cm->nurbs[idx] = nurbs_rev;
+                nurbs_rev->ref++;
+              }
           }
+          if (!nurbs->ref) delete nurbs;
         }
+      }
 
-        // update refmap coeffs of curvilinear elements
-        Element* e;
-        for_all_elements(e, mesh)
-          if (e->cm != NULL)
-            e->cm->update_refmap_coeffs(e);
+      // update refmap coeffs of curvilinear elements
+      Element* e;
+      for_all_elements(e, mesh)
+        if (e->cm != NULL)
+          e->cm->update_refmap_coeffs(e);
 
-        //// refinements /////////////////////////////////////////////////////////////
-        if (m.n_ref > 0)
+      //// refinements /////////////////////////////////////////////////////////////
+      if (m.n_ref > 0)
+      {
+        n = m.n_ref;
+        if (n < 0) error("File %s: 'refinements' must be a list.", filename);
+
+        // perform initial refinements
+        for (i = 0; i < n; i++)
         {
-          n = m.n_ref;
-          if (n < 0) error("File %s: 'refinements' must be a list.", filename);
-
-          // perform initial refinements
-          for (i = 0; i < n; i++)
-          {
-            int id, ref;
-            id = m.ref_elt[i];
-            ref = m.ref_type[i];
-            mesh->refine_element_id(id, ref);
-          }
+          int id, ref;
+          id = m.ref_elt[i];
+          ref = m.ref_type[i];
+          mesh->refine_element_id(id, ref);
         }
-        mesh->ninitial = mesh->elements.get_num_items();
+      }
+      mesh->ninitial = mesh->elements.get_num_items();
 
-        mesh->seq = g_mesh_seq++;
+      mesh->seq = g_mesh_seq++;
 
 
-        return true;
+      return true;
     }
-
-    //// save ////////////////////////////////////////////////////////////////////////////////////
 
     void MeshReaderH2D::save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first)
     {
@@ -426,7 +408,6 @@ namespace Hermes
       }
     }
 
-
     void MeshReaderH2D::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
     {
       if (nurbs->arc)
@@ -450,7 +431,6 @@ namespace Hermes
         fprintf(f, "} }");
       }
     }
-
 
     static bool is_twin_nurbs(Element* e, int i)
     {
@@ -483,11 +463,9 @@ namespace Hermes
         if (!e->used)
           fprintf(f, "%s  { }", nl);
         else if (e->is_triangle())
-          fprintf(f, "%s  { %d, %d, %d, \"%s\" }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id,
-              mesh->element_markers_conversion.get_user_marker(e->marker).c_str());
+          fprintf(f, "%s  { %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->marker);
         else
-          fprintf(f, "%s  { %d, %d, %d, %d, \"%s\" }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id,
-                  mesh->element_markers_conversion.get_user_marker(e->marker).c_str());
+          fprintf(f, "%s  { %d, %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, e->marker);
       }
 
       // save boundary markers
@@ -510,8 +488,7 @@ namespace Hermes
                   fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
                   save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
                 }
-                if (!first)
-                  fprintf(f, "\n}\n\n");
+                if (!first) fprintf(f, "\n}\n\n");
 
                 // save refinements
                 unsigned temp = mesh->seq;

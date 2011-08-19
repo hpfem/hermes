@@ -45,7 +45,7 @@ namespace Hermes
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
       {
-        Hermes::Ord result = 0;
+        Hermes::Ord result = Hermes::Ord(0);
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * conj(v->val[i]));
         return result;

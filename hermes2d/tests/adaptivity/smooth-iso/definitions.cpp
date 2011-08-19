@@ -22,7 +22,7 @@ double CustomFunction::value(double x, double y) const
   return -2*Hermes::sin(x)*Hermes::sin(y);
 }
 
-Ord CustomFunction::value_ord(Ord x, Ord y) const 
+Ord CustomFunction::value(Ord x, Ord y) const 
 {
   return Ord(7);
 }

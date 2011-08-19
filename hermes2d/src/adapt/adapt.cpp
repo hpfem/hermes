@@ -347,7 +347,7 @@ namespace Hermes
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      SolFunctionDomain result = 0;
+      SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]));
       return result;
@@ -358,7 +358,7 @@ namespace Hermes
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      SolFunctionDomain result = 0;
+      SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
         + u->dy[i] * conj(v->dy[i]));
@@ -370,7 +370,7 @@ namespace Hermes
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      SolFunctionDomain result = 0;
+      SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
       return result;
@@ -385,7 +385,7 @@ namespace Hermes
       error("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
-      SolFunctionDomain result = 0;
+      SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
         u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -397,7 +397,7 @@ namespace Hermes
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-      SolFunctionDomain result = 0;
+      SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
         u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));

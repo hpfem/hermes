@@ -4305,7 +4305,7 @@ namespace Hermes
 
         // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
         Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(&geom_ord, nbs_u->neighb_el->marker, 
-          nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+          nbs_u->neighb_el->id, Hermes::Ord(nbs_u->neighb_el->get_diameter()));
         double fake_wt = 1.0;
 
         // Total order of the vector form.
@@ -4382,7 +4382,7 @@ namespace Hermes
 
         // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
         Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(&geom_ord, nbs_u->neighb_el->marker, 
-          nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+          nbs_u->neighb_el->id, Hermes::Ord(nbs_u->neighb_el->get_diameter()));
         double fake_wt = 1.0;
 
         // Total order of the vector form.
@@ -4678,7 +4678,7 @@ namespace Hermes
 
         // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
         Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(&geom_ord,
-          nbs_v->neighb_el->marker, nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+          nbs_v->neighb_el->marker, nbs_v->neighb_el->id, Hermes::Ord(nbs_v->neighb_el->get_diameter()));
         double fake_wt = 1.0;
 
         // Total order of the vector form.
@@ -4756,7 +4756,7 @@ namespace Hermes
 
         // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
         Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(&geom_ord,
-          nbs_v->neighb_el->marker, nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+          nbs_v->neighb_el->marker, nbs_v->neighb_el->id, Hermes::Ord(nbs_v->neighb_el->get_diameter()));
         double fake_wt = 1.0;
 
         // Total order of the vector form.

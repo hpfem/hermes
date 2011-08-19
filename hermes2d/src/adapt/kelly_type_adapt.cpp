@@ -674,7 +674,7 @@ namespace Hermes
       // ExtData<Hermes::Ord>* fake_ext = this->dp.init_ext_fns_ord(err_est_form->ext, nbs);
 
       // Polynomial order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, nbs->neighb_el->get_diameter());
+      Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, Hermes::Ord(nbs->neighb_el->get_diameter()));
       double fake_wt = 1.0;
       Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ui->fn, fake_ui->fn[err_est_form->i], fake_e, NULL);
 

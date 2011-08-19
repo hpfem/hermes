@@ -192,27 +192,13 @@ namespace Hermes
       void update_essential_bc_values();
 
       /// \brief Returns the number of basis functions contained in the spaces.
-      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces) {
-        _F_;
-        int ndof = 0;
-        for (unsigned int i=0; i<spaces.size(); i++) {
-          ndof += spaces[i]->get_num_dofs();
-        }
-        return ndof;
-      }
+      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
+
+      /// \brief Returns the number of basis functions contained in the space.
+      static int get_num_dofs(Space<Scalar>* space);
 
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-      static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces) {
-        _F_;
-        int n = spaces.size();
-        // assigning dofs to each space
-        int ndof = 0;
-        for (int i = 0; i < n; i++) {
-          ndof += spaces[i]->assign_dofs(ndof);
-        }
-
-        return ndof;
-      }
+      static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
     protected:
       /// Number of degrees of freedom (dimension of the space).

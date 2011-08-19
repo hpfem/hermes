@@ -27,7 +27,7 @@ namespace Hermes
     template<typename Real>
     Real int_v(int n, double *wt, Func<Real> *v)
     {
-      Real result = 0;
+      Real result = Real(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * v->val[i];
       return result;
@@ -36,7 +36,7 @@ namespace Hermes
     template<typename Real>
     Real int_x_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
     {
-      Real result = 0;
+      Real result = Real(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->x[i] * v->val[i];
       return result;
@@ -45,7 +45,7 @@ namespace Hermes
     template<typename Real>
     Real int_y_v(int n, double *wt, Func<Real> *v, Geom<Real> *e)
     {
-      Real result = 0;
+      Real result = Real(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->y[i] * v->val[i];
       return result;
@@ -54,7 +54,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u->val[i] * v->val[i];
       return result;
@@ -64,7 +64,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u_ext->val[i] * v->val[i];
       return result;
@@ -73,7 +73,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_x_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->x[i] * u->val[i] * v->val[i];
       return result;
@@ -83,7 +83,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_x_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->x[i] * u_ext->val[i] * v->val[i];
       return result;
@@ -92,7 +92,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_y_u_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->y[i] * u->val[i] * v->val[i];
       return result;
@@ -102,7 +102,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_y_u_ext_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->y[i] * u_ext->val[i] * v->val[i];
       return result;
@@ -111,7 +111,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_F_v(int n, double *wt, Real (*F)(Real x, Real y), Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * ((*F)(e->x[i], e->y[i]) * v->val[i]);
       return result;
@@ -120,7 +120,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       return result;
@@ -130,7 +130,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
       return result;
@@ -139,7 +139,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_x_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       return result;
@@ -149,7 +149,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_x_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->x[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
       return result;
@@ -158,7 +158,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_y_grad_u_grad_v(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
       return result;
@@ -168,7 +168,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_y_grad_u_ext_grad_v(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * e->y[i] * (u_ext->dx[i] * v->dx[i] + u_ext->dy[i] * v->dy[i]);
       return result;
@@ -177,7 +177,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudx_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * v->val[i]);
       return result;
@@ -186,7 +186,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudy_v(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dy[i] * v->val[i]);
       return result;
@@ -195,7 +195,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u->val[i] * v->dx[i];
       return result;
@@ -204,7 +204,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_dvdx_over_x(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * ((e->x[i] > 0) ? u->val[i] * v->dx[i] / e->x[i] : 0.0);
       return result;
@@ -214,7 +214,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_ext_dvdx_over_x(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u_ext->val[i] * v->dx[i] / e->x[i];
       return result;
@@ -223,7 +223,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u->val[i] * v->dy[i];
       return result;
@@ -232,7 +232,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_dvdy_over_y(int n, double *wt, Func<Real> *u, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * ((e->y[i] > 0) ? u->val[i] * v->dy[i] / e->y[i] : 0.0);
       return result;
@@ -242,7 +242,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_u_ext_dvdy_over_y(int n, double *wt, Func<Scalar> *u_ext, Func<Real> *v, Geom<Real> *e)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * u_ext->val[i] * v->dy[i] / e->y[i];
       return result;
@@ -251,7 +251,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudx_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * v->dx[i]);
       return result;
@@ -260,7 +260,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudy_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dy[i] * v->dy[i]);
       return result;
@@ -269,7 +269,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudx_dvdy(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (u->dx[i] * v->dy[i]);
       return result;
@@ -278,7 +278,7 @@ namespace Hermes
     template<typename Real, typename Scalar>
     Scalar int_dudy_dvdx(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (v->dx[i] * u->dy[i]);
       return result;
@@ -288,7 +288,7 @@ namespace Hermes
     Scalar int_w_nabla_u_v(int n, double *wt, Func<Real> *w1, Func<Real> *w2,
       Func<Real> *u, Func<Real> *v)
     {
-      Scalar result = 0;
+      Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
         result += wt[i] * (w1->val[i] * u->dx[i] + w2->val[i] * u->dy[i]) * v->val[i];
       return result;

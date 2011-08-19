@@ -34,7 +34,7 @@ namespace Hermes
 
     Ord();
     explicit Ord(int o);
-    Ord(double d);
+    explicit Ord(double o);
 
     int get_order() const;
 
@@ -42,23 +42,33 @@ namespace Hermes
 
     Ord operator+(const Ord &o);
     Ord operator+(double d);
+    Ord operator+(std::complex<double> d);
     Ord operator-(const Ord &o);
     Ord operator-(double d);
+    Ord operator-(std::complex<double> d);
     Ord operator*(const Ord &o);
     Ord operator*(double d);
+    Ord operator*(std::complex<double> d);
     Ord operator/(const Ord &o);
     Ord operator/(double d);
+    Ord operator/(std::complex<double> d);
 
     Ord operator+=(const Ord &o);
     Ord operator-=(const Ord &o);
 
     Ord operator+=(const double &d);
+    Ord operator+=(const std::complex<double> &d);
     Ord operator-=(const double &d);
+    Ord operator-=(const std::complex<double> &d);
     Ord operator*=(const double &d);
+    Ord operator*=(const std::complex<double> &d);
     Ord operator/=(const double &d);
+    Ord operator/=(const std::complex<double> &d);
 
     bool operator<(double d);
+    bool operator<(std::complex<double> d);
     bool operator>(double d);
+    bool operator>(std::complex<double> d);
     bool operator<(const Ord &o);
     bool operator>(const Ord &o);
 

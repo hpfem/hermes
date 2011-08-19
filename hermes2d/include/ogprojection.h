@@ -140,7 +140,7 @@ namespace Hermes
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           return result;
@@ -151,7 +151,7 @@ namespace Hermes
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           return result;
@@ -162,7 +162,7 @@ namespace Hermes
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->val[i] * v->val[i]);
           return result;
@@ -173,7 +173,7 @@ namespace Hermes
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->curl[i] * conj(v->curl[i]));
             result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -186,7 +186,7 @@ namespace Hermes
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->div[i] * conj(v->div[i]));
             result += wt[i] * (u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
@@ -256,7 +256,7 @@ namespace Hermes
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i] 
           + (u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
@@ -269,7 +269,7 @@ namespace Hermes
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i] 
           + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
@@ -281,7 +281,7 @@ namespace Hermes
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i];
           return result;
@@ -292,7 +292,7 @@ namespace Hermes
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u_ext[this->i]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
             result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
@@ -307,7 +307,7 @@ namespace Hermes
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
           _F_
-            SolFunctionDomain result = 0;
+            SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u_ext[this->i]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
             result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])

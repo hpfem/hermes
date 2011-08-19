@@ -238,7 +238,6 @@ namespace Hermes
       x = y = NULL;
       nx = ny = NULL;
       tx = ty = NULL;
-      diam = 0;
     }
 
     template<typename T>
