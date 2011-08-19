@@ -15,6 +15,9 @@
 
 #include "mesh.h"
 #include "mesh_reader_h2d_xml.h"
+#include <iostream>
+
+using namespace std;
 
 namespace Hermes
 {
@@ -42,16 +45,16 @@ namespace Hermes
           variables[variables_i] = parsed_h2d_xml_mesh->variables().variable().at(variables_i).value();
 
         // Vertices //.
-        unsigned int vertices_count = parsed_h2d_xml_mesh->vertices().vertex().size();
+        int vertices_count = parsed_h2d_xml_mesh->vertices().vertex().size();
 
         // Initialize mesh.
-        unsigned int size = HashTable::H2D_DEFAULT_HASH_SIZE;
+        int size = HashTable::H2D_DEFAULT_HASH_SIZE;
         while (size < 8 * vertices_count)
           size *= 2;
         mesh->init(size);
 
         // Create top-level vertex nodes.
-        for (unsigned int vertices_i = 0; vertices_i < vertices_count; vertices_i++)
+        for (int vertices_i = 0; vertices_i < vertices_count; vertices_i++)
         {
           Node* node = mesh->nodes.add();
           assert(node->id == vertices_i);
@@ -261,7 +264,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        cerr << e << endl;
+        std::cerr << e << endl;
         return 1;
       }
 

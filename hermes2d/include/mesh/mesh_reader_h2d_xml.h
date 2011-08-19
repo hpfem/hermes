@@ -20,6 +20,7 @@
 #ifdef error(...)
 #undef error(...)
 #endif
+
 #include "mesh_h2d_xml.h"
 
 // This is here mainly because XSD uses its own error, therefore it had to be undefined previously.

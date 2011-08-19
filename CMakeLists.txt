@@ -196,23 +196,9 @@ project(hermes)
 	# set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-			# Stop on first error (sometimes gcc doesn't print all the possible
-			# candidates when a function signature is wrong if this is enabled, so we
-			# leave it disabled by default):
-			# set(CMAKE_CXX_FLAGS "-Wfatal-errors ${CMAKE_CXX_FLAGS}")
-
-			# All warnings are errors
-			#set(CMAKE_CXX_FLAGS "-Werror ${CMAKE_CXX_FLAGS}")
-
-			# Disable the "unused variable/parameters/functions" warnings (as those are
-			# not really problematic, it doesn't cause any harm):
-			set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function ${CMAKE_CXX_FLAGS}")
-
-			# Disable all switch warnings for now (until all code is fixed)
-			set(CMAKE_CXX_FLAGS "-Wno-switch-enum -Wno-switch -Wno-switch-default ${CMAKE_CXX_FLAGS}")
-
-			# Enable all warnings:
-			set(CMAKE_CXX_FLAGS "-W -Wuninitialized -Wall ${CMAKE_CXX_FLAGS}")
+			# Disable all warnings and turn on only important ones:
+			set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS}")
+			set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
 			set(RELEASE_FLAGS "-DNDEBUG -O3")
 			set(DEBUG_FLAGS   "-g")
