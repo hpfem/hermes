@@ -276,7 +276,7 @@ namespace Hermes
         else
           fprintf(f, " notitle ");
 
-        if (i < rows.size() - 1) fprintf(f, ", ");
+        if (i < rows.size() - 1) fprintf(f, ",\\\n     ");
       }
       fprintf(f,"\n");
 
