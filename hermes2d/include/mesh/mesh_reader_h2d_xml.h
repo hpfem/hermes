@@ -22,6 +22,7 @@
 #endif
 
 #include "mesh_h2d_xml.h"
+#include "subdomains_h2d_xml.h"
 
 // This is here mainly because XSD uses its own error, therefore it had to be undefined previously.
 #ifndef error(...)
@@ -41,7 +42,13 @@ namespace Hermes
       MeshReaderH2DXML();
       virtual ~MeshReaderH2DXML();
 
+      /// This method loads a single mesh from a file.
       virtual bool load(const char *file_name, Mesh *mesh);
+
+      /// This method loads multiple meshes according to subdomains described in the meshfile.
+      /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
+      ///            also the order is determined by the order in the file.
+      //bool load(const char *file_name, Hermes::vector<Mesh *> meshes);
 
     protected:
       Nurbs* load_arc(Mesh *mesh, std::auto_ptr<mesh_h2d> & m, int id, Node** en, int &p1, int &p2);
