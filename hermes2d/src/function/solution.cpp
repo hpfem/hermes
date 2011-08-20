@@ -955,7 +955,7 @@ namespace Hermes
       {
         if (mask & ~H2D_FN_DEFAULT)
           error("Cannot obtain second derivatives of an exact solution.");
-        node = new_node(mask = H2D_FN_DEFAULT, np);
+        node = this->new_node(mask = H2D_FN_DEFAULT, np);
 
         this->update_refmap();
         double* x = this->refmap->get_phys_x(order);

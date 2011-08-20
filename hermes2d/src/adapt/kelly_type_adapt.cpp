@@ -425,7 +425,7 @@ namespace Hermes
         this->errors_squared_sum /= total_norm;
 
       // Prepare an ordered list of elements according to an error.
-      fill_regular_queue(&(stage.meshes.front()));
+      this->fill_regular_queue(&(stage.meshes.front()));
       this->have_errors = true;
 
       if (calc_norm)

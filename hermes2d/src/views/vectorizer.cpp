@@ -977,7 +977,7 @@ namespace Hermes
       void Vectorizer<Scalar>::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
       {
         assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
-        calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->nv, min_x, max_x, min_y, max_y);
+        this->calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->nv, min_x, max_x, min_y, max_y);
       }
       template class HERMES_API Vectorizer<double>;
       template class HERMES_API Vectorizer<std::complex<double> >;

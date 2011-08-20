@@ -266,8 +266,8 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
         Hermes::vector<Ord> result;
-        Ord result_0_0 = 0;
-        Ord result_1_1 = 0;
+        Ord result_0_0(0);
+        Ord result_1_1(0);
         for (int i = 0; i < n; i++) 
         {
           result_0_0 += wt[i] * ((lambda + 2*mu) * u->dx[i] * v->dx[i] + mu * u->dy[i] * v->dy[i]);
@@ -318,8 +318,8 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
         Hermes::vector<Ord> result;
-        Ord result_0 = 0;
-        Ord result_1 = 0;
+        Ord result_0(0);
+        Ord result_1(0);
         for (int i = 0; i < n; i++) 
         {
           result_0 += wt[i] * ((lambda + 2*mu) * u_ext[0]->dx[i] * v->dx[i] + mu * u_ext[0]->dy[i] * v->dy[i]);

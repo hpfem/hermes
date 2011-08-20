@@ -998,10 +998,10 @@ namespace Hermes
         GeomType gt) : WeakForm<Scalar>()
       {
         // Jacobian.
-        add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, coeff, HERMES_NONSYM, gt));
+        this->add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, coeff, HERMES_NONSYM, gt));
 
         // Residual.
-        add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, coeff, gt));
+        this->add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, coeff, gt));
       };
 
       template<typename Scalar>
@@ -1017,11 +1017,11 @@ namespace Hermes
       {
         // Jacobian.
         // NOTE: The flag HERMES_NONSYM is important here.
-        add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, coeff, HERMES_NONSYM, gt));
+        this->add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, area, coeff, HERMES_NONSYM, gt));
 
         // Residual.
-        add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, coeff, gt));
-        add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f, gt));
+        this->add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, coeff, gt));
+        this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f, gt));
       };
 
       template class HERMES_API DefaultMatrixFormVol<double>;

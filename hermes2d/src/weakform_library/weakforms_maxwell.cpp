@@ -96,7 +96,7 @@ namespace Hermes
       Ord DefaultJacobianMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord planar_part = 0;
+        Ord planar_part(0);
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
@@ -166,7 +166,7 @@ namespace Hermes
       Ord DefaultResidualMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         Geom<Ord> *e, ExtData<Ord> *ext) const 
       {
-        Ord planar_part = 0;
+        Ord planar_part(0);
         for (int i = 0; i < n; i++) 
         {
           Ord B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
