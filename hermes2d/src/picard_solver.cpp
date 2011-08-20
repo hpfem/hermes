@@ -106,20 +106,20 @@ namespace Hermes
           rhs[i] += residual_n_k * (residual_n_k - residual_i_k);
 	}
         for (int j = 0; j < n; j++)
-	{ 
-          mat[i][j] = 0;
+	{
+          Scalar val = 0;
           for (int k = 0; k < ndof; k++) 
   	  { 
             Scalar residual_n_k = previous_vectors[n+1][k] - previous_vectors[n][k];
             Scalar residual_i_k = previous_vectors[i+1][k] - previous_vectors[i][k];
             Scalar residual_j_k = previous_vectors[j+1][k] - previous_vectors[j][k];
-            // FIXME: Is this how real part should be obtained?
-            Scalar val = (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
+            val += (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
+          }
 
-            // THIS IS WRONG!!!
-            // The abs() needs to be replaced with a real part.
-            mat[i][j] += std::abs(val);
-	  }
+          // FIXME: This is not a nice way to cast Scalar to double. Not mentioning
+          // that this will not work for Scalar = complex.
+          double* ptr = (double*)(&val);
+          mat[i][j] = *ptr;
         }
       }
 
