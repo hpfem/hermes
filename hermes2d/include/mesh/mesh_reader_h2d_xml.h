@@ -17,6 +17,8 @@
 #define _MESH_READER_H2D_XML_H_
 
 #include "mesh_reader.h"
+
+// This is here mainly because XSD uses its own error, therefore it has to be undefined here.
 #ifdef error(...)
 #undef error(...)
 #endif
@@ -48,11 +50,11 @@ namespace Hermes
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///            also the order is determined by the order in the file.
-      //bool load(const char *file_name, Hermes::vector<Mesh *> meshes);
+      bool load(const char *file_name, Hermes::vector<Mesh *> meshes);
 
     protected:
-      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<mesh_h2d> & m, int id, Node** en, int &p1, int &p2);
-      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<mesh_h2d> & m, int id, Node** en, int &p1, int &p2);
+      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<XMLMesh::mesh> & m, int id, Node** en, int &p1, int &p2);
+      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<XMLMesh::mesh> & m, int id, Node** en, int &p1, int &p2);
     };
   }
 }

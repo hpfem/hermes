@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
-
-<domain_h2d xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../include/mesh/subdomains_h2d_xml.xsd">
-
+<namespace:domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:namespace="XMLSubdomains"
+	xsi:schemaLocation="XMLSubdomains ../../include/mesh/subdomains_h2d_xml.xsd">
   <variables>
     <variable name="a" value="1.0" />
     <variable name="two_a" value="2.0" />
@@ -74,4 +73,4 @@
 			<boundary_edge-number number="9" />
 		</subdomain>
 	</subdomains>
-</domain_h2d>
+</namespace:domain>

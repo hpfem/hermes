@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
-<mesh_h2d xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../../include/mesh/mesh_h2d_xml.xsd">
+<namespace:mesh xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:namespace="XMLMesh"
+	xsi:schemaLocation="XMLMesh ../../../../include/mesh/mesh_h2d_xml.xsd">
   <vertices>
     <vertex x="0" y="0" />
 		<vertex x="2.0" y="0" />
@@ -33,4 +34,4 @@
 			<knot value="1" />
 		</NURBS>
   </curves>
-</mesh_h2d>
+</namespace:mesh>

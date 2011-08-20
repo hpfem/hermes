@@ -1,109 +1,128 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="mesh_h2d">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="1" name="variables">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="0" maxOccurs="unbounded" name="variable">
-                <xs:complexType>
-									<xs:attribute name="name" type="xs:string" use="required" />
-									<xs:attribute name="value" type="xs:decimal" use="required" />
-								</xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="vertices">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="3" maxOccurs="unbounded" name="vertex">
-                <xs:complexType>
-                  <xs:attribute name="x" type="xs:string" use="required" />
-									<xs:attribute name="y" type="xs:string" use="required" />
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="elements">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:choice minOccurs="1" maxOccurs="unbounded">
-                <xs:element minOccurs="0" maxOccurs="unbounded" name="triangle">
-                  <xs:complexType>
-                    <xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />
-										<xs:attribute name="v3" type="xs:integer" use="required" />										
-										<xs:attribute name="marker" type="xs:string" use="required" />
-                    <xs:attribute name="empty" type="xs:boolean" />
-                  </xs:complexType>
-                </xs:element>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="quad">
-                  <xs:complexType>
-                    <xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />
-										<xs:attribute name="v3" type="xs:integer" use="required" />
-										<xs:attribute name="v4" type="xs:integer" use="required" />										
-										<xs:attribute name="marker" type="xs:string" use="required" />
-                    <xs:attribute name="empty" type="xs:boolean" />
-                  </xs:complexType>
-                </xs:element>
-              </xs:choice>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="boundaries">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="0" maxOccurs="unbounded" name="boundary_edge">
-                <xs:complexType>
-                  <xs:attribute name="v1" type="xs:integer" use="required" />
-									<xs:attribute name="v2" type="xs:integer" use="required" />										
-									<xs:attribute name="marker" type="xs:string" use="required" />
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-				<xs:element minOccurs="0" maxOccurs="1" name="curves">
-					<xs:complexType>
-            <xs:sequence>
-						  <xs:choice>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="arc">
-									<xs:complexType>
-										<xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />	
-										<xs:attribute name="angle" type="xs:decimal" use="required" />
-									</xs:complexType>
-								</xs:element>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="NURBS">
-									<xs:complexType mixed="true">
-										<xs:sequence>
-											<xs:element minOccurs="0" maxOccurs="unbounded" name="inner_point">
-												<xs:complexType>
-													<xs:attribute name="x" type="xs:decimal" use="required" />
-													<xs:attribute name="y" type="xs:decimal" use="required" />	
-													<xs:attribute name="weight" type="xs:decimal" use="required" />
-												</xs:complexType>
-											</xs:element> 
-											<xs:element minOccurs="0" maxOccurs="unbounded" name="knot">
-												<xs:complexType>
-													<xs:attribute name="value" type="xs:decimal" use="required" />
-												</xs:complexType>
-											</xs:element>
-										</xs:sequence>
-										<xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />	
-										<xs:attribute name="degree" type="xs:integer" use="required" />
-									</xs:complexType>
-								</xs:element>
-							</xs:choice>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-</xs:schema>
+<schema targetNamespace="XMLMesh"
+xmlns:mesh="XMLMesh"
+xmlns="http://www.w3.org/2001/XMLSchema">
+  <element name="mesh">
+    <complexType>
+      <sequence>
+        <element minOccurs="0" maxOccurs="1" name="variables"
+        type="mesh:variables_type" />
+        <element minOccurs="1" maxOccurs="1" name="vertices"
+        type="mesh:vertices_type" />
+        <element minOccurs="1" maxOccurs="1" name="elements"
+        type="mesh:elements_type" />
+        <element minOccurs="1" maxOccurs="1" name="boundaries"
+        type="mesh:boundaries_type" />
+        <element minOccurs="0" maxOccurs="1" name="curves"
+        type="mesh:curves_type" />
+      </sequence>
+    </complexType>
+  </element>
+	
+  <complexType name="variables_type">
+    <sequence>
+      <element minOccurs="0" maxOccurs="unbounded" name="variable">
+        <complexType>
+          <attribute name="name" type="string" use="required" />
+          <attribute name="value" type="decimal" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+	
+  <complexType name="vertices_type">
+    <sequence>
+      <element minOccurs="3" maxOccurs="unbounded" name="vertex">
+        <complexType>
+          <attribute name="x" type="string" use="required" />
+          <attribute name="y" type="string" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+	
+  <complexType name="elements_type">
+    <sequence>
+      <choice minOccurs="1" maxOccurs="unbounded">
+        <element minOccurs="0" maxOccurs="unbounded"
+        name="triangle">
+          <complexType>
+            <attribute name="v1" type="integer" use="required" />
+            <attribute name="v2" type="integer" use="required" />
+            <attribute name="v3" type="integer" use="required" />
+            <attribute name="marker" type="string"
+            use="required" />
+            <attribute name="empty" type="boolean" />
+          </complexType>
+        </element>
+        <element minOccurs="0" maxOccurs="unbounded" name="quad">
+          <complexType>
+            <attribute name="v1" type="integer" use="required" />
+            <attribute name="v2" type="integer" use="required" />
+            <attribute name="v3" type="integer" use="required" />
+            <attribute name="v4" type="integer" use="required" />
+            <attribute name="marker" type="string"
+            use="required" />
+            <attribute name="empty" type="boolean" />
+          </complexType>
+        </element>
+      </choice>
+    </sequence>
+  </complexType>
+	
+  <complexType name="boundaries_type">
+    <sequence>
+      <element minOccurs="0" maxOccurs="unbounded"
+      name="boundary_edge">
+        <complexType>
+          <attribute name="v1" type="integer" use="required" />
+          <attribute name="v2" type="integer" use="required" />
+          <attribute name="marker" type="string" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+	
+  <complexType name="curves_type">
+    <sequence>
+      <choice>
+        <element minOccurs="0" maxOccurs="unbounded" name="arc">
+          <complexType>
+            <attribute name="v1" type="integer" use="required" />
+            <attribute name="v2" type="integer" use="required" />
+            <attribute name="angle" type="decimal"
+            use="required" />
+          </complexType>
+        </element>
+        <element minOccurs="0" maxOccurs="unbounded" name="NURBS">
+          <complexType mixed="true">
+            <sequence>
+              <element minOccurs="0" maxOccurs="unbounded"
+              name="inner_point">
+                <complexType>
+                  <attribute name="x" type="decimal"
+                  use="required" />
+                  <attribute name="y" type="decimal"
+                  use="required" />
+                  <attribute name="weight" type="decimal"
+                  use="required" />
+                </complexType>
+              </element>
+              <element minOccurs="0" maxOccurs="unbounded"
+              name="knot">
+                <complexType>
+                  <attribute name="value" type="decimal"
+                  use="required" />
+                </complexType>
+              </element>
+            </sequence>
+            <attribute name="v1" type="integer" use="required" />
+            <attribute name="v2" type="integer" use="required" />
+            <attribute name="degree" type="integer"
+            use="required" />
+          </complexType>
+        </element>
+      </choice>
+    </sequence>
+  </complexType>
+</schema>

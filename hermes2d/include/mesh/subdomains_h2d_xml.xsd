@@ -1,132 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="domain_h2d">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="1" name="variables">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="0" maxOccurs="unbounded" name="variable">
-                <xs:complexType>
-									<xs:attribute name="name" type="xs:string" use="required" />
-									<xs:attribute name="value" type="xs:decimal" use="required" />
-								</xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="vertices">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="3" maxOccurs="unbounded" name="vertex">
-                <xs:complexType>
-                  <xs:attribute name="x" type="xs:string" use="required" />
-									<xs:attribute name="y" type="xs:string" use="required" />
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="elements">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:choice minOccurs="1" maxOccurs="unbounded">
-                <xs:element minOccurs="0" maxOccurs="unbounded" name="triangle">
-                  <xs:complexType>
-                    <xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />
-										<xs:attribute name="v3" type="xs:integer" use="required" />										
-										<xs:attribute name="marker" type="xs:string" use="required" />
-                    <xs:attribute name="empty" type="xs:boolean" />
-                  </xs:complexType>
-                </xs:element>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="quad">
-                  <xs:complexType>
-                    <xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />
-										<xs:attribute name="v3" type="xs:integer" use="required" />
-										<xs:attribute name="v4" type="xs:integer" use="required" />										
-										<xs:attribute name="marker" type="xs:string" use="required" />
-                    <xs:attribute name="empty" type="xs:boolean" />
-                  </xs:complexType>
-                </xs:element>
-              </xs:choice>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element minOccurs="1" maxOccurs="1" name="boundaries">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element minOccurs="0" maxOccurs="unbounded" name="boundary_edge">
-                <xs:complexType>
-                  <xs:attribute name="v1" type="xs:integer" use="required" />
-									<xs:attribute name="v2" type="xs:integer" use="required" />										
-									<xs:attribute name="marker" type="xs:string" use="required" />
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-				<xs:element minOccurs="0" maxOccurs="1" name="curves">
-					<xs:complexType>
-            <xs:sequence>
-						  <xs:choice>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="arc">
-									<xs:complexType>
-										<xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />	
-										<xs:attribute name="angle" type="xs:decimal" use="required" />
-									</xs:complexType>
-								</xs:element>
-								<xs:element minOccurs="0" maxOccurs="unbounded" name="NURBS">
-									<xs:complexType mixed="true">
-										<xs:sequence>
-											<xs:element minOccurs="0" maxOccurs="unbounded" name="inner_point">
-												<xs:complexType>
-													<xs:attribute name="x" type="xs:decimal" use="required" />
-													<xs:attribute name="y" type="xs:decimal" use="required" />	
-													<xs:attribute name="weight" type="xs:decimal" use="required" />
-												</xs:complexType>
-											</xs:element> 
-											<xs:element minOccurs="0" maxOccurs="unbounded" name="knot">
-												<xs:complexType>
-													<xs:attribute name="value" type="xs:decimal" use="required" />
-												</xs:complexType>
-											</xs:element>
-										</xs:sequence>
-										<xs:attribute name="v1" type="xs:integer" use="required" />
-										<xs:attribute name="v2" type="xs:integer" use="required" />	
-										<xs:attribute name="degree" type="xs:integer" use="required" />
-									</xs:complexType>
-								</xs:element>
-							</xs:choice>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-				<xs:element name="subdomains">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element minOccurs="1" maxOccurs="unbounded" name="subdomain">
-								<xs:complexType mixed="true">
-									<xs:sequence>
-										<xs:element minOccurs="0" maxOccurs="unbounded" name="element-number">
-											<xs:complexType>
-												<xs:attribute name="number" type="xs:integer" use="required" />
-											</xs:complexType>
-										</xs:element> 
-										<xs:element minOccurs="0" maxOccurs="unbounded" name="boundary_edge-number">
-											<xs:complexType>
-												<xs:attribute name="number" type="xs:integer" use="required" />
-											</xs:complexType>
-										</xs:element>
-									</xs:sequence>
-									<xs:attribute name="name" type="xs:string" use="required" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-</xs:schema>
+<schema targetNamespace="XMLSubdomains"
+	xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:mesh="XMLMesh">
+	<import namespace="XMLMesh" 
+  schemaLocation="mesh_h2d_xml.xsd"/>	
+  <element name="domain">
+		<complexType>
+      <sequence>
+        <element name="variables" type="mesh:variables_type"/>
+        <element name="vertices" type="mesh:vertices_type"/>
+        <element name="elements" type="mesh:elements_type"/>
+        <element name="boundaries" type="mesh:boundaries_type"/>
+				<element name="curves" type="mesh:curves_type"/>
+				<element name="subdomains">
+					<complexType>
+						<sequence>
+							<element minOccurs="1" maxOccurs="unbounded" name="subdomain">
+								<complexType mixed="true">
+									<sequence>
+										<element minOccurs="0" maxOccurs="unbounded" name="element-number">
+											<complexType>
+												<attribute name="number" type="integer" use="required" />
+											</complexType>
+										</element> 
+										<element minOccurs="0" maxOccurs="unbounded" name="boundary_edge-number">
+											<complexType>
+												<attribute name="number" type="integer" use="required" />
+											</complexType>
+										</element>
+									</sequence>
+									<attribute name="name" type="string" use="required" />
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+      </sequence>
+    </complexType>
+  </element>
+</schema>

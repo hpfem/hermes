@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <domain_h2d xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="subdomains_h2d_xml.xsd">
+       xsi:noNamespaceSchemaLocation="subdomains_h2d_xml.xsd" targetNamespace="SubdomainsXML">
 
   <variables>
     <variable name="a" value="1.0" />
