@@ -252,13 +252,13 @@ namespace Hermes
           */
 
           // Calculate new vector and store it in this->sln_vector[].
-          // FIXME: Anderson beta should be used here.
           for (int i = 0; i < ndof; i++)
 	  {
             this->sln_vector[i] = 0;
             for (int j = 1; j < num_last_vectors_used; j++)
 	    {
-              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i]; 
+              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] 
+		- (1.0 - anderson_beta) * anderson_coeffs[j-1] * (previous_vectors[j][i] - previous_vectors[j-1][i]); 
 	    }
           }
         }
