@@ -49,7 +49,17 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), pss(NULL)
     {
+      // Set all attributes for which we don't need to acces wf or spaces. 
+      // This is important for the destructor to properly detect what needs to be deallocated.
       sp_seq = NULL;
+      cache_for_adaptivity = false;
+      temp_cache_for_adaptivity = false;
+      is_fvm = false;
+      RungeKutta = false;
+      RK_original_spaces_count = 0;
+      matrix_buffer = NULL;
+      matrix_buffer_dim = 0;
+      have_matrix = false;
     }
 
     template<typename Scalar>
