@@ -7,11 +7,16 @@
   <element name="domain">
 		<complexType>
       <sequence>
-        <element name="variables" type="mesh:variables_type"/>
-        <element name="vertices" type="mesh:vertices_type"/>
-        <element name="elements" type="mesh:elements_type"/>
-        <element name="boundaries" type="mesh:boundaries_type"/>
-				<element name="curves" type="mesh:curves_type"/>
+        <element minOccurs="0" maxOccurs="1" name="variables"
+        type="mesh:variables_type" />
+        <element minOccurs="1" maxOccurs="1" name="vertices"
+        type="mesh:vertices_type" />
+        <element minOccurs="1" maxOccurs="1" name="elements"
+        type="mesh:elements_type" />
+        <element minOccurs="1" maxOccurs="1" name="boundaries"
+        type="mesh:boundaries_type" />
+        <element minOccurs="0" maxOccurs="1" name="curves"
+        type="mesh:curves_type" />
 				<element name="subdomains">
 					<complexType>
 						<sequence>

@@ -53,8 +53,20 @@ namespace Hermes
       bool load(const char *file_name, Hermes::vector<Mesh *> meshes);
 
     protected:
-      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<XMLMesh::mesh> & m, int id, Node** en, int &p1, int &p2);
-      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<XMLMesh::mesh> & m, int id, Node** en, int &p1, int &p2);
+      /// Internal method loading contents of parsed_xml_entity into mesh.
+      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
+      template<typename T>
+      bool load(std::auto_ptr<T> & parsed_xml_entity, Mesh *mesh);
+
+      /// Loads one circular arc.
+      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
+      template<typename T>
+      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int &p1, int &p2);
+
+      /// Loads one general NURBS curve.
+      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
+      template<typename T>
+      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int &p1, int &p2);
     };
   }
 }

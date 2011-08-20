@@ -34,10 +34,96 @@ namespace Hermes
     bool MeshReaderH2DXML::load(const char *filename, Mesh *mesh)
     {
       mesh->free();
+      std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh (XMLMesh::mesh_(filename));
+      return load<XMLMesh::mesh>(parsed_xml_mesh, mesh);
+    }
+
+    bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
+    {
+      for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
+        meshes.at(meshes_i)->free();
+
+      Mesh global_mesh;
+      std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
+
+      load<XMLSubdomains::domain>(parsed_xml_domain, &global_mesh);
+
+      // Subdomains //
+      unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
+      if(subdomains_count != meshes.size())
+        error("Number of subdomains(=%u) does not equal the number of provided meshes in the vector(=%u).", subdomains_count, meshes.size());
+
+      for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
+      {
+        unsigned int i;
+
+        // copy nodes and elements
+        if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().size() == 0)
+          meshes[subdomains_i]->copy(&global_mesh);
+        else
+        {
+          meshes[subdomains_i]->HashTable::copy(&global_mesh);
+          for(unsigned int element_number_i = 0; element_number_i < parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().size(); element_number_i++)
+          {
+            Element e(*global_mesh.get_element(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().at(element_number_i).number()));
+            meshes[subdomains_i]->elements.add(e);
+         
+            // update vertex node pointers
+            for (i = 0; i < e.nvert; i++)
+              e.vn[i] = &meshes[subdomains_i]->nodes[e.vn[i]->id];
+
+            if (e.active)
+            {
+              // update edge node pointers
+              for (i = 0; i < e.nvert; i++)
+                e.en[i] = &meshes[subdomains_i]->nodes[e.en[i]->id];
+            }
+            else
+            {
+              // update son pointers
+              for (i = 0; i < 4; i++)
+                if (e.sons[i] != NULL)
+                  e.sons[i] = &meshes[subdomains_i]->elements[e.sons[i]->id];
+            }
+
+            // copy CurvMap, update its parent
+            if (e.cm != NULL)
+            {
+              e.cm = new CurvMap(e.cm);
+              if (!e.cm->toplevel)
+                e.cm->parent = &meshes[subdomains_i]->elements[e.cm->parent->id];
+            }
+
+            //update parent pointer
+            if(e.parent != NULL)
+              e.parent = &meshes[subdomains_i]->elements[e.parent->id];
+          }
+        }
+
+        // update element pointers in edge nodes
+        Node* node;
+        for (int _id = 0, _max = meshes[subdomains_i]->get_max_node_id(); _id < _max; _id++)
+          if ((node = meshes[subdomains_i]->get_node(_id))->used)
+            if (node->type)
+              for (i = 0; i < 2; i++)
+                if (node->elem[i] != NULL)
+                  node->elem[i] = &meshes[subdomains_i]->elements[node->elem[i]->id];
+
+        meshes[subdomains_i]->nbase = global_mesh.nbase;
+        meshes[subdomains_i]->nactive = global_mesh.nactive;
+        meshes[subdomains_i]->ntopvert = global_mesh.ntopvert;
+        meshes[subdomains_i]->ninitial = global_mesh.ninitial;
+        meshes[subdomains_i]->seq = global_mesh.seq;
+      }
+
+      return true;
+    }
+
+    template<typename T>
+    bool MeshReaderH2DXML::load(std::auto_ptr<T> & parsed_xml_mesh, Mesh *mesh)
+    {
       try
       {
-        std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh (XMLMesh::mesh_(filename));
-
         // Variables //
         unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;
         std::map<std::string, double> variables;
@@ -94,10 +180,10 @@ namespace Hermes
               int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
               for(int i = 0; i < dot_position; i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  error("Wrong syntax in the x coordinate of vertex no. %i in the mesh file %s.", vertices_i + 1, filename);
+                  error("Wrong syntax in the x coordinate of vertex no. %i.", vertices_i + 1);
               for(int i = dot_position + 1; i < x.length(); i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  error("Wrong syntax in the x coordinate of vertex no. %i in the mesh file %s.", vertices_i + 1, filename);
+                  error("Wrong syntax in the x coordinate of vertex no. %i.", vertices_i + 1);
               x_value = std::strtod(x.c_str(), NULL);
             }
 
@@ -110,10 +196,10 @@ namespace Hermes
               int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
               for(int i = 0; i < dot_position; i++)
                 if(strncmp(y.c_str() + i, "0", 1) != 0)
-                  error("Wrong syntay in the y coordinate of vertey no. %i in the mesh file %s.", vertices_i + 1, filename);
+                  error("Wrong syntay in the y coordinate of vertey no. %i.", vertices_i + 1);
               for(int i = dot_position + 1; i < y.length(); i++)
                 if(strncmp(y.c_str() + i, "0", 1) != 0)
-                  error("Wrong syntay in the y coordinate of vertey no. %i in the mesh file %s.", vertices_i + 1, filename);
+                  error("Wrong syntay in the y coordinate of vertey no. %i.", vertices_i + 1);
               y_value = std::strtod(y.c_str(), NULL);
             }
 
@@ -155,7 +241,7 @@ namespace Hermes
 
           for (unsigned int vertex_i = 0; vertex_i < 3; vertex_i++)
             if (idx[vertex_i] < 0 || idx[vertex_i] >= mesh->ntopvert)
-              error("File %s: error creating triangle #%d: vertex #%d does not exist.", filename, triangles_i, idx[vertex_i]);
+              error("Error creating triangle #%d: vertex #%d does not exist.", triangles_i, idx[vertex_i]);
 
           Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
 
@@ -201,7 +287,7 @@ namespace Hermes
 
           for (unsigned int vertex_i = 0; vertex_i < 4; vertex_i++)
             if (idx[vertex_i] < 0 || idx[vertex_i] >= mesh->ntopvert)
-              error("File %s: error creating quad #%d: vertex #%d does not exist.", filename, quads_i, idx[vertex_i]);
+              error("Error creating quad #%d: vertex #%d does not exist.", quads_i, idx[vertex_i]);
 
           Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]], *v3 = &mesh->nodes[idx[3]];
 
@@ -233,7 +319,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
-            error("File %s: boundary data #%d: edge %d-%d does not exist", filename, boundaries_i, v1, v2);
+            error("Boundary data #%d: edge %d-%d does not exist", boundaries_i, v1, v2);
 
           std::string bnd_marker = parsed_xml_mesh->boundaries().boundary_edge().at(boundaries_i).marker();
           
@@ -332,37 +418,16 @@ namespace Hermes
 
       return true;
     }
-    
-    bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
-    {
-      for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
-        meshes.at(meshes_i)->free();
-
-      // Progress:
-      // Just load one dummy mesh normally from the file, from the part that corresponds to the "full - global mesh", 
-      // then just copy Meshes, and delete stuff that is there to be deleted.
-      // Simple as that.
-      try
-      {
-        std::auto_ptr<XMLSubdomains::domain> parsed_xml_mesh (XMLSubdomains::domain_(filename));
-      }
-      catch (const xml_schema::exception& e)
-      {
-        std::cerr << e << endl;
-        std::exit(1);
-      }
-
-      return true;
-    }
-    
-    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<XMLMesh::mesh>& m, int id, Node** en, int &p1, int &p2)
+   
+    template<typename T>
+    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<T>& parsed_xml_entity, int id, Node** en, int &p1, int &p2)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = true;
 
       // read the end point indices
-      p1 = m->curves()->arc().at(id).v1();
-      p2 = m->curves()->arc().at(id).v2();
+      p1 = parsed_xml_entity->curves()->arc().at(id).v1();
+      p2 = parsed_xml_entity->curves()->arc().at(id).v2();
 
       *en = mesh->peek_edge_node(p1, p2);
       if (*en == NULL)
@@ -392,7 +457,7 @@ namespace Hermes
       nurbs->pt[2][2] = 1.0;
 
       // read the arc angle
-      nurbs->angle = m->curves()->arc().at(id).angle();
+      nurbs->angle = parsed_xml_entity->curves()->arc().at(id).angle();
       double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
 
       // generate one inner control point
@@ -406,24 +471,25 @@ namespace Hermes
       return nurbs;
     }
 
-    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<XMLMesh::mesh> & m, int id, Node** en, int &p1, int &p2)
+    template<typename T>
+    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int &p1, int &p2)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = false;
 
       // read the end point indices
-      p1 = m->curves()->NURBS().at(id).v1();
-      p2 = m->curves()->NURBS().at(id).v2();
+      p1 = parsed_xml_entity->curves()->NURBS().at(id).v1();
+      p2 = parsed_xml_entity->curves()->NURBS().at(id).v2();
 
       *en = mesh->peek_edge_node(p1, p2);
       if (*en == NULL)
         error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
       // degree of curved edge
-      nurbs->degree = m->curves()->NURBS().at(id).degree();
+      nurbs->degree = parsed_xml_entity->curves()->NURBS().at(id).degree();
 
       // get the number of control points
-      int inner = m->curves()->NURBS().at(id).inner_point().size();
+      int inner = parsed_xml_entity->curves()->NURBS().at(id).inner_point().size();
       
       nurbs->np = inner + 2;
 
@@ -439,13 +505,13 @@ namespace Hermes
       // read inner control points
       for (int i = 0; i < inner; i++)
       {
-        nurbs->pt[i + 1][0] = m->curves()->NURBS().at(id).inner_point().at(i).x();
-        nurbs->pt[i + 1][1] = m->curves()->NURBS().at(id).inner_point().at(i).y();
-        nurbs->pt[i + 1][2] = m->curves()->NURBS().at(id).inner_point().at(i).weight();
+        nurbs->pt[i + 1][0] = parsed_xml_entity->curves()->NURBS().at(id).inner_point().at(i).x();
+        nurbs->pt[i + 1][1] = parsed_xml_entity->curves()->NURBS().at(id).inner_point().at(i).y();
+        nurbs->pt[i + 1][2] = parsed_xml_entity->curves()->NURBS().at(id).inner_point().at(i).weight();
       }
 
       // get the number of knot vector points
-      inner = m->curves()->NURBS().at(id).knot().size();
+      inner = parsed_xml_entity->curves()->NURBS().at(id).knot().size();
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       int outer = nurbs->nk - inner;
       if ((outer & 1) == 1)
@@ -459,7 +525,7 @@ namespace Hermes
 
       if (inner > 0) 
         for (int i = outer/2; i < inner + outer/2; i++) 
-          nurbs->kv[i] = m->curves()->NURBS().at(id).knot().at(i - (outer/2)).value();
+          nurbs->kv[i] = parsed_xml_entity->curves()->NURBS().at(id).knot().at(i - (outer/2)).value();
 
       for (int i = outer/2 + inner; i < nurbs->nk; i++)
         nurbs->kv[i] = 1.0;
