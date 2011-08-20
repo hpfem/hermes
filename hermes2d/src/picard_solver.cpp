@@ -244,6 +244,13 @@ namespace Hermes
           // Calculate Anderson coefficients. 
           calculate_anderson_coeffs(previous_vectors, anderson_coeffs, num_last_vectors_used, ndof);
 
+          /*
+          // Debug - do not delete.
+          printf("alpha: ");
+          for (int i = 0; i < num_last_vectors_used-1; i++) printf("%g ", anderson_coeffs[i]);
+          printf("\n");
+          */
+
           // Calculate new vector and store it in this->sln_vector[].
           // FIXME: Anderson beta should be used here.
           for (int i = 0; i < ndof; i++)
