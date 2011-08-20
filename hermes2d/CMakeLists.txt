@@ -1,4 +1,12 @@
 project(hermes2d)
+  # Generating classes for XML mesh parsing according to your version of XSD.
+	message("Hermes2D: Generating classes for XML mesh parsing according to your version of XSD.")
+	if(WIN32)
+		execute_process(COMMAND "${PROJECT_SOURCE_DIR}/include/mesh/xml_schemas_generate_win.bat" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/include/mesh/" OUTPUT_QUIET)
+	else(WIN32)
+		execute_process(COMMAND "${PROJECT_SOURCE_DIR}/include/mesh/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/include/mesh/" OUTPUT_QUIET)
+	endif(WIN32)
+
 	# Determine which version (debug x release) to build.
 	if (NOT H2D_DEBUG AND NOT H2D_RELEASE)
 		message(FATAL_ERROR "WITH_H2D is set to YES, but no versions are specified. 
@@ -304,25 +312,3 @@ project(hermes2d)
 		enable_testing()
 		add_subdirectory(tests)
 	endif(H2D_WITH_TESTS)
-	
-	#
-	# Documentation
-	#
-
-	# This doesn't work yet:
-	#add_subdirectory(doc)
-	#add_custom_target(doc)
-	#add_custom_command(
-	#	SOURCE	${DOXYGEN_CONFIG_FILE}
-	#	COMMAND	${DOXYGEN_BINARY}
-	#	ARGS	${DOXYGEN_CONFIG_FILE}
-	#	TARGET	doc
-	#	OUTPUTS	${PROJECT_BINARY_DIR}/doc/html
-	#)
-
-	#add_custom_command(
-	#	SOURCE	doc
-	#	TARGET	doc
-	#	DEPENDS	${PROJECT_BINARY_DIR}/doc/html
-	#)
-	message("\n")
