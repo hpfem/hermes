@@ -23,8 +23,8 @@ int main(int argc, char* argv[])
 {
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
-  Hermes::Hermes2D::MeshReaderH2D mloader;
-  mloader.load("../domain.mesh", &mesh);
+  Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  mloader.load("../domain.xml", &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i=0; i < INIT_REF_NUM; i++) 

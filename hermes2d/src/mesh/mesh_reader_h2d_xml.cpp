@@ -38,13 +38,13 @@ namespace Hermes
       {
         std::auto_ptr<mesh_h2d> parsed_h2d_xml_mesh (mesh_h2d_(filename));
 
-        // Variables //.
-        unsigned int variables_count = parsed_h2d_xml_mesh->variables().variable().size();
-        double *variables = new double[variables_count];
+        // Variables //
+        unsigned int variables_count = parsed_h2d_xml_mesh->variables().present() ? parsed_h2d_xml_mesh->variables()->variable().size() : 0;
+        std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
-          variables[variables_i] = parsed_h2d_xml_mesh->variables().variable().at(variables_i).value();
+          variables.insert(std::make_pair<std::string, double>(parsed_h2d_xml_mesh->variables()->variable().at(variables_i).name(), parsed_h2d_xml_mesh->variables()->variable().at(variables_i).value()));
 
-        // Vertices //.
+        // Vertices //
         int vertices_count = parsed_h2d_xml_mesh->vertices().vertex().size();
 
         // Initialize mesh.
@@ -61,14 +61,69 @@ namespace Hermes
           node->ref = TOP_LEVEL_REF;
           node->type = HERMES_TYPE_VERTEX;
           node->bnd = 0;
-          node->p1 = node->p2 = -1;
+          node->p1 = node->p2 = -1;          
           node->next_hash = NULL;
-          node->x = parsed_h2d_xml_mesh->vertices().vertex().at(vertices_i).x();
-          node->y = parsed_h2d_xml_mesh->vertices().vertex().at(vertices_i).y();
+          
+          // variables matching.
+          std::string x = parsed_h2d_xml_mesh->vertices().vertex().at(vertices_i).x();
+          std::string y = parsed_h2d_xml_mesh->vertices().vertex().at(vertices_i).y();
+          double x_value;
+          double y_value;
+
+          // variables lookup.
+          bool x_found = false;
+          bool y_found = false;
+          if(variables.find(x) != variables.end())
+          {
+            x_value = variables.find(x)->second;
+            x_found = true;
+          }
+          if(variables.find(y) != variables.end())
+          {
+            y_value = variables.find(y)->second;
+            y_found = true;
+          }
+
+          // test of value if no variable found.
+          if(!x_found)
+            if(std::strtod(x.c_str(), NULL) != 0.0)
+              x_value = std::strtod(x.c_str(), NULL);
+            else
+            {
+              // This is a hard part, to find out if it is really zero.
+              int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
+              for(int i = 0; i < dot_position; i++)
+                if(strncmp(x.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntax in the x coordinate of vertex no. %i in the mesh file %s.", vertices_i + 1, filename);
+              for(int i = dot_position + 1; i < x.length(); i++)
+                if(strncmp(x.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntax in the x coordinate of vertex no. %i in the mesh file %s.", vertices_i + 1, filename);
+              x_value = std::strtod(x.c_str(), NULL);
+            }
+
+          if(!y_found)
+            if(std::strtod(y.c_str(), NULL) != 0.0)
+              y_value = std::strtod(y.c_str(), NULL);
+            else
+            {
+              // This is a hard part, to find out if it is really zero.
+              int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
+              for(int i = 0; i < dot_position; i++)
+                if(strncmp(y.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntay in the y coordinate of vertey no. %i in the mesh file %s.", vertices_i + 1, filename);
+              for(int i = dot_position + 1; i < y.length(); i++)
+                if(strncmp(y.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntay in the y coordinate of vertey no. %i in the mesh file %s.", vertices_i + 1, filename);
+              y_value = std::strtod(y.c_str(), NULL);
+            }
+
+          // assignment.
+          node->x = x_value;
+          node->y = y_value;
         }
         mesh->ntopvert = vertices_count;
 
-        // Elements.//
+        // Elements //
         unsigned int triangles_count = parsed_h2d_xml_mesh->elements().triangle().size();
         unsigned int quads_count = parsed_h2d_xml_mesh->elements().quad().size();
 
@@ -167,7 +222,7 @@ namespace Hermes
 
         mesh->nbase = triangles_count + quads_count;
 
-        // Boundaries. //
+        // Boundaries //
         unsigned int boundaries_count = parsed_h2d_xml_mesh->boundaries().boundary_edge().size();
 
         Node* en;
@@ -210,18 +265,25 @@ namespace Hermes
           if (en->ref < 2 && en->marker == 0)
             warn("Boundary edge node does not have a boundary marker");
 
-        // Curves. //
-        unsigned int curves_count = parsed_h2d_xml_mesh->curves().curve().size();
+        // Curves //
+        // Arcs & NURBSs //
+        unsigned int arc_count = parsed_h2d_xml_mesh->curves().present() ? parsed_h2d_xml_mesh->curves()->arc().size() : 0;
+        unsigned int nurbs_count = parsed_h2d_xml_mesh->curves().present() ? parsed_h2d_xml_mesh->curves()->NURBS().size() : 0;
 
-        for (unsigned int curves_i = 0; curves_i < curves_count; curves_i++)
+        for (unsigned int curves_i = 0; curves_i < arc_count + nurbs_count; curves_i++)
         {
           // load the control points, knot vector, etc.
           Node* en;
           int p1, p2;
 
-          Nurbs* nurbs = load_nurbs(mesh, parsed_h2d_xml_mesh, curves_i, &en, p1, p2);
+          // first do arcs, then NURBSs.
+          Nurbs* nurbs;
+          if(curves_i < arc_count)
+            nurbs = load_arc(mesh, parsed_h2d_xml_mesh, curves_i, &en, p1, p2);
+          else
+            nurbs = load_nurbs(mesh, parsed_h2d_xml_mesh, curves_i - arc_count, &en, p1, p2);
 
-          // assign the nurbs to the elements sharing the edge node
+          // assign the arc to the elements sharing the edge node
           for (unsigned int node_i = 0; node_i < 2; node_i++)
           {
             Element* e = en->elem[node_i];
@@ -271,29 +333,76 @@ namespace Hermes
       return true;
     }
 
-    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<mesh_h2d>& m, int id, Node** en, int &p1, int &p2)
+    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<mesh_h2d>& m, int id, Node** en, int &p1, int &p2)
     {
       Nurbs* nurbs = new Nurbs;
-
-      /// \todo We can only parse arcs now.
       nurbs->arc = true;
 
       // read the end point indices
-      p1 = m->curves().curve().at(id).v1();
-      p2 = m->curves().curve().at(id).v2();
+      p1 = m->curves()->arc().at(id).v1();
+      p2 = m->curves()->arc().at(id).v2();
+
+      *en = mesh->peek_edge_node(p1, p2);
+      if (*en == NULL)
+        error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+
+      // degree of an arc == 2.
+      nurbs->degree = 2;
+      // there are three control points.
+      nurbs->np = 3;
+      // there are 6 knots: {0,0,0,1,1,1}
+      nurbs->nk = 6;
+      nurbs->kv = new double[nurbs->nk];
+
+      for (int i = 0; i < 3; i++)
+        nurbs->kv[i] = 0.0;
+
+      for (int i = 3; i < nurbs->nk; i++)
+        nurbs->kv[i] = 1.0;
+
+      // edge endpoints control points.
+      nurbs->pt = new double3[3];
+      nurbs->pt[0][0] = mesh->nodes[p1].x;
+      nurbs->pt[0][1] = mesh->nodes[p1].y;
+      nurbs->pt[0][2] = 1.0;
+      nurbs->pt[2][0] = mesh->nodes[p2].x;
+      nurbs->pt[2][1] = mesh->nodes[p2].y;
+      nurbs->pt[2][2] = 1.0;
+
+      // read the arc angle
+      nurbs->angle = m->curves()->arc().at(id).angle();
+      double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
+
+      // generate one inner control point
+      double x = 1.0 / std::tan(a * 0.5);
+      nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
+      nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
+      nurbs->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
+
+      nurbs->ref = 0;
+
+      return nurbs;
+    }
+
+    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<mesh_h2d> & m, int id, Node** en, int &p1, int &p2)
+    {
+      Nurbs* nurbs = new Nurbs;
+      nurbs->arc = false;
+
+      // read the end point indices
+      p1 = m->curves()->NURBS().at(id).v1();
+      p2 = m->curves()->NURBS().at(id).v2();
 
       *en = mesh->peek_edge_node(p1, p2);
       if (*en == NULL)
         error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
       // degree of curved edge
-      nurbs->degree = 2;
+      nurbs->degree = m->curves()->NURBS().at(id).degree();
 
       // get the number of control points
-      std::vector<double> vCP;
-
-      int inner = 1, outer;
-
+      int inner = m->curves()->NURBS().at(id).inner_point().size();
+      
       nurbs->np = inner + 2;
 
       // edge endpoints are also control points, with weight 1.0
@@ -305,23 +414,18 @@ namespace Hermes
       nurbs->pt[inner+1][1] = mesh->nodes[p2].y;
       nurbs->pt[inner+1][2] = 1.0;
 
-      // read the arc angle
-      nurbs->angle = m->curves().curve().at(id).angle();
-      double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
-
-      // generate one control point
-      double x = 1.0 / tan(a * 0.5);
-      nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-      nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-      nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+      // read inner control points
+      for (int i = 0; i < inner; i++)
+      {
+        nurbs->pt[i + 1][0] = m->curves()->NURBS().at(id).inner_point().at(i).x();
+        nurbs->pt[i + 1][1] = m->curves()->NURBS().at(id).inner_point().at(i).y();
+        nurbs->pt[i + 1][2] = m->curves()->NURBS().at(id).inner_point().at(i).weight();
+      }
 
       // get the number of knot vector points
-      std::vector<double> vKnots;
-
-      inner = 0;
-
+      inner = m->curves()->NURBS().at(id).knot().size();
       nurbs->nk = nurbs->degree + nurbs->np + 1;
-      outer = nurbs->nk - inner;
+      int outer = nurbs->nk - inner;
       if ((outer & 1) == 1)
         error("Curve #%d: incorrect number of knot points.", id);
 
@@ -331,11 +435,9 @@ namespace Hermes
       for (int i = 0; i < outer/2; i++)
         nurbs->kv[i] = 0.0;
 
-      if (inner) {
-        for (int i = outer/2; i < inner + outer/2; i++) {
-          nurbs->kv[i] = vKnots[i - (outer/2)];
-        }
-      }
+      if (inner > 0) 
+        for (int i = outer/2; i < inner + outer/2; i++) 
+          nurbs->kv[i] = m->curves()->NURBS().at(id).knot().at(i - (outer/2)).value();
 
       for (int i = outer/2 + inner; i < nurbs->nk; i++)
         nurbs->kv[i] = 1.0;

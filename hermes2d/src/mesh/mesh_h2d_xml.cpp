@@ -43,22 +43,28 @@
 // mesh_h2d
 // 
 
-const mesh_h2d::variables_type& mesh_h2d::
+const mesh_h2d::variables_optional& mesh_h2d::
 variables () const
 {
-  return this->variables_.get ();
+  return this->variables_;
 }
 
-mesh_h2d::variables_type& mesh_h2d::
+mesh_h2d::variables_optional& mesh_h2d::
 variables ()
 {
-  return this->variables_.get ();
+  return this->variables_;
 }
 
 void mesh_h2d::
 variables (const variables_type& x)
 {
   this->variables_.set (x);
+}
+
+void mesh_h2d::
+variables (const variables_optional& x)
+{
+  this->variables_ = x;
 }
 
 void mesh_h2d::
@@ -139,22 +145,28 @@ boundaries (::std::auto_ptr< boundaries_type > x)
   this->boundaries_.set (x);
 }
 
-const mesh_h2d::curves_type& mesh_h2d::
+const mesh_h2d::curves_optional& mesh_h2d::
 curves () const
 {
-  return this->curves_.get ();
+  return this->curves_;
 }
 
-mesh_h2d::curves_type& mesh_h2d::
+mesh_h2d::curves_optional& mesh_h2d::
 curves ()
 {
-  return this->curves_.get ();
+  return this->curves_;
 }
 
 void mesh_h2d::
 curves (const curves_type& x)
 {
   this->curves_.set (x);
+}
+
+void mesh_h2d::
+curves (const curves_optional& x)
+{
+  this->curves_ = x;
 }
 
 void mesh_h2d::
@@ -273,22 +285,40 @@ boundary_edge (const boundary_edge_sequence& s)
 // curves
 // 
 
-const curves::curve_sequence& curves::
-curve () const
+const curves::arc_sequence& curves::
+arc () const
 {
-  return this->curve_;
+  return this->arc_;
 }
 
-curves::curve_sequence& curves::
-curve ()
+curves::arc_sequence& curves::
+arc ()
 {
-  return this->curve_;
+  return this->arc_;
 }
 
 void curves::
-curve (const curve_sequence& s)
+arc (const arc_sequence& s)
 {
-  this->curve_ = s;
+  this->arc_ = s;
+}
+
+const curves::NURBS_sequence& curves::
+NURBS () const
+{
+  return this->NURBS_;
+}
+
+curves::NURBS_sequence& curves::
+NURBS ()
+{
+  return this->NURBS_;
+}
+
+void curves::
+NURBS (const NURBS_sequence& s)
+{
+  this->NURBS_ = s;
 }
 
 
@@ -359,6 +389,12 @@ x (const x_type& x)
   this->x_.set (x);
 }
 
+void vertex::
+x (::std::auto_ptr< x_type > x)
+{
+  this->x_.set (x);
+}
+
 const vertex::y_type& vertex::
 y () const
 {
@@ -373,6 +409,12 @@ y ()
 
 void vertex::
 y (const y_type& x)
+{
+  this->y_.set (x);
+}
+
+void vertex::
+y (::std::auto_ptr< y_type > x)
 {
   this->y_.set (x);
 }
@@ -672,61 +714,235 @@ marker (::std::auto_ptr< marker_type > x)
 }
 
 
-// curve
+// arc
 // 
 
-const curve::v1_type& curve::
+const arc::v1_type& arc::
 v1 () const
 {
   return this->v1_.get ();
 }
 
-curve::v1_type& curve::
+arc::v1_type& arc::
 v1 ()
 {
   return this->v1_.get ();
 }
 
-void curve::
+void arc::
 v1 (const v1_type& x)
 {
   this->v1_.set (x);
 }
 
-const curve::v2_type& curve::
+const arc::v2_type& arc::
 v2 () const
 {
   return this->v2_.get ();
 }
 
-curve::v2_type& curve::
+arc::v2_type& arc::
 v2 ()
 {
   return this->v2_.get ();
 }
 
-void curve::
+void arc::
 v2 (const v2_type& x)
 {
   this->v2_.set (x);
 }
 
-const curve::angle_type& curve::
+const arc::angle_type& arc::
 angle () const
 {
   return this->angle_.get ();
 }
 
-curve::angle_type& curve::
+arc::angle_type& arc::
 angle ()
 {
   return this->angle_.get ();
 }
 
-void curve::
+void arc::
 angle (const angle_type& x)
 {
   this->angle_.set (x);
+}
+
+
+// NURBS
+// 
+
+const NURBS::inner_point_sequence& NURBS::
+inner_point () const
+{
+  return this->inner_point_;
+}
+
+NURBS::inner_point_sequence& NURBS::
+inner_point ()
+{
+  return this->inner_point_;
+}
+
+void NURBS::
+inner_point (const inner_point_sequence& s)
+{
+  this->inner_point_ = s;
+}
+
+const NURBS::knot_sequence& NURBS::
+knot () const
+{
+  return this->knot_;
+}
+
+NURBS::knot_sequence& NURBS::
+knot ()
+{
+  return this->knot_;
+}
+
+void NURBS::
+knot (const knot_sequence& s)
+{
+  this->knot_ = s;
+}
+
+const NURBS::v1_type& NURBS::
+v1 () const
+{
+  return this->v1_.get ();
+}
+
+NURBS::v1_type& NURBS::
+v1 ()
+{
+  return this->v1_.get ();
+}
+
+void NURBS::
+v1 (const v1_type& x)
+{
+  this->v1_.set (x);
+}
+
+const NURBS::v2_type& NURBS::
+v2 () const
+{
+  return this->v2_.get ();
+}
+
+NURBS::v2_type& NURBS::
+v2 ()
+{
+  return this->v2_.get ();
+}
+
+void NURBS::
+v2 (const v2_type& x)
+{
+  this->v2_.set (x);
+}
+
+const NURBS::degree_type& NURBS::
+degree () const
+{
+  return this->degree_.get ();
+}
+
+NURBS::degree_type& NURBS::
+degree ()
+{
+  return this->degree_.get ();
+}
+
+void NURBS::
+degree (const degree_type& x)
+{
+  this->degree_.set (x);
+}
+
+
+// inner_point
+// 
+
+const inner_point::x_type& inner_point::
+x () const
+{
+  return this->x_.get ();
+}
+
+inner_point::x_type& inner_point::
+x ()
+{
+  return this->x_.get ();
+}
+
+void inner_point::
+x (const x_type& x)
+{
+  this->x_.set (x);
+}
+
+const inner_point::y_type& inner_point::
+y () const
+{
+  return this->y_.get ();
+}
+
+inner_point::y_type& inner_point::
+y ()
+{
+  return this->y_.get ();
+}
+
+void inner_point::
+y (const y_type& x)
+{
+  this->y_.set (x);
+}
+
+const inner_point::weight_type& inner_point::
+weight () const
+{
+  return this->weight_.get ();
+}
+
+inner_point::weight_type& inner_point::
+weight ()
+{
+  return this->weight_.get ();
+}
+
+void inner_point::
+weight (const weight_type& x)
+{
+  this->weight_.set (x);
+}
+
+
+// knot
+// 
+
+const knot::value_type& knot::
+value () const
+{
+  return this->value_.get ();
+}
+
+knot::value_type& knot::
+value ()
+{
+  return this->value_.get ();
+}
+
+void knot::
+value (const value_type& x)
+{
+  this->value_.set (x);
 }
 
 
@@ -736,32 +952,28 @@ angle (const angle_type& x)
 //
 
 mesh_h2d::
-mesh_h2d (const variables_type& variables,
-          const vertices_type& vertices,
+mesh_h2d (const vertices_type& vertices,
           const elements_type& elements,
-          const boundaries_type& boundaries,
-          const curves_type& curves)
+          const boundaries_type& boundaries)
 : ::xml_schema::type (),
-  variables_ (variables, ::xml_schema::flags (), this),
+  variables_ (::xml_schema::flags (), this),
   vertices_ (vertices, ::xml_schema::flags (), this),
   elements_ (elements, ::xml_schema::flags (), this),
   boundaries_ (boundaries, ::xml_schema::flags (), this),
-  curves_ (curves, ::xml_schema::flags (), this)
+  curves_ (::xml_schema::flags (), this)
 {
 }
 
 mesh_h2d::
-mesh_h2d (::std::auto_ptr< variables_type >& variables,
-          ::std::auto_ptr< vertices_type >& vertices,
+mesh_h2d (::std::auto_ptr< vertices_type >& vertices,
           ::std::auto_ptr< elements_type >& elements,
-          ::std::auto_ptr< boundaries_type >& boundaries,
-          ::std::auto_ptr< curves_type >& curves)
+          ::std::auto_ptr< boundaries_type >& boundaries)
 : ::xml_schema::type (),
-  variables_ (variables, ::xml_schema::flags (), this),
+  variables_ (::xml_schema::flags (), this),
   vertices_ (vertices, ::xml_schema::flags (), this),
   elements_ (elements, ::xml_schema::flags (), this),
   boundaries_ (boundaries, ::xml_schema::flags (), this),
-  curves_ (curves, ::xml_schema::flags (), this)
+  curves_ (::xml_schema::flags (), this)
 {
 }
 
@@ -813,7 +1025,7 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
       ::std::auto_ptr< variables_type > r (
         variables_traits::create (i, f, this));
 
-      if (!variables_.present ())
+      if (!this->variables_)
       {
         this->variables_.set (r);
         continue;
@@ -869,7 +1081,7 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
       ::std::auto_ptr< curves_type > r (
         curves_traits::create (i, f, this));
 
-      if (!curves_.present ())
+      if (!this->curves_)
       {
         this->curves_.set (r);
         continue;
@@ -877,13 +1089,6 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
     }
 
     break;
-  }
-
-  if (!variables_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "variables",
-      "");
   }
 
   if (!vertices_.present ())
@@ -904,13 +1109,6 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
   {
     throw ::xsd::cxx::tree::expected_element< char > (
       "boundaries",
-      "");
-  }
-
-  if (!curves_.present ())
-  {
-    throw ::xsd::cxx::tree::expected_element< char > (
-      "curves",
       "");
   }
 }
@@ -1227,7 +1425,8 @@ boundaries::
 curves::
 curves ()
 : ::xml_schema::type (),
-  curve_ (::xml_schema::flags (), this)
+  arc_ (::xml_schema::flags (), this),
+  NURBS_ (::xml_schema::flags (), this)
 {
 }
 
@@ -1236,7 +1435,8 @@ curves (const curves& x,
         ::xml_schema::flags f,
         ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
-  curve_ (x.curve_, f, this)
+  arc_ (x.arc_, f, this),
+  NURBS_ (x.NURBS_, f, this)
 {
 }
 
@@ -1245,7 +1445,8 @@ curves (const ::xercesc::DOMElement& e,
         ::xml_schema::flags f,
         ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
-  curve_ (f, this)
+  arc_ (f, this),
+  NURBS_ (f, this)
 {
   if ((f & ::xml_schema::flags::base) == 0)
   {
@@ -1264,14 +1465,25 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
     const ::xsd::cxx::xml::qualified_name< char > n (
       ::xsd::cxx::xml::dom::name< char > (i));
 
-    // curve
+    // arc
     //
-    if (n.name () == "curve" && n.namespace_ ().empty ())
+    if (n.name () == "arc" && n.namespace_ ().empty ())
     {
-      ::std::auto_ptr< curve_type > r (
-        curve_traits::create (i, f, this));
+      ::std::auto_ptr< arc_type > r (
+        arc_traits::create (i, f, this));
 
-      this->curve_.push_back (r);
+      this->arc_.push_back (r);
+      continue;
+    }
+
+    // NURBS
+    //
+    if (n.name () == "NURBS" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< NURBS_type > r (
+        NURBS_traits::create (i, f, this));
+
+      this->NURBS_.push_back (r);
       continue;
     }
 
@@ -1430,13 +1642,19 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
 
     if (n.name () == "x" && n.namespace_ ().empty ())
     {
-      this->x_.set (x_traits::create (i, f, this));
+      ::std::auto_ptr< x_type > r (
+        x_traits::create (i, f, this));
+
+      this->x_.set (r);
       continue;
     }
 
     if (n.name () == "y" && n.namespace_ ().empty ())
     {
-      this->y_.set (y_traits::create (i, f, this));
+      ::std::auto_ptr< y_type > r (
+        y_traits::create (i, f, this));
+
+      this->y_.set (r);
       continue;
     }
   }
@@ -1858,13 +2076,13 @@ boundary_edge::
 {
 }
 
-// curve
+// arc
 //
 
-curve::
-curve (const v1_type& v1,
-       const v2_type& v2,
-       const angle_type& angle)
+arc::
+arc (const v1_type& v1,
+     const v2_type& v2,
+     const angle_type& angle)
 : ::xml_schema::type (),
   v1_ (v1, ::xml_schema::flags (), this),
   v2_ (v2, ::xml_schema::flags (), this),
@@ -1872,10 +2090,10 @@ curve (const v1_type& v1,
 {
 }
 
-curve::
-curve (const curve& x,
-       ::xml_schema::flags f,
-       ::xml_schema::container* c)
+arc::
+arc (const arc& x,
+     ::xml_schema::flags f,
+     ::xml_schema::container* c)
 : ::xml_schema::type (x, f, c),
   v1_ (x.v1_, f, this),
   v2_ (x.v2_, f, this),
@@ -1883,10 +2101,10 @@ curve (const curve& x,
 {
 }
 
-curve::
-curve (const ::xercesc::DOMElement& e,
-       ::xml_schema::flags f,
-       ::xml_schema::container* c)
+arc::
+arc (const ::xercesc::DOMElement& e,
+     ::xml_schema::flags f,
+     ::xml_schema::container* c)
 : ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
   v1_ (f, this),
   v2_ (f, this),
@@ -1899,7 +2117,7 @@ curve (const ::xercesc::DOMElement& e,
   }
 }
 
-void curve::
+void arc::
 parse (::xsd::cxx::xml::dom::parser< char >& p,
        ::xml_schema::flags f)
 {
@@ -1950,15 +2168,330 @@ parse (::xsd::cxx::xml::dom::parser< char >& p,
   }
 }
 
-curve* curve::
+arc* arc::
 _clone (::xml_schema::flags f,
         ::xml_schema::container* c) const
 {
-  return new class curve (*this, f, c);
+  return new class arc (*this, f, c);
 }
 
-curve::
-~curve ()
+arc::
+~arc ()
+{
+}
+
+// NURBS
+//
+
+NURBS::
+NURBS (const v1_type& v1,
+       const v2_type& v2,
+       const degree_type& degree)
+: ::xml_schema::type (),
+  inner_point_ (::xml_schema::flags (), this),
+  knot_ (::xml_schema::flags (), this),
+  v1_ (v1, ::xml_schema::flags (), this),
+  v2_ (v2, ::xml_schema::flags (), this),
+  degree_ (degree, ::xml_schema::flags (), this)
+{
+}
+
+NURBS::
+NURBS (const NURBS& x,
+       ::xml_schema::flags f,
+       ::xml_schema::container* c)
+: ::xml_schema::type (x, f, c),
+  inner_point_ (x.inner_point_, f, this),
+  knot_ (x.knot_, f, this),
+  v1_ (x.v1_, f, this),
+  v2_ (x.v2_, f, this),
+  degree_ (x.degree_, f, this)
+{
+}
+
+NURBS::
+NURBS (const ::xercesc::DOMElement& e,
+       ::xml_schema::flags f,
+       ::xml_schema::container* c)
+: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
+  inner_point_ (f, this),
+  knot_ (f, this),
+  v1_ (f, this),
+  v2_ (f, this),
+  degree_ (f, this)
+{
+  if ((f & ::xml_schema::flags::base) == 0)
+  {
+    ::xsd::cxx::xml::dom::parser< char > p (e, true, true);
+    this->parse (p, f);
+  }
+}
+
+void NURBS::
+parse (::xsd::cxx::xml::dom::parser< char >& p,
+       ::xml_schema::flags f)
+{
+  for (; p.more_elements (); p.next_element ())
+  {
+    const ::xercesc::DOMElement& i (p.cur_element ());
+    const ::xsd::cxx::xml::qualified_name< char > n (
+      ::xsd::cxx::xml::dom::name< char > (i));
+
+    // inner_point
+    //
+    if (n.name () == "inner_point" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< inner_point_type > r (
+        inner_point_traits::create (i, f, this));
+
+      this->inner_point_.push_back (r);
+      continue;
+    }
+
+    // knot
+    //
+    if (n.name () == "knot" && n.namespace_ ().empty ())
+    {
+      ::std::auto_ptr< knot_type > r (
+        knot_traits::create (i, f, this));
+
+      this->knot_.push_back (r);
+      continue;
+    }
+
+    break;
+  }
+
+  while (p.more_attributes ())
+  {
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
+    const ::xsd::cxx::xml::qualified_name< char > n (
+      ::xsd::cxx::xml::dom::name< char > (i));
+
+    if (n.name () == "v1" && n.namespace_ ().empty ())
+    {
+      this->v1_.set (v1_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "v2" && n.namespace_ ().empty ())
+    {
+      this->v2_.set (v2_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "degree" && n.namespace_ ().empty ())
+    {
+      this->degree_.set (degree_traits::create (i, f, this));
+      continue;
+    }
+  }
+
+  if (!v1_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v1",
+      "");
+  }
+
+  if (!v2_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "v2",
+      "");
+  }
+
+  if (!degree_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "degree",
+      "");
+  }
+}
+
+NURBS* NURBS::
+_clone (::xml_schema::flags f,
+        ::xml_schema::container* c) const
+{
+  return new class NURBS (*this, f, c);
+}
+
+NURBS::
+~NURBS ()
+{
+}
+
+// inner_point
+//
+
+inner_point::
+inner_point (const x_type& x,
+             const y_type& y,
+             const weight_type& weight)
+: ::xml_schema::type (),
+  x_ (x, ::xml_schema::flags (), this),
+  y_ (y, ::xml_schema::flags (), this),
+  weight_ (weight, ::xml_schema::flags (), this)
+{
+}
+
+inner_point::
+inner_point (const inner_point& x,
+             ::xml_schema::flags f,
+             ::xml_schema::container* c)
+: ::xml_schema::type (x, f, c),
+  x_ (x.x_, f, this),
+  y_ (x.y_, f, this),
+  weight_ (x.weight_, f, this)
+{
+}
+
+inner_point::
+inner_point (const ::xercesc::DOMElement& e,
+             ::xml_schema::flags f,
+             ::xml_schema::container* c)
+: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
+  x_ (f, this),
+  y_ (f, this),
+  weight_ (f, this)
+{
+  if ((f & ::xml_schema::flags::base) == 0)
+  {
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
+    this->parse (p, f);
+  }
+}
+
+void inner_point::
+parse (::xsd::cxx::xml::dom::parser< char >& p,
+       ::xml_schema::flags f)
+{
+  while (p.more_attributes ())
+  {
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
+    const ::xsd::cxx::xml::qualified_name< char > n (
+      ::xsd::cxx::xml::dom::name< char > (i));
+
+    if (n.name () == "x" && n.namespace_ ().empty ())
+    {
+      this->x_.set (x_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "y" && n.namespace_ ().empty ())
+    {
+      this->y_.set (y_traits::create (i, f, this));
+      continue;
+    }
+
+    if (n.name () == "weight" && n.namespace_ ().empty ())
+    {
+      this->weight_.set (weight_traits::create (i, f, this));
+      continue;
+    }
+  }
+
+  if (!x_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "x",
+      "");
+  }
+
+  if (!y_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "y",
+      "");
+  }
+
+  if (!weight_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "weight",
+      "");
+  }
+}
+
+inner_point* inner_point::
+_clone (::xml_schema::flags f,
+        ::xml_schema::container* c) const
+{
+  return new class inner_point (*this, f, c);
+}
+
+inner_point::
+~inner_point ()
+{
+}
+
+// knot
+//
+
+knot::
+knot (const value_type& value)
+: ::xml_schema::type (),
+  value_ (value, ::xml_schema::flags (), this)
+{
+}
+
+knot::
+knot (const knot& x,
+      ::xml_schema::flags f,
+      ::xml_schema::container* c)
+: ::xml_schema::type (x, f, c),
+  value_ (x.value_, f, this)
+{
+}
+
+knot::
+knot (const ::xercesc::DOMElement& e,
+      ::xml_schema::flags f,
+      ::xml_schema::container* c)
+: ::xml_schema::type (e, f | ::xml_schema::flags::base, c),
+  value_ (f, this)
+{
+  if ((f & ::xml_schema::flags::base) == 0)
+  {
+    ::xsd::cxx::xml::dom::parser< char > p (e, false, true);
+    this->parse (p, f);
+  }
+}
+
+void knot::
+parse (::xsd::cxx::xml::dom::parser< char >& p,
+       ::xml_schema::flags f)
+{
+  while (p.more_attributes ())
+  {
+    const ::xercesc::DOMAttr& i (p.next_attribute ());
+    const ::xsd::cxx::xml::qualified_name< char > n (
+      ::xsd::cxx::xml::dom::name< char > (i));
+
+    if (n.name () == "value" && n.namespace_ ().empty ())
+    {
+      this->value_.set (value_traits::create (i, f, this));
+      continue;
+    }
+  }
+
+  if (!value_.present ())
+  {
+    throw ::xsd::cxx::tree::expected_attribute< char > (
+      "value",
+      "");
+  }
+}
+
+knot* knot::
+_clone (::xml_schema::flags f,
+        ::xml_schema::container* c) const
+{
+  return new class knot (*this, f, c);
+}
+
+knot::
+~knot ()
 {
 }
 
@@ -1967,11 +2500,19 @@ curve::
 ::std::ostream&
 operator<< (::std::ostream& o, const mesh_h2d& i)
 {
-  o << ::std::endl << "variables: " << i.variables ();
+  if (i.variables ())
+  {
+    o << ::std::endl << "variables: " << *i.variables ();
+  }
+
   o << ::std::endl << "vertices: " << i.vertices ();
   o << ::std::endl << "elements: " << i.elements ();
   o << ::std::endl << "boundaries: " << i.boundaries ();
-  o << ::std::endl << "curves: " << i.curves ();
+  if (i.curves ())
+  {
+    o << ::std::endl << "curves: " << *i.curves ();
+  }
+
   return o;
 }
 
@@ -2037,11 +2578,18 @@ operator<< (::std::ostream& o, const boundaries& i)
 ::std::ostream&
 operator<< (::std::ostream& o, const curves& i)
 {
-  for (curves::curve_const_iterator
-       b (i.curve ().begin ()), e (i.curve ().end ());
+  for (curves::arc_const_iterator
+       b (i.arc ().begin ()), e (i.arc ().end ());
        b != e; ++b)
   {
-    o << ::std::endl << "curve: " << *b;
+    o << ::std::endl << "arc: " << *b;
+  }
+
+  for (curves::NURBS_const_iterator
+       b (i.NURBS ().begin ()), e (i.NURBS ().end ());
+       b != e; ++b)
+  {
+    o << ::std::endl << "NURBS: " << *b;
   }
 
   return o;
@@ -2104,11 +2652,50 @@ operator<< (::std::ostream& o, const boundary_edge& i)
 }
 
 ::std::ostream&
-operator<< (::std::ostream& o, const curve& i)
+operator<< (::std::ostream& o, const arc& i)
 {
   o << ::std::endl << "v1: " << i.v1 ();
   o << ::std::endl << "v2: " << i.v2 ();
   o << ::std::endl << "angle: " << i.angle ();
+  return o;
+}
+
+::std::ostream&
+operator<< (::std::ostream& o, const NURBS& i)
+{
+  for (NURBS::inner_point_const_iterator
+       b (i.inner_point ().begin ()), e (i.inner_point ().end ());
+       b != e; ++b)
+  {
+    o << ::std::endl << "inner_point: " << *b;
+  }
+
+  for (NURBS::knot_const_iterator
+       b (i.knot ().begin ()), e (i.knot ().end ());
+       b != e; ++b)
+  {
+    o << ::std::endl << "knot: " << *b;
+  }
+
+  o << ::std::endl << "v1: " << i.v1 ();
+  o << ::std::endl << "v2: " << i.v2 ();
+  o << ::std::endl << "degree: " << i.degree ();
+  return o;
+}
+
+::std::ostream&
+operator<< (::std::ostream& o, const inner_point& i)
+{
+  o << ::std::endl << "x: " << i.x ();
+  o << ::std::endl << "y: " << i.y ();
+  o << ::std::endl << "weight: " << i.weight ();
+  return o;
+}
+
+::std::ostream&
+operator<< (::std::ostream& o, const knot& i)
+{
+  o << ::std::endl << "value: " << i.value ();
   return o;
 }
 

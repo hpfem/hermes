@@ -10,14 +10,15 @@
   </variables>
 
   <vertices>
-    <vertex x="0" y="-1.0" />
-		<vertex x="1.0" y="-1.0" />
-		<vertex x="-1.0" y="0" />
-		<vertex x="0" y="0" />
-		<vertex x="1.0" y="0" />
-		<vertex x="-1.0" y="1.0" />
-		<vertex x="0" y="1.0" />
-		<vertex x="0.70710678118654757" y="0.70710678118654757" />
+	<!-- Contains all examples how it is possible to write zero. -->
+    <vertex x="0.00000000000000000000" y="m_a" />
+		<vertex x="a" y="m_a" />
+		<vertex x="m_a" y="0" />
+		<vertex x="." y=".00" />
+		<vertex x="a" y=".00000000" />
+		<vertex x="m_a" y="a" />
+		<vertex x="0.000" y="a" />
+		<vertex x="b" y="b" />
   </vertices>
 
   <elements>
@@ -39,7 +40,7 @@
 	</boundaries>
 
   <curves>
-    <curve v1="4" v2="7" angle="45" />
-		<curve v1="7" v2="6" angle="45" />
+    <arc v1="4" v2="7" angle="45" />
+		<arc v1="7" v2="6" angle="45" />
   </curves>
 </mesh_h2d>

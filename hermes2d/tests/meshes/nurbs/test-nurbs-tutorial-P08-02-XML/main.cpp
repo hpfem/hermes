@@ -6,9 +6,9 @@ using namespace Hermes::Hermes2D;
 
 // This test makes sure that NURBS work correctly.
 
-const char* mesh_file_1 = "domain-1.mesh";          // One control point.
-const char* mesh_file_2 = "domain-2.mesh";          // Two control points.
-const char* mesh_file_3 = "domain-3.mesh";          // Three control points.
+const char* mesh_file_1 = "domain-1.xml";          // One control point.
+const char* mesh_file_2 = "domain-2.xml";          // Two control points.
+const char* mesh_file_3 = "domain-3.xml";          // Three control points.
 
 // The following parameters can be also changed:
 
@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
   // Load the mesh.
   Mesh mesh;
-  MeshReaderH2D mloader;
+  MeshReaderH2DXML mloader;
   if (strcasecmp(argv[1], "1") == 0)
     mloader.load(mesh_file_1, &mesh);
   if (strcasecmp(argv[1], "2") == 0)
