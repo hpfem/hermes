@@ -61,12 +61,12 @@ namespace Hermes
       /// Loads one circular arc.
       /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
       template<typename T>
-      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int &p1, int &p2);
+      Nurbs* load_arc(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2);
 
       /// Loads one general NURBS curve.
       /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
       template<typename T>
-      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int &p1, int &p2);
+      Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2);
     };
   }
 }

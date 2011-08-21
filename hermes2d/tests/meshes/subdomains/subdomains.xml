@@ -1,6 +1,7 @@
-<?xml version="1.0"?>
-<namespace:domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:namespace="XMLSubdomains"
+<?xml version="1.0" encoding="utf-8"?>
+<domain:domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:domain="XMLSubdomains"
+	xmlns:element="XMLMesh"
 	xsi:schemaLocation="XMLSubdomains ../../../include/mesh/subdomains_h2d_xml.xsd">
   <variables>
     <variable name="a" value="1.0" />
@@ -20,13 +21,13 @@
   </vertices>
 
   <elements>
-		<quad v1="0" v2="1" v3="8" v4="7" marker="Bottom Left" />
-		<quad v1="1" v2="2" v3="3" v4="8" marker="Bottom Right" />
-		<quad v1="8" v2="3" v3="4" v4="5" marker="Top Right" />
-		<quad v1="7" v2="8" v3="5" v4="6" marker="Top Left" />
+		<element:quad v1="0" v2="1" v3="8" v4="7" marker="Bottom Left" />
+		<element:quad v1="1" v2="2" v3="3" v4="8" marker="Bottom Right" />
+		<element:quad v1="8" v2="3" v3="4" v4="5" marker="Top Right" />
+		<element:quad v1="7" v2="8" v3="5" v4="6" marker="Top Left" />
   </elements>
 
-  <boundaries>
+  <boundary_edges>
     <boundary_edge v1="0" v2="1" marker="Bottom Left" />
 		<boundary_edge v1="1" v2="2" marker="Bottom Right" />
 		
@@ -48,29 +49,41 @@
 		<boundary_edge v1="8" v2="7" marker="Horizontal Left" />
 		<boundary_edge v1="8" v2="3" marker="Horizontal Right" />
 		<boundary_edge v1="3" v2="8" marker="Horizontal Right" />
-	</boundaries>
+	</boundary_edges>
 	
 	<subdomains>
 		<subdomain name="Whole domain" />
 		<subdomain name="Bottom Left Corner" >
-			<element-number number="0" />
-			<boundary_edge-number number="0" />
-			<boundary_edge-number number="8" />
-			<boundary_edge-number number="13" />
-			<boundary_edge-number number="7" />
+			<vertex_number number="0" />
+			<vertex_number number="1" />
+			<vertex_number number="8" />
+			<vertex_number number="7" />
+			<element_number number="0" />
+			<boundary_edge_number number="0" />
+			<boundary_edge_number number="8" />
+			<boundary_edge_number number="13" />
+			<boundary_edge_number number="7" />
 		</subdomain>
 		<subdomain name="Supplement of Bottom Left Corner">
-			<element-number number="1" />
-			<element-number number="2" />
-			<element-number number="3" />
-			<boundary_edge-number number="1" />
-			<boundary_edge-number number="2" />
-			<boundary_edge-number number="3" />
-			<boundary_edge-number number="4" />
-			<boundary_edge-number number="5" />
-			<boundary_edge-number number="6" />
-			<boundary_edge-number number="12" />
-			<boundary_edge-number number="9" />
+			<vertex_number number="1" />
+			<vertex_number number="2" />
+			<vertex_number number="3" />
+			<vertex_number number="4" />
+			<vertex_number number="5" />
+			<vertex_number number="6" />
+			<vertex_number number="7" />
+			<vertex_number number="8" />
+			<element_number number="1" />
+			<element_number number="2" />
+			<element_number number="3" />
+			<boundary_edge_number number="1" />
+			<boundary_edge_number number="2" />
+			<boundary_edge_number number="3" />
+			<boundary_edge_number number="4" />
+			<boundary_edge_number number="5" />
+			<boundary_edge_number number="6" />
+			<boundary_edge_number number="12" />
+			<boundary_edge_number number="9" />
 		</subdomain>
 	</subdomains>
-</namespace:domain>
+</domain:domain>

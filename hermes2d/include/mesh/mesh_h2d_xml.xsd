@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<schema targetNamespace="XMLMesh"
-xmlns:mesh="XMLMesh"
+<schema targetNamespace="XMLMesh" xmlns:mesh="XMLMesh"
 xmlns="http://www.w3.org/2001/XMLSchema">
   <element name="mesh">
     <complexType>
@@ -11,14 +10,13 @@ xmlns="http://www.w3.org/2001/XMLSchema">
         type="mesh:vertices_type" />
         <element minOccurs="1" maxOccurs="1" name="elements"
         type="mesh:elements_type" />
-        <element minOccurs="1" maxOccurs="1" name="boundaries"
-        type="mesh:boundaries_type" />
+        <element minOccurs="1" maxOccurs="1" name="boundary_edges"
+        type="mesh:boundary_edges_type" />
         <element minOccurs="0" maxOccurs="1" name="curves"
         type="mesh:curves_type" />
       </sequence>
     </complexType>
   </element>
-	
   <complexType name="variables_type">
     <sequence>
       <element minOccurs="0" maxOccurs="unbounded" name="variable">
@@ -29,7 +27,6 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       </element>
     </sequence>
   </complexType>
-	
   <complexType name="vertices_type">
     <sequence>
       <element minOccurs="3" maxOccurs="unbounded" name="vertex">
@@ -40,37 +37,40 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       </element>
     </sequence>
   </complexType>
+	  
+	<element name="element" abstract="true"
+  type="mesh:element_type" />
+  <element name="triangle" substitutionGroup="mesh:element"
+  type="mesh:triangle_type" />
+  <element name="quad" substitutionGroup="mesh:element"
+  type="mesh:quad_type" />
 	
   <complexType name="elements_type">
     <sequence>
-      <choice minOccurs="1" maxOccurs="unbounded">
-        <element minOccurs="0" maxOccurs="unbounded"
-        name="triangle">
-          <complexType>
-            <attribute name="v1" type="integer" use="required" />
-            <attribute name="v2" type="integer" use="required" />
-            <attribute name="v3" type="integer" use="required" />
-            <attribute name="marker" type="string"
-            use="required" />
-            <attribute name="empty" type="boolean" />
-          </complexType>
-        </element>
-        <element minOccurs="0" maxOccurs="unbounded" name="quad">
-          <complexType>
-            <attribute name="v1" type="integer" use="required" />
-            <attribute name="v2" type="integer" use="required" />
-            <attribute name="v3" type="integer" use="required" />
-            <attribute name="v4" type="integer" use="required" />
-            <attribute name="marker" type="string"
-            use="required" />
-            <attribute name="empty" type="boolean" />
-          </complexType>
-        </element>
-      </choice>
+      <element ref="mesh:element" maxOccurs="unbounded" />
     </sequence>
   </complexType>
+		
+  <complexType name="element_type" abstract="true">
+    <attribute name="v1" type="integer" use="required" />
+    <attribute name="v2" type="integer" use="required" />
+    <attribute name="v3" type="integer" use="required" />
+    <attribute name="marker" type="string" use="required" />
+  </complexType>
+  <complexType name="triangle_type">
+    <complexContent>
+      <extension base="mesh:element_type" />
+    </complexContent>
+  </complexType>
+  <complexType name="quad_type">
+    <complexContent>
+      <extension base="mesh:element_type">
+        <attribute name="v4" type="integer" use="required" />
+      </extension>
+    </complexContent>
+  </complexType>
 	
-  <complexType name="boundaries_type">
+  <complexType name="boundary_edges_type">
     <sequence>
       <element minOccurs="0" maxOccurs="unbounded"
       name="boundary_edge">
@@ -82,7 +82,6 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       </element>
     </sequence>
   </complexType>
-	
   <complexType name="curves_type">
     <sequence>
       <choice>

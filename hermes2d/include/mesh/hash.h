@@ -60,7 +60,7 @@ namespace Hermes
       /// created first.
       Node* get_edge_node(int p1, int p2);
       
-      static const int H2D_DEFAULT_HASH_SIZE = 0x20000; // 128K entries
+      static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
 
       // The following functions are used by the derived class Mesh:
     protected:

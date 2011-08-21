@@ -29,6 +29,7 @@ namespace Hermes
     template<typename Scalar> class Space;
     template<typename Scalar> class KellyTypeAdapt;
     struct MItem;
+    extern unsigned g_mesh_seq;
 
     /// \brief Stores one node of a mesh.
     ///
