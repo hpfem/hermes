@@ -17,13 +17,13 @@ int main(int argc, char* argv[])
 
   Views::MeshView m;
   m.show(&mesh_whole_domain);
-  m.wait_for_keypress();
+  Views::View::wait();
   m.show(&mesh_bottom_left_corner);
-  m.wait_for_keypress();
+  Views::View::wait();
   m.show(&mesh_supplement);
-  m.wait_for_close();
+  Views::View::wait();
 
-  if(mesh_whole_domain.get_num_elements() == 4 && mesh_bottom_left_corner.get_num_elements() == 1 && mesh_supplement.get_num_elements() == 3)
+  if(mesh_whole_domain.get_num_active_elements() == 4 && mesh_bottom_left_corner.get_num_active_elements() == 1 && mesh_supplement.get_num_active_elements() == 3)
   {
     info("Success!");
     return TEST_SUCCESS;

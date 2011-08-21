@@ -157,12 +157,28 @@ namespace Hermes
 
           // Element numbers //
           unsigned int element_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().size();
-          meshes[subdomains_i]->nbase = meshes[subdomains_i]->nactive = meshes[subdomains_i]->ninitial = element_number_count;
+          unsigned int element_count = parsed_xml_domain->elements().element().size();
+          meshes[subdomains_i]->nbase = element_count;
+          meshes[subdomains_i]->nactive = meshes[subdomains_i]->ninitial = element_number_count;
 
           Element* e;
-          for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
+          for (int element_i = 0; element_i < element_count; element_i++)
           {
-            XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().at(element_number_i).number());
+            bool found = false;
+            for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
+              if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).element_number().at(element_number_i).number() == element_i)
+              {
+                 found = true;
+                 break;
+              }
+
+            if(!found)
+            {
+              meshes[subdomains_i]->elements.skip_slot();
+                continue;
+            }
+            
+            XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
 
             // Trim whitespaces.
             unsigned int begin = element->marker().find_first_not_of(" \t\n");
