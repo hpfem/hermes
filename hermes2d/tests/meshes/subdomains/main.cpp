@@ -15,6 +15,14 @@ int main(int argc, char* argv[])
   MeshReaderH2DXML mloader;
   mloader.load("subdomains.xml", Hermes::vector<Mesh*>(&mesh_whole_domain, &mesh_bottom_left_corner, &mesh_supplement));
 
+  Views::MeshView m;
+  m.show(&mesh_whole_domain);
+  m.wait_for_keypress();
+  m.show(&mesh_bottom_left_corner);
+  m.wait_for_keypress();
+  m.show(&mesh_supplement);
+  m.wait_for_close();
+
   if(mesh_whole_domain.get_num_elements() == 4 && mesh_bottom_left_corner.get_num_elements() == 1 && mesh_supplement.get_num_elements() == 3)
   {
     info("Success!");
