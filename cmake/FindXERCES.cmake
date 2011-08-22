@@ -1,4 +1,8 @@
-set(XERCES_LIBRARY_NAMES xerces-c xerces-c_3)
+if(WIN32)
+  set(XERCES_LIBRARY_NAMES xerces-c_3)
+else(WIN32)
+  set(XERCES_LIBRARY_NAMES xerces-c)
+endif(WIN32)
 
 FIND_PATH(XERCES_INCLUDE_DIR xercesc/sax/InputSource.hpp xercesc/dom/DOMDocument.hpp xercesc/dom/DOMErrorHandler.hpp ${XERCES_ROOT}/include)
 
