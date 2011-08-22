@@ -107,12 +107,12 @@ namespace Hermes
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false,
                         bool verbose = false, double newton_tol = 1e-6, 
                         int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
-                        double newton_max_allowed_residual_norm = 1e6);
+                        double newton_max_allowed_residual_norm = 1e10);
       bool rk_time_step(double current_time, double time_step, Solution<Scalar>* slns_time_prev, 
                         Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn, 
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false, 
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
-                        double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+                        double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e10);
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted). 
@@ -120,12 +120,12 @@ namespace Hermes
                         Hermes::vector<Solution<Scalar>*> slns_time_new, 
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false, 
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20, 
-                        double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e6);
+                        double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e10);
       bool rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
                         Solution<Scalar>* sln_time_new, bool freeze_jacobian = true, 
                         bool block_diagonal_jacobian = false, bool verbose = false, 
                         double newton_tol = 1e-6, int newton_max_iter = 20, double newton_damping_coeff = 1.0, 
-                        double newton_max_allowed_residual_norm = 1e6);
+                        double newton_max_allowed_residual_norm = 1e10);
 
 
     protected:
