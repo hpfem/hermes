@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   DefaultEssentialBCConst<double> bc_essential_whole_domain(Hermes::vector<std::string>("Bottom Left", "Bottom Right", "Top Left", "Top Right"), 0.0);
   EssentialBCs<double> bcs_whole_domain(&bc_essential_whole_domain);
 
-  DefaultEssentialBCConst<double> bc_essential_bottom_left_corner(Hermes::vector<std::string>("Bottom Left", "Vertical Bottom", "Horizontal Left"), 0.0);
+  DefaultEssentialBCConst<double> bc_essential_bottom_left_corner(Hermes::vector<std::string>("Bottom Left", "Horizontal Left"), 0.0);
   EssentialBCs<double> bcs_bottom_left_corner(&bc_essential_bottom_left_corner);
 
   DefaultEssentialBCConst<double> bc_essential_supplement(Hermes::vector<std::string>("Bottom Right", "Top Right", "Top Left", "Horizontal Left", "Vertical Bottom"), 0.0);
