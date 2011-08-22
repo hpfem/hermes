@@ -171,7 +171,7 @@ namespace Hermes
       }
       else
       {
-        bnd[0] = (s->cr.b == 0)   && e->en[0]->bnd;  // moved this to linsystem.cpp:583 (r102)
+        bnd[0] = (s->cr.b == 0)   && e->en[0]->bnd;
         bnd[1] = (s->cr.r == ONE) && e->en[1]->bnd;
         bnd[2] = (s->cr.t == ONE) && e->en[2]->bnd;
         bnd[3] = (s->cr.l == 0)   && e->en[3]->bnd;
