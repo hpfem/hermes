@@ -18,14 +18,14 @@ int main(int argc, char* argv[])
 {
   // Load the mesh.
   Mesh mesh_whole_domain, mesh_bottom_left_corner, mesh_complement;
-  Hermes::vector<Mesh*> mesh_vector (&mesh_whole_domain, &mesh_bottom_left_corner, &mesh_complement);
+  Hermes::vector<Mesh*> meshes (&mesh_whole_domain, &mesh_bottom_left_corner, &mesh_complement);
   MeshReaderH2DXML mloader;
-  mloader.load("subdomains.xml", mesh_vector);
+  mloader.load("subdomains.xml", meshes);
 
   // Perform initial mesh refinements (optional).
   for(int i = 0; i < INIT_REF_NUM; i++)
-    for(unsigned int meshes_i = 0; meshes_i < mesh_vector.size(); meshes_i++)
-      mesh_vector[meshes_i]->refine_all_elements();
+    for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
+      meshes[meshes_i]->refine_all_elements();
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf;
