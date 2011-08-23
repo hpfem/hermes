@@ -64,7 +64,7 @@
 			<boundary_edge_number number="13" />
 			<boundary_edge_number number="7" />
 		</subdomain>
-		<subdomain name="Supplement of Bottom Left Corner">
+		<subdomain name="complement of Bottom Left Corner">
 			<vertex_number number="1" />
 			<vertex_number number="2" />
 			<vertex_number number="3" />
