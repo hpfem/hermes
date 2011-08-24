@@ -299,7 +299,7 @@ double* sln;
     PetscVector<double> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver solver(&mat, &rhs);
+    PetscLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif
@@ -310,7 +310,7 @@ double* sln;
     PetscVector<double> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver solver(&mat, &rhs);
+    PetscLinearSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif
