@@ -80,16 +80,16 @@ namespace Hermes
         e = mesh->get_element_fast(i);
         if (e->used)
           if (e->is_triangle())
-            elements.element().push_back(std::auto_ptr<XMLMesh::triangle_type>(new XMLMesh::triangle_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str())));
+            elements.element().push_back(XMLMesh::triangle_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str()));
           else
-            elements.element().push_back(std::auto_ptr<XMLMesh::quad_type>(new XMLMesh::quad_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id)));
+            elements.element().push_back(XMLMesh::quad_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id));
       }
       // save boundary markers
       XMLMesh::boundary_edges_type boundary_edges;
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->nvert; i++)
           if (mesh->get_base_edge_node(e, i)->marker)
-            boundary_edges.boundary_edge().push_back(std::auto_ptr<XMLMesh::boundary_edge>(new XMLMesh::boundary_edge(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str())));
+            boundary_edges.boundary_edge().push_back(XMLMesh::boundary_edge(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str()));
 
       // save curved edges
       XMLMesh::curves_type curves;
@@ -802,7 +802,7 @@ namespace Hermes
       }
       else if (e->hsplit())
       {
-        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
+        refinements.refinement().push_back(XMLMesh::refinement(id));
         refinements.refinement().back().refinement_type() = 1;
         int sid = mesh->seq; mesh->seq += 2;
         save_refinements(mesh, e->sons[0], sid, refinements);
@@ -810,7 +810,7 @@ namespace Hermes
       }
       else
       {
-        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
+        refinements.refinement().push_back(XMLMesh::refinement(id));
         refinements.refinement().back().refinement_type() = 2;
         int sid = mesh->seq; mesh->seq += 2;
         save_refinements(mesh, e->sons[2], sid, refinements);
@@ -820,7 +820,7 @@ namespace Hermes
 
     void MeshReaderH2DXML::save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
     {
-      curves.arc().push_back(std::auto_ptr<XMLMesh::arc>(new XMLMesh::arc(p1, p2, nurbs->angle)));
+      curves.arc().push_back(XMLMesh::arc(p1, p2, nurbs->angle));
     }
 
     void MeshReaderH2DXML::save_nurbs(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
@@ -831,11 +831,11 @@ namespace Hermes
       int outer = nurbs->nk - inner;
       
       for (int i = 1; i < nurbs->np-1; i++)
-        nurbs_xml.inner_point().push_back(std::auto_ptr<XMLMesh::inner_point>(new XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2])));
+        nurbs_xml.inner_point().push_back(XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2]));
 
       int max = nurbs->nk - (nurbs->degree + 1);
       for (int i = nurbs->degree+1; i < max; i++)
-        nurbs_xml.knot().push_back(std::auto_ptr<XMLMesh::knot>(new XMLMesh::knot(nurbs->kv[i])));
+        nurbs_xml.knot().push_back(XMLMesh::knot(nurbs->kv[i]));
     }
   }
 }
